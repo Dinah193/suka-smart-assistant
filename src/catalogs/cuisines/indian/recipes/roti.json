@@ -1,0 +1,371 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-20T00:00:00.000Z",
+
+  "meta": {
+    "id": "recipes.cuisines.indian.roti",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Roti (Chapati)",
+    "subtitle": "Soft whole-wheat flatbread cooked on a hot tawa/skillet",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA canonical cuisines/indian/recipes/roti.json",
+      "notes": [
+        "Deterministic roti method with clear doneness checks for softness and puff.",
+        "Designed for standard US kitchens (cast iron or nonstick works)."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.indian",
+    "category": "flatbread",
+    "mealArchetypes": ["meal.side.bread", "meal.starch.flatbread"],
+    "servingStyles": ["family_style"],
+    "plannerTags": [
+      "cuisine.indian",
+      "dish.roti",
+      "dish.chapati",
+      "role.rice_or_flatbread",
+      "weeknight.friendly",
+      "batch.friendly",
+      "staple.bread"
+    ]
+  },
+
+  "summary": "Classic Indian roti (chapati): whole-wheat dough rested briefly, rolled thin, and cooked on a hot skillet until spotted and softly puffed.",
+
+  "keywords": ["roti", "chapati", "phulka", "whole wheat flatbread", "atta"],
+
+  "tags": [
+    "cuisine.indian",
+    "dish.roti",
+    "dish.chapati",
+    "role.rice_or_flatbread",
+    "weeknight.friendly",
+    "batch.friendly"
+  ],
+
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 2, "unit": "roti" },
+    "notes": "Makes 8 rotis (2 per person)."
+  },
+
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 15,
+    "totalMins": 40
+  },
+
+  "difficulty": 2,
+
+  "equipment": {
+    "minimum": [
+      "equip.mixing_bowl",
+      "equip.measuring_cups",
+      "equip.skillet",
+      "equip.spatuIa"
+    ],
+    "recommended": [
+      "equip.rolling_pin",
+      "equip.bench_scraper",
+      "equip.kitchen_towel"
+    ],
+    "optional": [
+      {
+        "id": "equip.tawa",
+        "label": "Tawa (flat griddle)",
+        "required": false,
+        "notes": "A tawa is traditional; a cast-iron skillet works great."
+      },
+      {
+        "id": "equip.tongs",
+        "label": "Tongs",
+        "required": false,
+        "notes": "Useful if finishing directly over flame for puffing."
+      }
+    ]
+  },
+
+  "signals": {
+    "weeknightPossible": true,
+    "batchFriendly": true,
+    "leftoversGood": true,
+    "freezerFriendly": true
+  },
+
+  "dietFlags": ["diet.vegan"],
+
+  "allergens": {
+    "contains": ["allergen.wheat_gluten"],
+    "mayContain": [],
+    "notes": ["Contains wheat (gluten)."]
+  },
+
+  "ingredients": [
+    {
+      "id": "ing.whole_wheat_flour",
+      "label": "Whole wheat flour (atta preferred)",
+      "role": "role.flour",
+      "amount": { "value": 2, "unit": "cups" },
+      "notes": [
+        "If using standard whole wheat flour, sift once for softer roti.",
+        "Atta is milled finer and yields softer rotis."
+      ]
+    },
+    {
+      "id": "ing.salt_kosher",
+      "label": "Kosher salt",
+      "role": "role.seasoning",
+      "amount": { "value": 0.75, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ing.oil_neutral",
+      "label": "Neutral oil (optional)",
+      "role": "role.fat",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": [
+        "Optional; a small amount can soften dough.",
+        "You may also brush finished rotis with ghee or butter (not vegan)."
+      ]
+    },
+    {
+      "id": "ing.water_warm",
+      "label": "Warm water",
+      "role": "role.liquid",
+      "amount": { "value": 0.75, "unit": "cup" },
+      "notes": [
+        "Add gradually; humidity and flour type change the exact amount.",
+        "Target: soft, pliable dough—not sticky."
+      ]
+    },
+    {
+      "id": "ing.flour_for_dusting",
+      "label": "Flour for dusting",
+      "role": "role.dusting",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true
+    }
+  ],
+
+  "methods": [
+    "method.mix",
+    "method.knead",
+    "method.rest",
+    "method.roll",
+    "method.griddle_cook"
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_mix",
+      "title": "Mix the dough",
+      "instructions": [
+        "In a bowl, combine whole wheat flour and salt (if using).",
+        "Drizzle in oil (optional).",
+        "Add warm water gradually while mixing until a shaggy dough forms."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 0,
+      "checks": [
+        "Dough should come together without dry flour pockets.",
+        "If sticky, dust with a little flour; if dry, add water 1 tsp at a time."
+      ]
+    },
+    {
+      "id": "step_02_knead",
+      "title": "Knead until smooth",
+      "instructions": [
+        "Knead 6–8 minutes until the dough is smooth and elastic.",
+        "Cover with a damp towel or lid to prevent drying."
+      ],
+      "activeMins": 8,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Knead dough", "minutes": 7 }],
+      "checks": [
+        "Dough should feel soft and spring back slowly when pressed.",
+        "If dough tears when stretched, knead 1–2 minutes more."
+      ]
+    },
+    {
+      "id": "step_03_rest",
+      "title": "Rest the dough",
+      "instructions": [
+        "Rest dough covered for 10–20 minutes.",
+        "This relaxes gluten so rolling is easier and roti stays tender."
+      ],
+      "activeMins": 1,
+      "handsOffMins": 15,
+      "timers": [{ "label": "Dough rest", "minutes": 15 }],
+      "checks": [
+        "After resting, dough should roll without snapping back too much."
+      ]
+    },
+    {
+      "id": "step_04_portion",
+      "title": "Portion and shape",
+      "instructions": [
+        "Divide dough into 8 equal balls.",
+        "Keep balls covered while you roll to prevent crusting."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "checks": ["Smooth balls = smoother rolling and fewer cracks."]
+    },
+    {
+      "id": "step_05_roll",
+      "title": "Roll thin circles",
+      "instructions": [
+        "Lightly dust a ball with flour and roll into a 6–7 inch circle (about 2 mm thick).",
+        "Use minimal dusting flour; too much can dry the roti and burn on the pan."
+      ],
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "checks": [
+        "Even thickness helps puffing.",
+        "If edges crack, dough is too dry—wet hands and knead briefly."
+      ]
+    },
+    {
+      "id": "step_06_cook",
+      "title": "Cook on hot skillet (tawa)",
+      "instructions": [
+        "Heat a dry skillet over medium-high until very hot.",
+        "Place roti on the skillet; cook 20–30 seconds until small bubbles appear and the bottom shows light spots.",
+        "Flip; cook 30–45 seconds until brown spots develop.",
+        "Flip again; press gently with a spatula or cloth at the edges to encourage puffing; cook 10–20 seconds.",
+        "Remove and keep covered in a towel-lined container to stay soft."
+      ],
+      "activeMins": 12,
+      "handsOffMins": 0,
+      "timers": [
+        { "label": "First side", "seconds": 25 },
+        { "label": "Second side", "seconds": 40 },
+        { "label": "Final puff", "seconds": 15 }
+      ],
+      "checks": [
+        "If roti browns too fast, lower heat slightly.",
+        "If roti stays pale and stiff, pan may be too cool—preheat longer."
+      ]
+    },
+    {
+      "id": "step_07_finish",
+      "title": "Optional finish and serve",
+      "instructions": [
+        "Optional: brush warm rotis with ghee/butter for extra softness (not vegan).",
+        "Serve immediately with curries, dal, or chana masala."
+      ],
+      "activeMins": 1,
+      "handsOffMins": 0
+    }
+  ],
+
+  "pairings": {
+    "mains": [
+      "recipes.cuisines.indian.chana_masala",
+      "recipes.cuisines.indian.dal",
+      "recipes.cuisines.indian.goat_curry",
+      "recipes.cuisines.indian.chicken_curry"
+    ],
+    "notes": [
+      "Roti is best fresh and warm.",
+      "For meal prep: freeze cooked rotis with parchment between layers."
+    ]
+  },
+
+  "storage": {
+    "refrigerator": {
+      "durationDays": 3,
+      "notes": [
+        "Cool completely, then store sealed.",
+        "Reheat on skillet 15–25 seconds per side or microwave wrapped in a damp paper towel."
+      ]
+    },
+    "freezer": {
+      "durationMonths": 2,
+      "notes": [
+        "Freeze with parchment between rotis; store in a freezer bag.",
+        "Reheat from frozen on skillet covered briefly to steam-soften."
+      ]
+    }
+  },
+
+  "safety": {
+    "notes": [
+      "Keep cooked rotis covered to prevent drying and cracking.",
+      "Do not leave cooked bread at room temperature for extended periods."
+    ]
+  },
+
+  "variations": [
+    {
+      "id": "var_phulka_flame_puff",
+      "label": "Phulka-style flame puff",
+      "when": { "stove": "gas" },
+      "adapt": {
+        "notes": [
+          "After the second flip, use tongs to place roti directly over a low flame for a few seconds to puff fully.",
+          "Move constantly to avoid scorching."
+        ]
+      }
+    },
+    {
+      "id": "var_softer_with_milk",
+      "label": "Softer roti (partial milk-water)",
+      "when": { "texture": "extra_soft" },
+      "adapt": {
+        "notes": [
+          "Replace 1/4 cup of the water with warm milk (not vegan).",
+          "Or add 1 tsp oil/ghee to dough."
+        ]
+      }
+    },
+    {
+      "id": "var_half_all_purpose",
+      "label": "Softer, less rustic (blend flours)",
+      "when": { "flour": "blend" },
+      "adapt": {
+        "notes": [
+          "Use 1 cup atta + 1 cup all-purpose flour for softer, less wheaty roti.",
+          "You may need slightly less water."
+        ]
+      }
+    }
+  ],
+
+  "planner": {
+    "roles": [
+      { "role": "role.rice_or_flatbread", "primary": true },
+      { "role": "role.starch", "primary": true }
+    ],
+    "weeknight": {
+      "friendly": true,
+      "notes": [
+        "Dough can be made earlier in the day and held covered for a few hours.",
+        "Cooked rotis reheat quickly for fast dinners."
+      ]
+    }
+  },
+
+  "compat": {
+    "cuisineId": "cuisines.indian",
+    "dishId": "dish.indian.roti",
+    "aliases": ["roti", "chapati", "phulka"],
+    "index": {
+      "primaryTokens": ["roti", "chapati", "atta", "flatbread"],
+      "secondaryTokens": ["tawa", "whole wheat", "phulka"]
+    }
+  },
+
+  "audit": {
+    "curatedBy": "SSA",
+    "curationTier": "canonical",
+    "lastReviewedAt": "2026-01-20T00:00:00.000Z"
+  }
+}

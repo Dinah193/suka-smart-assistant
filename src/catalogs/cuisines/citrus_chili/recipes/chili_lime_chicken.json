@@ -1,0 +1,457 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "meta": {
+    "id": "cuisines.citrus_chili.recipes.chili_lime_chicken",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Chili-Lime Chicken",
+    "subtitle": "Bright citrus marinade + savory garlic + controlled heat (grill, sear, or roast)"
+  },
+  "classification": {
+    "cuisine": "citrus_chili",
+    "category": "main",
+    "mealArchetypes": ["protein_main", "weeknight_main"],
+    "servingStyles": ["plates", "bowls", "family_style"],
+    "plannerTags": [
+      "cuisine.citrus_chili",
+      "protein.chicken",
+      "flavor.citrus_bright",
+      "flavor.spicy",
+      "weeknight.friendly",
+      "marinade",
+      "grill_or_sear"
+    ]
+  },
+  "summary": "Juicy chicken with a chili-lime-garlic marinade that caramelizes beautifully on the grill or in a skillet. Easy to scale for meal prep.",
+  "yield": {
+    "servings": 4,
+    "notes": "Serves 4 as a main with sides; 6 in bowls/tacos with extra toppings."
+  },
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 40,
+    "totalMins": 60
+  },
+  "difficulty": "beginner",
+  "signals": {
+    "weeknightPossible": true,
+    "batchFriendly": true,
+    "leftoversGood": true,
+    "freezerFriendly": "marinated_raw_only",
+    "spiceAdjustable": true
+  },
+  "tasteProfile": {
+    "heatLevel": 3,
+    "acidity": "bright",
+    "salt": "medium",
+    "sweetness": "low",
+    "notes": [
+      "lime-forward",
+      "garlic-forward",
+      "chili warmth",
+      "smoky char if grilled"
+    ]
+  },
+  "equipment": {
+    "minimum": [
+      "mixing_bowl",
+      "tongs",
+      "skillet_or_grill",
+      "cutting_board",
+      "knife"
+    ],
+    "recommended": [
+      "instant_read_thermometer",
+      "zester",
+      "citrus_juicer",
+      "cast_iron_skillet"
+    ],
+    "optional": [
+      {
+        "id": "sheet_pan",
+        "label": "Sheet pan (oven method)",
+        "notes": "Use if roasting instead of grilling/searing."
+      }
+    ],
+    "required": [
+      {
+        "id": "skillet_or_grill",
+        "label": "Skillet or grill",
+        "required": true
+      }
+    ]
+  },
+  "allergens": ["citrus"],
+  "dietFlags": ["gluten_free", "dairy_free", "high_protein"],
+  "keywords": [
+    "chili lime chicken",
+    "lime chili chicken",
+    "citrus chili chicken",
+    "grilled chicken",
+    "skillet chicken",
+    "marinated chicken"
+  ],
+  "tags": [
+    "cuisine.citrus_chili",
+    "protein.chicken",
+    "flavor.citrus_bright",
+    "flavor.spicy",
+    "weeknight.friendly",
+    "batch.friendly"
+  ],
+  "methods": ["quick_marinade", "pan_sear", "grill", "roast"],
+  "ingredientGroups": [
+    {
+      "id": "protein",
+      "label": "Protein",
+      "items": ["chicken_thighs"]
+    },
+    {
+      "id": "marinade",
+      "label": "Chili-Lime Marinade",
+      "items": [
+        "lime_juice",
+        "lime_zest",
+        "olive_oil",
+        "garlic",
+        "chili_powder",
+        "smoked_paprika",
+        "cumin",
+        "oregano",
+        "salt",
+        "black_pepper",
+        "honey"
+      ]
+    },
+    {
+      "id": "finish",
+      "label": "Finish",
+      "items": ["fresh_cilantro", "lime_wedges"]
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "chicken_thighs",
+      "label": "Chicken thighs (boneless/skinless preferred)",
+      "role": "protein",
+      "amount": { "value": 900, "unit": "g" },
+      "notes": [
+        "Or use 6–8 bone-in thighs; increase cook time and verify internal temp.",
+        "Chicken breast works too; reduce heat slightly and do not overcook."
+      ]
+    },
+    {
+      "id": "lime_juice",
+      "label": "Fresh lime juice",
+      "role": "acid",
+      "amount": { "value": 60, "unit": "ml" },
+      "notes": "About 2–3 limes depending on size/juiciness."
+    },
+    {
+      "id": "lime_zest",
+      "label": "Lime zest",
+      "role": "aroma",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "If you don’t have a zester, peel thin strips (avoid white pith) and mince finely."
+    },
+    {
+      "id": "olive_oil",
+      "label": "Olive oil",
+      "role": "fat",
+      "amount": { "value": 30, "unit": "ml" }
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 4, "unit": "cloves" }
+    },
+    {
+      "id": "chili_powder",
+      "label": "Chili powder",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Use mild chili powder for less heat; ancho is great for depth."
+    },
+    {
+      "id": "smoked_paprika",
+      "label": "Smoked paprika",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": "Optional but recommended for grill-like smokiness."
+    },
+    {
+      "id": "ground_cumin",
+      "label": "Ground cumin",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "dried_oregano",
+      "label": "Dried oregano",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "salt",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 1.25, "unit": "tsp" }
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "honey",
+      "label": "Honey (optional)",
+      "role": "balance",
+      "optional": true,
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Helps caramelization and rounds sharp citrus/heat."
+    },
+    {
+      "id": "fresh_cilantro",
+      "label": "Cilantro, chopped (optional)",
+      "role": "finish",
+      "optional": true,
+      "amount": { "value": 15, "unit": "g" }
+    },
+    {
+      "id": "lime_wedges",
+      "label": "Lime wedges (optional)",
+      "role": "finish",
+      "optional": true,
+      "amount": { "value": 1, "unit": "each" },
+      "notes": "Serve extra lime on the side for brightness."
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Make the chili-lime marinade",
+      "instructions": [
+        "In a bowl, whisk together lime juice, lime zest, olive oil, minced garlic, chili powder, smoked paprika (if using), cumin, oregano, salt, pepper, and honey (if using).",
+        "Taste the marinade: it should be tangy, savory, and slightly spicy. Adjust salt or honey to balance if needed."
+      ],
+      "activeMins": 5,
+      "timers": [
+        {
+          "label": "Marinade mix time",
+          "minutes": 5
+        }
+      ]
+    },
+    {
+      "id": "step_02",
+      "title": "Marinate the chicken",
+      "instructions": [
+        "Pat chicken dry. Add it to the marinade and toss until evenly coated.",
+        "Cover and refrigerate for at least 20 minutes (best: 30–60 minutes).",
+        "If short on time, you can cook immediately, but flavor improves with a brief rest."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 30,
+      "timers": [
+        {
+          "label": "Minimum marinade",
+          "minutes": 20
+        },
+        {
+          "label": "Preferred marinade",
+          "minutes": 45
+        }
+      ]
+    },
+    {
+      "id": "step_03",
+      "title": "Choose your cook method (grill, skillet, or oven)",
+      "instructions": [
+        "Grill (best flavor): Preheat to medium-high. Oil grates lightly.",
+        "Skillet: Heat a skillet over medium-high until hot; add a small splash of oil if needed.",
+        "Oven: Preheat to 425°F / 218°C and line a sheet pan."
+      ],
+      "activeMins": 5,
+      "temperature": {
+        "type": "oven",
+        "value": 218,
+        "unit": "C",
+        "notes": "If using oven method."
+      }
+    },
+    {
+      "id": "step_04",
+      "title": "Cook the chicken",
+      "instructions": [
+        "Grill: Cook 4–6 minutes per side depending on thickness until browned and the center reaches 165°F / 74°C.",
+        "Skillet: Sear 4–6 minutes per side until well-browned and cooked through. Reduce heat if garlic threatens to burn.",
+        "Oven: Spread chicken on sheet pan and roast 16–22 minutes (depending on thickness), flipping once if desired."
+      ],
+      "activeMins": 15,
+      "handsOffMins": 5,
+      "temperature": {
+        "type": "internal",
+        "value": 74,
+        "unit": "C",
+        "notes": "Target internal temperature for chicken."
+      },
+      "checks": [
+        "Chicken reaches 165°F / 74°C internal temperature",
+        "Juices run clear; no pink at thickest point",
+        "Exterior has browned but garlic is not burnt"
+      ],
+      "timers": [
+        {
+          "label": "Typical cook time (skillet/grill)",
+          "minutes": 12
+        },
+        {
+          "label": "Typical oven roast time",
+          "minutes": 18
+        }
+      ]
+    },
+    {
+      "id": "step_05",
+      "title": "Rest and finish",
+      "instructions": [
+        "Rest chicken 5 minutes before slicing (keeps it juicy).",
+        "Finish with cilantro (optional) and serve with lime wedges."
+      ],
+      "activeMins": 2,
+      "handsOffMins": 5,
+      "timers": [
+        {
+          "label": "Rest",
+          "minutes": 5
+        }
+      ]
+    },
+    {
+      "id": "step_06",
+      "title": "Serve (pairing ideas)",
+      "instructions": [
+        "Plates: serve with rice, roasted vegetables, or salad.",
+        "Bowls/tacos: slice and serve with slaw, beans, avocado, and extra lime.",
+        "Meal prep: portion with rice + veg; add fresh lime/cilantro at reheat time."
+      ],
+      "activeMins": 3
+    }
+  ],
+  "pairings": {
+    "sides": [
+      "citrus_chili.recipes.cilantro_lime_rice (if available)",
+      "herb_garlic.recipes.herb_roasted_vegetables (if available)",
+      "simple_slaw",
+      "black_beans"
+    ],
+    "sauces": ["lime_crema_optional", "garlic_lime_aioli_optional"]
+  },
+  "storage": {
+    "refrigerator": {
+      "maxDays": 4,
+      "notes": "Cool quickly; store in shallow containers."
+    },
+    "freezer": {
+      "supported": true,
+      "notes": "Freeze raw chicken in marinade for up to 2 months; thaw in fridge before cooking."
+    },
+    "reheat": {
+      "methods": [
+        "Skillet with a splash of water and cover briefly",
+        "Microwave in short bursts, covered"
+      ],
+      "notes": "Avoid overcooking on reheat; add fresh lime after warming."
+    }
+  },
+  "safety": {
+    "internalTemp": {
+      "target": 74,
+      "unit": "C",
+      "notes": "USDA safe minimum: 165°F / 74°C for chicken."
+    },
+    "handling": [
+      "Marinate in the refrigerator, not on the counter.",
+      "Discard used marinade that touched raw chicken unless boiled."
+    ]
+  },
+  "variations": [
+    {
+      "id": "variation_mild",
+      "label": "Mild version",
+      "notes": [
+        "Use mild chili powder and omit any additional hot chilies.",
+        "Increase honey to 1 tbsp if you want a gentler heat impression."
+      ]
+    },
+    {
+      "id": "variation_hot",
+      "label": "Hotter version",
+      "notes": [
+        "Add 1 minced jalapeño or 1/4 tsp cayenne.",
+        "Finish with a pinch of chili flakes and extra lime zest."
+      ]
+    },
+    {
+      "id": "variation_oven_broil_finish",
+      "label": "Oven + broil finish",
+      "notes": [
+        "Roast until cooked through, then broil 1–2 minutes for charred edges (watch closely)."
+      ]
+    }
+  ],
+  "planner": {
+    "cuisineId": "cuisines.citrus_chili",
+    "defaultCourse": "main",
+    "leftoversPlan": {
+      "day2": "Slice into bowls with rice/beans and a quick slaw.",
+      "day3": "Dice into a salad or wrap with greens + citrus vinaigrette."
+    },
+    "shopping": {
+      "corePantry": [
+        "salt",
+        "black_pepper",
+        "chili_powder",
+        "ground_cumin",
+        "dried_oregano",
+        "olive_oil"
+      ],
+      "fresh": ["limes", "garlic", "cilantro_optional"]
+    }
+  },
+  "compat": {
+    "cuisine": "citrus_chili",
+    "dishId": "citrus_chili_chicken",
+    "ingredientIds": [
+      "chicken_thighs",
+      "lime_juice",
+      "lime_zest",
+      "olive_oil",
+      "garlic",
+      "chili_powder",
+      "smoked_paprika",
+      "ground_cumin",
+      "dried_oregano",
+      "salt",
+      "black_pepper",
+      "honey",
+      "fresh_cilantro",
+      "lime_wedges"
+    ],
+    "equipmentIds": [
+      "skillet_or_grill",
+      "mixing_bowl",
+      "tongs",
+      "instant_read_thermometer",
+      "zester",
+      "citrus_juicer",
+      "sheet_pan"
+    ],
+    "methodIds": ["quick_marinade", "pan_sear", "grill", "roast"]
+  }
+}

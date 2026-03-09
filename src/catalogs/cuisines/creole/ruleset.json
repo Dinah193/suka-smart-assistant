@@ -1,0 +1,223 @@
+{
+  "id": "creole_ruleset",
+  "cuisineId": "creole",
+  "version": "1.0.0",
+  "name": "Creole Ruleset",
+  "description": "Deterministic cuisine rules for SSA planners and adapters: default bases, common pairings, substitutions, technique constraints, and meal-shaping guidance for Louisiana Creole cooking.",
+  "defaults": {
+    "servings": 6,
+    "starch": {
+      "primary": "rice",
+      "alternates": ["french_bread", "grits"]
+    },
+    "aromaticBase": {
+      "id": "holy_trinity_plus_garlic",
+      "items": ["onion", "bell pepper", "celery", "garlic"]
+    },
+    "tomatoPolicy": {
+      "useOften": true,
+      "notes": "Creole cooking often includes tomatoes in stews and sauces; allow tomato-forward variants by default."
+    },
+    "heatLevel": "medium",
+    "fatPreference": ["butter", "neutral_oil"],
+    "stockPreference": ["seafood_stock", "chicken_stock"]
+  },
+  "signaturePatterns": [
+    {
+      "id": "creole_tomato_stew_over_rice",
+      "name": "Tomato stew/sauce over rice",
+      "shape": {
+        "base": ["holy_trinity", "garlic"],
+        "thickener": ["tomato_paste_reduction", "simmer_reduction"],
+        "liquid": ["stock", "tomatoes"],
+        "protein": ["shrimp", "crawfish", "chicken", "crab"],
+        "finish": [
+          "green_onion",
+          "parsley",
+          "lemon_optional",
+          "hot_sauce_optional"
+        ],
+        "serveWith": ["rice"]
+      }
+    },
+    {
+      "id": "creole_light_roux_sauce_over_rice",
+      "name": "Light roux sauce (etouffee-style)",
+      "shape": {
+        "base": ["holy_trinity", "garlic"],
+        "thickener": ["light_roux"],
+        "liquid": ["stock"],
+        "protein": ["crawfish", "shrimp", "chicken"],
+        "finish": ["green_onion", "parsley", "lemon"],
+        "serveWith": ["rice"]
+      }
+    },
+    {
+      "id": "creole_gumbo_balanced",
+      "name": "Creole gumbo (often tomato-friendly)",
+      "shape": {
+        "base": ["holy_trinity", "garlic"],
+        "thickener": ["light_to_medium_roux", "okra_optional", "file_optional"],
+        "liquid": ["stock"],
+        "protein": ["seafood_mix", "chicken", "sausage", "crab"],
+        "finish": ["green_onion", "parsley", "hot_sauce_optional"],
+        "serveWith": ["rice"]
+      }
+    }
+  ],
+  "pairingRules": {
+    "primaryStarchByDish": [
+      { "dishId": "creole_shrimp_creole", "starch": ["rice"] },
+      { "dishId": "creole_gumbo", "starch": ["rice"] },
+      { "dishId": "creole_jambalaya", "starch": ["none"] },
+      { "dishId": "creole_crawfish_etouffee", "starch": ["rice"] },
+      { "dishId": "creole_red_beans_and_rice", "starch": ["rice"] },
+      { "dishId": "creole_oyster_po_boy", "starch": ["french_bread"] },
+      { "dishId": "creole_shrimp_po_boy", "starch": ["french_bread"] },
+      { "dishId": "creole_grillades_and_grits", "starch": ["grits"] }
+    ],
+    "defaultSides": [
+      {
+        "id": "creole_default_side_set",
+        "sides": ["simple_salad", "steamed_greens", "cornbread_optional"],
+        "notes": "Keep sides simple; main dishes already carry bold, layered flavor."
+      }
+    ]
+  },
+  "ingredientPreferences": {
+    "preferredProteins": [
+      "shrimp",
+      "crawfish",
+      "crab",
+      "oysters",
+      "fish",
+      "chicken_thighs",
+      "smoked_sausage",
+      "ham"
+    ],
+    "preferredAromatics": ["onion", "bell_pepper", "celery", "garlic"],
+    "preferredHerbs": [
+      "thyme",
+      "oregano",
+      "bay_leaf",
+      "parsley",
+      "green_onion"
+    ],
+    "preferredSpices": ["paprika", "black_pepper", "cayenne"],
+    "preferredCondiments": ["hot_sauce", "worcestershire", "lemon"],
+    "tomatoIngredients": ["tomato_paste", "diced_tomatoes", "crushed_tomatoes"]
+  },
+  "substitutions": {
+    "stock": [
+      {
+        "from": "seafood_stock",
+        "to": ["chicken_stock"],
+        "notes": "Chicken stock is acceptable if seafood stock is unavailable; add a small amount of shellfish or fish sauce only if user allows."
+      }
+    ],
+    "proteins": [
+      {
+        "from": "crawfish",
+        "to": ["shrimp", "crab"],
+        "notes": "Use shrimp as the closest practical substitute; crab for richer profile."
+      },
+      {
+        "from": "oysters",
+        "to": ["shrimp", "fish"],
+        "notes": "Use shrimp or mild fish; keep cook time short."
+      }
+    ],
+    "thickeners": [
+      {
+        "from": "light_roux",
+        "to": ["gluten_free_slurry", "reduction"],
+        "notes": "For gluten-free: replace roux with cornstarch slurry added at the end, or reduce longer for body."
+      }
+    ],
+    "aromatics": [
+      {
+        "from": "bell_pepper",
+        "to": ["poblano_pepper"],
+        "notes": "Use mild pepper if bell pepper is not available; avoid overly hot substitutions unless requested."
+      }
+    ],
+    "fats": [
+      {
+        "from": "butter",
+        "to": ["neutral_oil"],
+        "notes": "For dairy-free, use oil; expect slightly less rounded flavor."
+      }
+    ]
+  },
+  "techniqueConstraints": {
+    "roux": {
+      "preferredColorRange": "light_to_medium",
+      "notes": "Creole sauces commonly use light or medium roux; very dark roux shifts profile toward Cajun gumbo."
+    },
+    "seafoodHandling": {
+      "maxSimmerAfterAddMinutes": 10,
+      "notes": "Add seafood near the end and avoid hard boiling to keep texture tender."
+    },
+    "tomatoTiming": {
+      "pasteBloomSeconds": 60,
+      "notes": "Cook tomato paste briefly in fat to deepen flavor before adding liquid."
+    }
+  },
+  "plannerGuidance": {
+    "weeklyRotation": {
+      "recommendedMainFrequency": [
+        { "dishId": "creole_shrimp_creole", "maxPerWeek": 1 },
+        { "dishId": "creole_gumbo", "maxPerWeek": 1 },
+        { "dishId": "creole_jambalaya", "maxPerWeek": 1 },
+        { "dishId": "creole_crawfish_etouffee", "maxPerWeek": 1 },
+        { "dishId": "creole_red_beans_and_rice", "maxPerWeek": 1 }
+      ],
+      "notes": "Keep variety across seafood, chicken/sausage, and beans. Avoid repeating the same signature pattern more than twice weekly."
+    },
+    "batchCooking": {
+      "freezerFriendly": [
+        "creole_gumbo",
+        "creole_red_beans_and_rice",
+        "creole_jambalaya"
+      ],
+      "bestFresh": ["creole_shrimp_creole", "creole_crawfish_etouffee"],
+      "notes": "Stews and beans batch well; seafood sauces are best cooked close to serving time."
+    },
+    "timeTiers": [
+      {
+        "id": "quick",
+        "minutes": 30,
+        "examples": ["po_boys", "quick shrimp creole (using pre-made stock)"]
+      },
+      {
+        "id": "standard",
+        "minutes": 60,
+        "examples": ["etouffee", "shrimp creole"]
+      },
+      {
+        "id": "slow",
+        "minutes": 150,
+        "examples": ["red beans and rice", "gumbo"]
+      }
+    ]
+  },
+  "compatibility": {
+    "dietModes": {
+      "glutenFree": {
+        "supported": true,
+        "strategies": ["slurry_thickening", "gf_flour_roux", "reduction"],
+        "avoid": ["wheat_roux", "breaded_frying_unless_gf"]
+      },
+      "dairyFree": {
+        "supported": true,
+        "strategies": ["use_oil_instead_of_butter"],
+        "avoid": ["cream_sauces_optional"]
+      },
+      "lowCarb": {
+        "supported": true,
+        "strategies": ["serve_over_cauliflower_rice", "reduce_starch_sides"],
+        "avoid": ["rice_as_default", "bread_sides"]
+      }
+    }
+  }
+}

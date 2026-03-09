@@ -1,0 +1,165 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+
+  "meta": {
+    "type": "recipe",
+    "id": "soul_food.cornbread.v1",
+    "name": "Soul Food Cornbread (Skillet)",
+    "cuisine": "soul_food",
+    "region": "US_South",
+    "version": "1.0.0",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-17",
+    "updatedAt": "2026-01-17",
+    "status": "canonical",
+    "source": {
+      "type": "compiled",
+      "notes": "Canonical SSA soul food baseline. Classic cast-iron skillet cornbread with crisp edges. Lightly sweet option included."
+    },
+    "tags": [
+      "soul_food",
+      "cornbread",
+      "skillet",
+      "cast_iron",
+      "baked",
+      "quick_bread",
+      "comfort_food"
+    ],
+    "allergens": ["milk", "wheat", "egg"],
+    "dietary": {
+      "halal": true,
+      "kosher_style": false,
+      "gluten_free": false,
+      "dairy_free": false
+    },
+    "summary": "Crisp-edged cast-iron cornbread with a tender crumb—perfect for potlikker, chili, or a holiday table.",
+    "difficulty": "easy",
+    "servings": {
+      "count": 10,
+      "unit": "servings"
+    },
+    "yield": "1 (10-inch skillet) cornbread",
+    "timing": {
+      "prepMinutes": 10,
+      "inactiveMinutes": 5,
+      "cookMinutes": 22,
+      "totalMinutes": 37
+    },
+    "equipment": [
+      {
+        "id": "cast_iron_skillet_10in",
+        "label": "10-inch cast iron skillet",
+        "required": true
+      },
+      { "id": "mixing_bowl", "label": "Mixing bowl", "required": true },
+      { "id": "whisk", "label": "Whisk", "required": false },
+      { "id": "spatula", "label": "Spatula", "required": true },
+      {
+        "id": "measuring_cups",
+        "label": "Measuring cups/spoons",
+        "required": false
+      }
+    ],
+    "foodSafety": {
+      "minInternalTempF": 190,
+      "notes": [
+        "Quick breads are typically done around 190–200°F internal temperature.",
+        "Avoid overbaking to prevent dryness."
+      ]
+    }
+  },
+
+  "ingredients": [
+    {
+      "id": "cornmeal",
+      "label": "Yellow cornmeal (stone-ground preferred)",
+      "amount": { "value": 1.5, "unit": "cup" }
+    },
+    {
+      "id": "all_purpose_flour",
+      "label": "All-purpose flour",
+      "amount": { "value": 0.5, "unit": "cup" }
+    },
+    {
+      "id": "baking_powder",
+      "label": "Baking powder",
+      "amount": { "value": 1, "unit": "tbsp" }
+    },
+    {
+      "id": "baking_soda",
+      "label": "Baking soda",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "kosher_salt",
+      "label": "Kosher salt",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "granulated_sugar",
+      "label": "Sugar (optional; for lightly sweet cornbread)",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+
+    {
+      "id": "buttermilk",
+      "label": "Buttermilk",
+      "amount": { "value": 2, "unit": "cup" }
+    },
+    {
+      "id": "eggs",
+      "label": "Eggs",
+      "amount": { "value": 2, "unit": "large" }
+    },
+    {
+      "id": "unsalted_butter",
+      "label": "Butter, melted (or neutral oil)",
+      "amount": { "value": 6, "unit": "tbsp" }
+    },
+
+    {
+      "id": "bacon_fat_or_butter_for_skillet",
+      "label": "Bacon fat or butter (for preheating skillet)",
+      "amount": { "value": 1, "unit": "tbsp" }
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_preheat",
+      "title": "Preheat oven and skillet",
+      "body": "Place cast iron skillet in the oven and preheat to 425°F. Let the skillet heat fully while you mix the batter."
+    },
+    {
+      "id": "step_02_mix_dry",
+      "title": "Mix dry ingredients",
+      "body": "In a bowl, whisk together cornmeal, flour, baking powder, baking soda, salt, and sugar (if using)."
+    },
+    {
+      "id": "step_03_mix_wet",
+      "title": "Mix wet ingredients",
+      "body": "In a second bowl, whisk buttermilk, eggs, and melted butter until combined."
+    },
+    {
+      "id": "step_04_combine",
+      "title": "Combine batter (do not overmix)",
+      "body": "Pour wet ingredients into dry ingredients. Stir just until no dry streaks remain. Batter will be thick—avoid overmixing."
+    },
+    {
+      "id": "step_05_grease_hot_skillet",
+      "title": "Grease the hot skillet",
+      "body": "Carefully remove hot skillet from oven. Add bacon fat or butter and swirl to coat bottom and sides."
+    },
+    {
+      "id": "step_06_bake",
+      "title": "Bake until golden",
+      "body": "Pour batter into hot greased skillet (it should sizzle). Bake 18–24 minutes, until deeply golden and a toothpick comes out clean. Internal temp should be ~190–200°F."
+    },
+    {
+      "id": "step_07_rest",
+      "title": "Rest briefly, then serve",
+      "body": "Rest 5–10 minutes. Slice and serve warm (great with collard greens potlikker or chili)."
+    }
+  ]
+}

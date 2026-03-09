@@ -5,17 +5,24 @@
   // ----------------------------- Safe Imports -----------------------------
   var eventBus = { emit: function () {} };
   try {
-    eventBus = (require("@/services/eventBus") || {}).eventBus || eventBus;
+    eventBus =
+      (require("@/services/events/eventBus") || {}).eventBus || eventBus;
   } catch (e) {}
 
   var automation = null;
   try {
-    automation = (require("@/services/automation/runtime") || {}).automation || null;
+    automation =
+      (require("@/services/automation/runtime") || {}).automation || null;
   } catch (e) {}
 
-  var HouseholdCalendar = { getEventsInRange: function () { return []; } };
+  var HouseholdCalendar = {
+    getEventsInRange: function () {
+      return [];
+    },
+  };
   try {
-    HouseholdCalendar = require("@/store/HouseholdCalendarStore") || HouseholdCalendar;
+    HouseholdCalendar =
+      require("@/store/HouseholdCalendarStore") || HouseholdCalendar;
   } catch (e) {}
 
   var logger = console;
@@ -37,14 +44,23 @@
   function sameDay(a, b) {
     var A = asDate(a);
     var B = asDate(b);
-    return A.getFullYear() === B.getFullYear() &&
-           A.getMonth() === B.getMonth() &&
-           A.getDate() === B.getDate();
+    return (
+      A.getFullYear() === B.getFullYear() &&
+      A.getMonth() === B.getMonth() &&
+      A.getDate() === B.getDate()
+    );
   }
 
   function getId(recipe) {
     if (!recipe) return null;
-    return recipe.id || recipe._id || recipe.slug || recipe.title || recipe.name || null;
+    return (
+      recipe.id ||
+      recipe._id ||
+      recipe.slug ||
+      recipe.title ||
+      recipe.name ||
+      null
+    );
   }
 
   function deepMerge() {
@@ -73,33 +89,35 @@
           proteinCooldownDays: 2,
           cuisineCooldownDays: 3,
           techniqueCooldownDays: 2,
-          breakfastRepeatsPerWeek: 5
+          breakfastRepeatsPerWeek: 5,
         },
         leftovers: {
           autoPlace: true,
           defaultMealType: "lunch",
           windowDays: 2,
-          reserveAs: "LEFTOVER"
+          reserveAs: "LEFTOVER",
         },
         zones: {
           default: "indoor", // assume indoor when unspecified
           windMaxKphForGrill: 35,
           rainBlockForOutdoor: true,
           heatWarnC: 32,
-          coldWarnC: -5
+          coldWarnC: -5,
         },
         species: {
-          blockOnQuarantine: true
-        }
-      }
+          blockOnQuarantine: true,
+        },
+      },
     };
 
-    var ctxPrefs = (ctx && ctx.preferences) ? { preferences: ctx.preferences } : {};
+    var ctxPrefs =
+      ctx && ctx.preferences ? { preferences: ctx.preferences } : {};
     var runtimePrefs = {};
     try {
-      var fromRuntime = automation && typeof automation.get === "function"
-        ? automation.get("placement.rules")
-        : null;
+      var fromRuntime =
+        automation && typeof automation.get === "function"
+          ? automation.get("placement.rules")
+          : null;
       if (fromRuntime && typeof fromRuntime === "object") {
         runtimePrefs = { preferences: fromRuntime };
       }
@@ -134,7 +152,12 @@
 
   function firstNonEmpty() {
     for (var i = 0; i < arguments.length; i++) {
-      if (arguments[i] !== undefined && arguments[i] !== null && arguments[i] !== "") return arguments[i];
+      if (
+        arguments[i] !== undefined &&
+        arguments[i] !== null &&
+        arguments[i] !== ""
+      )
+        return arguments[i];
     }
     return null;
   }
@@ -185,25 +208,47 @@
     var fixes = [];
 
     var slotDate = asDate((slot && (slot.start || slot.date)) || slot);
-    var mealType = (slot && slot.mealType) ? slot.mealType : "dinner";
+    var mealType = slot && slot.mealType ? slot.mealType : "dinner";
 
     var protein = extractTagValue(recipe && recipe.tags, "protein");
     var cuisine = extractTagValue(recipe && recipe.tags, "cuisine");
     var technique = extractTagValue(recipe && recipe.tags, "technique");
 
-    var protRecents = gatherRecent(ctx, slotDate, null, prefs.variety.proteinCooldownDays);
-    var cuisRecents = gatherRecent(ctx, slotDate, null, prefs.variety.cuisineCooldownDays);
-    var techRecents = gatherRecent(ctx, slotDate, null, prefs.variety.techniqueCooldownDays);
+    var protRecents = gatherRecent(
+      ctx,
+      slotDate,
+      null,
+      prefs.variety.proteinCooldownDays
+    );
+    var cuisRecents = gatherRecent(
+      ctx,
+      slotDate,
+      null,
+      prefs.variety.cuisineCooldownDays
+    );
+    var techRecents = gatherRecent(
+      ctx,
+      slotDate,
+      null,
+      prefs.variety.techniqueCooldownDays
+    );
 
     var ok = true;
 
     if (protein) {
       for (var i = 0; i < protRecents.length; i++) {
         var pr = protRecents[i];
-        if (extractTagValue(pr.recipe && pr.recipe.tags, "protein") === protein) {
+        if (
+          extractTagValue(pr.recipe && pr.recipe.tags, "protein") === protein
+        ) {
           ok = false;
           reasons.push('Protein "' + protein + '" used recently.');
-          fixes.push(mkFix("Swap protein or shift by +1 day", { type: "SHIFT_DAYS", days: 1 }));
+          fixes.push(
+            mkFix("Swap protein or shift by +1 day", {
+              type: "SHIFT_DAYS",
+              days: 1,
+            })
+          );
           break;
         }
       }
@@ -212,10 +257,19 @@
     if (cuisine) {
       for (var j = 0; j < cuisRecents.length; j++) {
         var cr = cuisRecents[j];
-        if (extractTagValue(cr.recipe && cr.recipe.tags, "cuisine") === cuisine) {
+        if (
+          extractTagValue(cr.recipe && cr.recipe.tags, "cuisine") === cuisine
+        ) {
           ok = false;
-          reasons.push('Cuisine "' + cuisine + '" repeated in cooldown window.');
-          fixes.push(mkFix("Pick a different cuisine style", { type: "ALTER_TAG", tag: "cuisine" }));
+          reasons.push(
+            'Cuisine "' + cuisine + '" repeated in cooldown window.'
+          );
+          fixes.push(
+            mkFix("Pick a different cuisine style", {
+              type: "ALTER_TAG",
+              tag: "cuisine",
+            })
+          );
           break;
         }
       }
@@ -224,10 +278,18 @@
     if (technique) {
       for (var k = 0; k < techRecents.length; k++) {
         var tr = techRecents[k];
-        if (extractTagValue(tr.recipe && tr.recipe.tags, "technique") === technique) {
+        if (
+          extractTagValue(tr.recipe && tr.recipe.tags, "technique") ===
+          technique
+        ) {
           ok = false;
           reasons.push('Technique "' + technique + '" used recently.');
-          fixes.push(mkFix("Change technique (e.g., bake vs. saute)", { type: "ALTER_TAG", tag: "technique" }));
+          fixes.push(
+            mkFix("Change technique (e.g., bake vs. saute)", {
+              type: "ALTER_TAG",
+              tag: "technique",
+            })
+          );
           break;
         }
       }
@@ -249,13 +311,20 @@
       var title = ((recipe && recipe.title) || "").toLowerCase();
       var repeats = 0;
       for (var n = 0; n < breakfasts.length; n++) {
-        var bt = ((breakfasts[n].recipe && breakfasts[n].recipe.title) || "").toLowerCase();
+        var bt = (
+          (breakfasts[n].recipe && breakfasts[n].recipe.title) ||
+          ""
+        ).toLowerCase();
         if (bt === title) repeats++;
       }
       if (repeats >= prefs.variety.breakfastRepeatsPerWeek) {
         ok = false;
         reasons.push("Breakfast repeat cap reached for the week.");
-        fixes.push(mkFix("Pick a different breakfast or reduce repeats", { type: "ALTER_TITLE" }));
+        fixes.push(
+          mkFix("Pick a different breakfast or reduce repeats", {
+            type: "ALTER_TITLE",
+          })
+        );
       }
     }
 
@@ -270,7 +339,10 @@
     if (recipe && Array.isArray(recipe.tags)) {
       for (var i = 0; i < recipe.tags.length; i++) {
         var t = String(recipe.tags[i]).toLowerCase();
-        if (t.indexOf("batch") >= 0) { batchy = true; break; }
+        if (t.indexOf("batch") >= 0) {
+          batchy = true;
+          break;
+        }
       }
     }
     return s >= 4 || time >= 60 || batchy;
@@ -280,9 +352,10 @@
     var plan = (ctx && ctx.plan) || [];
     for (var i = 0; i < plan.length; i++) {
       var p = plan[i];
-      var same = sameDay(p.slot && p.slot.start, slot.start) &&
-                 (p.slot && p.slot.mealType) === slot.mealType &&
-                 !(p.meta && p.meta.type === "LEFTOVER");
+      var same =
+        sameDay(p.slot && p.slot.start, slot.start) &&
+        (p.slot && p.slot.mealType) === slot.mealType &&
+        !(p.meta && p.meta.type === "LEFTOVER");
       if (same) return true;
     }
     return false;
@@ -296,20 +369,46 @@
 
     var pol = (recipe && recipe.leftoverPolicy) || {};
     var predicts = !!pol.predictsLeftovers || estimatePredictsLeftovers(recipe);
-    if (!predicts) return { ok: true, reasons: reasons, fixes: fixes, reservations: reservations };
+    if (!predicts)
+      return {
+        ok: true,
+        reasons: reasons,
+        fixes: fixes,
+        reservations: reservations,
+      };
 
     var servings = Number((recipe && recipe.servings) || 0);
-    var leftoverServings = Number(pol.leftoverServings || Math.max(0, servings - 1));
-    if (leftoverServings <= 0) return { ok: true, reasons: reasons, fixes: fixes, reservations: reservations };
+    var leftoverServings = Number(
+      pol.leftoverServings || Math.max(0, servings - 1)
+    );
+    if (leftoverServings <= 0)
+      return {
+        ok: true,
+        reasons: reasons,
+        fixes: fixes,
+        reservations: reservations,
+      };
 
     var slotDate = asDate((slot && (slot.start || slot.date)) || slot);
-    var keepDays = Number(pol.keepDays || Math.max(2, prefs.leftovers.windowDays));
-    var targetMealType = pol.preferredMealType || prefs.leftovers.defaultMealType || "lunch";
+    var keepDays = Number(
+      pol.keepDays || Math.max(2, prefs.leftovers.windowDays)
+    );
+    var targetMealType =
+      pol.preferredMealType || prefs.leftovers.defaultMealType || "lunch";
 
     if (!prefs.leftovers.autoPlace) {
       reasons.push("Leftovers likely (" + leftoverServings + " servings).");
-      fixes.push(mkFix("Auto-place leftovers (enable in settings)", { type: "ENABLE_AUTO_LEFTOVERS" }));
-      return { ok: true, reasons: reasons, fixes: fixes, reservations: reservations };
+      fixes.push(
+        mkFix("Auto-place leftovers (enable in settings)", {
+          type: "ENABLE_AUTO_LEFTOVERS",
+        })
+      );
+      return {
+        ok: true,
+        reasons: reasons,
+        fixes: fixes,
+        reservations: reservations,
+      };
     }
 
     for (var d = 1; d <= keepDays; d++) {
@@ -321,35 +420,61 @@
           type: prefs.leftovers.reserveAs,
           forRecipeId: getId(recipe),
           servings: leftoverServings,
-          slot: candidate
+          slot: candidate,
         });
-        reasons.push("Reserved leftovers on " + day.toDateString() + " (" + targetMealType + ").");
+        reasons.push(
+          "Reserved leftovers on " +
+            day.toDateString() +
+            " (" +
+            targetMealType +
+            ")."
+        );
         break;
       }
     }
 
     if (reservations.length === 0) {
       reasons.push("No suitable slot found for leftovers within window.");
-      fixes.push(mkFix("Manually pick a leftovers slot", { type: "PICK_SLOT", withinDays: keepDays } ));
+      fixes.push(
+        mkFix("Manually pick a leftovers slot", {
+          type: "PICK_SLOT",
+          withinDays: keepDays,
+        })
+      );
     }
 
-    return { ok: true, reasons: reasons, fixes: fixes, reservations: reservations };
+    return {
+      ok: true,
+      reasons: reasons,
+      fixes: fixes,
+      reservations: reservations,
+    };
   }
 
   // -------------------------- Appliance Conflict Rule ------------------------
   function checkApplianceWindows(recipe, slot, ctx, reasons, fixes) {
     var appliances = Array.isArray(recipe && recipe.appliances)
-      ? recipe.appliances.map(function (a) { return String(a).toLowerCase(); })
+      ? recipe.appliances.map(function (a) {
+          return String(a).toLowerCase();
+        })
       : [];
     if (!appliances.length) return true;
 
     var start = asDate((slot && (slot.start || slot.date)) || slot);
-    var end = (slot && slot.end)
-      ? asDate(slot.end)
-      : new Date(start.getTime() + (Number((recipe && recipe.totalTimeMinutes) || 45) * 60000));
+    var end =
+      slot && slot.end
+        ? asDate(slot.end)
+        : new Date(
+            start.getTime() +
+              Number((recipe && recipe.totalTimeMinutes) || 45) * 60000
+          );
 
     var hardBlocks = (ctx && ctx.applianceAvailability) || {};
-    if ((!hardBlocks || !Object.keys(hardBlocks).length) && automation && typeof automation.get === "function") {
+    if (
+      (!hardBlocks || !Object.keys(hardBlocks).length) &&
+      automation &&
+      typeof automation.get === "function"
+    ) {
       var rb = automation.get("appliances.busy");
       if (rb && typeof rb === "object") hardBlocks = rb;
     }
@@ -363,17 +488,30 @@
         var be = asDate(b.end);
         var overlap = !(end <= bs || start >= be);
         if (overlap) {
-          reasons.push('Appliance "' + app + '" is unavailable (' + (b.reason || "busy") + ').');
-          fixes.push(mkFix("Shift time beyond " + be.toLocaleString(), { type: "SHIFT_TIME", to: be }));
+          reasons.push(
+            'Appliance "' +
+              app +
+              '" is unavailable (' +
+              (b.reason || "busy") +
+              ")."
+          );
+          fixes.push(
+            mkFix("Shift time beyond " + be.toLocaleString(), {
+              type: "SHIFT_TIME",
+              to: be,
+            })
+          );
           return false;
         }
       }
     }
 
-    var calBusy = (ctx && Array.isArray(ctx.calendarBusy) && ctx.calendarBusy) ||
-                  (HouseholdCalendar && typeof HouseholdCalendar.getEventsInRange === "function"
-                    ? HouseholdCalendar.getEventsInRange(start, end)
-                    : []);
+    var calBusy =
+      (ctx && Array.isArray(ctx.calendarBusy) && ctx.calendarBusy) ||
+      (HouseholdCalendar &&
+      typeof HouseholdCalendar.getEventsInRange === "function"
+        ? HouseholdCalendar.getEventsInRange(start, end)
+        : []);
 
     if (Array.isArray(calBusy)) {
       for (var k = 0; k < calBusy.length; k++) {
@@ -382,7 +520,9 @@
         var ee = asDate(e.end);
         var overlap2 = !(end <= es || start >= ee);
         if (overlap2) {
-          reasons.push("Calendar busy window overlaps: " + (e.label || "event") + ".");
+          reasons.push(
+            "Calendar busy window overlaps: " + (e.label || "event") + "."
+          );
           fixes.push(mkFix("Choose a different slot", { type: "PICK_SLOT" }));
           return false;
         }
@@ -393,19 +533,37 @@
     for (var p = 0; p < plan.length; p++) {
       var item = plan[p];
       var rApps = Array.isArray(item && item.recipe && item.recipe.appliances)
-        ? item.recipe.appliances.map(function (a) { return String(a).toLowerCase(); })
+        ? item.recipe.appliances.map(function (a) {
+            return String(a).toLowerCase();
+          })
         : [];
       if (!rApps.length) continue;
       var ps = asDate(item.slot && item.slot.start);
-      var pe = (item.slot && item.slot.end)
-        ? asDate(item.slot.end)
-        : new Date(ps.getTime() + (Number((item.recipe && item.recipe.totalTimeMinutes) || 45) * 60000));
+      var pe =
+        item.slot && item.slot.end
+          ? asDate(item.slot.end)
+          : new Date(
+              ps.getTime() +
+                Number((item.recipe && item.recipe.totalTimeMinutes) || 45) *
+                  60000
+            );
       var overlaps = !(end <= ps || start >= pe);
       if (!overlaps) continue;
       for (var r = 0; r < rApps.length; r++) {
         if (appliances.indexOf(rApps[r]) >= 0) {
-          reasons.push('Appliance conflict with "' + ((item.recipe && item.recipe.title) || item.recipeId) + '" (' + rApps[r] + ").");
-          fixes.push(mkFix("Adjust start time by +30m", { type: "SHIFT_MINUTES", minutes: 30 }));
+          reasons.push(
+            'Appliance conflict with "' +
+              ((item.recipe && item.recipe.title) || item.recipeId) +
+              '" (' +
+              rApps[r] +
+              ")."
+          );
+          fixes.push(
+            mkFix("Adjust start time by +30m", {
+              type: "SHIFT_MINUTES",
+              minutes: 30,
+            })
+          );
           return false;
         }
       }
@@ -430,14 +588,22 @@
     var prefs = loadPrefs(ctx);
     var reasons = [];
     var fixes = [];
-    var zone = extractTagValue(item && item.tags, "zone") || prefs.zones.default;
+    var zone =
+      extractTagValue(item && item.tags, "zone") || prefs.zones.default;
 
     // Busy windows for zones (e.g., grill/patio reserved)
     var start = asDate((slot && (slot.start || slot.date)) || slot);
-    var end = (slot && slot.end) ? asDate(slot.end) : new Date(start.getTime() + 60 * 60000);
+    var end =
+      slot && slot.end
+        ? asDate(slot.end)
+        : new Date(start.getTime() + 60 * 60000);
 
     var busy = (ctx && ctx.zoneAvailability) || {};
-    if ((!busy || !Object.keys(busy).length) && automation && typeof automation.get === "function") {
+    if (
+      (!busy || !Object.keys(busy).length) &&
+      automation &&
+      typeof automation.get === "function"
+    ) {
       var z = automation.get("zones.busy");
       if (z && typeof z === "object") busy = z;
     }
@@ -449,8 +615,16 @@
       var be = asDate(b.end);
       var overlap = !(end <= bs || start >= be);
       if (overlap) {
-        reasons.push('Zone "' + zone + '" unavailable (' + (b.reason || "busy") + ").");
-        fixes.push(mkFix("Pick another zone or shift time", { type: "PICK_ZONE_OR_SHIFT", zone: zone, to: be }));
+        reasons.push(
+          'Zone "' + zone + '" unavailable (' + (b.reason || "busy") + ")."
+        );
+        fixes.push(
+          mkFix("Pick another zone or shift time", {
+            type: "PICK_ZONE_OR_SHIFT",
+            zone: zone,
+            to: be,
+          })
+        );
         return { ok: false, reasons: reasons, fixes: fixes };
       }
     }
@@ -469,8 +643,15 @@
     var reasons = [];
     var fixes = [];
 
-    var zone = (zoneResult && zoneResult.zone) || extractTagValue(item && item.tags, "zone") || prefs.zones.default;
-    var isOutdoor = zone === "outdoor" || zone === "grill" || zone === "patio" || hasTag(item && item.tags, "outdoor");
+    var zone =
+      (zoneResult && zoneResult.zone) ||
+      extractTagValue(item && item.tags, "zone") ||
+      prefs.zones.default;
+    var isOutdoor =
+      zone === "outdoor" ||
+      zone === "grill" ||
+      zone === "patio" ||
+      hasTag(item && item.tags, "outdoor");
 
     // garden task heuristic: outdoor by default
     if (!isOutdoor && item && item.domain === "garden") isOutdoor = true;
@@ -480,7 +661,10 @@
     }
 
     var when = asDate((slot && (slot.start || slot.date)) || slot);
-    var forecastFunc = (ctx && typeof ctx.weatherForecast === "function") ? ctx.weatherForecast : null;
+    var forecastFunc =
+      ctx && typeof ctx.weatherForecast === "function"
+        ? ctx.weatherForecast
+        : null;
 
     var forecast = null;
     try {
@@ -505,29 +689,53 @@
 
     if (prefs.zones.rainBlockForOutdoor && precipProb >= 0.5) {
       reasons.push("High chance of rain for outdoor slot.");
-      fixes.push(mkFix("Shift to indoor or change day", { type: "PICK_ZONE_OR_SHIFT", to: when, zone: "indoor" }));
+      fixes.push(
+        mkFix("Shift to indoor or change day", {
+          type: "PICK_ZONE_OR_SHIFT",
+          to: when,
+          zone: "indoor",
+        })
+      );
       return { ok: false, reasons: reasons, fixes: fixes };
     }
 
-    if (windKph >= prefs.zones.windMaxKphForGrill && (zone === "grill" || hasTag(item && item.tags, "grill"))) {
+    if (
+      windKph >= prefs.zones.windMaxKphForGrill &&
+      (zone === "grill" || hasTag(item && item.tags, "grill"))
+    ) {
       reasons.push("Wind too strong for grill.");
-      fixes.push(mkFix("Pick calmer slot or cook indoor variant", { type: "PICK_ZONE_OR_SHIFT", zone: "indoor" }));
+      fixes.push(
+        mkFix("Pick calmer slot or cook indoor variant", {
+          type: "PICK_ZONE_OR_SHIFT",
+          zone: "indoor",
+        })
+      );
       return { ok: false, reasons: reasons, fixes: fixes };
     }
 
     if (tempC >= prefs.zones.heatWarnC) {
       reasons.push("Heat advisory for outdoor work.");
-      fixes.push(mkFix("Shift to cooler hours", { type: "SHIFT_HOURS", hours: -2 }));
+      fixes.push(
+        mkFix("Shift to cooler hours", { type: "SHIFT_HOURS", hours: -2 })
+      );
     }
     if (tempC <= prefs.zones.coldWarnC) {
       reasons.push("Very cold for outdoor work.");
-      fixes.push(mkFix("Shift to warmer hours", { type: "SHIFT_HOURS", hours: 2 }));
+      fixes.push(
+        mkFix("Shift to warmer hours", { type: "SHIFT_HOURS", hours: 2 })
+      );
     }
 
-    if (item && item.domain === "garden" && (item.kind === "transplant" || item.kind === "sow")) {
+    if (
+      item &&
+      item.domain === "garden" &&
+      (item.kind === "transplant" || item.kind === "sow")
+    ) {
       if (frostRisk) {
         reasons.push("Frost risk near task time.");
-        fixes.push(mkFix("Delay until frost-safe", { type: "SHIFT_DAYS", days: 1 }));
+        fixes.push(
+          mkFix("Delay until frost-safe", { type: "SHIFT_DAYS", days: 1 })
+        );
         return { ok: false, reasons: reasons, fixes: fixes };
       }
     }
@@ -548,16 +756,27 @@
 
     // meal recipes may carry species:beef/pork (ignored for busy windows); animal-care tasks use barn species.
     var speciesTag = extractTagValue(item && item.tags, "species");
-    if (!speciesTag && Array.isArray(item && item.species) && item.species.length) {
+    if (
+      !speciesTag &&
+      Array.isArray(item && item.species) &&
+      item.species.length
+    ) {
       speciesTag = String(item.species[0]).toLowerCase();
     }
     if (!speciesTag) return { ok: true, reasons: reasons, fixes: fixes };
 
     var start = asDate((slot && (slot.start || slot.date)) || slot);
-    var end = (slot && slot.end) ? asDate(slot.end) : new Date(start.getTime() + 60 * 60000);
+    var end =
+      slot && slot.end
+        ? asDate(slot.end)
+        : new Date(start.getTime() + 60 * 60000);
 
     var windows = (ctx && ctx.speciesBusy) || {};
-    if ((!windows || !Object.keys(windows).length) && automation && typeof automation.get === "function") {
+    if (
+      (!windows || !Object.keys(windows).length) &&
+      automation &&
+      typeof automation.get === "function"
+    ) {
       var wb = automation.get("species.busy");
       if (wb && typeof wb === "object") windows = wb;
     }
@@ -569,12 +788,31 @@
       var be = asDate(b.end);
       var overlap = !(end <= bs || start >= be);
       if (overlap) {
-        if (prefs.species.blockOnQuarantine || (b.type && String(b.type).toLowerCase() === "quarantine")) {
-          reasons.push('Species "' + speciesTag + '" unavailable (' + (b.reason || b.type || "busy") + ").");
-          fixes.push(mkFix("Choose different time or species", { type: "PICK_SLOT_OR_SPECIES", to: be, species: speciesTag }));
+        if (
+          prefs.species.blockOnQuarantine ||
+          (b.type && String(b.type).toLowerCase() === "quarantine")
+        ) {
+          reasons.push(
+            'Species "' +
+              speciesTag +
+              '" unavailable (' +
+              (b.reason || b.type || "busy") +
+              ")."
+          );
+          fixes.push(
+            mkFix("Choose different time or species", {
+              type: "PICK_SLOT_OR_SPECIES",
+              to: be,
+              species: speciesTag,
+            })
+          );
           return { ok: false, reasons: reasons, fixes: fixes };
         } else {
-          reasons.push('Species window overlaps (' + (b.reason || "busy") + "). Proceed with caution.");
+          reasons.push(
+            "Species window overlaps (" +
+              (b.reason || "busy") +
+              "). Proceed with caution."
+          );
         }
       }
     }
@@ -595,13 +833,20 @@
     var a = applianceCheck(recipe, slot, ctx);
 
     // New rules: zone → weather → species
-    var z = zoneCheck(recipe, slot, ctx);                // may return zone
-    var w = weatherCheck(recipe, slot, ctx, z);          // uses zone result if outdoor
+    var z = zoneCheck(recipe, slot, ctx); // may return zone
+    var w = weatherCheck(recipe, slot, ctx, z); // uses zone result if outdoor
     var s = speciesCheck(recipe, slot, ctx);
 
     var ok = v.ok && l.ok && a.ok && z.ok && w.ok && s.ok;
 
-    reasons = reasons.concat(v.reasons, l.reasons, a.reasons, z.reasons, w.reasons, s.reasons);
+    reasons = reasons.concat(
+      v.reasons,
+      l.reasons,
+      a.reasons,
+      z.reasons,
+      w.reasons,
+      s.reasons
+    );
     fixes = fixes.concat(v.fixes, l.fixes, a.fixes, z.fixes, w.fixes, s.fixes);
     if (l.reservations && l.reservations.length) {
       reservations = reservations.concat(l.reservations);
@@ -613,35 +858,58 @@
           recipeId: getId(recipe),
           slot: slot,
           reasons: reasons,
-          fixes: fixes
+          fixes: fixes,
         });
       }
     } catch (e) {}
 
-    return { ok: ok, reasons: reasons, fixes: fixes, reservations: reservations };
+    return {
+      ok: ok,
+      reasons: reasons,
+      fixes: fixes,
+      reservations: reservations,
+    };
   }
 
   function registerPlacement(recipe, slot, ctx) {
     if (ctx === void 0) ctx = {};
     if (!ctx.ephemeral) ctx.ephemeral = {};
-    var key = asDate(slot && (slot.start || slot)).toDateString() + "::" + ((slot && slot.mealType) || "dinner");
+    var key =
+      asDate(slot && (slot.start || slot)).toDateString() +
+      "::" +
+      ((slot && slot.mealType) || "dinner");
     if (!ctx.ephemeral.byDayMeal) ctx.ephemeral.byDayMeal = {};
     if (!ctx.ephemeral.byDayMeal[key]) ctx.ephemeral.byDayMeal[key] = [];
-    ctx.ephemeral.byDayMeal[key].push({ recipeId: getId(recipe), recipe: recipe, slot: slot });
+    ctx.ephemeral.byDayMeal[key].push({
+      recipeId: getId(recipe),
+      recipe: recipe,
+      slot: slot,
+    });
 
     var apps = Array.isArray(recipe && recipe.appliances)
-      ? recipe.appliances.map(function (a) { return String(a).toLowerCase(); })
+      ? recipe.appliances.map(function (a) {
+          return String(a).toLowerCase();
+        })
       : [];
     if (apps.length) {
       if (!ctx.ephemeral.applianceUse) ctx.ephemeral.applianceUse = {};
       var start = asDate(slot && (slot.start || slot));
-      var end = (slot && slot.end)
-        ? asDate(slot.end)
-        : new Date(start.getTime() + (Number((recipe && recipe.totalTimeMinutes) || 45) * 60000));
+      var end =
+        slot && slot.end
+          ? asDate(slot.end)
+          : new Date(
+              start.getTime() +
+                Number((recipe && recipe.totalTimeMinutes) || 45) * 60000
+            );
       for (var i = 0; i < apps.length; i++) {
         var app = apps[i];
-        if (!ctx.ephemeral.applianceUse[app]) ctx.ephemeral.applianceUse[app] = [];
-        ctx.ephemeral.applianceUse[app].push({ start: start, end: end, recipeId: getId(recipe) });
+        if (!ctx.ephemeral.applianceUse[app])
+          ctx.ephemeral.applianceUse[app] = [];
+        ctx.ephemeral.applianceUse[app].push({
+          start: start,
+          end: end,
+          recipeId: getId(recipe),
+        });
       }
     }
 
@@ -649,7 +917,7 @@
       if (eventBus && typeof eventBus.emit === "function") {
         eventBus.emit("placement:registered", {
           recipeId: getId(recipe),
-          slot: slot
+          slot: slot,
         });
       }
     } catch (e) {}
@@ -665,12 +933,18 @@
     for (var i = 0; i < plan.length; i++) {
       var p = plan[i];
       var apps = Array.isArray(p && p.recipe && p.recipe.appliances)
-        ? p.recipe.appliances.map(function (a) { return String(a).toLowerCase(); })
+        ? p.recipe.appliances.map(function (a) {
+            return String(a).toLowerCase();
+          })
         : [];
       var start = asDate(p.slot && p.slot.start);
-      var end = (p.slot && p.slot.end)
-        ? asDate(p.slot.end)
-        : new Date(start.getTime() + (Number((p.recipe && p.recipe.totalTimeMinutes) || 45) * 60000));
+      var end =
+        p.slot && p.slot.end
+          ? asDate(p.slot.end)
+          : new Date(
+              start.getTime() +
+                Number((p.recipe && p.recipe.totalTimeMinutes) || 45) * 60000
+            );
       for (var j = 0; j < apps.length; j++) {
         var app = apps[j];
         if (!schedule[app]) schedule[app] = [];
@@ -681,25 +955,38 @@
     var appKeys = Object.keys(schedule);
     for (var a = 0; a < appKeys.length; a++) {
       var appName = appKeys[a];
-      var items = schedule[appName].sort(function (x, y) { return x.start - y.start; });
+      var items = schedule[appName].sort(function (x, y) {
+        return x.start - y.start;
+      });
       for (var k = 1; k < items.length; k++) {
         var prev = items[k - 1];
         var curr = items[k];
         var overlap = !(curr.start >= prev.end);
         if (overlap) {
           conflicts.push({ appliance: appName, A: prev.ref, B: curr.ref });
-          fixes.push(mkFix('Shift "' + (curr.ref.recipe && curr.ref.recipe.title) + '" by +30m on ' + appName, {
-            type: "SHIFT_MINUTES",
-            minutes: 30,
-            recipeId: getId(curr.ref.recipe)
-          }));
+          fixes.push(
+            mkFix(
+              'Shift "' +
+                (curr.ref.recipe && curr.ref.recipe.title) +
+                '" by +30m on ' +
+                appName,
+              {
+                type: "SHIFT_MINUTES",
+                minutes: 30,
+                recipeId: getId(curr.ref.recipe),
+              }
+            )
+          );
         }
       }
     }
 
     try {
       if (conflicts.length && eventBus && typeof eventBus.emit === "function") {
-        eventBus.emit("placement:applianceConflicts", { conflicts: conflicts, fixes: fixes });
+        eventBus.emit("placement:applianceConflicts", {
+          conflicts: conflicts,
+          fixes: fixes,
+        });
       }
     } catch (e) {}
 
@@ -710,20 +997,34 @@
     if (ctx === void 0) ctx = {};
     var reasons = [];
     var base = asDate((slot && (slot.start || slot)) || slot);
-    var mealType = (slot && slot.mealType) ? slot.mealType : "dinner";
+    var mealType = slot && slot.mealType ? slot.mealType : "dinner";
 
     var candidates = [
       { start: new Date(base.getTime() - DAY_MS), mealType: mealType },
-      { start: new Date(base.getTime() + DAY_MS), mealType: mealType }
+      { start: new Date(base.getTime() + DAY_MS), mealType: mealType },
     ];
 
     for (var i = 0; i < candidates.length; i++) {
       var s = candidates[i];
       var check = canPlace(recipe, s, ctx);
       if (check.ok) {
-        return { slot: s, reasons: ["Alternate slot available: " + s.start.toDateString() + " (" + mealType + ")"] };
+        return {
+          slot: s,
+          reasons: [
+            "Alternate slot available: " +
+              s.start.toDateString() +
+              " (" +
+              mealType +
+              ")",
+          ],
+        };
       } else {
-        reasons.push("Blocked alt (" + s.start.toDateString() + "): " + check.reasons.join("; "));
+        reasons.push(
+          "Blocked alt (" +
+            s.start.toDateString() +
+            "): " +
+            check.reasons.join("; ")
+        );
       }
     }
     return { slot: null, reasons: reasons };
@@ -742,7 +1043,7 @@
       zoneCheck: zoneCheck,
       weatherCheck: weatherCheck,
       speciesCheck: speciesCheck,
-      loadPrefs: loadPrefs
-    }
+      loadPrefs: loadPrefs,
+    },
   };
 })();

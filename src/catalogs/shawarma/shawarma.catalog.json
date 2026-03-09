@@ -1,0 +1,240 @@
+{
+  "$schema": "../../schemas/catalog.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+  "meta": {
+    "id": "catalogs.shawarma",
+    "type": "catalog",
+    "name": "shawarma",
+    "label": "Shawarma",
+    "status": "canonical",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Catalog"
+    }
+  },
+  "items": [
+    {
+      "id": "shawarma.spice_blends.shawarma_classic_blend",
+      "type": "spice_blend",
+      "label": "Classic Shawarma Blend",
+      "path": "./spice_blends/shawarma_classic_blend.json",
+      "tags": [
+        "module.shawarma",
+        "spice_blend",
+        "classic",
+        "balanced",
+        "warm_spice"
+      ]
+    },
+    {
+      "id": "shawarma.spice_blends.shawarma_chicken_blend",
+      "type": "spice_blend",
+      "label": "Chicken Shawarma Blend",
+      "path": "./spice_blends/shawarma_chicken_blend.json",
+      "tags": [
+        "module.shawarma",
+        "spice_blend",
+        "chicken",
+        "bright",
+        "aromatic"
+      ]
+    },
+    {
+      "id": "shawarma.spice_blends.shawarma_beef_blend",
+      "type": "spice_blend",
+      "label": "Beef Shawarma Blend",
+      "path": "./spice_blends/shawarma_beef_blend.json",
+      "tags": [
+        "module.shawarma",
+        "spice_blend",
+        "beef",
+        "peppery",
+        "warm_spice"
+      ]
+    },
+    {
+      "id": "shawarma.spice_blends.shawarma_lamb_blend",
+      "type": "spice_blend",
+      "label": "Lamb Shawarma Blend",
+      "path": "./spice_blends/shawarma_lamb_blend.json",
+      "tags": ["module.shawarma", "spice_blend", "lamb", "bold", "warm_spice"]
+    },
+    {
+      "id": "shawarma.spice_blends.shawarma_vegetable_blend",
+      "type": "spice_blend",
+      "label": "Vegetable Shawarma Blend",
+      "path": "./spice_blends/shawarma_vegetable_blend.json",
+      "tags": [
+        "module.shawarma",
+        "spice_blend",
+        "vegetables",
+        "sumac",
+        "herby",
+        "bright"
+      ]
+    },
+
+    {
+      "id": "shawarma.marinades.vinegar_shawarma_base",
+      "type": "marinade_base",
+      "label": "Vinegar Shawarma Base",
+      "path": "./marinades/vinegar_shawarma_base.json",
+      "tags": [
+        "module.shawarma",
+        "marinade_base",
+        "vinegar",
+        "bright",
+        "beef_friendly"
+      ]
+    },
+    {
+      "id": "shawarma.marinades.yogurt_shawarma_base",
+      "type": "marinade_base",
+      "label": "Yogurt Shawarma Base",
+      "path": "./marinades/yogurt_shawarma_base.json",
+      "tags": [
+        "module.shawarma",
+        "marinade_base",
+        "yogurt",
+        "creamy",
+        "chicken_friendly"
+      ]
+    },
+    {
+      "id": "shawarma.marinades.chicken_shawarma_marinade",
+      "type": "marinade",
+      "label": "Chicken Shawarma Marinade (Complete)",
+      "path": "./marinades/chicken_shawarma_marinade.json",
+      "tags": ["module.shawarma", "marinade", "chicken", "complete", "default"]
+    },
+    {
+      "id": "shawarma.marinades.beef_shawarma_marinade",
+      "type": "marinade",
+      "label": "Beef Shawarma Marinade (Complete)",
+      "path": "./marinades/beef_shawarma_marinade.json",
+      "tags": ["module.shawarma", "marinade", "beef", "complete", "default"]
+    },
+    {
+      "id": "shawarma.marinades.lamb_shawarma_marinade",
+      "type": "marinade",
+      "label": "Lamb Shawarma Marinade (Complete)",
+      "path": "./marinades/lamb_shawarma_marinade.json",
+      "tags": ["module.shawarma", "marinade", "lamb", "complete", "default"]
+    },
+    {
+      "id": "shawarma.marinades.vegetable_shawarma_marinade",
+      "type": "marinade",
+      "label": "Vegetable Shawarma Marinade (Complete)",
+      "path": "./marinades/vegetable_shawarma_marinade.json",
+      "tags": [
+        "module.shawarma",
+        "marinade",
+        "vegetables",
+        "complete",
+        "default"
+      ]
+    },
+
+    {
+      "id": "shawarma.sauces.spicy_garlic_pepper_sauce",
+      "type": "sauce",
+      "label": "Spicy Garlic Pepper Sauce",
+      "path": "./sauces/spicy_garlic_pepper_sauce.json",
+      "tags": ["module.shawarma", "sauce", "garlic", "spicy", "peppery"]
+    },
+    {
+      "id": "shawarma.sauces.green_herb_shawarma_sauce",
+      "type": "sauce",
+      "label": "Green Herb Shawarma Sauce",
+      "path": "./sauces/green_herb_shawarma_sauce.json",
+      "tags": ["module.shawarma", "sauce", "herby", "green", "bright"]
+    },
+    {
+      "id": "shawarma.sauces.creamy_roasted_pepper_sauce",
+      "type": "sauce",
+      "label": "Creamy Roasted Pepper Sauce",
+      "path": "./sauces/creamy_roasted_pepper_sauce.json",
+      "tags": [
+        "module.shawarma",
+        "sauce",
+        "creamy",
+        "roasted_pepper",
+        "smoky_sweet"
+      ]
+    },
+    {
+      "id": "shawarma.sauces.sweet_heat_shawarma_drizzle",
+      "type": "sauce",
+      "label": "Sweet-Heat Shawarma Drizzle",
+      "path": "./sauces/sweet_heat_shawarma_drizzle.json",
+      "tags": ["module.shawarma", "sauce", "drizzle", "sweet_heat", "finisher"]
+    },
+
+    {
+      "id": "shawarma.condiments.pickled_shawarma_vegetables",
+      "type": "condiment",
+      "label": "Pickled Shawarma Vegetables",
+      "path": "./condiments/pickled_shawarma_vegetables.json",
+      "tags": [
+        "module.shawarma",
+        "condiment",
+        "pickles",
+        "bright",
+        "crunch",
+        "contrast"
+      ]
+    },
+
+    {
+      "id": "rulesets.shawarma.acid_fat_balance",
+      "type": "ruleset",
+      "label": "Shawarma Acid–Fat Balance Ruleset",
+      "path": "./rules/shawarma_acid_fat_balance.ruleset.json",
+      "tags": [
+        "module.shawarma",
+        "ruleset",
+        "balance",
+        "marinade",
+        "sauce",
+        "deterministic"
+      ]
+    },
+    {
+      "id": "rulesets.shawarma.marinade_by_protein",
+      "type": "ruleset",
+      "label": "Shawarma Marinade by Protein Ruleset",
+      "path": "./rules/shawarma_marinade_by_protein.ruleset.json",
+      "tags": ["module.shawarma", "ruleset", "marinade", "protein", "selection"]
+    },
+    {
+      "id": "rulesets.shawarma.spice_selection",
+      "type": "ruleset",
+      "label": "Shawarma Spice Selection Ruleset",
+      "path": "./rules/shawarma_spice_selection.ruleset.json",
+      "tags": ["module.shawarma", "ruleset", "spice", "blend", "selection"]
+    },
+
+    {
+      "id": "docs.shawarma.regional_variations",
+      "type": "doc",
+      "label": "Regional Variations",
+      "path": "./docs/regional_variations.md",
+      "tags": ["module.shawarma", "docs", "regional", "styles", "reference"]
+    },
+    {
+      "id": "docs.shawarma.flavor_logic",
+      "type": "doc",
+      "label": "Shawarma Flavor Logic",
+      "path": "./docs/shawarma_flavor_logic.md",
+      "tags": ["module.shawarma", "docs", "logic", "balance", "rulesets"]
+    },
+    {
+      "id": "docs.shawarma.traditional_spice_notes",
+      "type": "doc",
+      "label": "Traditional Spice Notes",
+      "path": "./docs/traditional_spice_notes.md",
+      "tags": ["module.shawarma", "docs", "spices", "education", "reference"]
+    }
+  ]
+}

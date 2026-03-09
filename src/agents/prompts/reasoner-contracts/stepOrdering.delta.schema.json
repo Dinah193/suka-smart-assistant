@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://suka.local/agents/prompts/reasoner-contracts/stepOrdering.delta.schema.json",
+  "$id": "https://suka.local/agents/runtime/reasoner/prompts/reasoner-contracts/stepOrdering.delta.schema.json",
   "title": "SSA Reasoner – Step Ordering Delta",
   "description": "Delta-style schema for proposed step reordering within SSA sessions. Used by the Reasoner to suggest re-sequencing, pinning, or parallelizing steps across cooking, cleaning, garden, animals, preservation, and storehouse domains.",
   "type": "object",
@@ -60,20 +60,13 @@
           "status": {
             "type": "string",
             "description": "Whether this reordering is newly proposed, already accepted, or deprecated.",
-            "enum": [
-              "proposed",
-              "accepted",
-              "deprecated"
-            ],
+            "enum": ["proposed", "accepted", "deprecated"],
             "default": "proposed"
           },
           "operation": {
             "type": "string",
             "description": "How this delta should be applied to the step-ordering knowledge.",
-            "enum": [
-              "upsert",
-              "remove"
-            ],
+            "enum": ["upsert", "remove"],
             "default": "upsert"
           },
           "sessionId": {
@@ -114,11 +107,7 @@
           "changeMagnitude": {
             "type": "string",
             "description": "Rough description of how disruptive this reordering is.",
-            "enum": [
-              "minimal",
-              "moderate",
-              "major"
-            ],
+            "enum": ["minimal", "moderate", "major"],
             "default": "minimal"
           },
           "confidence": {
@@ -255,10 +244,7 @@
                       "description": "User-facing note for why these steps are grouped in parallel."
                     }
                   },
-                  "required": [
-                    "groupId",
-                    "stepIds"
-                  ]
+                  "required": ["groupId", "stepIds"]
                 }
               },
               "sequentialIsRecommended": {
@@ -285,21 +271,11 @@
             "description": "ISO 8601 timestamp when this reordering record was last updated."
           }
         },
-        "required": [
-          "id",
-          "operation",
-          "sessionId",
-          "proposedOrder"
-        ]
+        "required": ["id", "operation", "sessionId", "proposedOrder"]
       }
     }
   },
-  "required": [
-    "schemaVersion",
-    "domains",
-    "generatedAt",
-    "reorderings"
-  ],
+  "required": ["schemaVersion", "domains", "generatedAt", "reorderings"],
   "$defs": {
     "guardResult": {
       "type": "object",
@@ -317,11 +293,7 @@
         "severity": {
           "type": "string",
           "description": "Severity level for a non-ok guard.",
-          "enum": [
-            "info",
-            "warning",
-            "hard-block"
-          ]
+          "enum": ["info", "warning", "hard-block"]
         },
         "reasonCode": {
           "type": "string",
@@ -338,11 +310,7 @@
         "suggestedAction": {
           "type": "string",
           "description": "Suggested next step if this guard is not ok.",
-          "enum": [
-            "proceed",
-            "reschedule",
-            "require-user-confirmation"
-          ]
+          "enum": ["proceed", "reschedule", "require-user-confirmation"]
         },
         "checkedAt": {
           "type": "string",
@@ -350,10 +318,7 @@
           "description": "When the guard was evaluated."
         }
       },
-      "required": [
-        "guardId",
-        "ok"
-      ]
+      "required": ["guardId", "ok"]
     },
     "guardSummary": {
       "type": "object",
@@ -395,10 +360,7 @@
           "description": "Timestamp for the aggregate evaluation."
         }
       },
-      "required": [
-        "okToApply",
-        "hasWarnings"
-      ]
+      "required": ["okToApply", "hasWarnings"]
     }
   }
 }

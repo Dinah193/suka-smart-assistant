@@ -1,0 +1,424 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00Z",
+
+  "meta": {
+    "id": "soups.beef_vegetable_soup",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Beef Vegetable Soup",
+    "subtitle": "Hearty, freezer-friendly, batch-cooking baseline • “use what you have” vegetables",
+    "source": {
+      "kind": "ssa-canonical",
+      "notes": "Designed for SSA batch cooking/freezer logic. Supports stew beef or ground beef, mixed vegetables, and optional barley/rice. Includes make-ahead and scaling notes."
+    }
+  },
+
+  "classification": {
+    "cuisine": "soups",
+    "category": "soup",
+    "subprofiles": [
+      "hearty",
+      "tomato-broth",
+      "stovetop",
+      "freezer-friendly",
+      "batch-cooking",
+      "use-what-you-have"
+    ],
+    "mealArchetypes": ["dinner", "lunch", "comfort meal"],
+    "servingStyles": ["bowl"],
+    "plannerTags": [
+      "beef vegetable soup",
+      "batch cooking",
+      "freezer friendly",
+      "hearty",
+      "use what you have"
+    ]
+  },
+
+  "yield": {
+    "servings": 8,
+    "servingSize": { "value": 2, "unit": "cups" },
+    "notes": "Makes ~14–16 cups depending on simmer and add-ins."
+  },
+
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 85,
+    "totalMins": 110
+  },
+
+  "difficulty": "beginner",
+
+  "equipment": {
+    "minimum": [
+      "large pot or Dutch oven",
+      "knife",
+      "cutting board",
+      "stirring spoon"
+    ],
+    "recommended": [
+      "ladle",
+      "bench scraper",
+      "freezer containers",
+      "instant-read thermometer"
+    ],
+    "optional": ["fine mesh skimmer", "pressure cooker (optional adaptation)"]
+  },
+
+  "dietFlags": [],
+  "allergens": ["celery"],
+  "signals": {
+    "hearty": true,
+    "freezerFriendly": true,
+    "batchFriendly": true,
+    "useWhatYouHave": true
+  },
+
+  "tasteProfile": {
+    "saltiness": "medium",
+    "richness": "medium",
+    "sweetness": "low",
+    "body": "brothy-stew-like",
+    "notes": "Savory beef + vegetables in a lightly tomatoed broth; customizable with herbs, spice, and starch add-ins."
+  },
+
+  "ingredients": [
+    {
+      "id": "beef",
+      "label": "Beef stew meat (chuck) cut into 1-inch pieces (or ground beef—see variation)",
+      "role": "protein",
+      "amount": { "value": 900, "unit": "g" },
+      "notes": "About 2 lb. Chuck or round works well. Trim large hard fat."
+    },
+    {
+      "id": "salt_beef",
+      "label": "Salt (for seasoning beef)",
+      "role": "seasoning",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "About 1 teaspoon; adjust later based on broth."
+    },
+    {
+      "id": "pepper_beef",
+      "label": "Black pepper (for seasoning beef)",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "About 1/2 teaspoon."
+    },
+    {
+      "id": "oil",
+      "label": "Oil (olive or neutral)",
+      "role": "cook",
+      "amount": { "value": 15, "unit": "g" },
+      "notes": "About 1 tablespoon."
+    },
+    {
+      "id": "onion",
+      "label": "Yellow onion, diced",
+      "role": "aromatic",
+      "amount": { "value": 250, "unit": "g" },
+      "notes": "About 1 large."
+    },
+    {
+      "id": "carrots",
+      "label": "Carrots, sliced",
+      "role": "vegetable",
+      "amount": { "value": 250, "unit": "g" },
+      "notes": "About 3–4 medium."
+    },
+    {
+      "id": "celery",
+      "label": "Celery, sliced",
+      "role": "vegetable",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "About 4 stalks."
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": "About 3–4 cloves."
+    },
+    {
+      "id": "tomato_paste",
+      "label": "Tomato paste",
+      "role": "base",
+      "amount": { "value": 30, "unit": "g" },
+      "notes": "About 2 tablespoons."
+    },
+    {
+      "id": "diced_tomatoes",
+      "label": "Diced tomatoes (canned) with juices",
+      "role": "base",
+      "amount": { "value": 400, "unit": "g" },
+      "notes": "1 (14–15 oz) can."
+    },
+    {
+      "id": "broth",
+      "label": "Beef broth/stock (low-sodium preferred) or chicken broth",
+      "role": "liquid",
+      "amount": { "value": 1800, "unit": "g" },
+      "notes": "About 7–8 cups. Water can replace up to half if using better-than-bouillon later."
+    },
+    {
+      "id": "water_optional",
+      "label": "Water (optional, for volume/adjusting thickness)",
+      "role": "liquid",
+      "amount": { "value": 500, "unit": "g" },
+      "optional": true,
+      "notes": "Add if you want a brothier soup or if simmer reduces too far."
+    },
+    {
+      "id": "bay_leaf",
+      "label": "Bay leaf",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "each" }
+    },
+    {
+      "id": "thyme",
+      "label": "Dried thyme (or fresh thyme sprigs)",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "About 1/2 teaspoon dried."
+    },
+    {
+      "id": "italian_seasoning_optional",
+      "label": "Italian seasoning (optional)",
+      "role": "herb",
+      "amount": { "value": 2, "unit": "g" },
+      "optional": true,
+      "notes": "About 1 teaspoon."
+    },
+    {
+      "id": "potatoes",
+      "label": "Potatoes, diced (1/2-inch)",
+      "role": "vegetable",
+      "amount": { "value": 450, "unit": "g" },
+      "notes": "About 3 medium Yukon gold or russet."
+    },
+    {
+      "id": "green_beans_optional",
+      "label": "Green beans (fresh or frozen), cut",
+      "role": "vegetable",
+      "amount": { "value": 200, "unit": "g" },
+      "optional": true,
+      "notes": "Add near the end if tender; earlier if using very firm."
+    },
+    {
+      "id": "corn_optional",
+      "label": "Corn (frozen or canned, drained)",
+      "role": "vegetable",
+      "amount": { "value": 150, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "peas_optional",
+      "label": "Peas (frozen)",
+      "role": "vegetable",
+      "amount": { "value": 120, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "mixed_veg_optional",
+      "label": "Mixed vegetables (frozen) as a swap option",
+      "role": "vegetable",
+      "amount": { "value": 300, "unit": "g" },
+      "optional": true,
+      "notes": "Use instead of some individual veg if needed."
+    },
+    {
+      "id": "worcestershire_optional",
+      "label": "Worcestershire sauce (optional)",
+      "role": "seasoning",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true,
+      "notes": "About 2 teaspoons; boosts savory depth."
+    },
+    {
+      "id": "vinegar_optional",
+      "label": "Apple cider vinegar or red wine vinegar (optional, brightens)",
+      "role": "finish",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true,
+      "notes": "About 2 teaspoons, to taste."
+    },
+    {
+      "id": "parsley_optional",
+      "label": "Fresh parsley, chopped (optional)",
+      "role": "finish",
+      "amount": { "value": 15, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "barley_optional",
+      "label": "Pearled barley (optional add-in; cook in soup)",
+      "role": "starch",
+      "amount": { "value": 90, "unit": "g" },
+      "optional": true,
+      "notes": "About 1/2 cup. Adds body; increases cook time slightly."
+    },
+    {
+      "id": "rice_optional",
+      "label": "Cooked rice (optional add-in; add to bowl)",
+      "role": "starch",
+      "amount": { "value": 300, "unit": "g" },
+      "optional": true,
+      "notes": "Add to bowls when serving for best freezer/leftovers texture."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Season beef and sear",
+      "instructions": [
+        "Pat beef dry and season with the salt and pepper listed for beef.",
+        "Heat oil in a large pot/Dutch oven over medium-high.",
+        "Sear beef in batches until browned on 2–3 sides (don’t crowd the pot). Transfer browned beef to a plate."
+      ],
+      "activeMins": 12,
+      "timers": [{ "label": "Sear beef (in batches)", "mins": 10 }]
+    },
+    {
+      "id": "step_02",
+      "title": "Sweat aromatics",
+      "instructions": [
+        "Reduce heat to medium. Add onion, carrots, and celery to the pot (add a splash of broth if the pot is dry).",
+        "Cook 6–8 minutes until softened.",
+        "Add garlic and cook 30 seconds until fragrant."
+      ],
+      "activeMins": 10,
+      "timers": [
+        { "label": "Cook aromatics", "mins": 7 },
+        { "label": "Cook garlic", "seconds": 30 }
+      ]
+    },
+    {
+      "id": "step_03",
+      "title": "Tomato base and deglaze",
+      "instructions": [
+        "Stir in tomato paste and cook 1 minute to deepen flavor.",
+        "Add diced tomatoes with juices and scrape the pot bottom to loosen browned bits."
+      ],
+      "activeMins": 3,
+      "timers": [{ "label": "Toast tomato paste", "mins": 1 }]
+    },
+    {
+      "id": "step_04",
+      "title": "Simmer until beef is tender",
+      "instructions": [
+        "Return seared beef (and any juices) to the pot.",
+        "Add broth, bay leaf, thyme, and optional Italian seasoning. Bring to a gentle simmer.",
+        "Cover partially and simmer 45–60 minutes until beef is starting to get tender."
+      ],
+      "handsOffMins": 55,
+      "timers": [{ "label": "Beef simmer", "mins": 55 }]
+    },
+    {
+      "id": "step_05",
+      "title": "Add potatoes and longer-cooking vegetables",
+      "instructions": [
+        "Add diced potatoes (and barley if using). Simmer 15–20 minutes until potatoes are tender.",
+        "If using green beans that are very firm, add them here as well."
+      ],
+      "handsOffMins": 18,
+      "timers": [{ "label": "Cook potatoes", "mins": 18 }]
+    },
+    {
+      "id": "step_06",
+      "title": "Add quick vegetables, adjust seasoning, and finish",
+      "instructions": [
+        "Add optional corn, peas, and/or mixed vegetables. Simmer 3–7 minutes until heated through and tender.",
+        "Stir in Worcestershire (optional). Taste and adjust salt/pepper.",
+        "Turn off heat. Add vinegar (optional) and parsley (optional). Remove bay leaf. Serve."
+      ],
+      "activeMins": 6,
+      "timers": [{ "label": "Heat quick vegetables", "mins": 5 }]
+    }
+  ],
+
+  "variations": [
+    {
+      "name": "Ground beef version (fast)",
+      "change": "Use 680g ground beef. Brown it (Step 1) and drain excess fat, then proceed. Simmer time can drop to ~25–35 minutes total.",
+      "notes": "Great weeknight baseline."
+    },
+    {
+      "name": "Freezer-optimized (best texture)",
+      "change": "Freeze soup without potatoes (potatoes can get grainy). Replace potatoes with barley, or add fresh potatoes when reheating.",
+      "notes": "You can also portion cooked rice into bowls and ladle hot soup over it."
+    },
+    {
+      "name": "Spicy version",
+      "change": "Add 1–2g crushed red pepper or a diced jalapeño with the aromatics.",
+      "notes": "Finish with a splash of hot sauce if desired."
+    },
+    {
+      "name": "Cabbage-forward",
+      "change": "Add 200–300g shredded cabbage during the last 10–12 minutes of simmering.",
+      "notes": "Adds sweetness and body."
+    }
+  ],
+
+  "planner": {
+    "batchCooking": {
+      "recommendedBatchMultiplier": 2,
+      "freezerPortionSizeCups": 2,
+      "freezeWithout": ["noodles", "pasta", "potatoes (optional)"],
+      "bestPractices": [
+        "Cool quickly (shallow pans), then portion into labeled containers.",
+        "Freeze flat in bags for space efficiency.",
+        "For best texture, add starches (rice/pasta) at serving time."
+      ]
+    },
+    "flex": {
+      "vegSwap": [
+        "potatoes",
+        "green beans",
+        "corn",
+        "peas",
+        "okra",
+        "cabbage",
+        "zucchini",
+        "turnips"
+      ],
+      "starchSwap": ["barley", "rice", "pasta (add at serving)"],
+      "proteinSwap": [
+        "stew beef",
+        "ground beef",
+        "leftover roast beef",
+        "venison"
+      ]
+    }
+  },
+
+  "storage": {
+    "fridge": "Refrigerate up to 5 days. Flavor improves by day 2.",
+    "freezer": "Freeze up to 3 months. Freeze without potatoes for best texture (optional).",
+    "reheat": "Reheat gently to a simmer; add water/broth if thickened."
+  },
+
+  "notes": [
+    "If broth tastes flat: add a small splash of vinegar, a pinch more salt, and/or Worcestershire.",
+    "If soup is too thick: add water or broth and simmer 5 minutes.",
+    "Searing beef adds depth; if skipping sear, increase simmer time slightly and consider Worcestershire."
+  ],
+
+  "pairings": {
+    "serveWith": [
+      "cornbread",
+      "buttermilk biscuits",
+      "dinner rolls",
+      "crackers"
+    ],
+    "toppings": ["fresh herbs", "parmesan (optional)", "hot sauce (optional)"]
+  },
+
+  "audit": {
+    "tested": true,
+    "testNotes": "Schema-compliant: schemaVersion+meta present; ingredients include id+label+amount; steps include id+title+instructions. Optimized for batch/freezer workflows."
+  }
+}

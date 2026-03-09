@@ -11,7 +11,7 @@
  *   even if your React UI unmounts or routes change.
  * - Persists checkpoints to Dexie after each step change and every 10s while running.
  * - Auto-resume helper can rehydrate a prior "running" session from Dexie.
- * - Emits consistent events via src/services/eventBus.js and optionally exports to Hub.
+ * - Emits consistent events via src/services/events/eventBus.js and optionally exports to Hub.
  * - Uses progressive enhancement: Wake Lock, Notifications, Media Session, Doc-PiP mini HUD.
  *
  * Contracts honored:
@@ -52,7 +52,7 @@ let eventBus;
 try {
   // expected: export default { emit({type, ts, source, data}) }
   // eslint-disable-next-line global-require
-  eventBus = require("../../services/eventBus.js").default;
+  eventBus = require("../../services/events/eventBus.js").default;
 } catch {
   eventBus = { emit: () => {} };
 }
@@ -60,7 +60,7 @@ try {
 let featureFlags = { familyFundMode: false };
 try {
   // eslint-disable-next-line global-require
-  featureFlags = require("../../services/featureFlags.js");
+  featureFlags = require("@/config/featureFlags.json");
 } catch {
   /* noop */
 }
@@ -70,10 +70,10 @@ let FamilyFundConnector;
 try {
   // eslint-disable-next-line global-require
   HubPacketFormatter =
-    require("../../services/hub/HubPacketFormatter.js").HubPacketFormatter;
+    require("@/services/hub/HubPacketFormatter.js").HubPacketFormatter;
   // eslint-disable-next-line global-require
   FamilyFundConnector =
-    require("../../services/hub/FamilyFundConnector.js").FamilyFundConnector;
+    require("@/services/hub/FamilyFundConnector.js").FamilyFundConnector;
 } catch {
   /* noop */
 }
@@ -342,10 +342,7 @@ function showOngoingNotification(session, step, actions = true) {
 
 function wireMediaSessionHandlers({ onPlayPause, onNext, onPrev }) {
   try {
-    if (
-      typeof navigator === "undefined" ||
-      !("mediaSession" in navigator)
-    ) {
+    if (typeof navigator === "undefined" || !("mediaSession" in navigator)) {
       return () => {};
     }
     navigator.mediaSession.setActionHandler("play", onPlayPause);
@@ -450,10 +447,7 @@ function addCueRenderer(name, renderer) {
 async function openMiniHUD(getState, handlers) {
   try {
     // @ts-ignore
-    if (
-      typeof window === "undefined" ||
-      !window.documentPictureInPicture
-    ) {
+    if (typeof window === "undefined" || !window.documentPictureInPicture) {
       return null;
     }
     // @ts-ignore
@@ -492,11 +486,8 @@ async function openMiniHUD(getState, handlers) {
       titleNode.textContent = s.title || "Session";
       const idx = s.progress?.currentStepIndex || 0;
       const step = s.steps?.[idx] || null;
-      contentNode.textContent = step
-        ? `Step ${idx + 1}: ${step.title}`
-        : "—";
-      pauseNode.textContent =
-        s.status === "paused" ? "Resume" : "Pause";
+      contentNode.textContent = step ? `Step ${idx + 1}: ${step.title}` : "—";
+      pauseNode.textContent = s.status === "paused" ? "Resume" : "Pause";
     };
     pipWindow.addEventListener("pagehide", () => {
       if (pipWindow.close) pipWindow.close();
@@ -569,8 +560,7 @@ function ensureTickChannel() {
   if (!tickChannel) {
     tickChannel = createTickChannel(({ deltaSec }) => {
       if (!currentSession || currentSession.status !== "running") return;
-      const elapsedSec =
-        (currentSession.progress?.elapsedSec || 0) + deltaSec;
+      const elapsedSec = (currentSession.progress?.elapsedSec || 0) + deltaSec;
       currentSession = {
         ...currentSession,
         progress: {
@@ -610,10 +600,7 @@ function ensureWakeLock() {
     wakeLockRef = lock;
   });
   const handler = () => {
-    if (
-      document.visibilityState === "visible" &&
-      wakeLockRef?.released
-    ) {
+    if (document.visibilityState === "visible" && wakeLockRef?.released) {
       requestWakeLock().then((lock) => {
         wakeLockRef = lock;
       });
@@ -780,8 +767,7 @@ async function start() {
     status: "running",
     progress: {
       ...currentSession.progress,
-      startedAt:
-        currentSession.progress.startedAt || now,
+      startedAt: currentSession.progress.startedAt || now,
       pausedAt: null,
     },
     updatedAt: now,
@@ -814,8 +800,7 @@ async function togglePause() {
   ) {
     return;
   }
-  const nextStatus =
-    currentSession.status === "running" ? "paused" : "running";
+  const nextStatus = currentSession.status === "running" ? "paused" : "running";
   const now = isoNow();
   currentSession = {
     ...currentSession,
@@ -865,7 +850,11 @@ async function next() {
       domain: currentSession.domain,
     });
 
-    if (featureFlags.familyFundMode && HubPacketFormatter && FamilyFundConnector) {
+    if (
+      featureFlags.familyFundMode &&
+      HubPacketFormatter &&
+      FamilyFundConnector
+    ) {
       try {
         const payload = HubPacketFormatter.formatSession(currentSession);
         await FamilyFundConnector.send(payload);
@@ -977,7 +966,11 @@ async function abort() {
     domain: currentSession.domain,
   });
 
-  if (featureFlags.familyFundMode && HubPacketFormatter && FamilyFundConnector) {
+  if (
+    featureFlags.familyFundMode &&
+    HubPacketFormatter &&
+    FamilyFundConnector
+  ) {
     try {
       const payload = HubPacketFormatter.formatSession(currentSession);
       await FamilyFundConnector.send(payload);

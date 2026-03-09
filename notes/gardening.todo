@@ -51,14 +51,14 @@ git commit -m "chore(garden): notes/gardening.todo + core scaffolding"
   ☐ Manual fine-tuning per member/crop.
 
 4) Agents & services
-- src/agents/gardenAgent.js (NEW)
+- src/agents/gardenShim.js (NEW)
   ☐ buildGardenPlan(crops, beds, zone, prefs, hebrewCal) → {plan, tasks}
   ☐ computeHarvestDelta(entry, inventory) → { delta, value }
   ☐ proposePreservation(crop, qty, constraints)
-- src/agents/soilAndWaterAgent.js (NEW or extend)
+- src/agents/soilAndWaterShim.js (NEW or extend)
   ☐ buildIrrigationPlan(beds, weatherHint, soilType) → timers/mixes
   ☐ fertigationSchedule(cropStage, recipes) → mix rates + cautions
-- src/agents/gardenCollabAgent.js (NEW)
+- src/agents/gardenCollabShim.js (NEW)
   ☐ optimizeAllocations(goal, members, {cropFacts, hebrewCal}) → {allocation, schedule}
   ☐ forecastYield(allocation, granularity)
   ☐ detectConflicts(schedule, hebrewCal, calendars)
@@ -152,7 +152,7 @@ Subscribe:
 }
 
 9) Planning pseudocode (agents)
-/* gardenAgent.js */
+/* gardenShim.js */
 export async function buildGardenPlan(crops,beds,zone,prefs,hebrewCal){
   const base = assignCropsToBeds(crops,beds,zone,prefs.microclimate);
   const companionMap = computeCompanions(base);
@@ -168,12 +168,12 @@ export async function computeHarvestDelta(entry, inventory){
   return { delta:{produce,missing:[],preservePlan}, value };
 }
 
-/* soilAndWaterAgent.js */
+/* soilAndWaterShim.js */
 export function buildIrrigationPlan(beds, weatherHint, soilType){
   // return { scheduleId, timers:[{bedId:'bed-1', start:'2025-10-16T06:00', durationMin:30}] }
 }
 
-/* gardenCollabAgent.js */
+/* gardenCollabShim.js */
 export async function optimizeAllocations(goal,members,{cropFacts,hebrewCal}){
   // Fairness round-robin; pick bed by sun fit; compute expectedYield; schedule seed-start/transplant/harvest; apply Hebrew guard
   return { allocation, schedule };
@@ -285,7 +285,7 @@ async function finalize(){
 17) VS Code steps (you now)
 ☐ Create folders: src/pages/garden/, src/components/garden/, src/pages/garden/collab/, src/components/garden/collab/
 ☐ Scaffold components in §3; add route /tier2/household/garden and /tier2/household/garden/collab.
-☐ Implement gardenAgent.js & soilAndWaterAgent.js stubs; return plausible schedules.
+☐ Implement gardenShim.js & soilAndWaterShim.js stubs; return plausible schedules.
 ☐ Implement GardenPlanner (crops → plan → tasks) & CompanionLegend.
 ☐ Implement HarvestPanel + InventorySavingsPanel (delta preview + savings ledger + root cellar toggle).
 ☐ Implement WaterSoilPanel (organic recipes + Apply timers).

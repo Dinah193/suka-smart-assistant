@@ -35,7 +35,7 @@
  * }
  */
 
-import { emit } from "@/services/eventBus"; // guarded usage below
+import { emit } from "@/services/events/eventBus"; // guarded usage below
 
 /* ------------------------------- Soft DB load ------------------------------- */
 
@@ -49,11 +49,7 @@ async function getDb() {
   if (_dbPromise) return _dbPromise;
 
   _dbPromise = (async () => {
-    const candidates = [
-      "@/services/db",
-      "@/db",
-      "@/data/db",
-    ];
+    const candidates = ["@/services/db", "@/db", "@/data/db"];
 
     for (const path of candidates) {
       try {
@@ -81,18 +77,16 @@ async function getInventoryTable() {
   if (!db) return null;
 
   // Prefer explicit inventory, then storehouse-like tables
-  const candidates = [
-    db.inventory,
-    db.storehouse,
-    db.storehouseItems,
-  ];
+  const candidates = [db.inventory, db.storehouse, db.storehouseItems];
   for (const t of candidates) {
     if (t && typeof t.where === "function") return t;
   }
 
   // Last resort: scan db.tables
   if (Array.isArray(db.tables)) {
-    const inv = db.tables.find((t) => /inventory|storehouse/i.test(t.name || ""));
+    const inv = db.tables.find((t) =>
+      /inventory|storehouse/i.test(t.name || "")
+    );
     if (inv) return inv;
   }
 
@@ -156,7 +150,10 @@ export async function lookupById(id) {
     setCache(key, item);
   }
 
-  emitLookupEvent("inventory.lookup.performed", { mode: "id", hits: item ? 1 : 0 });
+  emitLookupEvent("inventory.lookup.performed", {
+    mode: "id",
+    hits: item ? 1 : 0,
+  });
   return item;
 }
 
@@ -179,10 +176,15 @@ export async function lookupBySku(sku) {
   let item = null;
   try {
     // Prefer indexed where if available
-    if (table.schema?.idxByName?.includes("sku") || table.schema?.indexes?.some?.((i) => i.src === "sku")) {
+    if (
+      table.schema?.idxByName?.includes("sku") ||
+      table.schema?.indexes?.some?.((i) => i.src === "sku")
+    ) {
       item = await table.where("sku").equalsIgnoreCase(s).first();
     } else {
-      item = await table.filter((row) => (row.sku || "").toLowerCase() === s.toLowerCase()).first();
+      item = await table
+        .filter((row) => (row.sku || "").toLowerCase() === s.toLowerCase())
+        .first();
     }
   } catch (err) {
     console.warn("[inventory.lookup] lookupBySku failed:", err);
@@ -193,7 +195,10 @@ export async function lookupBySku(sku) {
     setCache(key, item);
   }
 
-  emitLookupEvent("inventory.lookup.performed", { mode: "sku", hits: item ? 1 : 0 });
+  emitLookupEvent("inventory.lookup.performed", {
+    mode: "sku",
+    hits: item ? 1 : 0,
+  });
   return item;
 }
 
@@ -241,7 +246,8 @@ export async function lookupByName(name, options = {}) {
           const n = norm(row.name || row.label || "");
           if (!n) return false;
           if (!n.includes(needle)) return false;
-          if (domainFilter && row.domain && row.domain !== domainFilter) return false;
+          if (domainFilter && row.domain && row.domain !== domainFilter)
+            return false;
           return true;
         })
         .limit(limit)
@@ -253,7 +259,10 @@ export async function lookupByName(name, options = {}) {
   }
 
   setCache(key, rows);
-  emitLookupEvent("inventory.lookup.performed", { mode: "name", hits: rows.length });
+  emitLookupEvent("inventory.lookup.performed", {
+    mode: "name",
+    hits: rows.length,
+  });
   return rows;
 }
 
@@ -301,7 +310,11 @@ export async function lookupManyByIds(ids = []) {
     }
   }
 
-  emitLookupEvent("inventory.lookup.bulk", { mode: "id", inCount: uniqueIds.length, outCount: results.length });
+  emitLookupEvent("inventory.lookup.bulk", {
+    mode: "id",
+    inCount: uniqueIds.length,
+    outCount: results.length,
+  });
   return results;
 }
 
@@ -369,7 +382,11 @@ export async function searchInventory(query = {}) {
           const n = norm(row.name || "");
           const sku = norm(row.sku || "");
           const tagsJoined = norm((row.tags || []).join(" "));
-          if (!n.includes(textNorm) && !sku.includes(textNorm) && !tagsJoined.includes(textNorm)) {
+          if (
+            !n.includes(textNorm) &&
+            !sku.includes(textNorm) &&
+            !tagsJoined.includes(textNorm)
+          ) {
             return false;
           }
         }
@@ -400,7 +417,10 @@ export async function searchInventory(query = {}) {
  * @param {Array<{name:string, qty?:number, unit?:string}>} ingredients
  * @param {{ domain?:string, limitPerIngredient?:number }} [options]
  */
-export async function lookupIngredientAvailability(ingredients = [], options = {}) {
+export async function lookupIngredientAvailability(
+  ingredients = [],
+  options = {}
+) {
   const domain = options.domain || "cooking";
   const limit = options.limitPerIngredient || 5;
 
@@ -418,7 +438,10 @@ export async function lookupIngredientAvailability(ingredients = [], options = {
     }
 
     // naive "best" pick: highest quantity
-    const best = rows.reduce((a, b) => (Number(b.quantity || 0) > Number(a.quantity || 0) ? b : a), rows[0]);
+    const best = rows.reduce(
+      (a, b) => (Number(b.quantity || 0) > Number(a.quantity || 0) ? b : a),
+      rows[0]
+    );
 
     matches.push({
       ingredient: ing,
@@ -454,10 +477,14 @@ function emitLookupEvent(type, data) {
 /* --------------------------------- Utils ----------------------------------- */
 
 function norm(s) {
-  return String(s || "").toLowerCase().trim();
+  return String(s || "")
+    .toLowerCase()
+    .trim();
 }
 function cleanSpace(s) {
-  return String(s || "").replace(/\s+/g, " ").trim();
+  return String(s || "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 /* --------------------------------- Export ---------------------------------- */

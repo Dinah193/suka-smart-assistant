@@ -21,7 +21,9 @@ import React from "react";
 // ----------------------------- Soft Imports ---------------------------------
 let eventBus = null;
 try {
-  eventBus = require("@/services/eventBus").default ?? require("@/services/eventBus");
+  eventBus =
+    require("@/services/events/eventBus").default ??
+    require("@/services/events/eventBus");
 } catch {}
 
 let Config = { get: (_k, fb) => fb };
@@ -54,7 +56,8 @@ function emit(type, source, data) {
     // Also mirror to the DOM event system for DevTools listeners.
     window?.dispatchEvent?.(new CustomEvent(type, { detail: payload }));
   } catch (e) {
-    if (process.env.NODE_ENV !== "production") console.debug("[ErrorBoundary] emit failed:", e);
+    if (process.env.NODE_ENV !== "production")
+      console.debug("[ErrorBoundary] emit failed:", e);
   }
   return payload;
 }
@@ -69,7 +72,8 @@ async function exportToHubIfEnabled(payload) {
     if (!packet) return;
     await FamilyFundConnector.send?.(packet);
   } catch (e) {
-    if (process.env.NODE_ENV !== "production") console.debug("[ErrorBoundary] hub export ignored:", e);
+    if (process.env.NODE_ENV !== "production")
+      console.debug("[ErrorBoundary] hub export ignored:", e);
   }
 }
 
@@ -78,7 +82,10 @@ function toErrorData(error, extra) {
   return {
     message: String(error?.message || error),
     name: error?.name || "Error",
-    stack: typeof error?.stack === "string" ? error.stack.split("\n").slice(0, 10).join("\n") : undefined,
+    stack:
+      typeof error?.stack === "string"
+        ? error.stack.split("\n").slice(0, 10).join("\n")
+        : undefined,
     ...extra,
   };
 }
@@ -90,18 +97,26 @@ function toErrorData(error, extra) {
  */
 export function installGlobalErrorListeners(source = "GlobalErrorListener") {
   const onError = (e) => {
-    const payload = emit("app.error", source, toErrorData(e.error ?? e, {
-      filename: e?.filename,
-      lineno: e?.lineno,
-      colno: e?.colno,
-      kind: "window.error",
-    }));
+    const payload = emit(
+      "app.error",
+      source,
+      toErrorData(e.error ?? e, {
+        filename: e?.filename,
+        lineno: e?.lineno,
+        colno: e?.colno,
+        kind: "window.error",
+      })
+    );
     exportToHubIfEnabled(payload);
   };
 
   const onRejection = (e) => {
     const reason = e?.reason ?? "unhandledrejection";
-    const payload = emit("app.error", source, toErrorData(reason, { kind: "unhandledrejection" }));
+    const payload = emit(
+      "app.error",
+      source,
+      toErrorData(reason, { kind: "unhandledrejection" })
+    );
     exportToHubIfEnabled(payload);
   };
 
@@ -140,7 +155,11 @@ export default class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, info) {
     const name = this.props.boundaryName || "ErrorBoundary";
-    const data = toErrorData(error, { componentStack: info?.componentStack, boundary: name, kind: "react.render" });
+    const data = toErrorData(error, {
+      componentStack: info?.componentStack,
+      boundary: name,
+      kind: "react.render",
+    });
     const payload = emit("app.error", name, data);
     exportToHubIfEnabled(payload);
     this.props.onError?.(error, info);
@@ -180,7 +199,10 @@ export default class ErrorBoundary extends React.Component {
     // Default accessible fallback UI (Tailwind-friendly)
     const msg = String(error?.message || error || "Unknown error");
     return (
-      <div role="alert" className="m-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-rose-900 shadow-sm">
+      <div
+        role="alert"
+        className="m-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-rose-900 shadow-sm"
+      >
         <div className="mb-1 text-sm font-semibold">Something went wrong.</div>
         <div className="text-sm">{msg}</div>
         {process.env.NODE_ENV !== "production" && error?.stack ? (

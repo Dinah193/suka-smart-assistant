@@ -1,0 +1,228 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "type": "recipe",
+    "id": "desserts.banana_pudding_southern",
+    "slug": "banana_pudding_southern",
+    "name": "Southern Banana Pudding (Soul-Food Classic)",
+    "version": "1.0.0",
+    "status": "canonical",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-18T00:00:00.000Z",
+    "updatedAt": "2026-01-18T00:00:00.000Z",
+    "locale": "en-US",
+    "difficulty": "beginner",
+    "tags": [
+      "dessert",
+      "banana-pudding",
+      "southern",
+      "soul-food",
+      "classic",
+      "custard",
+      "no-bake",
+      "make-ahead",
+      "family",
+      "high-cultural-relevance"
+    ],
+    "allergens": ["wheat", "eggs", "dairy"],
+    "description": "A soul-food classic Southern banana pudding with scratch vanilla custard and layered vanilla wafers. Includes both a classic baked/torch meringue finish and an optional whipped topping finish. Note: this dessert is not flour-based; the 'fresh-milled or commercial flour' concept applies to the cookie/wafers layer only (store-bought wafers or homemade cookies)."
+  },
+  "equipment": [
+    { "id": "saucepan", "label": "Medium saucepan" },
+    { "id": "whisk", "label": "Whisk" },
+    { "id": "mixing_bowl_medium", "label": "Medium mixing bowl" },
+    { "id": "rubber_spatula", "label": "Rubber spatula" },
+    { "id": "measuring_cups", "label": "Measuring cups/spoons" },
+    { "id": "kitchen_scale", "label": "Kitchen scale (recommended)" },
+    {
+      "id": "fine_mesh_sieve",
+      "label": "Fine-mesh sieve (recommended)",
+      "optional": true
+    },
+    {
+      "id": "baking_dish_9x13",
+      "label": "9x13-inch baking dish or trifle dish"
+    },
+    { "id": "plastic_wrap", "label": "Plastic wrap" },
+    {
+      "id": "mixer_hand_or_stand",
+      "label": "Hand mixer or stand mixer (for meringue/whip)",
+      "optional": true
+    },
+    {
+      "id": "torch_or_broiler",
+      "label": "Kitchen torch or broiler (for meringue finish)",
+      "optional": true
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "milk_whole",
+      "label": "Whole milk",
+      "amount": { "value": 960, "unit": "ml" },
+      "notes": "About 4 cups."
+    },
+    {
+      "id": "cream_heavy_optional",
+      "label": "Heavy cream (optional, for richer custard)",
+      "amount": { "value": 240, "unit": "ml" },
+      "notes": "Optional: replace 1 cup of milk with cream for extra richness. If you use this, reduce milk to 720 ml.",
+      "optional": true
+    },
+    {
+      "id": "sugar_granulated",
+      "label": "Granulated sugar",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "About 1 cup."
+    },
+    {
+      "id": "cornstarch",
+      "label": "Cornstarch",
+      "amount": { "value": 45, "unit": "g" },
+      "notes": "About 1/3 cup. Thickens custard to sliceable set."
+    },
+    {
+      "id": "salt_kosher",
+      "label": "Kosher salt",
+      "amount": { "value": 3, "unit": "g" },
+      "notes": "About 1/2 tsp."
+    },
+    {
+      "id": "egg_yolks",
+      "label": "Egg yolks",
+      "amount": { "value": 6, "unit": "each" },
+      "notes": "Reserve whites if doing meringue finish."
+    },
+    {
+      "id": "butter_unsalted",
+      "label": "Unsalted butter",
+      "amount": { "value": 57, "unit": "g" },
+      "notes": "About 4 tbsp."
+    },
+    {
+      "id": "vanilla_extract",
+      "label": "Vanilla extract",
+      "amount": { "value": 15, "unit": "ml" },
+      "notes": "About 1 tbsp."
+    },
+    {
+      "id": "vanilla_bean_optional",
+      "label": "Vanilla bean (optional)",
+      "amount": { "value": 1, "unit": "each" },
+      "notes": "Optional: split and scrape; infuse in warm milk for deeper flavor.",
+      "optional": true
+    },
+
+    {
+      "id": "bananas_ripe",
+      "label": "Ripe bananas",
+      "amount": { "value": 6, "unit": "each" },
+      "notes": "6–8 medium bananas. Ripe with a few spots; not mushy."
+    },
+    {
+      "id": "vanilla_wafers_store",
+      "label": "Vanilla wafers (store-bought) OR homemade vanilla cookies",
+      "amount": { "value": 350, "unit": "g" },
+      "notes": "About 12 oz box. If making homemade wafers/cookies, you can use either fresh-milled or commercial flour in those cookies.",
+      "optional": true
+    },
+
+    {
+      "id": "meringue_sugar",
+      "label": "Sugar for meringue (only if using meringue finish)",
+      "amount": { "value": 150, "unit": "g" },
+      "notes": "About 3/4 cup.",
+      "optional": true
+    },
+    {
+      "id": "egg_whites_reserved",
+      "label": "Reserved egg whites (from the yolks) for meringue finish",
+      "amount": { "value": 6, "unit": "each" },
+      "notes": "Only if using the classic meringue top.",
+      "optional": true
+    },
+    {
+      "id": "cream_of_tartar_optional",
+      "label": "Cream of tartar (optional, stabilizes meringue)",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "About 1/4 tsp.",
+      "optional": true
+    },
+
+    {
+      "id": "whipped_topping_optional",
+      "label": "Whipped topping or stabilized whipped cream (optional alternative to meringue)",
+      "amount": { "value": 450, "unit": "g" },
+      "notes": "Use if you prefer a no-bake finish instead of meringue.",
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_setup",
+      "title": "Set up the dish",
+      "body": "Choose a 9x13-inch dish (or trifle bowl). Have wafers and sliced bananas ready. If using vanilla bean, split and scrape it now."
+    },
+    {
+      "id": "step_02_make_slurry_base",
+      "title": "Whisk custard base (off heat)",
+      "body": "In a medium bowl, whisk sugar, cornstarch, and salt. Add egg yolks and whisk until smooth and slightly thick. This prevents cornstarch clumps."
+    },
+    {
+      "id": "step_03_warm_milk",
+      "title": "Warm the milk",
+      "body": "In a saucepan, warm milk (and cream if using) over medium heat until steaming and small bubbles form at the edges—do not boil. If using vanilla bean, add pod + seeds to the milk while warming."
+    },
+    {
+      "id": "step_04_temper",
+      "title": "Temper the yolks",
+      "body": "Slowly whisk about 1 cup (240 ml) of the warm milk into the yolk mixture to temper, then pour the tempered mixture back into the saucepan while whisking constantly."
+    },
+    {
+      "id": "step_05_thicken",
+      "title": "Cook until thick",
+      "body": "Cook over medium heat, whisking constantly, until the custard thickens and gently bubbles (about 2–5 minutes once it starts to thicken). Keep whisking for 30–60 seconds after bubbling begins to fully cook the starch. Custard should be thick enough to coat a spoon."
+    },
+    {
+      "id": "step_06_finish_custard",
+      "title": "Finish with butter and vanilla",
+      "body": "Remove from heat. Remove vanilla bean pod if used. Whisk in butter until melted, then whisk in vanilla extract. For ultra-smooth custard, strain through a fine-mesh sieve."
+    },
+    {
+      "id": "step_07_layer",
+      "title": "Layer wafers, bananas, custard",
+      "body": "Spread a thin layer of custard in the bottom of the dish. Add a layer of vanilla wafers, then a layer of sliced bananas, then a generous layer of custard. Repeat layers until you run out, finishing with custard on top. Typical: 3 wafer layers, 2 banana layers."
+    },
+    {
+      "id": "step_08_choose_finish",
+      "title": "Choose your finish: classic meringue or whipped topping",
+      "body": "Classic: add meringue on top and brown it. Alternative: cool and top with whipped topping/whipped cream before serving."
+    },
+    {
+      "id": "step_09_meringue_optional",
+      "title": "Classic meringue finish (optional)",
+      "body": "If using meringue: beat reserved egg whites (and cream of tartar if using) until foamy, then gradually add sugar and beat to glossy medium-stiff peaks. Spread meringue over warm pudding, sealing to the edges (prevents weeping). Brown with a torch or under a broiler 1–3 minutes, watching closely."
+    },
+    {
+      "id": "step_10_chill_set",
+      "title": "Chill to set and soften wafers",
+      "body": "Press plastic wrap directly onto the surface if NOT using meringue (prevents a skin). Chill at least 4 hours, ideally overnight. This lets wafers soften into cake-like layers and the custard set for clean scoops."
+    },
+    {
+      "id": "step_11_serve",
+      "title": "Serve",
+      "body": "Serve chilled. For best banana texture, eat within 24–36 hours (bananas brown over time)."
+    }
+  ],
+  "notes": [
+    "Cultural baseline: This is the classic Southern-style layered banana pudding with vanilla wafers and scratch custard; the meringue finish is traditional in many households, while whipped topping is a common modern variant.",
+    "Flour note: This dessert itself is not flour-based; the flour choice applies only if you make your own vanilla wafers/cookies. Store-bought wafers are standard and culturally common.",
+    "Banana selection: Use ripe bananas with some speckling for best flavor. Very overripe bananas can go mushy and brown faster.",
+    "Prevent browning: Bananas will brown eventually; tighter layering and quick chilling help. If you must, you can lightly brush banana slices with lemon juice, but it changes the classic flavor."
+  ],
+  "storage": {
+    "refrigerator": "Cover and refrigerate up to 3 days. Best texture and banana color are within 24–36 hours.",
+    "freezer": "Not recommended (custard can weep and bananas change texture)."
+  }
+}

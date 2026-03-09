@@ -35,19 +35,21 @@ try {
 
 let eventBus = { emit: () => {}, on: () => {}, off: () => {} };
 try {
-  eventBus = require("@/services/eventBus").eventBus || eventBus;
+  eventBus = require("@/services/events/eventBus").eventBus || eventBus;
 } catch (_) {}
 
 let usePersonalFoodStandards = () => ({ standards: {} });
 try {
   usePersonalFoodStandards =
-    require("@/app/context/HouseholdSettingsContext").usePersonalFoodStandards ||
-    usePersonalFoodStandards;
+    require("@/app/context/HouseholdSettingsContext")
+      .usePersonalFoodStandards || usePersonalFoodStandards;
 } catch (_) {}
 
 let useBatchQueue = () => ({ addFilter: () => {}, clearFilter: () => {} });
 try {
-  useBatchQueue = require("@/features/meals/BatchQueueProvider").useBatchQueue || useBatchQueue;
+  useBatchQueue =
+    require("@/features/meals/BatchQueueProvider").useBatchQueue ||
+    useBatchQueue;
 } catch (_) {}
 
 let TagSuggest = null;
@@ -126,12 +128,17 @@ function savePresets(list) {
 function toQueryString(filters) {
   const params = new URLSearchParams();
   if (filters.q) params.set("q", filters.q);
-  if (filters.includeTags?.length) params.set("tags", filters.includeTags.join(","));
-  if (filters.excludeTags?.length) params.set("not", filters.excludeTags.join(","));
-  if (filters.collections?.length) params.set("col", filters.collections.join(","));
-  if (filters.mealTypes?.length) params.set("type", filters.mealTypes.join(","));
+  if (filters.includeTags?.length)
+    params.set("tags", filters.includeTags.join(","));
+  if (filters.excludeTags?.length)
+    params.set("not", filters.excludeTags.join(","));
+  if (filters.collections?.length)
+    params.set("col", filters.collections.join(","));
+  if (filters.mealTypes?.length)
+    params.set("type", filters.mealTypes.join(","));
   if (filters.cuisine?.length) params.set("cui", filters.cuisine.join(","));
-  if (filters.difficulty?.length) params.set("diff", filters.difficulty.join(","));
+  if (filters.difficulty?.length)
+    params.set("diff", filters.difficulty.join(","));
   if (filters.ratingMin) params.set("rate", String(filters.ratingMin));
   if (filters.prepTimeMax) params.set("prep", String(filters.prepTimeMax));
   if (filters.inventoryAware) params.set("inv", "1");
@@ -162,7 +169,10 @@ function fromQueryString(search) {
     pinnedOnly: url.get("pin") === "1",
     batchReadyOnly: url.get("batch") === "1",
     hasMedia: url.get("media") === "1",
-    sort: { key: url.get("sort") || "relevance", dir: url.get("dir") || "desc" },
+    sort: {
+      key: url.get("sort") || "relevance",
+      dir: url.get("dir") || "desc",
+    },
     viewPreset: url.get("view") || "Decide",
   };
 }
@@ -170,7 +180,13 @@ function fromQueryString(search) {
 /* ---------------------------- Small UI primitives ---------------------------- */
 const cx = (...xs) => xs.filter(Boolean).join(" ");
 
-const Chip = ({ selected, onClick, children, className, "aria-label": ariaLabel }) => (
+const Chip = ({
+  selected,
+  onClick,
+  children,
+  className,
+  "aria-label": ariaLabel,
+}) => (
   <button
     type="button"
     aria-pressed={!!selected}
@@ -189,7 +205,12 @@ const Chip = ({ selected, onClick, children, className, "aria-label": ariaLabel 
 );
 
 const Toggle = ({ label, checked, onChange, icon: Icon, className }) => (
-  <label className={cx("flex items-center gap-2 cursor-pointer select-none", className)}>
+  <label
+    className={cx(
+      "flex items-center gap-2 cursor-pointer select-none",
+      className
+    )}
+  >
     <input
       type="checkbox"
       className="peer sr-only"
@@ -209,7 +230,12 @@ const Toggle = ({ label, checked, onChange, icon: Icon, className }) => (
 );
 
 const Section = ({ title, icon: Icon, children, dense }) => (
-  <div className={cx("rounded-xl border border-gray-200 bg-white", dense ? "p-3" : "p-4")}>
+  <div
+    className={cx(
+      "rounded-xl border border-gray-200 bg-white",
+      dense ? "p-3" : "p-4"
+    )}
+  >
     <div className="flex items-center gap-2 mb-3">
       {Icon ? <Icon className="w-4 h-4 text-gray-500" /> : null}
       <h4 className="text-sm font-semibold text-gray-700">{title}</h4>
@@ -232,8 +258,13 @@ export default function LibraryFilters({
   counts = {}, // shape: { total: n, afterFilter: n } (optional)
 }) {
   // Load order: URL -> localStorage -> parent initial
-  const urlFilters = useMemo(() => fromQueryString(window?.location?.search || ""), []);
-  const [filters, setFilters] = useState(() => loadState({ ...initial, ...urlFilters }));
+  const urlFilters = useMemo(
+    () => fromQueryString(window?.location?.search || ""),
+    []
+  );
+  const [filters, setFilters] = useState(() =>
+    loadState({ ...initial, ...urlFilters })
+  );
   const [expanded, setExpanded] = useState(false);
   const [presets, setPresets] = useState(loadPresets());
   const [presetName, setPresetName] = useState("");
@@ -243,7 +274,8 @@ export default function LibraryFilters({
   const isFirst = useRef(true);
 
   const { standards } = usePersonalFoodStandards();
-  const { addFilter: linkToBatchQueue, clearFilter: clearBatchLink } = useBatchQueue();
+  const { addFilter: linkToBatchQueue, clearFilter: clearBatchLink } =
+    useBatchQueue();
 
   // Seed diet toggles from personal standards (only once)
   useEffect(() => {
@@ -257,7 +289,9 @@ export default function LibraryFilters({
         noPork: prev.diet.noPork ?? true,
         goatAllowed: prev.diet.goatAllowed ?? true,
         lambBeefOnly: prev.diet.lambBeefOnly || !!standards?.lambBeefOnly,
-        allergens: Array.isArray(standards?.allergens) ? [...standards.allergens] : prev.diet.allergens,
+        allergens: Array.isArray(standards?.allergens)
+          ? [...standards.allergens]
+          : prev.diet.allergens,
       },
     }));
   }, [standards]);
@@ -273,11 +307,16 @@ export default function LibraryFilters({
     debounceRef.current = setTimeout(() => {
       onChange(normalize(filters));
       if (filters.viewPreset === "Plan" || filters.batchReadyOnly) {
-        linkToBatchQueue({ source: "LibraryFilters", filters: normalize(filters) });
+        linkToBatchQueue({
+          source: "LibraryFilters",
+          filters: normalize(filters),
+        });
       } else {
         clearBatchLink?.();
       }
-      eventBus.emit("meals.library.filters.changed", { filters: normalize(filters) });
+      eventBus.emit("meals.library.filters.changed", {
+        filters: normalize(filters),
+      });
     }, 180);
 
     return () => clearTimeout(debounceRef.current);
@@ -330,7 +369,13 @@ export default function LibraryFilters({
         ...defaultFilters,
         viewPreset: "Collect",
         sort: { key: "created", dir: "desc" },
-        source: { ...prev.source, web: true, imported: true, vault: true, scanned: true },
+        source: {
+          ...prev.source,
+          web: true,
+          imported: true,
+          vault: true,
+          scanned: true,
+        },
       }));
     } else if (name === "Decide") {
       setFilters((prev) => ({
@@ -478,7 +523,8 @@ export default function LibraryFilters({
           <div className="text-xs text-gray-600 ml-auto">
             {totalShown != null && totalAll != null ? (
               <span>
-                Showing <strong>{totalShown}</strong> of <strong>{totalAll}</strong>
+                Showing <strong>{totalShown}</strong> of{" "}
+                <strong>{totalAll}</strong>
               </span>
             ) : null}
           </div>
@@ -522,14 +568,22 @@ export default function LibraryFilters({
                         const selected = prev.includeTags.includes(t.id)
                           ? prev.includeTags.filter((x) => x !== t.id)
                           : [...prev.includeTags, t.id];
-                        return { ...prev, includeTags: selected, excludeTags: prev.excludeTags.filter((x) => x !== t.id) };
+                        return {
+                          ...prev,
+                          includeTags: selected,
+                          excludeTags: prev.excludeTags.filter(
+                            (x) => x !== t.id
+                          ),
+                        };
                       })
                     }
                     aria-label={`Include tag ${t.label}`}
                   >
                     {t.label}
                     {typeof t.count === "number" ? (
-                      <span className="ml-2 text-[10px] opacity-80">({t.count})</span>
+                      <span className="ml-2 text-[10px] opacity-80">
+                        ({t.count})
+                      </span>
                     ) : null}
                   </Chip>
                 ))}
@@ -548,7 +602,13 @@ export default function LibraryFilters({
                         const selected = prev.excludeTags.includes(t.id)
                           ? prev.excludeTags.filter((x) => x !== t.id)
                           : [...prev.excludeTags, t.id];
-                        return { ...prev, excludeTags: selected, includeTags: prev.includeTags.filter((x) => x !== t.id) };
+                        return {
+                          ...prev,
+                          excludeTags: selected,
+                          includeTags: prev.includeTags.filter(
+                            (x) => x !== t.id
+                          ),
+                        };
                       })
                     }
                     aria-label={`Exclude tag ${t.label}`}
@@ -567,7 +627,9 @@ export default function LibraryFilters({
                       setFilters((p) => ({
                         ...p,
                         includeTags: unique([...(p.includeTags || []), tagId]),
-                        excludeTags: (p.excludeTags || []).filter((x) => x !== tagId),
+                        excludeTags: (p.excludeTags || []).filter(
+                          (x) => x !== tagId
+                        ),
                       }))
                     }
                   />
@@ -594,7 +656,9 @@ export default function LibraryFilters({
                   >
                     {c.label}
                     {typeof c.count === "number" ? (
-                      <span className="ml-2 text-[10px] opacity-80">({c.count})</span>
+                      <span className="ml-2 text-[10px] opacity-80">
+                        ({c.count})
+                      </span>
                     ) : null}
                   </Chip>
                 ))}
@@ -653,7 +717,9 @@ export default function LibraryFilters({
             <Section title="Quality & Time" icon={Star}>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">Min Rating</label>
+                  <label className="block text-xs text-gray-500 mb-1">
+                    Min Rating
+                  </label>
                   <div className="flex items-center gap-2">
                     <input
                       type="range"
@@ -662,16 +728,23 @@ export default function LibraryFilters({
                       step="1"
                       value={filters.ratingMin}
                       onChange={(e) =>
-                        setFilters((p) => ({ ...p, ratingMin: Number(e.target.value) || 0 }))
+                        setFilters((p) => ({
+                          ...p,
+                          ratingMin: Number(e.target.value) || 0,
+                        }))
                       }
                       className="w-full"
                       aria-label="Minimum rating"
                     />
-                    <span className="text-sm w-6 text-right">{filters.ratingMin}</span>
+                    <span className="text-sm w-6 text-right">
+                      {filters.ratingMin}
+                    </span>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">Max Prep Time (min)</label>
+                  <label className="block text-xs text-gray-500 mb-1">
+                    Max Prep Time (min)
+                  </label>
                   <div className="flex items-center gap-2">
                     <input
                       type="number"
@@ -679,7 +752,10 @@ export default function LibraryFilters({
                       max="600"
                       value={filters.prepTimeMax}
                       onChange={(e) =>
-                        setFilters((p) => ({ ...p, prepTimeMax: Number(e.target.value) || 0 }))
+                        setFilters((p) => ({
+                          ...p,
+                          prepTimeMax: Number(e.target.value) || 0,
+                        }))
                       }
                       className="w-24 px-2 py-1 rounded border border-gray-300"
                       aria-label="Max prep time"
@@ -719,23 +795,40 @@ export default function LibraryFilters({
                 <Toggle
                   label="Use my Personal Food Standards"
                   checked={!!filters.diet.clean}
-                  onChange={(v) => setFilters((p) => ({ ...p, diet: { ...p.diet, clean: v } }))}
+                  onChange={(v) =>
+                    setFilters((p) => ({ ...p, diet: { ...p.diet, clean: v } }))
+                  }
                   icon={Settings2}
                 />
                 <Toggle
                   label="No Pork"
                   checked={!!filters.diet.noPork}
-                  onChange={(v) => setFilters((p) => ({ ...p, diet: { ...p.diet, noPork: v } }))}
+                  onChange={(v) =>
+                    setFilters((p) => ({
+                      ...p,
+                      diet: { ...p.diet, noPork: v },
+                    }))
+                  }
                 />
                 <Toggle
                   label="Lamb/Beef only"
                   checked={!!filters.diet.lambBeefOnly}
-                  onChange={(v) => setFilters((p) => ({ ...p, diet: { ...p.diet, lambBeefOnly: v } }))}
+                  onChange={(v) =>
+                    setFilters((p) => ({
+                      ...p,
+                      diet: { ...p.diet, lambBeefOnly: v },
+                    }))
+                  }
                 />
                 <Toggle
                   label="Goat allowed"
                   checked={!!filters.diet.goatAllowed}
-                  onChange={(v) => setFilters((p) => ({ ...p, diet: { ...p.diet, goatAllowed: v } }))}
+                  onChange={(v) =>
+                    setFilters((p) => ({
+                      ...p,
+                      diet: { ...p.diet, goatAllowed: v },
+                    }))
+                  }
                 />
               </div>
 
@@ -743,33 +836,56 @@ export default function LibraryFilters({
                 <Toggle
                   label="Vault"
                   checked={!!filters.source.vault}
-                  onChange={(v) => setFilters((p) => ({ ...p, source: { ...p.source, vault: v } }))}
+                  onChange={(v) =>
+                    setFilters((p) => ({
+                      ...p,
+                      source: { ...p.source, vault: v },
+                    }))
+                  }
                 />
                 <Toggle
                   label="Scanned"
                   checked={!!filters.source.scanned}
-                  onChange={(v) => setFilters((p) => ({ ...p, source: { ...p.source, scanned: v } }))}
+                  onChange={(v) =>
+                    setFilters((p) => ({
+                      ...p,
+                      source: { ...p.source, scanned: v },
+                    }))
+                  }
                 />
                 <Toggle
                   label="Web"
                   checked={!!filters.source.web}
-                  onChange={(v) => setFilters((p) => ({ ...p, source: { ...p.source, web: v } }))}
+                  onChange={(v) =>
+                    setFilters((p) => ({
+                      ...p,
+                      source: { ...p.source, web: v },
+                    }))
+                  }
                 />
                 <Toggle
                   label="Imported"
                   checked={!!filters.source.imported}
                   onChange={(v) =>
-                    setFilters((p) => ({ ...p, source: { ...p.source, imported: v } }))
+                    setFilters((p) => ({
+                      ...p,
+                      source: { ...p.source, imported: v },
+                    }))
                   }
                 />
               </div>
             </Section>
 
             {/* Macros */}
-            <Section title="Macro Targets (upper bounds except protein)" icon={SlidersHorizontal}>
+            <Section
+              title="Macro Targets (upper bounds except protein)"
+              icon={SlidersHorizontal}
+            >
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">Protein min (g)</label>
+                  <label className="block text-xs text-gray-500 mb-1">
+                    Protein min (g)
+                  </label>
                   <input
                     type="number"
                     min="0"
@@ -778,14 +894,19 @@ export default function LibraryFilters({
                     onChange={(e) =>
                       setFilters((p) => ({
                         ...p,
-                        macros: { ...p.macros, proteinMin: Number(e.target.value) || 0 },
+                        macros: {
+                          ...p.macros,
+                          proteinMin: Number(e.target.value) || 0,
+                        },
                       }))
                     }
                     className="w-24 px-2 py-1 rounded border border-gray-300"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">Carbs max (g)</label>
+                  <label className="block text-xs text-gray-500 mb-1">
+                    Carbs max (g)
+                  </label>
                   <input
                     type="number"
                     min="0"
@@ -794,14 +915,19 @@ export default function LibraryFilters({
                     onChange={(e) =>
                       setFilters((p) => ({
                         ...p,
-                        macros: { ...p.macros, carbsMax: Number(e.target.value) || 0 },
+                        macros: {
+                          ...p.macros,
+                          carbsMax: Number(e.target.value) || 0,
+                        },
                       }))
                     }
                     className="w-24 px-2 py-1 rounded border border-gray-300"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">Fat max (g)</label>
+                  <label className="block text-xs text-gray-500 mb-1">
+                    Fat max (g)
+                  </label>
                   <input
                     type="number"
                     min="0"
@@ -810,14 +936,19 @@ export default function LibraryFilters({
                     onChange={(e) =>
                       setFilters((p) => ({
                         ...p,
-                        macros: { ...p.macros, fatMax: Number(e.target.value) || 0 },
+                        macros: {
+                          ...p.macros,
+                          fatMax: Number(e.target.value) || 0,
+                        },
                       }))
                     }
                     className="w-24 px-2 py-1 rounded border border-gray-300"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">Calories max</label>
+                  <label className="block text-xs text-gray-500 mb-1">
+                    Calories max
+                  </label>
                   <input
                     type="number"
                     min="0"
@@ -826,7 +957,10 @@ export default function LibraryFilters({
                     onChange={(e) =>
                       setFilters((p) => ({
                         ...p,
-                        macros: { ...p.macros, kcalMax: Number(e.target.value) || 0 },
+                        macros: {
+                          ...p.macros,
+                          kcalMax: Number(e.target.value) || 0,
+                        },
                       }))
                     }
                     className="w-24 px-2 py-1 rounded border border-gray-300"
@@ -841,7 +975,9 @@ export default function LibraryFilters({
                 <Toggle
                   label="Inventory-aware"
                   checked={!!filters.inventoryAware}
-                  onChange={(v) => setFilters((p) => ({ ...p, inventoryAware: v }))}
+                  onChange={(v) =>
+                    setFilters((p) => ({ ...p, inventoryAware: v }))
+                  }
                 />
                 <Toggle
                   label="Pinned only"
@@ -852,7 +988,9 @@ export default function LibraryFilters({
                 <Toggle
                   label="Batch-ready only"
                   checked={!!filters.batchReadyOnly}
-                  onChange={(v) => setFilters((p) => ({ ...p, batchReadyOnly: v }))}
+                  onChange={(v) =>
+                    setFilters((p) => ({ ...p, batchReadyOnly: v }))
+                  }
                 />
                 <Toggle
                   label="Has media"
@@ -866,7 +1004,10 @@ export default function LibraryFilters({
                 <select
                   value={filters.sort.key}
                   onChange={(e) =>
-                    setFilters((p) => ({ ...p, sort: { ...p.sort, key: e.target.value } }))
+                    setFilters((p) => ({
+                      ...p,
+                      sort: { ...p.sort, key: e.target.value },
+                    }))
                   }
                   className="px-2 py-1 rounded border border-gray-300 text-sm"
                 >
@@ -881,7 +1022,10 @@ export default function LibraryFilters({
                 <select
                   value={filters.sort.dir}
                   onChange={(e) =>
-                    setFilters((p) => ({ ...p, sort: { ...p.sort, dir: e.target.value } }))
+                    setFilters((p) => ({
+                      ...p,
+                      sort: { ...p.sort, dir: e.target.value },
+                    }))
                   }
                   className="px-2 py-1 rounded border border-gray-300 text-sm"
                 >
@@ -918,13 +1062,20 @@ export default function LibraryFilters({
                 <label className="inline-flex items-center gap-1 px-3 py-1.5 rounded border text-sm bg-white hover:bg-gray-50 cursor-pointer">
                   <Upload className="w-4 h-4" />
                   Import
-                  <input type="file" accept="application/json" onChange={importPreset} className="sr-only" />
+                  <input
+                    type="file"
+                    accept="application/json"
+                    onChange={importPreset}
+                    className="sr-only"
+                  />
                 </label>
               </div>
 
               <div className="mt-3 grid grid-cols-1 gap-2 max-h-40 overflow-auto pr-1">
                 {presets.length === 0 ? (
-                  <div className="text-xs text-gray-500">No presets saved yet.</div>
+                  <div className="text-xs text-gray-500">
+                    No presets saved yet.
+                  </div>
                 ) : (
                   presets.map((p) => (
                     <div
@@ -968,8 +1119,16 @@ export default function LibraryFilters({
           </button>
 
           <div className="ml-auto flex items-center gap-2 text-xs text-gray-600">
-            <Star className={cx("w-4 h-4", filters.pinnedOnly ? "text-amber-500" : "text-gray-400")} />
-            <span>Tip: press <kbd className="px-1 border rounded">/</kbd> to focus search, <kbd className="px-1 border rounded">esc</kbd> to clear.</span>
+            <Star
+              className={cx(
+                "w-4 h-4",
+                filters.pinnedOnly ? "text-amber-500" : "text-gray-400"
+              )}
+            />
+            <span>
+              Tip: press <kbd className="px-1 border rounded">/</kbd> to focus
+              search, <kbd className="px-1 border rounded">esc</kbd> to clear.
+            </span>
           </div>
         </div>
       </div>

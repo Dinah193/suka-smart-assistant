@@ -23,7 +23,7 @@ let eventBus = {
   emit: (...a) => console.debug("[MobileBottomBar:eventBus.emit]", ...a),
 };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -44,7 +44,12 @@ try {
 const isoNow = () => new Date().toISOString();
 
 function emitEvent(type, data = {}) {
-  const payload = { type, ts: isoNow(), source: "components.cooking.MobileBottomBar", data };
+  const payload = {
+    type,
+    ts: isoNow(),
+    source: "components.cooking.MobileBottomBar",
+    data,
+  };
   eventBus.emit?.(type, payload);
   return payload;
 }
@@ -96,7 +101,8 @@ export default function MobileBottomBar({
   rightSlot = null, // custom node right of Next
 }) {
   const time = useMemo(() => {
-    const secs = primaryTimer?.remainingSeconds ?? primaryTimer?.totalSeconds ?? 0;
+    const secs =
+      primaryTimer?.remainingSeconds ?? primaryTimer?.totalSeconds ?? 0;
     return mmss(secs);
   }, [primaryTimer?.remainingSeconds, primaryTimer?.totalSeconds]);
 
@@ -127,7 +133,12 @@ export default function MobileBottomBar({
       ...extra,
     };
     // Local bus for observers (Remote, Overlay sync handlers, etc.)
-    eventBus.emit?.("play.control", { type: "play.control", ts: env.ts, source: "MobileBottomBar", data: env });
+    eventBus.emit?.("play.control", {
+      type: "play.control",
+      ts: env.ts,
+      source: "MobileBottomBar",
+      data: env,
+    });
     // Optional upstream delivery (rtcClient, WS fallback)
     try {
       onControlSend?.(env);
@@ -176,7 +187,9 @@ export default function MobileBottomBar({
   const handleTimerToggle = () => {
     if (disabled || timerDisabled) return;
     vibrate([10, 10, 10]);
-    const env = sendEnvelope("timer.toggle", { toState: running ? "paused" : "running" });
+    const env = sendEnvelope("timer.toggle", {
+      toState: running ? "paused" : "running",
+    });
     const e = emitEvent("play.timer.toggled", {
       sessionId,
       timerId: primaryTimer?.id || null,

@@ -18,10 +18,10 @@
  */
 
 import { db } from "../../../services/db";
-import { emitEvent } from "../../../services/eventBus";
-import { familyFundMode } from "../../../services/featureFlags";
-import { HubPacketFormatter } from "../../../services/hub/HubPacketFormatter";
-import { FamilyFundConnector } from "../../../services/hub/FamilyFundConnector";
+import { emitEvent } from "../../../services/events/eventBus";
+import { familyFundMode } from "../../../config/featureFlags";
+import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
+import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
 
 /* -------------------------------------------------------------------------- */
 /* Typedefs                                                                   */
@@ -171,11 +171,7 @@ function normalizePlantKey(plant) {
   if (!plant || typeof plant !== "object") return "unknown";
 
   const base =
-    plant.slug ||
-    plant.name ||
-    plant.latinName ||
-    plant.id ||
-    "unknown";
+    plant.slug || plant.name || plant.latinName || plant.id || "unknown";
 
   return String(base)
     .toLowerCase()
@@ -522,8 +518,7 @@ export async function lookupPlantCompanions(plants, options = {}) {
         plantId: plant.id,
         key,
         optionsCount: swapOptions.length,
-        autoSelectedId:
-          swapOptions.find((opt) => opt.autoSelected)?.id || null,
+        autoSelectedId: swapOptions.find((opt) => opt.autoSelected)?.id || null,
       });
     } catch (err) {
       // eslint-disable-next-line no-console

@@ -1,0 +1,410 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-22T23:45:00Z",
+  "meta": {
+    "id": "cuisines.japanese.recipes.chicken_teriyaki",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Chicken Teriyaki",
+    "subtitle": "Glossy soy-mirin glaze with tender chicken",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa-core",
+      "notes": [
+        "Canonical SSA catalog recipe.",
+        "Japanese home-style teriyaki; adaptable to thighs or breast; stovetop default."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "japanese",
+    "category": "main",
+    "mealArchetypes": ["stew_and_starch", "plates", "bowls"],
+    "servingStyles": ["plates", "bowls", "family_style"],
+    "plannerTags": [
+      "cuisine.japanese",
+      "dish.teriyaki",
+      "protein.chicken",
+      "weeknight.friendly",
+      "pan.sear",
+      "sauce.glaze",
+      "flavor.umami_forward"
+    ]
+  },
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 1, "unit": "plate" },
+    "notes": "Serves 4 as a main when paired with rice and a vegetable side."
+  },
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 10,
+    "totalMins": 30
+  },
+  "difficulty": "beginner",
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": "partial",
+    "notes": "Sauce keeps well; cooked chicken freezes best without delicate garnish."
+  },
+  "tasteProfile": {
+    "sweet": 2,
+    "salty": 3,
+    "umami": 4,
+    "acid": 1,
+    "heat": 0,
+    "balanceNotes": "Classic sweet-salty glaze; adjust sweetness by adding honey/sugar gradually."
+  },
+  "equipment": {
+    "minimum": [
+      "skillet",
+      "tongs",
+      "measuring_cups",
+      "measuring_spoons",
+      "knife",
+      "cutting_board"
+    ],
+    "recommended": [
+      "instant_read_thermometer",
+      "small_saucepan",
+      "microplane",
+      "fine_mesh_strainer"
+    ],
+    "optional": [
+      {
+        "id": "rice_cooker",
+        "label": "Rice cooker",
+        "required": false,
+        "notes": "Helpful for hands-off rice."
+      }
+    ]
+  },
+  "dietFlags": [],
+  "allergens": {
+    "mayContain": ["soy", "gluten", "sesame"],
+    "commonTriggers": ["soy_sauce"],
+    "notes": [
+      "Use gluten-free tamari or certified GF soy sauce for gluten-free adaptation.",
+      "Confirm mirin brand if strict gluten avoidance is needed."
+    ]
+  },
+  "ingredients": [
+    {
+      "id": "chicken_thighs_boneless_skinless",
+      "label": "Boneless skinless chicken thighs",
+      "role": "protein",
+      "amount": { "value": 680, "unit": "g" },
+      "notes": "About 1.5 lb. Breast works too; reduce cook time to avoid dryness."
+    },
+    {
+      "id": "kosher_salt",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": "If soy sauce is very salty, reduce to 1/2 tsp."
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "neutral_oil",
+      "label": "Neutral oil (avocado/canola)",
+      "role": "fat",
+      "amount": { "value": 1, "unit": "tbsp" }
+    },
+    {
+      "id": "soy_sauce",
+      "label": "Soy sauce",
+      "role": "sauce",
+      "amount": { "value": 80, "unit": "ml" },
+      "notes": "About 1/3 cup. Use tamari for gluten-free."
+    },
+    {
+      "id": "mirin",
+      "label": "Mirin",
+      "role": "sauce",
+      "amount": { "value": 80, "unit": "ml" },
+      "notes": "About 1/3 cup. If using 'aji-mirin' (sweetened), reduce added sugar."
+    },
+    {
+      "id": "sake",
+      "label": "Sake (or dry white wine)",
+      "role": "sauce",
+      "amount": { "value": 45, "unit": "ml" },
+      "optional": true,
+      "notes": "About 3 Tbsp. If omitted, add 2 Tbsp water."
+    },
+    {
+      "id": "brown_sugar",
+      "label": "Brown sugar (or honey)",
+      "role": "sweetener",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "notes": "Adjust to taste; some mirin is already sweet."
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 2, "unit": "cloves" },
+      "optional": true
+    },
+    {
+      "id": "ginger",
+      "label": "Fresh ginger, grated",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true
+    },
+    {
+      "id": "cornstarch",
+      "label": "Cornstarch",
+      "role": "thickener",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": "Optional for extra glossy, faster-thickening sauce."
+    },
+    {
+      "id": "water",
+      "label": "Water (for slurry)",
+      "role": "other",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true
+    },
+    {
+      "id": "scallions",
+      "label": "Scallions, sliced",
+      "role": "garnish",
+      "amount": { "value": 2, "unit": "stalks" },
+      "optional": true
+    },
+    {
+      "id": "sesame_seeds",
+      "label": "Toasted sesame seeds",
+      "role": "garnish",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_prep_chicken",
+      "title": "Prep the chicken",
+      "activeMins": 5,
+      "handsOffMins": 0,
+      "instructions": [
+        "Pat chicken dry with paper towels (dry surface browns better).",
+        "Season both sides with salt and pepper."
+      ],
+      "checks": ["Chicken is dry to the touch", "Seasoning evenly distributed"]
+    },
+    {
+      "id": "step_02_mix_sauce",
+      "title": "Mix teriyaki sauce",
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "instructions": [
+        "In a bowl, whisk soy sauce, mirin, sake (or water), brown sugar (or honey), garlic, and ginger until sugar is mostly dissolved.",
+        "If using cornstarch, whisk cornstarch with water to make a slurry and set aside."
+      ],
+      "checks": ["Sauce tastes balanced (sweet-salty) before cooking"]
+    },
+    {
+      "id": "step_03_sear_chicken",
+      "title": "Sear the chicken",
+      "activeMins": 8,
+      "handsOffMins": 0,
+      "instructions": [
+        "Heat a skillet over medium-high heat. Add neutral oil.",
+        "Place chicken smooth-side down. Sear until deeply browned, 3–5 minutes (don’t move it too early).",
+        "Flip and cook 2–4 minutes more until mostly cooked through."
+      ],
+      "timers": [
+        { "label": "First side sear", "minutes": 4 },
+        { "label": "Second side sear", "minutes": 3 }
+      ],
+      "checks": [
+        "Good browning (golden to deep amber)",
+        "Chicken is nearly cooked (about 150–155°F / 65–68°C internal for thighs before glazing)"
+      ],
+      "temperature": {
+        "type": "internal",
+        "value": 74,
+        "unit": "C",
+        "notes": "Target 165°F / 74°C final for food safety."
+      }
+    },
+    {
+      "id": "step_04_glaze",
+      "title": "Add sauce and glaze",
+      "activeMins": 6,
+      "handsOffMins": 2,
+      "instructions": [
+        "Reduce heat to medium. Pour in the sauce.",
+        "Simmer, turning chicken to coat, until sauce thickens and turns glossy.",
+        "If using cornstarch slurry, add it during simmering and cook 30–60 seconds until shiny.",
+        "Continue until chicken reaches 165°F / 74°C and sauce clings to the chicken."
+      ],
+      "timers": [
+        { "label": "Sauce simmer & reduce", "minutes": 4 },
+        { "label": "Post-slurry gloss (if used)", "minutes": 1 }
+      ],
+      "checks": [
+        "Sauce coats the back of a spoon",
+        "Chicken internal temp reaches 165°F / 74°C"
+      ]
+    },
+    {
+      "id": "step_05_slice_and_serve",
+      "title": "Slice and serve",
+      "activeMins": 3,
+      "handsOffMins": 2,
+      "instructions": [
+        "Rest chicken 2 minutes, then slice.",
+        "Spoon extra glaze over the top.",
+        "Garnish with scallions and toasted sesame seeds.",
+        "Serve with rice and a simple vegetable (e.g., steamed broccoli, sautéed bok choy, or cucumber salad)."
+      ],
+      "timers": [{ "label": "Rest", "minutes": 2 }],
+      "checks": ["Juices settle after resting", "Slices are glossy with glaze"]
+    }
+  ],
+  "pairings": {
+    "serveWith": [
+      { "id": "steamed_rice", "label": "Steamed Japanese rice" },
+      { "id": "miso_soup", "label": "Miso soup" },
+      { "id": "sunomono", "label": "Cucumber sunomono" },
+      { "id": "steamed_broccoli", "label": "Steamed broccoli" }
+    ],
+    "notes": "Balance sweet-salty teriyaki with something light and acidic (pickles/salad) and a simple vegetable."
+  },
+  "storage": {
+    "refrigerator": {
+      "duration": "3-4 days",
+      "notes": "Store chicken with sauce in an airtight container. Reheat gently to avoid sugar scorching."
+    },
+    "freezer": {
+      "duration": "2-3 months",
+      "notes": "Freeze sliced chicken with sauce. Thaw overnight in fridge; reheat gently with a splash of water."
+    },
+    "reheat": {
+      "methods": [
+        "Skillet over low heat with 1–2 Tbsp water, covered",
+        "Microwave in short bursts, stirring sauce between bursts"
+      ]
+    }
+  },
+  "planner": {
+    "mealRole": "protein",
+    "suggestedSides": ["rice", "greens", "pickled_veg"],
+    "batchNotes": "Double the sauce and cook extra chicken for rice bowls and salads."
+  },
+  "keywords": [
+    "teriyaki",
+    "chicken teriyaki",
+    "shoyu",
+    "mirin",
+    "glaze",
+    "weeknight"
+  ],
+  "tags": [
+    "cuisine.japanese",
+    "dish.teriyaki",
+    "protein.chicken",
+    "technique.sear",
+    "technique.simmer",
+    "sauce.glaze",
+    "weeknight.friendly"
+  ],
+  "notes": [
+    "If using chicken breast: pound to even thickness; reduce cook time; pull at 160°F and rest to 165°F carryover.",
+    "For less sweet teriyaki: start with 1 Tbsp sugar and adjust after reduction.",
+    "For classic simplicity: omit garlic/ginger; rely on soy+mirin+sake+sugar."
+  ],
+  "variations": [
+    {
+      "id": "var_thighs_skin_on",
+      "label": "Skin-on thighs (crisp skin)",
+      "when": { "ingredient": "chicken_thighs_skin_on" },
+      "adapt": {
+        "notes": [
+          "Start skin-side down; render on medium heat 6–8 minutes until crisp.",
+          "Pour off excess fat before adding sauce to prevent greasy glaze."
+        ]
+      }
+    },
+    {
+      "id": "var_salmon_teriyaki",
+      "label": "Salmon teriyaki",
+      "when": { "proteinSwap": "salmon" },
+      "adapt": {
+        "notes": [
+          "Sear salmon 2–3 minutes per side depending on thickness.",
+          "Glaze gently; avoid overcooking."
+        ]
+      }
+    },
+    {
+      "id": "var_gluten_free",
+      "label": "Gluten-free",
+      "when": { "diet": "gluten_free" },
+      "adapt": {
+        "notes": [
+          "Use tamari or certified gluten-free soy sauce.",
+          "Verify mirin and sake labels."
+        ]
+      }
+    }
+  ],
+  "summary": "Classic stovetop chicken teriyaki: seared chicken finished in a glossy soy-mirin glaze. Weeknight-friendly and great for rice bowls.",
+  "safety": {
+    "criticalTemps": [
+      {
+        "food": "chicken",
+        "tempF": 165,
+        "tempC": 74,
+        "notes": "USDA safe minimum internal temperature."
+      }
+    ],
+    "handling": [
+      "Keep raw chicken separate from ready-to-eat foods.",
+      "Avoid cross-contamination: wash hands, boards, and knives after handling raw poultry."
+    ]
+  },
+  "ingredientGroups": [
+    {
+      "id": "grp_chicken",
+      "label": "Chicken",
+      "items": [
+        "chicken_thighs_boneless_skinless",
+        "kosher_salt",
+        "black_pepper",
+        "neutral_oil"
+      ]
+    },
+    {
+      "id": "grp_teriyaki_sauce",
+      "label": "Teriyaki Sauce",
+      "items": ["soy_sauce", "mirin", "sake", "brown_sugar", "garlic", "ginger"]
+    },
+    {
+      "id": "grp_optional_finish",
+      "label": "Optional Finish",
+      "items": ["cornstarch", "water", "scallions", "sesame_seeds"]
+    }
+  ],
+  "methods": ["sear", "simmer", "reduce_glaze"],
+  "compat": {
+    "cuisineId": "cuisines.japanese",
+    "dishId": "cuisines.japanese.dishes.chicken_teriyaki",
+    "aliases": ["teriyaki chicken", "shoyu chicken (teriyaki style)"],
+    "searchBoost": ["teriyaki", "mirin", "shoyu", "glaze"]
+  }
+}

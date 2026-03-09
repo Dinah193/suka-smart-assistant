@@ -1,0 +1,1440 @@
+{
+  "$schema": "../../../schemas/cuisine.profile.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-22T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.japanese",
+    "type": "cuisine_profile",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Japanese",
+    "shortName": "Japanese",
+    "description": "Clean, balanced Japanese home and restaurant cooking anchored by dashi, soy, miso, rice, noodles, pickles, and precise technique. Emphasizes umami, seasonal ingredients, lightness, and contrast (crisp/soft, hot/cold, salty/sour/sweet).",
+    "subtitle": "Dashi • Rice • Noodles • Fermentation • Balance",
+    "originRegions": ["Japan"],
+    "regions": ["East Asia"],
+    "primaryCountriesAndIslands": ["Japan"],
+    "tags": [
+      "cuisine.japanese",
+      "region.east_asia",
+      "profile.traditional",
+      "umami.high",
+      "fermented.friendly",
+      "seafood.common",
+      "rice.core",
+      "noodles.core",
+      "bento.friendly",
+      "weeknight.friendly",
+      "batch.friendly"
+    ],
+    "icon": "cuisine_japanese",
+    "colorHint": "indigo",
+    "heritageNotes": [
+      "This profile describes broadly-recognized Japanese cooking patterns (washoku + modern home cooking).",
+      "Many dishes have regional variations (Kansai vs Kanto seasoning, Okinawan influences, Hokkaido dairy/seafood).",
+      "Flavor balance often relies on dashi + soy + mirin/sugar + sake; adjust for dietary needs."
+    ],
+    "version": "1.0.0",
+    "author": "SSA Catalog Curation",
+    "createdAt": "2026-01-22",
+    "updatedAt": "2026-01-22",
+    "status": "canonical",
+    "source": {
+      "curation": "SSA canonical cuisine profile",
+      "maintainer": "SSA",
+      "license": "internal",
+      "attribution": "General culinary knowledge synthesis",
+      "kind": "curated",
+      "author": "SSA Catalog",
+      "origin": "internal",
+      "type": "cuisine_profile",
+      "notes": "IDs reference SSA ingredient/method catalogs (or future equivalents).",
+      "url": null
+    },
+    "family": {
+      "parent": "cuisines.east_asian",
+      "siblings": [
+        "cuisines.korean",
+        "cuisines.chinese",
+        "cuisines.vietnamese"
+      ],
+      "overlapsWith": [
+        {
+          "id": "cuisines.korean",
+          "reason": "Shared pantry items (soy, sesame, rice, seaweed) but different seasoning balance and technique emphasis."
+        },
+        {
+          "id": "cuisines.chinese",
+          "reason": "Shared noodles/soy/sauces; Japanese tends to lighter seasoning and dashi-based broths."
+        }
+      ]
+    },
+    "subprofiles": [
+      {
+        "id": "japanese.washoku",
+        "name": "Washoku (Traditional)",
+        "signatureNotes": "Dashi-first, seasonal, subtle seasoning, emphasis on rice + soup + small dishes.",
+        "commonSauceBases": [
+          "base.dashi",
+          "condiment.soy_sauce",
+          "condiment.miso",
+          "condiment.rice_vinegar"
+        ]
+      },
+      {
+        "id": "japanese.izakaya",
+        "name": "Izakaya (Pub Fare)",
+        "signatureNotes": "Snackable small plates: fried, grilled, skewers, bold sauces, beer-friendly.",
+        "commonSauceBases": [
+          "sauce.teriyaki",
+          "sauce.ponzu",
+          "sauce.miso_glaze",
+          "sauce.kewpie_mayo"
+        ]
+      },
+      {
+        "id": "japanese.ramen",
+        "name": "Ramen & Noodle Shop",
+        "signatureNotes": "Structured broths (shoyu/shio/miso/tonkotsu), tare seasoning, aromatic oils, chewy noodles.",
+        "commonSauceBases": [
+          "base.dashi",
+          "condiment.soy_sauce",
+          "condiment.miso",
+          "condiment.sesame_oil"
+        ]
+      },
+      {
+        "id": "japanese.yoshoku",
+        "name": "Yōshoku (Japanese-Western)",
+        "signatureNotes": "Japanese comfort foods influenced by Western cooking (katsu, curry rice, hambāgu).",
+        "commonSauceBases": [
+          "sauce.japanese_curry",
+          "sauce.tonkatsu",
+          "sauce.demi_glace_style"
+        ]
+      },
+      {
+        "id": "japanese.bento",
+        "name": "Bento & Meal Prep",
+        "signatureNotes": "Packable mains + rice + pickles + simple veg; make-ahead friendly.",
+        "commonSauceBases": [
+          "sauce.teriyaki",
+          "sauce.miso_glaze",
+          "condiment.rice_vinegar"
+        ]
+      }
+    ],
+    "regionHints": ["Kanto", "Kansai", "Hokkaido", "Okinawa", "Kyushu"],
+    "countryHints": ["Japan"]
+  },
+
+  "domain": "cuisines",
+  "locale": "en-US",
+  "id": "cuisines.japanese",
+  "title": "Japanese",
+  "tags": [
+    "cuisine.japanese",
+    "east_asian",
+    "umami_forward",
+    "dashi_based",
+    "rice_and_noodles",
+    "fermentation",
+    "seafood_common",
+    "bento_meal_prep"
+  ],
+
+  "notes": [
+    "This profile uses stable SSA-style IDs (ingredient.*, condiment.*, sauce.*, method.*, equipment.*).",
+    "If your ingredient catalog uses different IDs, map them via aliases or a translator layer.",
+    "Japanese cooking often uses small amounts of sugar/mirin to balance salt/acid; adjust to household preferences."
+  ],
+
+  "plannerDefaults": {
+    "mealRoles": [
+      "role.rice",
+      "role.noodles",
+      "role.soup",
+      "role.protein",
+      "role.veg",
+      "role.pickles",
+      "role.sauce",
+      "role.snack"
+    ],
+    "batchFriendly": true,
+    "freezerFriendly": true,
+    "defaultHeatLevel": "low",
+    "defaultServingStyle": [
+      "bowls",
+      "plates",
+      "snacks",
+      "street_food",
+      "family_style"
+    ],
+    "defaultStaples": [
+      "ingredient.japanese_short_grain_rice",
+      "ingredient.soy_sauce",
+      "ingredient.miso_paste",
+      "ingredient.rice_vinegar",
+      "ingredient.mirin",
+      "ingredient.sake_cooking",
+      "ingredient.kombu",
+      "ingredient.katsuobushi",
+      "ingredient.nori_sheets",
+      "ingredient.sesame_seeds",
+      "ingredient.sesame_oil",
+      "ingredient.scallions",
+      "ingredient.ginger",
+      "ingredient.garlic",
+      "ingredient.panko",
+      "ingredient.udon_noodles",
+      "ingredient.soba_noodles",
+      "ingredient.ramen_noodles",
+      "ingredient.tofu_firm",
+      "ingredient.eggs",
+      "ingredient.shichimi_togarashi",
+      "ingredient.white_sugar"
+    ],
+    "inventorySignals": [
+      "signal.low_rice",
+      "signal.low_dashi_inputs",
+      "signal.low_soy_sauce",
+      "signal.low_miso",
+      "signal.low_nori",
+      "signal.low_noodles"
+    ],
+    "makeAheadNotes": [
+      "Cook extra rice and cool quickly; portion and freeze for fast bowls and fried rice.",
+      "Make dashi concentrate or keep kombu/katsuobushi on hand for quick fresh dashi.",
+      "Quick pickles (sunomono, asazuke) boost variety and help balance rich/fried dishes.",
+      "Teriyaki-style glaze can be made in a jar (soy + mirin + sugar) for weeknight proteins."
+    ]
+  },
+
+  "flavorSystem": {
+    "signatureNotes": [
+      "dashi_umami",
+      "soy_salt",
+      "miso_depth",
+      "mirin_sweet_balance",
+      "rice_vinegar_brightness",
+      "sesame_nutty_finish",
+      "seaweed_mineral",
+      "ginger_fresh_heat"
+    ],
+    "aromaticsCore": [
+      "ingredient.scallions",
+      "ingredient.ginger",
+      "ingredient.garlic",
+      "ingredient.leek",
+      "ingredient.onion",
+      "ingredient.shallot"
+    ],
+    "spiceCore": [
+      "ingredient.shichimi_togarashi",
+      "ingredient.sansho_pepper",
+      "ingredient.white_pepper"
+    ],
+    "umamiBuilders": [
+      "ingredient.kombu",
+      "ingredient.katsuobushi",
+      "ingredient.dried_shiitake",
+      "ingredient.soy_sauce",
+      "ingredient.miso_paste",
+      "ingredient.fish_sauce",
+      "ingredient.nori_sheets",
+      "ingredient.wakame"
+    ],
+    "acidOptions": [
+      "ingredient.rice_vinegar",
+      "ingredient.yuzu_juice",
+      "ingredient.lemon",
+      "ingredient.lime"
+    ],
+    "sweetBalanceOptions": [
+      "ingredient.mirin",
+      "ingredient.white_sugar",
+      "ingredient.brown_sugar",
+      "ingredient.honey"
+    ],
+    "heatOptions": [
+      "ingredient.shichimi_togarashi",
+      "ingredient.japanese_mustard_karashi",
+      "ingredient.wasabi",
+      "ingredient.chili_oil"
+    ]
+  },
+
+  "pantryTiers": {
+    "tier0_minimum": {
+      "description": "Minimum to cook simple Japanese meals (rice bowls, miso soup, quick stir-fries).",
+      "items": [
+        "ingredient.japanese_short_grain_rice",
+        "ingredient.soy_sauce",
+        "ingredient.miso_paste",
+        "ingredient.rice_vinegar",
+        "ingredient.sesame_oil",
+        "ingredient.sesame_seeds",
+        "ingredient.scallions",
+        "ingredient.ginger",
+        "ingredient.eggs",
+        "ingredient.tofu_firm",
+        "ingredient.nori_sheets"
+      ]
+    },
+    "tier1_core": {
+      "description": "Core pantry that unlocks dashi-forward cooking, noodle soups, and classic sauces.",
+      "items": [
+        "ingredient.kombu",
+        "ingredient.katsuobushi",
+        "ingredient.dried_shiitake",
+        "ingredient.mirin",
+        "ingredient.sake_cooking",
+        "ingredient.panko",
+        "ingredient.udon_noodles",
+        "ingredient.soba_noodles",
+        "ingredient.ramen_noodles",
+        "ingredient.wakame",
+        "ingredient.pickled_ginger",
+        "ingredient.kewpie_mayo"
+      ]
+    },
+    "tier2_traditional": {
+      "description": "Traditional/expanded items for more authentic variety and regional dishes.",
+      "items": [
+        "ingredient.yuzu_juice",
+        "ingredient.sansho_pepper",
+        "ingredient.katsuobushi_powder",
+        "ingredient.ponzu",
+        "ingredient.miso_white_shiro",
+        "ingredient.miso_red_aka",
+        "ingredient.mochiko_rice_flour",
+        "ingredient.tempura_flour",
+        "ingredient.bonito_dashi_granules",
+        "ingredient.tonkatsu_sauce",
+        "ingredient.okonomiyaki_sauce",
+        "ingredient.sushi_rice_seasoning"
+      ]
+    },
+    "tier3_specialty": {
+      "description": "Specialty pantry for enthusiasts (ramen oils, specialty seaweeds, fermentation, sushi).",
+      "items": [
+        "ingredient.kansui",
+        "ingredient.niboshi_dried_anchovy",
+        "ingredient.shio_koji",
+        "ingredient.miso_tamari",
+        "ingredient.dried_kelp_knot",
+        "ingredient.konbu_tea",
+        "ingredient.shoyu_koji",
+        "ingredient.aonori",
+        "ingredient.kizami_nori",
+        "ingredient.sushi_grade_fish",
+        "ingredient.kombu_vinegar",
+        "ingredient.rice_koji"
+      ]
+    }
+  },
+
+  "techniquesEmphasis": {
+    "primary": [
+      "method.make_dashi",
+      "method.simmer",
+      "method.quick_pickling",
+      "method.grill_broil",
+      "method.pan_fry",
+      "method.deep_fry",
+      "method.steam",
+      "method.noodle_cook",
+      "method.rice_cook"
+    ],
+    "common": [
+      "method.marinade",
+      "method.glaze_reduce",
+      "method.stir_fry",
+      "method.poach",
+      "method.soft_boiled_egg",
+      "method.breading_katsu",
+      "method.tempura_batter",
+      "method.quick_blanche"
+    ],
+    "notes": [
+      "Flavor is often built with a light base (dashi) + seasoning (tare/soy/miso) + a finishing garnish.",
+      "Temperature and texture contrast matter: keep toppings crisp, broths hot, noodles properly cooked.",
+      "Avoid overcooking fish and vegetables; aim for clean, distinct ingredients."
+    ]
+  },
+
+  "dishArchetypes": [
+    {
+      "id": "archetype.donburi_bowl",
+      "label": "Donburi Bowl",
+      "description": "Rice bowl topped with protein and/or vegetables, usually with a savory-sweet sauce or broth.",
+      "commonExamples": [
+        "Gyudon",
+        "Oyakodon",
+        "Katsudon",
+        "Unadon",
+        "Poke-style bowls (fusion)"
+      ],
+      "defaults": {
+        "baseOptions": ["ingredient.japanese_short_grain_rice"],
+        "proteinOptions": [
+          "ingredient.chicken_thigh",
+          "ingredient.beef_sliced",
+          "ingredient.pork_cutlet",
+          "ingredient.tofu_firm",
+          "ingredient.salmon",
+          "ingredient.shrimp"
+        ],
+        "vegOptions": [
+          "ingredient.onion",
+          "ingredient.scallions",
+          "ingredient.spinach",
+          "ingredient.cabbage",
+          "ingredient.mushrooms",
+          "ingredient.cucumber"
+        ],
+        "sauceOptions": [
+          "sauce.teriyaki",
+          "sauce.oyakodon_broth",
+          "sauce.gyudon_sauce"
+        ],
+        "garnishOptions": [
+          "ingredient.nori_sheets",
+          "ingredient.sesame_seeds",
+          "ingredient.pickled_ginger",
+          "ingredient.shichimi_togarashi"
+        ],
+        "pairings": ["archetype.miso_soup", "archetype.quick_pickles"]
+      }
+    },
+    {
+      "id": "archetype.noodle_soup",
+      "label": "Noodle Soup",
+      "description": "Hot broth + noodles + toppings. Can be light (udon/soba) or rich (ramen styles).",
+      "commonExamples": [
+        "Shoyu ramen",
+        "Miso ramen",
+        "Udon noodle soup",
+        "Soba in dashi"
+      ],
+      "defaults": {
+        "baseOptions": ["base.dashi", "base.chicken_broth", "base.pork_broth"],
+        "grainOptions": [
+          "ingredient.ramen_noodles",
+          "ingredient.udon_noodles",
+          "ingredient.soba_noodles"
+        ],
+        "proteinOptions": [
+          "ingredient.chashu_pork",
+          "ingredient.chicken_thigh",
+          "ingredient.soft_boiled_egg",
+          "ingredient.tofu_firm",
+          "ingredient.shrimp"
+        ],
+        "vegOptions": [
+          "ingredient.scallions",
+          "ingredient.spinach",
+          "ingredient.corn",
+          "ingredient.mushrooms"
+        ],
+        "garnishOptions": [
+          "ingredient.nori_sheets",
+          "ingredient.sesame_seeds",
+          "ingredient.chili_oil"
+        ],
+        "pairings": ["archetype.izakaya_side", "archetype.quick_pickles"]
+      }
+    },
+    {
+      "id": "archetype.miso_soup",
+      "label": "Miso Soup",
+      "description": "Dashi-based soup seasoned with miso; includes tofu/seaweed/veg. Quick, versatile staple.",
+      "commonExamples": [
+        "Tofu & wakame miso soup",
+        "Mushroom miso soup",
+        "Clam miso soup"
+      ],
+      "defaults": {
+        "stew_baseOptions": ["base.dashi"],
+        "proteinOptions": [
+          "ingredient.tofu_firm",
+          "ingredient.clams",
+          "ingredient.eggs"
+        ],
+        "vegOptions": [
+          "ingredient.scallions",
+          "ingredient.mushrooms",
+          "ingredient.spinach"
+        ],
+        "garnishOptions": ["ingredient.wakame"],
+        "pairings": ["archetype.rice_and_pickles"]
+      }
+    },
+    {
+      "id": "archetype.grilled_fish_set",
+      "label": "Grilled Fish Set Meal",
+      "description": "Simple grilled fish with rice, miso soup, and small sides/pickles. Classic home pattern.",
+      "commonExamples": [
+        "Shiozake (salted salmon)",
+        "Mackerel shioyaki",
+        "Teriyaki fish"
+      ],
+      "defaults": {
+        "proteinOptions": [
+          "ingredient.salmon",
+          "ingredient.mackerel",
+          "ingredient.sardines"
+        ],
+        "riceOptions": ["ingredient.japanese_short_grain_rice"],
+        "sideOptions": ["dish.edamame", "dish.sunomono", "dish.tamagoyaki"],
+        "pairings": ["archetype.miso_soup", "archetype.quick_pickles"]
+      }
+    },
+    {
+      "id": "archetype.izakaya_side",
+      "label": "Izakaya Side",
+      "description": "Snackable side dish: fried, grilled, chilled, or dressed salads. Great for variety plates.",
+      "commonExamples": [
+        "Karaage",
+        "Gyoza",
+        "Agedashi tofu",
+        "Cucumber salad",
+        "Edamame"
+      ],
+      "defaults": {
+        "proteinOptions": [
+          "ingredient.chicken_thigh",
+          "ingredient.tofu_firm",
+          "ingredient.pork_ground"
+        ],
+        "sideOptions": [
+          "dish.edamame",
+          "dish.gyoza",
+          "dish.karaage",
+          "dish.cucumber_sunomono"
+        ],
+        "sauceOptions": ["sauce.ponzu", "sauce.kewpie_mayo", "sauce.gyoza_dip"],
+        "garnishOptions": [
+          "ingredient.scallions",
+          "ingredient.sesame_seeds",
+          "ingredient.shichimi_togarashi"
+        ]
+      }
+    },
+    {
+      "id": "archetype.rice_and_pickles",
+      "label": "Rice & Pickles",
+      "description": "Rice paired with pickles and simple toppings; supports low-effort meals and leftovers.",
+      "commonExamples": ["Onigiri + pickles", "Rice + furikake", "Ochazuke"],
+      "defaults": {
+        "starchOptions": ["ingredient.japanese_short_grain_rice"],
+        "garnishOptions": [
+          "ingredient.nori_sheets",
+          "ingredient.furikake",
+          "ingredient.pickled_plum_umeboshi"
+        ],
+        "pairings": ["archetype.miso_soup", "archetype.quick_pickles"]
+      }
+    }
+  ],
+
+  "ingredientPreferences": {
+    "preferred": [
+      "ingredient.japanese_short_grain_rice",
+      "ingredient.soy_sauce",
+      "ingredient.miso_paste",
+      "ingredient.rice_vinegar",
+      "ingredient.mirin",
+      "ingredient.sake_cooking",
+      "ingredient.kombu",
+      "ingredient.katsuobushi",
+      "ingredient.dried_shiitake",
+      "ingredient.nori_sheets",
+      "ingredient.wakame",
+      "ingredient.sesame_seeds",
+      "ingredient.sesame_oil",
+      "ingredient.scallions",
+      "ingredient.ginger",
+      "ingredient.daikon",
+      "ingredient.cabbage",
+      "ingredient.tofu_firm",
+      "ingredient.eggs",
+      "ingredient.salmon"
+    ],
+    "optional_traditional": [
+      "ingredient.yuzu_juice",
+      "ingredient.sansho_pepper",
+      "ingredient.shio_koji",
+      "ingredient.niboshi_dried_anchovy",
+      "ingredient.okra",
+      "ingredient.konnyaku"
+    ],
+    "avoid_or_limit": [
+      {
+        "id": "ingredient.heavy_smoke_flavor",
+        "label": "Heavy smoke flavor",
+        "reason": "Not typical in many Japanese home dishes; can overpower dashi and delicate broths."
+      },
+      {
+        "id": "ingredient.excessive_sugar",
+        "label": "Excessive sugar",
+        "reason": "Sweetness is usually restrained and used for balance; too much can flatten umami and acid."
+      }
+    ]
+  },
+
+  "substitutionGuidance": {
+    "proteinSubstitutions": [
+      {
+        "for": "ingredient.salmon",
+        "options": [
+          "ingredient.trout",
+          "ingredient.mackerel",
+          "ingredient.sardines"
+        ],
+        "notes": "Use oily fish for grilling; adjust salt and cooking time by thickness."
+      },
+      {
+        "for": "ingredient.chicken_thigh",
+        "options": ["ingredient.chicken_breast", "ingredient.tofu_firm"],
+        "notes": "Breast dries faster—use lower heat or sauce; tofu works well for donburi and soups."
+      },
+      {
+        "for": "ingredient.pork_cutlet",
+        "options": ["ingredient.chicken_cutlet", "ingredient.tofu_firm"],
+        "notes": "For katsu: match thickness and breading method; tofu katsu benefits from pressing + chilling."
+      }
+    ],
+    "sideSubstitutions": [
+      {
+        "for": "dish.quick_pickles",
+        "options": [
+          "dish.cucumber_sunomono",
+          "dish.daikon_pickles",
+          "dish.cabbage_asazuke"
+        ],
+        "notes": "Any quick pickle adds brightness and crunch."
+      },
+      {
+        "for": "dish.edamame",
+        "options": ["dish.blistered_shishito", "dish.cucumber_sunomono"],
+        "notes": "Swap based on availability and season."
+      }
+    ],
+    "thickenerSubstitutions": [
+      {
+        "for": "ingredient.potato_starch",
+        "options": ["ingredient.cornstarch", "ingredient.tapioca_starch"],
+        "notes": "Potato starch yields a clearer, glossier sauce; cornstarch is fine at similar ratios."
+      }
+    ],
+    "notes": [
+      "If kombu + katsuobushi aren’t available, use dried shiitake + a small amount of fish sauce for umami.",
+      "If mirin isn’t available, combine a small amount of sugar/honey with rice vinegar and a splash of sake or water.",
+      "Ponzu can be approximated with soy sauce + citrus (lemon/lime) + a touch of rice vinegar."
+    ]
+  },
+
+  "mealTemplates": [
+    {
+      "id": "template.japanese_simple_set_meal",
+      "label": "Simple Set Meal",
+      "archetypeId": "archetype.grilled_fish_set",
+      "components": [
+        {
+          "role": "starch",
+          "ingredientIds": ["ingredient.japanese_short_grain_rice"],
+          "chooseOne": false,
+          "notes": "Cook fresh or use frozen portions."
+        },
+        {
+          "role": "protein",
+          "ingredientIds": [
+            "ingredient.salmon",
+            "ingredient.mackerel",
+            "ingredient.chicken_thigh",
+            "ingredient.tofu_firm"
+          ],
+          "chooseOne": true,
+          "notes": "Prefer grilling/broiling or quick pan-sear."
+        },
+        {
+          "role": "soup",
+          "ingredientIds": ["dish.miso_soup"],
+          "chooseOne": false,
+          "notes": "Dashi + miso + tofu/wakame; quick."
+        },
+        {
+          "role": "side",
+          "ingredientIds": [
+            "dish.quick_pickles",
+            "dish.cucumber_sunomono",
+            "dish.edamame"
+          ],
+          "chooseOne": true,
+          "notes": "Pick one crisp/acidic side."
+        }
+      ],
+      "prepNotes": [
+        "Start rice first.",
+        "Make miso soup while protein cooks.",
+        "Finish with pickles and nori/sesame."
+      ]
+    },
+    {
+      "id": "template.japanese_weeknight_donburi",
+      "label": "Weeknight Donburi",
+      "archetypeId": "archetype.donburi_bowl",
+      "components": [
+        {
+          "role": "base",
+          "ingredientIds": ["ingredient.japanese_short_grain_rice"],
+          "chooseOne": false,
+          "notes": "Rice base; warm bowls."
+        },
+        {
+          "role": "protein",
+          "ingredientIds": [
+            "ingredient.beef_sliced",
+            "ingredient.chicken_thigh",
+            "ingredient.tofu_firm",
+            "ingredient.eggs"
+          ],
+          "chooseOne": true,
+          "notes": "Use a quick simmer or glaze method."
+        },
+        {
+          "role": "veg",
+          "ingredientIds": [
+            "ingredient.onion",
+            "ingredient.scallions",
+            "ingredient.cabbage",
+            "ingredient.spinach",
+            "ingredient.mushrooms"
+          ],
+          "chooseOne": true,
+          "notes": "Cook with protein or add fresh as garnish."
+        },
+        {
+          "role": "sauce",
+          "ingredientIds": [
+            "sauce.gyudon_sauce",
+            "sauce.teriyaki",
+            "sauce.oyakodon_broth"
+          ],
+          "chooseOne": true,
+          "notes": "Soy + mirin + sugar + dashi/sake style."
+        },
+        {
+          "role": "garnish",
+          "ingredientIds": [
+            "ingredient.nori_sheets",
+            "ingredient.sesame_seeds",
+            "ingredient.pickled_ginger",
+            "ingredient.shichimi_togarashi"
+          ],
+          "chooseOne": true,
+          "notes": "Add texture and aroma."
+        }
+      ],
+      "prepNotes": [
+        "Use frozen rice portions for speed.",
+        "Simmer sauce until glossy; don’t over-reduce with salty soy."
+      ]
+    },
+    {
+      "id": "template.japanese_noodle_night",
+      "label": "Noodle Night",
+      "archetypeId": "archetype.noodle_soup",
+      "components": [
+        {
+          "role": "base",
+          "ingredientIds": ["base.dashi", "base.chicken_broth"],
+          "chooseOne": true,
+          "notes": "Dashi-forward for lighter soups; chicken broth for richer weeknight ramen-style."
+        },
+        {
+          "role": "starch",
+          "ingredientIds": [
+            "ingredient.udon_noodles",
+            "ingredient.soba_noodles",
+            "ingredient.ramen_noodles"
+          ],
+          "chooseOne": true,
+          "notes": "Cook noodles separately when possible to keep broth clear."
+        },
+        {
+          "role": "protein",
+          "ingredientIds": [
+            "ingredient.soft_boiled_egg",
+            "ingredient.chicken_thigh",
+            "ingredient.tofu_firm",
+            "ingredient.shrimp"
+          ],
+          "chooseOne": true,
+          "notes": "Soft egg elevates any bowl."
+        },
+        {
+          "role": "veg",
+          "ingredientIds": [
+            "ingredient.scallions",
+            "ingredient.spinach",
+            "ingredient.mushrooms",
+            "ingredient.corn"
+          ],
+          "chooseOne": true,
+          "notes": "Quick blanch/steam; keep color bright."
+        },
+        {
+          "role": "garnish",
+          "ingredientIds": [
+            "ingredient.nori_sheets",
+            "ingredient.sesame_seeds",
+            "ingredient.chili_oil"
+          ],
+          "chooseOne": true,
+          "notes": "Finish with nori and sesame; optional chili oil for heat."
+        }
+      ],
+      "prepNotes": [
+        "Prepare toppings first; noodles cook fast.",
+        "Season broth gradually; taste with noodles for final balance."
+      ]
+    }
+  ],
+
+  "safetyNotes": [
+    {
+      "id": "safety.japanese_allergens_soy",
+      "label": "Soy & Wheat (Soy Sauce, Miso)",
+      "notes": [
+        "Soy sauce often contains wheat; use tamari or certified gluten-free shoyu if needed.",
+        "Miso may contain soy and sometimes barley/rice; check labels for allergen compatibility."
+      ]
+    },
+    {
+      "id": "safety.japanese_fish_shellfish",
+      "label": "Fish, Shellfish & Dashi",
+      "notes": [
+        "Dashi commonly uses katsuobushi (fish) and sometimes niboshi (anchovy). Use kombu + dried shiitake for a vegetarian alternative.",
+        "Handle seafood with cold chain care; cook to safe internal temperatures where applicable."
+      ]
+    },
+    {
+      "id": "safety.japanese_rice_handling",
+      "label": "Rice Cooling & Storage",
+      "notes": [
+        "Cool cooked rice quickly (spread thin) before refrigerating to reduce food safety risk.",
+        "Reheat rice thoroughly; keep hot foods hot and cold foods cold during bento packing."
+      ]
+    },
+    {
+      "id": "safety.japanese_frying",
+      "label": "Deep Frying (Katsu, Tempura)",
+      "notes": [
+        "Use a stable pot and thermometer; avoid overcrowding to prevent oil overflow.",
+        "Drain well to keep food crisp; keep oil away from water and wet batters to prevent splatter."
+      ]
+    }
+  ],
+
+  "searchHints": {
+    "keywords": [
+      "washoku",
+      "dashi",
+      "miso",
+      "shoyu",
+      "mirin",
+      "ponzu",
+      "teriyaki",
+      "donburi",
+      "bento",
+      "udon",
+      "soba",
+      "ramen",
+      "katsu",
+      "tempura",
+      "yakitori",
+      "okonomiyaki",
+      "onigiri",
+      "tamagoyaki"
+    ],
+    "commonAlternateNames": [
+      "Japanese home cooking",
+      "Washoku cuisine",
+      "Izakaya-style",
+      "Japanese-Western (yoshoku)"
+    ]
+  },
+
+  "pantry": {
+    "staples": {
+      "notes": "Prefer mapping these to your SSA ingredients catalog; this section is permissive for maintainers."
+    },
+    "freshCore": [
+      "ingredient.scallions",
+      "ingredient.ginger",
+      "ingredient.daikon",
+      "ingredient.cabbage",
+      "ingredient.mushrooms"
+    ],
+    "proteinsCommon": [
+      "ingredient.chicken_thigh",
+      "ingredient.eggs",
+      "ingredient.tofu_firm",
+      "ingredient.salmon",
+      "ingredient.pork"
+    ],
+    "produceCommon": [
+      "ingredient.onion",
+      "ingredient.spinach",
+      "ingredient.cucumber",
+      "ingredient.carrot",
+      "ingredient.corn"
+    ],
+    "availabilityNotes": [
+      {
+        "ingredient": "ingredient.yuzu_juice",
+        "fallbacks": ["ingredient.lemon", "ingredient.lime"],
+        "note": "Use lemon/lime to approximate yuzu brightness; add a tiny bit of grapefruit if available for complexity."
+      },
+      {
+        "ingredient": "ingredient.kombu",
+        "fallbacks": [
+          "ingredient.dried_shiitake",
+          "ingredient.bonito_dashi_granules"
+        ],
+        "note": "Kombu provides glutamates; shiitake adds guanylate umami; dashi granules work in weeknight contexts."
+      },
+      {
+        "ingredient": "ingredient.katsuobushi",
+        "fallbacks": [
+          "ingredient.bonito_dashi_granules",
+          "ingredient.fish_sauce"
+        ],
+        "note": "Bonito provides smoky umami; granules are convenient; fish sauce is potent—use sparingly."
+      }
+    ],
+    "coreStaples": {
+      "condiments": [
+        "ingredient.soy_sauce",
+        "ingredient.miso_paste",
+        "ingredient.rice_vinegar",
+        "ingredient.mirin",
+        "ingredient.sake_cooking",
+        "ingredient.sesame_oil"
+      ],
+      "dashi_inputs": [
+        "ingredient.kombu",
+        "ingredient.katsuobushi",
+        "ingredient.dried_shiitake"
+      ],
+      "seaweed": ["ingredient.nori_sheets", "ingredient.wakame"],
+      "noodles": [
+        "ingredient.udon_noodles",
+        "ingredient.soba_noodles",
+        "ingredient.ramen_noodles"
+      ]
+    },
+    "optionalRegionalStaples": {
+      "kansai": [
+        "ingredient.light_soy_sauce_usukuchi",
+        "ingredient.white_miso_shiro"
+      ],
+      "kanto": [
+        "ingredient.dark_soy_sauce_koikuchi",
+        "ingredient.red_miso_aka"
+      ],
+      "okinawa": ["ingredient.awamori", "ingredient.bitter_melon_goya"]
+    }
+  },
+
+  "techniques": {
+    "coreMethods": [
+      "method.make_dashi",
+      "method.simmer",
+      "method.grill_broil",
+      "method.pan_fry",
+      "method.deep_fry",
+      "method.quick_pickling",
+      "method.rice_cook",
+      "method.noodle_cook"
+    ],
+    "hallmarkProcesses": [
+      {
+        "id": "process.make_dashi_basic",
+        "name": "Basic Dashi (Kombu + Bonito)",
+        "steps": [
+          "step.soak_kombu",
+          "step.warm_gently",
+          "step.remove_kombu_before_boiling",
+          "step.add_bonito",
+          "step.steep_and_strain"
+        ],
+        "notes": "Keep heat gentle; boiling kombu can produce bitterness."
+      },
+      {
+        "id": "process.teriyaki_glaze",
+        "name": "Teriyaki-Style Glaze",
+        "steps": [
+          "step.combine_soy_mirin_sugar",
+          "step.simmer_reduce",
+          "step.coat_protein",
+          "step.finish_garnish"
+        ],
+        "notes": "Reduce to glossy; watch salt concentration as it reduces."
+      },
+      {
+        "id": "process.katsu_breading",
+        "name": "Katsu Breading (Flour → Egg → Panko)",
+        "steps": [
+          "step.season_protein",
+          "step.dredge_flour",
+          "step.dip_egg",
+          "step.coat_panko",
+          "step.fry_to_crisp"
+        ],
+        "notes": "Press panko lightly; rest breaded cutlets briefly before frying."
+      }
+    ],
+    "coreTechniques": [],
+    "equipmentAffinity": {
+      "method.rice_cook": ["equipment.rice_cooker", "equipment.pot_with_lid"],
+      "method.deep_fry": [
+        "equipment.deep_pot",
+        "equipment.thermometer",
+        "equipment.wire_rack"
+      ],
+      "method.make_dashi": ["equipment.saucepan", "equipment.fine_strainer"],
+      "method.noodle_cook": ["equipment.stock_pot", "equipment.colander"],
+      "method.grill_broil": [
+        "equipment.broiler",
+        "equipment.grill_pan",
+        "equipment.sheet_pan"
+      ]
+    },
+    "core": [],
+    "signatureMethods": [
+      "Dashi-first cooking: build a light broth base, then season.",
+      "Quick pickling for brightness and texture.",
+      "Precise frying (tempura/katsu) for crispness without greasiness.",
+      "Gentle simmering for donburi sauces and nimono-style dishes."
+    ]
+  },
+
+  "equipment": {
+    "recommended": [
+      "equipment.rice_cooker",
+      "equipment.saucepan",
+      "equipment.stock_pot",
+      "equipment.fine_mesh_strainer",
+      "equipment.sharp_knife",
+      "equipment.cut_board",
+      "equipment.nonstick_pan",
+      "equipment.sheet_pan",
+      "equipment.thermometer"
+    ],
+    "optionalButHelpful": [
+      "equipment.bamboo_sushi_mat",
+      "equipment.mandoline",
+      "equipment.mortar_pestle",
+      "equipment.kitchen_scale",
+      "equipment.wire_rack",
+      "equipment.oto_shibori_pickling_press"
+    ],
+    "notes": [
+      "A rice cooker improves consistency and reduces weeknight effort.",
+      "A fine strainer helps clarify broths and dashi.",
+      "A thermometer improves frying outcomes (tempura/katsu) and reduces oil absorption."
+    ]
+  },
+
+  "dietAndAllergens": {
+    "commonAllergens": [
+      "allergen.soy",
+      "allergen.wheat",
+      "allergen.fish",
+      "allergen.shellfish",
+      "allergen.sesame",
+      "allergen.egg"
+    ],
+    "dietCompatibility": {
+      "diet.vegetarian": "medium",
+      "diet.vegan": "low",
+      "diet.pescatarian": "high",
+      "diet.gluten_free": "low",
+      "diet.dairy_free": "high",
+      "diet.low_carb": "low"
+    }
+  },
+
+  "signatureDishes": {
+    "core": [
+      {
+        "id": "dish.miso_soup",
+        "name": "Miso Soup",
+        "subprofiles": ["japanese.washoku", "japanese.bento"],
+        "difficulty": "beginner",
+        "heatTypical": 0,
+        "notes": "Daily staple; varies by household and season."
+      },
+      {
+        "id": "dish.gyudon",
+        "name": "Gyudon (Beef Bowl)",
+        "subprofiles": ["japanese.washoku", "japanese.bento"],
+        "difficulty": "beginner",
+        "heatTypical": 0,
+        "notes": "Quick simmered beef/onion over rice; great weeknight template."
+      },
+      {
+        "id": "dish.oyakodon",
+        "name": "Oyakodon (Chicken & Egg Bowl)",
+        "subprofiles": ["japanese.washoku", "japanese.bento"],
+        "difficulty": "beginner",
+        "heatTypical": 0,
+        "notes": "Dashi-based simmer; finish with softly set egg."
+      },
+      {
+        "id": "dish.karaage",
+        "name": "Karaage (Japanese Fried Chicken)",
+        "subprofiles": ["japanese.izakaya", "japanese.bento"],
+        "difficulty": "intermediate",
+        "heatTypical": 0,
+        "notes": "Marinated, coated, fried; excellent for leftovers and bento."
+      },
+      {
+        "id": "dish.tonkatsu",
+        "name": "Tonkatsu",
+        "subprofiles": ["japanese.yoshoku", "japanese.izakaya"],
+        "difficulty": "intermediate",
+        "heatTypical": 0,
+        "notes": "Panko-breaded cutlet; pair with shredded cabbage and sauce."
+      },
+      {
+        "id": "dish.ramen_shoyu",
+        "name": "Shoyu Ramen",
+        "subprofiles": ["japanese.ramen"],
+        "difficulty": "advanced",
+        "heatTypical": 1,
+        "notes": "Broth + tare + aromatic oil + toppings; scale complexity based on time."
+      },
+      {
+        "id": "dish.udon_soup",
+        "name": "Udon Noodle Soup",
+        "subprofiles": ["japanese.washoku"],
+        "difficulty": "beginner",
+        "heatTypical": 0,
+        "notes": "Comforting and quick; dashi + soy seasoning."
+      },
+      {
+        "id": "dish.onigiri",
+        "name": "Onigiri",
+        "subprofiles": ["japanese.bento"],
+        "difficulty": "beginner",
+        "heatTypical": 0,
+        "notes": "Great for meal prep; fill with salmon, umeboshi, or tuna-mayo."
+      }
+    ],
+    "dessertsAndDrinks": [
+      {
+        "id": "dish.matcha_latte",
+        "name": "Matcha Latte",
+        "subprofiles": ["japanese.yoshoku"],
+        "difficulty": "beginner",
+        "heatTypical": 0,
+        "notes": "Adjust sweetness; dairy-free options work well."
+      },
+      {
+        "id": "dish.mochi",
+        "name": "Mochi (Simple)",
+        "subprofiles": ["japanese.washoku"],
+        "difficulty": "intermediate",
+        "heatTypical": 0,
+        "notes": "Use mochiko for simplified preparation."
+      }
+    ],
+    "examples": [
+      "Yakitori",
+      "Tamagoyaki",
+      "Okonomiyaki",
+      "Takoyaki",
+      "Tempura",
+      "Sukiyaki",
+      "Nikujaga",
+      "Ochazuke"
+    ],
+    "mealPatterns": [
+      "Set meal: rice + soup + main + small sides/pickles",
+      "Bowl meal: rice/noodles + topping + garnish",
+      "Izakaya spread: several small plates shared"
+    ]
+  },
+
+  "pairingRules": {
+    "typicalStarches": [
+      "ingredient.japanese_short_grain_rice",
+      "ingredient.udon_noodles",
+      "ingredient.soba_noodles",
+      "ingredient.ramen_noodles"
+    ],
+    "typicalVegSides": [
+      "dish.cucumber_sunomono",
+      "dish.quick_pickles",
+      "dish.shredded_cabbage"
+    ],
+    "typicalCondiments": [
+      "ingredient.shichimi_togarashi",
+      "ingredient.pickled_ginger",
+      "ingredient.kewpie_mayo",
+      "ingredient.nori_sheets"
+    ],
+    "typicalFlavorPairings": [
+      {
+        "with": "ingredient.salmon",
+        "pair": ["sauce.miso_glaze", "ingredient.lemon", "ingredient.daikon"],
+        "note": "Miso glaze adds depth; citrus brightens; daikon refreshes palate."
+      },
+      {
+        "with": "dish.tonkatsu",
+        "pair": ["sauce.tonkatsu", "dish.shredded_cabbage", "dish.miso_soup"],
+        "note": "Rich fried cutlets balance with crisp cabbage and light soup."
+      },
+      {
+        "with": "dish.ramen_shoyu",
+        "pair": [
+          "ingredient.nori_sheets",
+          "ingredient.soft_boiled_egg",
+          "ingredient.scallions"
+        ],
+        "note": "Classic ramen toppings emphasize aroma, umami, and texture."
+      }
+    ],
+    "antiPairings": [
+      {
+        "id": "anti.heavy_smoke_in_dashi",
+        "avoid": ["ingredient.heavy_smoke_flavor"],
+        "note": "Heavy smoke can dominate delicate dashi-based broths and subtle seasoning."
+      }
+    ]
+  },
+
+  "substitutions": {
+    "ingredientRules": [
+      {
+        "id": "sub.dashi_veg",
+        "whenMissing": [
+          "ingredient.katsuobushi",
+          "ingredient.niboshi_dried_anchovy"
+        ],
+        "use": ["ingredient.kombu", "ingredient.dried_shiitake"],
+        "with": ["ingredient.kombu", "ingredient.dried_shiitake"],
+        "ratio": 1,
+        "notes": "Vegetarian dashi: kombu + shiitake. Add a small amount of soy/miso for extra depth."
+      },
+      {
+        "id": "sub.mirin_alt",
+        "whenMissing": ["ingredient.mirin"],
+        "use": ["ingredient.white_sugar", "ingredient.rice_vinegar"],
+        "with": ["ingredient.white_sugar", "ingredient.rice_vinegar"],
+        "ratio": 1,
+        "notes": "Approximate mirin balance using a small amount of sugar + rice vinegar + water/sake."
+      },
+      {
+        "id": "sub.ponzu_alt",
+        "whenMissing": ["ingredient.ponzu"],
+        "use": [
+          "ingredient.soy_sauce",
+          "ingredient.lemon",
+          "ingredient.rice_vinegar"
+        ],
+        "with": [
+          "ingredient.soy_sauce",
+          "ingredient.lemon",
+          "ingredient.rice_vinegar"
+        ],
+        "ratio": 1,
+        "notes": "Ponzu approximation: soy + citrus + rice vinegar. Add a pinch of sugar if needed."
+      },
+      {
+        "id": "sub.potato_starch_alt",
+        "whenMissing": ["ingredient.potato_starch"],
+        "use": ["ingredient.cornstarch"],
+        "with": ["ingredient.cornstarch"],
+        "ratio": 1,
+        "notes": "Cornstarch works similarly; potato starch yields glossier sauces."
+      }
+    ],
+    "methodRules": [
+      {
+        "id": "methodsub.rice_cooker_to_pot",
+        "whenNoEquipment": ["equipment.rice_cooker"],
+        "whenHasEquipment": ["equipment.pot_with_lid"],
+        "adapt": "method.rice_cook_pot",
+        "notes": "Use absorption method: rinse, soak, simmer low, rest covered."
+      },
+      {
+        "id": "methodsub.broiler_for_grill",
+        "whenNoEquipment": ["equipment.grill"],
+        "whenHasEquipment": ["equipment.broiler"],
+        "adapt": "method.broil",
+        "notes": "Broiler mimics grill top heat; watch closely to prevent burning."
+      },
+      {
+        "id": "methodsub.deep_fry_shallow_fry",
+        "whenNoEquipment": ["equipment.deep_fryer"],
+        "whenHasEquipment": ["equipment.deep_pot"],
+        "adapt": "method.deep_fry_pot",
+        "notes": "Use a pot + thermometer; keep oil depth adequate and avoid overcrowding."
+      }
+    ],
+    "rules": []
+  },
+
+  "planningHints": {
+    "batchFriendly": [
+      {
+        "id": "batch.make_rice",
+        "name": "Batch Rice (Cook + Portion)",
+        "makes": "component.cooked_rice",
+        "freezerFriendly": true,
+        "notes": "Freeze single portions for fast bowls, fried rice, ochazuke."
+      },
+      {
+        "id": "batch.make_teriyaki_sauce",
+        "name": "Teriyaki Sauce Jar",
+        "makes": "component.teriyaki_sauce",
+        "freezerFriendly": false,
+        "notes": "Keep in fridge; use for chicken, salmon, tofu, veggies."
+      },
+      {
+        "id": "batch.quick_pickles",
+        "name": "Quick Pickles",
+        "makes": "dish.quick_pickles",
+        "freezerFriendly": false,
+        "notes": "Cucumber/daikon/cabbage; boosts set meals and bento variety."
+      }
+    ],
+    "weeknightShortcuts": [
+      "Use dashi granules for weeknight soups; upgrade with kombu/shiitake when time allows.",
+      "Cook noodles and toppings separately to keep broth clean and avoid overcooked noodles.",
+      "Use leftover rice for quick fried rice (yakimeshi style) or onigiri."
+    ],
+    "seasonality": [
+      {
+        "season": "season.spring",
+        "focus": [
+          "ingredient.green_onion",
+          "ingredient.asparagus",
+          "ingredient.snap_peas",
+          "ingredient.strawberries"
+        ]
+      },
+      {
+        "season": "season.summer",
+        "focus": [
+          "ingredient.cucumber",
+          "ingredient.tomato",
+          "ingredient.eggplant",
+          "ingredient.shishito_pepper"
+        ]
+      },
+      {
+        "season": "season.autumn",
+        "focus": [
+          "ingredient.mushrooms",
+          "ingredient.sweet_potato",
+          "ingredient.persimmon",
+          "ingredient.soba_noodles"
+        ]
+      },
+      {
+        "season": "season.winter",
+        "focus": [
+          "ingredient.daikon",
+          "ingredient.napa_cabbage",
+          "ingredient.miso_paste",
+          "ingredient.hot_pot_broth"
+        ]
+      }
+    ]
+  },
+
+  "ui": {
+    "heroSuggestions": [
+      {
+        "title": "Build a Japanese Pantry",
+        "items": [
+          "ingredient.japanese_short_grain_rice",
+          "ingredient.soy_sauce",
+          "ingredient.miso_paste",
+          "ingredient.rice_vinegar",
+          "ingredient.kombu",
+          "ingredient.katsuobushi"
+        ]
+      },
+      {
+        "title": "Fast Weeknight Templates",
+        "items": [
+          "template.japanese_weeknight_donburi",
+          "template.japanese_noodle_night",
+          "template.japanese_simple_set_meal"
+        ]
+      },
+      {
+        "title": "Izakaya Favorites",
+        "items": [
+          "dish.karaage",
+          "dish.gyoza",
+          "dish.edamame",
+          "dish.cucumber_sunomono"
+        ]
+      }
+    ],
+    "searchBoostTerms": [
+      "dashi",
+      "miso",
+      "ponzu",
+      "teriyaki",
+      "donburi",
+      "bento",
+      "udon",
+      "soba",
+      "ramen",
+      "katsu",
+      "karaage",
+      "gyoza",
+      "tamagoyaki"
+    ],
+    "colorHints": {
+      "primary": "indigo",
+      "accent": "rice_white",
+      "umami": "soy_brown",
+      "fresh": "scallion_green"
+    },
+    "iconHints": [
+      "icon.rice_bowl",
+      "icon.noodles",
+      "icon.fish",
+      "icon.bento",
+      "icon.seaweed"
+    ]
+  },
+
+  "compat": {
+    "recipeTagDefaults": [
+      "cuisine.japanese",
+      "umami_forward",
+      "weeknight_friendly"
+    ],
+    "defaultPlateTemplateIds": [
+      "template.japanese_simple_set_meal",
+      "template.japanese_weeknight_donburi",
+      "template.japanese_noodle_night"
+    ],
+    "notes": [
+      "If your recipe system uses different dish/template IDs, update compat.defaultPlateTemplateIds accordingly.",
+      "Planner can treat dishArchetypes + mealTemplates as seed patterns for schedule generation."
+    ]
+  }
+}

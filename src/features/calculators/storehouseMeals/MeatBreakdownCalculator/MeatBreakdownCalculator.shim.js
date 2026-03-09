@@ -19,8 +19,8 @@
  * - computing serving estimates for storehouse & meal planning.
  */
 
-import { emit } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { HubPacketFormatter, FamilyFundConnector } from "@/services/hub";
 
 /** @typedef {import("./MeatBreakdownCalculator.config").MeatBreakdownCalculatorInput} MeatBreakdownCalculatorInput */
@@ -53,7 +53,9 @@ export async function runMeatBreakdownCalculator(payload) {
 
   try {
     if (!payload || typeof payload !== "object") {
-      throw new Error("MeatBreakdownCalculator: payload is required and must be an object.");
+      throw new Error(
+        "MeatBreakdownCalculator: payload is required and must be an object."
+      );
     }
 
     const { inputs, metadata = {} } = payload;
@@ -62,7 +64,12 @@ export async function runMeatBreakdownCalculator(payload) {
       throw new Error("MeatBreakdownCalculator: `inputs` is required.");
     }
 
-    const { animal, carcass, processingPreferences = {}, batchContext = {} } = inputs;
+    const {
+      animal,
+      carcass,
+      processingPreferences = {},
+      batchContext = {},
+    } = inputs;
 
     if (!animal || typeof animal !== "object") {
       throw new Error("MeatBreakdownCalculator: `inputs.animal` is required.");
@@ -72,14 +79,15 @@ export async function runMeatBreakdownCalculator(payload) {
     }
 
     const { species = "other" } = animal;
-    const {
-      basisType,
-      basisWeight,
-      weightUnit,
-    } = deriveBasisFromCarcass(carcass, batchContext);
+    const { basisType, basisWeight, weightUnit } = deriveBasisFromCarcass(
+      carcass,
+      batchContext
+    );
 
     if (!basisWeight || basisWeight <= 0) {
-      throw new Error("MeatBreakdownCalculator: could not determine a valid basis weight.");
+      throw new Error(
+        "MeatBreakdownCalculator: could not determine a valid basis weight."
+      );
     }
 
     const speciesProfile = getSpeciesProfile(species);
@@ -95,11 +103,7 @@ export async function runMeatBreakdownCalculator(payload) {
       weightUnit
     );
 
-    const cuts = buildCutsFromProfile(
-      tunedProfile,
-      summary,
-      weightUnit
-    );
+    const cuts = buildCutsFromProfile(tunedProfile, summary, weightUnit);
 
     const byproducts = buildByproductsFromProfile(
       tunedProfile,
@@ -660,17 +664,14 @@ function buildCutsFromProfile(profile, summary, weightUnit) {
     const weight = (totalMeat * pctOfMeat) / 100;
     const yieldPctOfBasis = (weight / basisSafe) * 100;
 
-    const estimatedServings =
-      servingSize > 0 ? weight / servingSize : 0;
+    const estimatedServings = servingSize > 0 ? weight / servingSize : 0;
 
     // Packaging defaults: aim for ~1.5lb/0.7kg packages.
     const targetPerPackage = weightUnit === "kg" ? 0.7 : 1.5;
     const packages =
       weight > 0 ? Math.max(1, Math.round(weight / targetPerPackage)) : 0;
-    const weightPerPackage =
-      packages > 0 ? weight / packages : 0;
-    const servingsPerPackage =
-      packages > 0 ? estimatedServings / packages : 0;
+    const weightPerPackage = packages > 0 ? weight / packages : 0;
+    const servingsPerPackage = packages > 0 ? estimatedServings / packages : 0;
 
     cuts.push({
       id: `cut_${c.key || index}`,
@@ -747,13 +748,7 @@ function buildByproductsFromProfile(profile, summary, weightUnit) {
 
   const offalWeight = summary.totalOffalWeight || 0;
   const offalPct = (offalWeight / basisSafe) * 100;
-  addByproduct(
-    "organ",
-    "Organs & Offal",
-    offalWeight,
-    offalPct,
-    "stock"
-  );
+  addByproduct("organ", "Organs & Offal", offalWeight, offalPct, "stock");
 
   return byproducts;
 }
@@ -781,8 +776,7 @@ async function exportToHubIfEnabled(calculatorPayload) {
       HubPacketFormatter &&
       typeof HubPacketFormatter.buildPacket === "function";
     const hasConnector =
-      FamilyFundConnector &&
-      typeof FamilyFundConnector.send === "function";
+      FamilyFundConnector && typeof FamilyFundConnector.send === "function";
 
     if (!hasFormatter || !hasConnector) {
       console.warn(
@@ -802,18 +796,14 @@ async function exportToHubIfEnabled(calculatorPayload) {
     emit({
       type: "calculator.meatBreakdown.exported",
       ts: new Date().toISOString(),
-      source:
-        "features/calculators/storehouseMeals/MeatBreakdownCalculator",
+      source: "features/calculators/storehouseMeals/MeatBreakdownCalculator",
       data: {
         calculatorId: "MeatBreakdownCalculator",
         hubPacketId: packet.id || null,
       },
     });
   } catch (err) {
-    console.error(
-      "[MeatBreakdownCalculator] Failed to export to Hub:",
-      err
-    );
+    console.error("[MeatBreakdownCalculator] Failed to export to Hub:", err);
     // Fail silently from the perspective of the caller.
   }
 }

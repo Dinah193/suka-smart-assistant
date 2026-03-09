@@ -20,13 +20,19 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 
 // ----------------------------- Safe Imports -----------------------------
-let eventBus = { on: function(){}, off: function(){}, emit: function(){} };
+let eventBus = {
+  on: function () {},
+  off: function () {},
+  emit: function () {},
+};
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = (eb && (eb.default || eb.eventBus)) || eventBus;
 } catch (e) {}
 
-let estimateEngine = { estimate: () => ({ currency: "USD", subtotal: 0, lines: [] }) };
+let estimateEngine = {
+  estimate: () => ({ currency: "USD", subtotal: 0, lines: [] }),
+};
 try {
   const ee = require("@/engines/estimateEngine");
   estimateEngine = (ee && (ee.default || ee)) || estimateEngine;
@@ -51,8 +57,9 @@ try {
   InventoryMonitor = (im && (im.default || im)) || InventoryMonitor;
 } catch (e) {}
 
-let placementRules = { // variety/leftovers/appliance conflicts (best effort)
-  detect: () => ({ conflicts: [] })
+let placementRules = {
+  // variety/leftovers/appliance conflicts (best effort)
+  detect: () => ({ conflicts: [] }),
 };
 try {
   const pr = require("@/engines/placementRules");
@@ -65,7 +72,9 @@ try {
   stabilityScore = (ss && (ss.default || ss)) || stabilityScore;
 } catch (e) {}
 
-let Settings = { get: () => ({ sabbathGuard: false, decider: { epsilon: 0.08 } }) };
+let Settings = {
+  get: () => ({ sabbathGuard: false, decider: { epsilon: 0.08 } }),
+};
 try {
   const setMod = require("@/stores/SettingsStore");
   Settings = (setMod && (setMod.default || setMod)) || Settings;
@@ -84,12 +93,13 @@ const uid = (p = "decider") => p + ":" + Math.random().toString(36).slice(2);
 
 const softmaxPick = (items, temp = 1) => {
   if (!items.length) return [];
-  const scores = items.map(i => safeNum(i.total, 0));
+  const scores = items.map((i) => safeNum(i.total, 0));
   const max = Math.max.apply(null, scores);
-  const exp = scores.map(s => Math.exp((s - max) / (temp || 1)));
+  const exp = scores.map((s) => Math.exp((s - max) / (temp || 1)));
   const sum = exp.reduce((a, b) => a + b, 0);
-  return items.map((it, idx) => ({ ...it, p: exp[idx] / (sum || 1) }))
-              .sort((a, b) => b.p - a.p);
+  return items
+    .map((it, idx) => ({ ...it, p: exp[idx] / (sum || 1) }))
+    .sort((a, b) => b.p - a.p);
 };
 
 const epsilonGreedy = (items, epsilon = 0.1) => {
@@ -100,7 +110,9 @@ const epsilonGreedy = (items, epsilon = 0.1) => {
     const copy = sorted.slice();
     for (let i = copy.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      const t = copy[i]; copy[i] = copy[j]; copy[j] = t;
+      const t = copy[i];
+      copy[i] = copy[j];
+      copy[j] = t;
     }
     return copy;
   }
@@ -123,28 +135,52 @@ const DEFAULT_WEIGHTS = {
     inventory: 0.28,
     cost: 0.18,
     timeFit: 0.18,
-    effort: 0.10,
-    variety: 0.10,
+    effort: 0.1,
+    variety: 0.1,
     applianceFit: 0.06,
     weatherFit: 0.05,
     ppeRisk: 0.05,
   },
   meals: {
-    inventory: 0.30, cost: 0.16, timeFit: 0.16, effort: 0.10, variety: 0.12,
-    applianceFit: 0.06, weatherFit: 0.04, ppeRisk: 0.06
+    inventory: 0.3,
+    cost: 0.16,
+    timeFit: 0.16,
+    effort: 0.1,
+    variety: 0.12,
+    applianceFit: 0.06,
+    weatherFit: 0.04,
+    ppeRisk: 0.06,
   },
   cleaning: {
-    inventory: 0.22, cost: 0.16, timeFit: 0.20, effort: 0.14, variety: 0.10,
-    applianceFit: 0.08, weatherFit: 0.04, ppeRisk: 0.06
+    inventory: 0.22,
+    cost: 0.16,
+    timeFit: 0.2,
+    effort: 0.14,
+    variety: 0.1,
+    applianceFit: 0.08,
+    weatherFit: 0.04,
+    ppeRisk: 0.06,
   },
   animals: {
-    inventory: 0.26, cost: 0.16, timeFit: 0.18, effort: 0.08, variety: 0.06,
-    applianceFit: 0.10, weatherFit: 0.06, ppeRisk: 0.10
+    inventory: 0.26,
+    cost: 0.16,
+    timeFit: 0.18,
+    effort: 0.08,
+    variety: 0.06,
+    applianceFit: 0.1,
+    weatherFit: 0.06,
+    ppeRisk: 0.1,
   },
   garden: {
-    inventory: 0.18, cost: 0.12, timeFit: 0.18, effort: 0.10, variety: 0.16,
-    applianceFit: 0.06, weatherFit: 0.12, ppeRisk: 0.08
-  }
+    inventory: 0.18,
+    cost: 0.12,
+    timeFit: 0.18,
+    effort: 0.1,
+    variety: 0.16,
+    applianceFit: 0.06,
+    weatherFit: 0.12,
+    ppeRisk: 0.08,
+  },
 };
 
 // ----------------------------- Veto Rules -----------------------------
@@ -152,36 +188,57 @@ function applyVetoes(candidate, ctx) {
   const reasons = [];
 
   // Sabbath guard: disallow heavy labor or cooking that violates config
-  if (ctx?.constraints?.sabbathGuard && candidate.tags?.includes("heavy-labor")) {
+  if (
+    ctx?.constraints?.sabbathGuard &&
+    candidate.tags?.includes("heavy-labor")
+  ) {
     reasons.push("sabbath-guard");
   }
 
   // Allergies / dietary hard bans (meals)
   if (ctx?.constraints?.allergies && candidate.allergens) {
-    const hit = candidate.allergens.find(a => ctx.constraints.allergies.includes(a));
+    const hit = candidate.allergens.find((a) =>
+      ctx.constraints.allergies.includes(a)
+    );
     if (hit) reasons.push("allergy:" + hit);
   }
 
   // Weather holds (e.g., outdoor chores/garden in storm)
-  const weather = scheduleHelpers.weatherHolds ? scheduleHelpers.weatherHolds({ tasks: [candidate] }) : { holds: [] };
-  if (weather.holds && weather.holds.length && (candidate.flags || []).includes("outdoor")) {
+  const weather = scheduleHelpers.weatherHolds
+    ? scheduleHelpers.weatherHolds({ tasks: [candidate] })
+    : { holds: [] };
+  if (
+    weather.holds &&
+    weather.holds.length &&
+    (candidate.flags || []).includes("outdoor")
+  ) {
     reasons.push("weather-hold");
   }
 
   // PPE required but missing (animals/butchery/cleaning)
   if (candidate.ppeRequired && candidate.ppeRequired.length) {
-    const missing = (candidate.ppeRequired || []).filter(p => !(ctx?.ppeAvailable || []).includes(p));
+    const missing = (candidate.ppeRequired || []).filter(
+      (p) => !(ctx?.ppeAvailable || []).includes(p)
+    );
     if (missing.length) reasons.push("ppe-missing:" + missing.join(","));
   }
 
   // Appliance not available
-  if (candidate.appliances && candidate.appliances.length && ctx?.applianceLocks) {
-    const conflict = candidate.appliances.find(a => ctx.applianceLocks.includes(a));
+  if (
+    candidate.appliances &&
+    candidate.appliances.length &&
+    ctx?.applianceLocks
+  ) {
+    const conflict = candidate.appliances.find((a) =>
+      ctx.applianceLocks.includes(a)
+    );
     if (conflict) reasons.push("appliance-locked:" + conflict);
   }
 
   // Withholds (animals: deworming/vaccine windows; garden: spray intervals)
-  const withholds = scheduleHelpers.computeWithholds ? scheduleHelpers.computeWithholds({ tasks: [candidate] }) : { withholds: [] };
+  const withholds = scheduleHelpers.computeWithholds
+    ? scheduleHelpers.computeWithholds({ tasks: [candidate] })
+    : { withholds: [] };
   if (withholds.withholds && withholds.withholds.length) {
     reasons.push("withhold-active");
   }
@@ -193,7 +250,7 @@ function applyVetoes(candidate, ctx) {
 const domainScorers = {
   meals(candidate, ctx) {
     // inventory score
-    const inv = (candidate.inventory || { have: 0, short: 0, unknown: 0 });
+    const inv = candidate.inventory || { have: 0, short: 0, unknown: 0 };
     const invScore = clamp01((inv.have || 0) - 0.5 * (inv.short || 0));
 
     // cost score (lower cost -> higher score)
@@ -204,17 +261,29 @@ const domainScorers = {
     // time fit (compare estMinutes to ctx window)
     const est = safeNum(candidate.estMinutes, 30);
     const fit = ctx.timeWindow ? Math.max(0, ctx.timeWindow - est) : 0;
-    const timeScore = clamp01(1 - Math.abs((est - (ctx.timeWindow || est)) / (ctx.timeWindow || (est || 1))));
+    const timeScore = clamp01(
+      1 -
+        Math.abs((est - (ctx.timeWindow || est)) / (ctx.timeWindow || est || 1))
+    );
 
     const effortScore = 1 - clamp01(safeNum(candidate.effort, 0.5));
     const varietyScore = candidate.varietyBoost || 0.5;
-    const applianceFit = candidate.appliances?.length ? 1 - clamp01(candidate.appliancesOverlap || 0) : 0.8;
+    const applianceFit = candidate.appliances?.length
+      ? 1 - clamp01(candidate.appliancesOverlap || 0)
+      : 0.8;
     const weatherFit = (candidate.flags || []).includes("outdoor") ? 0.2 : 0.9;
-    const ppeRisk = (candidate.ppeRequired && candidate.ppeRequired.length) ? 0.3 : 0.9;
+    const ppeRisk =
+      candidate.ppeRequired && candidate.ppeRequired.length ? 0.3 : 0.9;
 
     return {
-      inventory: invScore, cost: costScore, timeFit: timeScore, effort: effortScore,
-      variety: varietyScore, applianceFit, weatherFit, ppeRisk
+      inventory: invScore,
+      cost: costScore,
+      timeFit: timeScore,
+      effort: effortScore,
+      variety: varietyScore,
+      applianceFit,
+      weatherFit,
+      ppeRisk,
     };
   },
 
@@ -223,13 +292,28 @@ const domainScorers = {
     const cost = safeNum(candidate.cost?.subtotal, 0);
     const costScore = 1 - ctx._norm.cost(cost);
     const est = safeNum(candidate.estMinutes, 20);
-    const timeScore = clamp01(1 - Math.abs((est - (ctx.timeWindow || est)) / (ctx.timeWindow || (est || 1))));
+    const timeScore = clamp01(
+      1 -
+        Math.abs((est - (ctx.timeWindow || est)) / (ctx.timeWindow || est || 1))
+    );
     const effortScore = 1 - clamp01(safeNum(candidate.effort, 0.5));
     const varietyScore = candidate.rotationBoost || 0.5;
-    const applianceFit = candidate.appliances?.length ? 1 - clamp01(candidate.appliancesOverlap || 0) : 0.85;
+    const applianceFit = candidate.appliances?.length
+      ? 1 - clamp01(candidate.appliancesOverlap || 0)
+      : 0.85;
     const weatherFit = (candidate.flags || []).includes("outdoor") ? 0.4 : 0.9;
-    const ppeRisk = (candidate.ppeRequired && candidate.ppeRequired.length) ? 0.4 : 0.9;
-    return { inventory: invScore, cost: costScore, timeFit: timeScore, effort: effortScore, variety: varietyScore, applianceFit, weatherFit, ppeRisk };
+    const ppeRisk =
+      candidate.ppeRequired && candidate.ppeRequired.length ? 0.4 : 0.9;
+    return {
+      inventory: invScore,
+      cost: costScore,
+      timeFit: timeScore,
+      effort: effortScore,
+      variety: varietyScore,
+      applianceFit,
+      weatherFit,
+      ppeRisk,
+    };
   },
 
   animals(candidate, ctx) {
@@ -237,13 +321,28 @@ const domainScorers = {
     const cost = safeNum(candidate.cost?.subtotal, 0);
     const costScore = 1 - ctx._norm.cost(cost);
     const est = safeNum(candidate.estMinutes, 45);
-    const timeScore = clamp01(1 - Math.abs((est - (ctx.timeWindow || est)) / (ctx.timeWindow || (est || 1))));
+    const timeScore = clamp01(
+      1 -
+        Math.abs((est - (ctx.timeWindow || est)) / (ctx.timeWindow || est || 1))
+    );
     const effortScore = 1 - clamp01(safeNum(candidate.effort, 0.7));
     const varietyScore = candidate.batchRotationBoost || 0.5;
-    const applianceFit = candidate.appliances?.length ? 1 - clamp01(candidate.appliancesOverlap || 0) : 0.8;
+    const applianceFit = candidate.appliances?.length
+      ? 1 - clamp01(candidate.appliancesOverlap || 0)
+      : 0.8;
     const weatherFit = (candidate.flags || []).includes("outdoor") ? 0.5 : 0.9;
-    const ppeRisk = (candidate.ppeRequired && candidate.ppeRequired.length) ? 0.3 : 0.85;
-    return { inventory: invScore, cost: costScore, timeFit: timeScore, effort: effortScore, variety: varietyScore, applianceFit, weatherFit, ppeRisk };
+    const ppeRisk =
+      candidate.ppeRequired && candidate.ppeRequired.length ? 0.3 : 0.85;
+    return {
+      inventory: invScore,
+      cost: costScore,
+      timeFit: timeScore,
+      effort: effortScore,
+      variety: varietyScore,
+      applianceFit,
+      weatherFit,
+      ppeRisk,
+    };
   },
 
   garden(candidate, ctx) {
@@ -251,31 +350,67 @@ const domainScorers = {
     const cost = safeNum(candidate.cost?.subtotal, 0);
     const costScore = 1 - ctx._norm.cost(cost);
     const est = safeNum(candidate.estMinutes, 30);
-    const timeScore = clamp01(1 - Math.abs((est - (ctx.timeWindow || est)) / (ctx.timeWindow || (est || 1))));
+    const timeScore = clamp01(
+      1 -
+        Math.abs((est - (ctx.timeWindow || est)) / (ctx.timeWindow || est || 1))
+    );
     const effortScore = 1 - clamp01(safeNum(candidate.effort, 0.6));
     const varietyScore = candidate.zoneRotationBoost || 0.6;
-    const applianceFit = candidate.appliances?.length ? 1 - clamp01(candidate.appliancesOverlap || 0) : 0.85;
-    const weatherFit = (candidate.flags || []).includes("outdoor") ? (ctx.weatherOK ? 0.9 : 0.3) : 0.9;
-    const ppeRisk = (candidate.ppeRequired && candidate.ppeRequired.length) ? 0.5 : 0.9;
-    return { inventory: invScore, cost: costScore, timeFit: timeScore, effort: effortScore, variety: varietyScore, applianceFit, weatherFit, ppeRisk };
+    const applianceFit = candidate.appliances?.length
+      ? 1 - clamp01(candidate.appliancesOverlap || 0)
+      : 0.85;
+    const weatherFit = (candidate.flags || []).includes("outdoor")
+      ? ctx.weatherOK
+        ? 0.9
+        : 0.3
+      : 0.9;
+    const ppeRisk =
+      candidate.ppeRequired && candidate.ppeRequired.length ? 0.5 : 0.9;
+    return {
+      inventory: invScore,
+      cost: costScore,
+      timeFit: timeScore,
+      effort: effortScore,
+      variety: varietyScore,
+      applianceFit,
+      weatherFit,
+      ppeRisk,
+    };
   },
 
   custom(candidate, ctx) {
     // Generic fallback
     const cost = safeNum(candidate.cost?.subtotal, 0);
     const costScore = 1 - ctx._norm.cost(cost);
-    return { inventory: 0.5, cost: costScore, timeFit: 0.5, effort: 0.5, variety: 0.5, applianceFit: 0.5, weatherFit: 0.5, ppeRisk: 0.5 };
-  }
+    return {
+      inventory: 0.5,
+      cost: costScore,
+      timeFit: 0.5,
+      effort: 0.5,
+      variety: 0.5,
+      applianceFit: 0.5,
+      weatherFit: 0.5,
+      ppeRisk: 0.5,
+    };
+  },
 };
 
 // ----------------------------- Core Scoring -----------------------------
 async function enrichCandidate(candidate, domain) {
   // Estimate cost if missing
   if (!candidate.cost || typeof candidate.cost.subtotal !== "number") {
-    try { candidate.cost = estimateEngine.estimate ? estimateEngine.estimate({ domain, tasks: [candidate] }) : candidate.cost; } catch (e) {}
+    try {
+      candidate.cost = estimateEngine.estimate
+        ? estimateEngine.estimate({ domain, tasks: [candidate] })
+        : candidate.cost;
+    } catch (e) {}
   }
   // Inventory breakdown hint (best effort)
-  if (!candidate.inventory && InventoryMonitor.classifyItems && candidate.items) {
+  if (
+    !candidate.inventory &&
+    InventoryMonitor.classifyItems &&
+    candidate.items
+  ) {
     try {
       const klass = InventoryMonitor.classifyItems(candidate.items);
       candidate.inventory = {
@@ -304,9 +439,10 @@ function facetTotal(facets, weights) {
 function diversityPenalty(candidate, ctx) {
   const hist = ctx?.recentHistory || [];
   if (!hist.length) return 0;
-  const idHit = hist.find(h => h.id === candidate.id);
+  const idHit = hist.find((h) => h.id === candidate.id);
   const cat = (candidate.category || candidate.zone || "").toLowerCase();
-  const catHit = cat && hist.find(h => (h.category || h.zone || "").toLowerCase() === cat);
+  const catHit =
+    cat && hist.find((h) => (h.category || h.zone || "").toLowerCase() === cat);
   let penalty = 0;
   if (idHit) penalty += 0.2;
   if (catHit) penalty += 0.1;
@@ -318,12 +454,21 @@ export function createWorkDecider(config = {}) {
   const state = {
     id: uid(),
     domain: config.domain || "custom",
-    weights: { ...(DEFAULT_WEIGHTS.common), ...(DEFAULT_WEIGHTS[config.domain || "custom"] || {}), ...(config.weights || {}) },
+    weights: {
+      ...DEFAULT_WEIGHTS.common,
+      ...(DEFAULT_WEIGHTS[config.domain || "custom"] || {}),
+      ...(config.weights || {}),
+    },
     strategy: config.strategy || "epsilon-greedy", // "greedy" | "softmax" | "epsilon-greedy"
-    strategyKey: config.strategyKey || "A",         // A/B knob
-    epsilon: typeof config.epsilon === "number" ? config.epsilon : (Settings.get()?.decider?.epsilon ?? 0.08),
+    strategyKey: config.strategyKey || "A", // A/B knob
+    epsilon:
+      typeof config.epsilon === "number"
+        ? config.epsilon
+        : Settings.get()?.decider?.epsilon ?? 0.08,
     temp: typeof config.temp === "number" ? config.temp : 1,
-    constraints: config.constraints || { sabbathGuard: Settings.get()?.sabbathGuard || false },
+    constraints: config.constraints || {
+      sabbathGuard: Settings.get()?.sabbathGuard || false,
+    },
     ppeAvailable: config.ppeAvailable || [],
     applianceLocks: config.applianceLocks || [],
     timeWindow: config.timeWindow || null,
@@ -332,23 +477,35 @@ export function createWorkDecider(config = {}) {
     _norm: { cost: (v) => 0.5 },
   };
 
-  const registerDomainScorer = (domain, scorerFn) => { domainScorers[domain] = scorerFn || domainScorers.custom; };
+  const registerDomainScorer = (domain, scorerFn) => {
+    domainScorers[domain] = scorerFn || domainScorers.custom;
+  };
 
-  const setWeights = (partial) => { state.weights = { ...state.weights, ...(partial || {}) }; };
+  const setWeights = (partial) => {
+    state.weights = { ...state.weights, ...(partial || {}) };
+  };
   const setStrategy = (name, opts = {}) => {
     state.strategy = name || state.strategy;
     if (typeof opts.epsilon === "number") state.epsilon = opts.epsilon;
     if (typeof opts.temp === "number") state.temp = opts.temp;
     if (opts.strategyKey) state.strategyKey = opts.strategyKey;
   };
-  const setConstraints = (partial) => { state.constraints = { ...state.constraints, ...(partial || {}) }; };
-  const setContext = (partial) => { Object.assign(state, partial || {}); };
+  const setConstraints = (partial) => {
+    state.constraints = { ...state.constraints, ...(partial || {}) };
+  };
+  const setContext = (partial) => {
+    Object.assign(state, partial || {});
+  };
 
   async function decide(candidates = []) {
     const dom = state.domain || "custom";
     const scorer = domainScorers[dom] || domainScorers.custom;
 
-    eventBus.emit("decider.requested", { id: state.id, domain: dom, count: candidates.length });
+    eventBus.emit("decider.requested", {
+      id: state.id,
+      domain: dom,
+      count: candidates.length,
+    });
 
     // Enrich candidates & collect costs for normalization
     const enriched = [];
@@ -373,7 +530,11 @@ export function createWorkDecider(config = {}) {
           __vetoReasons: veto.reasons,
           total: 0,
           breakdown: {},
-          _explain: { reasons: veto.reasons, strategy: state.strategy, strategyKey: state.strategyKey }
+          _explain: {
+            reasons: veto.reasons,
+            strategy: state.strategy,
+            strategyKey: state.strategyKey,
+          },
         });
         continue;
       }
@@ -393,22 +554,38 @@ export function createWorkDecider(config = {}) {
           facets,
           diversityPenalty: divPen,
           strategy: state.strategy,
-          strategyKey: state.strategyKey
-        }
+          strategyKey: state.strategyKey,
+        },
       });
     }
 
-    eventBus.emit("decider.scored", { id: state.id, domain: dom, scored: scored.length });
+    eventBus.emit("decider.scored", {
+      id: state.id,
+      domain: dom,
+      scored: scored.length,
+    });
 
     // Resolve conflicts (best effort)
     let conflictAdjusted = scored;
     try {
-      const conf = placementRules.detect ? placementRules.detect(scored) : { conflicts: [] };
+      const conf = placementRules.detect
+        ? placementRules.detect(scored)
+        : { conflicts: [] };
       if (conf.conflicts?.length) {
         // down-rank conflicted items slightly
         const conflictedIds = new Set();
-        conf.conflicts.forEach((c) => (c.tasks || []).forEach(tid => conflictedIds.add(tid)));
-        conflictAdjusted = scored.map(item => conflictedIds.has(item.id) ? { ...item, total: clamp01(item.total - 0.1), _explain: { ...(item._explain||{}), conflictPenalty: 0.1 } } : item);
+        conf.conflicts.forEach((c) =>
+          (c.tasks || []).forEach((tid) => conflictedIds.add(tid))
+        );
+        conflictAdjusted = scored.map((item) =>
+          conflictedIds.has(item.id)
+            ? {
+                ...item,
+                total: clamp01(item.total - 0.1),
+                _explain: { ...(item._explain || {}), conflictPenalty: 0.1 },
+              }
+            : item
+        );
       }
     } catch (e) {}
 
@@ -424,12 +601,17 @@ export function createWorkDecider(config = {}) {
     }
 
     const result = ranked.map((r, idx) => ({ ...r, rank: idx + 1 }));
-    eventBus.emit("decider.completed", { id: state.id, domain: dom, top: result[0]?.id || null, count: result.length });
+    eventBus.emit("decider.completed", {
+      id: state.id,
+      domain: dom,
+      top: result[0]?.id || null,
+      count: result.length,
+    });
     return result;
   }
 
   function explain(candidateId, ranked = []) {
-    const hit = (ranked || []).find(r => r.id === candidateId);
+    const hit = (ranked || []).find((r) => r.id === candidateId);
     if (!hit) return null;
     return {
       id: hit.id,
@@ -448,7 +630,7 @@ export function createWorkDecider(config = {}) {
     setContext,
     registerDomainScorer,
     decide,
-    explain
+    explain,
   };
 }
 
@@ -464,17 +646,27 @@ export function useWorkDecider(initial = {}) {
 
   const setWeights = useCallback((partial) => {
     ref.current.setWeights(partial);
-    setConfig((prev) => ({ ...prev, weights: { ...(prev.weights || {}), ...(partial || {}) } }));
+    setConfig((prev) => ({
+      ...prev,
+      weights: { ...(prev.weights || {}), ...(partial || {}) },
+    }));
   }, []);
 
   const setStrategy = useCallback((name, opts = {}) => {
     ref.current.setStrategy(name, opts);
-    setConfig((prev) => ({ ...prev, strategy: name || prev.strategy, ...opts }));
+    setConfig((prev) => ({
+      ...prev,
+      strategy: name || prev.strategy,
+      ...opts,
+    }));
   }, []);
 
   const setConstraints = useCallback((partial) => {
     ref.current.setConstraints(partial);
-    setConfig((prev) => ({ ...prev, constraints: { ...(prev.constraints || {}), ...(partial || {}) } }));
+    setConfig((prev) => ({
+      ...prev,
+      constraints: { ...(prev.constraints || {}), ...(partial || {}) },
+    }));
   }, []);
 
   const setContext = useCallback((partial) => {
@@ -500,7 +692,10 @@ export function useWorkDecider(initial = {}) {
     }
   }, []);
 
-  const explain = useCallback((id, ranked) => ref.current.explain(id, ranked), []);
+  const explain = useCallback(
+    (id, ranked) => ref.current.explain(id, ranked),
+    []
+  );
 
   const state = useMemo(() => ref.current.getState(), [config]);
 
@@ -513,7 +708,7 @@ export function useWorkDecider(initial = {}) {
     setContext,
     registerDomainScorer,
     decide,
-    explain
+    explain,
   };
 }
 

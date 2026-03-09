@@ -35,7 +35,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 // ---- Defensive imports -----------------------------------------------------
 let eventBus;
 try {
-  eventBus = require("../../services/eventBus.js").default;
+  eventBus = require("../../services/events/eventBus.js").default;
 } catch {
   eventBus = { emit: () => {} };
 }
@@ -43,12 +43,18 @@ try {
 // ---- Styles (scoped; replace with your design system tokens) ---------------
 const styles = {
   card: {
-    background: "linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))",
+    background:
+      "linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))",
     border: "1px solid rgba(255,255,255,0.06)",
     borderRadius: 16,
     padding: 16,
   },
-  headerRow: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 },
+  headerRow: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
   title: { fontWeight: 800, fontSize: 16 },
   sub: { fontSize: 12, opacity: 0.8 },
   pill: {
@@ -61,8 +67,18 @@ const styles = {
   },
   desc: { opacity: 0.9, marginTop: 8, whiteSpace: "pre-wrap" },
   cuesRow: { display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 },
-  section: { marginTop: 14, paddingTop: 12, borderTop: "1px solid rgba(255,255,255,0.08)" },
-  checklist: { listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 6 },
+  section: {
+    marginTop: 14,
+    paddingTop: 12,
+    borderTop: "1px solid rgba(255,255,255,0.08)",
+  },
+  checklist: {
+    listStyle: "none",
+    margin: 0,
+    padding: 0,
+    display: "grid",
+    gap: 6,
+  },
   item: {
     padding: "8px 10px",
     borderRadius: 10,
@@ -104,16 +120,31 @@ const styles = {
     border: "1px solid rgba(0,0,0,0.2)",
   },
   timeBadge: { fontVariantNumeric: "tabular-nums", fontWeight: 700 },
-  gaugesRow: { display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" },
+  gaugesRow: {
+    display: "flex",
+    gap: 8,
+    flexWrap: "wrap",
+    alignItems: "center",
+  },
 };
 
 // ---- Cue renderers (compatible with SessionRunner.addCueRenderer) ----------
 const cueRenderers = {
-  color: (notes) => <span style={styles.pill}>Color: {notes || "watch for browning"}</span>,
-  texture: (notes) => <span style={styles.pill}>Texture: {notes || "smooth/firm cue"}</span>,
-  probeTemp: (notes) => <span style={styles.pill}>Probe Temp: {notes || "check thermometer"}</span>,
-  timer: (notes) => <span style={styles.pill}>Timer: {notes || "watch countdown"}</span>,
-  smell: (notes) => <span style={styles.pill}>Smell: {notes || "aroma cue"}</span>,
+  color: (notes) => (
+    <span style={styles.pill}>Color: {notes || "watch for browning"}</span>
+  ),
+  texture: (notes) => (
+    <span style={styles.pill}>Texture: {notes || "smooth/firm cue"}</span>
+  ),
+  probeTemp: (notes) => (
+    <span style={styles.pill}>Probe Temp: {notes || "check thermometer"}</span>
+  ),
+  timer: (notes) => (
+    <span style={styles.pill}>Timer: {notes || "watch countdown"}</span>
+  ),
+  smell: (notes) => (
+    <span style={styles.pill}>Smell: {notes || "aroma cue"}</span>
+  ),
 };
 
 /** Allow runtime extension by other modules */
@@ -126,8 +157,15 @@ const isoNow = () => new Date().toISOString();
 
 function emitUi(action, data = {}) {
   try {
-    eventBus.emit({ type: "session.ui.click", ts: isoNow(), source: "SessionStepPanel", data: { action, ...data } });
-  } catch { /* noop */ }
+    eventBus.emit({
+      type: "session.ui.click",
+      ts: isoNow(),
+      source: "SessionStepPanel",
+      data: { action, ...data },
+    });
+  } catch {
+    /* noop */
+  }
 }
 
 function speakMaybe(enabled, text) {
@@ -138,7 +176,9 @@ function speakMaybe(enabled, text) {
     u.pitch = 1;
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(u);
-  } catch { /* noop */ }
+  } catch {
+    /* noop */
+  }
 }
 
 function secondsToMMSS(s) {
@@ -177,10 +217,12 @@ export default function SessionStepPanel({
   onRenderExtras,
 }) {
   // Internal countdown derived from step.durationSec, not authoritative.
-  const [remaining, setRemaining] = useState(() => Math.max(0, step?.durationSec | 0));
+  const [remaining, setRemaining] = useState(() =>
+    Math.max(0, step?.durationSec | 0)
+  );
   const startedAtRef = useRef(Date.now());
   const tickIdRef = useRef(0);
-  const [guardFail, setGuardFail] = useState(/** @type {string[]} */([]));
+  const [guardFail, setGuardFail] = useState(/** @type {string[]} */ ([]));
 
   // Reset countdown on step change
   useEffect(() => {
@@ -189,7 +231,9 @@ export default function SessionStepPanel({
     setGuardFail([]);
     // Voice summary on step change
     if (session?.prefs?.voiceGuidance && step?.title) {
-      const cueText = step?.metadata?.donenessCue ? `, cue: ${step.metadata.donenessCue}` : "";
+      const cueText = step?.metadata?.donenessCue
+        ? `, cue: ${step.metadata.donenessCue}`
+        : "";
       speakMaybe(true, `Step ${stepIndex + 1}. ${step.title}${cueText}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -200,10 +244,14 @@ export default function SessionStepPanel({
     let mounted = true;
     (async () => {
       if (!step) return setGuardFail([]);
-      const res = await (evaluateGuards ? evaluateGuards(step) : Promise.resolve({ ok: true, failed: [] }));
-      if (mounted) setGuardFail(res.ok ? [] : (res.failed || []));
+      const res = await (evaluateGuards
+        ? evaluateGuards(step)
+        : Promise.resolve({ ok: true, failed: [] }));
+      if (mounted) setGuardFail(res.ok ? [] : res.failed || []);
     })();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [step, evaluateGuards]);
 
   // Local ticking (ties to parent running state)
@@ -222,7 +270,9 @@ export default function SessionStepPanel({
         clearInterval(tickIdRef.current);
         (async () => {
           // re-check guards just before advancing
-          const res = await (evaluateGuards ? evaluateGuards(step) : Promise.resolve({ ok: true, failed: [] }));
+          const res = await (evaluateGuards
+            ? evaluateGuards(step)
+            : Promise.resolve({ ok: true, failed: [] }));
           if (res.ok) {
             emitUi("autoAdvance", { id: session?.id, stepIndex });
             onAdvanceRequested?.();
@@ -233,7 +283,16 @@ export default function SessionStepPanel({
       }
     }, 1000);
     return () => clearInterval(tickIdRef.current);
-  }, [sessionIsRunning, step?.durationSec, stepIndex, session?.prefs?.autoAdvance, evaluateGuards, onAdvanceRequested, step, session?.id]);
+  }, [
+    sessionIsRunning,
+    step?.durationSec,
+    stepIndex,
+    session?.prefs?.autoAdvance,
+    evaluateGuards,
+    onAdvanceRequested,
+    step,
+    session?.id,
+  ]);
 
   // Derived display
   const cue = step?.metadata?.donenessCue || null;
@@ -244,16 +303,23 @@ export default function SessionStepPanel({
     const list = Array.isArray(step?.blockers) ? step.blockers : [];
     if (!list.length) return null;
     return (
-      <div className="blockers" style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
+      <div
+        className="blockers"
+        style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}
+      >
         {list.map((b, i) => (
-          <span key={b + i} style={styles.pill}>{b}</span>
+          <span key={b + i} style={styles.pill}>
+            {b}
+          </span>
         ))}
       </div>
     );
   }, [step]);
 
   // Mini checklist storage is upstream; just render if present on step.metadata.checklist
-  const checklist = Array.isArray(step?.metadata?.checklist) ? step.metadata.checklist : null;
+  const checklist = Array.isArray(step?.metadata?.checklist)
+    ? step.metadata.checklist
+    : null;
 
   return (
     <div style={styles.card}>
@@ -264,12 +330,20 @@ export default function SessionStepPanel({
             {step ? `Step ${stepIndex + 1}: ${step.title}` : "No current step"}
           </div>
           <div style={styles.sub}>
-            {step ? <>
-              <span style={styles.timeBadge}>
-                {step?.durationSec ? secondsToMMSS(remaining) : "—:—"}
-              </span>
-              {step?.durationSec ? <span style={{ marginLeft: 8, opacity: 0.8 }}>remaining</span> : <span style={{ marginLeft: 8, opacity: 0.8 }}>open-ended</span>}
-            </> : null}
+            {step ? (
+              <>
+                <span style={styles.timeBadge}>
+                  {step?.durationSec ? secondsToMMSS(remaining) : "—:—"}
+                </span>
+                {step?.durationSec ? (
+                  <span style={{ marginLeft: 8, opacity: 0.8 }}>remaining</span>
+                ) : (
+                  <span style={{ marginLeft: 8, opacity: 0.8 }}>
+                    open-ended
+                  </span>
+                )}
+              </>
+            ) : null}
           </div>
         </div>
 
@@ -280,33 +354,72 @@ export default function SessionStepPanel({
               <button
                 type="button"
                 style={styles.btn}
-                onClick={() => { emitUi("duration.nudge", { id: session?.id, stepIndex, delta: -10 }); onAdjustDuration?.(-10); }}
+                onClick={() => {
+                  emitUi("duration.nudge", {
+                    id: session?.id,
+                    stepIndex,
+                    delta: -10,
+                  });
+                  onAdjustDuration?.(-10);
+                }}
                 title="-10s"
-              >−10s</button>
+              >
+                −10s
+              </button>
               <button
                 type="button"
                 style={styles.btn}
-                onClick={() => { emitUi("duration.nudge", { id: session?.id, stepIndex, delta: +10 }); onAdjustDuration?.(+10); }}
+                onClick={() => {
+                  emitUi("duration.nudge", {
+                    id: session?.id,
+                    stepIndex,
+                    delta: +10,
+                  });
+                  onAdjustDuration?.(+10);
+                }}
                 title="+10s"
-              >+10s</button>
+              >
+                +10s
+              </button>
               <button
                 type="button"
                 style={styles.btn}
-                onClick={() => { emitUi("duration.nudge", { id: session?.id, stepIndex, delta: -60 }); onAdjustDuration?.(-60); }}
+                onClick={() => {
+                  emitUi("duration.nudge", {
+                    id: session?.id,
+                    stepIndex,
+                    delta: -60,
+                  });
+                  onAdjustDuration?.(-60);
+                }}
                 title="-60s"
-              >−60s</button>
+              >
+                −60s
+              </button>
               <button
                 type="button"
                 style={styles.btn}
-                onClick={() => { emitUi("duration.nudge", { id: session?.id, stepIndex, delta: +60 }); onAdjustDuration?.(+60); }}
+                onClick={() => {
+                  emitUi("duration.nudge", {
+                    id: session?.id,
+                    stepIndex,
+                    delta: +60,
+                  });
+                  onAdjustDuration?.(+60);
+                }}
                 title="+60s"
-              >+60s</button>
+              >
+                +60s
+              </button>
             </>
           ) : null}
           <button
             type="button"
             style={{ ...styles.btn, ...styles.btnPrimary }}
-            onClick={() => { emitUi("advance.request", { id: session?.id, stepIndex }); onAdvanceRequested?.(); }}
+            onClick={() => {
+              emitUi("advance.request", { id: session?.id, stepIndex });
+              onAdvanceRequested?.();
+            }}
             title="Next"
           >
             Next
@@ -314,7 +427,10 @@ export default function SessionStepPanel({
           <button
             type="button"
             style={styles.btn}
-            onClick={() => { emitUi("skip.request", { id: session?.id, stepIndex }); onSkipRequested?.(); }}
+            onClick={() => {
+              emitUi("skip.request", { id: session?.id, stepIndex });
+              onSkipRequested?.();
+            }}
             title="Skip step"
           >
             Skip
@@ -323,14 +439,28 @@ export default function SessionStepPanel({
       </div>
 
       {/* Description */}
-      {step?.desc ? <div style={styles.desc}>{step.desc}</div> : (
-        <div style={{ ...styles.desc, opacity: 0.7 }}>(No details provided for this step.)</div>
+      {step?.desc ? (
+        <div style={styles.desc}>{step.desc}</div>
+      ) : (
+        <div style={{ ...styles.desc, opacity: 0.7 }}>
+          (No details provided for this step.)
+        </div>
       )}
 
       {/* Cues */}
       <div style={styles.cuesRow}>
-        {cue ? (cueRenderers[cue] ? cueRenderers[cue](cueNotes) : <span style={styles.pill}>{cue}: {cueNotes || "—"}</span>) : null}
-        {tempTarget ? <span style={styles.pill}>Target: {tempTarget} °F</span> : null}
+        {cue ? (
+          cueRenderers[cue] ? (
+            cueRenderers[cue](cueNotes)
+          ) : (
+            <span style={styles.pill}>
+              {cue}: {cueNotes || "—"}
+            </span>
+          )
+        ) : null}
+        {tempTarget ? (
+          <span style={styles.pill}>Target: {tempTarget} °F</span>
+        ) : null}
       </div>
 
       {/* Blockers (declared) */}
@@ -339,7 +469,9 @@ export default function SessionStepPanel({
       {/* Guard failures (evaluated) */}
       {guardFail.length ? (
         <div style={{ ...styles.section }}>
-          <div style={styles.danger}>Blocked by: {guardFail.join(", ")}. Resolve before advancing.</div>
+          <div style={styles.danger}>
+            Blocked by: {guardFail.join(", ")}. Resolve before advancing.
+          </div>
         </div>
       ) : null}
 
@@ -358,11 +490,18 @@ export default function SessionStepPanel({
                     type="checkbox"
                     checked={checked}
                     onChange={(e) => {
-                      emitUi("checklist.toggle", { id: session?.id, stepIndex, itemIndex: i, checked: e.target.checked });
+                      emitUi("checklist.toggle", {
+                        id: session?.id,
+                        stepIndex,
+                        itemIndex: i,
+                        checked: e.target.checked,
+                      });
                       onChecklistToggle?.(i, e.target.checked);
                     }}
                   />
-                  <label htmlFor={id} style={{ cursor: "pointer" }}>{c.label || `Item ${i + 1}`}</label>
+                  <label htmlFor={id} style={{ cursor: "pointer" }}>
+                    {c.label || `Item ${i + 1}`}
+                  </label>
                 </li>
               );
             })}
@@ -371,28 +510,35 @@ export default function SessionStepPanel({
       ) : null}
 
       {/* Temperature / Doneness tips */}
-      {(tempTarget || cueNotes) ? (
+      {tempTarget || cueNotes ? (
         <div style={styles.section}>
           <div style={{ fontWeight: 700, marginBottom: 8 }}>Tips</div>
           <div style={styles.gaugesRow}>
-            {tempTarget ? <span style={styles.pill}>Probe to {tempTarget} °F</span> : null}
+            {tempTarget ? (
+              <span style={styles.pill}>Probe to {tempTarget} °F</span>
+            ) : null}
             {cue ? <span style={styles.pill}>Doneness: {cue}</span> : null}
           </div>
-          {cueNotes ? <div style={{ marginTop: 8, opacity: 0.9, fontSize: 13 }}>{cueNotes}</div> : null}
+          {cueNotes ? (
+            <div style={{ marginTop: 8, opacity: 0.9, fontSize: 13 }}>
+              {cueNotes}
+            </div>
+          ) : null}
         </div>
       ) : null}
 
       {/* Domain extras slot */}
       {onRenderExtras ? (
-        <div style={styles.section}>
-          {onRenderExtras()}
-        </div>
+        <div style={styles.section}>{onRenderExtras()}</div>
       ) : null}
 
       {/* Warnings for bad/missing step */}
       {!step ? (
         <div style={{ ...styles.section }}>
-          <div style={styles.warn}>This session has no valid current step. Use Next/Prev to navigate or Abort.</div>
+          <div style={styles.warn}>
+            This session has no valid current step. Use Next/Prev to navigate or
+            Abort.
+          </div>
         </div>
       ) : null}
     </div>

@@ -1,0 +1,449 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T01:22:00.000Z",
+
+  "meta": {
+    "id": "cuisines.italian.recipes.risotto",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Classic Risotto (Parmigiano + Butter)",
+    "subtitle": "Creamy stovetop rice made by gradual stock absorption; base recipe for many variations",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa-core",
+      "notes": [
+        "Canonical risotto base (risotto bianco) suitable for branching variations (mushroom, seafood, saffron, etc.).",
+        "Designed for deterministic planning: clear roles, timing, and equipment requirements."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.italian",
+    "category": "rice_dish",
+    "mealArchetypes": ["plates", "plated_meals"],
+    "servingStyles": ["plated_meals", "family_style"],
+    "plannerTags": [
+      "cuisine.italian",
+      "category.rice",
+      "method.stovetop",
+      "technique.stir",
+      "comfort_food",
+      "weeknight.friendly",
+      "gluten_free",
+      "vegetarian_option"
+    ]
+  },
+
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 360, "unit": "g" },
+    "notes": "Serves 4 as a main, 6 as a primi (first course)."
+  },
+
+  "time": {
+    "activeMins": 30,
+    "handsOffMins": 10,
+    "totalMins": 40
+  },
+
+  "difficulty": "intermediate",
+
+  "signals": {
+    "batchFriendly": false,
+    "weeknightPossible": true,
+    "leftoversGood": "ok",
+    "freezerFriendly": false,
+    "notes": [
+      "Best eaten immediately for classic creamy texture.",
+      "Leftovers can be repurposed into arancini or baked risotto cakes."
+    ]
+  },
+
+  "tasteProfile": {
+    "saltiness": 3,
+    "umami": 4,
+    "sweetness": 0,
+    "sourness": 0,
+    "heat": 0,
+    "oilUse": 1,
+    "notes": [
+      "Primary flavor is buttery, nutty, and cheesy; balance salt carefully because stock and cheese both add salt."
+    ]
+  },
+
+  "equipment": {
+    "minimum": [
+      "tool.wide_saucepan",
+      "tool.saucepan",
+      "tool.wooden_spoon",
+      "tool.ladle",
+      "tool.knife",
+      "tool.cutting_board",
+      "tool.measuring_cups"
+    ],
+    "recommended": ["tool.microplane", "tool.instant_read_thermometer"],
+    "optional": [
+      {
+        "id": "tool.wine_glass_measure",
+        "label": "Measuring cup for wine",
+        "required": false,
+        "notes": "Helps keep additions consistent."
+      }
+    ]
+  },
+
+  "dietFlags": ["diet.vegetarian"],
+  "allergens": ["allergen.dairy"],
+
+  "ingredients": [
+    {
+      "id": "stock.vegetable_or_chicken",
+      "label": "Stock (vegetable or chicken), kept hot",
+      "role": "liquid",
+      "amount": { "value": 1200, "unit": "ml" },
+      "notes": [
+        "About 5 cups; you may not use all of it.",
+        "Keep at a bare simmer to maintain risotto temperature."
+      ]
+    },
+    {
+      "id": "fat.butter",
+      "label": "Unsalted butter, divided",
+      "role": "fat",
+      "amount": { "value": 60, "unit": "g" },
+      "notes": "Half for cooking, half for finishing (mantecatura)."
+    },
+    {
+      "id": "fat.olive_oil",
+      "label": "Olive oil",
+      "role": "fat",
+      "amount": { "value": 15, "unit": "ml" },
+      "notes": "About 1 tablespoon; optional but helps prevent butter scorching."
+    },
+    {
+      "id": "aromatic.shallot_or_onion",
+      "label": "Shallot (or onion), finely minced",
+      "role": "aromatic",
+      "amount": { "value": 80, "unit": "g" },
+      "notes": "About 1 large shallot or 1/2 small onion."
+    },
+    {
+      "id": "rice.arborio",
+      "label": "Arborio rice (or Carnaroli)",
+      "role": "starch",
+      "amount": { "value": 320, "unit": "g" },
+      "notes": "About 1 3/4 cups. Carnaroli is excellent if available."
+    },
+    {
+      "id": "wine.white_dry",
+      "label": "Dry white wine (optional)",
+      "role": "deglaze",
+      "amount": { "value": 120, "unit": "ml" },
+      "optional": true,
+      "notes": "About 1/2 cup. If omitted, use an extra ladle of stock with a squeeze of lemon at the end (optional)."
+    },
+    {
+      "id": "salt.kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "Start light; adjust at the end (stock + cheese add salt)."
+    },
+    {
+      "id": "pepper.black",
+      "label": "Black pepper, freshly ground",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "Adjust to taste."
+    },
+    {
+      "id": "cheese.parmesan",
+      "label": "Parmigiano-Reggiano, finely grated",
+      "role": "cheese",
+      "amount": { "value": 80, "unit": "g" },
+      "notes": "About 3/4 to 1 cup grated."
+    },
+    {
+      "id": "herb.parsley",
+      "label": "Parsley, chopped (optional)",
+      "role": "garnish",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "lemon.zest",
+      "label": "Lemon zest (optional)",
+      "role": "finish",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": "Nice brightness, especially if skipping wine."
+    },
+    {
+      "id": "lemon.juice",
+      "label": "Lemon juice (optional)",
+      "role": "finish",
+      "amount": { "value": 10, "unit": "ml" },
+      "optional": true,
+      "notes": "A small squeeze at the end if needed for balance."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_heat_stock",
+      "title": "Heat stock and prep aromatics",
+      "instructions": [
+        "Warm stock in a saucepan and keep it at a bare simmer.",
+        "Mince shallot/onion finely; grate Parmesan."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 10,
+      "timers": [{ "label": "Bring stock to simmer", "minutes": 10 }],
+      "checks": [
+        "Stock is hot (steaming) so it doesn’t cool the pan each addition."
+      ]
+    },
+    {
+      "id": "step_02_sweat_aromatics",
+      "title": "Sweat aromatics",
+      "instructions": [
+        "In a wide saucepan, heat olive oil and 30 g butter over medium heat.",
+        "Add minced shallot/onion with a pinch of salt and cook 3–5 minutes until soft and translucent (not browned)."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Sweat aromatics", "minutes": 4 }],
+      "checks": ["Aromatics are soft and sweet, not browned."]
+    },
+    {
+      "id": "step_03_toast_rice",
+      "title": "Toast rice (tostatura)",
+      "instructions": [
+        "Add rice to the pan and stir to coat in fat.",
+        "Cook 2–3 minutes, stirring, until the grains look slightly translucent on the edges and smell lightly nutty."
+      ],
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Toast rice", "minutes": 3 }],
+      "checks": ["Rice is coated and warm; avoid browning the aromatics."]
+    },
+    {
+      "id": "step_04_add_wine_optional",
+      "title": "Add wine (optional) and reduce",
+      "instructions": [
+        "Pour in white wine (if using) and stir.",
+        "Simmer until the wine is mostly absorbed/evaporated and the alcohol smell is gone."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 1,
+      "timers": [{ "label": "Reduce wine", "minutes": 2 }],
+      "checks": ["Pan is not swimming; wine is mostly absorbed."]
+    },
+    {
+      "id": "step_05_cook_with_stock",
+      "title": "Cook risotto by adding hot stock gradually",
+      "instructions": [
+        "Add 1 ladle of hot stock (about 120 ml) and stir until mostly absorbed.",
+        "Continue adding stock 1 ladle at a time, stirring frequently, keeping the risotto at a gentle simmer.",
+        "After about 18–22 minutes, begin tasting the rice: it should be tender with a slight bite (al dente).",
+        "Adjust with smaller additions near the end to hit a loose, creamy texture."
+      ],
+      "activeMins": 20,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Cook risotto", "minutes": 20 }],
+      "checks": [
+        "Rice is tender but not mushy.",
+        "Texture is 'all’onda' (waves): loose enough to spread slightly, not stiff."
+      ]
+    },
+    {
+      "id": "step_06_mantecatura_finish",
+      "title": "Finish (mantecatura) with butter and Parmesan",
+      "instructions": [
+        "Turn heat to low (or off if pan is very hot).",
+        "Stir in remaining 30 g butter until glossy and emulsified.",
+        "Stir in grated Parmesan until creamy.",
+        "Taste and adjust salt and pepper.",
+        "Optional: add lemon zest and/or a small squeeze of lemon juice for brightness."
+      ],
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "checks": ["Risotto looks glossy and creamy, not greasy or clumpy."]
+    },
+    {
+      "id": "step_07_serve",
+      "title": "Serve immediately",
+      "instructions": [
+        "Serve hot in warm bowls or plates.",
+        "Optional garnish: parsley and extra Parmesan."
+      ],
+      "activeMins": 2,
+      "handsOffMins": 0,
+      "notes": "Risotto tightens as it sits; serve right away for best texture."
+    }
+  ],
+
+  "safety": {
+    "notes": [
+      "Keep stock hot to maintain safe cooking temperature and proper texture.",
+      "If using chicken stock, treat as perishable; cool leftovers promptly and refrigerate within 2 hours."
+    ]
+  },
+
+  "storage": {
+    "refrigerate": {
+      "notes": [
+        "Refrigerate up to 3 days.",
+        "Reheat gently with a splash of stock or water and a knob of butter to loosen."
+      ]
+    },
+    "freeze": {
+      "notes": [
+        "Not ideal for classic risotto texture, but can be frozen for arancini use.",
+        "Thaw in fridge and reheat with liquid; use as filling or cakes."
+      ]
+    }
+  },
+
+  "notes": [
+    "Stirring is important for creaminess (starch release) but doesn’t need constant frantic stirring—just frequent.",
+    "A wide pan helps evaporation and even cooking.",
+    "If stock is very salty, reduce added salt until the end."
+  ],
+
+  "variations": [
+    {
+      "id": "variation_mushroom",
+      "label": "Mushroom risotto",
+      "when": { "variant": "mushroom" },
+      "adapt": {
+        "notes": [
+          "Sauté mushrooms separately until browned; add near the end with a little of their juices.",
+          "Finish with thyme and a touch more Parmesan."
+        ],
+        "addIngredients": [
+          {
+            "id": "veg.mushrooms",
+            "label": "Mushrooms (cremini/portobello), sliced",
+            "amount": { "value": 340, "unit": "g" }
+          },
+          {
+            "id": "herb.thyme",
+            "label": "Fresh thyme (optional)",
+            "amount": { "value": 1, "unit": "tsp" },
+            "optional": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "variation_saffron_milanese",
+      "label": "Saffron risotto (Risotto alla Milanese)",
+      "when": { "variant": "saffron" },
+      "adapt": {
+        "notes": [
+          "Bloom saffron in 2 tablespoons warm stock and add around minute 10 of cooking.",
+          "Traditionally paired with osso buco."
+        ],
+        "addIngredients": [
+          {
+            "id": "spice.saffron",
+            "label": "Saffron threads",
+            "amount": { "value": 0.2, "unit": "g" },
+            "notes": "A pinch."
+          }
+        ]
+      }
+    },
+    {
+      "id": "variation_vegan",
+      "label": "Vegan risotto",
+      "when": { "diet": "vegan" },
+      "adapt": {
+        "notes": [
+          "Use vegetable stock.",
+          "Replace butter with olive oil or vegan butter.",
+          "Replace Parmesan with nutritional yeast or a vegan Parmesan substitute."
+        ],
+        "removeIngredients": ["fat.butter", "cheese.parmesan"],
+        "addIngredients": [
+          {
+            "id": "umami.nutritional_yeast",
+            "label": "Nutritional yeast (or vegan Parmesan)",
+            "amount": { "value": 20, "unit": "g" },
+            "notes": "Adjust to taste."
+          }
+        ]
+      }
+    },
+    {
+      "id": "variation_leftover_arancini",
+      "label": "Leftover conversion: arancini (risotto balls)",
+      "when": { "useCase": "leftovers" },
+      "adapt": {
+        "notes": [
+          "Chill risotto until firm.",
+          "Form balls with a small cube of mozzarella in the center, bread, then fry or bake.",
+          "Great for meal-prep snacks."
+        ]
+      }
+    }
+  ],
+
+  "planner": {
+    "roles": [
+      { "role": "starch", "ids": ["rice.arborio"] },
+      { "role": "liquid", "ids": ["stock.vegetable_or_chicken"] },
+      { "role": "fat", "ids": ["fat.butter", "fat.olive_oil"] },
+      { "role": "cheese", "ids": ["cheese.parmesan"] }
+    ],
+    "pairWith": {
+      "proteinSides": [
+        "protein.chicken_roast",
+        "protein.fish_pan_seared",
+        "protein.osso_buco_optional"
+      ],
+      "vegSides": [
+        "veg.roasted_asparagus",
+        "veg.sauteed_greens",
+        "veg.simple_salad"
+      ]
+    },
+    "leftovers": {
+      "bestUses": ["snack.arancini", "side.risotto_cakes"],
+      "notes": [
+        "Plan leftover conversion rather than expecting the same creamy texture on reheat."
+      ]
+    }
+  },
+
+  "methods": [
+    "technique.saute",
+    "technique.toast",
+    "technique.simmer",
+    "technique.stir"
+  ],
+
+  "compat": {
+    "aliases": [
+      "risotto bianco",
+      "parmigiano risotto",
+      "basic risotto",
+      "risotto base"
+    ],
+    "keywordBoost": [
+      "mantecatura",
+      "all’onda",
+      "carnaroli",
+      "arborio",
+      "primi"
+    ],
+    "normalization": {
+      "titleCaseFold": true,
+      "preferredIdCase": "lower"
+    }
+  }
+}

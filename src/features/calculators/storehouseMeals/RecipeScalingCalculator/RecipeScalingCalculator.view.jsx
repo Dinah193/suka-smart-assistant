@@ -16,13 +16,13 @@
 
 import React, { useState, useMemo } from "react";
 import { calculateRecipeScaling } from "./RecipeScalingCalculator.shim";
-import { emit as emitEvent } from "@/services/eventBus";
+import { emit as emitEvent } from "@/services/events/eventBus";
 
 const ROUNDING_OPTIONS = [
   { value: "friendlyKitchen", label: "Friendly Kitchen (¼ increments)" },
   { value: "fractionQuarter", label: "Quarter Fractions (¼, ½, ¾)" },
   { value: "storePackage", label: "Approx. Store Packages" },
-  { value: "none", label: "Exact (no rounding)" }
+  { value: "none", label: "Exact (no rounding)" },
 ];
 
 /**
@@ -39,8 +39,13 @@ const ROUNDING_OPTIONS = [
  * }} props
  */
 export default function RecipeScalingCalculatorView(props) {
-  const { baseRecipe, initialInput, householdId = null, onResult, onClose } =
-    props;
+  const {
+    baseRecipe,
+    initialInput,
+    householdId = null,
+    onResult,
+    onClose,
+  } = props;
 
   const [baseServings, setBaseServings] = useState(
     initialInput?.baseServings || 4
@@ -75,7 +80,9 @@ export default function RecipeScalingCalculatorView(props) {
   const [result, setResult] = useState(null);
 
   const hasIngredients = useMemo(
-    () => Array.isArray(baseRecipe?.ingredients) && baseRecipe.ingredients.length > 0,
+    () =>
+      Array.isArray(baseRecipe?.ingredients) &&
+      baseRecipe.ingredients.length > 0,
     [baseRecipe]
   );
 
@@ -92,8 +99,7 @@ export default function RecipeScalingCalculatorView(props) {
 
       const parsedTargetServings =
         targetServings === "" ? null : Number(targetServings);
-      const parsedScaleFactor =
-        scaleFactor === "" ? null : Number(scaleFactor);
+      const parsedScaleFactor = scaleFactor === "" ? null : Number(scaleFactor);
       const parsedMinFactor =
         minScaleFactor === "" ? null : Number(minScaleFactor);
       const parsedMaxFactor =
@@ -108,9 +114,7 @@ export default function RecipeScalingCalculatorView(props) {
             ? parsedTargetServings
             : null,
         scaleFactor:
-          parsedScaleFactor && parsedScaleFactor > 0
-            ? parsedScaleFactor
-            : null,
+          parsedScaleFactor && parsedScaleFactor > 0 ? parsedScaleFactor : null,
         roundingMode,
         minScaleFactor:
           parsedMinFactor && parsedMinFactor > 0 ? parsedMinFactor : null,
@@ -122,7 +126,7 @@ export default function RecipeScalingCalculatorView(props) {
         inventorySnapshot: null,
         equipmentConstraints: null,
         timeConstraints: null,
-        householdContext: householdId ? { householdId } : null
+        householdContext: householdId ? { householdId } : null,
       };
 
       const payload = {
@@ -131,12 +135,12 @@ export default function RecipeScalingCalculatorView(props) {
           ? {
               id: baseRecipe?.id || null,
               name: baseRecipe?.name || null,
-              ingredients: baseRecipe?.ingredients || []
+              ingredients: baseRecipe?.ingredients || [],
             }
           : undefined,
         meta: {
-          householdId: householdId || null
-        }
+          householdId: householdId || null,
+        },
       };
 
       const calcResult = await calculateRecipeScaling(payload);
@@ -150,8 +154,8 @@ export default function RecipeScalingCalculatorView(props) {
         data: {
           recipeId: input.recipeId,
           scaledServings: calcResult.output.scaledServings,
-          appliedScaleFactor: calcResult.output.appliedScaleFactor
-        }
+          appliedScaleFactor: calcResult.output.appliedScaleFactor,
+        },
       });
 
       if (typeof onResult === "function") {
@@ -176,8 +180,8 @@ export default function RecipeScalingCalculatorView(props) {
         <div>
           <h2 className="ssa-panel__title">Recipe Scaling Calculator</h2>
           <p className="ssa-panel__subtitle">
-            Scale a recipe up or down and preview new ingredient amounts
-            before committing to a batch session.
+            Scale a recipe up or down and preview new ingredient amounts before
+            committing to a batch session.
           </p>
         </div>
         {onClose && (
@@ -235,8 +239,8 @@ export default function RecipeScalingCalculatorView(props) {
               placeholder="e.g. 12"
             />
             <p className="ssa-form__help">
-              If provided, this is used to derive the scale factor. Leave
-              blank if you want to specify the scale factor directly.
+              If provided, this is used to derive the scale factor. Leave blank
+              if you want to specify the scale factor directly.
             </p>
           </div>
 
@@ -255,8 +259,8 @@ export default function RecipeScalingCalculatorView(props) {
               placeholder="e.g. 2 for double"
             />
             <p className="ssa-form__help">
-              If both target servings and scale factor are provided, the
-              scale factor is used.
+              If both target servings and scale factor are provided, the scale
+              factor is used.
             </p>
           </div>
 
@@ -293,8 +297,7 @@ export default function RecipeScalingCalculatorView(props) {
               placeholder="e.g. 0.5"
             />
             <p className="ssa-form__help">
-              Ensures you don&apos;t accidentally scale down below this
-              factor.
+              Ensures you don&apos;t accidentally scale down below this factor.
             </p>
           </div>
 
@@ -334,9 +337,7 @@ export default function RecipeScalingCalculatorView(props) {
               <input
                 type="checkbox"
                 checked={respectEquipmentLimits}
-                onChange={(e) =>
-                  setRespectEquipmentLimits(e.target.checked)
-                }
+                onChange={(e) => setRespectEquipmentLimits(e.target.checked)}
               />
               <span>Respect equipment limits</span>
             </label>
@@ -345,9 +346,7 @@ export default function RecipeScalingCalculatorView(props) {
               <input
                 type="checkbox"
                 checked={respectTimeConstraints}
-                onChange={(e) =>
-                  setRespectTimeConstraints(e.target.checked)
-                }
+                onChange={(e) => setRespectTimeConstraints(e.target.checked)}
               />
               <span>Respect time constraints</span>
             </label>
@@ -379,23 +378,17 @@ export default function RecipeScalingCalculatorView(props) {
       {result && (
         <div className="ssa-panel__section">
           <div className="ssa-panel__section-header">
-            <h3 className="ssa-panel__section-title">
-              Scaled Recipe Preview
-            </h3>
+            <h3 className="ssa-panel__section-title">Scaled Recipe Preview</h3>
             <div className="ssa-panel__section-meta">
               <span>
-                Base Servings:{" "}
-                <strong>{result.input.baseServings}</strong>
+                Base Servings: <strong>{result.input.baseServings}</strong>
               </span>
               <span>
-                New Servings:{" "}
-                <strong>{result.output.scaledServings}</strong>
+                New Servings: <strong>{result.output.scaledServings}</strong>
               </span>
               <span>
                 Scale Factor:{" "}
-                <strong>
-                  {result.output.appliedScaleFactor.toFixed(3)}
-                </strong>
+                <strong>{result.output.appliedScaleFactor.toFixed(3)}</strong>
               </span>
             </div>
           </div>
@@ -417,23 +410,15 @@ export default function RecipeScalingCalculatorView(props) {
                 <span>
                   Estimated total cook time:{" "}
                   <strong>
-                    {
-                      result.output.sessionsHints
-                        .estimatedTotalCookMinutes
-                    }{" "}
-                    min
+                    {result.output.sessionsHints.estimatedTotalCookMinutes} min
                   </strong>
                 </span>
               )}
-              {result.output.sessionsHints.recommendedBatchCount !=
-                null && (
+              {result.output.sessionsHints.recommendedBatchCount != null && (
                 <span>
                   Suggested batches:{" "}
                   <strong>
-                    {
-                      result.output.sessionsHints
-                        .recommendedBatchCount
-                    }
+                    {result.output.sessionsHints.recommendedBatchCount}
                   </strong>
                 </span>
               )}
@@ -462,9 +447,7 @@ export default function RecipeScalingCalculatorView(props) {
                       <td>
                         {ing.scaledQuantity} {ing.scaledUnit}
                       </td>
-                      <td>
-                        {formatInventoryStatus(ing.inventoryStatus)}
-                      </td>
+                      <td>{formatInventoryStatus(ing.inventoryStatus)}</td>
                       <td>
                         {ing.warnings && ing.warnings.length > 0 && (
                           <ul className="ssa-table__warning-list">
@@ -481,9 +464,8 @@ export default function RecipeScalingCalculatorView(props) {
             </div>
           ) : (
             <p className="ssa-panel__empty">
-              No ingredient details to show yet. Wire this calculator to
-              a recipe source with ingredient quantities to see a full
-              comparison.
+              No ingredient details to show yet. Wire this calculator to a
+              recipe source with ingredient quantities to see a full comparison.
             </p>
           )}
         </div>

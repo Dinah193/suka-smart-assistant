@@ -24,6 +24,14 @@ const navItems = [
   },
   { path: "/jobs", label: "Jobs", icon: <Brush size={18} /> },
   { path: "/storehouse", label: "Storehouse", icon: <Warehouse size={18} /> },
+
+  // ✅ Keep Homestead Planner button (always visible)
+  {
+    path: "/homesteadplanner",
+    label: "Homestead Planner",
+    icon: <Leaf size={18} />,
+  },
+
   { path: "/community", label: "Community", icon: <Users size={18} /> },
   { path: "/badges", label: "Badges", icon: <BadgeCheck size={18} /> },
   { path: "/settings", label: "Settings", icon: <Settings size={18} /> },
@@ -93,6 +101,7 @@ export default function Sidebar() {
 
   const activeLabel = useMemo(() => {
     const p = location?.pathname || "/";
+    if (p.startsWith("/homesteadplanner")) return "Homestead planning";
     if (p.startsWith("/meal-planning")) return "Planning meals";
     if (p.startsWith("/jobs") || p.startsWith("/cleaning"))
       return "Household jobs";
@@ -103,6 +112,28 @@ export default function Sidebar() {
     if (p.startsWith("/settings")) return "Settings";
     return "Today’s dashboard";
   }, [location?.pathname]);
+
+  // ✅ Only show nested Homestead items while inside that module
+  const isInHomesteadPlanner = useMemo(() => {
+    const p = location?.pathname || "/";
+    return p === "/homesteadplanner" || p.startsWith("/homesteadplanner/");
+  }, [location?.pathname]);
+
+  const homesteadNestedItems = useMemo(
+    () => [
+      { path: "/homesteadplanner", label: "Overview" },
+      { path: "/homesteadplanner/targets", label: "Targets" },
+      { path: "/homesteadplanner/components", label: "Components" },
+      { path: "/homesteadplanner/inventory", label: "Inventory" },
+      { path: "/homesteadplanner/batches", label: "Batches" },
+      { path: "/homesteadplanner/garden-targets", label: "Garden Targets" },
+      { path: "/homesteadplanner/animal-targets", label: "Animal Targets" },
+      { path: "/homesteadplanner/cuisines", label: "Cuisines" },
+      { path: "/homesteadplanner/preferences", label: "Preferences" },
+      { path: "/homesteadplanner/skills", label: "Skills" },
+    ],
+    [],
+  );
 
   return (
     <aside className="w-64 h-screen bg-pink-600 text-white flex flex-col shadow-2xl font-sans">
@@ -148,7 +179,7 @@ export default function Sidebar() {
           Main
         </div>
         <div className="space-y-2">
-          {navItems.slice(0, 5).map(({ path, label, icon }) => (
+          {navItems.slice(0, 6).map(({ path, label, icon }) => (
             <NavLink
               key={path}
               to={path}
@@ -157,7 +188,7 @@ export default function Sidebar() {
                   "w-full flex items-center gap-4 px-5 py-3 rounded-full text-sm font-bold transition transform",
                   isActive
                     ? "bg-yellow-300 text-pink-700 shadow-md scale-[1.02]"
-                    : "bg-white/10 hover:bg-white/20 text-white"
+                    : "bg-white/10 hover:bg-white/20 text-white",
                 )
               }
             >
@@ -165,6 +196,34 @@ export default function Sidebar() {
               <span>{label}</span>
             </NavLink>
           ))}
+
+          {/* ✅ Optional nested Homestead items, only visible inside the module */}
+          {isInHomesteadPlanner ? (
+            <div className="mt-2 ml-4 mr-2 rounded-2xl bg-white/10 border border-white/15 p-2">
+              <div className="px-2 py-1 text-[11px] tracking-wide uppercase text-pink-100/80">
+                Homestead
+              </div>
+              <div className="mt-1 space-y-1">
+                {homesteadNestedItems.map((it) => (
+                  <NavLink
+                    key={it.path}
+                    to={it.path}
+                    className={({ isActive }) =>
+                      cx(
+                        "w-full flex items-center gap-2 px-3 py-2 rounded-full text-[13px] font-semibold transition",
+                        isActive
+                          ? "bg-yellow-300 text-pink-700 shadow-sm"
+                          : "bg-white/5 hover:bg-white/15 text-white",
+                      )
+                    }
+                  >
+                    <span className="opacity-90">•</span>
+                    <span className="truncate">{it.label}</span>
+                  </NavLink>
+                ))}
+              </div>
+            </div>
+          ) : null}
         </div>
 
         {/* Household */}
@@ -172,7 +231,7 @@ export default function Sidebar() {
           Household
         </div>
         <div className="space-y-2">
-          {navItems.slice(5, 7).map(({ path, label, icon }) => (
+          {navItems.slice(6, 7).map(({ path, label, icon }) => (
             <NavLink
               key={path}
               to={path}
@@ -181,7 +240,7 @@ export default function Sidebar() {
                   "w-full flex items-center gap-4 px-5 py-3 rounded-full text-sm font-bold transition transform",
                   isActive
                     ? "bg-yellow-300 text-pink-700 shadow-md scale-[1.02]"
-                    : "bg-white/10 hover:bg-white/20 text-white"
+                    : "bg-white/10 hover:bg-white/20 text-white",
                 )
               }
             >
@@ -205,7 +264,7 @@ export default function Sidebar() {
                   "w-full flex items-center gap-4 px-5 py-3 rounded-full text-sm font-bold transition transform",
                   isActive
                     ? "bg-yellow-300 text-pink-700 shadow-md scale-[1.02]"
-                    : "bg-white/10 hover:bg-white/20 text-white"
+                    : "bg-white/10 hover:bg-white/20 text-white",
                 )
               }
             >

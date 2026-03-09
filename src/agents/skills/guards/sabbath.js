@@ -26,7 +26,7 @@
  *     for debugging/analytics (optional).
  */
 
-import { emit } from '../../../services/eventBus';
+import { emit } from "../../../services/events/eventBus";
 
 /**
  * @typedef {'fixedClock'|'sunsetToSunset'} SabbathMode
@@ -136,40 +136,49 @@ export function evaluateSabbath(config = {}, now = new Date()) {
     isSabbath: false,
     windowStart: null,
     windowEnd: null,
-    reasonCode: 'fallback.unknown',
-    warnings: []
+    reasonCode: "fallback.unknown",
+    warnings: [],
   };
 
-  if (!config || typeof config !== 'object') {
-    const res = applyFallbackSaturdayRule(baseResult, now, 'Config missing or not an object.');
+  if (!config || typeof config !== "object") {
+    const res = applyFallbackSaturdayRule(
+      baseResult,
+      now,
+      "Config missing or not an object."
+    );
     safeEmitSabbathEvaluated(res);
     return res;
   }
 
-  const enabled = typeof config.enabled === 'boolean' ? config.enabled : true;
+  const enabled = typeof config.enabled === "boolean" ? config.enabled : true;
   if (!enabled) {
     const res = {
       ...baseResult,
       isSabbath: false,
-      reasonCode: 'disabled'
+      reasonCode: "disabled",
     };
     safeEmitSabbathEvaluated(res);
     return res;
   }
 
-  const mode = config.mode === 'sunsetToSunset' || config.mode === 'fixedClock'
-    ? config.mode
-    : 'fixedClock';
+  const mode =
+    config.mode === "sunsetToSunset" || config.mode === "fixedClock"
+      ? config.mode
+      : "fixedClock";
 
   let result;
-  if (mode === 'sunsetToSunset' && config.sunset && isValidSunsetConfig(config.sunset)) {
+  if (
+    mode === "sunsetToSunset" &&
+    config.sunset &&
+    isValidSunsetConfig(config.sunset)
+  ) {
     result = evaluateSunsetMode(config.sunset, now, baseResult);
-  } else if (mode === 'sunsetToSunset') {
+  } else if (mode === "sunsetToSunset") {
     // Mode says sunset, but config is invalid: log a warning + fallback.
     result = applyFallbackSaturdayRule(
       baseResult,
       now,
-      'Sunset mode requested but sunset config is missing or invalid; using Saturday fallback.'
+      "Sunset mode requested but sunset config is missing or invalid; using Saturday fallback."
     );
   } else {
     // fixedClock (default)
@@ -213,7 +222,11 @@ function evaluateFixedClockMode(fixedCfg, now, baseResult) {
 
   // Build approximate window start/end as ISO for debugging/analytics
   const { startDate, endDate } = deriveFixedWindowDates(now, cfg);
-  const windowStart = buildLocalDateWithTime(startDate, cfg.startHour, cfg.startMinute);
+  const windowStart = buildLocalDateWithTime(
+    startDate,
+    cfg.startHour,
+    cfg.startMinute
+  );
   const windowEnd = buildLocalDateWithTime(endDate, cfg.endHour, cfg.endMinute);
 
   res.windowStart = windowStart.toISOString();
@@ -226,22 +239,22 @@ function evaluateFixedClockMode(fixedCfg, now, baseResult) {
   // covers most cases; localDay checks are more for human intuition.
   if (withinWindow) {
     res.isSabbath = true;
-    res.reasonCode = 'fixedClock.inWindow';
+    res.reasonCode = "fixedClock.inWindow";
     return res;
   }
 
   // Fallback: entire Sabbath end day is Sabbath if you want to be generous.
   if (localDay === cfg.sabbathEndDay) {
     res.isSabbath = true;
-    res.reasonCode = 'fixedClock.inWindow';
+    res.reasonCode = "fixedClock.inWindow";
     res.warnings.push(
-      'Now is outside the configured fixed-clock window but on the Sabbath end day; treating as Sabbath.'
+      "Now is outside the configured fixed-clock window but on the Sabbath end day; treating as Sabbath."
     );
     return res;
   }
 
   res.isSabbath = false;
-  res.reasonCode = 'fixedClock.outside';
+  res.reasonCode = "fixedClock.outside";
   return res;
 }
 
@@ -252,10 +265,14 @@ function evaluateFixedClockMode(fixedCfg, now, baseResult) {
  * @returns {Required<FixedClockConfig>}
  */
 function normalizeFixedClockConfig(cfg) {
-  const safe = cfg || /** @type {FixedClockConfig} */ ({ mode: 'fixedClock' });
+  const safe = cfg || /** @type {FixedClockConfig} */ ({ mode: "fixedClock" });
 
-  const sabbathStartDay = isValidDayIndex(safe.sabbathStartDay) ? safe.sabbathStartDay : 5; // Friday
-  const sabbathEndDay = isValidDayIndex(safe.sabbathEndDay) ? safe.sabbathEndDay : 6; // Saturday
+  const sabbathStartDay = isValidDayIndex(safe.sabbathStartDay)
+    ? safe.sabbathStartDay
+    : 5; // Friday
+  const sabbathEndDay = isValidDayIndex(safe.sabbathEndDay)
+    ? safe.sabbathEndDay
+    : 6; // Saturday
 
   const startHour = isValidHour(safe.startHour) ? safe.startHour : 18;
   const startMinute = isValidMinute(safe.startMinute) ? safe.startMinute : 0;
@@ -263,13 +280,13 @@ function normalizeFixedClockConfig(cfg) {
   const endMinute = isValidMinute(safe.endMinute) ? safe.endMinute : 0;
 
   return {
-    mode: 'fixedClock',
+    mode: "fixedClock",
     sabbathStartDay,
     sabbathEndDay,
     startHour,
     startMinute,
     endHour,
-    endMinute
+    endMinute,
   };
 }
 
@@ -326,9 +343,9 @@ function deriveFixedWindowDates(now, cfg) {
 function isValidSunsetConfig(cfg) {
   return (
     cfg &&
-    cfg.mode === 'sunsetToSunset' &&
+    cfg.mode === "sunsetToSunset" &&
     cfg.sunsetByDate &&
-    typeof cfg.sunsetByDate === 'object'
+    typeof cfg.sunsetByDate === "object"
   );
 }
 
@@ -350,7 +367,7 @@ function isValidSunsetConfig(cfg) {
  * @returns {SabbathEvaluationResult}
  */
 function evaluateSunsetMode(cfg, now, baseResult) {
-  const res = { ...baseResult, reasonCode: 'sunset.outside' };
+  const res = { ...baseResult, reasonCode: "sunset.outside" };
 
   const today = stripTime(now);
   const localDay = now.getDay(); // 0 = Sunday, 5 = Friday, 6 = Saturday
@@ -362,22 +379,27 @@ function evaluateSunsetMode(cfg, now, baseResult) {
   // We’re primarily concerned with Friday/Saturday windows, but if
   // your community follows a different pattern, you can adjust here.
   const fridayKey =
-    localDay === 5 ? todayKey :
-    localDay === 6 ? prevKey :
-    // “nearest Friday” heuristic for other days
-    findNearestWeekdayKey(today, 5);
+    localDay === 5
+      ? todayKey
+      : localDay === 6
+      ? prevKey
+      : // “nearest Friday” heuristic for other days
+        findNearestWeekdayKey(today, 5);
 
   const saturdayKey =
-    localDay === 5 ? nextKey :
-    localDay === 6 ? todayKey :
-    // “nearest Saturday” heuristic for other days
-    findNearestWeekdayKey(today, 6);
+    localDay === 5
+      ? nextKey
+      : localDay === 6
+      ? todayKey
+      : // “nearest Saturday” heuristic for other days
+        findNearestWeekdayKey(today, 6);
 
   const fridaySunsetIso = cfg.sunsetByDate[fridayKey] || null;
   const saturdaySunsetIso = cfg.sunsetByDate[saturdayKey] || null;
 
   if (!fridaySunsetIso || !saturdaySunsetIso) {
-    const msg = 'Missing sunset data for Friday or Saturday; using Saturday fallback.';
+    const msg =
+      "Missing sunset data for Friday or Saturday; using Saturday fallback.";
     res.warnings.push(msg);
     return applyFallbackSaturdayRule(res, now, msg);
   }
@@ -389,19 +411,19 @@ function evaluateSunsetMode(cfg, now, baseResult) {
   res.windowEnd = end.toISOString();
 
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
-    const msg = 'Invalid sunset ISO strings; using Saturday fallback.';
+    const msg = "Invalid sunset ISO strings; using Saturday fallback.";
     res.warnings.push(msg);
     return applyFallbackSaturdayRule(res, now, msg);
   }
 
   if (now >= start && now < end) {
     res.isSabbath = true;
-    res.reasonCode = 'sunset.inWindow';
+    res.reasonCode = "sunset.inWindow";
     return res;
   }
 
   res.isSabbath = false;
-  res.reasonCode = 'sunset.outside';
+  res.reasonCode = "sunset.outside";
   return res;
 }
 
@@ -443,7 +465,7 @@ function findNearestWeekdayKey(baseDate, targetDay) {
  * @returns {SabbathEvaluationResult}
  */
 function applyFallbackSaturdayRule(baseResult, now, warning) {
-  const res = { ...baseResult, reasonCode: 'fallback.saturday' };
+  const res = { ...baseResult, reasonCode: "fallback.saturday" };
   if (warning) {
     res.warnings = [...(baseResult.warnings || []), warning];
   }
@@ -485,12 +507,12 @@ function applyFallbackSaturdayRule(baseResult, now, warning) {
  */
 function safeEmitSabbathEvaluated(result) {
   try {
-    if (typeof emit !== 'function') return;
+    if (typeof emit !== "function") return;
     emit({
-      type: 'sabbath.evaluated',
+      type: "sabbath.evaluated",
       ts: new Date().toISOString(),
-      source: 'guards.sabbath',
-      data: result
+      source: "guards.sabbath",
+      data: result,
     });
   } catch (_err) {
     // Never crash guard logic because of eventBus failures.

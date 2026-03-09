@@ -1,0 +1,233 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+  "meta": {
+    "id": "mexican.tacos.basic",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Classic Mexican Tacos",
+    "subtitle": "Flexible taco framework for beef, chicken, pork, or vegetable fillings",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Mexican Cuisine"
+    }
+  },
+  "classification": {
+    "cuisine": "mexican",
+    "category": "main",
+    "mealArchetypes": ["archetype.taco"],
+    "servingStyles": ["tacos", "handheld"],
+    "plannerTags": ["course.main", "weeknight", "family_friendly"]
+  },
+  "summary": "A foundational Mexican taco recipe designed as a flexible template. Supports beef, chicken, pork, or vegetable fillings with classic garnishes and salsa.",
+  "yield": {
+    "servings": 4,
+    "servingSize": {
+      "value": 2,
+      "unit": "tacos"
+    },
+    "notes": "Adjust filling quantities for heartier eaters."
+  },
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 10,
+    "totalMins": 35
+  },
+  "difficulty": "beginner",
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": "filling_only"
+  },
+  "tasteProfile": {
+    "savory": 4,
+    "spicy": 2,
+    "acidic": 2,
+    "fresh": 3
+  },
+  "equipment": {
+    "minimum": ["equipment.skillet", "equipment.comal"],
+    "recommended": ["equipment.grill"],
+    "optional": [
+      {
+        "id": "equipment.sheet_pan",
+        "label": "Sheet Pan",
+        "notes": "Useful for oven-based fillings"
+      }
+    ]
+  },
+  "dietFlags": [],
+  "allergens": ["allergen.gluten"],
+  "ingredients": [
+    {
+      "id": "ingredient.corn_tortilla",
+      "label": "Corn tortillas",
+      "role": "starch.tortilla",
+      "amount": { "value": 8, "unit": "each" },
+      "notes": "Warm before serving"
+    },
+    {
+      "id": "ingredient.ground_beef",
+      "label": "Ground beef",
+      "role": "protein",
+      "amount": { "value": 450, "unit": "g" },
+      "notes": "May substitute chicken, pork, or vegetables"
+    },
+    {
+      "id": "ingredient.onion_white",
+      "label": "White onion",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "medium" },
+      "notes": "Finely diced"
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic cloves",
+      "role": "aromatic",
+      "amount": { "value": 2, "unit": "cloves" },
+      "notes": "Minced"
+    },
+    {
+      "id": "ingredient.cumin_ground",
+      "label": "Ground cumin",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.chili_powder",
+      "label": "Chili powder",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.salt",
+      "label": "Salt",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.cilantro",
+      "label": "Fresh cilantro",
+      "role": "garnish",
+      "amount": { "value": 0.25, "unit": "cup" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.lime",
+      "label": "Lime",
+      "role": "acid",
+      "amount": { "value": 1, "unit": "each" },
+      "notes": "Cut into wedges",
+      "optional": true
+    },
+    {
+      "id": "ingredient.salsa_roja",
+      "label": "Red salsa",
+      "role": "sauce",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "optional": true
+    }
+  ],
+  "ingredientGroups": [
+    {
+      "label": "Taco Filling",
+      "items": [
+        "ingredient.ground_beef",
+        "ingredient.onion_white",
+        "ingredient.garlic",
+        "ingredient.cumin_ground",
+        "ingredient.chili_powder",
+        "ingredient.salt",
+        "ingredient.black_pepper"
+      ]
+    },
+    {
+      "label": "Assembly & Garnish",
+      "items": [
+        "ingredient.corn_tortilla",
+        "ingredient.cilantro",
+        "ingredient.lime",
+        "ingredient.salsa_roja"
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.prep_aromatics",
+      "title": "Prepare aromatics",
+      "activeMins": 5,
+      "body": "Dice the onion finely and mince the garlic. Set aside."
+    },
+    {
+      "id": "step.cook_filling",
+      "title": "Cook the filling",
+      "activeMins": 15,
+      "body": "Heat a skillet over medium heat. Add ground beef and cook until browned. Add onion and garlic; sauté until softened. Stir in cumin, chili powder, salt, and pepper.",
+      "timers": [
+        { "label": "Brown meat", "minutes": 7 },
+        { "label": "Simmer spices", "minutes": 5 }
+      ],
+      "checks": ["Meat fully cooked", "Spices evenly distributed"]
+    },
+    {
+      "id": "step.warm_tortillas",
+      "title": "Warm tortillas",
+      "activeMins": 5,
+      "body": "Warm tortillas on a comal or dry skillet until pliable and lightly toasted.",
+      "timers": [{ "label": "Per side", "minutes": 1 }]
+    },
+    {
+      "id": "step.assemble",
+      "title": "Assemble tacos",
+      "activeMins": 5,
+      "body": "Fill each warm tortilla with the cooked filling. Top with cilantro, salsa, and a squeeze of lime as desired."
+    }
+  ],
+  "variations": [
+    {
+      "id": "variation.chicken",
+      "label": "Chicken Tacos",
+      "notes": "Substitute ground beef with shredded or diced chicken breast or thighs."
+    },
+    {
+      "id": "variation.vegetarian",
+      "label": "Vegetarian Tacos",
+      "notes": "Use sautéed mushrooms, black beans, or seasoned roasted vegetables in place of meat."
+    },
+    {
+      "id": "variation.spicy",
+      "label": "Spicy Tacos",
+      "notes": "Add diced jalapeño or chipotle in adobo to the filling."
+    }
+  ],
+  "storage": {
+    "refrigeration": "Store cooked filling in an airtight container for up to 3 days.",
+    "freezing": "Cooked filling may be frozen for up to 2 months."
+  },
+  "pairings": {
+    "sides": ["mexican.arroz_rojo", "mexican.frijoles_refritos"],
+    "drinks": ["mexican.agua_fresca_jamaica", "mexican.horchata"]
+  },
+  "planner": {
+    "preferredFor": ["taco_night", "weeknight_dinner"],
+    "scalesWell": true
+  },
+  "notes": [
+    "Designed as a canonical taco baseline for SSA planners.",
+    "Supports adapter-driven substitutions for protein, tortillas, and cooking method."
+  ],
+  "methods": ["technique.sauté", "technique.warm_flatbread"],
+  "compat": {
+    "dishId": "mexican.tacos",
+    "aliases": ["tacos", "mexican tacos"]
+  }
+}

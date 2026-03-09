@@ -1,0 +1,522 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-22T23:55:00Z",
+  "meta": {
+    "id": "cuisines.japanese.recipes.tempura",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Tempura",
+    "subtitle": "Light, crisp Japanese batter-fry for shrimp and vegetables",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa-core",
+      "notes": [
+        "Canonical SSA catalog recipe.",
+        "Cold batter + hot oil technique for airy, delicate crispness.",
+        "Designed to be modular: shrimp + mixed vegetables with optional tentsuyu dipping sauce."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "japanese",
+    "category": "main",
+    "mealArchetypes": ["plates", "bowls", "snacks"],
+    "servingStyles": ["plates", "family_style", "street_food"],
+    "plannerTags": [
+      "cuisine.japanese",
+      "dish.tempura",
+      "technique.deep_fry",
+      "texture.crispy",
+      "seafood.optional",
+      "veg.forward",
+      "weekend.project",
+      "party.friendly"
+    ]
+  },
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 1, "unit": "plate" },
+    "notes": "Serves 4 as an appetizer or light main when paired with rice/noodles and soup."
+  },
+  "time": {
+    "activeMins": 35,
+    "handsOffMins": 15,
+    "totalMins": 50
+  },
+  "difficulty": "intermediate",
+  "signals": {
+    "batchFriendly": false,
+    "weeknightPossible": false,
+    "leftoversGood": false,
+    "freezerFriendly": false,
+    "notes": "Tempura is best eaten immediately. Re-crisping is possible but not ideal."
+  },
+  "tasteProfile": {
+    "sweet": 0,
+    "salty": 1,
+    "umami": 2,
+    "acid": 0,
+    "heat": 0,
+    "balanceNotes": "Tempura is mild and relies on dipping sauce (tentsuyu), salt, or citrus for contrast."
+  },
+  "equipment": {
+    "minimum": [
+      "heavy_pot_or_dutch_oven",
+      "thermometer",
+      "skimmer_or_spider",
+      "mixing_bowls",
+      "whisk_or_chopsticks",
+      "sheet_pan",
+      "wire_rack_or_paper_towels",
+      "knife",
+      "cutting_board"
+    ],
+    "recommended": [
+      "deep_fry_thermometer",
+      "fine_mesh_sieve",
+      "kitchen_scale",
+      "chopsticks",
+      "cooling_rack",
+      "small_saucepan"
+    ],
+    "optional": [
+      {
+        "id": "electric_deep_fryer",
+        "label": "Electric deep fryer",
+        "required": false,
+        "notes": "Helps maintain stable oil temperature for consistent results."
+      }
+    ]
+  },
+  "dietFlags": [],
+  "allergens": {
+    "mayContain": ["gluten", "shellfish", "egg", "soy"],
+    "commonTriggers": [
+      "wheat_flour",
+      "shrimp",
+      "egg_optional",
+      "soy_sauce_in_dip"
+    ],
+    "notes": [
+      "For gluten-free tempura: use a gluten-free flour blend + rice flour; results vary.",
+      "For shellfish-free: omit shrimp; use only vegetables."
+    ]
+  },
+  "ingredients": [
+    {
+      "id": "neutral_oil",
+      "label": "Neutral frying oil (canola/avocado/peanut)",
+      "role": "fat",
+      "amount": { "value": 1500, "unit": "ml" },
+      "notes": "Amount depends on pot size; aim for 2–3 inches depth."
+    },
+
+    {
+      "id": "shrimp_large",
+      "label": "Large shrimp, peeled and deveined (tails on optional)",
+      "role": "protein",
+      "amount": { "value": 340, "unit": "g" },
+      "optional": true,
+      "notes": "About 12–16 large shrimp. Omit for vegetarian tempura."
+    },
+    {
+      "id": "salt",
+      "label": "Salt",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": "Lightly season shrimp/veg before frying or serve as finishing salt."
+    },
+
+    {
+      "id": "sweet_potato",
+      "label": "Sweet potato, thin rounds",
+      "role": "veg",
+      "amount": { "value": 250, "unit": "g" }
+    },
+    {
+      "id": "zucchini",
+      "label": "Zucchini, spears or rounds",
+      "role": "veg",
+      "amount": { "value": 200, "unit": "g" }
+    },
+    {
+      "id": "eggplant",
+      "label": "Eggplant, slices",
+      "role": "veg",
+      "amount": { "value": 250, "unit": "g" }
+    },
+    {
+      "id": "shiitake_mushrooms",
+      "label": "Shiitake mushrooms (or button mushrooms)",
+      "role": "veg",
+      "amount": { "value": 150, "unit": "g" }
+    },
+    {
+      "id": "green_beans",
+      "label": "Green beans (or shishito peppers)",
+      "role": "veg",
+      "amount": { "value": 150, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "nori_sheets",
+      "label": "Nori sheets (for optional nori tempura)",
+      "role": "other",
+      "amount": { "value": 2, "unit": "sheets" },
+      "optional": true,
+      "notes": "Cut into strips; fries very fast."
+    },
+
+    {
+      "id": "all_purpose_flour",
+      "label": "All-purpose flour",
+      "role": "base",
+      "amount": { "value": 120, "unit": "g" },
+      "notes": "About 1 cup. Keep cold if possible."
+    },
+    {
+      "id": "rice_flour",
+      "label": "Rice flour",
+      "role": "base",
+      "amount": { "value": 60, "unit": "g" },
+      "optional": true,
+      "notes": "About 1/2 cup. Helps crispness; can replace with more AP flour if needed."
+    },
+    {
+      "id": "cornstarch",
+      "label": "Cornstarch (or potato starch)",
+      "role": "thickener",
+      "amount": { "value": 30, "unit": "g" },
+      "optional": true,
+      "notes": "About 1/4 cup. Optional but improves lightness and crunch."
+    },
+    {
+      "id": "baking_powder",
+      "label": "Baking powder",
+      "role": "other",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": "Optional lift; classic tempura can omit leavener."
+    },
+    {
+      "id": "egg",
+      "label": "Egg",
+      "role": "binder",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": "Some tempura batters use egg; optional here for flexibility."
+    },
+    {
+      "id": "ice_water",
+      "label": "Ice-cold water",
+      "role": "other",
+      "amount": { "value": 300, "unit": "ml" },
+      "notes": "About 1 1/4 cups. Must be very cold."
+    },
+    {
+      "id": "ice_cubes",
+      "label": "Ice cubes",
+      "role": "other",
+      "amount": { "value": 6, "unit": "each" },
+      "optional": true,
+      "notes": "Use to keep batter cold while frying."
+    },
+
+    {
+      "id": "dashi",
+      "label": "Dashi (for tentsuyu dipping sauce)",
+      "role": "sauce",
+      "amount": { "value": 240, "unit": "ml" },
+      "optional": true,
+      "notes": "About 1 cup. Use instant dashi or homemade."
+    },
+    {
+      "id": "soy_sauce",
+      "label": "Soy sauce (for tentsuyu)",
+      "role": "sauce",
+      "amount": { "value": 60, "unit": "ml" },
+      "optional": true,
+      "notes": "About 1/4 cup."
+    },
+    {
+      "id": "mirin",
+      "label": "Mirin (for tentsuyu)",
+      "role": "sauce",
+      "amount": { "value": 60, "unit": "ml" },
+      "optional": true,
+      "notes": "About 1/4 cup."
+    },
+    {
+      "id": "daikon",
+      "label": "Daikon, grated (for serving)",
+      "role": "garnish",
+      "amount": { "value": 120, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "lemon_wedges",
+      "label": "Lemon wedges (for serving)",
+      "role": "garnish",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_prep_station",
+      "title": "Set up the frying station",
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "instructions": [
+        "Place a wire rack over a sheet pan (or line a tray with paper towels).",
+        "Set out a spider/skimmer, chopsticks or tongs, and a thermometer.",
+        "Have a second tray with a light dusting of flour for dredging (optional but helpful)."
+      ],
+      "checks": ["Draining rack is ready", "Tools are within reach"]
+    },
+    {
+      "id": "step_02_prep_ingredients",
+      "title": "Prep shrimp and vegetables",
+      "activeMins": 12,
+      "handsOffMins": 0,
+      "instructions": [
+        "Pat vegetables dry; excess moisture makes batter slip and oil spatter.",
+        "Slice sweet potato thin (1/8 inch) so it cooks through quickly.",
+        "Slice eggplant and zucchini; keep pieces similar size for even frying.",
+        "If using shrimp: pat dry. Make 3–4 shallow slashes on the belly side and gently press to straighten (prevents curling)."
+      ],
+      "checks": ["Ingredients are dry", "Pieces are uniform thickness"]
+    },
+    {
+      "id": "step_03_make_tentsuyu_optional",
+      "title": "Make tentsuyu dipping sauce (optional)",
+      "activeMins": 5,
+      "handsOffMins": 5,
+      "instructions": [
+        "In a small saucepan, combine dashi, soy sauce, and mirin.",
+        "Bring to a gentle simmer for 2–3 minutes, then remove from heat.",
+        "Serve warm or room temperature with grated daikon (optional)."
+      ],
+      "timers": [{ "label": "Tentsuyu simmer", "minutes": 3 }],
+      "checks": ["Sauce tastes savory-sweet and balanced"]
+    },
+    {
+      "id": "step_04_heat_oil",
+      "title": "Heat oil to frying temperature",
+      "activeMins": 3,
+      "handsOffMins": 7,
+      "instructions": [
+        "Fill a heavy pot with 2–3 inches of oil (do not exceed half full).",
+        "Heat to 340–360°F (170–182°C). Aim for ~350°F (175°C) for most items.",
+        "Keep the thermometer clipped and adjust heat to maintain temperature."
+      ],
+      "timers": [{ "label": "Preheat oil", "minutes": 7 }],
+      "checks": ["Oil reaches ~350°F / 175°C", "Oil is steady (not smoking)"],
+      "temperature": {
+        "type": "oil",
+        "value": 175,
+        "unit": "C",
+        "notes": "Tempura batters fry best around 340–360°F / 170–182°C."
+      }
+    },
+    {
+      "id": "step_05_mix_batter",
+      "title": "Mix the tempura batter (keep it cold, mix minimally)",
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "instructions": [
+        "In a bowl, whisk flour, rice flour (if using), cornstarch (if using), and baking powder (if using).",
+        "In a separate bowl or measuring cup, beat the egg with ice-cold water (or just use ice water if omitting egg).",
+        "Pour wet into dry and mix very lightly with chopsticks or a fork—leave small lumps. Overmixing develops gluten and makes batter heavy.",
+        "Set the bowl over ice (or add a few ice cubes) to keep batter cold while frying."
+      ],
+      "checks": [
+        "Batter is cold and lightly mixed",
+        "Small lumps remain (good)"
+      ]
+    },
+    {
+      "id": "step_06_fry_tempura",
+      "title": "Fry in small batches",
+      "activeMins": 12,
+      "handsOffMins": 0,
+      "instructions": [
+        "Optional: lightly dredge items in flour to help batter adhere; shake off excess.",
+        "Dip pieces into batter and let excess drip off.",
+        "Gently lay items into hot oil away from you. Do not overcrowd—temperature drops cause greasiness.",
+        "Fry until pale golden and crisp: vegetables ~2–4 minutes; shrimp ~1.5–2.5 minutes depending on size.",
+        "Use the spider to remove and drain on the rack. Sprinkle a pinch of salt immediately if desired.",
+        "Skim loose batter bits between batches to keep oil clean."
+      ],
+      "timers": [
+        { "label": "Vegetable fry (typical)", "minutes": 3 },
+        { "label": "Shrimp fry (typical)", "minutes": 2 }
+      ],
+      "checks": [
+        "Batter is crisp and light (not dark brown)",
+        "Oil temperature stays near 340–360°F (170–182°C)"
+      ]
+    },
+    {
+      "id": "step_07_serve",
+      "title": "Serve immediately",
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "instructions": [
+        "Arrange tempura on a platter.",
+        "Serve with tentsuyu dipping sauce and grated daikon (optional).",
+        "Offer lemon wedges and/or a small dish of finishing salt."
+      ],
+      "checks": ["Tempura is crisp at serving", "Sauce and garnish ready"]
+    }
+  ],
+  "pairings": {
+    "serveWith": [
+      { "id": "tentsuyu", "label": "Tentsuyu dipping sauce" },
+      { "id": "steamed_rice", "label": "Steamed rice" },
+      { "id": "udon_noodles", "label": "Udon (kake udon or zaru udon)" },
+      { "id": "miso_soup", "label": "Miso soup" },
+      {
+        "id": "cabbage_salad",
+        "label": "Shredded cabbage salad with sesame dressing"
+      }
+    ],
+    "notes": "Tempura pairs well with simple broths/noodles and light, fresh sides."
+  },
+  "storage": {
+    "refrigerator": {
+      "duration": "1 day (quality declines)",
+      "notes": "Store uncovered on a rack if possible to reduce sogginess; best eaten same day."
+    },
+    "reheat": {
+      "methods": [
+        "Oven/toaster oven at 400°F / 205°C for 6–10 minutes on a rack",
+        "Air fryer at 375°F / 190°C for 4–7 minutes"
+      ],
+      "notes": "Avoid microwave (softens batter). Re-crisping is decent but not like fresh."
+    }
+  },
+  "planner": {
+    "mealRole": "main_or_side",
+    "suggestedSides": ["rice", "noodles", "soup", "pickled_veg"],
+    "batchNotes": "Plan to fry right before eating; prep vegetables and sauce ahead to reduce active time."
+  },
+  "keywords": [
+    "tempura",
+    "shrimp tempura",
+    "vegetable tempura",
+    "tentsuyu",
+    "deep fry",
+    "crispy batter"
+  ],
+  "tags": [
+    "cuisine.japanese",
+    "dish.tempura",
+    "technique.deep_fry",
+    "texture.crispy",
+    "veg.forward",
+    "seafood.optional",
+    "party.friendly"
+  ],
+  "notes": [
+    "Key success: keep batter cold and mix minimally; keep oil hot and fry in small batches.",
+    "If batter slides off: ingredients may be too wet or not dredged; pat dry and dust lightly with flour.",
+    "If tempura is greasy: oil too cool or pot overcrowded; let oil recover between batches.",
+    "If tempura is tough: batter overmixed; mix fewer strokes and accept lumps."
+  ],
+  "variations": [
+    {
+      "id": "var_vegetarian_only",
+      "label": "Vegetarian tempura",
+      "when": { "omit": "shrimp" },
+      "adapt": {
+        "notes": [
+          "Use hearty vegetables like sweet potato, mushrooms, broccoli florets, asparagus, and shishitos.",
+          "Serve with lemon + salt or tentsuyu + grated daikon."
+        ]
+      }
+    },
+    {
+      "id": "var_no_egg_batter",
+      "label": "No-egg batter (classic simple style)",
+      "when": { "diet": "egg_free" },
+      "adapt": {
+        "notes": [
+          "Omit egg; use only ice-cold water for the wet component.",
+          "Mix lightly; the batter will still crisp well."
+        ]
+      }
+    },
+    {
+      "id": "var_gluten_reduced",
+      "label": "Extra-crisp batter (higher starch)",
+      "when": { "preference": "extra_crisp" },
+      "adapt": {
+        "notes": [
+          "Use more rice flour and/or potato starch; reduce AP flour accordingly.",
+          "Keep batter very cold and fry at the higher end of the temp range (360°F / 182°C)."
+        ]
+      }
+    }
+  ],
+  "summary": "Crisp, airy Japanese tempura using a cold, lightly mixed batter and hot oil. Includes optional tentsuyu dipping sauce and flexible shrimp/vegetable mix.",
+  "safety": {
+    "oilSafety": [
+      "Never fill the pot more than halfway with oil.",
+      "Keep a lid nearby to smother flames; do not use water on a grease fire.",
+      "Monitor temperature to avoid smoking oil."
+    ],
+    "handling": [
+      "Pat ingredients dry to reduce splatter.",
+      "Lower food into oil away from you to prevent burns."
+    ]
+  },
+  "ingredientGroups": [
+    {
+      "id": "grp_frying",
+      "label": "Frying",
+      "items": ["neutral_oil"]
+    },
+    {
+      "id": "grp_main_items",
+      "label": "Shrimp & Vegetables",
+      "items": [
+        "shrimp_large",
+        "sweet_potato",
+        "zucchini",
+        "eggplant",
+        "shiitake_mushrooms",
+        "green_beans",
+        "nori_sheets"
+      ]
+    },
+    {
+      "id": "grp_batter",
+      "label": "Batter",
+      "items": [
+        "all_purpose_flour",
+        "rice_flour",
+        "cornstarch",
+        "baking_powder",
+        "egg",
+        "ice_water",
+        "ice_cubes"
+      ]
+    },
+    {
+      "id": "grp_dipping_sauce_optional",
+      "label": "Tentsuyu (Optional)",
+      "items": ["dashi", "soy_sauce", "mirin", "daikon", "lemon_wedges"]
+    }
+  ],
+  "methods": ["deep_fry", "light_batter", "tentsuyu_sauce"],
+  "compat": {
+    "cuisineId": "cuisines.japanese",
+    "dishId": "cuisines.japanese.dishes.tempura",
+    "aliases": ["shrimp tempura", "vegetable tempura", "tempura mix"],
+    "searchBoost": ["tempura", "tentsuyu", "deep fry", "crispy batter"]
+  }
+}

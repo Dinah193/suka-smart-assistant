@@ -29,10 +29,10 @@
 
 /* ---------------------------------- Imports ---------------------------------- */
 
-import { emitEvent } from "../../services/eventBus";
-import { featureFlags } from "../../services/featureFlags";
-import { HubPacketFormatter } from "../../services/hub/HubPacketFormatter";
-import { FamilyFundConnector } from "../../services/hub/FamilyFundConnector";
+import { emitEvent } from "../../services/events/eventBus";
+import { featureFlags } from "../../config/featureFlags";
+import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
+import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
 
 import {
   normalizeCookingInput,

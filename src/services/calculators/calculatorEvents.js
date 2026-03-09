@@ -32,7 +32,7 @@
  *   these helpers for a fully unified event vocabulary.
  */
 
-import eventBus from "@/services/eventBus";
+import eventBus from "@/services/events/eventBus";
 
 /**
  * @typedef {import("./calculatorRunner").CalculatorRunContext} CalculatorRunContext
@@ -386,7 +386,11 @@ function safeEmit(payload) {
  */
 function safeClone(value) {
   if (value == null) return value;
-  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean")
+  if (
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean"
+  )
     return value;
 
   try {
@@ -448,9 +452,7 @@ function sanitizeContext(ctx = /** @type {CalculatorRunContext} */ ({})) {
         ? context.sessionDomain.trim()
         : undefined,
     env:
-      context.env && typeof context.env === "object"
-        ? context.env
-        : undefined,
+      context.env && typeof context.env === "object" ? context.env : undefined,
   };
 }
 

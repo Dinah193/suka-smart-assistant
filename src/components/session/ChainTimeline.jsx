@@ -9,7 +9,8 @@ const BTN =
   "inline-flex items-center gap-2 rounded-2xl px-3 py-1.5 text-sm font-medium shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 active:translate-y-px";
 const VAR = {
   primary: "bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-600",
-  subtle: "bg-white text-gray-900 hover:bg-gray-50 border border-gray-200 focus:ring-indigo-600",
+  subtle:
+    "bg-white text-gray-900 hover:bg-gray-50 border border-gray-200 focus:ring-indigo-600",
   ghost: "bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-indigo-600",
   danger: "bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-600",
 };
@@ -21,7 +22,7 @@ const TAG =
 /* ----------------------------- Defensive imports ---------------------------- */
 let eventBus = { emit: () => {}, on: () => {}, off: () => {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch (_) {}
 
@@ -39,7 +40,9 @@ try {
 
 let SaveSessionModalLazy = null;
 try {
-  SaveSessionModalLazy = React.lazy(() => import("@/components/sessions/SaveSessionModal.jsx"));
+  SaveSessionModalLazy = React.lazy(() =>
+    import("@/components/session/SaveSessionModal.jsx")
+  );
 } catch (_) {}
 
 /* ---------------------------------- Icons ---------------------------------- */
@@ -99,7 +102,10 @@ try {
 
 /* ---------------------------------- Utils ---------------------------------- */
 const safeFile = (name = "session-chain") =>
-  String(name).toLowerCase().replace(/[^a-z0-9-_]+/gi, "-").replace(/-+/g, "-");
+  String(name)
+    .toLowerCase()
+    .replace(/[^a-z0-9-_]+/gi, "-")
+    .replace(/-+/g, "-");
 
 function toastSafe(message, variant = "success") {
   try {
@@ -113,11 +119,16 @@ function toastSafe(message, variant = "success") {
 /** Status color helpers */
 const statusHue = (s) => {
   switch (s) {
-    case "done": return "bg-emerald-600";
-    case "running": return "bg-indigo-600";
-    case "blocked": return "bg-amber-500";
-    case "error": return "bg-rose-600";
-    default: return "bg-gray-300";
+    case "done":
+      return "bg-emerald-600";
+    case "running":
+      return "bg-indigo-600";
+    case "blocked":
+      return "bg-amber-500";
+    case "error":
+      return "bg-rose-600";
+    default:
+      return "bg-gray-300";
   }
 };
 const nodeRing = (type, active) =>
@@ -129,11 +140,16 @@ const nodeRing = (type, active) =>
 
 const guardIcon = (k) => {
   switch (k) {
-    case "inventory": return <I.ShoppingCart className="h-3.5 w-3.5" />;
-    case "weather": return <I.CloudLightning className="h-3.5 w-3.5" />;
-    case "time": return <I.Clock className="h-3.5 w-3.5" />;
-    case "appliance": return <I.ThermometerSnowflake className="h-3.5 w-3.5" />;
-    default: return <I.AlertTriangle className="h-3.5 w-3.5" />;
+    case "inventory":
+      return <I.ShoppingCart className="h-3.5 w-3.5" />;
+    case "weather":
+      return <I.CloudLightning className="h-3.5 w-3.5" />;
+    case "time":
+      return <I.Clock className="h-3.5 w-3.5" />;
+    case "appliance":
+      return <I.ThermometerSnowflake className="h-3.5 w-3.5" />;
+    default:
+      return <I.AlertTriangle className="h-3.5 w-3.5" />;
   }
 };
 
@@ -182,7 +198,9 @@ export default function ChainTimeline({
 
   /* ----------------------------- Favorites (session) ----------------------------- */
   const favApi = useFavoriteSessions ? useFavoriteSessions(domain) : null;
-  const [fav, setFav] = useState(() => (!!sessionId && !!favApi?.isFavorite?.(sessionId)) || false);
+  const [fav, setFav] = useState(
+    () => (!!sessionId && !!favApi?.isFavorite?.(sessionId)) || false
+  );
   useEffect(() => {
     if (favApi && sessionId) setFav(!!favApi.isFavorite?.(sessionId));
   }, [favApi, sessionId]);
@@ -194,7 +212,11 @@ export default function ChainTimeline({
     }
     try {
       if (favApi?.toggleFavorite) {
-        const next = await favApi.toggleFavorite(sessionId, { id: sessionId, title: sessionTitle, domain });
+        const next = await favApi.toggleFavorite(sessionId, {
+          id: sessionId,
+          title: sessionTitle,
+          domain,
+        });
         setFav(!!next);
       } else {
         const next = !fav;
@@ -207,7 +229,9 @@ export default function ChainTimeline({
           source: "ChainTimeline",
         });
       }
-      toastSafe(fav ? "Removed from favorite sessions." : "Added to favorite sessions.");
+      toastSafe(
+        fav ? "Removed from favorite sessions." : "Added to favorite sessions."
+      );
     } catch (e) {
       console.warn("[ChainTimeline] favorite toggle failed", e);
       toastSafe("Could not update favorite sessions.", "error");
@@ -222,7 +246,11 @@ export default function ChainTimeline({
       return;
     }
     setSaveOpen(true);
-    eventBus.emit?.("session.save.modal.opened", { domain, sessionId, source: "ChainTimeline" });
+    eventBus.emit?.("session.save.modal.opened", {
+      domain,
+      sessionId,
+      source: "ChainTimeline",
+    });
   };
 
   /* ------------------------------ Orchestration I/O ------------------------------ */
@@ -231,7 +259,8 @@ export default function ChainTimeline({
     const apply = (s) => {
       if (!s) return;
       if (Array.isArray(s.chain)) setChain(s.chain);
-      if (typeof s.progressPct === "number") setProgressPct(Math.max(0, Math.min(100, s.progressPct)));
+      if (typeof s.progressPct === "number")
+        setProgressPct(Math.max(0, Math.min(100, s.progressPct)));
       if (s.title) setSessionTitle(s.title);
       if (s.currentNodeId) setActiveId(s.currentNodeId);
     };
@@ -255,25 +284,44 @@ export default function ChainTimeline({
       });
     }
 
-    return () => { offA?.(); offB?.(); };
+    return () => {
+      offA?.();
+      offB?.();
+    };
   }, [sessionId, chainProp]);
 
   // Smooth-scroll to active node when it changes
   useEffect(() => {
     if (!activeId || !scrollerRef.current) return;
-    const el = scrollerRef.current.querySelector(`[data-node-id="${CSS.escape(activeId)}"]`);
-    if (el) el.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+    const el = scrollerRef.current.querySelector(
+      `[data-node-id="${CSS.escape(activeId)}"]`
+    );
+    if (el)
+      el.scrollIntoView({
+        inline: "center",
+        block: "nearest",
+        behavior: "smooth",
+      });
   }, [activeId]);
 
   /* --------------------------------- Actions --------------------------------- */
   const start = () => {
     setBusy(true);
-    eventBus.emit?.("session.start.requested", { domain, sessionId, source: "ChainTimeline" });
+    eventBus.emit?.("session.start.requested", {
+      domain,
+      sessionId,
+      source: "ChainTimeline",
+    });
     setBusy(false);
   };
   const pause = () => {
     setBusy(true);
-    eventBus.emit?.("session.pause.requested", { domain, sessionId, reason: "user", source: "ChainTimeline" });
+    eventBus.emit?.("session.pause.requested", {
+      domain,
+      sessionId,
+      reason: "user",
+      source: "ChainTimeline",
+    });
     setBusy(false);
   };
   const completeNode = (node) => {
@@ -329,7 +377,12 @@ export default function ChainTimeline({
     });
   };
   const openAnchor = (node) => {
-    eventBus.emit?.("session.anchor.open", { domain, sessionId, anchorId: node?.id, source: "ChainTimeline" });
+    eventBus.emit?.("session.anchor.open", {
+      domain,
+      sessionId,
+      anchorId: node?.id,
+      source: "ChainTimeline",
+    });
   };
   const addToCalendar = () => {
     eventBus.emit?.("calendar.write.requested", {
@@ -349,7 +402,9 @@ export default function ChainTimeline({
       source: "ChainTimeline",
       reply: (snap) => {
         const data = snap || fallback;
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        const blob = new Blob([JSON.stringify(data, null, 2)], {
+          type: "application/json",
+        });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
         a.download = `${safeFile(sessionTitle)}.json`;
@@ -396,7 +451,10 @@ export default function ChainTimeline({
     return Math.round((done / total) * 100);
   }, [progressPct, chain]);
 
-  const activeNode = useMemo(() => chain.find((n) => n.id === activeId) || null, [chain, activeId]);
+  const activeNode = useMemo(
+    () => chain.find((n) => n.id === activeId) || null,
+    [chain, activeId]
+  );
 
   /* ---------------------------------- Render --------------------------------- */
   return (
@@ -404,7 +462,9 @@ export default function ChainTimeline({
       {/* Header */}
       <div className="flex flex-wrap items-center gap-2 border-b border-gray-200 bg-gradient-to-r from-white to-gray-50 px-4 py-3 rounded-t-3xl">
         <div className="min-w-0">
-          <h3 className="truncate text-sm sm:text-base font-semibold text-gray-900">{sessionTitle}</h3>
+          <h3 className="truncate text-sm sm:text-base font-semibold text-gray-900">
+            {sessionTitle}
+          </h3>
           <div className="mt-1 flex items-center gap-2">
             <span className={CHIP}>
               <I.Info className="h-3.5 w-3.5" />
@@ -425,8 +485,17 @@ export default function ChainTimeline({
             Pause
           </button>
 
-          <button className={cx(BTN, VAR.ghost)} onClick={toggleFavoriteSession} aria-pressed={fav} title={fav ? "Unfavorite session" : "Favorite session"}>
-            {fav ? <I.Star className="h-4 w-4 text-amber-500" /> : <I.StarOff className="h-4 w-4" />}
+          <button
+            className={cx(BTN, VAR.ghost)}
+            onClick={toggleFavoriteSession}
+            aria-pressed={fav}
+            title={fav ? "Unfavorite session" : "Favorite session"}
+          >
+            {fav ? (
+              <I.Star className="h-4 w-4 text-amber-500" />
+            ) : (
+              <I.StarOff className="h-4 w-4" />
+            )}
           </button>
 
           <button className={cx(BTN, VAR.subtle)} onClick={openSave}>
@@ -435,13 +504,27 @@ export default function ChainTimeline({
           </button>
 
           <details className="relative">
-            <summary className={cx(BTN, VAR.ghost, "cursor-pointer list-none [&::-webkit-details-marker]:hidden")}>
+            <summary
+              className={cx(
+                BTN,
+                VAR.ghost,
+                "cursor-pointer list-none [&::-webkit-details-marker]:hidden"
+              )}
+            >
               <I.More className="h-4 w-4" />
             </summary>
             <div className="absolute right-0 z-10 mt-2 min-w-[14rem] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl">
-              <MenuItem onClick={addToCalendar} icon={<I.Calendar className="h-4 w-4" />} label="Add to calendar" />
+              <MenuItem
+                onClick={addToCalendar}
+                icon={<I.Calendar className="h-4 w-4" />}
+                label="Add to calendar"
+              />
               <div className="h-px bg-gray-100" />
-              <MenuItem onClick={exportChain} icon={<I.Download className="h-4 w-4" />} label="Export chain (.json)" />
+              <MenuItem
+                onClick={exportChain}
+                icon={<I.Download className="h-4 w-4" />}
+                label="Export chain (.json)"
+              />
             </div>
           </details>
         </div>
@@ -473,7 +556,10 @@ export default function ChainTimeline({
             >
               {/* Connector line (left) */}
               {idx > 0 && (
-                <div className="absolute left-[-12px] top-1/2 h-[2px] w-3 translate-y-[-1px] bg-gray-200" aria-hidden="true" />
+                <div
+                  className="absolute left-[-12px] top-1/2 h-[2px] w-3 translate-y-[-1px] bg-gray-200"
+                  aria-hidden="true"
+                />
               )}
 
               {/* Node */}
@@ -481,14 +567,21 @@ export default function ChainTimeline({
                 type="button"
                 className={cx(
                   "relative flex items-center gap-3 rounded-2xl border bg-white px-3 py-2 text-left transition hover:shadow-sm",
-                  node.type === "anchor" ? "border-indigo-200" : "border-gray-200",
+                  node.type === "anchor"
+                    ? "border-indigo-200"
+                    : "border-gray-200",
                   nodeRing(node.type, node.id === activeId)
                 )}
                 onClick={() => {
                   setActiveId(node.id);
                   setDetailsOpen(true);
                   if (node.type === "anchor") {
-                    eventBus.emit?.("session.anchor.open", { domain, sessionId, anchorId: node.id, source: "ChainTimeline" });
+                    eventBus.emit?.("session.anchor.open", {
+                      domain,
+                      sessionId,
+                      anchorId: node.id,
+                      source: "ChainTimeline",
+                    });
                   }
                 }}
               >
@@ -500,20 +593,37 @@ export default function ChainTimeline({
                   )}
                   title={node.type}
                 >
-                  {node.type === "anchor" ? <I.Anchor className="h-4 w-4 text-indigo-700" /> : <I.Sparkles className="h-4 w-4 text-gray-700" />}
+                  {node.type === "anchor" ? (
+                    <I.Anchor className="h-4 w-4 text-indigo-700" />
+                  ) : (
+                    <I.Sparkles className="h-4 w-4 text-gray-700" />
+                  )}
                 </div>
 
                 <div className="min-w-[12rem] max-w-[18rem]">
-                  <p className="truncate text-sm font-medium text-gray-900">{node.title || (node.type === "anchor" ? "Anchor" : "Action")}</p>
-                  {node.subtitle && <p className="truncate text-xs text-gray-600">{node.subtitle}</p>}
+                  <p className="truncate text-sm font-medium text-gray-900">
+                    {node.title ||
+                      (node.type === "anchor" ? "Anchor" : "Action")}
+                  </p>
+                  {node.subtitle && (
+                    <p className="truncate text-xs text-gray-600">
+                      {node.subtitle}
+                    </p>
+                  )}
                   <div className="mt-1 flex flex-wrap items-center gap-1">
                     {node.status && (
-                      <span className={cx("h-1.5 w-1.5 rounded-full", statusHue(node.status))} title={node.status} />
+                      <span
+                        className={cx(
+                          "h-1.5 w-1.5 rounded-full",
+                          statusHue(node.status)
+                        )}
+                        title={node.status}
+                      />
                     )}
                     {typeof node.etaSec === "number" && (
                       <span className={TAG}>
-                        <I.Clock className="mr-1 inline-block h-3 w-3" />
-                        ~{Math.max(0, Math.round(node.etaSec / 60))}m
+                        <I.Clock className="mr-1 inline-block h-3 w-3" />~
+                        {Math.max(0, Math.round(node.etaSec / 60))}m
                       </span>
                     )}
                     {(node.guards || []).slice(0, 2).map((g, i) => (
@@ -526,7 +636,10 @@ export default function ChainTimeline({
 
                 {/* Drag handle */}
                 {enableReorder && (
-                  <div className="ml-2 hidden cursor-grab text-gray-400 group-hover:block" title="Drag to reorder">
+                  <div
+                    className="ml-2 hidden cursor-grab text-gray-400 group-hover:block"
+                    title="Drag to reorder"
+                  >
                     <I.Drag className="h-4 w-4" />
                   </div>
                 )}
@@ -534,7 +647,10 @@ export default function ChainTimeline({
 
               {/* Connector arrow (right) */}
               {idx < chain.length - 1 && (
-                <div className="absolute right-[-16px] top-1/2 translate-y-[-9px] text-gray-300" aria-hidden="true">
+                <div
+                  className="absolute right-[-16px] top-1/2 translate-y-[-9px] text-gray-300"
+                  aria-hidden="true"
+                >
                   <I.ArrowRight className="h-4 w-4" />
                 </div>
               )}
@@ -542,7 +658,9 @@ export default function ChainTimeline({
           ))}
 
           {chain.length === 0 && (
-            <div className="text-sm text-gray-500">No steps yet. Generate a draft or start a session.</div>
+            <div className="text-sm text-gray-500">
+              No steps yet. Generate a draft or start a session.
+            </div>
           )}
         </ol>
       </div>
@@ -561,8 +679,8 @@ export default function ChainTimeline({
       )}
 
       {/* Save Session modal (lazy first) */}
-      {saveOpen && (
-        SaveSessionModalLazy ? (
+      {saveOpen &&
+        (SaveSessionModalLazy ? (
           <Suspense fallback={null}>
             <SaveSessionModalLazy
               isOpen={saveOpen}
@@ -571,7 +689,10 @@ export default function ChainTimeline({
               domain={domain}
               sessionId={sessionId}
               onSaved={(saved) => {
-                eventBus.emit?.("session.saved", { from: "ChainTimeline", saved });
+                eventBus.emit?.("session.saved", {
+                  from: "ChainTimeline",
+                  saved,
+                });
                 toastSafe("Session saved.");
                 setSaveOpen(false);
               }}
@@ -584,13 +705,15 @@ export default function ChainTimeline({
             defaultTitle={sessionTitle}
             onClose={() => setSaveOpen(false)}
             onSaved={(saved) => {
-              eventBus.emit?.("session.saved", { from: "ChainTimeline", saved });
+              eventBus.emit?.("session.saved", {
+                from: "ChainTimeline",
+                saved,
+              });
               toastSafe("Session saved.");
               setSaveOpen(false);
             }}
           />
-        )
-      )}
+        ))}
     </section>
   );
 }
@@ -609,7 +732,15 @@ function MenuItem({ onClick, label, icon = null }) {
   );
 }
 
-function DetailsDrawer({ node, onClose, onRun, onPreview, onComplete, onSkip, onJump }) {
+function DetailsDrawer({
+  node,
+  onClose,
+  onRun,
+  onPreview,
+  onComplete,
+  onSkip,
+  onJump,
+}) {
   return (
     <div
       role="dialog"
@@ -623,9 +754,15 @@ function DetailsDrawer({ node, onClose, onRun, onPreview, onComplete, onSkip, on
         <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
           <div>
             <p className="text-sm font-semibold text-gray-900">{node.title}</p>
-            {node.subtitle && <p className="text-xs text-gray-600">{node.subtitle}</p>}
+            {node.subtitle && (
+              <p className="text-xs text-gray-600">{node.subtitle}</p>
+            )}
           </div>
-          <button className={cx(BTN, VAR.ghost, "px-2")} onClick={onClose} aria-label="Close">
+          <button
+            className={cx(BTN, VAR.ghost, "px-2")}
+            onClick={onClose}
+            aria-label="Close"
+          >
             <I.X className="h-4 w-4" />
           </button>
         </div>
@@ -634,14 +771,19 @@ function DetailsDrawer({ node, onClose, onRun, onPreview, onComplete, onSkip, on
           <div className="flex flex-wrap items-center gap-2">
             {node.status && (
               <span className={CHIP}>
-                <span className={cx("h-1.5 w-1.5 rounded-full", statusHue(node.status))} />
+                <span
+                  className={cx(
+                    "h-1.5 w-1.5 rounded-full",
+                    statusHue(node.status)
+                  )}
+                />
                 <span className="capitalize">{node.status}</span>
               </span>
             )}
             {typeof node.etaSec === "number" && (
               <span className={CHIP}>
-                <I.Clock className="h-3.5 w-3.5" />
-                ~{Math.max(0, Math.round(node.etaSec / 60))}m
+                <I.Clock className="h-3.5 w-3.5" />~
+                {Math.max(0, Math.round(node.etaSec / 60))}m
               </span>
             )}
             {(node.guards || []).slice(0, 4).map((g, i) => (
@@ -654,7 +796,9 @@ function DetailsDrawer({ node, onClose, onRun, onPreview, onComplete, onSkip, on
 
           {node.params && Object.keys(node.params).length > 0 && (
             <div className="rounded-2xl border border-gray-200 bg-gray-50 p-3">
-              <p className="mb-2 text-xs font-semibold text-gray-700">Parameters</p>
+              <p className="mb-2 text-xs font-semibold text-gray-700">
+                Parameters
+              </p>
               <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
                 {Object.entries(node.params).map(([k, v]) => (
                   <div key={k} className="text-xs">
@@ -706,7 +850,13 @@ function DetailsDrawer({ node, onClose, onRun, onPreview, onComplete, onSkip, on
 }
 
 /* ------------------------------- Inline Save ------------------------------- */
-function InlineSaveSession({ domain, sessionId, defaultTitle, onClose, onSaved }) {
+function InlineSaveSession({
+  domain,
+  sessionId,
+  defaultTitle,
+  onClose,
+  onSaved,
+}) {
   const [name, setName] = useState(defaultTitle || "");
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
@@ -719,7 +869,10 @@ function InlineSaveSession({ domain, sessionId, defaultTitle, onClose, onSaved }
     setBusy(true);
     try {
       const payload = { id: sessionId, domain, title: name, notes };
-      eventBus.emit?.("session.save.requested", { payload, source: "ChainTimeline" });
+      eventBus.emit?.("session.save.requested", {
+        payload,
+        source: "ChainTimeline",
+      });
       onSaved?.(payload);
     } finally {
       setBusy(false);
@@ -731,16 +884,22 @@ function InlineSaveSession({ domain, sessionId, defaultTitle, onClose, onSaved }
       <div className="w-[95vw] max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-xl">
         <div className="flex items-center justify-between">
           <h3 className="text-base font-semibold">Save Session</h3>
-          <button className={cx(BTN, VAR.ghost, "px-2")} onClick={onClose}><I.X className="h-4 w-4" /></button>
+          <button className={cx(BTN, VAR.ghost, "px-2")} onClick={onClose}>
+            <I.X className="h-4 w-4" />
+          </button>
         </div>
-        <label className="mt-4 block text-sm font-medium text-gray-700">Title</label>
+        <label className="mt-4 block text-sm font-medium text-gray-700">
+          Title
+        </label>
         <input
           className="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Session title"
         />
-        <label className="mt-4 block text-sm font-medium text-gray-700">Notes</label>
+        <label className="mt-4 block text-sm font-medium text-gray-700">
+          Notes
+        </label>
         <textarea
           className="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
           rows={3}
@@ -749,8 +908,14 @@ function InlineSaveSession({ domain, sessionId, defaultTitle, onClose, onSaved }
           placeholder="What should future-you remember?"
         />
         <div className="mt-6 flex justify-end gap-2">
-          <button className={cx(BTN, VAR.ghost)} onClick={onClose}>Cancel</button>
-          <button className={cx(BTN, VAR.primary)} onClick={submit} disabled={busy}>
+          <button className={cx(BTN, VAR.ghost)} onClick={onClose}>
+            Cancel
+          </button>
+          <button
+            className={cx(BTN, VAR.primary)}
+            onClick={submit}
+            disabled={busy}
+          >
             <I.Save className="h-4 w-4" />
             Save
           </button>

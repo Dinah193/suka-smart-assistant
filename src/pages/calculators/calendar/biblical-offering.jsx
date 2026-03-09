@@ -25,8 +25,8 @@
 // -----------------------------------------------------------------------------
 
 import React, { useCallback, useMemo, useState } from "react";
-import { familyFundMode } from "@/services/featureFlags";
-import { emitEvent } from "@/services/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
+import { emitEvent } from "@/services/events/eventBus";
 
 /**
  * @typedef {Object} OfferingPercents
@@ -137,7 +137,10 @@ function requestNextSession(domainHints) {
     });
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.error("[BiblicalOfferingCalculator] Failed to emit session.requestNext", err);
+    console.error(
+      "[BiblicalOfferingCalculator] Failed to emit session.requestNext",
+      err
+    );
   }
 }
 
@@ -176,9 +179,9 @@ function OfferingNotesModal({ open, onClose }) {
             local leadership.
           </p>
           <p>
-            You can base offerings on harvest, income, or both. Values may be
-            in your local currency or in “value units” if you track offerings in
-           -kind (grain, oil, livestock).
+            You can base offerings on harvest, income, or both. Values may be in
+            your local currency or in “value units” if you track offerings in
+            -kind (grain, oil, livestock).
           </p>
           <p>
             After you&apos;re comfortable with the numbers, use{" "}
@@ -522,7 +525,9 @@ function BiblicalOfferingCalculatorPage() {
                     step="0.1"
                     className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-50 outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400"
                     value={percents.tithe}
-                    onChange={(e) => handlePercentChange("tithe", e.target.value)}
+                    onChange={(e) =>
+                      handlePercentChange("tithe", e.target.value)
+                    }
                   />
                   <p className="text-[11px] text-slate-500">
                     Common baseline is 10%. Adjust as needed.
@@ -569,7 +574,9 @@ function BiblicalOfferingCalculatorPage() {
                     step="0.1"
                     className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-50 outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400"
                     value={percents.poor}
-                    onChange={(e) => handlePercentChange("poor", e.target.value)}
+                    onChange={(e) =>
+                      handlePercentChange("poor", e.target.value)
+                    }
                   />
                   <p className="text-[11px] text-slate-500">
                     Helping widows, orphans, strangers, and those who minister.
@@ -628,8 +635,8 @@ function BiblicalOfferingCalculatorPage() {
                       <span className="font-semibold text-slate-200">
                         {(100 - stats.percentSum).toFixed(2)}%
                       </span>{" "}
-                      unassigned in your base. This becomes household use or extra
-                      generosity.
+                      unassigned in your base. This becomes household use or
+                      extra generosity.
                     </p>
                   )}
                 </div>
@@ -742,8 +749,8 @@ function BiblicalOfferingCalculatorPage() {
                   <span>
                     <span className="font-semibold">Storehouse sessions:</span>{" "}
                     turn each offering category into labeled storage bins,
-                    envelopes, or digital buckets. The SessionRunner can walk you
-                    through physically separating grain, meat, or funds.
+                    envelopes, or digital buckets. The SessionRunner can walk
+                    you through physically separating grain, meat, or funds.
                   </span>
                 </li>
                 <li className="flex gap-2">
@@ -768,10 +775,10 @@ function BiblicalOfferingCalculatorPage() {
                   <li className="flex gap-2">
                     <span className="mt-[3px] inline-block h-1.5 w-1.5 rounded-full bg-indigo-400" />
                     <span>
-                      <span className="font-semibold">Family Fund Hub:</span> when
-                      you launch and complete a storehouse / offering session,
-                      SSA can export anonymized analytics to the Hub so you can
-                      see how your household uses increase across years.
+                      <span className="font-semibold">Family Fund Hub:</span>{" "}
+                      when you launch and complete a storehouse / offering
+                      session, SSA can export anonymized analytics to the Hub so
+                      you can see how your household uses increase across years.
                     </span>
                   </li>
                 )}
@@ -797,7 +804,10 @@ function BiblicalOfferingCalculatorPage() {
       </main>
 
       {/* Local informational modal */}
-      <OfferingNotesModal open={notesOpen} onClose={() => setNotesOpen(false)} />
+      <OfferingNotesModal
+        open={notesOpen}
+        onClose={() => setNotesOpen(false)}
+      />
     </div>
   );
 }

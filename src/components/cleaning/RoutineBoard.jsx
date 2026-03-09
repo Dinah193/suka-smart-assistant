@@ -35,40 +35,68 @@ import {
 let eventBus = { emit: () => {}, on: () => () => {} };
 let automation = { queue: () => {}, invoke: async () => {} };
 let CleaningPlanManager = null;
-let deepCleanCadenceToRRULE = (x) => "RRULE:FREQ=YEARLY;BYHOUR=9;BYMINUTE=0;BYSECOND=0";
+let deepCleanCadenceToRRULE = (x) =>
+  "RRULE:FREQ=YEARLY;BYHOUR=9;BYMINUTE=0;BYSECOND=0";
 let getStrategies = () => [];
 let suggestStrategies = () => [];
-let PreferencesStore = { getState: () => ({ timezone: "America/New_York", sabbathAware: true }) };
+let PreferencesStore = {
+  getState: () => ({ timezone: "America/New_York", sabbathAware: true }),
+};
 
 (async () => {
-  try { ({ eventBus } = await import("@/services/events/eventBus")); } catch {}
-  try { ({ automation } = await import("@/services/automation/runtime")); } catch {}
-  try { ({ default: CleaningPlanManager } = await import("@/managers/CleaningPlanManager")); } catch {}
+  try {
+    ({ eventBus } = await import("@/services/events/eventBus"));
+  } catch {}
+  try {
+    ({ automation } = await import("@/services/automation/runtime"));
+  } catch {}
+  try {
+    ({ default: CleaningPlanManager } = await import(
+      "@/managers/CleaningPlanManager"
+    ));
+  } catch {}
   try {
     const s = await import("@/data/organizingStrategies");
-    deepCleanCadenceToRRULE = s?.deepCleanCadenceToRRULE || deepCleanCadenceToRRULE;
+    deepCleanCadenceToRRULE =
+      s?.deepCleanCadenceToRRULE || deepCleanCadenceToRRULE;
     getStrategies = s?.getStrategies || getStrategies;
     suggestStrategies = s?.suggestStrategies || suggestStrategies;
   } catch {}
   try {
-    const p = await import("@/stores/preferences");
+    const p = await import("@/store/PreferencesStore");
     PreferencesStore = p?.usePreferencesStore || PreferencesStore;
   } catch {}
 })();
 
 /* --------------------------------- Utilities --------------------------------- */
 const TZ = () => {
-  try { return PreferencesStore.getState()?.timezone || "America/New_York"; } catch { return "America/New_York"; }
+  try {
+    return PreferencesStore.getState()?.timezone || "America/New_York";
+  } catch {
+    return "America/New_York";
+  }
 };
 const SABBATH_AWARE = () => {
-  try { return !!PreferencesStore.getState()?.sabbathAware; } catch { return true; }
+  try {
+    return !!PreferencesStore.getState()?.sabbathAware;
+  } catch {
+    return true;
+  }
 };
-const isSabbathApprox = (d = new Date(), tz = "America/New_York", aware = true) => {
+const isSabbathApprox = (
+  d = new Date(),
+  tz = "America/New_York",
+  aware = true
+) => {
   if (!aware) return false;
-  const dow = new Intl.DateTimeFormat("en-US", { weekday: "short", timeZone: tz }).format(d);
+  const dow = new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    timeZone: tz,
+  }).format(d);
   return dow === "Sat";
 };
-const uid = () => (crypto?.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random());
+const uid = () =>
+  crypto?.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random();
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
 
 /* ------------------------------ Local persistence ----------------------------- */
@@ -79,10 +107,14 @@ function readRoutines() {
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed : [];
-  } catch { return []; }
+  } catch {
+    return [];
+  }
 }
 function writeRoutines(xs) {
-  try { localStorage.setItem(LKEY, JSON.stringify(xs || [])); } catch {}
+  try {
+    localStorage.setItem(LKEY, JSON.stringify(xs || []));
+  } catch {}
 }
 
 /* ------------------------------- Undo/Redo Hook ------------------------------- */
@@ -120,13 +152,18 @@ export default function RoutineBoard() {
   const suggestions = useMemo(() => suggestStrategies({}), [routines.length]);
 
   // persist whenever history changes
-  useEffect(() => { writeRoutines(routines); }, [routines]);
+  useEffect(() => {
+    writeRoutines(routines);
+  }, [routines]);
 
   // listen to external plan creation to show success
   useEffect(() => {
     const off = eventBus.on("cleaning:plan:created", ({ planId, source }) => {
       if (!planId) return;
-      eventBus.emit("ui:toast", { type: "success", message: "Routine created. Open Live Session to start." });
+      eventBus.emit("ui:toast", {
+        type: "success",
+        message: "Routine created. Open Live Session to start.",
+      });
     });
     return () => off();
   }, []);
@@ -134,10 +171,15 @@ export default function RoutineBoard() {
   /* ----------------------------- Derived collections ----------------------------- */
   const filteredMine = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return routines.filter(r => {
-      const matchesQ = !q || (r.name?.toLowerCase?.().includes(q) || (r.tags || []).join(", ").toLowerCase().includes(q));
-      const matchesCad = filters.cadence === "all" || (r.cadence || "none") === filters.cadence;
-      const matchesTag = filters.tag === "all" || (r.tags || []).includes(filters.tag);
+    return routines.filter((r) => {
+      const matchesQ =
+        !q ||
+        r.name?.toLowerCase?.().includes(q) ||
+        (r.tags || []).join(", ").toLowerCase().includes(q);
+      const matchesCad =
+        filters.cadence === "all" || (r.cadence || "none") === filters.cadence;
+      const matchesTag =
+        filters.tag === "all" || (r.tags || []).includes(filters.tag);
       return matchesQ && matchesCad && matchesTag;
     });
   }, [routines, query, filters]);
@@ -149,27 +191,38 @@ export default function RoutineBoard() {
       name: "New Routine",
       tz,
       sabbathAware,
-      cadence: "none",         // for display; steps can have own cadence
+      cadence: "none", // for display; steps can have own cadence
       tags: [],
       steps: [],
       createdAt: new Date().toISOString(),
     };
     const next = [...routines, draft];
     history.set(next);
-    eventBus.emit("ui:toast", { type: "info", message: "Blank routine created. Add steps or Edit." });
+    eventBus.emit("ui:toast", {
+      type: "info",
+      message: "Blank routine created. Add steps or Edit.",
+    });
   };
 
   const duplicateRoutine = (rid) => {
-    const r = routines.find(x => x.id === rid);
+    const r = routines.find((x) => x.id === rid);
     if (!r) return;
-    const dup = { ...r, id: uid(), name: `${r.name} (copy)`, createdAt: new Date().toISOString() };
+    const dup = {
+      ...r,
+      id: uid(),
+      name: `${r.name} (copy)`,
+      createdAt: new Date().toISOString(),
+    };
     history.set([...routines, dup]);
-    eventBus.emit("ui:toast", { type: "success", message: "Routine duplicated." });
+    eventBus.emit("ui:toast", {
+      type: "success",
+      message: "Routine duplicated.",
+    });
   };
 
   const deleteRoutine = (rid) => {
     const prev = routines;
-    const next = prev.filter(x => x.id !== rid);
+    const next = prev.filter((x) => x.id !== rid);
     history.set(next);
     eventBus.emit("ui:toast:undo", {
       message: "Routine deleted",
@@ -179,57 +232,82 @@ export default function RoutineBoard() {
   };
 
   const saveRoutineMeta = (rid, patch) => {
-    const next = routines.map(r => r.id === rid ? { ...r, ...patch } : r);
+    const next = routines.map((r) => (r.id === rid ? { ...r, ...patch } : r));
     history.set(next);
   };
 
   const openDesigner = (rid = null) => {
     // prefer route if available
-    eventBus.emit("ui:navigate", { to: "/cleaning/entry-exit-flow", state: { routineId: rid } });
+    eventBus.emit("ui:navigate", {
+      to: "/cleaning/entry-exit-flow",
+      state: { routineId: rid },
+    });
   };
 
   const startLive = (rid) => {
-    const r = routines.find(x => x.id === rid);
+    const r = routines.find((x) => x.id === rid);
     if (!r) return;
     // Create ad-hoc plan with routine steps
     try {
-      const tasks = (r.steps || []).map((s, idx) => ({
-        id: s.id || `t-${idx}`,
-        title: s.title || `Step ${idx + 1}`,
-        area: s.zone || "entry",
-        estMinutes: clamp(s.estMinutes || 3, 1, 120),
-        priority: 2,
-        cadence: s.cadence || null,
-        meta: { trigger: s.trigger, role: s.role, sabbathBlocked: s.sabbathBlocked !== false, tags: s.tags || [] },
-      })).filter(t => !(t.meta?.sabbathBlocked && sabbathActive));
+      const tasks = (r.steps || [])
+        .map((s, idx) => ({
+          id: s.id || `t-${idx}`,
+          title: s.title || `Step ${idx + 1}`,
+          area: s.zone || "entry",
+          estMinutes: clamp(s.estMinutes || 3, 1, 120),
+          priority: 2,
+          cadence: s.cadence || null,
+          meta: {
+            trigger: s.trigger,
+            role: s.role,
+            sabbathBlocked: s.sabbathBlocked !== false,
+            tags: s.tags || [],
+          },
+        }))
+        .filter((t) => !(t.meta?.sabbathBlocked && sabbathActive));
 
       if (CleaningPlanManager?.createAdhocPlan) {
         const plan = CleaningPlanManager.createAdhocPlan({
           title: r.name || "Routine",
           tasks,
-          meta: { source: "RoutineBoard", routineId: rid, createdAt: new Date().toISOString() },
+          meta: {
+            source: "RoutineBoard",
+            routineId: rid,
+            createdAt: new Date().toISOString(),
+          },
         });
-        eventBus.emit("cleaning:plan:created", { planId: plan?.id, source: "routine-board" });
+        eventBus.emit("cleaning:plan:created", {
+          planId: plan?.id,
+          source: "routine-board",
+        });
         // Navigate to live session view if registered by the app shell
         eventBus.emit("ui:navigate", { to: "/tier2/household/cleaning/live" });
       } else {
-        eventBus.emit("ui:toast", { type: "info", message: "Live session service not available." });
+        eventBus.emit("ui:toast", {
+          type: "info",
+          message: "Live session service not available.",
+        });
       }
 
       // Schedule cadence steps
-      tasks.filter(t => !!t.cadence).forEach((t) => {
-        const rrule = deepCleanCadenceToRRULE(t.cadence);
-        eventBus.emit("calendar:create:rrule", {
-          title: `Routine: ${t.title}`,
-          area: t.area,
-          rrule,
-          tz,
-          meta: { source: "routine-board", cadence: t.cadence },
+      tasks
+        .filter((t) => !!t.cadence)
+        .forEach((t) => {
+          const rrule = deepCleanCadenceToRRULE(t.cadence);
+          eventBus.emit("calendar:create:rrule", {
+            title: `Routine: ${t.title}`,
+            area: t.area,
+            rrule,
+            tz,
+            meta: { source: "routine-board", cadence: t.cadence },
+          });
         });
-      });
     } catch (e) {
       console.error(e);
-      eventBus.emit("ui:toast", { type: "error", message: "Could not start live session." });
+      eventBus.emit("ui:toast", {
+        type: "error",
+        message: "Could not start live session.",
+      });
     }
   };
 
@@ -238,7 +316,9 @@ export default function RoutineBoard() {
     try {
       // soft import to avoid circular
       const mod = await import("@/data/organizingStrategies");
-      const res = await mod.materializeStrategy(strategyId, { blockOnSabbath: true });
+      const res = await mod.materializeStrategy(strategyId, {
+        blockOnSabbath: true,
+      });
       const steps = (res?.tasks || []).map((t) => ({
         id: t.id || uid(),
         title: t.title,
@@ -253,7 +333,9 @@ export default function RoutineBoard() {
 
       const routine = {
         id: uid(),
-        name: (getStrategies().find(s => s.id === strategyId)?.name) || "Generated Routine",
+        name:
+          getStrategies().find((s) => s.id === strategyId)?.name ||
+          "Generated Routine",
         tz,
         sabbathAware,
         cadence: "mixed",
@@ -264,21 +346,29 @@ export default function RoutineBoard() {
       history.set([...routines, routine]);
 
       // If strategy already scheduled cadences, great; otherwise do it now:
-      steps.filter(s => !!s.cadence).forEach((s) => {
-        const rrule = deepCleanCadenceToRRULE(s.cadence);
-        eventBus.emit("calendar:create:rrule", {
-          title: `Routine: ${s.title}`,
-          area: s.zone,
-          rrule,
-          tz,
-          meta: { source: "routine-board", cadence: s.cadence },
+      steps
+        .filter((s) => !!s.cadence)
+        .forEach((s) => {
+          const rrule = deepCleanCadenceToRRULE(s.cadence);
+          eventBus.emit("calendar:create:rrule", {
+            title: `Routine: ${s.title}`,
+            area: s.zone,
+            rrule,
+            tz,
+            meta: { source: "routine-board", cadence: s.cadence },
+          });
         });
-      });
 
-      eventBus.emit("ui:toast", { type: "success", message: "Routine generated from suggestion." });
+      eventBus.emit("ui:toast", {
+        type: "success",
+        message: "Routine generated from suggestion.",
+      });
     } catch (e) {
       console.error(e);
-      eventBus.emit("ui:toast", { type: "error", message: "Could not generate from suggestion." });
+      eventBus.emit("ui:toast", {
+        type: "error",
+        message: "Could not generate from suggestion.",
+      });
     } finally {
       setBusy(false);
     }
@@ -289,16 +379,31 @@ export default function RoutineBoard() {
   const Toolbar = () => (
     <div className="flex flex-wrap items-center gap-2 mb-3">
       <div className="flex items-center gap-2">
-        <button className="btn" onClick={() => history.undo()} disabled={!history.canUndo} title="Undo">
+        <button
+          className="btn"
+          onClick={() => history.undo()}
+          disabled={!history.canUndo}
+          title="Undo"
+        >
           <Undo2 className="w-4 h-4 mr-1" /> Undo
         </button>
-        <button className="btn" onClick={() => history.redo()} disabled={!history.canRedo} title="Redo">
+        <button
+          className="btn"
+          onClick={() => history.redo()}
+          disabled={!history.canRedo}
+          title="Redo"
+        >
           <Redo2 className="w-4 h-4 mr-1" /> Redo
         </button>
         <button className="btn" onClick={() => createBlankRoutine()}>
           <Plus className="w-4 h-4 mr-1" /> New Routine
         </button>
-        <button className="btn" onClick={() => eventBus.emit("ui:navigate", { to: "/cleaning/entry-exit-flow" })}>
+        <button
+          className="btn"
+          onClick={() =>
+            eventBus.emit("ui:navigate", { to: "/cleaning/entry-exit-flow" })
+          }
+        >
           <DoorOpen className="w-4 h-4 mr-1" /> New Entry/Exit Flow
         </button>
       </div>
@@ -318,7 +423,9 @@ export default function RoutineBoard() {
           <select
             className="border rounded-lg px-2 py-2"
             value={filters.cadence}
-            onChange={(e) => setFilters((f) => ({ ...f, cadence: e.target.value }))}
+            onChange={(e) =>
+              setFilters((f) => ({ ...f, cadence: e.target.value }))
+            }
           >
             <option value="all">All cadences</option>
             <option value="none">No cadence</option>
@@ -347,14 +454,24 @@ export default function RoutineBoard() {
 
   const Tabs = () => (
     <div className="flex items-center gap-2 mb-3">
-      <button className={`tab ${tab === "mine" ? "tab-active" : ""}`} onClick={() => setTab("mine")}>My Routines</button>
-      <button className={`tab ${tab === "suggestions" ? "tab-active" : ""}`} onClick={() => setTab("suggestions")}>
+      <button
+        className={`tab ${tab === "mine" ? "tab-active" : ""}`}
+        onClick={() => setTab("mine")}
+      >
+        My Routines
+      </button>
+      <button
+        className={`tab ${tab === "suggestions" ? "tab-active" : ""}`}
+        onClick={() => setTab("suggestions")}
+      >
         <Sparkles className="w-4 h-4 mr-1" /> Suggestions
       </button>
       <div className="ml-auto flex items-center gap-2 text-sm text-gray-600">
         <BadgeCheck className="w-4 h-4" />
         Sabbath Guard: {sabbathAware ? "On" : "Off"}
-        {sabbathActive && <span className="ml-2 text-amber-600">(active now)</span>}
+        {sabbathActive && (
+          <span className="ml-2 text-amber-600">(active now)</span>
+        )}
       </div>
     </div>
   );
@@ -363,16 +480,26 @@ export default function RoutineBoard() {
     <div className="p-4 border rounded-2xl bg-white flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <div className="font-medium">{r.name}</div>
-        <div className="text-xs text-gray-500">{new Date(r.createdAt).toLocaleDateString()}</div>
+        <div className="text-xs text-gray-500">
+          {new Date(r.createdAt).toLocaleDateString()}
+        </div>
       </div>
       <div className="text-sm text-gray-600">
         {(r.tags || []).map((t) => (
-          <span key={t} className="inline-block text-xs px-2 py-1 rounded-full border mr-1 mb-1">{t}</span>
+          <span
+            key={t}
+            className="inline-block text-xs px-2 py-1 rounded-full border mr-1 mb-1"
+          >
+            {t}
+          </span>
         ))}
-        {!r.tags?.length && <span className="text-xs text-gray-400">No tags</span>}
+        {!r.tags?.length && (
+          <span className="text-xs text-gray-400">No tags</span>
+        )}
       </div>
       <div className="text-xs text-gray-500">
-        {r.steps?.length || 0} steps{r.cadence && r.cadence !== "none" ? ` • ${r.cadence}` : ""}
+        {r.steps?.length || 0} steps
+        {r.cadence && r.cadence !== "none" ? ` • ${r.cadence}` : ""}
       </div>
 
       {/* Quick actions */}
@@ -386,20 +513,28 @@ export default function RoutineBoard() {
         <button className="btn" onClick={() => duplicateRoutine(r.id)}>
           <Copy className="w-4 h-4 mr-1" /> Duplicate
         </button>
-        <button className="btn" onClick={() => {
-          // schedule all cadence steps (if any)
-          (r.steps || []).filter(s => !!s.cadence).forEach((s) => {
-            const rrule = deepCleanCadenceToRRULE(s.cadence);
-            eventBus.emit("calendar:create:rrule", {
-              title: `Routine: ${s.title}`,
-              area: s.zone || "entry",
-              rrule,
-              tz,
-              meta: { source: "routine-board", cadence: s.cadence },
+        <button
+          className="btn"
+          onClick={() => {
+            // schedule all cadence steps (if any)
+            (r.steps || [])
+              .filter((s) => !!s.cadence)
+              .forEach((s) => {
+                const rrule = deepCleanCadenceToRRULE(s.cadence);
+                eventBus.emit("calendar:create:rrule", {
+                  title: `Routine: ${s.title}`,
+                  area: s.zone || "entry",
+                  rrule,
+                  tz,
+                  meta: { source: "routine-board", cadence: s.cadence },
+                });
+              });
+            eventBus.emit("ui:toast", {
+              type: "success",
+              message: "Cadence items scheduled.",
             });
-          });
-          eventBus.emit("ui:toast", { type: "success", message: "Cadence items scheduled." });
-        }}>
+          }}
+        >
           <CalendarPlus className="w-4 h-4 mr-1" /> Schedule
         </button>
         <button className="btn btn-danger" onClick={() => deleteRoutine(r.id)}>
@@ -443,17 +578,39 @@ export default function RoutineBoard() {
 
       {/* Strategy-driven suggestions */}
       {suggestions.slice(0, 6).map(({ id, name, description, tags = [] }) => (
-        <div key={id} className="p-4 border rounded-2xl bg-white flex flex-col gap-2">
+        <div
+          key={id}
+          className="p-4 border rounded-2xl bg-white flex flex-col gap-2"
+        >
           <div className="font-medium">{name}</div>
           <div className="text-sm text-gray-600">{description}</div>
           <div className="text-xs text-gray-500">
-            {tags.map((t) => <span key={t} className="inline-block text-xs px-2 py-1 rounded-full border mr-1 mb-1">{t}</span>)}
+            {tags.map((t) => (
+              <span
+                key={t}
+                className="inline-block text-xs px-2 py-1 rounded-full border mr-1 mb-1"
+              >
+                {t}
+              </span>
+            ))}
           </div>
           <div className="flex gap-2 mt-1">
-            <button className="btn btn-primary" disabled={busy} onClick={() => materializeSuggestion(id)}>
+            <button
+              className="btn btn-primary"
+              disabled={busy}
+              onClick={() => materializeSuggestion(id)}
+            >
               <Sparkles className="w-4 h-4 mr-1" /> Generate Routine
             </button>
-            <button className="btn" onClick={() => eventBus.emit("ui:navigate", { to: "/cleaning/entry-exit-flow", state: { preset: id } })}>
+            <button
+              className="btn"
+              onClick={() =>
+                eventBus.emit("ui:navigate", {
+                  to: "/cleaning/entry-exit-flow",
+                  state: { preset: id },
+                })
+              }
+            >
               <Edit3 className="w-4 h-4 mr-1" /> Edit First
             </button>
           </div>
@@ -471,13 +628,29 @@ export default function RoutineBoard() {
           <h2 className="text-lg font-semibold">Routine Board</h2>
         </div>
         <div className="flex items-center gap-2">
-          <button className="btn" onClick={() => eventBus.emit("ui:navigate", { to: "/tier2/household/cleaning/live" })}>
+          <button
+            className="btn"
+            onClick={() =>
+              eventBus.emit("ui:navigate", {
+                to: "/tier2/household/cleaning/live",
+              })
+            }
+          >
             <Play className="w-4 h-4 mr-1" /> Open Live Session
           </button>
-          <button className="btn" onClick={() => eventBus.emit("ui:refresh", { scope: "routines" })}>
+          <button
+            className="btn"
+            onClick={() => eventBus.emit("ui:refresh", { scope: "routines" })}
+          >
             <RefreshCcw className="w-4 h-4 mr-1" /> Refresh
           </button>
-          <button className="btn" onClick={() => { writeRoutines(routines); eventBus.emit("ui:toast", { type: "success", message: "Saved." }); }}>
+          <button
+            className="btn"
+            onClick={() => {
+              writeRoutines(routines);
+              eventBus.emit("ui:toast", { type: "success", message: "Saved." });
+            }}
+          >
             <Save className="w-4 h-4 mr-1" /> Save
           </button>
         </div>
@@ -495,13 +668,20 @@ export default function RoutineBoard() {
                 <span className="font-medium">No routines found</span>
               </div>
               <p className="text-sm text-gray-500 mt-1">
-                Get started with a preset or create a blank routine, then edit in the Flow Designer.
+                Get started with a preset or create a blank routine, then edit
+                in the Flow Designer.
               </p>
               <div className="mt-4 flex items-center justify-center gap-2">
-                <button className="btn" onClick={() => materializeSuggestion("daily-reset")}>
+                <button
+                  className="btn"
+                  onClick={() => materializeSuggestion("daily-reset")}
+                >
                   <DoorOpen className="w-4 h-4 mr-1" /> Daily Entry Reset
                 </button>
-                <button className="btn" onClick={() => materializeSuggestion("bug-shield-perimeter")}>
+                <button
+                  className="btn"
+                  onClick={() => materializeSuggestion("bug-shield-perimeter")}
+                >
                   <Shield className="w-4 h-4 mr-1" /> Bug-Shield
                 </button>
                 <button className="btn" onClick={createBlankRoutine}>
@@ -511,7 +691,9 @@ export default function RoutineBoard() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-              {filteredMine.map((r) => <RoutineCard key={r.id} r={r} />)}
+              {filteredMine.map((r) => (
+                <RoutineCard key={r.id} r={r} />
+              ))}
             </div>
           )}
         </>
@@ -523,13 +705,16 @@ export default function RoutineBoard() {
       <div className="mt-4 p-3 rounded-2xl border bg-white">
         <div className="flex flex-wrap items-center gap-3 text-sm">
           <span className="text-gray-600 flex items-center gap-1">
-            <Play className="w-4 h-4" /> <b>Start Live Session</b> launches an ad-hoc plan with Sabbath guard.
+            <Play className="w-4 h-4" /> <b>Start Live Session</b> launches an
+            ad-hoc plan with Sabbath guard.
           </span>
           <span className="text-gray-600 flex items-center gap-1">
-            <CalendarPlus className="w-4 h-4" /> <b>Schedule</b> creates RRULEs for steps with cadences (monthly/quarterly/bi-annual/annual).
+            <CalendarPlus className="w-4 h-4" /> <b>Schedule</b> creates RRULEs
+            for steps with cadences (monthly/quarterly/bi-annual/annual).
           </span>
           <span className="text-gray-600 flex items-center gap-1">
-            <Sparkles className="w-4 h-4" /> <b>Suggestions</b> learn from Inventory/Garden/Household signals over time.
+            <Sparkles className="w-4 h-4" /> <b>Suggestions</b> learn from
+            Inventory/Garden/Household signals over time.
           </span>
         </div>
       </div>
@@ -541,7 +726,13 @@ export default function RoutineBoard() {
 }
 
 /* ------------------------------ Small subcomponents ------------------------------ */
-function SuggestionTile({ icon, title, subtitle, onGenerate, cta = "Generate" }) {
+function SuggestionTile({
+  icon,
+  title,
+  subtitle,
+  onGenerate,
+  cta = "Generate",
+}) {
   return (
     <div className="p-4 border rounded-2xl bg-white flex flex-col gap-2">
       <div className="flex items-center gap-2">

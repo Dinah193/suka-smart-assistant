@@ -36,8 +36,8 @@
 //
 // -----------------------------------------------------------------------------
 
-import eventBus from "@/services/eventBus.js";
-import featureFlags from "@/config/featureFlags.js";
+import eventBus from "@/services/events/eventBus.js";
+import featureFlags from "@/config/featureFlags.json";
 
 // soft hub deps
 let HubPacketFormatter = null;
@@ -175,7 +175,15 @@ function detectDomainFromEvent(evt = {}) {
   return "other";
 }
 
-function upsertMethod(method, domain, evtTs, sourceId, weightIn, weightOut, successFlag) {
+function upsertMethod(
+  method,
+  domain,
+  evtTs,
+  sourceId,
+  weightIn,
+  weightOut,
+  successFlag
+) {
   const key = method || "other";
   const monthKey = getMonthKey(evtTs);
   const iso = typeof evtTs === "string" ? evtTs : nowIso();
@@ -257,7 +265,8 @@ function initListener() {
     // 1) Real completed preservation from the system or user
     if (evt.type === "preservation.completed") {
       const method = detectMethod(evt.data || {});
-      const srcId = evt.data?.id || evt.data?.preservationId || evt.data?.sourceId;
+      const srcId =
+        evt.data?.id || evt.data?.preservationId || evt.data?.sourceId;
       const weightIn = asNumber(evt.data?.weightIn || evt.data?.weightBefore);
       const weightOut = asNumber(evt.data?.weightOut || evt.data?.weightAfter);
       const successFlag =
@@ -270,7 +279,7 @@ function initListener() {
         srcId,
         weightIn,
         weightOut,
-        successFlag,
+        successFlag
       );
 
       // this is a REAL household-changing event → export
@@ -295,7 +304,15 @@ function initListener() {
       const srcId = evt.data?.id || null;
       const weightIn = asNumber(evt.data?.weight);
 
-      upsertMethod("potential-from-garden", "garden", ts, srcId, weightIn, null, true);
+      upsertMethod(
+        "potential-from-garden",
+        "garden",
+        ts,
+        srcId,
+        weightIn,
+        null,
+        true
+      );
 
       // no export – this is just potential
       return;
@@ -315,8 +332,8 @@ function initListener() {
         .join("\n")
         .toLowerCase();
 
-      const hasPreservationWord = Object.values(METHOD_ALIASES).some((aliases) =>
-        aliases.some((a) => text.includes(a)),
+      const hasPreservationWord = Object.values(METHOD_ALIASES).some(
+        (aliases) => aliases.some((a) => text.includes(a))
       );
 
       if (hasPreservationWord) {
@@ -329,7 +346,10 @@ function initListener() {
     }
 
     // 4) animal/butchery – may imply preservation (freeze/cure)
-    if (evt.type === "animal.processed" || evt.type === "animal.butchery.completed") {
+    if (
+      evt.type === "animal.processed" ||
+      evt.type === "animal.butchery.completed"
+    ) {
       const srcId = evt.data?.id || null;
       const weightOut = asNumber(evt.data?.meatWeight);
       upsertMethod("freeze", "animal", ts, srcId, weightOut, weightOut, true);
@@ -429,9 +449,4 @@ const preservationStats = {
 };
 
 export default preservationStats;
-export {
-  initListener,
-  getAllStats,
-  getMethodReport,
-  prune,
-};
+export { initListener, getAllStats, getMethodReport, prune };

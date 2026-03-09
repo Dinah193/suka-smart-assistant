@@ -1,0 +1,730 @@
+{
+  "$schema": "../../schemas/farm_to_table/substitutions.catalog.schema.json",
+  "catalogId": "farm_to_table.substitutions",
+  "version": "1.0.0",
+  "generatedAt": "2026-01-10T02:21:36Z",
+  "notes": [
+    "Deterministic substitution rules for SSA Farm-to-Table planning.",
+    "Rules operate on component IDs, substitution groups, tags, and categories defined in components.catalog.json.",
+    "Cuisine and diet/allergen constraints can be used as gates for rule eligibility.",
+    "This catalog is designed to be applied in priority order; first match wins unless merge is enabled by the caller."
+  ],
+  "enums": {
+    "matchMode": ["any", "all"],
+    "priority": ["critical", "high", "medium", "low"],
+    "applyMode": ["replace", "add", "remove", "prefer", "avoid", "suggest"],
+    "reasonCodes": [
+      "out_of_stock",
+      "seasonal_unavailable",
+      "allergen_avoidance",
+      "diet_preference",
+      "cost_saving",
+      "time_saving",
+      "technique_fit",
+      "cuisine_alignment",
+      "preservation_fit",
+      "storehouse_first",
+      "garden_first",
+      "animal_first"
+    ],
+    "dietTags": [
+      "omnivore",
+      "pescatarian",
+      "vegetarian",
+      "vegan",
+      "gluten_free",
+      "dairy_free",
+      "egg_free",
+      "low_carb",
+      "low_sodium"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy",
+      "egg",
+      "soy",
+      "fish",
+      "shellfish",
+      "peanut",
+      "tree_nut",
+      "sesame"
+    ]
+  },
+  "indexes": {
+    "byCuisine": true,
+    "byReasonCode": true,
+    "byTargetGroup": true,
+    "byAllergen": true,
+    "byDiet": true
+  },
+  "groups": [
+    {
+      "id": "group.protein.poultry",
+      "label": "Poultry proteins",
+      "description": "Chicken and similar poultry cuts.",
+      "match": {
+        "substitutionGroupsAny": ["protein.poultry"],
+        "tagsAny": ["poultry"],
+        "categoryIds": ["proteins.meat"]
+      }
+    },
+    {
+      "id": "group.protein.red_meat",
+      "label": "Red meat proteins",
+      "description": "Beef and lamb cuts.",
+      "match": {
+        "substitutionGroupsAny": ["protein.red_meat"],
+        "tagsAny": ["beef", "lamb"],
+        "categoryIds": ["proteins.meat"]
+      }
+    },
+    {
+      "id": "group.protein.eggs",
+      "label": "Eggs",
+      "description": "Eggs as a protein source.",
+      "match": {
+        "substitutionGroupsAny": ["protein.eggs"],
+        "tagsAny": ["eggs"],
+        "categoryIds": ["proteins.eggs"]
+      }
+    },
+    {
+      "id": "group.legume.dry",
+      "label": "Dry legumes",
+      "description": "Dry beans and lentils.",
+      "match": {
+        "substitutionGroupsAny": ["legume.dry_beans", "legume.lentils"],
+        "tagsAny": ["beans", "lentils", "legume"],
+        "categoryIds": ["staples.legumes"]
+      }
+    },
+    {
+      "id": "group.starch.rice",
+      "label": "Rice",
+      "description": "White/brown rice staples.",
+      "match": {
+        "substitutionGroupsAny": ["grain.rice_white", "grain.rice_brown"],
+        "tagsAny": ["rice"],
+        "categoryIds": ["staples.grains"]
+      }
+    },
+    {
+      "id": "group.starch.cornmeal",
+      "label": "Cornmeal",
+      "description": "Cornmeal for cornbread/grits.",
+      "match": {
+        "substitutionGroupsAny": ["grain.cornmeal"],
+        "tagsAny": ["corn", "cornbread", "grits"],
+        "categoryIds": ["staples.grains"]
+      }
+    },
+    {
+      "id": "group.starch.potato",
+      "label": "Potato",
+      "description": "Potatoes as starch.",
+      "match": {
+        "substitutionGroupsAny": ["starch.potato"],
+        "tagsAny": ["root", "starch"],
+        "categoryIds": ["staples.grains"]
+      }
+    },
+    {
+      "id": "group.baking.flour",
+      "label": "Flour (wheat/whole wheat)",
+      "description": "Wheat flour and wheat berries used for bread/flatbreads.",
+      "match": {
+        "substitutionGroupsAny": ["grain.flour", "grain.wheat_berries"],
+        "tagsAny": ["flour", "grain", "bread", "milling"],
+        "categoryIds": ["staples.grains"]
+      }
+    },
+    {
+      "id": "group.veg.cabbage",
+      "label": "Cabbage",
+      "description": "Cabbage/crucifer veg used for slaw, ferment, sides.",
+      "match": {
+        "substitutionGroupsAny": ["veg.cabbage"],
+        "tagsAny": ["crucifer", "slaw", "ferment"],
+        "categoryIds": ["produce.vegetables"]
+      }
+    },
+    {
+      "id": "group.veg.tomato",
+      "label": "Tomato",
+      "description": "Tomato base veg.",
+      "match": {
+        "substitutionGroupsAny": ["veg.tomato"],
+        "tagsAny": ["tomato", "sauce", "nightshade"],
+        "categoryIds": ["produce.vegetables"]
+      }
+    },
+    {
+      "id": "group.veg.aromatics",
+      "label": "Aromatics",
+      "description": "Onion and garlic.",
+      "match": {
+        "substitutionGroupsAny": ["veg.onion", "veg.garlic"],
+        "tagsAny": ["aromatic", "allium"],
+        "categoryIds": ["produce.vegetables"]
+      }
+    },
+    {
+      "id": "group.pantry.vinegar",
+      "label": "Vinegar / acidifier",
+      "description": "Pickling vinegar / acids.",
+      "match": {
+        "substitutionGroupsAny": [
+          "pantry.vinegar",
+          "preserve_input.vinegar",
+          "preserve_input.acidifier"
+        ],
+        "tagsAny": ["vinegar", "pickling"],
+        "categoryIds": ["pantry.condiments", "preservation.inputs"]
+      }
+    },
+    {
+      "id": "group.pantry.tomato_concentrate",
+      "label": "Tomato concentrate",
+      "description": "Tomato paste and concentrates.",
+      "match": {
+        "substitutionGroupsAny": ["pantry.tomato_concentrate"],
+        "tagsAny": ["tomato", "sauce"],
+        "categoryIds": ["pantry.condiments"]
+      }
+    },
+    {
+      "id": "group.preserve.inputs.salt",
+      "label": "Preservation salt",
+      "description": "Salt used for preservation and seasoning.",
+      "match": {
+        "substitutionGroupsAny": ["preserve_input.salt"],
+        "tagsAny": ["salt", "preservation"],
+        "categoryIds": ["preservation.inputs"]
+      }
+    }
+  ],
+  "rules": [
+    {
+      "id": "rule.protein_missing_shift_to_legumes_or_eggs",
+      "label": "Protein missing → shift to legumes/eggs",
+      "description": "If a meat protein is missing/out-of-stock, prefer legumes or eggs; otherwise reduce protein portion and increase veg.",
+      "priority": "high",
+      "when": {
+        "targetRole": "protein",
+        "missingGroupAny": ["group.protein.poultry", "group.protein.red_meat"],
+        "matchMode": "any"
+      },
+      "constraints": {
+        "cuisinesAny": [],
+        "cuisinesNot": [],
+        "dietsAny": [],
+        "dietsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "then": {
+        "applyMode": "prefer",
+        "preferGroups": ["group.legume.dry", "group.protein.eggs"],
+        "fallbackStrategies": [
+          "reduce_target_ratio",
+          "increase_group:group.veg.cabbage",
+          "increase_group:group.veg.tomato"
+        ]
+      },
+      "reasonCodes": ["out_of_stock", "storehouse_first", "time_saving"],
+      "notes": ""
+    },
+    {
+      "id": "rule.starch_missing_swap_rice_potato_cornmeal",
+      "label": "Starch missing → swap rice/potato/cornmeal",
+      "description": "If preferred starch group is unavailable, swap to another starch group.",
+      "priority": "high",
+      "when": {
+        "targetRole": "starch",
+        "missingGroupAny": [
+          "group.starch.rice",
+          "group.starch.potato",
+          "group.starch.cornmeal"
+        ],
+        "matchMode": "any"
+      },
+      "constraints": {
+        "cuisinesAny": [],
+        "cuisinesNot": [],
+        "dietsAny": [],
+        "dietsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "then": {
+        "applyMode": "prefer",
+        "preferGroups": [
+          "group.starch.rice",
+          "group.starch.potato",
+          "group.starch.cornmeal"
+        ],
+        "avoidGroups": [],
+        "fallbackStrategies": ["use_bread_from_group:group.baking.flour"]
+      },
+      "reasonCodes": ["out_of_stock", "storehouse_first"],
+      "notes": ""
+    },
+    {
+      "id": "rule.veg_missing_use_preserved_or_fermented",
+      "label": "Vegetable missing → use preserved or fermented",
+      "description": "If fresh vegetables are low, use frozen/canned/fermented equivalents via preservation tags/groups.",
+      "priority": "medium",
+      "when": {
+        "targetRole": "vegetable",
+        "missingGroupAny": ["group.veg.cabbage", "group.veg.tomato"],
+        "matchMode": "any"
+      },
+      "constraints": {
+        "cuisinesAny": [],
+        "cuisinesNot": [],
+        "dietsAny": [],
+        "dietsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "then": {
+        "applyMode": "suggest",
+        "suggestions": [
+          {
+            "strategy": "use_preserved_variant",
+            "methodsPrefer": [
+              "preserve.freeze",
+              "preserve.culture_ferment",
+              "preserve.dehydrate",
+              "preserve.pressure_can"
+            ]
+          },
+          {
+            "strategy": "use_slaw_or_ferment",
+            "group": "group.veg.cabbage"
+          }
+        ]
+      },
+      "reasonCodes": ["out_of_stock", "preservation_fit"],
+      "notes": ""
+    },
+    {
+      "id": "rule.gluten_free_swap_flour_to_rice_or_potato",
+      "label": "Gluten-free: avoid wheat flour → rice/potato/cornmeal",
+      "description": "If gluten-free diet is active, avoid wheat flour and shift starch choices to rice, potato, or cornmeal.",
+      "priority": "critical",
+      "when": {
+        "matchAny": [
+          {
+            "role": "starch",
+            "group": "group.baking.flour"
+          },
+          {
+            "role": "bread",
+            "group": "group.baking.flour"
+          }
+        ]
+      },
+      "constraints": {
+        "cuisinesAny": [],
+        "cuisinesNot": [],
+        "dietsAny": ["gluten_free"],
+        "dietsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "then": {
+        "applyMode": "avoid",
+        "avoidGroups": ["group.baking.flour"],
+        "preferGroups": [
+          "group.starch.rice",
+          "group.starch.potato",
+          "group.starch.cornmeal"
+        ]
+      },
+      "reasonCodes": ["diet_preference", "allergen_avoidance"],
+      "notes": "Cornmeal may still be acceptable; validate household-specific cross-contamination preferences separately."
+    },
+    {
+      "id": "rule.dairy_free_swap_butter_to_oil",
+      "label": "Dairy-free: butter → olive oil",
+      "description": "If dairy-free diet is active, prefer olive oil over butter/ghee.",
+      "priority": "critical",
+      "when": {
+        "targetComponentsAny": ["dairy.butter"]
+      },
+      "constraints": {
+        "cuisinesAny": [],
+        "cuisinesNot": [],
+        "dietsAny": ["dairy_free"],
+        "dietsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "then": {
+        "applyMode": "replace",
+        "replace": [
+          {
+            "fromComponentId": "dairy.butter",
+            "toComponentGroup": "group.fat.oil",
+            "toComponentIdFallback": "fat.olive_oil"
+          }
+        ]
+      },
+      "reasonCodes": ["diet_preference", "allergen_avoidance"],
+      "notes": ""
+    },
+    {
+      "id": "rule.egg_free_swap_eggs_to_legumes",
+      "label": "Egg-free: eggs → legumes",
+      "description": "If egg-free diet is active, avoid eggs and shift protein role to legumes.",
+      "priority": "critical",
+      "when": {
+        "targetComponentsAny": ["protein.eggs_chicken"]
+      },
+      "constraints": {
+        "cuisinesAny": [],
+        "cuisinesNot": [],
+        "dietsAny": ["egg_free"],
+        "dietsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "then": {
+        "applyMode": "replace",
+        "replace": [
+          {
+            "fromComponentId": "protein.eggs_chicken",
+            "toComponentGroup": "group.legume.dry"
+          }
+        ]
+      },
+      "reasonCodes": ["diet_preference", "allergen_avoidance"],
+      "notes": ""
+    },
+    {
+      "id": "rule.curry_indian_masala_additions",
+      "label": "Indian curry: add masala aromatics/spices",
+      "description": "When curry intent is detected and Indian cuisine active, add/encourage core masala aromatics and spices.",
+      "priority": "high",
+      "when": {
+        "intentTagsAny": ["curry", "masala", "gravy", "stew"]
+      },
+      "constraints": {
+        "cuisinesAny": ["cuisine.indian.north_masala"],
+        "cuisinesNot": [],
+        "dietsAny": [],
+        "dietsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "then": {
+        "applyMode": "add",
+        "addPrefer": {
+          "spices": [
+            "spice.cumin",
+            "spice.coriander",
+            "spice.turmeric",
+            "spice.garam_masala"
+          ],
+          "aromatics": ["spice.onion", "spice.garlic", "spice.ginger"],
+          "acids": ["spice.lemon"]
+        }
+      },
+      "reasonCodes": ["cuisine_alignment", "technique_fit"],
+      "notes": ""
+    },
+    {
+      "id": "rule.curry_caribbean_additions",
+      "label": "Caribbean curry: add allspice/thyme/lime",
+      "description": "When curry intent is detected and Caribbean cuisine active, add/encourage allspice, thyme, and lime/vinegar.",
+      "priority": "high",
+      "when": {
+        "intentTagsAny": ["curry", "stew"]
+      },
+      "constraints": {
+        "cuisinesAny": [
+          "cuisine.aai.caribbean_stream",
+          "cuisine.caribbean.island_home"
+        ],
+        "cuisinesNot": [],
+        "dietsAny": [],
+        "dietsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "then": {
+        "applyMode": "add",
+        "addPrefer": {
+          "spices": ["spice.allspice", "spice.thyme", "spice.curry_powder"],
+          "aromatics": ["spice.scallion", "spice.garlic", "spice.onion"],
+          "acids": ["spice.lime", "spice.vinegar"],
+          "heat": ["spice.scotch_bonnet"]
+        }
+      },
+      "reasonCodes": ["cuisine_alignment"],
+      "notes": ""
+    },
+    {
+      "id": "rule.curry_starch_pairing_indian_vs_caribbean",
+      "label": "Curry starch pairing: Indian vs Caribbean",
+      "description": "Bias starch pairing based on cuisine when curry intent exists.",
+      "priority": "medium",
+      "when": {
+        "intentTagsAny": ["curry", "stew"]
+      },
+      "constraints": {
+        "cuisinesAny": [],
+        "cuisinesNot": [],
+        "dietsAny": [],
+        "dietsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "then": {
+        "applyMode": "prefer",
+        "preferByCuisine": {
+          "cuisine.indian.north_masala": [
+            "group.starch.rice",
+            "group.baking.flour"
+          ],
+          "cuisine.aai.caribbean_stream": [
+            "group.starch.rice",
+            "group.starch.cornmeal"
+          ],
+          "cuisine.caribbean.island_home": [
+            "group.starch.rice",
+            "group.starch.cornmeal"
+          ]
+        }
+      },
+      "reasonCodes": ["cuisine_alignment"],
+      "notes": ""
+    },
+    {
+      "id": "rule.southern_side_bias_cabbage_or_pickle",
+      "label": "Southern/AAI comfort: cabbage/pickle sides",
+      "description": "For Southern/AAI comfort plates, nudge vegetable sides to cabbage/slaw or pickled elements.",
+      "priority": "low",
+      "when": {
+        "targetRole": "vegetable"
+      },
+      "constraints": {
+        "cuisinesAny": ["cuisine.aai.southern_stream", "cuisine.aai.core"],
+        "cuisinesNot": [],
+        "dietsAny": [],
+        "dietsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "then": {
+        "applyMode": "prefer",
+        "preferGroups": ["group.veg.cabbage"],
+        "alsoSuggest": [
+          {
+            "strategy": "add_condiment",
+            "group": "group.pantry.vinegar"
+          }
+        ]
+      },
+      "reasonCodes": ["cuisine_alignment", "preservation_fit"],
+      "notes": ""
+    },
+    {
+      "id": "rule.pressure_can_stew_prefer_beef_or_chicken",
+      "label": "Pressure-canning stew: prefer beef/chicken + tomato base",
+      "description": "When preservation intent includes pressure canning, prefer proteins/veg that can into a stable stew base.",
+      "priority": "medium",
+      "when": {
+        "preservationIntentAny": ["preserve.pressure_can"],
+        "intentTagsAny": ["stew", "soup", "batch"]
+      },
+      "constraints": {
+        "cuisinesAny": [],
+        "cuisinesNot": [],
+        "dietsAny": [],
+        "dietsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "then": {
+        "applyMode": "prefer",
+        "preferGroups": [
+          "group.protein.poultry",
+          "group.protein.red_meat",
+          "group.veg.aromatics",
+          "group.veg.tomato",
+          "group.pantry.tomato_concentrate"
+        ],
+        "avoidTags": ["leafy_raw_only"]
+      },
+      "reasonCodes": ["preservation_fit", "time_saving"],
+      "notes": ""
+    },
+    {
+      "id": "rule.ferment_side_prefer_cabbage",
+      "label": "Ferment side: prefer cabbage",
+      "description": "If fermentation intent exists for sides, prioritize cabbage.",
+      "priority": "medium",
+      "when": {
+        "preservationIntentAny": ["preserve.culture_ferment"],
+        "targetRole": "vegetable"
+      },
+      "constraints": {
+        "cuisinesAny": [],
+        "cuisinesNot": [],
+        "dietsAny": [],
+        "dietsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "then": {
+        "applyMode": "prefer",
+        "preferGroups": ["group.veg.cabbage"],
+        "alsoAdd": [
+          {
+            "componentId": "preserve_input.salt",
+            "unit": "tbsp",
+            "amount": 2
+          }
+        ]
+      },
+      "reasonCodes": ["preservation_fit", "storehouse_first"],
+      "notes": ""
+    },
+    {
+      "id": "rule.cost_saving_swap_red_meat_to_poultry_or_legume",
+      "label": "Cost saving: red meat → poultry/legume",
+      "description": "If budget constraint is active, prefer poultry or legumes over red meat.",
+      "priority": "medium",
+      "when": {
+        "budgetMode": true,
+        "targetGroupAny": ["group.protein.red_meat"]
+      },
+      "constraints": {
+        "cuisinesAny": [],
+        "cuisinesNot": [],
+        "dietsAny": [],
+        "dietsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "then": {
+        "applyMode": "prefer",
+        "preferGroups": ["group.protein.poultry", "group.legume.dry"],
+        "avoidGroups": ["group.protein.red_meat"]
+      },
+      "reasonCodes": ["cost_saving"],
+      "notes": ""
+    },
+    {
+      "id": "rule.garden_first_use_in_season_veg",
+      "label": "Garden-first: prioritize in-season vegetables",
+      "description": "When sourcing priority is garden-first, prefer components marked seasonal and sourced from garden.",
+      "priority": "medium",
+      "when": {
+        "sourcingPriority": "garden_first",
+        "targetRole": "vegetable"
+      },
+      "constraints": {
+        "cuisinesAny": [],
+        "cuisinesNot": [],
+        "dietsAny": [],
+        "dietsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "then": {
+        "applyMode": "prefer",
+        "preferBySource": ["garden", "swap"],
+        "preferSeasonal": true
+      },
+      "reasonCodes": ["garden_first", "seasonal_unavailable"],
+      "notes": ""
+    },
+    {
+      "id": "rule.animals_first_use_available_protein",
+      "label": "Animals-first: prioritize animal proteins",
+      "description": "When animals-first is active, prefer animal proteins over purchased ones if on hand.",
+      "priority": "medium",
+      "when": {
+        "sourcingPriority": "animal_first",
+        "targetRole": "protein"
+      },
+      "constraints": {
+        "cuisinesAny": [],
+        "cuisinesNot": [],
+        "dietsAny": [],
+        "dietsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "then": {
+        "applyMode": "prefer",
+        "preferBySource": ["animals", "swap", "purchase"]
+      },
+      "reasonCodes": ["animal_first", "storehouse_first"],
+      "notes": ""
+    },
+    {
+      "id": "rule.swap_brown_rice_to_white_rice_for_storage",
+      "label": "Swap brown rice → white rice for long storage",
+      "description": "If long-term dry storage is prioritized, prefer white rice over brown rice.",
+      "priority": "low",
+      "when": {
+        "longStorageMode": true,
+        "targetComponentsAny": ["grain.rice_brown"]
+      },
+      "constraints": {
+        "cuisinesAny": [],
+        "cuisinesNot": [],
+        "dietsAny": [],
+        "dietsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "then": {
+        "applyMode": "replace",
+        "replace": [
+          {
+            "fromComponentId": "grain.rice_brown",
+            "toComponentId": "grain.rice_white_long"
+          }
+        ]
+      },
+      "reasonCodes": ["storehouse_first", "time_saving"],
+      "notes": ""
+    },
+    {
+      "id": "rule.swap_fresh_tomato_to_tomato_paste_when_out",
+      "label": "Fresh tomato missing → tomato paste (sauce base)",
+      "description": "If tomatoes are out of stock, use tomato paste as concentrate base.",
+      "priority": "medium",
+      "when": {
+        "missingComponentAny": ["veg.tomato"],
+        "intentTagsAny": ["sauce", "stew", "curry", "gravy"]
+      },
+      "constraints": {
+        "cuisinesAny": [],
+        "cuisinesNot": [],
+        "dietsAny": [],
+        "dietsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "then": {
+        "applyMode": "prefer",
+        "preferGroups": ["group.pantry.tomato_concentrate"],
+        "alsoSuggest": [
+          {
+            "strategy": "add_water_or_stock",
+            "notes": "Tomato paste needs dilution to replace fresh tomato volume."
+          }
+        ]
+      },
+      "reasonCodes": ["out_of_stock", "time_saving"],
+      "notes": ""
+    }
+  ],
+  "resolutionOrder": ["critical", "high", "medium", "low"]
+}

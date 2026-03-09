@@ -14,7 +14,12 @@
 // - This loader is pure in-memory. Persistence to Dexie is handled elsewhere in the fixed-layer spine.
 // - Avoid heavy deps. If you later want full JSON-Schema validation, add Ajv behind a try/catch.
 
-import { LEXICON_FILES, CATALOG_FILES, CATALOG_DISCOVERY, REGISTRY_META } from "../registry/index.js";
+import {
+  LEXICON_FILES,
+  CATALOG_FILES,
+  CATALOG_DISCOVERY,
+  REGISTRY_META,
+} from "../registry/index.js";
 
 const ACTION_TYPES = new Set([
   "boostMethodKey",
@@ -30,11 +35,18 @@ function isObj(v) {
 }
 
 function norm(s) {
-  return String(s || "").toLowerCase().trim();
+  return String(s || "")
+    .toLowerCase()
+    .trim();
 }
 
 function jsonPtr(pathParts) {
-  return "/" + pathParts.map((p) => String(p).replace(/~/g, "~0").replace(/\//g, "~1")).join("/");
+  return (
+    "/" +
+    pathParts
+      .map((p) => String(p).replace(/~/g, "~0").replace(/\//g, "~1"))
+      .join("/")
+  );
 }
 
 function err(file, ptr, code, message, extra = {}) {
@@ -54,51 +66,136 @@ function err(file, ptr, code, message, extra = {}) {
 function validateLexicon(obj, file) {
   const errors = [];
 
-  if (!isObj(obj)) return [err(file, "", "LEXICON_NOT_OBJECT", "Lexicon must be a JSON object.")];
+  if (!isObj(obj))
+    return [
+      err(file, "", "LEXICON_NOT_OBJECT", "Lexicon must be a JSON object."),
+    ];
 
   // Enforce allowed top-level keys
-  const allowedTop = new Set(["meta", "methods", "synonyms", "phrases", "rules", "actions", "signals"]);
+  const allowedTop = new Set([
+    "meta",
+    "methods",
+    "synonyms",
+    "phrases",
+    "rules",
+    "actions",
+    "signals",
+  ]);
   Object.keys(obj).forEach((k) => {
     if (!allowedTop.has(k)) {
-      errors.push(err(file, jsonPtr([k]), "LEXICON_TOPLEVEL_KEY", `Top-level key "${k}" is not allowed.`));
+      errors.push(
+        err(
+          file,
+          jsonPtr([k]),
+          "LEXICON_TOPLEVEL_KEY",
+          `Top-level key "${k}" is not allowed.`
+        )
+      );
     }
   });
 
   // meta
-  if (!isObj(obj.meta)) errors.push(err(file, "/meta", "LEXICON_META", "meta must be an object."));
+  if (!isObj(obj.meta))
+    errors.push(err(file, "/meta", "LEXICON_META", "meta must be an object."));
   else {
-    if (!obj.meta.id) errors.push(err(file, "/meta/id", "LEXICON_META_ID", "meta.id is required."));
-    if (!obj.meta.domain) errors.push(err(file, "/meta/domain", "LEXICON_META_DOMAIN", "meta.domain is required."));
-    if (!obj.meta.version) errors.push(err(file, "/meta/version", "LEXICON_META_VERSION", "meta.version is required."));
+    if (!obj.meta.id)
+      errors.push(
+        err(file, "/meta/id", "LEXICON_META_ID", "meta.id is required.")
+      );
+    if (!obj.meta.domain)
+      errors.push(
+        err(
+          file,
+          "/meta/domain",
+          "LEXICON_META_DOMAIN",
+          "meta.domain is required."
+        )
+      );
+    if (!obj.meta.version)
+      errors.push(
+        err(
+          file,
+          "/meta/version",
+          "LEXICON_META_VERSION",
+          "meta.version is required."
+        )
+      );
   }
 
   // methods
-  if (!isObj(obj.methods)) errors.push(err(file, "/methods", "LEXICON_METHODS", "methods must be an object."));
+  if (!isObj(obj.methods))
+    errors.push(
+      err(file, "/methods", "LEXICON_METHODS", "methods must be an object.")
+    );
   else {
     for (const [methodKey, def] of Object.entries(obj.methods)) {
       if (!isObj(def)) {
-        errors.push(err(file, jsonPtr(["methods", methodKey]), "LEXICON_METHOD_DEF", "Method definition must be an object."ాడు));
+        errors.push(
+          err(
+            file,
+            jsonPtr(["methods", methodKey]),
+            "LEXICON_METHOD_DEF",
+            "Method definition must be an object."
+          )
+        );
         continue;
       }
-      if (!def.label) errors.push(err(file, jsonPtr(["methods", methodKey, "label"]), "LEXICON_METHOD_LABEL", "Method label is required."));
+      if (!def.label)
+        errors.push(
+          err(
+            file,
+            jsonPtr(["methods", methodKey, "label"]),
+            "LEXICON_METHOD_LABEL",
+            "Method label is required."
+          )
+        );
     }
   }
 
   // synonyms
   if (obj.synonyms !== undefined) {
-    if (!isObj(obj.synonyms)) errors.push(err(file, "/synonyms", "LEXICON_SYNONYMS", "synonyms must be an object."));
+    if (!isObj(obj.synonyms))
+      errors.push(
+        err(
+          file,
+          "/synonyms",
+          "LEXICON_SYNONYMS",
+          "synonyms must be an object."
+        )
+      );
     else {
       for (const [phrase, v] of Object.entries(obj.synonyms)) {
         if (!isObj(v)) {
-          errors.push(err(file, jsonPtr(["synonyms", phrase]), "LEXICON_SYNONYM_DEF", "Synonym entry must be an object."));
+          errors.push(
+            err(
+              file,
+              jsonPtr(["synonyms", phrase]),
+              "LEXICON_SYNONYM_DEF",
+              "Synonym entry must be an object."
+            )
+          );
           continue;
         }
         if (!Array.isArray(v.methodIds) || v.methodIds.length === 0) {
-          errors.push(err(file, jsonPtr(["synonyms", phrase, "methodIds"]), "LEXICON_SYNONYM_METHODIDS", "methodIds must be a non-empty array."));
+          errors.push(
+            err(
+              file,
+              jsonPtr(["synonyms", phrase, "methodIds"]),
+              "LEXICON_SYNONYM_METHODIDS",
+              "methodIds must be a non-empty array."
+            )
+          );
         } else {
           v.methodIds.forEach((id, idx) => {
             if (typeof id !== "string" || !id.trim()) {
-              errors.push(err(file, jsonPtr(["synonyms", phrase, "methodIds", idx]), "LEXICON_METHODID", "methodIds entries must be non-empty strings."));
+              errors.push(
+                err(
+                  file,
+                  jsonPtr(["synonyms", phrase, "methodIds", idx]),
+                  "LEXICON_METHODID",
+                  "methodIds entries must be non-empty strings."
+                )
+              );
             }
           });
         }
@@ -108,20 +205,52 @@ function validateLexicon(obj, file) {
 
   // phrases
   if (obj.phrases !== undefined) {
-    if (!Array.isArray(obj.phrases)) errors.push(err(file, "/phrases", "LEXICON_PHRASES", "phrases must be an array."));
+    if (!Array.isArray(obj.phrases))
+      errors.push(
+        err(file, "/phrases", "LEXICON_PHRASES", "phrases must be an array.")
+      );
     else {
       obj.phrases.forEach((p, idx) => {
         if (!isObj(p)) {
-          errors.push(err(file, jsonPtr(["phrases", idx]), "LEXICON_PHRASE", "Phrase entry must be an object."));
+          errors.push(
+            err(
+              file,
+              jsonPtr(["phrases", idx]),
+              "LEXICON_PHRASE",
+              "Phrase entry must be an object."
+            )
+          );
           return;
         }
-        if (!p.text) errors.push(err(file, jsonPtr(["phrases", idx, "text"]), "LEXICON_PHRASE_TEXT", "text is required."));
+        if (!p.text)
+          errors.push(
+            err(
+              file,
+              jsonPtr(["phrases", idx, "text"]),
+              "LEXICON_PHRASE_TEXT",
+              "text is required."
+            )
+          );
         if (!Array.isArray(p.methodIds) || p.methodIds.length === 0) {
-          errors.push(err(file, jsonPtr(["phrases", idx, "methodIds"]), "LEXICON_PHRASE_METHODIDS", "methodIds must be a non-empty array."));
+          errors.push(
+            err(
+              file,
+              jsonPtr(["phrases", idx, "methodIds"]),
+              "LEXICON_PHRASE_METHODIDS",
+              "methodIds must be a non-empty array."
+            )
+          );
         } else {
           p.methodIds.forEach((id, j) => {
             if (typeof id !== "string" || !id.trim()) {
-              errors.push(err(file, jsonPtr(["phrases", idx, "methodIds", j]), "LEXICON_METHODID", "methodIds entries must be non-empty strings."));
+              errors.push(
+                err(
+                  file,
+                  jsonPtr(["phrases", idx, "methodIds", j]),
+                  "LEXICON_METHODID",
+                  "methodIds entries must be non-empty strings."
+                )
+              );
             }
           });
         }
@@ -132,49 +261,131 @@ function validateLexicon(obj, file) {
   // rules / actions (SSA lexicon action constraints)
   const checkAction = (a, ptrBase) => {
     if (!isObj(a)) {
-      errors.push(err(file, ptrBase, "LEXICON_ACTION", "Action must be an object."));
+      errors.push(
+        err(file, ptrBase, "LEXICON_ACTION", "Action must be an object.")
+      );
       return;
     }
     if (!ACTION_TYPES.has(a.type)) {
-      errors.push(err(file, ptrBase + "/type", "LEXICON_ACTION_TYPE", `Invalid action type: ${String(a.type)}.`));
+      errors.push(
+        err(
+          file,
+          ptrBase + "/type",
+          "LEXICON_ACTION_TYPE",
+          `Invalid action type: ${String(a.type)}.`
+        )
+      );
     }
   };
 
   if (obj.rules !== undefined) {
-    if (!Array.isArray(obj.rules)) errors.push(err(file, "/rules", "LEXICON_RULES", "rules must be an array."));
+    if (!Array.isArray(obj.rules))
+      errors.push(
+        err(file, "/rules", "LEXICON_RULES", "rules must be an array.")
+      );
     else {
       obj.rules.forEach((r, idx) => {
         if (!isObj(r)) {
-          errors.push(err(file, jsonPtr(["rules", idx]), "LEXICON_RULE", "Rule must be an object."));
+          errors.push(
+            err(
+              file,
+              jsonPtr(["rules", idx]),
+              "LEXICON_RULE",
+              "Rule must be an object."
+            )
+          );
           return;
         }
-        if (!r.id) errors.push(err(file, jsonPtr(["rules", idx, "id"]), "LEXICON_RULE_ID", "Rule id is required."));
-        if (!isObj(r.when)) errors.push(err(file, jsonPtr(["rules", idx, "when"]), "LEXICON_RULE_WHEN", "when must be an object."));
-        if (!Array.isArray(r.then)) errors.push(err(file, jsonPtr(["rules", idx, "then"]), "LEXICON_RULE_THEN", "then must be an array of actions."));
+        if (!r.id)
+          errors.push(
+            err(
+              file,
+              jsonPtr(["rules", idx, "id"]),
+              "LEXICON_RULE_ID",
+              "Rule id is required."
+            )
+          );
+        if (!isObj(r.when))
+          errors.push(
+            err(
+              file,
+              jsonPtr(["rules", idx, "when"]),
+              "LEXICON_RULE_WHEN",
+              "when must be an object."
+            )
+          );
+        if (!Array.isArray(r.then))
+          errors.push(
+            err(
+              file,
+              jsonPtr(["rules", idx, "then"]),
+              "LEXICON_RULE_THEN",
+              "then must be an array of actions."
+            )
+          );
         else {
-          r.then.forEach((a, j) => checkAction(a, jsonPtr(["rules", idx, "then", j])));
+          r.then.forEach((a, j) =>
+            checkAction(a, jsonPtr(["rules", idx, "then", j]))
+          );
         }
       });
     }
   }
 
   if (obj.actions !== undefined) {
-    if (!Array.isArray(obj.actions)) errors.push(err(file, "/actions", "LEXICON_ACTIONS", "actions must be an array."));
+    if (!Array.isArray(obj.actions))
+      errors.push(
+        err(file, "/actions", "LEXICON_ACTIONS", "actions must be an array.")
+      );
     else obj.actions.forEach((a, i) => checkAction(a, jsonPtr(["actions", i])));
   }
 
   // signals
   if (obj.signals !== undefined) {
-    if (!Array.isArray(obj.signals)) errors.push(err(file, "/signals", "LEXICON_SIGNALS", "signals must be an array."));
+    if (!Array.isArray(obj.signals))
+      errors.push(
+        err(file, "/signals", "LEXICON_SIGNALS", "signals must be an array.")
+      );
     else {
       obj.signals.forEach((s, idx) => {
         if (!isObj(s)) {
-          errors.push(err(file, jsonPtr(["signals", idx]), "LEXICON_SIGNAL", "Signal must be an object."));
+          errors.push(
+            err(
+              file,
+              jsonPtr(["signals", idx]),
+              "LEXICON_SIGNAL",
+              "Signal must be an object."
+            )
+          );
           return;
         }
-        if (!s.id) errors.push(err(file, jsonPtr(["signals", idx, "id"]), "LEXICON_SIGNAL_ID", "Signal id is required."));
-        if (!s.type) errors.push(err(file, jsonPtr(["signals", idx, "type"]), "LEXICON_SIGNAL_TYPE", "Signal type is required."));
-        if (!s.pattern) errors.push(err(file, jsonPtr(["signals", idx, "pattern"]), "LEXICON_SIGNAL_PATTERN", "Signal pattern is required."));
+        if (!s.id)
+          errors.push(
+            err(
+              file,
+              jsonPtr(["signals", idx, "id"]),
+              "LEXICON_SIGNAL_ID",
+              "Signal id is required."
+            )
+          );
+        if (!s.type)
+          errors.push(
+            err(
+              file,
+              jsonPtr(["signals", idx, "type"]),
+              "LEXICON_SIGNAL_TYPE",
+              "Signal type is required."
+            )
+          );
+        if (!s.pattern)
+          errors.push(
+            err(
+              file,
+              jsonPtr(["signals", idx, "pattern"]),
+              "LEXICON_SIGNAL_PATTERN",
+              "Signal pattern is required."
+            )
+          );
       });
     }
   }
@@ -184,38 +395,110 @@ function validateLexicon(obj, file) {
 
 function validateCatalogPattern(obj, file) {
   const errors = [];
-  if (!isObj(obj)) return [err(file, "", "CATALOG_NOT_OBJECT", "Catalog must be a JSON object.")];
+  if (!isObj(obj))
+    return [
+      err(file, "", "CATALOG_NOT_OBJECT", "Catalog must be a JSON object."),
+    ];
 
   // Allow index.json lists (catalog index files)
-  const isIndex = file.endsWith("/index.json") && isObj(obj) && Array.isArray(obj.patterns);
+  const isIndex =
+    file.endsWith("/index.json") && isObj(obj) && Array.isArray(obj.patterns);
   if (isIndex) return errors;
 
-  const required = ["id", "domain", "kind", "title", "intentTags", "inputs", "outputs", "constraints", "steps", "kpis"];
+  const required = [
+    "id",
+    "domain",
+    "kind",
+    "title",
+    "intentTags",
+    "inputs",
+    "outputs",
+    "constraints",
+    "steps",
+    "kpis",
+  ];
   required.forEach((k) => {
-    if (obj[k] === undefined) errors.push(err(file, jsonPtr([k]), "CATALOG_REQUIRED", `Missing required field: ${k}`));
+    if (obj[k] === undefined)
+      errors.push(
+        err(
+          file,
+          jsonPtr([k]),
+          "CATALOG_REQUIRED",
+          `Missing required field: ${k}`
+        )
+      );
   });
 
-  if (obj.intentTags !== undefined && !Array.isArray(obj.intentTags)) errors.push(err(file, "/intentTags", "CATALOG_INTENTTAGS", "intentTags must be an array."));
-  if (obj.steps !== undefined && !Array.isArray(obj.steps)) errors.push(err(file, "/steps", "CATALOG_STEPS", "steps must be an array."));
-  if (obj.kpis !== undefined && !Array.isArray(obj.kpis)) errors.push(err(file, "/kpis", "CATALOG_KPIS", "kpis must be an array."));
+  if (obj.intentTags !== undefined && !Array.isArray(obj.intentTags))
+    errors.push(
+      err(
+        file,
+        "/intentTags",
+        "CATALOG_INTENTTAGS",
+        "intentTags must be an array."
+      )
+    );
+  if (obj.steps !== undefined && !Array.isArray(obj.steps))
+    errors.push(
+      err(file, "/steps", "CATALOG_STEPS", "steps must be an array.")
+    );
+  if (obj.kpis !== undefined && !Array.isArray(obj.kpis))
+    errors.push(err(file, "/kpis", "CATALOG_KPIS", "kpis must be an array."));
 
   // Variants
   if (obj.variants !== undefined) {
-    if (!Array.isArray(obj.variants)) errors.push(err(file, "/variants", "CATALOG_VARIANTS", "variants must be an array."));
+    if (!Array.isArray(obj.variants))
+      errors.push(
+        err(file, "/variants", "CATALOG_VARIANTS", "variants must be an array.")
+      );
     else {
       obj.variants.forEach((v, idx) => {
-        if (!isObj(v)) return errors.push(err(file, jsonPtr(["variants", idx]), "CATALOG_VARIANT", "variant must be an object."));
-        if (!v.id) errors.push(err(file, jsonPtr(["variants", idx, "id"]), "CATALOG_VARIANT_ID", "variant.id is required."));
-        if (!isObj(v.when)) errors.push(err(file, jsonPtr(["variants", idx, "when"]), "CATALOG_VARIANT_WHEN", "variant.when must be an object."));
-        if (!isObj(v.overrides)) errors.push(err(file, jsonPtr(["variants", idx, "overrides"]), "CATALOG_VARIANT_OVERRIDES", "variant.overrides must be an object."));
+        if (!isObj(v))
+          return errors.push(
+            err(
+              file,
+              jsonPtr(["variants", idx]),
+              "CATALOG_VARIANT",
+              "variant must be an object."
+            )
+          );
+        if (!v.id)
+          errors.push(
+            err(
+              file,
+              jsonPtr(["variants", idx, "id"]),
+              "CATALOG_VARIANT_ID",
+              "variant.id is required."
+            )
+          );
+        if (!isObj(v.when))
+          errors.push(
+            err(
+              file,
+              jsonPtr(["variants", idx, "when"]),
+              "CATALOG_VARIANT_WHEN",
+              "variant.when must be an object."
+            )
+          );
+        if (!isObj(v.overrides))
+          errors.push(
+            err(
+              file,
+              jsonPtr(["variants", idx, "overrides"]),
+              "CATALOG_VARIANT_OVERRIDES",
+              "variant.overrides must be an object."
+            )
+          );
       });
     }
   }
 
   // Lean block
-  if (obj.lean !== undefined && !isObj(obj.lean)) errors.push(err(file, "/lean", "CATALOG_LEAN", "lean must be an object."));
+  if (obj.lean !== undefined && !isObj(obj.lean))
+    errors.push(err(file, "/lean", "CATALOG_LEAN", "lean must be an object."));
   // UI hints
-  if (obj.ui !== undefined && !isObj(obj.ui)) errors.push(err(file, "/ui", "CATALOG_UI", "ui must be an object."));
+  if (obj.ui !== undefined && !isObj(obj.ui))
+    errors.push(err(file, "/ui", "CATALOG_UI", "ui must be an object."));
 
   return errors;
 }
@@ -236,7 +519,8 @@ function buildLexiconIndex(lexicon) {
   };
 
   if (isObj(lexicon.synonyms)) {
-    for (const [phrase, entry] of Object.entries(lexicon.synonyms)) add(phrase, entry, "synonyms");
+    for (const [phrase, entry] of Object.entries(lexicon.synonyms))
+      add(phrase, entry, "synonyms");
   }
   if (Array.isArray(lexicon.phrases)) {
     lexicon.phrases.forEach((p) => add(p.text, p, "phrases"));
@@ -334,7 +618,9 @@ export class LayerAssetLoader {
     };
 
     const lexiconObjs = await this._loadJsonList(LEXICON_FILES);
-    const catalogObjs = await this._loadJsonList(await this._expandCatalogFiles());
+    const catalogObjs = await this._loadJsonList(
+      await this._expandCatalogFiles()
+    );
 
     // Validate + index lexicons
     for (const item of lexiconObjs) {
@@ -362,7 +648,10 @@ export class LayerAssetLoader {
 
       if (!errs.length || !this.opts.strict) {
         const obj = item.data;
-        const isIndex = item.file.endsWith("/index.json") && isObj(obj) && Array.isArray(obj.patterns);
+        const isIndex =
+          item.file.endsWith("/index.json") &&
+          isObj(obj) &&
+          Array.isArray(obj.patterns);
         if (isIndex) {
           this.catalogs.push({ __type: "index", __file: item.file, ...obj });
           continue;
@@ -396,8 +685,13 @@ export class LayerAssetLoader {
 
   // --- Query helpers ---
   getLexicon(nameOrDomain) {
-    if (!this._loaded) throw new Error("LayerAssetLoader not loaded. Call loadAll() first.");
-    return this.index.lexiconById.get(nameOrDomain) || this.index.lexiconByDomain.get(nameOrDomain) || null;
+    if (!this._loaded)
+      throw new Error("LayerAssetLoader not loaded. Call loadAll() first.");
+    return (
+      this.index.lexiconById.get(nameOrDomain) ||
+      this.index.lexiconByDomain.get(nameOrDomain) ||
+      null
+    );
   }
 
   getLexiconPhraseIndex(lexiconIdOrDomain) {
@@ -408,27 +702,35 @@ export class LayerAssetLoader {
   }
 
   getPattern(id) {
-    if (!this._loaded) throw new Error("LayerAssetLoader not loaded. Call loadAll() first.");
+    if (!this._loaded)
+      throw new Error("LayerAssetLoader not loaded. Call loadAll() first.");
     return this.index.patternById.get(id) || null;
   }
 
   searchCatalog({ domain, tags = [], constraints = [], text = "" } = {}) {
-    if (!this._loaded) throw new Error("LayerAssetLoader not loaded. Call loadAll() first.");
+    if (!this._loaded)
+      throw new Error("LayerAssetLoader not loaded. Call loadAll() first.");
 
-    const pool = domain ? (this.index.patternsByDomain.get(domain) || []) : Array.from(this.index.patternById.values());
+    const pool = domain
+      ? this.index.patternsByDomain.get(domain) || []
+      : Array.from(this.index.patternById.values());
     const tagSet = new Set((tags || []).map(String));
     const constraintSet = new Set((constraints || []).map(String));
     const q = norm(text);
 
     const scoreText = (p) => {
       if (!q) return 0;
-      const hay = norm([p.title, p.description, ...(p.intentTags || [])].join(" "));
+      const hay = norm(
+        [p.title, p.description, ...(p.intentTags || [])].join(" ")
+      );
       if (!hay) return 0;
       // token overlap score
       const qTok = new Set(q.split(/\s+/).filter(Boolean));
       const hTok = new Set(hay.split(/\s+/).filter(Boolean));
       let hit = 0;
-      qTok.forEach((t) => { if (hTok.has(t)) hit += 1; });
+      qTok.forEach((t) => {
+        if (hTok.has(t)) hit += 1;
+      });
       return qTok.size ? hit / qTok.size : 0;
     };
 
@@ -460,12 +762,14 @@ export class LayerAssetLoader {
     this.index.patternById.set(p.id, p);
 
     const domain = p.domain || "unknown";
-    if (!this.index.patternsByDomain.has(domain)) this.index.patternsByDomain.set(domain, []);
+    if (!this.index.patternsByDomain.has(domain))
+      this.index.patternsByDomain.set(domain, []);
     this.index.patternsByDomain.get(domain).push(p);
 
     (p.intentTags || []).forEach((t) => {
       const key = String(t);
-      if (!this.index.patternsByIntentTag.has(key)) this.index.patternsByIntentTag.set(key, []);
+      if (!this.index.patternsByIntentTag.has(key))
+        this.index.patternsByIntentTag.set(key, []);
       this.index.patternsByIntentTag.get(key).push(p);
     });
 
@@ -473,37 +777,43 @@ export class LayerAssetLoader {
     (p.variants || []).forEach((v) => {
       const cls = classifyVariant(v.when);
       cls.cultureTags.forEach((ct) => {
-        if (!this.index.patternsByCultureTag.has(ct)) this.index.patternsByCultureTag.set(ct, []);
-        this.index.patternsByCultureTag.get(ct).push({ patternId: p.id, variantId: v.id });
+        if (!this.index.patternsByCultureTag.has(ct))
+          this.index.patternsByCultureTag.set(ct, []);
+        this.index.patternsByCultureTag
+          .get(ct)
+          .push({ patternId: p.id, variantId: v.id });
       });
       cls.seasonTags.forEach((st) => {
-        if (!this.index.patternsBySeasonTag.has(st)) this.index.patternsBySeasonTag.set(st, []);
-        this.index.patternsBySeasonTag.get(st).push({ patternId: p.id, variantId: v.id });
+        if (!this.index.patternsBySeasonTag.has(st))
+          this.index.patternsBySeasonTag.set(st, []);
+        this.index.patternsBySeasonTag
+          .get(st)
+          .push({ patternId: p.id, variantId: v.id });
       });
     });
   }
 
   // --- File expansion ---
   async _expandCatalogFiles() {
-    // If you keep CATALOG_FILES explicit, that’s enough.
-    // If you also want folder discovery, this method can expand pattern folders using Vite glob.
+    // IMPORTANT (Vite build constraint):
+    // import.meta.glob() only allows *literal* glob strings at build time.
+    // Building globs dynamically (from runtime variables) will fail with:
+    //   [vite:import-glob] Invalid glob import syntax: Could only use literals
+    //
+    // Therefore, we keep catalog discovery deterministic by relying on:
+    // 1) CATALOG_FILES (explicit registry list), and
+    // 2) (optional) any pre-expanded lists your registry chooses to provide.
+    //
+    // If you later want automated discovery, add a build-time generated registry
+    // file that contains a literal list of catalog JSON paths.
+
     const out = new Set(CATALOG_FILES);
 
-    // Attempt folder discovery in Vite dev/build environments
-    // (Non-fatal if unavailable)
+    // Best-effort: allow registry to provide a pre-expanded list without using import.meta.glob here.
     try {
-      const roots = Object.values(CATALOG_DISCOVERY || {});
-      if (roots.length) {
-        const globs = roots.map((r) => `/${r}/**/*.json`);
-        // import.meta.glob must be literal in many setups; we keep this best-effort.
-        // We'll fallback to explicit list if it fails.
-        // eslint-disable-next-line no-unused-vars
-        const modules = import.meta.glob(globs, { eager: false });
-        Object.keys(modules || {}).forEach((k) => {
-          // Normalize to repo-root style path
-          const p = k.startsWith("/") ? k.slice(1) : k;
-          out.add(p);
-        });
+      const extra = CATALOG_DISCOVERY?.expandedFiles;
+      if (Array.isArray(extra)) {
+        extra.forEach((p) => out.add(String(p)));
       }
     } catch {
       // ignore
@@ -525,10 +835,20 @@ export class LayerAssetLoader {
   async _loadJson(file) {
     try {
       if (this.opts.mode === "fetch") {
-        const url = new URL(file.replace(/^\//, ""), this.opts.baseUrl || window.location.origin).toString();
+        const url = new URL(
+          file.replace(/^\//, ""),
+          this.opts.baseUrl || window.location.origin
+        ).toString();
         const res = await fetch(url, { cache: "no-store" });
         if (!res.ok) {
-          this.errors.push(err(file, "", "LOAD_FAILED", `Fetch failed (${res.status}) for ${url}`));
+          this.errors.push(
+            err(
+              file,
+              "",
+              "LOAD_FAILED",
+              `Fetch failed (${res.status}) for ${url}`
+            )
+          );
           return null;
         }
         const data = await res.json();
@@ -540,8 +860,18 @@ export class LayerAssetLoader {
       const data = mod?.default ?? mod;
       return { file, data };
     } catch (e) {
-      this.errors.push(err(file, "", "LOAD_FAILED", `Failed to load JSON asset: ${String(e?.message || e)}`));
+      this.errors.push(
+        err(
+          file,
+          "",
+          "LOAD_FAILED",
+          `Failed to load JSON asset: ${String(e?.message || e)}`
+        )
+      );
       return null;
     }
   }
 }
+
+// ✅ Add a default export so `import LayerAssetLoader from ...` works.
+export default LayerAssetLoader;

@@ -37,7 +37,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-import eventBus from "@/services/eventBus";
+import eventBus from "@/services/events/eventBus";
 import { SESSION_EVENTS } from "@/features/session/session.events";
 
 // ------------------------------- Internal Bus --------------------------------
@@ -158,10 +158,7 @@ function iconForKind(kind) {
 
 function normalizeOpts(o) {
   const id =
-    o.id ||
-    `t_${Date.now()}_${Math.random()
-      .toString(36)
-      .slice(2, 7)}`;
+    o.id || `t_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
   return {
     id: String(id),
     title: o.title || "",
@@ -225,9 +222,7 @@ function handleSessionEvent(evt) {
         ? Math.round(step.durationSec / 60)
         : null;
     const label =
-      "Step " +
-      (nextStepIndex + 1) +
-      (minutes ? " • " + minutes + " min" : "");
+      "Step " + (nextStepIndex + 1) + (minutes ? " • " + minutes + " min" : "");
 
     toast({
       id: `sess_${sessionId || "unknown"}_step_${nextStepIndex}`,
@@ -279,14 +274,10 @@ function handleSessionEvent(evt) {
   if (type === SESSION_EVENTS.ABORTED) {
     const sessionId = data.sessionId;
     const reason = data.reason;
-    toast.error(
-      reason ? "Aborted: " + reason : "Session aborted",
-      "Stopped",
-      {
-        durationMs: 6000,
-        id: `sess_${sessionId || "unknown"}_aborted`,
-      }
-    );
+    toast.error(reason ? "Aborted: " + reason : "Session aborted", "Stopped", {
+      durationMs: 6000,
+      id: `sess_${sessionId || "unknown"}_aborted`,
+    });
     return;
   }
 
@@ -501,4 +492,3 @@ export default function ToastBus() {
 //   <ToastBus />  // once at app root (App.jsx)
 //   toast.success("Saved!");
 //   toast({ title: "Step 2", message: "Boil water", kind: "info", actions: [...] })
-export { toast };

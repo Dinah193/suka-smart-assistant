@@ -1,0 +1,568 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "meta": {
+    "id": "recipes.tex_mex.chili_con_carne",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Tex-Mex Chili Con Carne",
+    "subtitle": "Hearty beef chili with chile-forward flavor, optional beans, and crowd-friendly batch scaling.",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Tex-Mex",
+      "notes": [
+        "Built for weeknight or batch cooking; improves after resting.",
+        "Beans are optional to support different chili traditions/preferences.",
+        "Designed to pair with tacos, nachos, rice, cornbread, or baked potatoes."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "tex_mex",
+    "category": "main",
+    "mealArchetypes": [
+      "archetype.stew_chili",
+      "archetype.one_pot",
+      "archetype.batch_cook"
+    ],
+    "servingStyles": ["bowl", "family_style", "meal_prep"],
+    "plannerTags": [
+      "cuisine.tex_mex",
+      "main.hearty",
+      "one_pot",
+      "batch.friendly",
+      "leftovers.friendly",
+      "freezer.friendly"
+    ],
+    "subprofiles": [
+      "texmex.chile_forward",
+      "texmex.tomato_optional",
+      "texmex.beans_optional"
+    ]
+  },
+  "yield": {
+    "servings": 8,
+    "servingSize": { "value": 1.5, "unit": "cup" },
+    "notes": "Makes ~10–12 cups depending on simmer time."
+  },
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 55,
+    "totalMins": 80
+  },
+  "difficulty": "intermediate",
+  "summary": "Classic Tex-Mex-style chili con carne: browned beef, onion/garlic, chile spice blend, and a long simmer for depth. Optional beans and cocoa/coffee notes for richness.",
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": true,
+    "crowdFriendly": true
+  },
+  "tasteProfile": {
+    "salt": 3,
+    "acid": 2,
+    "sweet": 1,
+    "heat": 2,
+    "umami": 4,
+    "notes": ["chile-forward", "beefy", "savory", "slow-simmered"]
+  },
+  "equipment": {
+    "minimum": [
+      "equipment.dutch_oven",
+      "equipment.knife",
+      "equipment.cutting_board",
+      "equipment.wooden_spoon"
+    ],
+    "recommended": [
+      "equipment.cast_iron_dutch_oven",
+      "equipment.ladle",
+      "equipment.measuring_spoons",
+      "equipment.can_opener"
+    ],
+    "optional": [
+      {
+        "id": "equipment.slow_cooker",
+        "label": "Slow cooker (optional finish)",
+        "required": false,
+        "notes": "Brown meat/spices first, then slow cook 4–6 hours on LOW."
+      },
+      {
+        "id": "equipment.immersion_blender",
+        "label": "Immersion blender (optional)",
+        "required": false,
+        "notes": "Blend a small portion to naturally thicken without flour."
+      }
+    ]
+  },
+  "dietFlags": ["diet.gluten_free_default", "diet.dairy_free_default"],
+  "allergens": [],
+  "ingredientGroups": [
+    {
+      "id": "group.meat",
+      "label": "Meat",
+      "items": ["ingredient.ground_beef", "ingredient.beef_chuck_optional"]
+    },
+    {
+      "id": "group.aromatics",
+      "label": "Aromatics",
+      "items": [
+        "ingredient.onion",
+        "ingredient.garlic",
+        "ingredient.green_bell_pepper_optional",
+        "ingredient.jalapeno_optional"
+      ]
+    },
+    {
+      "id": "group.spice",
+      "label": "Chile & spices",
+      "items": [
+        "ingredient.chili_powder",
+        "ingredient.cumin",
+        "ingredient.smoked_paprika_optional",
+        "ingredient.oregano",
+        "ingredient.cayenne_optional"
+      ]
+    },
+    {
+      "id": "group.liquids",
+      "label": "Liquids & body",
+      "items": [
+        "ingredient.tomato_paste",
+        "ingredient.diced_tomatoes_optional",
+        "ingredient.beef_broth",
+        "ingredient.coffee_optional",
+        "ingredient.cocoa_powder_optional"
+      ]
+    },
+    {
+      "id": "group.beans_optional",
+      "label": "Optional beans",
+      "items": [
+        "ingredient.kidney_beans_optional",
+        "ingredient.pinto_beans_optional",
+        "ingredient.black_beans_optional"
+      ]
+    },
+    {
+      "id": "group.finish",
+      "label": "Finish & serve",
+      "items": [
+        "ingredient.apple_cider_vinegar_optional",
+        "ingredient.lime_optional",
+        "ingredient.salt",
+        "ingredient.black_pepper"
+      ]
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "ingredient.ground_beef",
+      "label": "Ground beef (80/20 preferred)",
+      "role": "protein",
+      "amount": { "value": 2, "unit": "lb" },
+      "notes": "For leaner beef, add a bit more oil for browning."
+    },
+    {
+      "id": "ingredient.beef_chuck_optional",
+      "label": "Beef chuck, small dice (optional, for chunkier chili)",
+      "role": "protein",
+      "amount": { "value": 1, "unit": "lb" },
+      "optional": true,
+      "notes": "If using chuck, increase simmer time to 2–2.5 hours until tender."
+    },
+
+    {
+      "id": "ingredient.onion",
+      "label": "Onion, diced",
+      "role": "aromatic",
+      "amount": { "value": 2, "unit": "cup" }
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 6, "unit": "clove" }
+    },
+    {
+      "id": "ingredient.green_bell_pepper_optional",
+      "label": "Green bell pepper, diced (optional)",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "cup" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.jalapeno_optional",
+      "label": "Jalapeño, minced (optional)",
+      "role": "heat",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": "Remove seeds for milder heat."
+    },
+
+    {
+      "id": "ingredient.neutral_oil",
+      "label": "Neutral oil",
+      "role": "fat",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true,
+      "notes": "Only needed if meat is very lean."
+    },
+
+    {
+      "id": "ingredient.chili_powder",
+      "label": "Chili powder",
+      "role": "spice",
+      "amount": { "value": 3, "unit": "tbsp" },
+      "notes": "Use a blend you like; ancho-style adds depth."
+    },
+    {
+      "id": "ingredient.cumin",
+      "label": "Ground cumin",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.oregano",
+      "label": "Dried oregano",
+      "role": "spice",
+      "amount": { "value": 1.5, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.smoked_paprika_optional",
+      "label": "Smoked paprika (optional)",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.cayenne_optional",
+      "label": "Cayenne pepper (optional)",
+      "role": "heat",
+      "amount": { "value": 0.25, "unit": "tsp" },
+      "optional": true
+    },
+
+    {
+      "id": "ingredient.tomato_paste",
+      "label": "Tomato paste",
+      "role": "body",
+      "amount": { "value": 3, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.diced_tomatoes_optional",
+      "label": "Diced tomatoes (optional)",
+      "role": "body",
+      "amount": { "value": 28, "unit": "oz" },
+      "optional": true,
+      "notes": "If you prefer a tomato-forward chili, include. For more chile-forward, reduce or omit."
+    },
+    {
+      "id": "ingredient.beef_broth",
+      "label": "Beef broth (or water)",
+      "role": "liquid",
+      "amount": { "value": 3.5, "unit": "cup" },
+      "notes": "Start with 3 cups and add as needed during simmer."
+    },
+
+    {
+      "id": "ingredient.kidney_beans_optional",
+      "label": "Kidney beans, drained and rinsed (optional)",
+      "role": "beans",
+      "amount": { "value": 30, "unit": "oz" },
+      "optional": true,
+      "notes": "Typically 2 cans (15 oz each)."
+    },
+    {
+      "id": "ingredient.pinto_beans_optional",
+      "label": "Pinto beans, drained and rinsed (optional)",
+      "role": "beans",
+      "amount": { "value": 30, "unit": "oz" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.black_beans_optional",
+      "label": "Black beans, drained and rinsed (optional)",
+      "role": "beans",
+      "amount": { "value": 30, "unit": "oz" },
+      "optional": true
+    },
+
+    {
+      "id": "ingredient.cocoa_powder_optional",
+      "label": "Unsweetened cocoa powder (optional)",
+      "role": "depth",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": "Adds mole-like depth; do not overdo."
+    },
+    {
+      "id": "ingredient.coffee_optional",
+      "label": "Strong brewed coffee (optional)",
+      "role": "depth",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "optional": true,
+      "notes": "Adds roastiness; can replace part of the broth."
+    },
+
+    {
+      "id": "ingredient.salt",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Adjust to taste; broths vary in salt."
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.apple_cider_vinegar_optional",
+      "label": "Apple cider vinegar (optional, to finish)",
+      "role": "acid",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": "Brightens flavors at the end; start small."
+    },
+    {
+      "id": "ingredient.lime_optional",
+      "label": "Lime wedges (optional)",
+      "role": "acid",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.prep",
+      "title": "Prep and measure",
+      "activeMins": 8,
+      "instructions": [
+        "Dice onion (and optional bell pepper). Mince garlic and optional jalapeño.",
+        "Measure spices and tomato paste so they’re ready to add quickly.",
+        "If using beans, drain and rinse them now."
+      ],
+      "checks": [
+        "Aromatics prepped",
+        "Spices measured",
+        "Beans drained (if using)"
+      ]
+    },
+    {
+      "id": "step.brown_beef",
+      "title": "Brown the beef deeply",
+      "activeMins": 10,
+      "instructions": [
+        "Heat a Dutch oven over medium-high. Add neutral oil only if needed (very lean beef).",
+        "Add ground beef in an even layer. Let it sear undisturbed 3–4 minutes to develop browning.",
+        "Break up and continue cooking until well-browned and most moisture has cooked off.",
+        "If there’s excessive grease, spoon off some but leave a little for flavor."
+      ],
+      "timers": [{ "label": "Initial sear", "minutes": 4 }],
+      "checks": [
+        "Beef browned (not gray/steamed)",
+        "Moisture mostly cooked off"
+      ]
+    },
+    {
+      "id": "step.saute_aromatics",
+      "title": "Sauté aromatics",
+      "activeMins": 6,
+      "instructions": [
+        "Add diced onion (and optional bell pepper). Cook 4–5 minutes until softened.",
+        "Add garlic (and optional jalapeño). Cook 30–60 seconds until fragrant."
+      ],
+      "timers": [{ "label": "Soften aromatics", "minutes": 5 }],
+      "checks": ["Onion softened", "Garlic fragrant (not browned/burnt)"]
+    },
+    {
+      "id": "step.toast_spices",
+      "title": "Toast the chile-spice blend and tomato paste",
+      "activeMins": 3,
+      "instructions": [
+        "Add chili powder, cumin, oregano, and optional smoked paprika/cayenne.",
+        "Stir 30–60 seconds to toast spices.",
+        "Add tomato paste and cook 60–90 seconds, stirring, until it darkens slightly."
+      ],
+      "timers": [{ "label": "Toast spices + tomato paste", "minutes": 2 }],
+      "checks": ["Spices aromatic", "Tomato paste slightly darkened"]
+    },
+    {
+      "id": "step.deglaze_simmer",
+      "title": "Deglaze and simmer",
+      "activeMins": 5,
+      "handsOffMins": 45,
+      "instructions": [
+        "Add broth (start with ~3 cups) and scrape up browned bits from the bottom.",
+        "If using diced tomatoes, add them now.",
+        "Bring to a gentle boil, then reduce to a low simmer.",
+        "Simmer uncovered 40–50 minutes, stirring occasionally, until thick and flavorful.",
+        "Add more broth/water as needed to maintain a thick stew consistency."
+      ],
+      "timers": [{ "label": "Simmer", "minutes": 45 }],
+      "checks": ["Chili thickened", "No scorching on bottom"]
+    },
+    {
+      "id": "step.add_beans_optional",
+      "title": "Optional: add beans and finish simmer",
+      "activeMins": 3,
+      "handsOffMins": 10,
+      "instructions": [
+        "If using beans, stir them in during the last 10–15 minutes of simmering to heat through.",
+        "Taste and adjust salt, chili powder, and cumin as needed."
+      ],
+      "timers": [{ "label": "Heat beans through", "minutes": 10 }],
+      "checks": ["Beans hot", "Seasoning adjusted"]
+    },
+    {
+      "id": "step.finish_brighten",
+      "title": "Finish and brighten",
+      "activeMins": 3,
+      "instructions": [
+        "Optional depth: stir in cocoa powder and/or a splash of coffee for extra richness.",
+        "Optional brightness: add a small splash of apple cider vinegar (start with 1 tsp).",
+        "Rest 10 minutes off heat for best flavor before serving."
+      ],
+      "checks": ["Balanced flavor: rich + bright", "Salt/heat adjusted"]
+    }
+  ],
+  "methods": [
+    "method.brown",
+    "method.saute",
+    "method.toast_spices",
+    "method.simmer"
+  ],
+  "pairings": {
+    "serveWith": [
+      "recipes.tex_mex.mexican_rice",
+      "recipes.tex_mex.refried_beans",
+      "recipes.tex_mex.tacos",
+      "cornbread",
+      "baked_potatoes",
+      "nachos"
+    ],
+    "toppings": [
+      "cheddar",
+      "sour_cream",
+      "diced_onion",
+      "jalapeno",
+      "cilantro",
+      "lime"
+    ]
+  },
+  "storage": {
+    "fridge": {
+      "duration": "4 days",
+      "notes": [
+        "Chili tastes better the next day.",
+        "Cool quickly; store airtight."
+      ]
+    },
+    "freezer": {
+      "duration": "3 months",
+      "notes": [
+        "Freeze in portioned containers or freezer bags (lay flat).",
+        "Thaw overnight in fridge or reheat gently with a splash of water/broth."
+      ]
+    }
+  },
+  "safety": {
+    "notes": [
+      "Cool chili promptly (divide into shallow containers for faster cooling).",
+      "Reheat until steaming hot before serving."
+    ]
+  },
+  "planner": {
+    "batchNotes": [
+      "Double batch fits a large stockpot; increase simmer time to reduce to desired thickness.",
+      "For meal prep: portion into 1.5–2 cup containers."
+    ],
+    "thickeningOptions": [
+      "Simmer uncovered longer to reduce.",
+      "Blend 1–2 cups briefly and stir back in for natural thickening.",
+      "Mash a portion of beans (if using) and stir back in."
+    ],
+    "heatControl": [
+      "Keep cayenne optional; serve hot sauce on the side for mixed preferences.",
+      "Use ancho-style chili powder for deep flavor with moderate heat."
+    ]
+  },
+  "variations": [
+    {
+      "id": "variation.no_beans",
+      "label": "No-bean chili (chile-forward)",
+      "when": { "preference": "no_beans" },
+      "adapt": {
+        "notes": [
+          "Omit beans; increase beef by 0.5–1 lb if you want more volume.",
+          "Simmer a bit longer to build body."
+        ]
+      }
+    },
+    {
+      "id": "variation.bean_blend",
+      "label": "Bean blend chili",
+      "when": { "use": "beans" },
+      "adapt": {
+        "notes": [
+          "Use a mix of kidney + pinto (or black).",
+          "Add beans only near the end to prevent them from breaking down too much."
+        ]
+      }
+    },
+    {
+      "id": "variation.chunky_chuck",
+      "label": "Chunky chili (with beef chuck)",
+      "when": { "use": "beef_chuck" },
+      "adapt": {
+        "notes": [
+          "Brown chuck cubes first, then proceed. Simmer 2–2.5 hours until tender.",
+          "Add extra broth as needed; longer simmer increases reduction."
+        ]
+      }
+    },
+    {
+      "id": "variation.smoky",
+      "label": "Smoky chili",
+      "when": { "style": "smoky" },
+      "adapt": {
+        "notes": [
+          "Use smoked paprika and a small amount of chipotle powder.",
+          "Optionally add a spoon of chipotle sauce (see chipotle_sauce.json) at the end."
+        ]
+      }
+    }
+  ],
+  "compat": {
+    "cuisineId": "cuisines.tex_mex",
+    "recipeTagDefaults": [
+      "cuisine.tex_mex",
+      "one_pot",
+      "batch.friendly",
+      "freezer.friendly"
+    ],
+    "ingredientIds": [
+      "ingredient.ground_beef",
+      "ingredient.onion",
+      "ingredient.garlic",
+      "ingredient.chili_powder",
+      "ingredient.tomato_paste"
+    ],
+    "equipmentIds": ["equipment.dutch_oven"],
+    "methodIds": ["method.brown", "method.simmer"],
+    "search": {
+      "keywords": [
+        "chili",
+        "chili con carne",
+        "tex mex chili",
+        "beef chili",
+        "one pot chili"
+      ],
+      "aliases": ["chili con carne", "texas chili", "beef chili"]
+    }
+  }
+}

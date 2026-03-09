@@ -105,32 +105,35 @@
  * @returns {string}
  */
 export function buildReasoningKey(parts, payload, options = {}) {
-  const ns = typeof options.namespace === 'string' && options.namespace.trim()
-    ? options.namespace.trim()
-    : 'ssa';
+  const ns =
+    typeof options.namespace === "string" && options.namespace.trim()
+      ? options.namespace.trim()
+      : "ssa";
 
-  const schemaVersion = typeof options.schemaVersion === 'string' && options.schemaVersion.trim()
-    ? options.schemaVersion.trim()
-    : 'v1';
+  const schemaVersion =
+    typeof options.schemaVersion === "string" && options.schemaVersion.trim()
+      ? options.schemaVersion.trim()
+      : "v1";
 
-  const safeDomain = normalizeSegment(parts.domain, 'unknown-domain');
-  const safeIntent = normalizeSegment(parts.intent, 'unknown-intent');
-  const variant = normalizeSegment(parts.variant || 'default', 'default');
-  const userId = normalizeSegment(parts.userId || 'anon', 'anon');
+  const safeDomain = normalizeSegment(parts.domain, "unknown-domain");
+  const safeIntent = normalizeSegment(parts.intent, "unknown-intent");
+  const variant = normalizeSegment(parts.variant || "default", "default");
+  const userId = normalizeSegment(parts.userId || "anon", "anon");
 
-  const famSegment = parts.familyFundMode ? 'fam1' : 'fam0';
-  const riskSegment = parts.riskLevel ? `risk-${parts.riskLevel}` : 'risk-unk';
+  const famSegment = parts.familyFundMode ? "fam1" : "fam0";
+  const riskSegment = parts.riskLevel ? `risk-${parts.riskLevel}` : "risk-unk";
 
-  const confLabel = parts.confidenceLabel || '';
-  const confSegment = confLabel ? `conf-${confLabel}` : 'conf-unk';
+  const confLabel = parts.confidenceLabel || "";
+  const confSegment = confLabel ? `conf-${confLabel}` : "conf-unk";
 
   const fingerprintSegment = parts.fingerprint
     ? `fpr-${compactString(parts.fingerprint)}`
-    : 'fpr-none';
+    : "fpr-none";
 
-  const tagsSegment = Array.isArray(parts.tags) && parts.tags.length
-    ? `tags-${compactString(parts.tags.slice().sort().join(','))}`
-    : 'tags-none';
+  const tagsSegment =
+    Array.isArray(parts.tags) && parts.tags.length
+      ? `tags-${compactString(parts.tags.slice().sort().join(","))}`
+      : "tags-none";
 
   const payloadStr = stableStringify(payload);
   const payloadHash = simpleHash(payloadStr);
@@ -138,18 +141,22 @@ export function buildReasoningKey(parts, payload, options = {}) {
   // key layout:
   //   {ns}:{schemaVersion}:{domain}:{intent}:{variant}:{userId}:
   //   {famSegment}:{riskSegment}:{confSegment}:{fingerprintSegment}:{tagsSegment}|{payloadHash}
-  return [
-    `${ns}:${schemaVersion}`,
-    safeDomain,
-    safeIntent,
-    variant,
-    userId,
-    famSegment,
-    riskSegment,
-    confSegment,
-    fingerprintSegment,
-    tagsSegment
-  ].join(':') + '|' + payloadHash;
+  return (
+    [
+      `${ns}:${schemaVersion}`,
+      safeDomain,
+      safeIntent,
+      variant,
+      userId,
+      famSegment,
+      riskSegment,
+      confSegment,
+      fingerprintSegment,
+      tagsSegment,
+    ].join(":") +
+    "|" +
+    payloadHash
+  );
 }
 
 /**
@@ -168,11 +175,30 @@ export function makeReasoningKey(domain, intent, payload, extras = {}) {
     {
       domain,
       intent,
-      ...rest
+      ...rest,
     },
     payload,
     { namespace, schemaVersion }
   );
+}
+
+/**
+ * Back-compat alias expected by some shims.
+ *
+ * preservationShim.js imports:
+ *   import { makeCacheKey } from "@/agents/cache/keys";
+ *
+ * We keep the canonical implementation as makeReasoningKey(), and expose
+ * makeCacheKey() as a deterministic alias.
+ *
+ * @param {string} domain
+ * @param {string} intent
+ * @param {any} payload
+ * @param {Partial<ReasoningKeyParts> & ReasoningKeyOptions} [extras]
+ * @returns {string}
+ */
+export function makeCacheKey(domain, intent, payload, extras = {}) {
+  return makeReasoningKey(domain, intent, payload, extras);
 }
 
 /**
@@ -185,26 +211,101 @@ export function makeReasoningKey(domain, intent, payload, extras = {}) {
  * @returns {string}
  */
 export function describeKeyParts(parts, options = {}) {
-  const ns = options.namespace || 'ssa';
-  const schemaVersion = options.schemaVersion || 'v1';
+  const ns = options.namespace || "ssa";
+  const schemaVersion = options.schemaVersion || "v1";
 
-  const tags = Array.isArray(parts.tags) && parts.tags.length
-    ? parts.tags.slice().sort().join(',')
-    : '';
+  const tags =
+    Array.isArray(parts.tags) && parts.tags.length
+      ? parts.tags.slice().sort().join(",")
+      : "";
 
   return JSON.stringify({
     ns,
     schemaVersion,
     domain: parts.domain,
     intent: parts.intent,
-    variant: parts.variant || 'default',
-    userId: parts.userId || 'anon',
+    variant: parts.variant || "default",
+    userId: parts.userId || "anon",
     familyFundMode: !!parts.familyFundMode,
-    riskLevel: parts.riskLevel || 'medium',
-    confidenceLabel: parts.confidenceLabel || 'unknown',
-    fingerprint: parts.fingerprint || '',
-    tags
+    riskLevel: parts.riskLevel || "medium",
+    confidenceLabel: parts.confidenceLabel || "unknown",
+    fingerprint: parts.fingerprint || "",
+    tags,
   });
+}
+
+/* -------------------------------------------------------------------------- */
+/*  SSA shim keys (HouseholdOrchestrator + friends)                           */
+/* -------------------------------------------------------------------------- */
+/**
+ * HouseholdOrchestrator expects this export.
+ * Keep it lightweight + deterministic.
+ *
+ * @param {Object} args
+ * @param {string} [args.domain]
+ * @param {string} [args.skill]
+ * @param {string} [args.mode]
+ * @param {string} [args.householdId]
+ * @param {string} [args.userId]
+ * @param {string} [args.planId]
+ * @param {any}    [args.input]
+ * @param {any}    [args.context]
+ * @param {any}    [args.flags]
+ * @param {string} [args.version]
+ * @returns {string}
+ */
+export function makeSessionOrchestratorCacheKey(args = {}) {
+  const {
+    domain,
+    skill,
+    mode,
+    householdId,
+    userId,
+    planId,
+    input,
+    context,
+    flags,
+    version,
+  } = args || {};
+
+  // Use existing canonical reasoning-key machinery so memoization stays consistent.
+  return buildReasoningKey(
+    {
+      domain: "sessions",
+      intent: `session.orchestrator.${normalizeSegment(
+        domain || "unknown",
+        "unknown"
+      )}`,
+      variant: normalizeSegment(version || "v1", "v1"),
+      userId: userId || "anon",
+      familyFundMode: false, // caller can embed in fingerprint if needed
+      riskLevel: "medium",
+      confidenceLabel: "",
+      fingerprint: [
+        `mode-${normalizeSegment(mode || "ssa", "ssa")}`,
+        `hh-${compactString(String(householdId || "")) || "none"}`,
+        `plan-${compactString(String(planId || "")) || "none"}`,
+        `skill-${compactString(String(skill || "")) || "none"}`,
+        flags ? `flags-${compactString(stableStringify(flags))}` : "flags-none",
+        context ? `ctx-${compactString(stableStringify(context))}` : "ctx-none",
+      ].join("."),
+      tags: ["orchestrator"],
+    },
+    {
+      // payload should capture the "ask" deterministically
+      input: input ?? null,
+      context: context ?? null,
+      flags: flags ?? null,
+      meta: {
+        domain: domain || null,
+        skill: skill || null,
+        mode: mode || null,
+        householdId: householdId || null,
+        planId: planId || null,
+        version: version || null,
+      },
+    }
+  );
 }
 
 /* -------------------------------------------------------------------------- */
@@ -221,17 +322,19 @@ export function describeKeyParts(parts, options = {}) {
  * @returns {string}
  */
 export function stableStringify(value) {
-  if (value === null || typeof value !== 'object') {
+  if (value === null || typeof value !== "object") {
     return JSON.stringify(value);
   }
 
   if (Array.isArray(value)) {
-    return '[' + value.map((v) => stableStringify(v)).join(',') + ']';
+    return "[" + value.map((v) => stableStringify(v)).join(",") + "]";
   }
 
   const keys = Object.keys(value).sort();
-  const pairs = keys.map((k) => JSON.stringify(k) + ':' + stableStringify(value[k]));
-  return '{' + pairs.join(',') + '}';
+  const pairs = keys.map(
+    (k) => JSON.stringify(k) + ":" + stableStringify(value[k])
+  );
+  return "{" + pairs.join(",") + "}";
 }
 
 /**
@@ -244,7 +347,7 @@ export function stableStringify(value) {
  * @returns {string}
  */
 export function simpleHash(str) {
-  if (typeof str !== 'string' || !str.length) return '0';
+  if (typeof str !== "string" || !str.length) return "0";
 
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -268,10 +371,10 @@ export function simpleHash(str) {
  * @returns {string}
  */
 function normalizeSegment(value, fallback) {
-  if (typeof value !== 'string') return fallback;
+  if (typeof value !== "string") return fallback;
   const trimmed = value.trim();
   if (!trimmed) return fallback;
-  return trimmed.replace(/[^a-zA-Z0-9._-]+/g, '-');
+  return trimmed.replace(/[^a-zA-Z0-9._-]+/g, "-");
 }
 
 /**
@@ -285,11 +388,21 @@ function normalizeSegment(value, fallback) {
  * @returns {string}
  */
 function compactString(str) {
-  if (typeof str !== 'string') return '';
+  if (typeof str !== "string") return "";
   const safe = str.trim();
-  if (!safe) return '';
+  if (!safe) return "";
   if (safe.length <= 32 && /^[a-zA-Z0-9._-]+$/.test(safe)) {
     return safe;
   }
   return simpleHash(safe).slice(0, 8);
 }
+
+export default {
+  buildReasoningKey,
+  makeReasoningKey,
+  makeCacheKey,
+  describeKeyParts,
+  makeSessionOrchestratorCacheKey,
+  stableStringify,
+  simpleHash,
+};

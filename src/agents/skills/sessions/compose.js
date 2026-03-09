@@ -1,5 +1,5 @@
 /**
- * @file src/agents/skills/sessions/compose.js
+ * @file src/@agents/skills/sessions/compose.js
  *
  * Domain-agnostic Session builder for Suka Smart Assistant (SSA).
  *
@@ -404,25 +404,6 @@ function normalizeSource(source) {
  * Compose a brand new Session object OR (optionally) merge into an existing one
  * for a “resume / recompose” scenario.
  *
- * Basic usage:
- * ```js
- * const session = composeSession({
- *   domain: 'cooking',
- *   source: { type: 'recipe', refId: recipeId },
- *   plan: parsedRecipePlan,    // or `steps: [...]`
- *   prefs: { voiceGuidance: true }
- * });
- * ```
- *
- * Resume usage (e.g. user edits steps then resumes):
- * ```js
- * const updated = composeSession({
- *   domain: 'cooking',
- *   plan: updatedPlan,
- *   resumeFrom: existingSession
- * });
- * ```
- *
  * @param {ComposeSessionOptions} opts
  * @returns {Session}
  */
@@ -510,9 +491,7 @@ export function composeSession(opts) {
 }
 
 /**
- * Clamp a step index to valid range [0, stepsLength-1].
- * If there are no steps, return 0.
- *
+ * Clamp a step index to valid range [0, stepsLength-1]. If there are no steps, return 0.
  * @param {number} index
  * @param {number} stepsLength
  * @returns {number}
@@ -528,15 +507,6 @@ function clampIndex(index, stepsLength) {
 /**
  * Emit a `session.composed` event in a defensive way so that this module never
  * hard-crashes if eventBus is misconfigured or temporarily unavailable.
- *
- * Event payload shape:
- * {
- *   type: 'session.composed',
- *   ts: ISO8601 string,
- *   source: 'sessions.compose',
- *   data: { session, mode: 'new'|'resume' }
- * }
- *
  * @param {Session} session
  * @param {'new'|'resume'} mode
  */
@@ -550,21 +520,13 @@ function safeEmitSessionComposed(session, mode) {
         data: { session, mode },
       });
     }
-  } catch (err) {
-    // Fail silently; composing a session should never crash due to eventBus issues.
-    // You may want to log this to your own telemetry.
-    // console.warn('[sessions.compose] Failed to emit session.composed', err);
+  } catch {
+    // composing a session should never crash due to eventBus issues
   }
 }
 
 /**
- * Convenience helper for building a trivial one-step “quick session”, e.g.:
- * - “15-minute kitchen reset”
- * - “Turn compost pile”
- * - “Check freezers”
- *
- * This is useful for quick ad-hoc sessions from buttons or voice commands.
- *
+ * Convenience helper for building a trivial one-step “quick session”.
  * @param {Object} opts
  * @param {SessionDomain} opts.domain
  * @param {string} opts.title
@@ -594,3 +556,112 @@ export function composeQuickSession(opts) {
     prefs: opts.prefs,
   });
 }
+
+/**
+ * Back-compat export expected by older shims:
+ * - cleaningShim imports { composeSessionsFromPlan }
+ *
+ * @param {Object} plan
+ * @param {Object} [opts]
+ * @param {SessionDomain} [opts.domain]
+ * @param {SessionSource} [opts.source]
+ * @param {Partial<SessionPrefs>} [opts.prefs]
+ * @returns {Session[]}
+ */
+export function composeSessionsFromPlan(plan = {}, opts = {}) {
+  const fallbackDomain = normalizeDomain(
+    opts.domain || plan?.domain || "cleaning"
+  );
+  const fallbackSource = normalizeSource(opts.source || plan?.source);
+  const fallbackPrefs = normalizePrefs(opts.prefs || plan?.prefs);
+
+  if (plan && typeof plan === "object" && Array.isArray(plan.sessions)) {
+    return plan.sessions.map((s, idx) =>
+      composeSession({
+        domain: normalizeDomain(s?.domain || fallbackDomain),
+        title: s?.title || s?.name || `Session ${idx + 1}`,
+        source: normalizeSource(s?.source || fallbackSource),
+        plan: s?.plan || undefined,
+        steps: s?.steps || undefined,
+        prefs: normalizePrefs(s?.prefs || fallbackPrefs),
+      })
+    );
+  }
+
+  return [
+    composeSession({
+      domain: fallbackDomain,
+      title: plan?.title || plan?.name || opts.title || undefined,
+      source: fallbackSource,
+      plan: plan?.plan || undefined,
+      steps: plan?.steps || undefined,
+      prefs: fallbackPrefs,
+    }),
+  ];
+}
+
+/**
+ * Back-compat export expected by animalShim:
+ * - animalShim imports { composeSessionsFromAnimalPlan }
+ *
+ * This is just a thin wrapper over composeSessionsFromPlan, but defaults
+ * domain/source more appropriately for the animals domain.
+ *
+ * @param {Object} animalPlan
+ * @param {Object} [opts]
+ * @param {SessionSource} [opts.source]
+ * @param {Partial<SessionPrefs>} [opts.prefs]
+ * @returns {Session[]}
+ */
+export function composeSessionsFromAnimalPlan(animalPlan = {}, opts = {}) {
+  const source = opts.source ||
+    animalPlan?.source || {
+      type: "animalTask",
+      refId: animalPlan?.id ?? animalPlan?.taskId ?? null,
+    };
+
+  return composeSessionsFromPlan(animalPlan, {
+    domain: "animals",
+    source,
+    prefs: opts.prefs || animalPlan?.prefs,
+    title: opts.title,
+  });
+}
+
+/**
+ * Back-compat export expected by preservationShim:
+ * - preservationShim imports { composeSessionsFromPreservationPlan }
+ *
+ * Thin wrapper over composeSessionsFromPlan with preservation defaults.
+ *
+ * @param {Object} preservationPlan
+ * @param {Object} [opts]
+ * @param {SessionSource} [opts.source]
+ * @param {Partial<SessionPrefs>} [opts.prefs]
+ * @returns {Session[]}
+ */
+export function composeSessionsFromPreservationPlan(
+  preservationPlan = {},
+  opts = {}
+) {
+  const source = opts.source ||
+    preservationPlan?.source || {
+      type: "import",
+      refId: preservationPlan?.id ?? preservationPlan?.planId ?? null,
+    };
+
+  return composeSessionsFromPlan(preservationPlan, {
+    domain: "preservation",
+    source,
+    prefs: opts.prefs || preservationPlan?.prefs,
+    title: opts.title,
+  });
+}
+
+export default {
+  composeSession,
+  composeQuickSession,
+  composeSessionsFromPlan,
+  composeSessionsFromAnimalPlan,
+  composeSessionsFromPreservationPlan,
+};

@@ -1,0 +1,1017 @@
+{
+  "$schema": "../../schemas/farm_to_table/roles.catalog.schema.json",
+  "catalogId": "farm_to_table.roles",
+  "version": "1.0.0",
+  "generatedAt": "2026-01-10T02:25:57Z",
+  "notes": [
+    "Roles define standardized semantic labels used across SSA Farm-to-Table: plate composition, provisioning targets, storehouse inventory classes, garden/animal planning, preservation flows, and session steps.",
+    "Roles are deterministic: engines should never infer new roles at runtime; instead, map to these role IDs.",
+    "Each role can include component matching hints (categories/tags/substitution groups) compatible with components.catalog.json."
+  ],
+  "enums": {
+    "roleKinds": [
+      "plate_role",
+      "provisioning_role",
+      "inventory_role",
+      "garden_role",
+      "animal_role",
+      "preservation_role",
+      "session_role"
+    ],
+    "measureModes": ["mass_edible", "volume_estimate", "count", "portion"],
+    "sourcingPriority": ["garden", "animals", "storehouse", "swap", "purchase"],
+    "nutritionFocus": [
+      "protein",
+      "carbs",
+      "fat",
+      "fiber",
+      "micronutrients",
+      "hydration"
+    ],
+    "defaultMealTimes": ["breakfast", "brunch", "lunch", "dinner", "snack"]
+  },
+  "roles": [
+    {
+      "id": "role.plate.protein",
+      "label": "Protein",
+      "kind": "plate_role",
+      "description": "Primary protein element of the plate (meat, fish, eggs, legumes depending on diet).",
+      "measureMode": "mass_edible",
+      "defaults": {
+        "ratio": 0.3,
+        "mealTimes": ["lunch", "dinner"],
+        "nutritionFocus": ["protein"],
+        "sourcingPriority": []
+      },
+      "match": {
+        "categoryIds": ["proteins.meat", "proteins.eggs", "staples.legumes"],
+        "tagsAny": ["protein", "meat", "eggs", "beans", "lentils"],
+        "substitutionGroupsAny": [
+          "protein.poultry",
+          "protein.red_meat",
+          "protein.eggs",
+          "legume.dry_beans",
+          "legume.lentils"
+        ],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Drumstick",
+        "colorHint": "primary",
+        "sortOrder": 10
+      }
+    },
+    {
+      "id": "role.plate.starch",
+      "label": "Starch",
+      "kind": "plate_role",
+      "description": "Starchy base: rice, potatoes, cornmeal, bread, or grains.",
+      "measureMode": "mass_edible",
+      "defaults": {
+        "ratio": 0.35,
+        "mealTimes": ["breakfast", "lunch", "dinner"],
+        "nutritionFocus": ["carbs"],
+        "sourcingPriority": []
+      },
+      "match": {
+        "categoryIds": ["staples.grains"],
+        "tagsAny": ["starch", "rice", "potato", "cornmeal", "bread", "grain"],
+        "substitutionGroupsAny": [
+          "grain.rice_white",
+          "grain.rice_brown",
+          "grain.cornmeal",
+          "grain.flour",
+          "starch.potato"
+        ],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Wheat",
+        "colorHint": "secondary",
+        "sortOrder": 20
+      }
+    },
+    {
+      "id": "role.plate.vegetable",
+      "label": "Vegetable",
+      "kind": "plate_role",
+      "description": "Vegetable side(s) and cooked greens; can be fresh or preserved.",
+      "measureMode": "mass_edible",
+      "defaults": {
+        "ratio": 0.3,
+        "mealTimes": ["lunch", "dinner"],
+        "nutritionFocus": ["fiber", "micronutrients"],
+        "sourcingPriority": []
+      },
+      "match": {
+        "categoryIds": ["produce.vegetables"],
+        "tagsAny": ["vegetable", "greens", "crucifer", "root", "garden"],
+        "substitutionGroupsAny": [
+          "veg.cabbage",
+          "veg.tomato",
+          "veg.onion",
+          "veg.garlic",
+          "veg.okra"
+        ],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Leaf",
+        "colorHint": "success",
+        "sortOrder": 30
+      }
+    },
+    {
+      "id": "role.plate.legume",
+      "label": "Legume",
+      "kind": "plate_role",
+      "description": "Bean/lentil component used as side or protein replacement.",
+      "measureMode": "mass_edible",
+      "defaults": {
+        "ratio": 0.2,
+        "mealTimes": ["lunch", "dinner"],
+        "nutritionFocus": ["protein", "fiber"],
+        "sourcingPriority": []
+      },
+      "match": {
+        "categoryIds": ["staples.legumes"],
+        "tagsAny": ["beans", "lentils", "legume"],
+        "substitutionGroupsAny": ["legume.dry_beans", "legume.lentils"],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Bean",
+        "colorHint": "accent",
+        "sortOrder": 25
+      }
+    },
+    {
+      "id": "role.plate.bread",
+      "label": "Bread",
+      "kind": "plate_role",
+      "description": "Bread element: flatbread, cornbread, rolls; often accompanies soup/stew or curry.",
+      "measureMode": "mass_edible",
+      "defaults": {
+        "ratio": 0.15,
+        "mealTimes": ["breakfast", "lunch", "dinner"],
+        "nutritionFocus": ["carbs"],
+        "sourcingPriority": []
+      },
+      "match": {
+        "categoryIds": ["staples.grains"],
+        "tagsAny": ["bread", "flour"],
+        "substitutionGroupsAny": ["grain.flour", "grain.cornmeal"],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Bread",
+        "colorHint": "secondary",
+        "sortOrder": 40
+      }
+    },
+    {
+      "id": "role.plate.sauce",
+      "label": "Sauce/Gravy",
+      "kind": "plate_role",
+      "description": "Sauce, gravy, curry gravy, or finishing sauce; can embody cuisine signature.",
+      "measureMode": "mass_edible",
+      "defaults": {
+        "ratio": 0.05,
+        "mealTimes": ["lunch", "dinner"],
+        "nutritionFocus": ["fat", "micronutrients"],
+        "sourcingPriority": []
+      },
+      "match": {
+        "categoryIds": ["pantry.condiments"],
+        "tagsAny": ["sauce", "gravy", "curry"],
+        "substitutionGroupsAny": ["pantry.tomato_concentrate"],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Droplet",
+        "colorHint": "muted",
+        "sortOrder": 50
+      }
+    },
+    {
+      "id": "role.plate.salad",
+      "label": "Salad/Raw Side",
+      "kind": "plate_role",
+      "description": "Fresh salad or raw side; often seasonal and garden-driven.",
+      "measureMode": "mass_edible",
+      "defaults": {
+        "ratio": 0.2,
+        "mealTimes": ["lunch", "dinner"],
+        "nutritionFocus": ["fiber", "micronutrients", "hydration"],
+        "sourcingPriority": []
+      },
+      "match": {
+        "categoryIds": ["produce.vegetables"],
+        "tagsAny": ["salad", "raw", "fresh"],
+        "substitutionGroupsAny": [],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Salad",
+        "colorHint": "success",
+        "sortOrder": 35
+      }
+    },
+    {
+      "id": "role.plate.soup_stew",
+      "label": "Soup/Stew",
+      "kind": "plate_role",
+      "description": "One-pot soup or stew as the main; ideal for leftovers and preservation.",
+      "measureMode": "mass_edible",
+      "defaults": {
+        "ratio": 0.65,
+        "mealTimes": ["lunch", "dinner"],
+        "nutritionFocus": ["hydration", "protein", "micronutrients"],
+        "sourcingPriority": []
+      },
+      "match": {
+        "categoryIds": [
+          "staples.legumes",
+          "proteins.meat",
+          "produce.vegetables"
+        ],
+        "tagsAny": ["stew", "soup", "one_pot", "batch"],
+        "substitutionGroupsAny": [],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Soup",
+        "colorHint": "primary",
+        "sortOrder": 15
+      }
+    },
+    {
+      "id": "role.plate.condiment",
+      "label": "Condiment/Finish",
+      "kind": "plate_role",
+      "description": "Small finishing element: vinegar, hot sauce, citrus, pickles.",
+      "measureMode": "mass_edible",
+      "defaults": {
+        "ratio": 0.05,
+        "mealTimes": ["breakfast", "lunch", "dinner"],
+        "nutritionFocus": ["micronutrients"],
+        "sourcingPriority": []
+      },
+      "match": {
+        "categoryIds": ["pantry.condiments", "preservation.inputs"],
+        "tagsAny": ["vinegar", "acid", "pickle", "hot"],
+        "substitutionGroupsAny": [
+          "pantry.vinegar",
+          "preserve_input.vinegar",
+          "preserve_input.acidifier"
+        ],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Sparkles",
+        "colorHint": "accent",
+        "sortOrder": 60
+      }
+    },
+    {
+      "id": "role.plate.fruit",
+      "label": "Fruit",
+      "kind": "plate_role",
+      "description": "Fruit side or dessert-like element (not always present in Farm-to-Table base).",
+      "measureMode": "mass_edible",
+      "defaults": {
+        "ratio": 0.15,
+        "mealTimes": ["breakfast", "snack", "dessert"],
+        "nutritionFocus": ["hydration", "micronutrients"],
+        "sourcingPriority": []
+      },
+      "match": {
+        "categoryIds": ["produce.fruits"],
+        "tagsAny": ["fruit"],
+        "substitutionGroupsAny": [],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Apple",
+        "colorHint": "accent",
+        "sortOrder": 70
+      }
+    },
+    {
+      "id": "role.plate.dessert",
+      "label": "Dessert",
+      "kind": "plate_role",
+      "description": "Dessert item; optional and feast-oriented.",
+      "measureMode": "mass_edible",
+      "defaults": {
+        "ratio": 0.1,
+        "mealTimes": ["dinner", "snack"],
+        "nutritionFocus": ["carbs", "fat"],
+        "sourcingPriority": []
+      },
+      "match": {
+        "categoryIds": ["baking.sweets"],
+        "tagsAny": ["dessert", "sweet"],
+        "substitutionGroupsAny": [],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Cake",
+        "colorHint": "accent",
+        "sortOrder": 80
+      }
+    },
+    {
+      "id": "role.plate.drink",
+      "label": "Drink",
+      "kind": "plate_role",
+      "description": "Drink element: water, tea, broth, etc. (usually not provisioned as a plate role).",
+      "measureMode": "mass_edible",
+      "defaults": {
+        "ratio": null,
+        "mealTimes": ["breakfast", "lunch", "dinner", "snack"],
+        "nutritionFocus": ["hydration"],
+        "sourcingPriority": []
+      },
+      "match": {
+        "categoryIds": ["pantry.drinks"],
+        "tagsAny": ["drink", "tea", "water"],
+        "substitutionGroupsAny": [],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "CupSoda",
+        "colorHint": "muted",
+        "sortOrder": 90
+      }
+    },
+    {
+      "id": "role.provisioning.bulk_staple",
+      "label": "Bulk Staple",
+      "kind": "provisioning_role",
+      "description": "High-volume, shelf-stable staples for long-term storehouse provisioning (grains, beans, salt, oils).",
+      "measureMode": "mass_edible",
+      "defaults": {
+        "ratio": null,
+        "mealTimes": [],
+        "nutritionFocus": ["carbs", "protein", "fat"],
+        "sourcingPriority": ["storehouse", "purchase", "swap"]
+      },
+      "match": {
+        "categoryIds": [
+          "staples.grains",
+          "staples.legumes",
+          "preservation.inputs"
+        ],
+        "tagsAny": ["bulk", "staple", "long_storage"],
+        "substitutionGroupsAny": [],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Warehouse",
+        "colorHint": "secondary",
+        "sortOrder": 110
+      }
+    },
+    {
+      "id": "role.provisioning.fresh_produce",
+      "label": "Fresh Produce",
+      "kind": "provisioning_role",
+      "description": "Fresh vegetables and fruits required for near-term meal cycles; can be satisfied by garden, swaps, or purchase.",
+      "measureMode": "mass_edible",
+      "defaults": {
+        "ratio": null,
+        "mealTimes": [],
+        "nutritionFocus": ["fiber", "micronutrients"],
+        "sourcingPriority": ["garden", "swap", "purchase", "storehouse"]
+      },
+      "match": {
+        "categoryIds": ["produce.vegetables", "produce.fruits"],
+        "tagsAny": ["fresh", "produce", "garden"],
+        "substitutionGroupsAny": [],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Sprout",
+        "colorHint": "success",
+        "sortOrder": 120
+      }
+    },
+    {
+      "id": "role.provisioning.animal_products",
+      "label": "Animal Products",
+      "kind": "provisioning_role",
+      "description": "Meat, eggs, fats, and related animal-based needs; may map to animals module targets.",
+      "measureMode": "mass_edible",
+      "defaults": {
+        "ratio": null,
+        "mealTimes": [],
+        "nutritionFocus": ["protein", "fat"],
+        "sourcingPriority": ["animals", "swap", "purchase", "storehouse"]
+      },
+      "match": {
+        "categoryIds": ["proteins.meat", "proteins.eggs"],
+        "tagsAny": ["meat", "eggs", "animal_product"],
+        "substitutionGroupsAny": [
+          "protein.poultry",
+          "protein.red_meat",
+          "protein.eggs"
+        ],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Shield",
+        "colorHint": "primary",
+        "sortOrder": 130
+      }
+    },
+    {
+      "id": "role.provisioning.preservation_inputs",
+      "label": "Preservation Inputs",
+      "kind": "provisioning_role",
+      "description": "Salt, acids, jars/lids (if cataloged), sugar, and other inputs for preservation workflows.",
+      "measureMode": "count",
+      "defaults": {
+        "ratio": null,
+        "mealTimes": [],
+        "nutritionFocus": [],
+        "sourcingPriority": ["storehouse", "purchase", "swap"]
+      },
+      "match": {
+        "categoryIds": ["preservation.inputs"],
+        "tagsAny": ["preservation", "input"],
+        "substitutionGroupsAny": [
+          "preserve_input.salt",
+          "preserve_input.vinegar",
+          "preserve_input.acidifier"
+        ],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Archive",
+        "colorHint": "muted",
+        "sortOrder": 140
+      }
+    },
+    {
+      "id": "role.inventory.pantry",
+      "label": "Pantry",
+      "kind": "inventory_role",
+      "description": "Shelf-stable pantry items (dry/canned/bottled).",
+      "measureMode": "count",
+      "defaults": {
+        "ratio": null,
+        "mealTimes": [],
+        "nutritionFocus": [],
+        "sourcingPriority": []
+      },
+      "match": {
+        "categoryIds": [
+          "staples.grains",
+          "staples.legumes",
+          "pantry.condiments",
+          "preservation.inputs"
+        ],
+        "tagsAny": ["pantry"],
+        "substitutionGroupsAny": [],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Package",
+        "colorHint": "secondary",
+        "sortOrder": 210
+      }
+    },
+    {
+      "id": "role.inventory.fridge",
+      "label": "Refrigerated",
+      "kind": "inventory_role",
+      "description": "Items stored in refrigerator (fresh produce, dairy, eggs, leftovers).",
+      "measureMode": "mass_edible",
+      "defaults": {
+        "ratio": null,
+        "mealTimes": [],
+        "nutritionFocus": [],
+        "sourcingPriority": []
+      },
+      "match": {
+        "categoryIds": [
+          "produce.vegetables",
+          "produce.fruits",
+          "proteins.eggs"
+        ],
+        "tagsAny": ["fridge", "fresh"],
+        "substitutionGroupsAny": [],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Refrigerator",
+        "colorHint": "primary",
+        "sortOrder": 220
+      }
+    },
+    {
+      "id": "role.inventory.freezer",
+      "label": "Frozen",
+      "kind": "inventory_role",
+      "description": "Frozen items and meals.",
+      "measureMode": "mass_edible",
+      "defaults": {
+        "ratio": null,
+        "mealTimes": [],
+        "nutritionFocus": [],
+        "sourcingPriority": []
+      },
+      "match": {
+        "categoryIds": ["proteins.meat", "produce.vegetables"],
+        "tagsAny": ["frozen"],
+        "substitutionGroupsAny": ["preserve.freeze"],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Snowflake",
+        "colorHint": "accent",
+        "sortOrder": 230
+      }
+    },
+    {
+      "id": "role.inventory.root_cellar",
+      "label": "Root Cellar",
+      "kind": "inventory_role",
+      "description": "Cool storage items suitable for root cellar (tubers, some fruits/veg).",
+      "measureMode": "mass_edible",
+      "defaults": {
+        "ratio": null,
+        "mealTimes": [],
+        "nutritionFocus": [],
+        "sourcingPriority": []
+      },
+      "match": {
+        "categoryIds": ["produce.vegetables"],
+        "tagsAny": ["root_cellar", "tuber"],
+        "substitutionGroupsAny": ["preserve.root_cellar"],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Home",
+        "colorHint": "muted",
+        "sortOrder": 240
+      }
+    },
+    {
+      "id": "role.garden.primary_crop",
+      "label": "Primary Crop",
+      "kind": "garden_role",
+      "description": "Crops targeted for main meal roles (veg/starch/legume) based on plate templates.",
+      "measureMode": "mass_edible",
+      "defaults": {
+        "ratio": null,
+        "mealTimes": [],
+        "nutritionFocus": [],
+        "sourcingPriority": ["garden"]
+      },
+      "match": {
+        "categoryIds": ["produce.vegetables"],
+        "tagsAny": ["garden", "primary_crop"],
+        "substitutionGroupsAny": [],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Tractor",
+        "colorHint": "success",
+        "sortOrder": 310
+      }
+    },
+    {
+      "id": "role.garden.aromatics",
+      "label": "Garden Aromatics",
+      "kind": "garden_role",
+      "description": "Aromatics grown to support cuisine signatures (onion/garlic/herbs).",
+      "measureMode": "mass_edible",
+      "defaults": {
+        "ratio": null,
+        "mealTimes": [],
+        "nutritionFocus": [],
+        "sourcingPriority": ["garden"]
+      },
+      "match": {
+        "categoryIds": ["produce.vegetables"],
+        "tagsAny": ["aromatic", "herb", "garden"],
+        "substitutionGroupsAny": ["veg.onion", "veg.garlic"],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Flame",
+        "colorHint": "success",
+        "sortOrder": 320
+      }
+    },
+    {
+      "id": "role.animals.meat_yield",
+      "label": "Meat Yield Target",
+      "kind": "animal_role",
+      "description": "Animal production target expressed as edible meat yield aligned to provisioning demand.",
+      "measureMode": "mass_edible",
+      "defaults": {
+        "ratio": null,
+        "mealTimes": [],
+        "nutritionFocus": [],
+        "sourcingPriority": ["animals"]
+      },
+      "match": {
+        "categoryIds": ["proteins.meat"],
+        "tagsAny": ["meat", "animal"],
+        "substitutionGroupsAny": ["protein.poultry", "protein.red_meat"],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Bone",
+        "colorHint": "primary",
+        "sortOrder": 410
+      }
+    },
+    {
+      "id": "role.animals.eggs",
+      "label": "Egg Production Target",
+      "kind": "animal_role",
+      "description": "Egg production target aligned to breakfast and baking needs.",
+      "measureMode": "count",
+      "defaults": {
+        "ratio": null,
+        "mealTimes": [],
+        "nutritionFocus": [],
+        "sourcingPriority": ["animals"]
+      },
+      "match": {
+        "categoryIds": ["proteins.eggs"],
+        "tagsAny": ["eggs", "animal"],
+        "substitutionGroupsAny": ["protein.eggs"],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Egg",
+        "colorHint": "primary",
+        "sortOrder": 420
+      }
+    },
+    {
+      "id": "role.preservation.freeze",
+      "label": "Freeze",
+      "kind": "preservation_role",
+      "description": "Preserve food by freezing; targets freezer inventory and packaging needs.",
+      "measureMode": "portion",
+      "defaults": {
+        "ratio": null,
+        "mealTimes": [],
+        "nutritionFocus": [],
+        "sourcingPriority": []
+      },
+      "match": {
+        "categoryIds": [],
+        "tagsAny": ["preserve.freeze"],
+        "substitutionGroupsAny": ["preserve.freeze"],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Snowflake",
+        "colorHint": "accent",
+        "sortOrder": 510
+      }
+    },
+    {
+      "id": "role.preservation.pressure_can",
+      "label": "Pressure Can",
+      "kind": "preservation_role",
+      "description": "Preserve by pressure canning; targets jars/lids and canning-safe recipes.",
+      "measureMode": "portion",
+      "defaults": {
+        "ratio": null,
+        "mealTimes": [],
+        "nutritionFocus": [],
+        "sourcingPriority": []
+      },
+      "match": {
+        "categoryIds": [],
+        "tagsAny": ["preserve.pressure_can"],
+        "substitutionGroupsAny": ["preserve.pressure_can"],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Jar",
+        "colorHint": "accent",
+        "sortOrder": 520
+      }
+    },
+    {
+      "id": "role.preservation.ferment",
+      "label": "Ferment/Culture",
+      "kind": "preservation_role",
+      "description": "Preserve by fermentation; targets salt, vessels, and fermentation recipes.",
+      "measureMode": "portion",
+      "defaults": {
+        "ratio": null,
+        "mealTimes": [],
+        "nutritionFocus": [],
+        "sourcingPriority": []
+      },
+      "match": {
+        "categoryIds": [],
+        "tagsAny": ["preserve.culture_ferment"],
+        "substitutionGroupsAny": ["preserve.culture_ferment"],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Beaker",
+        "colorHint": "accent",
+        "sortOrder": 530
+      }
+    },
+    {
+      "id": "role.preservation.dehydrate",
+      "label": "Dehydrate",
+      "kind": "preservation_role",
+      "description": "Preserve by dehydrating; targets dehydrator runtime and dry storage.",
+      "measureMode": "portion",
+      "defaults": {
+        "ratio": null,
+        "mealTimes": [],
+        "nutritionFocus": [],
+        "sourcingPriority": []
+      },
+      "match": {
+        "categoryIds": [],
+        "tagsAny": ["preserve.dehydrate"],
+        "substitutionGroupsAny": ["preserve.dehydrate"],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Wind",
+        "colorHint": "accent",
+        "sortOrder": 540
+      }
+    },
+    {
+      "id": "role.session.prep",
+      "label": "Prep Step",
+      "kind": "session_role",
+      "description": "A preparation step in SessionRunner (chop, measure, marinate, etc.).",
+      "measureMode": "count",
+      "defaults": {
+        "ratio": null,
+        "mealTimes": [],
+        "nutritionFocus": [],
+        "sourcingPriority": []
+      },
+      "match": {
+        "categoryIds": [],
+        "tagsAny": [],
+        "substitutionGroupsAny": [],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Clipboard",
+        "colorHint": "muted",
+        "sortOrder": 610
+      }
+    },
+    {
+      "id": "role.session.cook",
+      "label": "Cook Step",
+      "kind": "session_role",
+      "description": "A cooking step in SessionRunner (saute, simmer, bake, etc.).",
+      "measureMode": "count",
+      "defaults": {
+        "ratio": null,
+        "mealTimes": [],
+        "nutritionFocus": [],
+        "sourcingPriority": []
+      },
+      "match": {
+        "categoryIds": [],
+        "tagsAny": [],
+        "substitutionGroupsAny": [],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Flame",
+        "colorHint": "muted",
+        "sortOrder": 620
+      }
+    },
+    {
+      "id": "role.session.preserve",
+      "label": "Preserve Step",
+      "kind": "session_role",
+      "description": "A preservation step in SessionRunner (can, freeze, dehydrate, ferment).",
+      "measureMode": "count",
+      "defaults": {
+        "ratio": null,
+        "mealTimes": [],
+        "nutritionFocus": [],
+        "sourcingPriority": []
+      },
+      "match": {
+        "categoryIds": [],
+        "tagsAny": [],
+        "substitutionGroupsAny": [],
+        "componentIdsAny": []
+      },
+      "constraints": {
+        "dietTagsAny": [],
+        "dietTagsNot": [],
+        "allergensAny": [],
+        "allergensNot": []
+      },
+      "ui": {
+        "icon": "Archive",
+        "colorHint": "muted",
+        "sortOrder": 630
+      }
+    }
+  ],
+  "indexes": {
+    "byKind": true,
+    "byMealTime": true,
+    "byNutritionFocus": true
+  }
+}

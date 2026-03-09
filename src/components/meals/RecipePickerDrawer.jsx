@@ -1,5 +1,11 @@
 // src/components/meals/RecipePickerDrawer.jsx
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { classNames as cx } from "@/utils/css";
 import { eventBus } from "@/services/events/eventBus";
 import { automation, emitProgress } from "@/services/automation/runtime";
@@ -7,10 +13,18 @@ import { sabbathGuard } from "@/services/guardrails/sabbathGuard";
 
 // Optional stores — component gracefully degrades if missing.
 let useRecipeStore, usePreferencesStore, useFoodStore, useInventoryStore;
-try { useRecipeStore = require("@/store/RecipeStore").useRecipeStore; } catch {}
-try { usePreferencesStore = require("@/store/PreferencesStore").usePreferencesStore; } catch {}
-try { useFoodStore = require("@/store/FoodStore").useFoodStore; } catch {}
-try { useInventoryStore = require("@/store/InventoryStore").useInventoryStore; } catch {}
+try {
+  useRecipeStore = require("@/store/RecipeStore").useRecipeStore;
+} catch {}
+try {
+  usePreferencesStore = require("@/store/PreferencesStore").usePreferencesStore;
+} catch {}
+try {
+  useFoodStore = require("@/store/FoodStore").useFoodStore;
+} catch {}
+try {
+  useInventoryStore = require("@/store/InventoryStore").useInventoryStore;
+} catch {}
 
 /** LocalStorage fallback for favorites when store not wired */
 const FAV_LS_KEY = "suka.recipe.favorites";
@@ -18,8 +32,8 @@ const FAV_LS_KEY = "suka.recipe.favorites";
 export default function RecipePickerDrawer({
   open,
   onClose,
-  onSelect,                 // (recipeRef) => void
-  defaultFilters = {},      // e.g., { mealSlot:"Dinner", tags:[], mode:"Home", cuisine:"" }
+  onSelect, // (recipeRef) => void
+  defaultFilters = {}, // e.g., { mealSlot:"Dinner", tags:[], mode:"Home", cuisine:"" }
 }) {
   const prefs = usePreferencesStore?.() || {};
   const recipesStore = useRecipeStore?.();
@@ -51,9 +65,10 @@ export default function RecipePickerDrawer({
 
   // --- Favorites (from store or LS fallback) ---------------------------------
   const [favIds, setFavIds] = useState(() => getFavsFallback());
-  const favSet = useMemo(() => new Set(
-    recipesStore?.favorites?.map?.(f => f.id) || favIds
-  ), [recipesStore?.favorites, favIds]);
+  const favSet = useMemo(
+    () => new Set(recipesStore?.favorites?.map?.((f) => f.id) || favIds),
+    [recipesStore?.favorites, favIds]
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -63,7 +78,7 @@ export default function RecipePickerDrawer({
         try {
           const list = await recipesStore.listFavorites();
           if (Array.isArray(list)) {
-            const ids = list.map(r => r.id);
+            const ids = list.map((r) => r.id);
             setFavIds(ids);
             saveFavsFallback(ids);
           }
@@ -72,7 +87,9 @@ export default function RecipePickerDrawer({
         // optional fallback via automation
         try {
           const res = await automation("recipes.favorites.list", {});
-          const ids = Array.isArray(res?.items) ? res.items.map(r => r.id) : getFavsFallback();
+          const ids = Array.isArray(res?.items)
+            ? res.items.map((r) => r.id)
+            : getFavsFallback();
           setFavIds(ids);
           saveFavsFallback(ids);
         } catch {}
@@ -89,62 +106,108 @@ export default function RecipePickerDrawer({
     setHasMore(true);
     setActiveIndex(-1);
     fetchPage(0, true);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, slot, cuisine, mode, tags.join("|"), onlyOnHand, hideShellfish, hidePork, viewKind, simThreshold, boostFavs]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    open,
+    slot,
+    cuisine,
+    mode,
+    tags.join("|"),
+    onlyOnHand,
+    hideShellfish,
+    hidePork,
+    viewKind,
+    simThreshold,
+    boostFavs,
+  ]);
 
   // live updates: recipes/inventory/prefs/favorites
   useEffect(() => {
     const offA = eventBus?.on?.("recipes.updated", () => softRefresh());
     const offB = eventBus?.on?.("inventory.updated", () => softRefresh());
     const offC = eventBus?.on?.("preferences.changed", () => softRefresh());
-    const offD = eventBus?.on?.("favorites.updated", (ids) => { setFavIds(Array.isArray(ids) ? ids : getFavsFallback()); softRefresh(); });
-    return () => { offA?.(); offB?.(); offC?.(); offD?.(); };
+    const offD = eventBus?.on?.("favorites.updated", (ids) => {
+      setFavIds(Array.isArray(ids) ? ids : getFavsFallback());
+      softRefresh();
+    });
+    return () => {
+      offA?.();
+      offB?.();
+      offC?.();
+      offD?.();
+    };
   }, []);
 
   const softRefresh = () => fetchPage(0, true);
 
   // --- Fetch a page (store → automation → mock) ------------------------------
-  const fetchPage = useCallback(async (nextPage, replace = false) => {
-    if (!open) return;
-    setBusy(true);
-    const payload = {
-      q: query.trim(),
-      page: nextPage,
-      pageSize: 24,
-      filters: {
-        slot: slot === "Any" ? null : slot,
-        cuisine: cuisine || null,
-        mode, // Home | Street | FoodTruck
-        tags,
-        onlyOnHand,
-        exclude: { shellfish: hideShellfish, pork: hidePork },
-      },
-    };
+  const fetchPage = useCallback(
+    async (nextPage, replace = false) => {
+      if (!open) return;
+      setBusy(true);
+      const payload = {
+        q: query.trim(),
+        page: nextPage,
+        pageSize: 24,
+        filters: {
+          slot: slot === "Any" ? null : slot,
+          cuisine: cuisine || null,
+          mode, // Home | Street | FoodTruck
+          tags,
+          onlyOnHand,
+          exclude: { shellfish: hideShellfish, pork: hidePork },
+        },
+      };
 
-    let data = null;
-    if (recipesStore?.search) {
-      data = await recipesStore.search(payload);
-    } else if (automation) {
-      data = await automation("recipes.search", payload);
-    }
-    if (!data) data = mockSearch(payload); // WA-forward fallback
+      let data = null;
+      if (recipesStore?.search) {
+        data = await recipesStore.search(payload);
+      } else if (automation) {
+        data = await automation("recipes.search", payload);
+      }
+      if (!data) data = mockSearch(payload); // WA-forward fallback
 
-    const items = Array.isArray(data?.items) ? data.items : [];
+      const items = Array.isArray(data?.items) ? data.items : [];
 
-    // Household-aware post-processing (filter + ranking)
-    const enriched = rankAndFilter(items, {
+      // Household-aware post-processing (filter + ranking)
+      const enriched = rankAndFilter(items, {
+        viewKind,
+        boostFavs,
+        simThreshold,
+        favSet,
+      });
+
+      setRows((prev) => (replace ? enriched : [...prev, ...enriched]));
+      setHasMore(
+        Boolean(
+          items.length && items.length >= (data?.pageSize || payload.pageSize)
+        )
+      );
+      setPage(nextPage);
+      setBusy(false);
+      emitProgress?.("recipes.search.page", {
+        page: nextPage,
+        size: items.length,
+        viewKind,
+      });
+    },
+    [
+      open,
+      query,
+      slot,
+      cuisine,
+      mode,
+      tags,
+      onlyOnHand,
+      hideShellfish,
+      hidePork,
       viewKind,
-      boostFavs,
       simThreshold,
+      boostFavs,
+      recipesStore,
       favSet,
-    });
-
-    setRows((prev) => replace ? enriched : [...prev, ...enriched]);
-    setHasMore(Boolean(items.length && items.length >= (data?.pageSize || payload.pageSize)));
-    setPage(nextPage);
-    setBusy(false);
-    emitProgress?.("recipes.search.page", { page: nextPage, size: items.length, viewKind });
-  }, [open, query, slot, cuisine, mode, tags, onlyOnHand, hideShellfish, hidePork, viewKind, simThreshold, boostFavs, recipesStore, favSet]);
+    ]
+  );
 
   // infinite scroll
   useEffect(() => {
@@ -153,7 +216,8 @@ export default function RecipePickerDrawer({
     if (!div) return;
     const onScroll = () => {
       if (!hasMore || busy) return;
-      const nearBottom = div.scrollTop + div.clientHeight >= div.scrollHeight - 200;
+      const nearBottom =
+        div.scrollTop + div.clientHeight >= div.scrollHeight - 200;
       if (nearBottom) fetchPage(page + 1, false);
     };
     div.addEventListener("scroll", onScroll);
@@ -164,8 +228,10 @@ export default function RecipePickerDrawer({
   useEffect(() => {
     if (!open) return;
     const handler = (e) => {
-      if (["ArrowDown","ArrowUp","Enter","Escape"].includes(e.key)) e.preventDefault();
-      if (e.key === "ArrowDown") setActiveIndex((i) => Math.min(rows.length - 1, i + 1));
+      if (["ArrowDown", "ArrowUp", "Enter", "Escape"].includes(e.key))
+        e.preventDefault();
+      if (e.key === "ArrowDown")
+        setActiveIndex((i) => Math.min(rows.length - 1, i + 1));
       if (e.key === "ArrowUp") setActiveIndex((i) => Math.max(0, i - 1));
       if (e.key === "Enter" && rows[activeIndex]) doSelect(rows[activeIndex]);
       if (e.key === "Escape") onClose?.();
@@ -190,11 +256,33 @@ export default function RecipePickerDrawer({
   }, [rows, onlyOnHand, invIndex]);
 
   // Tag suggestions (West African forward + street foods)
-  const suggestedTags = useMemo(() => ([
-    "jollof","suya","waakye","fufu","egusi","thieb","puff-puff","kelewele","plantain","groundnut","shito",
-    "street-food","food-truck","grill","stew","one-pot","batch",
-    "high-protein","gluten-free","dairy-free","low-sodium","kosher-style",
-  ]), []);
+  const suggestedTags = useMemo(
+    () => [
+      "jollof",
+      "suya",
+      "waakye",
+      "fufu",
+      "egusi",
+      "thieb",
+      "puff-puff",
+      "kelewele",
+      "plantain",
+      "groundnut",
+      "shito",
+      "street-food",
+      "food-truck",
+      "grill",
+      "stew",
+      "one-pot",
+      "batch",
+      "high-protein",
+      "gluten-free",
+      "dairy-free",
+      "low-sodium",
+      "kosher-style",
+    ],
+    []
+  );
 
   // actions -------------------------------------------------------------------
   const doSelect = (recipe) => {
@@ -215,14 +303,23 @@ export default function RecipePickerDrawer({
         targetMode: mode || "Home",
         slot: slot === "Any" ? null : slot,
         prefs: {
-          hideShellfish, hidePork,
+          hideShellfish,
+          hidePork,
           nutritionGoals: prefs?.nutritionGoals || food?.goals || null,
           householdFavorites: Array.from(favSet),
         },
       });
-      const adapted = result?.recipe ? mkRecipeRef(result.recipe) : { ...base, title: annotateTitle(base.title, cuisine, mode) };
+      const adapted = result?.recipe
+        ? mkRecipeRef(result.recipe)
+        : { ...base, title: annotateTitle(base.title, cuisine, mode) };
       onSelect?.(adapted);
-      eventBus?.emit?.("recipes.adapted", { fromId: base.id, toId: adapted.id, cuisine, mode, slot });
+      eventBus?.emit?.("recipes.adapted", {
+        fromId: base.id,
+        toId: adapted.id,
+        cuisine,
+        mode,
+        slot,
+      });
       onClose?.();
     };
     await sabbathGuard(fn)();
@@ -234,7 +331,8 @@ export default function RecipePickerDrawer({
     const id = recipe?.id;
     if (!id) return;
     let nextIds = new Set(favSet);
-    if (nextIds.has(id)) nextIds.delete(id); else nextIds.add(id);
+    if (nextIds.has(id)) nextIds.delete(id);
+    else nextIds.add(id);
 
     // optimistic UI
     setFavIds(Array.from(nextIds));
@@ -256,41 +354,78 @@ export default function RecipePickerDrawer({
   if (!open) return null;
 
   return (
-    <div className={cx(
-      "fixed inset-0 z-40",
-      "bg-black/40 backdrop-blur-[1px]",
-      "flex justify-end"
-    )} role="dialog" aria-modal="true">
+    <div
+      className={cx(
+        "fixed inset-0 z-40",
+        "bg-black/40 backdrop-blur-[1px]",
+        "flex justify-end"
+      )}
+      role="dialog"
+      aria-modal="true"
+    >
       <div className="w-[92%] sm:w-[620px] h-full bg-base-100 border-l border-base-200 shadow-2xl flex flex-col">
         {/* Header */}
         <div className="p-4 border-b border-base-200 flex items-center justify-between">
           <div>
             <div className="text-lg font-semibold">Pick a Recipe</div>
             <div className="text-xs text-base-content/70">
-              West African–forward • favorites-aware • filter by slot, cuisine, mode • adapt for fusion or street/food-truck
+              West African–forward • favorites-aware • filter by slot, cuisine,
+              mode • adapt for fusion or street/food-truck
             </div>
           </div>
-          <button className="btn btn-ghost btn-sm" onClick={onClose} aria-label="Close">✕</button>
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            ✕
+          </button>
         </div>
 
         {/* Controls */}
         <div className="p-3 border-b border-base-200">
-          <form onSubmit={(e) => { e.preventDefault(); fetchPage(0, true); }} className="grid grid-cols-1 sm:grid-cols-12 gap-2">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              fetchPage(0, true);
+            }}
+            className="grid grid-cols-1 sm:grid-cols-12 gap-2"
+          >
             <input
               className="input input-bordered input-sm sm:col-span-6"
               placeholder="Search recipes, ingredients, tags…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
-            <select className="select select-bordered select-sm sm:col-span-3" value={slot} onChange={(e) => setSlot(e.target.value)}>
-              {["Any","Breakfast","Lunch","Dinner","Snack"].map(s => <option key={s} value={s}>{s}</option>)}
+            <select
+              className="select select-bordered select-sm sm:col-span-3"
+              value={slot}
+              onChange={(e) => setSlot(e.target.value)}
+            >
+              {["Any", "Breakfast", "Lunch", "Dinner", "Snack"].map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
             </select>
-            <select className="select select-bordered select-sm sm:col-span-3" value={mode} onChange={(e) => setMode(e.target.value)}>
-              {["Home","Street","FoodTruck"].map(m => <option key={m} value={m}>{m}</option>)}
+            <select
+              className="select select-bordered select-sm sm:col-span-3"
+              value={mode}
+              onChange={(e) => setMode(e.target.value)}
+            >
+              {["Home", "Street", "FoodTruck"].map((m) => (
+                <option key={m} value={m}>
+                  {m}
+                </option>
+              ))}
             </select>
 
             {/* Cuisine with West African focus */}
-            <select className="select select-bordered select-sm sm:col-span-5" value={cuisine} onChange={(e) => setCuisine(e.target.value)}>
+            <select
+              className="select select-bordered select-sm sm:col-span-5"
+              value={cuisine}
+              onChange={(e) => setCuisine(e.target.value)}
+            >
               <option value="">Cuisine: Any</option>
               <optgroup label="West African">
                 <option>Ghanaian</option>
@@ -303,9 +438,15 @@ export default function RecipePickerDrawer({
                 <option>West African (Regional)</option>
               </optgroup>
               <optgroup label="Popular">
-                <option>American</option><option>Italian</option><option>Mexican</option>
-                <option>Indian</option><option>Mediterranean</option><option>Caribbean</option>
-                <option>African (Other)</option><option>Middle Eastern</option><option>Thai</option>
+                <option>American</option>
+                <option>Italian</option>
+                <option>Mexican</option>
+                <option>Indian</option>
+                <option>Mediterranean</option>
+                <option>Caribbean</option>
+                <option>African (Other)</option>
+                <option>Middle Eastern</option>
+                <option>Thai</option>
               </optgroup>
             </select>
 
@@ -330,13 +471,20 @@ export default function RecipePickerDrawer({
               </select>
 
               <label className="sm:col-span-4 flex items-center gap-2 text-sm cursor-pointer">
-                <input type="checkbox" className="toggle toggle-sm" checked={boostFavs} onChange={(e) => setBoostFavs(e.target.checked)} />
+                <input
+                  type="checkbox"
+                  className="toggle toggle-sm"
+                  checked={boostFavs}
+                  onChange={(e) => setBoostFavs(e.target.checked)}
+                />
                 Boost favorites & related
               </label>
 
               {viewKind === "related" && (
                 <div className="sm:col-span-4 flex items-center gap-2">
-                  <span className="text-xs text-base-content/70">Similarity</span>
+                  <span className="text-xs text-base-content/70">
+                    Similarity
+                  </span>
                   <input
                     type="range"
                     min="0"
@@ -354,20 +502,53 @@ export default function RecipePickerDrawer({
             {/* Dietary + inventory toggles */}
             <div className="sm:col-span-12 flex flex-wrap items-center gap-3 mt-1">
               <label className="flex items-center gap-2 text-sm cursor-pointer">
-                <input type="checkbox" className="toggle toggle-sm" checked={onlyOnHand} onChange={(e) => setOnlyOnHand(e.target.checked)} />
+                <input
+                  type="checkbox"
+                  className="toggle toggle-sm"
+                  checked={onlyOnHand}
+                  onChange={(e) => setOnlyOnHand(e.target.checked)}
+                />
                 Only show recipes mostly covered by inventory
               </label>
               <label className="flex items-center gap-2 text-sm cursor-pointer">
-                <input type="checkbox" className="toggle toggle-sm" checked={hideShellfish} onChange={(e) => setHideShellfish(e.target.checked)} />
+                <input
+                  type="checkbox"
+                  className="toggle toggle-sm"
+                  checked={hideShellfish}
+                  onChange={(e) => setHideShellfish(e.target.checked)}
+                />
                 Hide shellfish
               </label>
               <label className="flex items-center gap-2 text-sm cursor-pointer">
-                <input type="checkbox" className="toggle toggle-sm" checked={hidePork} onChange={(e) => setHidePork(e.target.checked)} />
+                <input
+                  type="checkbox"
+                  className="toggle toggle-sm"
+                  checked={hidePork}
+                  onChange={(e) => setHidePork(e.target.checked)}
+                />
                 Hide pork
               </label>
               <div className="ml-auto flex items-center gap-2">
-                <button type="submit" className="btn btn-primary btn-sm" disabled={busy}>Search</button>
-                <button type="button" className="btn btn-outline btn-sm" onClick={() => { setQuery(""); setTags([]); setCuisine(""); setOnlyOnHand(false); setViewKind("all"); }}>Reset</button>
+                <button
+                  type="submit"
+                  className="btn btn-primary btn-sm"
+                  disabled={busy}
+                >
+                  Search
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-outline btn-sm"
+                  onClick={() => {
+                    setQuery("");
+                    setTags([]);
+                    setCuisine("");
+                    setOnlyOnHand(false);
+                    setViewKind("all");
+                  }}
+                >
+                  Reset
+                </button>
               </div>
             </div>
           </form>
@@ -405,10 +586,19 @@ export default function RecipePickerDrawer({
             ))}
           </div>
 
-          {busy && <div className="text-center text-sm text-base-content/70">Loading…</div>}
+          {busy && (
+            <div className="text-center text-sm text-base-content/70">
+              Loading…
+            </div>
+          )}
           {!busy && hasMore && filteredRows.length > 0 && (
             <div className="text-center">
-              <button className="btn btn-ghost btn-sm" onClick={() => fetchPage(page + 1, false)}>Load more</button>
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={() => fetchPage(page + 1, false)}
+              >
+                Load more
+              </button>
             </div>
           )}
         </div>
@@ -416,12 +606,27 @@ export default function RecipePickerDrawer({
         {/* Footer quick actions */}
         <div className="p-3 border-t border-base-200 flex items-center justify-between">
           <div className="text-xs text-base-content/70">
-            Tips: Press <kbd className="kbd kbd-xs">↓</kbd>/<kbd className="kbd kbd-xs">↑</kbd> to navigate, <kbd className="kbd kbd-xs">Enter</kbd> to pick, <kbd className="kbd kbd-xs">Esc</kbd> to close.
+            Tips: Press <kbd className="kbd kbd-xs">↓</kbd>/
+            <kbd className="kbd kbd-xs">↑</kbd> to navigate,{" "}
+            <kbd className="kbd kbd-xs">Enter</kbd> to pick,{" "}
+            <kbd className="kbd kbd-xs">Esc</kbd> to close.
           </div>
           <div className="flex items-center gap-2">
-            <button className="btn btn-outline btn-sm" onClick={() => importFromUrl()}>Import URL</button>
-            <button className="btn btn-outline btn-sm" onClick={() => triggerScan()}>Scan Barcode</button>
-            <button className="btn btn-ghost btn-sm" onClick={onClose}>Close</button>
+            <button
+              className="btn btn-outline btn-sm"
+              onClick={() => importFromUrl()}
+            >
+              Import URL
+            </button>
+            <button
+              className="btn btn-outline btn-sm"
+              onClick={() => triggerScan()}
+            >
+              Scan Barcode
+            </button>
+            <button className="btn btn-ghost btn-sm" onClick={onClose}>
+              Close
+            </button>
           </div>
         </div>
       </div>
@@ -434,7 +639,9 @@ export default function RecipePickerDrawer({
   async function triggerScan() {
     setBusy(true);
     const fn = async () => {
-      const result = await automation?.("recipes.scanBarcode", { intent: "add-recipe" });
+      const result = await automation?.("recipes.scanBarcode", {
+        intent: "add-recipe",
+      });
       if (result?.recipe) doSelect(result.recipe);
       setBusy(false);
     };
@@ -463,17 +670,30 @@ export default function RecipePickerDrawer({
 /* Subcomponents                                                              */
 /* ========================================================================== */
 
-function RecipeCard({ recipe, onPick, onAdapt, onToggleFavorite, favorite, active, draggable }) {
+function RecipeCard({
+  recipe,
+  onPick,
+  onAdapt,
+  onToggleFavorite,
+  favorite,
+  active,
+  draggable,
+}) {
   const n = recipe.nutrition || {};
   const kcal = Math.round(n.calories || 0);
-  const macros = `P${Math.round(n.protein || 0)} / C${Math.round(n.carbs || 0)} / F${Math.round(n.fat || 0)}`;
+  const macros = `P${Math.round(n.protein || 0)} / C${Math.round(
+    n.carbs || 0
+  )} / F${Math.round(n.fat || 0)}`;
   const tags = recipe.tags || [];
 
   const handleDragStart = (e) => {
     if (!draggable) return;
     const ref = mkRecipeRef(recipe);
     e.dataTransfer.effectAllowed = "copy";
-    e.dataTransfer.setData("text/plain", JSON.stringify({ t: "RECIPE_CARD", id: ref.id }));
+    e.dataTransfer.setData(
+      "text/plain",
+      JSON.stringify({ t: "RECIPE_CARD", id: ref.id })
+    );
   };
 
   return (
@@ -492,7 +712,8 @@ function RecipeCard({ recipe, onPick, onAdapt, onToggleFavorite, favorite, activ
         <div className="min-w-0">
           <div className="font-semibold truncate">{recipe.title}</div>
           <div className="text-xs text-base-content/70 mt-0.5 truncate">
-            {recipe.cuisine || "—"} • {recipe.slot || "Any"} • {recipe.mode || "Home"}
+            {recipe.cuisine || "—"} • {recipe.slot || "Any"} •{" "}
+            {recipe.mode || "Home"}
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -504,7 +725,9 @@ function RecipeCard({ recipe, onPick, onAdapt, onToggleFavorite, favorite, activ
           >
             {favorite ? "♥" : "♡"}
           </button>
-          <span className="badge badge-ghost">{Math.max(1, recipe.servings || 1)} sv</span>
+          <span className="badge badge-ghost">
+            {Math.max(1, recipe.servings || 1)} sv
+          </span>
         </div>
       </div>
 
@@ -514,14 +737,30 @@ function RecipeCard({ recipe, onPick, onAdapt, onToggleFavorite, favorite, activ
 
       {tags?.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1">
-          {tags.slice(0,5).map(t => <span key={t} className="badge badge-ghost badge-sm">{t}</span>)}
-          {tags.length > 5 && <span className="badge badge-ghost badge-sm">+{tags.length-5}</span>}
+          {tags.slice(0, 5).map((t) => (
+            <span key={t} className="badge badge-ghost badge-sm">
+              {t}
+            </span>
+          ))}
+          {tags.length > 5 && (
+            <span className="badge badge-ghost badge-sm">
+              +{tags.length - 5}
+            </span>
+          )}
         </div>
       )}
 
       <div className="mt-3 flex items-center gap-2">
-        <button className="btn btn-primary btn-xs" onClick={onPick}>Add</button>
-        <button className="btn btn-outline btn-xs" onClick={onAdapt} title="Adapt/fuse to chosen cuisine or mode">Adapt</button>
+        <button className="btn btn-primary btn-xs" onClick={onPick}>
+          Add
+        </button>
+        <button
+          className="btn btn-outline btn-xs"
+          onClick={onAdapt}
+          title="Adapt/fuse to chosen cuisine or mode"
+        >
+          Adapt
+        </button>
       </div>
     </div>
   );
@@ -543,7 +782,13 @@ function TagSelector({ className, selected, suggestions, onChange }) {
         {selected.map((t) => (
           <span key={t} className="badge badge-ghost gap-1">
             {t}
-            <button className="ml-1 text-error" onClick={() => remove(t)} aria-label={`Remove ${t}`}>✕</button>
+            <button
+              className="ml-1 text-error"
+              onClick={() => remove(t)}
+              aria-label={`Remove ${t}`}
+            >
+              ✕
+            </button>
           </span>
         ))}
         <input
@@ -551,7 +796,12 @@ function TagSelector({ className, selected, suggestions, onChange }) {
           placeholder="Add tag…"
           value={text}
           onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              add();
+            }
+          }}
         />
       </div>
       <details className="dropdown">
@@ -576,9 +826,15 @@ function EmptyState({ onScan, onImportUrl, onManual }) {
         Try different filters — or add one now.
       </p>
       <div className="mt-4 flex items-center justify-center gap-2">
-        <button className="btn btn-primary btn-sm" onClick={onManual}>Add Manually</button>
-        <button className="btn btn-outline btn-sm" onClick={onImportUrl}>Import from URL</button>
-        <button className="btn btn-outline btn-sm" onClick={onScan}>Scan Barcode</button>
+        <button className="btn btn-primary btn-sm" onClick={onManual}>
+          Add Manually
+        </button>
+        <button className="btn btn-outline btn-sm" onClick={onImportUrl}>
+          Import from URL
+        </button>
+        <button className="btn btn-outline btn-sm" onClick={onScan}>
+          Scan Barcode
+        </button>
       </div>
     </div>
   );
@@ -592,17 +848,17 @@ function rankAndFilter(items, { viewKind, boostFavs, simThreshold, favSet }) {
   if (!items?.length) return [];
 
   // Build a "profile" from the current favorites found within items (quick client-side)
-  const favItems = items.filter(i => favSet.has(i.id));
+  const favItems = items.filter((i) => favSet.has(i.id));
   const profile = makeProfile(favItems);
 
   // Score each item by similarity to the profile
-  const scored = items.map(r => {
+  const scored = items.map((r) => {
     const sim = similarityToProfile(r, profile);
     const isFav = favSet.has(r.id);
     let score = sim;
 
     if (boostFavs) {
-      if (isFav) score += 0.5;               // strong boost for actual favorites
+      if (isFav) score += 0.5; // strong boost for actual favorites
       else score += Math.min(0.4, sim * 0.6); // softer boost for "related"
     }
 
@@ -611,34 +867,51 @@ function rankAndFilter(items, { viewKind, boostFavs, simThreshold, favSet }) {
 
   // Filter by view
   let out = scored;
-  if (viewKind === "favorites") out = out.filter(x => x._isFav);
-  if (viewKind === "related")   out = out.filter(x => !x._isFav && x._sim >= simThreshold);
+  if (viewKind === "favorites") out = out.filter((x) => x._isFav);
+  if (viewKind === "related")
+    out = out.filter((x) => !x._isFav && x._sim >= simThreshold);
 
   // Sort by score desc, fallback to title
-  out.sort((a, b) => (b._score - a._score) || (a.title || "").localeCompare(b.title || ""));
+  out.sort(
+    (a, b) =>
+      b._score - a._score || (a.title || "").localeCompare(b.title || "")
+  );
   return out;
 }
 
 function makeProfile(favItems) {
-  const tags = new Map(), ings = new Map(), cuisines = new Map(), slots = new Map(), modes = new Map();
+  const tags = new Map(),
+    ings = new Map(),
+    cuisines = new Map(),
+    slots = new Map(),
+    modes = new Map();
   for (const r of favItems || []) {
-    for (const t of (r.tags || [])) tags.set(t.toLowerCase(), (tags.get(t.toLowerCase()) || 0) + 1);
-    for (const ing of (r.ingredients || [])) {
+    for (const t of r.tags || [])
+      tags.set(t.toLowerCase(), (tags.get(t.toLowerCase()) || 0) + 1);
+    for (const ing of r.ingredients || []) {
       const k = (ing.name || "").toLowerCase();
       if (k) ings.set(k, (ings.get(k) || 0) + 1);
     }
     if (r.cuisine) cuisines.set(r.cuisine, (cuisines.get(r.cuisine) || 0) + 1);
-    if (r.slot)    slots.set(r.slot, (slots.get(r.slot) || 0) + 1);
-    if (r.mode)    modes.set(r.mode, (modes.get(r.mode) || 0) + 1);
+    if (r.slot) slots.set(r.slot, (slots.get(r.slot) || 0) + 1);
+    if (r.mode) modes.set(r.mode, (modes.get(r.mode) || 0) + 1);
   }
-  return { tags, ings, cuisines, slots, modes, size: Math.max(1, favItems?.length || 0) };
+  return {
+    tags,
+    ings,
+    cuisines,
+    slots,
+    modes,
+    size: Math.max(1, favItems?.length || 0),
+  };
 }
 
 function similarityToProfile(recipe, p) {
   if (!p || !p.size) return 0;
 
   // simple weighted overlap score (0..1)
-  let t = 0, max = 0;
+  let t = 0,
+    max = 0;
 
   const norm = (s) => (s || "").toLowerCase();
 
@@ -649,7 +922,7 @@ function similarityToProfile(recipe, p) {
   max += 0.4;
 
   // ingredients (0.3)
-  const ring = (recipe.ingredients || []).map(i => norm(i.name));
+  const ring = (recipe.ingredients || []).map((i) => norm(i.name));
   const ingHit = ring.reduce((acc, n) => acc + (p.ings.has(n) ? 1 : 0), 0);
   t += (ingHit / Math.max(1, ring.length)) * 0.3;
   max += 0.3;
@@ -662,7 +935,8 @@ function similarityToProfile(recipe, p) {
   let sm = 0;
   if (recipe.slot && p.slots.has(recipe.slot)) sm += 0.06;
   if (recipe.mode && p.modes.has(recipe.mode)) sm += 0.04;
-  t += sm; max += 0.1;
+  t += sm;
+  max += 0.1;
 
   return Math.min(1, t / Math.max(0.0001, max));
 }
@@ -886,7 +1160,12 @@ function mockSearch({ q, page, pageSize, filters }) {
   ];
 
   const matches = base
-    .filter((r) => !q || r.title.toLowerCase().includes(q.toLowerCase()) || (r.tags || []).some(t => t.includes(q.toLowerCase())))
+    .filter(
+      (r) =>
+        !q ||
+        r.title.toLowerCase().includes(q.toLowerCase()) ||
+        (r.tags || []).some((t) => t.includes(q.toLowerCase()))
+    )
     .filter((r) => !filters?.slot || r.slot === filters.slot)
     .filter((r) => !filters?.cuisine || r.cuisine === filters.cuisine);
 
@@ -897,8 +1176,15 @@ function mockSearch({ q, page, pageSize, filters }) {
 
 /* -------- Favorites fallback (LS) ------- */
 function getFavsFallback() {
-  try { const raw = localStorage.getItem(FAV_LS_KEY); return raw ? JSON.parse(raw) : []; } catch { return []; }
+  try {
+    const raw = localStorage.getItem(FAV_LS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
 }
 function saveFavsFallback(ids) {
-  try { localStorage.setItem(FAV_LS_KEY, JSON.stringify(ids || [])); } catch {}
+  try {
+    localStorage.setItem(FAV_LS_KEY, JSON.stringify(ids || []));
+  } catch {}
 }

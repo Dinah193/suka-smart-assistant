@@ -22,8 +22,8 @@
  * - Can be re-run safely even if the user navigates away and returns later.
  */
 
-import { emit } from "@/services/eventBus"; // Adjust import if your eventBus exports differently
-import { familyFundMode } from "@/services/featureFlags";
+import { emit } from "@/services/events/eventBus"; // Adjust import if your eventBus exports differently
+import { familyFundMode } from "@/config/featureFlags";
 import { HubPacketFormatter, FamilyFundConnector } from "@/services/hub";
 
 /**
@@ -231,7 +231,9 @@ export async function runCostPerServingCalculation(payload) {
   } = payload;
 
   if (!Array.isArray(rawItems) || rawItems.length === 0) {
-    throw new Error("CostPerServingCalculator: payload.items must be a non-empty array.");
+    throw new Error(
+      "CostPerServingCalculator: payload.items must be a non-empty array."
+    );
   }
 
   const normalizedItems = [];
@@ -254,7 +256,10 @@ export async function runCostPerServingCalculation(payload) {
       continue;
     }
 
-    const pricePerUnit = computePricePerUnit(item.packagePrice, item.packageSize);
+    const pricePerUnit = computePricePerUnit(
+      item.packagePrice,
+      item.packageSize
+    );
     const pricePerServing = computePricePerServing(
       item.packagePrice,
       item.servingsFromPackage
@@ -299,7 +304,9 @@ export async function runCostPerServingCalculation(payload) {
   }
 
   const avgPricePerServing =
-    totalServingsCount > 0 ? weightedPricePerServingSum / totalServingsCount : 0;
+    totalServingsCount > 0
+      ? weightedPricePerServingSum / totalServingsCount
+      : 0;
 
   const summary = {
     totalItems: normalizedItems.length,

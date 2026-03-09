@@ -1,0 +1,600 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-21T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.korean.recipes.bulgogi",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Bulgogi (Korean Marinated Beef)",
+    "subtitle": "Thin-sliced beef in a soy-sesame-pear marinade, quickly seared for a smoky-sweet finish.",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa.catalogs.cuisines.korean",
+      "notes": "Canonical SSA-style bulgogi recipe. Supports skillet, grill pan, or outdoor grill."
+    }
+  },
+
+  "classification": {
+    "cuisine": "korean",
+    "category": "main",
+    "mealArchetypes": ["korean.meal.bbq_ssam", "korean.meal.rice_banchan"],
+    "servingStyles": ["family_style", "plates", "bowls"],
+    "plannerTags": [
+      "korean",
+      "bbq",
+      "bulgogi",
+      "weeknight",
+      "marinated",
+      "stir_fry",
+      "skillet",
+      "grill_optional",
+      "rice_pairing",
+      "banchan_pairing"
+    ],
+    "subprofiles": ["korean.home_style", "korean.bbq_house"]
+  },
+
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 220, "unit": "g" },
+    "notes": "Serves 4 with rice + banchan; serves 6 in lettuce wraps (ssam) with sides."
+  },
+
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 60,
+    "totalMins": 85
+  },
+
+  "difficulty": "beginner",
+
+  "signals": {
+    "weeknightFriendly": true,
+    "batchFriendly": "medium",
+    "leftoversGood": true,
+    "freezerFriendly": "medium",
+    "kidFriendly": true,
+    "mealPrep": true
+  },
+
+  "tasteProfile": {
+    "sweet": 2,
+    "salty": 3,
+    "umami": 4,
+    "sour": 0,
+    "heat": 0,
+    "aromatics": ["garlic", "ginger", "scallion"],
+    "notes": ["savory-sweet", "sesame", "light smoke from sear"]
+  },
+
+  "equipment": {
+    "required": [
+      {
+        "id": "equipment.mixing_bowl",
+        "label": "Mixing bowl",
+        "required": true
+      },
+      { "id": "equipment.knife", "label": "Chef’s knife", "required": true },
+      {
+        "id": "equipment.cutting_board",
+        "label": "Cutting board",
+        "required": true
+      },
+      {
+        "id": "equipment.skillet",
+        "label": "Large skillet or sauté pan",
+        "required": true
+      }
+    ],
+    "recommended": [
+      "equipment.cast_iron_skillet",
+      "equipment.microplane",
+      "equipment.tongs"
+    ],
+    "optional": [
+      {
+        "id": "equipment.grill",
+        "label": "Outdoor grill",
+        "required": false,
+        "notes": "Great for extra char."
+      },
+      { "id": "equipment.grill_pan", "label": "Grill pan", "required": false },
+      {
+        "id": "equipment.rice_cooker",
+        "label": "Rice cooker",
+        "required": false
+      }
+    ]
+  },
+
+  "dietFlags": ["diet.omnivore"],
+
+  "allergens": {
+    "contains": ["allergen.soy", "allergen.sesame"],
+    "mayContain": [],
+    "notes": [
+      "Use tamari or gluten-free soy sauce for gluten-sensitive diets (still soy).",
+      "Check gochujang or other optional sauces for wheat if used."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "ingredient.beef_ribeye_or_sirloin_thin_sliced",
+      "label": "Beef ribeye or sirloin, thinly sliced (bulgogi-cut)",
+      "role": "protein",
+      "amount": { "value": 680, "unit": "g" },
+      "notes": [
+        "Freeze beef 20–30 minutes to firm up for easier slicing if not pre-sliced.",
+        "Slice across the grain into 2–3 mm slices."
+      ]
+    },
+
+    {
+      "id": "ingredient.asian_pear",
+      "label": "Asian pear, grated (or blended)",
+      "role": "tenderizer_sweetener",
+      "amount": { "value": 120, "unit": "g" },
+      "notes": [
+        "Substitute: ripe pear or sweet apple (e.g., Fuji) if Asian pear isn’t available."
+      ]
+    },
+    {
+      "id": "ingredient.soy_sauce",
+      "label": "Soy sauce",
+      "role": "umami_salt",
+      "amount": { "value": 80, "unit": "ml" },
+      "notes": [
+        "Start here, then adjust after searing if needed.",
+        "Use tamari for gluten-free."
+      ]
+    },
+    {
+      "id": "ingredient.brown_sugar",
+      "label": "Brown sugar (or raw sugar)",
+      "role": "sweetener",
+      "amount": { "value": 20, "unit": "g" },
+      "notes": [
+        "For less sweetness, reduce to 10 g; for classic sweeter bulgogi, increase to 30 g."
+      ]
+    },
+    {
+      "id": "ingredient.sesame_oil",
+      "label": "Toasted sesame oil",
+      "role": "aroma_fat",
+      "amount": { "value": 15, "unit": "ml" }
+    },
+    {
+      "id": "ingredient.sesame_seeds",
+      "label": "Toasted sesame seeds",
+      "role": "garnish",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": "Plus extra for serving, if desired."
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic, finely minced or grated",
+      "role": "aromatic",
+      "amount": { "value": 18, "unit": "g" },
+      "notes": "About 5–6 cloves."
+    },
+    {
+      "id": "ingredient.ginger",
+      "label": "Ginger, finely grated",
+      "role": "aromatic",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": "About a 1-inch knob."
+    },
+    {
+      "id": "ingredient.scallions",
+      "label": "Scallions (green onions), thinly sliced",
+      "role": "aromatic",
+      "amount": { "value": 60, "unit": "g" },
+      "notes": "Reserve a small handful of green tops for serving."
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper, freshly ground",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "g" }
+    },
+
+    {
+      "id": "ingredient.onion",
+      "label": "Yellow onion, thinly sliced",
+      "role": "veg",
+      "amount": { "value": 150, "unit": "g" },
+      "optional": true,
+      "notes": "Classic in many home-style bulgogi; adds sweetness and volume."
+    },
+    {
+      "id": "ingredient.carrot",
+      "label": "Carrot, matchsticks (julienned)",
+      "role": "veg",
+      "amount": { "value": 80, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.mushrooms",
+      "label": "Mushrooms (shiitake or cremini), sliced",
+      "role": "veg",
+      "amount": { "value": 120, "unit": "g" },
+      "optional": true,
+      "notes": "Especially good if using a leaner cut."
+    },
+
+    {
+      "id": "ingredient.neutral_oil",
+      "label": "Neutral oil (for searing)",
+      "role": "fat",
+      "amount": { "value": 15, "unit": "ml" },
+      "notes": "Use avocado, grapeseed, or refined peanut oil."
+    },
+
+    {
+      "id": "ingredient.rice_short_grain_cooked",
+      "label": "Cooked short-grain rice (for serving)",
+      "role": "starch",
+      "amount": { "value": 700, "unit": "g" },
+      "optional": true,
+      "notes": "About 4 cups cooked."
+    },
+    {
+      "id": "ingredient.lettuce_leaves",
+      "label": "Lettuce leaves (for ssam wraps)",
+      "role": "wrap",
+      "amount": { "value": 120, "unit": "g" },
+      "optional": true,
+      "notes": "Butter lettuce, red leaf, or romaine hearts."
+    },
+    {
+      "id": "ingredient.ssamjang",
+      "label": "Ssamjang (for serving)",
+      "role": "condiment",
+      "amount": { "value": 60, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.kimchi",
+      "label": "Kimchi (for serving)",
+      "role": "banchan",
+      "amount": { "value": 180, "unit": "g" },
+      "optional": true
+    }
+  ],
+
+  "ingredientGroups": [
+    {
+      "id": "group.protein",
+      "label": "Protein",
+      "items": ["ingredient.beef_ribeye_or_sirloin_thin_sliced"]
+    },
+    {
+      "id": "group.marinade",
+      "label": "Marinade",
+      "items": [
+        "ingredient.asian_pear",
+        "ingredient.soy_sauce",
+        "ingredient.brown_sugar",
+        "ingredient.sesame_oil",
+        "ingredient.sesame_seeds",
+        "ingredient.garlic",
+        "ingredient.ginger",
+        "ingredient.scallions",
+        "ingredient.black_pepper"
+      ]
+    },
+    {
+      "id": "group.optional_veg",
+      "label": "Optional Vegetables",
+      "items": ["ingredient.onion", "ingredient.carrot", "ingredient.mushrooms"]
+    },
+    {
+      "id": "group.to_cook_and_serve",
+      "label": "To Cook + Serve",
+      "items": [
+        "ingredient.neutral_oil",
+        "ingredient.rice_short_grain_cooked",
+        "ingredient.lettuce_leaves",
+        "ingredient.ssamjang",
+        "ingredient.kimchi"
+      ]
+    }
+  ],
+
+  "methods": ["method.marinate", "method.sear", "method.stir_fry"],
+
+  "safety": {
+    "notes": [
+      "Marinate refrigerated. Do not leave raw marinated beef at room temperature.",
+      "Cook beef to a safe internal temperature appropriate for your household preferences; thin slices cook quickly—avoid prolonged simmering (gets tough).",
+      "If reusing marinade as a sauce, boil it thoroughly (at least 1 minute) before serving."
+    ]
+  },
+
+  "storage": {
+    "fridge": {
+      "maxDays": 4,
+      "notes": "Cool quickly; store in an airtight container."
+    },
+    "freezer": {
+      "maxDays": 90,
+      "notes": "Freeze cooked bulgogi in portions; thaw overnight and reheat hot in a skillet."
+    },
+    "reheat": {
+      "notes": [
+        "Skillet reheat is best: medium-high with a splash of water to loosen sauce.",
+        "Microwave: cover to prevent drying; heat in short bursts."
+      ]
+    }
+  },
+
+  "pairings": {
+    "banchan": [
+      "dish.kimchi",
+      "dish.spinach_namul",
+      "dish.bean_sprout_namul",
+      "dish.cucumber_kimchi"
+    ],
+    "starches": ["dish.steamed_rice", "dish.gim_rice_wraps"],
+    "soups": ["dish.doenjang_jjigae", "dish.miyeokguk"],
+    "condiments": [
+      "ingredient.ssamjang",
+      "ingredient.gim",
+      "ingredient.sesame_seeds"
+    ]
+  },
+
+  "planner": {
+    "roles": {
+      "protein": ["ingredient.beef_ribeye_or_sirloin_thin_sliced"],
+      "starch": ["ingredient.rice_short_grain_cooked"],
+      "veg": [
+        "ingredient.onion",
+        "ingredient.carrot",
+        "ingredient.mushrooms",
+        "ingredient.lettuce_leaves"
+      ],
+      "condiment": ["ingredient.ssamjang", "ingredient.kimchi"]
+    },
+    "suggestedPlates": [
+      {
+        "id": "plate.bulgogi_rice_banchan",
+        "label": "Bulgogi + Rice + Banchan",
+        "components": [
+          {
+            "role": "protein",
+            "items": ["cuisines.korean.recipes.bulgogi"],
+            "chooseOne": true
+          },
+          {
+            "role": "starch",
+            "items": ["dish.steamed_rice"],
+            "chooseOne": true
+          },
+          {
+            "role": "side",
+            "items": [
+              "dish.kimchi",
+              "dish.spinach_namul",
+              "dish.bean_sprout_namul"
+            ],
+            "chooseOne": false
+          }
+        ]
+      },
+      {
+        "id": "plate.bulgogi_ssam",
+        "label": "Bulgogi Ssam Wraps",
+        "components": [
+          {
+            "role": "protein",
+            "items": ["cuisines.korean.recipes.bulgogi"],
+            "chooseOne": true
+          },
+          {
+            "role": "wrap",
+            "items": ["ingredient.lettuce_leaves", "ingredient.perilla_leaves"],
+            "chooseOne": true
+          },
+          {
+            "role": "condiment",
+            "items": ["ingredient.ssamjang"],
+            "chooseOne": true
+          }
+        ]
+      }
+    ]
+  },
+
+  "adaptations": [
+    {
+      "id": "adapt.protein.chicken",
+      "label": "Chicken Bulgogi",
+      "when": { "missing": ["ingredient.beef_ribeye_or_sirloin_thin_sliced"] },
+      "changes": {
+        "swap": [
+          {
+            "from": "ingredient.beef_ribeye_or_sirloin_thin_sliced",
+            "to": "ingredient.chicken_thighs_sliced",
+            "notes": "Use boneless skinless thighs; marinate 30–60 minutes; cook thoroughly."
+          }
+        ]
+      }
+    },
+    {
+      "id": "adapt.protein.tofu",
+      "label": "Tofu Bulgogi Bowl",
+      "when": { "diet": ["vegetarian"] },
+      "changes": {
+        "swap": [
+          {
+            "from": "ingredient.beef_ribeye_or_sirloin_thin_sliced",
+            "to": "ingredient.tofu_extra_firm",
+            "notes": "Press tofu 20 minutes; cube; pan-sear first, then glaze with marinade reduced (boil marinade before glazing)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "adapt.no_asian_pear",
+      "label": "No Asian pear available",
+      "when": { "missing": ["ingredient.asian_pear"] },
+      "changes": {
+        "swap": [
+          {
+            "from": "ingredient.asian_pear",
+            "to": "ingredient.apple_ripe_grated",
+            "notes": "Use a sweet apple (Fuji/Honeycrisp). Blend with a splash of water if needed."
+          }
+        ]
+      }
+    },
+    {
+      "id": "adapt.no_grill",
+      "label": "Skillet-only method",
+      "when": {
+        "equipmentMissing": ["equipment.grill", "equipment.grill_pan"]
+      },
+      "changes": {
+        "notes": [
+          "Use a large cast-iron skillet for best browning.",
+          "Cook in batches—overcrowding steams the meat and reduces caramelization."
+        ]
+      }
+    }
+  ],
+
+  "variations": [
+    {
+      "id": "var.spicy_gochujang",
+      "label": "Spicy Bulgogi",
+      "notes": [
+        "Add 1–2 tbsp gochujang (15–30 g) to the marinade, and reduce sugar slightly.",
+        "Optionally add a pinch of gochugaru for extra heat."
+      ]
+    },
+    {
+      "id": "var.bulgogi_bowl",
+      "label": "Bulgogi Bowl",
+      "notes": [
+        "Serve over rice with quick cucumber salad, sautéed spinach, and a fried egg (if desired)."
+      ]
+    }
+  ],
+
+  "notes": [
+    "For best flavor: marinate at least 1 hour; overnight is excellent for deeper seasoning.",
+    "For best texture: sear hot and fast; do not simmer the meat.",
+    "If using very lean beef, include mushrooms and onions to add moisture and sweetness."
+  ],
+
+  "steps": [
+    {
+      "id": "step.01_prep_beef",
+      "title": "Prep the beef",
+      "instructions": [
+        "If the beef isn’t pre-sliced, place it in the freezer for 20–30 minutes to firm up.",
+        "Slice across the grain into thin slices (about 2–3 mm).",
+        "Place beef in a large bowl."
+      ],
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "checks": [
+        "Slices are thin and mostly uniform for quick searing.",
+        "Sliced across the grain for tenderness."
+      ]
+    },
+    {
+      "id": "step.02_make_marinade",
+      "title": "Make the marinade",
+      "instructions": [
+        "Grate (or blend) the pear until pulpy; add to a bowl.",
+        "Add soy sauce, brown sugar, sesame oil, sesame seeds, garlic, ginger, sliced scallions, and black pepper.",
+        "Stir well until sugar is mostly dissolved."
+      ],
+      "activeMins": 7,
+      "handsOffMins": 0,
+      "checks": ["Marinade tastes savory-sweet with clear garlic/ginger aroma."]
+    },
+    {
+      "id": "step.03_marinate",
+      "title": "Marinate the beef",
+      "instructions": [
+        "Pour marinade over beef and toss thoroughly to coat.",
+        "Optional: fold in sliced onion, carrot, and mushrooms.",
+        "Cover and refrigerate at least 1 hour (up to overnight)."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 60,
+      "timers": [
+        { "label": "Minimum marinade time", "minutes": 60 },
+        { "label": "Optional overnight marinade", "minutes": 720 }
+      ],
+      "checks": ["Beef is evenly coated and refrigerated."]
+    },
+    {
+      "id": "step.04_sear_batches",
+      "title": "Sear in batches (skillet method)",
+      "instructions": [
+        "Heat a large skillet over medium-high until very hot.",
+        "Add neutral oil, then add a single layer of beef (do not overcrowd).",
+        "Sear 60–90 seconds, then toss and cook another 60–90 seconds until browned and cooked through.",
+        "Transfer to a serving plate and repeat with remaining beef."
+      ],
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "timers": [
+        { "label": "Sear first side (per batch)", "seconds": 75 },
+        { "label": "Finish sear (per batch)", "seconds": 75 }
+      ],
+      "temperature": {
+        "type": "stovetop",
+        "notes": "Medium-high heat for caramelization; adjust as needed to avoid burning sugar."
+      },
+      "checks": [
+        "Beef is browned with caramelized edges (not steamed).",
+        "Pan stays hot between batches."
+      ]
+    },
+    {
+      "id": "step.05_finish_and_garnish",
+      "title": "Finish and serve",
+      "instructions": [
+        "Taste a piece and adjust: add a pinch of salt if needed (rare), or a tiny splash of soy if under-seasoned.",
+        "Top with reserved scallion greens and extra sesame seeds.",
+        "Serve with rice and banchan, or as lettuce wraps with ssamjang."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 0,
+      "checks": [
+        "Balanced savory-sweet flavor and fragrant sesame finish.",
+        "Serving setup includes rice or wraps + condiments."
+      ]
+    }
+  ],
+
+  "compat": {
+    "cuisineId": "cuisines.korean",
+    "dishId": "dish.bulgogi",
+    "sourcePaths": ["src/catalogs/cuisines/korean/recipes/bulgogi.json"],
+    "search": {
+      "aliases": ["korean bbq beef", "marinated beef", "bulgogi"],
+      "keywords": [
+        "bulgogi",
+        "korean",
+        "bbq",
+        "soy",
+        "sesame",
+        "pear marinade",
+        "stir-fry",
+        "skillet",
+        "rice bowl",
+        "ssam"
+      ]
+    }
+  }
+}

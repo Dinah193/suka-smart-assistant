@@ -1,0 +1,338 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "meta": {
+    "id": "recipe.ghanaian.kelewele",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Kelewele",
+    "subtitle": "Ghanaian spicy fried plantains with ginger, chili, and warm spices",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa",
+      "notes": [
+        "Classic Ghana street-food style kelewele: ripe plantains seasoned with ginger, chili, and warm spices, then fried until caramelized.",
+        "Designed for SSA: clear signals, scalable heat, and equipment-minimum friendly."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "cuisines.ghanaian",
+    "category": "category.snack",
+    "mealArchetypes": [
+      "archetype.snack",
+      "archetype.side",
+      "archetype.street_food"
+    ],
+    "servingStyles": ["street_food", "snacks", "family_style"],
+    "plannerTags": [
+      "cuisine.ghanaian",
+      "dish.kelewele",
+      "street_food",
+      "snack",
+      "side",
+      "fried",
+      "spicy",
+      "sweet_spicy",
+      "dairy_free",
+      "gluten_free",
+      "vegan"
+    ]
+  },
+  "summary": "Ripe plantain cubes tossed in a ginger-chili spice mix and fried until crisp-edged and caramelized—sweet, spicy, and fragrant.",
+  "yield": {
+    "servings": 4,
+    "notes": "Snack-size portions. Makes about 3–4 cups fried plantain cubes."
+  },
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 10,
+    "totalMins": 30
+  },
+  "difficulty": "beginner",
+  "signals": {
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "batchFriendly": "medium",
+    "freezerFriendly": false,
+    "kidFriendlyWithHeatReduced": true,
+    "makeAhead": "Season plantains up to 2 hours ahead; fry just before serving."
+  },
+  "tasteProfile": {
+    "signatureNotes": [
+      "caramelized plantain",
+      "ginger bite",
+      "warm spice",
+      "pepper heat",
+      "savory-sweet balance"
+    ],
+    "heat": 3,
+    "salt": 2,
+    "sweet": 4,
+    "acid": 1,
+    "umami": 1
+  },
+  "equipment": {
+    "minimum": [
+      "tool.knife",
+      "tool.board",
+      "tool.bowl",
+      "tool.pan",
+      "tool.spoon",
+      "tool.paper_towels"
+    ],
+    "recommended": [
+      "tool.thermometer_instant",
+      "tool.slotted_spoon",
+      "tool.wire_rack",
+      "tool.microplane"
+    ]
+  },
+  "dietFlags": ["diet.gluten_free", "diet.dairy_free", "diet.vegan"],
+  "allergens": [],
+  "ingredients": [
+    {
+      "id": "ingredient.plantain_ripe",
+      "label": "Ripe plantains",
+      "role": "base",
+      "amount": { "value": 3, "unit": "large" },
+      "notes": [
+        "Best when peel is mostly yellow with heavy black spotting (ripe, sweet).",
+        "Avoid fully soft/mushy plantains—they can break apart while frying."
+      ]
+    },
+    {
+      "id": "ingredient.ginger",
+      "label": "Fresh ginger, finely grated",
+      "role": "aromatic",
+      "amount": { "value": 1.5, "unit": "tbsp" },
+      "notes": "About a 2-inch knob. Adjust to taste."
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic, finely grated or minced",
+      "role": "aromatic",
+      "amount": { "value": 2, "unit": "cloves" },
+      "optional": true,
+      "notes": "Optional but common in modern versions."
+    },
+    {
+      "id": "ingredient.chili_powder_or_pepper",
+      "label": "Ground dried chili or cayenne",
+      "role": "heat",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "notes": "Use 1/4 tsp for mild; 1 tsp+ for hot."
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "spice",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.nutmeg",
+      "label": "Ground nutmeg",
+      "role": "spice",
+      "amount": { "value": 0.25, "unit": "tsp" },
+      "notes": "Kelewele signature note—don’t skip if possible."
+    },
+    {
+      "id": "ingredient.clove_ground",
+      "label": "Ground cloves",
+      "role": "spice",
+      "amount": { "value": 0.125, "unit": "tsp" },
+      "optional": true,
+      "notes": "A pinch; cloves can dominate quickly."
+    },
+    {
+      "id": "ingredient.salt",
+      "label": "Salt",
+      "role": "seasoning",
+      "amount": { "value": 0.75, "unit": "tsp" },
+      "notes": "Start here; adjust after frying if needed."
+    },
+    {
+      "id": "ingredient.oil_neutral",
+      "label": "Neutral oil for frying (peanut/canola/vegetable)",
+      "role": "fat",
+      "amount": { "value": 2, "unit": "cups" },
+      "notes": "Enough for 3/4–1 inch depth in a pan (amount depends on pan size)."
+    },
+    {
+      "id": "ingredient.onion_red",
+      "label": "Red onion, thinly sliced (optional serving)",
+      "role": "garnish",
+      "amount": { "value": 0.5, "unit": "small" },
+      "optional": true,
+      "notes": "Common street-style pairing."
+    },
+    {
+      "id": "ingredient.peanuts_roasted",
+      "label": "Roasted peanuts (optional serving)",
+      "role": "garnish",
+      "amount": { "value": 0.33, "unit": "cup" },
+      "optional": true,
+      "notes": "Traditional street-style pairing. Omit if avoiding nuts."
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.kel_01_prep_plantains",
+      "title": "Peel and cut the plantains",
+      "instructions": [
+        "Trim both ends of each plantain. Score the peel lengthwise and remove peel.",
+        "Cut plantains into bite-size cubes (about 3/4-inch).",
+        "Place cubes in a mixing bowl."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "checks": ["Plantains are evenly cut so they fry at the same rate."]
+    },
+    {
+      "id": "step.kel_02_mix_spice_paste",
+      "title": "Make the kelewele seasoning",
+      "instructions": [
+        "In a small bowl, combine grated ginger (and garlic if using), chili/cayenne, black pepper, nutmeg, optional cloves, and salt.",
+        "Add 1–2 teaspoons of water to form a loose paste (optional but helps distribute seasoning)."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "checks": ["Seasoning is fragrant and evenly mixed."]
+    },
+    {
+      "id": "step.kel_03_season_rest",
+      "title": "Coat and rest briefly",
+      "instructions": [
+        "Add seasoning paste to the plantain cubes and toss until evenly coated.",
+        "Let rest 10 minutes so flavors cling and soak in slightly."
+      ],
+      "activeMins": 2,
+      "handsOffMins": 10,
+      "timers": [{ "label": "Seasoning rest", "minutes": 10 }],
+      "checks": ["Plantains look evenly coated with spice paste."]
+    },
+    {
+      "id": "step.kel_04_heat_oil",
+      "title": "Heat the oil",
+      "instructions": [
+        "Add oil to a heavy pan to a depth of about 3/4 to 1 inch.",
+        "Heat to 350–365°F (175–185°C).",
+        "If you don’t have a thermometer, test with one plantain cube: it should sizzle actively and rise to the surface within a few seconds."
+      ],
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "temperature": {
+        "type": "oil",
+        "value": 360,
+        "unit": "F",
+        "notes": "Maintain 350–365°F for best caramelization without burning spices."
+      },
+      "checks": ["Oil is hot enough for steady sizzling but not smoking."]
+    },
+    {
+      "id": "step.kel_05_fry_batches",
+      "title": "Fry in batches until caramelized",
+      "instructions": [
+        "Fry plantains in small batches (don’t crowd the pan).",
+        "Stir gently so pieces don’t stick and cook evenly.",
+        "Fry 4–6 minutes per batch until deep golden with caramelized edges and slightly crisp exterior."
+      ],
+      "activeMins": 8,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Fry time (per batch)", "minutes": 5 }],
+      "checks": [
+        "Pieces are deep golden with crisp edges; spices smell toasted, not burnt."
+      ]
+    },
+    {
+      "id": "step.kel_06_drain_serve",
+      "title": "Drain and serve",
+      "instructions": [
+        "Remove with a slotted spoon and drain on paper towels or a wire rack.",
+        "Taste and add a pinch more salt if needed.",
+        "Serve hot with optional sliced red onion and roasted peanuts."
+      ],
+      "activeMins": 2,
+      "handsOffMins": 0,
+      "checks": ["Seasoning is balanced—sweet, spicy, and aromatic."]
+    }
+  ],
+  "pairings": {
+    "with": [
+      "recipe.ghanaian.banku_pepper_sauce",
+      "dish.ghanaian.grilled_fish",
+      "dish.ghanaian.jollof_rice_ghanaian"
+    ],
+    "notes": "Often served as a snack on its own or alongside spicy sauces and grilled meats/fish."
+  },
+  "storage": {
+    "fridge": {
+      "durationDays": 2,
+      "notes": "Best fresh. Reheat to restore crisp edges."
+    },
+    "reheat": {
+      "notes": "Reheat in an air fryer at 375°F for 4–6 minutes or in a hot skillet with a tiny splash of oil."
+    }
+  },
+  "safety": {
+    "notes": [
+      "Hot oil can splatter—dry plantains well if rinsed and use caution.",
+      "Spices can burn if oil is too hot; keep oil under 375°F and fry in batches."
+    ]
+  },
+  "notes": [
+    "Oil depth matters: too shallow can scorch spices before the plantain caramelizes; aim for at least 3/4-inch.",
+    "If plantains brown too fast, reduce heat slightly and fry smaller batches.",
+    "For a softer inside with crisp edges, choose ripe plantains that are sweet but still firm."
+  ],
+  "variations": [
+    {
+      "id": "variation.air_fryer",
+      "label": "Air fryer (lighter) kelewele",
+      "when": { "method": "air_fryer" },
+      "adapt": {
+        "notes": "Toss seasoned plantains with 1–2 tbsp oil, air-fry at 390°F for 10–14 minutes, shaking halfway. Texture differs (less glossy caramelization) but still tasty."
+      }
+    },
+    {
+      "id": "variation.mild_kid_friendly",
+      "label": "Mild / kid-friendly",
+      "when": { "heatPreference": "low" },
+      "adapt": {
+        "notes": "Reduce cayenne to 1/8 tsp or omit; keep ginger + nutmeg for signature flavor. Serve with a squeeze of lime if desired."
+      }
+    },
+    {
+      "id": "variation.extra_spicy",
+      "label": "Extra spicy street-style",
+      "when": { "heatPreference": "high" },
+      "adapt": {
+        "notes": "Increase cayenne to 1–1.5 tsp and add a minced fresh hot pepper to the seasoning paste."
+      }
+    }
+  ],
+  "methods": ["method.fry", "method.seasoning_paste"],
+  "compat": {
+    "cuisineId": "cuisines.ghanaian",
+    "dishId": "dish.ghanaian.kelewele",
+    "search": {
+      "aliases": [
+        "kelewele",
+        "spicy fried plantain",
+        "ghanaian fried plantain",
+        "plantain cubes"
+      ],
+      "keywords": [
+        "plantain",
+        "ginger",
+        "cayenne",
+        "nutmeg",
+        "street food",
+        "snack",
+        "ghana"
+      ]
+    }
+  }
+}

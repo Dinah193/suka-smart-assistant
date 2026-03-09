@@ -21,7 +21,7 @@
 //   useRouteParams(), useQuery(), toQueryString(query), ROUTES (frozen).
 //
 // ASSUMPTIONS:
-// - src/services/eventBus.js exports a default { emit, on }-style bus
+// - src/services/events/eventBus.js exports a default { emit, on }-style bus
 // - src/services/automationRuntime.js exports initAutomationRuntime(), handleEvent()
 // - pages may not all exist yet → we provide Stub(...) for missing ones
 // -----------------------------------------------------------------------------

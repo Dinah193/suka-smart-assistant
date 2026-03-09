@@ -18,8 +18,8 @@
  * - Implement the SessionRunner UI (mounted globally in App.jsx).
  */
 
-import { emit as emitRaw } from "@/services/eventBus";
-import { familyFundMode as familyFundModeFlag } from "@/services/featureFlags";
+import { emit as emitRaw } from "@/services/events/eventBus";
+import { familyFundMode as familyFundModeFlag } from "@/config/featureFlags";
 import { HubPacketFormatter, FamilyFundConnector } from "@/services/hub";
 
 /** Canonical source string for events emitted from these hooks */
@@ -93,9 +93,8 @@ function buildInventoryCapacityEvents({ inputs, outputs }) {
       freeLiters: typeof freeLiters === "number" ? freeLiters : null,
       utilizationPct:
         typeof utilizationPct === "number" ? utilizationPct : null,
-      reservePct: typeof reservePctEffective === "number"
-        ? reservePctEffective
-        : null,
+      reservePct:
+        typeof reservePctEffective === "number" ? reservePctEffective : null,
       ts: nowIso(),
       source: HOOK_SOURCE,
     });
@@ -137,7 +136,9 @@ function buildInventoryLayoutEvents({ inputs, outputs }) {
             quantity:
               typeof it?.quantity === "number" ? it.quantity : undefined,
             volumeLiters:
-              typeof it?.volumeLiters === "number" ? it.volumeLiters : undefined,
+              typeof it?.volumeLiters === "number"
+                ? it.volumeLiters
+                : undefined,
           }))
         : [],
     }));
@@ -193,8 +194,11 @@ function buildSessionRequests({ inputs, outputs }) {
   }
 
   // If overflow items exist, propose a batch-cooking/preservation session
-  if (fitReport && Array.isArray(fitReport.overflowItems) &&
-      fitReport.overflowItems.length > 0) {
+  if (
+    fitReport &&
+    Array.isArray(fitReport.overflowItems) &&
+    fitReport.overflowItems.length > 0
+  ) {
     sessions.push({
       kind: "batch-cook-overflow",
       label: "Batch cook / preserve overflow items",
@@ -255,7 +259,7 @@ async function exportToHubIfEnabled(calcResult) {
     // eslint-disable-next-line no-console
     console.error(
       "[FreezerSpaceCalculator.hooks] Hub export failed (soft):",
-      err,
+      err
     );
   }
 }
@@ -266,7 +270,7 @@ async function exportToHubIfEnabled(calcResult) {
  * Call this from your PlanningGraph / hooks orchestrator with your eventBus
  * subscription function, e.g.:
  *
- *   import { on } from "@/services/eventBus";
+ *   import { on } from "@/services/events/eventBus";
  *   import { registerFreezerSpaceCalculatorHooks } from
  *     "@/features/calculators/storehouseMeals/FreezerSpaceCalculator/FreezerSpaceCalculator.hooks";
  *
@@ -279,7 +283,7 @@ export function registerFreezerSpaceCalculatorHooks({ on } = {}) {
   if (typeof on !== "function") {
     // eslint-disable-next-line no-console
     console.warn(
-      "[FreezerSpaceCalculator.hooks] register called without a valid `on` function. Hooks not attached.",
+      "[FreezerSpaceCalculator.hooks] register called without a valid `on` function. Hooks not attached."
     );
     return;
   }

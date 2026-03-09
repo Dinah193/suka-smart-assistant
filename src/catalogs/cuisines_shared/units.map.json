@@ -1,0 +1,323 @@
+{
+  "$schema": "../../schemas/units.map.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-13",
+  "notes": [
+    "SSA Units Map (shared across cuisines).",
+    "Purpose: normalize unit strings from recipes/imports into canonical unit IDs.",
+    "Normalization: lowercase + trim + collapse whitespace + strip punctuation.",
+    "Important: 'c' is reserved for CUP (common recipe convention). Use '°c'/'deg c'/'celsius' for temperature."
+  ],
+  "meta": {
+    "id": "cuisines_shared.units.map",
+    "type": "unit_map",
+    "domain": "measurements",
+    "locale": "en-US",
+    "normalization": {
+      "case": "lower",
+      "trim": true,
+      "collapseWhitespace": true,
+      "stripPunctuation": true
+    }
+  },
+  "canonicalUnits": {
+    "count_each": {
+      "label": "each",
+      "dimension": "count",
+      "system": "neutral"
+    },
+    "count_piece": {
+      "label": "piece",
+      "dimension": "count",
+      "system": "neutral"
+    },
+    "count_clove": {
+      "label": "clove",
+      "dimension": "count",
+      "system": "neutral"
+    },
+    "count_slice": {
+      "label": "slice",
+      "dimension": "count",
+      "system": "neutral"
+    },
+    "count_can": { "label": "can", "dimension": "count", "system": "neutral" },
+    "count_jar": { "label": "jar", "dimension": "count", "system": "neutral" },
+    "count_package": {
+      "label": "package",
+      "dimension": "count",
+      "system": "neutral"
+    },
+
+    "vol_ml": {
+      "label": "milliliter",
+      "dimension": "volume",
+      "system": "metric"
+    },
+    "vol_l": { "label": "liter", "dimension": "volume", "system": "metric" },
+
+    "vol_tsp": {
+      "label": "teaspoon",
+      "dimension": "volume",
+      "system": "us_customary"
+    },
+    "vol_tbsp": {
+      "label": "tablespoon",
+      "dimension": "volume",
+      "system": "us_customary"
+    },
+    "vol_floz": {
+      "label": "fluid ounce",
+      "dimension": "volume",
+      "system": "us_customary"
+    },
+    "vol_cup": {
+      "label": "cup",
+      "dimension": "volume",
+      "system": "us_customary"
+    },
+    "vol_pint": {
+      "label": "pint",
+      "dimension": "volume",
+      "system": "us_customary"
+    },
+    "vol_quart": {
+      "label": "quart",
+      "dimension": "volume",
+      "system": "us_customary"
+    },
+    "vol_gallon": {
+      "label": "gallon",
+      "dimension": "volume",
+      "system": "us_customary"
+    },
+
+    "mass_g": { "label": "gram", "dimension": "mass", "system": "metric" },
+    "mass_kg": { "label": "kilogram", "dimension": "mass", "system": "metric" },
+
+    "mass_oz": {
+      "label": "ounce",
+      "dimension": "mass",
+      "system": "us_customary"
+    },
+    "mass_lb": {
+      "label": "pound",
+      "dimension": "mass",
+      "system": "us_customary"
+    },
+
+    "len_cm": {
+      "label": "centimeter",
+      "dimension": "length",
+      "system": "metric"
+    },
+    "len_m": { "label": "meter", "dimension": "length", "system": "metric" },
+    "len_in": {
+      "label": "inch",
+      "dimension": "length",
+      "system": "us_customary"
+    },
+
+    "temp_c": { "label": "°C", "dimension": "temperature", "system": "metric" },
+    "temp_f": {
+      "label": "°F",
+      "dimension": "temperature",
+      "system": "us_customary"
+    },
+
+    "time_sec": { "label": "second", "dimension": "time", "system": "neutral" },
+    "time_min": { "label": "minute", "dimension": "time", "system": "neutral" },
+    "time_hr": { "label": "hour", "dimension": "time", "system": "neutral" },
+
+    "other_pin": {
+      "label": "pinch",
+      "dimension": "other",
+      "system": "neutral"
+    },
+    "other_dash": {
+      "label": "dash",
+      "dimension": "other",
+      "system": "neutral"
+    },
+    "other_handful": {
+      "label": "handful",
+      "dimension": "other",
+      "system": "neutral"
+    },
+    "other_splash": {
+      "label": "splash",
+      "dimension": "other",
+      "system": "neutral"
+    },
+    "other_drizzle": {
+      "label": "drizzle",
+      "dimension": "other",
+      "system": "neutral"
+    },
+    "other_to_taste": {
+      "label": "to taste",
+      "dimension": "other",
+      "system": "neutral"
+    }
+  },
+  "map": {
+    "": "count_each",
+    "ea": "count_each",
+    "each": "count_each",
+    "unit": "count_each",
+    "units": "count_each",
+
+    "piece": "count_piece",
+    "pieces": "count_piece",
+    "pc": "count_piece",
+    "pcs": "count_piece",
+
+    "clove": "count_clove",
+    "cloves": "count_clove",
+
+    "slice": "count_slice",
+    "slices": "count_slice",
+
+    "can": "count_can",
+    "cans": "count_can",
+    "tin": "count_can",
+    "tins": "count_can",
+
+    "jar": "count_jar",
+    "jars": "count_jar",
+
+    "package": "count_package",
+    "packages": "count_package",
+    "pkg": "count_package",
+    "pkgs": "count_package",
+    "pack": "count_package",
+    "packs": "count_package",
+
+    "ml": "vol_ml",
+    "milliliter": "vol_ml",
+    "millilitre": "vol_ml",
+    "milliliters": "vol_ml",
+    "millilitres": "vol_ml",
+
+    "l": "vol_l",
+    "liter": "vol_l",
+    "litre": "vol_l",
+    "liters": "vol_l",
+    "litres": "vol_l",
+
+    "tsp": "vol_tsp",
+    "tsps": "vol_tsp",
+    "teaspoon": "vol_tsp",
+    "teaspoons": "vol_tsp",
+    "t": "vol_tsp",
+
+    "tbsp": "vol_tbsp",
+    "tbsps": "vol_tbsp",
+    "tablespoon": "vol_tbsp",
+    "tablespoons": "vol_tbsp",
+    "tbl": "vol_tbsp",
+    "tbs": "vol_tbsp",
+    "tb": "vol_tbsp",
+
+    "fl oz": "vol_floz",
+    "floz": "vol_floz",
+    "fluid ounce": "vol_floz",
+    "fluid ounces": "vol_floz",
+
+    "cup": "vol_cup",
+    "cups": "vol_cup",
+    "c": "vol_cup",
+
+    "pt": "vol_pint",
+    "pint": "vol_pint",
+    "pints": "vol_pint",
+
+    "qt": "vol_quart",
+    "quart": "vol_quart",
+    "quarts": "vol_quart",
+
+    "gal": "vol_gallon",
+    "gallon": "vol_gallon",
+    "gallons": "vol_gallon",
+
+    "g": "mass_g",
+    "gram": "mass_g",
+    "grams": "mass_g",
+
+    "kg": "mass_kg",
+    "kilogram": "mass_kg",
+    "kilograms": "mass_kg",
+
+    "oz": "mass_oz",
+    "ounce": "mass_oz",
+    "ounces": "mass_oz",
+
+    "lb": "mass_lb",
+    "lbs": "mass_lb",
+    "pound": "mass_lb",
+    "pounds": "mass_lb",
+
+    "cm": "len_cm",
+    "centimeter": "len_cm",
+    "centimeters": "len_cm",
+    "centimetre": "len_cm",
+    "centimetres": "len_cm",
+
+    "m": "len_m",
+    "meter": "len_m",
+    "meters": "len_m",
+    "metre": "len_m",
+    "metres": "len_m",
+
+    "in": "len_in",
+    "inch": "len_in",
+    "inches": "len_in",
+
+    "celsius": "temp_c",
+    "°c": "temp_c",
+    "deg c": "temp_c",
+    "degrees c": "temp_c",
+    "degrees celsius": "temp_c",
+
+    "fahrenheit": "temp_f",
+    "°f": "temp_f",
+    "deg f": "temp_f",
+    "degrees f": "temp_f",
+    "degrees fahrenheit": "temp_f",
+
+    "s": "time_sec",
+    "sec": "time_sec",
+    "secs": "time_sec",
+    "second": "time_sec",
+    "seconds": "time_sec",
+
+    "min": "time_min",
+    "mins": "time_min",
+    "minute": "time_min",
+    "minutes": "time_min",
+
+    "hr": "time_hr",
+    "hrs": "time_hr",
+    "hour": "time_hr",
+    "hours": "time_hr",
+
+    "pinch": "other_pin",
+    "pinches": "other_pin",
+
+    "dash": "other_dash",
+    "dashes": "other_dash",
+
+    "handful": "other_handful",
+    "handfuls": "other_handful",
+
+    "splash": "other_splash",
+    "splashes": "other_splash",
+
+    "drizzle": "other_drizzle",
+    "drizzles": "other_drizzle",
+
+    "to taste": "other_to_taste",
+    "as needed": "other_to_taste",
+    "as required": "other_to_taste"
+  }
+}

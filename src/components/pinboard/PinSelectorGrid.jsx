@@ -1,6 +1,12 @@
 // src/components/pinboard/PinSelectorGrid.jsx
 /* eslint-disable no-console */
-import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
 
 /* ------------------------------- Defensive deps ------------------------------- */
 let Icons = {};
@@ -34,7 +40,7 @@ try {
 
 let eventBus = { emit: () => {}, on: () => {}, off: () => {} };
 try {
-  eventBus = require("@/services/eventBus").eventBus || eventBus;
+  eventBus = require("@/services/events/eventBus").eventBus || eventBus;
 } catch {}
 
 let InventoryMonitor = {
@@ -49,14 +55,16 @@ try {
 
 let useBatchQueue = () => ({ addMany: () => {}, count: 0 });
 try {
-  useBatchQueue = require("@/features/meals/BatchQueueProvider").useBatchQueue || useBatchQueue;
+  useBatchQueue =
+    require("@/features/meals/BatchQueueProvider").useBatchQueue ||
+    useBatchQueue;
 } catch {}
 
 let usePersonalFoodStandards = () => ({ standards: {} });
 try {
   usePersonalFoodStandards =
-    require("@/app/context/HouseholdSettingsContext").usePersonalFoodStandards ||
-    usePersonalFoodStandards;
+    require("@/app/context/HouseholdSettingsContext")
+      .usePersonalFoodStandards || usePersonalFoodStandards;
 } catch {}
 
 let VariableSizeGrid = null;
@@ -71,8 +79,11 @@ const safeArr = (x) => (Array.isArray(x) ? x : x ? [x] : []);
 
 function standardsBadge(recipe = {}, standards = {}) {
   const title = recipe?.title || "";
-  const tags = new Set((recipe?.tags || []).map((t) => (typeof t === "string" ? t : t?.id)));
-  if (standards?.noPork && (tags.has("pork") || /pork/i.test(title))) return { ok: false, label: "No pork" };
+  const tags = new Set(
+    (recipe?.tags || []).map((t) => (typeof t === "string" ? t : t?.id))
+  );
+  if (standards?.noPork && (tags.has("pork") || /pork/i.test(title)))
+    return { ok: false, label: "No pork" };
   if (standards?.lambBeefOnly) {
     const bad =
       /chicken|fish|turkey|seafood/i.test(title) ||
@@ -104,8 +115,26 @@ export default function PinSelectorGrid({
   className,
 }) {
   const {
-    PinOff, PlusCircle, UtensilsCrossed, Soup, Check, X, Search, SortAsc, SortDesc, Filter,
-    Clock, Star, StarOff, Sparkles, ListChecks, AlertTriangle, Shield, ChevronLeft, ChevronRight, MoreHorizontal
+    PinOff,
+    PlusCircle,
+    UtensilsCrossed,
+    Soup,
+    Check,
+    X,
+    Search,
+    SortAsc,
+    SortDesc,
+    Filter,
+    Clock,
+    Star,
+    StarOff,
+    Sparkles,
+    ListChecks,
+    AlertTriangle,
+    Shield,
+    ChevronLeft,
+    ChevronRight,
+    MoreHorizontal,
   } = Icons;
 
   const ChevronRightIcon = Icons.ChevronRight || (() => null); // <-- fix for TSX member expression
@@ -143,7 +172,9 @@ export default function PinSelectorGrid({
       arr = items.filter((it) => {
         const hay = [
           it.title,
-          ...(safeArr(it.tags).map((t) => (typeof t === "string" ? t : t?.label || t?.id))),
+          ...safeArr(it.tags).map((t) =>
+            typeof t === "string" ? t : t?.label || t?.id
+          ),
           it.cuisine,
           it.mealType,
         ]
@@ -159,7 +190,10 @@ export default function PinSelectorGrid({
         case "rating":
           return Number(it.rating || 0);
         case "time":
-          return Number(it.totalMinutes || 0) || (it.prepMinutes || 0) + (it.cookMinutes || 0);
+          return (
+            Number(it.totalMinutes || 0) ||
+            (it.prepMinutes || 0) + (it.cookMinutes || 0)
+          );
         case "title":
           return (it.title || "").toLowerCase();
         case "recent":
@@ -230,22 +264,33 @@ export default function PinSelectorGrid({
   );
 
   const clearSelection = () => setSel(new Set());
-  const selectedItems = useMemo(() => pageItems.filter((it) => sel.has(it.id)), [pageItems, sel]);
+  const selectedItems = useMemo(
+    () => pageItems.filter((it) => sel.has(it.id)),
+    [pageItems, sel]
+  );
 
   /* --------------------------------- Actions -------------------------------- */
   function doPlan() {
     const pick = selectedItems.length ? selectedItems : pageItems;
     onPlanMany?.(pick);
-    eventBus.emit("pinboard.plan", { count: pick.length, ids: pick.map((x) => x.id) });
+    eventBus.emit("pinboard.plan", {
+      count: pick.length,
+      ids: pick.map((x) => x.id),
+    });
   }
   function doBatch() {
     const pick = selectedItems.length ? selectedItems : pageItems;
     if (typeof onBatchMany === "function") onBatchMany(pick);
     else batch.addMany?.(pick);
-    eventBus.emit("pinboard.batch", { count: pick.length, ids: pick.map((x) => x.id) });
+    eventBus.emit("pinboard.batch", {
+      count: pick.length,
+      ids: pick.map((x) => x.id),
+    });
   }
   function doUnpin() {
-    const ids = selectedItems.length ? selectedItems.map((x) => x.id) : pageItems.map((x) => x.id);
+    const ids = selectedItems.length
+      ? selectedItems.map((x) => x.id)
+      : pageItems.map((x) => x.id);
     onUnpinMany?.(ids);
     eventBus.emit("pinboard.unpin", { count: ids.length, ids });
     clearSelection();
@@ -257,10 +302,14 @@ export default function PinSelectorGrid({
     (item) => {
       if (!inventoryAware || !InventoryMonitor?.checkRecipe)
         return { status: "unknown", missingCount: 0 };
-      if (invCacheRef.current.has(item.id)) return invCacheRef.current.get(item.id);
+      if (invCacheRef.current.has(item.id))
+        return invCacheRef.current.get(item.id);
       try {
         const res = InventoryMonitor.checkRecipe(item);
-        invCacheRef.current.set(item.id, res || { status: "unknown", missingCount: 0 });
+        invCacheRef.current.set(
+          item.id,
+          res || { status: "unknown", missingCount: 0 }
+        );
         return res || { status: "unknown", missingCount: 0 };
       } catch {
         return { status: "unknown", missingCount: 0 };
@@ -360,7 +409,11 @@ export default function PinSelectorGrid({
           className="inline-flex items-center gap-1 px-2 py-1 rounded border border-gray-300 text-sm bg-white hover:bg-gray-50"
           title="Toggle sort direction"
         >
-          {sortDir === "asc" ? <SortAsc className="w-4 h-4" /> : <SortDesc className="w-4 h-4" />}
+          {sortDir === "asc" ? (
+            <SortAsc className="w-4 h-4" />
+          ) : (
+            <SortDesc className="w-4 h-4" />
+          )}
           {sortDir.toUpperCase()}
         </button>
       </div>
@@ -401,21 +454,28 @@ export default function PinSelectorGrid({
   /* --------------------------------- Grid cell ------------------------------- */
   const Card = ({ item }) => {
     const inv = getInv(item);
-    const std = standardsAware ? standardsBadge(item, standards) : { ok: true, label: "" };
+    const std = standardsAware
+      ? standardsBadge(item, standards)
+      : { ok: true, label: "" };
     const selected = sel.has(item.id);
     const rating = clamp(Number(item.rating || 0), 0, 5);
     const totalMinutes =
-      Number(item.totalMinutes || 0) || (item.prepMinutes || 0) + (item.cookMinutes || 0);
+      Number(item.totalMinutes || 0) ||
+      (item.prepMinutes || 0) + (item.cookMinutes || 0);
 
     return (
       <div
         role="button"
         tabIndex={0}
         onClick={(e) => toggleSelect(item.id, e)}
-        onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && toggleSelect(item.id, e)}
+        onKeyDown={(e) =>
+          (e.key === "Enter" || e.key === " ") && toggleSelect(item.id, e)
+        }
         className={cx(
           "group relative rounded-2xl border bg-white shadow-sm hover:shadow-md transition overflow-hidden",
-          selected ? "border-emerald-600 ring-2 ring-emerald-500" : "border-gray-200"
+          selected
+            ? "border-emerald-600 ring-2 ring-emerald-500"
+            : "border-gray-200"
         )}
         aria-label={`Select ${item.title}`}
       >
@@ -474,7 +534,8 @@ export default function PinSelectorGrid({
                 </span>
               ) : inv.status === "missing" ? (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[11px] bg-amber-50 border-amber-200 text-amber-700">
-                  <AlertTriangle className="w-3 h-3" /> {inv.missingCount || 1} missing
+                  <AlertTriangle className="w-3 h-3" /> {inv.missingCount || 1}{" "}
+                  missing
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[11px] bg-gray-50 border-gray-200 text-gray-600">
@@ -563,7 +624,8 @@ export default function PinSelectorGrid({
           ))}
           {pageItems.length === 0 ? (
             <div className="col-span-full rounded-xl border border-dashed p-6 text-center text-sm text-gray-600 bg-white">
-              No pins match your search. Try adjusting filters or pin more items from the Recipe Vault.
+              No pins match your search. Try adjusting filters or pin more items
+              from the Recipe Vault.
             </div>
           ) : null}
         </div>
@@ -602,9 +664,12 @@ export default function PinSelectorGrid({
       <div className="mt-3 text-[11px] text-gray-500 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Sparkles className="w-3 h-3" />
-          Tip: <kbd className="px-1 border rounded bg-white">Ctrl/Cmd+A</kbd> select page •
-          <kbd className="px-1 border rounded bg-white">Shift+Click</kbd> range select •
-          <kbd className="px-1 border rounded bg-white">B</kbd> batch •
+          Tip: <kbd className="px-1 border rounded bg-white">
+            Ctrl/Cmd+A
+          </kbd>{" "}
+          select page •
+          <kbd className="px-1 border rounded bg-white">Shift+Click</kbd> range
+          select •<kbd className="px-1 border rounded bg-white">B</kbd> batch •
           <kbd className="px-1 border rounded bg-white">P</kbd> plan •
           <kbd className="px-1 border rounded bg-white">U</kbd> unpin.
         </div>

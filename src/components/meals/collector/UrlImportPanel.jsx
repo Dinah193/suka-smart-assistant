@@ -1,10 +1,16 @@
 // src/components/meals/collector/UrlImportPanel.jsx
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 /* ------------------------------- Defensive deps ------------------------------- */
 let eventBus = null;
 try {
-  eventBus = require("@/services/eventBus").eventBus || null;
+  eventBus = require("@/services/events/eventBus").eventBus || null;
 } catch {}
 
 let automation = null;
@@ -26,7 +32,8 @@ try {
 
 let SourceAttributionCard = null;
 try {
-  SourceAttributionCard = require("./SourceAttributionCard.jsx").default || null;
+  SourceAttributionCard =
+    require("./SourceAttributionCard.jsx").default || null;
 } catch {}
 
 let SendToMenu = null;
@@ -40,16 +47,21 @@ try {
 } catch {}
 
 /* ----------------------------- Local helper utils ---------------------------- */
-const URL_REGEX =
-  /\b(https?:\/\/(?:www\.)?[^\s/$.?#].[^\s]*)/gi; // liberal; we normalize later
+const URL_REGEX = /\b(https?:\/\/(?:www\.)?[^\s/$.?#].[^\s]*)/gi; // liberal; we normalize later
 
 const stripUtm = (u) => {
   try {
     const url = new URL(u.trim());
     // Drop common tracking params
-    ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "fbclid", "gclid"].forEach((p) =>
-      url.searchParams.delete(p)
-    );
+    [
+      "utm_source",
+      "utm_medium",
+      "utm_campaign",
+      "utm_term",
+      "utm_content",
+      "fbclid",
+      "gclid",
+    ].forEach((p) => url.searchParams.delete(p));
     // Optional: canonicalize hostname (remove trailing dot)
     url.hostname = url.hostname.replace(/\.$/, "");
     return url.toString();
@@ -66,7 +78,8 @@ const classifyDomain = (u) => {
     if (/(pinterest|pinimg)\./.test(h)) return "pinboard";
     if (/(youtube|youtu\.be)\./.test(h)) return "video";
     if (/(tiktok)\./.test(h)) return "video";
-    if (/(allrecipes|foodnetwork|epicurious|seriouseats|tasteofhome)\./.test(h)) return "recipe";
+    if (/(allrecipes|foodnetwork|epicurious|seriouseats|tasteofhome)\./.test(h))
+      return "recipe";
     return "web";
   } catch {
     return "unknown";
@@ -83,7 +96,12 @@ const validateUrlShape = (u) => {
 };
 
 /* ------------------------------ Toast (defensive) ----------------------------- */
-let toast = { success: console.log, error: console.error, info: console.log, warn: console.warn };
+let toast = {
+  success: console.log,
+  error: console.error,
+  info: console.log,
+  warn: console.warn,
+};
 try {
   const mod = require("react-toastify");
   toast = mod.toast || toast;
@@ -101,7 +119,12 @@ const UrlImportPanel = ({
   const [isValidating, setIsValidating] = useState(false);
   const [tags, setTags] = useState([]);
   const [collectionId, setCollectionId] = useState(defaultCollectionId);
-  const [attribution, setAttribution] = useState({ source: "", author: "", license: "", notes: "" });
+  const [attribution, setAttribution] = useState({
+    source: "",
+    author: "",
+    license: "",
+    notes: "",
+  });
   const dropRef = useRef(null);
 
   /* ------------------------------ Parse & extract ----------------------------- */
@@ -120,7 +143,8 @@ const UrlImportPanel = ({
     const items = extractUrls(raw);
     setUrls(items);
     setSelected(new Set(items.map((x) => x.id))); // select all by default
-    if (!items.length) toast.info("No URLs detected. Paste links or drop cards to begin.");
+    if (!items.length)
+      toast.info("No URLs detected. Paste links or drop cards to begin.");
   }, [raw, extractUrls]);
 
   /* ----------------------------- Drag & Drop intake --------------------------- */
@@ -135,10 +159,16 @@ const UrlImportPanel = ({
       prevent(e);
       try {
         // Accept text/uri-list, text/plain, or custom recipe cards as JSON
-        const text = e.dataTransfer.getData("text/uri-list") || e.dataTransfer.getData("text/plain") || "";
+        const text =
+          e.dataTransfer.getData("text/uri-list") ||
+          e.dataTransfer.getData("text/plain") ||
+          "";
         const urlsFromDrop = extractUrls(text);
         if (urlsFromDrop.length) {
-          const merged = uniq([...urls.map((x) => x.url), ...urlsFromDrop.map((x) => x.url)]).map((u, i) => ({
+          const merged = uniq([
+            ...urls.map((x) => x.url),
+            ...urlsFromDrop.map((x) => x.url),
+          ]).map((u, i) => ({
             id: `${i}-${u}`,
             url: u,
             class: classifyDomain(u),
@@ -154,10 +184,14 @@ const UrlImportPanel = ({
         toast.error("Could not parse dropped content.");
       }
     };
-    ["dragenter", "dragover", "dragleave", "drop"].forEach((evt) => el.addEventListener(evt, prevent));
+    ["dragenter", "dragover", "dragleave", "drop"].forEach((evt) =>
+      el.addEventListener(evt, prevent)
+    );
     el.addEventListener("drop", onDrop);
     return () => {
-      ["dragenter", "dragover", "dragleave", "drop"].forEach((evt) => el.removeEventListener(evt, prevent));
+      ["dragenter", "dragover", "dragleave", "drop"].forEach((evt) =>
+        el.removeEventListener(evt, prevent)
+      );
       el.removeEventListener("drop", onDrop);
     };
   }, [urls, extractUrls]);
@@ -174,7 +208,10 @@ const UrlImportPanel = ({
       // auto-parse
       const items = extractUrls(text);
       if (items.length) {
-        const merged = uniq([...urls.map((x) => x.url), ...items.map((x) => x.url)]).map((u, i) => ({
+        const merged = uniq([
+          ...urls.map((x) => x.url),
+          ...items.map((x) => x.url),
+        ]).map((u, i) => ({
           id: `${i}-${u}`,
           url: u,
           class: classifyDomain(u),
@@ -206,7 +243,10 @@ const UrlImportPanel = ({
     }
   }, [urls]);
 
-  const selectedEntries = useMemo(() => urls.filter((u) => selected.has(u.id)), [urls, selected]);
+  const selectedEntries = useMemo(
+    () => urls.filter((u) => selected.has(u.id)),
+    [urls, selected]
+  );
 
   const emitImport = useCallback(
     (destination) => {
@@ -238,7 +278,9 @@ const UrlImportPanel = ({
       } catch {}
 
       onImported?.(payload);
-      toast.success(`Sent ${selectedEntries.length} link(s) to ${destination}.`);
+      toast.success(
+        `Sent ${selectedEntries.length} link(s) to ${destination}.`
+      );
     },
     [selectedEntries, tags, collectionId, attribution, onImported]
   );
@@ -318,11 +360,17 @@ const UrlImportPanel = ({
           title="Quick Validate"
         >
           <div className="flex items-center gap-2">
-            <Shield className={`w-4 h-4 ${isValidating ? "animate-pulse" : ""}`} />
+            <Shield
+              className={`w-4 h-4 ${isValidating ? "animate-pulse" : ""}`}
+            />
             <span>Validate</span>
           </div>
         </button>
-        <button className="px-3 py-1.5 rounded-md border hover:bg-gray-50" onClick={clearAll} title="Clear">
+        <button
+          className="px-3 py-1.5 rounded-md border hover:bg-gray-50"
+          onClick={clearAll}
+          title="Clear"
+        >
           <div className="flex items-center gap-2">
             <Trash2 className="w-4 h-4" />
             <span>Clear</span>
@@ -339,8 +387,12 @@ const UrlImportPanel = ({
         urls.length ? "border-gray-200" : "border-gray-300"
       }`}
     >
-      <label htmlFor="url-paste" className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-1">
-        <Link2 className="w-4 h-4" /> Paste links (one per line) or drop recipe cards/links
+      <label
+        htmlFor="url-paste"
+        className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-1"
+      >
+        <Link2 className="w-4 h-4" /> Paste links (one per line) or drop recipe
+        cards/links
       </label>
       <textarea
         id="url-paste"
@@ -351,7 +403,9 @@ const UrlImportPanel = ({
         onBlur={parseFromRaw}
       />
       <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
-        <span>Tip: We’ll auto-remove UTM tracking, dedupe, and classify sources.</span>
+        <span>
+          Tip: We’ll auto-remove UTM tracking, dedupe, and classify sources.
+        </span>
         <button
           className="underline underline-offset-2 hover:text-gray-700"
           onClick={parseFromRaw}
@@ -375,7 +429,10 @@ const UrlImportPanel = ({
         >
           Select all
         </button>
-        <button className="px-2 py-1 rounded border hover:bg-gray-50" onClick={() => setSelected(new Set())}>
+        <button
+          className="px-2 py-1 rounded border hover:bg-gray-50"
+          onClick={() => setSelected(new Set())}
+        >
           Select none
         </button>
       </div>
@@ -418,7 +475,12 @@ const UrlImportPanel = ({
           )}
         </div>
         <div className="mt-1 text-sm break-all">
-          <a href={item.url} target="_blank" rel="noreferrer" className="hover:underline inline-flex items-center gap-1">
+          <a
+            href={item.url}
+            target="_blank"
+            rel="noreferrer"
+            className="hover:underline inline-flex items-center gap-1"
+          >
             {item.url}
             <ExternalLink className="w-3 h-3 opacity-60" />
           </a>
@@ -463,7 +525,14 @@ const UrlImportPanel = ({
             className="w-full border rounded p-2 text-sm"
             placeholder="Comma-separated tags (fallback)"
             value={tags.join(", ")}
-            onChange={(e) => setTags(e.target.value.split(",").map((t) => t.trim()).filter(Boolean))}
+            onChange={(e) =>
+              setTags(
+                e.target.value
+                  .split(",")
+                  .map((t) => t.trim())
+                  .filter(Boolean)
+              )
+            }
           />
         )}
       </div>
@@ -474,32 +543,43 @@ const UrlImportPanel = ({
           <h4 className="font-medium">Source & Attribution</h4>
         </div>
         {SourceAttributionCard ? (
-          <SourceAttributionCard value={attribution} onChange={setAttribution} />
+          <SourceAttributionCard
+            value={attribution}
+            onChange={setAttribution}
+          />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <input
               className="border rounded p-2 text-sm"
               placeholder="Source (site/channel)"
               value={attribution.source}
-              onChange={(e) => setAttribution((p) => ({ ...p, source: e.target.value }))}
+              onChange={(e) =>
+                setAttribution((p) => ({ ...p, source: e.target.value }))
+              }
             />
             <input
               className="border rounded p-2 text-sm"
               placeholder="Author/Creator"
               value={attribution.author}
-              onChange={(e) => setAttribution((p) => ({ ...p, author: e.target.value }))}
+              onChange={(e) =>
+                setAttribution((p) => ({ ...p, author: e.target.value }))
+              }
             />
             <input
               className="border rounded p-2 text-sm"
               placeholder="License/Usage"
               value={attribution.license}
-              onChange={(e) => setAttribution((p) => ({ ...p, license: e.target.value }))}
+              onChange={(e) =>
+                setAttribution((p) => ({ ...p, license: e.target.value }))
+              }
             />
             <input
               className="border rounded p-2 text-sm md:col-span-2"
               placeholder="Notes"
               value={attribution.notes}
-              onChange={(e) => setAttribution((p) => ({ ...p, notes: e.target.value }))}
+              onChange={(e) =>
+                setAttribution((p) => ({ ...p, notes: e.target.value }))
+              }
             />
           </div>
         )}
@@ -581,7 +661,11 @@ const UrlImportPanel = ({
   );
 
   return (
-    <section className={`rounded-2xl border p-4 ${compact ? "bg-white" : "bg-white/80"} backdrop-blur`}>
+    <section
+      className={`rounded-2xl border p-4 ${
+        compact ? "bg-white" : "bg-white/80"
+      } backdrop-blur`}
+    >
       <Header />
       <PasteArea />
       <SelectedSummary />

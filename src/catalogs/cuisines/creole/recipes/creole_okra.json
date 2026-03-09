@@ -1,0 +1,150 @@
+{
+  "id": "creole_okra",
+  "name": "Creole Okra (Okra and Tomato Stew)",
+  "servings": 6,
+  "ingredients": [
+    {
+      "item": "okra",
+      "amount": 2,
+      "unit": "lb",
+      "prep": "trimmed and sliced (fresh preferred; frozen okra ok)"
+    },
+
+    { "item": "neutral oil", "amount": 2, "unit": "tbsp" },
+    {
+      "item": "unsalted butter",
+      "amount": 2,
+      "unit": "tbsp",
+      "prep": "optional for richness"
+    },
+
+    { "item": "yellow onion", "amount": 1, "unit": "large", "prep": "diced" },
+    {
+      "item": "green bell pepper",
+      "amount": 1,
+      "unit": "large",
+      "prep": "diced"
+    },
+    { "item": "celery", "amount": 2, "unit": "stalks", "prep": "diced" },
+    { "item": "garlic", "amount": 5, "unit": "cloves", "prep": "minced" },
+
+    { "item": "tomato paste", "amount": 2, "unit": "tbsp" },
+    {
+      "item": "diced tomatoes",
+      "amount": 1,
+      "unit": "can",
+      "prep": "14-15 oz"
+    },
+    {
+      "item": "crushed tomatoes",
+      "amount": 1,
+      "unit": "can",
+      "prep": "14-15 oz (or use another can of diced)"
+    },
+
+    {
+      "item": "chicken stock",
+      "amount": 2,
+      "unit": "cups",
+      "prep": "or seafood stock"
+    },
+
+    { "item": "bay leaves", "amount": 2, "unit": "each" },
+    { "item": "dried thyme", "amount": 1, "unit": "tsp" },
+    { "item": "dried oregano", "amount": 0.5, "unit": "tsp" },
+    { "item": "paprika", "amount": 1, "unit": "tsp" },
+    {
+      "item": "cayenne pepper",
+      "amount": 0.25,
+      "unit": "tsp",
+      "prep": "adjust to heat preference"
+    },
+    { "item": "black pepper", "amount": 0.75, "unit": "tsp" },
+    {
+      "item": "kosher salt",
+      "amount": 1,
+      "unit": "tsp",
+      "prep": "adjust to taste"
+    },
+
+    { "item": "Worcestershire sauce", "amount": 1, "unit": "tsp" },
+    {
+      "item": "hot sauce",
+      "amount": 1,
+      "unit": "tsp",
+      "prep": "optional, to taste"
+    },
+
+    {
+      "item": "smoked sausage",
+      "amount": 0.75,
+      "unit": "lb",
+      "prep": "andouille preferred, sliced (optional)"
+    },
+    {
+      "item": "shrimp",
+      "amount": 1,
+      "unit": "lb",
+      "prep": "peeled and deveined (optional)"
+    },
+
+    { "item": "lemon juice", "amount": 1, "unit": "tbsp" },
+    {
+      "item": "green onions",
+      "amount": 4,
+      "unit": "stalks",
+      "prep": "sliced (garnish)"
+    },
+    {
+      "item": "fresh parsley",
+      "amount": 0.25,
+      "unit": "cup",
+      "prep": "chopped (garnish)"
+    },
+
+    {
+      "item": "cooked white rice",
+      "amount": 6,
+      "unit": "servings",
+      "prep": "for serving (optional)"
+    }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "text": "Prep: Slice okra, dice onion/bell pepper/celery, and mince garlic. If using shrimp, pat dry and keep chilled."
+    },
+    {
+      "order": 2,
+      "text": "Optional: brown sausage: If using smoked sausage, heat 1 tbsp oil in a pot over medium-high heat and brown sausage lightly. Remove to a plate; leave drippings in the pot."
+    },
+    {
+      "order": 3,
+      "text": "Sweat the trinity: Add remaining oil and optional butter. Add onion, bell pepper, and celery. Cook until softened. Add garlic and cook 30–60 seconds."
+    },
+    {
+      "order": 4,
+      "text": "Bloom tomato paste: Stir in tomato paste and cook 1 minute."
+    },
+    {
+      "order": 5,
+      "text": "Build the sauce: Add diced tomatoes, crushed tomatoes, stock, bay leaves, thyme, oregano, paprika, cayenne, black pepper, salt, Worcestershire, and optional hot sauce. Bring to a gentle simmer."
+    },
+    {
+      "order": 6,
+      "text": "Cook okra: Stir in okra and simmer until tender and the sauce thickens. Stir occasionally. If using frozen okra, simmer a bit longer to reduce extra liquid."
+    },
+    {
+      "order": 7,
+      "text": "Add sausage/shrimp (optional): Return sausage to the pot to warm through. If using shrimp, add them near the end and simmer gently just until pink and cooked through."
+    },
+    {
+      "order": 8,
+      "text": "Finish: Remove bay leaves. Stir in lemon juice. Taste and adjust salt and hot sauce."
+    },
+    {
+      "order": 9,
+      "text": "Serve: Serve as a stew on its own or over rice. Garnish with green onions and parsley."
+    }
+  ]
+}

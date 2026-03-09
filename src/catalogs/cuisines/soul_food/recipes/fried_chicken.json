@@ -1,0 +1,241 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+
+  "meta": {
+    "type": "recipe",
+    "id": "soul_food.fried_chicken.v1",
+    "name": "Soul Food Fried Chicken",
+    "cuisine": "soul_food",
+    "region": "US_South",
+    "version": "1.0.0",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-17",
+    "updatedAt": "2026-01-17",
+    "status": "canonical",
+    "source": {
+      "type": "compiled",
+      "notes": "Canonical SSA soul food baseline. Designed for reliable home execution with cast iron or deep fryer."
+    },
+    "tags": [
+      "soul_food",
+      "fried",
+      "fried_chicken",
+      "chicken",
+      "comfort_food",
+      "family_meal",
+      "cast_iron",
+      "buttermilk_brine",
+      "crispy"
+    ],
+    "allergens": ["milk", "wheat", "egg"],
+    "dietary": {
+      "halal": false,
+      "kosher_style": false,
+      "gluten_free": false,
+      "dairy_free": false
+    },
+    "summary": "Classic soul food fried chicken with buttermilk hot-sauce marinade, seasoned flour dredge, and crisp golden crust.",
+    "difficulty": "medium",
+    "servings": {
+      "count": 6,
+      "unit": "servings"
+    },
+    "yield": "About 10 pieces (mixed parts)",
+    "timing": {
+      "prepMinutes": 25,
+      "inactiveMinutes": 240,
+      "cookMinutes": 25,
+      "totalMinutes": 290
+    },
+    "equipment": [
+      {
+        "id": "cast_iron_skillet_12in",
+        "label": "12-inch cast iron skillet",
+        "required": true
+      },
+      {
+        "id": "deep_fry_thermometer",
+        "label": "Deep-fry / instant thermometer",
+        "required": true
+      },
+      { "id": "wire_rack", "label": "Wire rack", "required": true },
+      { "id": "sheet_pan", "label": "Sheet pan", "required": true },
+      { "id": "tongs", "label": "Tongs", "required": true },
+      { "id": "mixing_bowls", "label": "Mixing bowls", "required": true },
+      { "id": "whisk", "label": "Whisk", "required": false },
+      { "id": "paper_towels", "label": "Paper towels", "required": false },
+      { "id": "splatter_screen", "label": "Splatter screen", "required": false }
+    ],
+    "foodSafety": {
+      "minInternalTempF": 165,
+      "notes": [
+        "Cook chicken to 165°F internal temperature in the thickest part (avoid bone).",
+        "Do not reuse raw marinade as a sauce unless boiled."
+      ]
+    }
+  },
+
+  "ingredients": [
+    {
+      "id": "chicken_pieces_mixed",
+      "label": "Chicken pieces (drumsticks, thighs, wings, breasts cut in half if large), skin-on, bone-in",
+      "amount": { "value": 4, "unit": "lb" }
+    },
+    {
+      "id": "buttermilk",
+      "label": "Buttermilk (full-fat recommended)",
+      "amount": { "value": 2, "unit": "cup" }
+    },
+    {
+      "id": "hot_sauce",
+      "label": "Hot sauce",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "kosher_salt",
+      "label": "Kosher salt (for marinade)",
+      "amount": { "value": 2.25, "unit": "tsp" }
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper (for marinade)",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "garlic_powder",
+      "label": "Garlic powder (for marinade)",
+      "amount": { "value": 1.5, "unit": "tsp" }
+    },
+    {
+      "id": "onion_powder",
+      "label": "Onion powder (for marinade)",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "paprika",
+      "label": "Paprika, sweet (for marinade)",
+      "amount": { "value": 1.5, "unit": "tsp" }
+    },
+
+    {
+      "id": "all_purpose_flour",
+      "label": "All-purpose flour",
+      "amount": { "value": 2.5, "unit": "cup" }
+    },
+    {
+      "id": "cornstarch",
+      "label": "Cornstarch",
+      "amount": { "value": 0.5, "unit": "cup" }
+    },
+    {
+      "id": "baking_powder",
+      "label": "Baking powder",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "kosher_salt_dredge",
+      "label": "Kosher salt (for dredge)",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "black_pepper_dredge",
+      "label": "Black pepper (for dredge)",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "paprika_dredge",
+      "label": "Paprika, sweet (for dredge)",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "garlic_powder_dredge",
+      "label": "Garlic powder (for dredge)",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "onion_powder_dredge",
+      "label": "Onion powder (for dredge)",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "cayenne_pepper",
+      "label": "Cayenne pepper (optional)",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "dried_thyme",
+      "label": "Dried thyme (optional)",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+
+    {
+      "id": "neutral_oil",
+      "label": "Neutral frying oil (peanut/canola/vegetable) — enough for 1/2–3/4 inch depth",
+      "amount": { "value": 6, "unit": "cup" }
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_prep_chicken",
+      "title": "Prep chicken",
+      "body": "Pat chicken dry with paper towels. Trim any excess loose skin/fat if desired."
+    },
+    {
+      "id": "step_02_make_marinade",
+      "title": "Make buttermilk marinade",
+      "body": "Whisk buttermilk, hot sauce, kosher salt, black pepper, garlic powder, onion powder, and paprika until smooth and evenly combined."
+    },
+    {
+      "id": "step_03_marinate",
+      "title": "Marinate (cold)",
+      "body": "Add chicken to marinade, turn to coat, cover, and refrigerate at least 4 hours (8–12 hours preferred)."
+    },
+    {
+      "id": "step_04_pre_fry_rest",
+      "title": "Warm slightly before frying",
+      "body": "Remove chicken from refrigerator 20–30 minutes before frying (keep it in marinade while it warms slightly)."
+    },
+    {
+      "id": "step_05_mix_dredge",
+      "title": "Mix seasoned dredge",
+      "body": "Combine flour, cornstarch, baking powder, salt, pepper, paprika, garlic powder, onion powder, and optional cayenne/thyme in a wide bowl."
+    },
+    {
+      "id": "step_06_dredge",
+      "title": "Dredge chicken for craggy crust",
+      "body": "Lift chicken from marinade, let excess drip off, then press firmly into seasoned flour on all sides. Optional: drizzle 2–3 tbsp of marinade into the flour, toss to form small clumps, then press chicken again into those clumps."
+    },
+    {
+      "id": "step_07_rest_dredged",
+      "title": "Rest dredged chicken",
+      "body": "Place dredged chicken on a wire rack over a sheet pan and rest 10–15 minutes so the coating hydrates and adheres."
+    },
+    {
+      "id": "step_08_heat_oil",
+      "title": "Heat oil",
+      "body": "Heat oil in a cast iron skillet to 325–350°F (aim ~335°F). Use a thermometer to monitor temperature."
+    },
+    {
+      "id": "step_09_fry_batches",
+      "title": "Fry in batches",
+      "body": "Lower chicken into oil (skin-side down when applicable). Fry without crowding; adjust heat to keep oil between 325–350°F."
+    },
+    {
+      "id": "step_10_flip_cook",
+      "title": "Flip and cook through",
+      "body": "Turn pieces every 3–5 minutes for even browning. Typical totals: thighs/drums 12–16 min, wings 8–12 min, breast halves 12–18 min depending on size and oil temp."
+    },
+    {
+      "id": "step_11_check_temp",
+      "title": "Confirm doneness",
+      "body": "Check thickest part with an instant thermometer: minimum 165°F internal (170–175°F ideal for thighs/drums)."
+    },
+    {
+      "id": "step_12_drain_serve",
+      "title": "Drain and serve",
+      "body": "Transfer to a wire rack over a sheet pan to drain and stay crisp. Serve hot (optional: a tiny pinch of fine salt right after frying)."
+    }
+  ]
+}

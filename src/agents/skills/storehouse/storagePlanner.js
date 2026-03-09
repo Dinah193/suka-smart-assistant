@@ -35,7 +35,7 @@
  *     storehouse session runs in the background.
  */
 
-import { emit } from "@/services/eventBus";
+import { emit } from "@/services/events/eventBus";
 
 /* -------------------------- Storage rule registry -------------------------- */
 
@@ -115,7 +115,8 @@ registerStorageRule(/potato(es)?|onion(s)?|root\s+veg/i, {
   light: "dark",
   container: "crate",
   shelfLifeDays: 120,
-  notes: "Store unwashed in breathable containers; keep dark to avoid sprouting.",
+  notes:
+    "Store unwashed in breathable containers; keep dark to avoid sprouting.",
 });
 
 registerStorageRule(/carrot(s)?|beet(s)?|parsnip(s)?/i, {
@@ -200,11 +201,7 @@ async function getDb() {
   if (_dbPromise) return _dbPromise;
 
   _dbPromise = (async () => {
-    const candidates = [
-      "@/services/db",
-      "@/db",
-      "@/data/db",
-    ];
+    const candidates = ["@/services/db", "@/db", "@/data/db"];
 
     for (const path of candidates) {
       try {
@@ -216,7 +213,9 @@ async function getDb() {
       }
     }
 
-    console.warn("[storehouse.storagePlanner] Dexie DB not found; returning null");
+    console.warn(
+      "[storehouse.storagePlanner] Dexie DB not found; returning null"
+    );
     return null;
   })();
 
@@ -242,21 +241,21 @@ async function getLocationsTable() {
   const db = await getDb();
   if (!db) return null;
 
-  const candidates = [
-    db.storehouseLocations,
-    db.locations,
-    db.storageZones,
-  ];
+  const candidates = [db.storehouseLocations, db.locations, db.storageZones];
   for (const t of candidates) {
     if (t && typeof t.where === "function") return t;
   }
 
   if (Array.isArray(db.tables)) {
-    const loc = db.tables.find((t) => /location|storehouse|zone/i.test(t.name || ""));
+    const loc = db.tables.find((t) =>
+      /location|storehouse|zone/i.test(t.name || "")
+    );
     if (loc) return loc;
   }
 
-  console.warn("[storehouse.storagePlanner] No locations-like table found on DB");
+  console.warn(
+    "[storehouse.storagePlanner] No locations-like table found on DB"
+  );
   return null;
 }
 
@@ -338,7 +337,10 @@ export async function planStorageForBatch(items = [], options = {}) {
     try {
       locations = await table.toArray();
     } catch (err) {
-      console.warn("[storehouse.storagePlanner] Failed to read locations table:", err);
+      console.warn(
+        "[storehouse.storagePlanner] Failed to read locations table:",
+        err
+      );
       locations = [];
     }
   }
@@ -422,12 +424,10 @@ export async function planStorageStepsForBatch(items = [], options = {}) {
     const qty = item?.quantity ?? item?.qty ?? null;
     const unit = item?.unit || null;
 
-    const qtyLabel =
-      qty != null
-        ? `${qty}${unit ? " " + unit : ""}`
-        : "";
+    const qtyLabel = qty != null ? `${qty}${unit ? " " + unit : ""}` : "";
 
-    const locName = location?.name || location?.label || profile.label || profile.zone;
+    const locName =
+      location?.name || location?.label || profile.label || profile.zone;
 
     return {
       title: `Move ${name} to ${locName}`,
@@ -536,7 +536,10 @@ function scoreLocation(item, profile, location, options) {
       const extra = Number(customLocationScorer(item, profile, location) || 0);
       score += extra;
     } catch (err) {
-      console.warn("[storehouse.storagePlanner] customLocationScorer error:", err);
+      console.warn(
+        "[storehouse.storagePlanner] customLocationScorer error:",
+        err
+      );
     }
   }
 
@@ -643,10 +646,14 @@ function emitSafe(type, data) {
 /* --------------------------------- Utils ----------------------------------- */
 
 function norm(s) {
-  return String(s || "").toLowerCase().trim();
+  return String(s || "")
+    .toLowerCase()
+    .trim();
 }
 function cleanSpace(s) {
-  return String(s || "").replace(/\s+/g, " ").trim();
+  return String(s || "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function friendlyLabelForZone(zone) {

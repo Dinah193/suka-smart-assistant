@@ -14,13 +14,31 @@ let PreferencesStore, CalendarStore;
 let InventoryStore, VendorsStore;
 let profileCuisineBias; // dynamic cuisine weights
 
-try { ({ eventBus } = await import("@/services/events/eventBus")); } catch {}
-try { ({ automation } = await import("@/services/automation/runtime")); } catch {}
-try { ({ usePreferencesStore: PreferencesStore } = await import("@/store/PreferencesStore")); } catch {}
-try { ({ useCalendarStore: CalendarStore } = await import("@/store/CalendarStore")); } catch {}
-try { ({ Inventory } = await import("@/store/InventoryStore")); InventoryStore = Inventory; } catch {}
-try { ({ Vendors } = await import("@/store/VendorStore")); VendorsStore = Vendors; } catch {}
-try { ({ profileCuisineBias } = await import("@/bootstrap/profileCuisineBias")); } catch {}
+try {
+  ({ eventBus } = await import("@/services/events/eventBus"));
+} catch {}
+try {
+  ({ automation } = await import("@/services/automation/runtime"));
+} catch {}
+try {
+  ({ usePreferencesStore: PreferencesStore } = await import(
+    "@/store/PreferencesStore"
+  ));
+} catch {}
+try {
+  ({ useCalendarStore: CalendarStore } = await import("@/store/CalendarStore"));
+} catch {}
+try {
+  ({ Inventory } = await import("@/store/InventoryStore"));
+  InventoryStore = Inventory;
+} catch {}
+try {
+  ({ Vendors } = await import("@/store/VendorStore"));
+  VendorsStore = Vendors;
+} catch {}
+try {
+  ({ profileCuisineBias } = await import("@/bootstrap/profileCuisineBias"));
+} catch {}
 
 /* ----------------------------------------------------------------------------
    Constants & Palette
@@ -28,12 +46,12 @@ try { ({ profileCuisineBias } = await import("@/bootstrap/profileCuisineBias"));
 const DAY = 24 * 60 * 60 * 1000;
 
 const PALETTE = {
-  blue:   "#3b82f6",
+  blue: "#3b82f6",
   purple: "#7c3aed",
-  scarlet:"#dc2626",
-  gold:   "#d4af37",
-  green:  "#16a34a",
-  ink:    "#0b1020",
+  scarlet: "#dc2626",
+  gold: "#d4af37",
+  green: "#16a34a",
+  ink: "#0b1020",
 };
 
 const DEFAULT_SLOTS = ["Breakfast", "Lunch", "Dinner", "Snack"];
@@ -74,23 +92,71 @@ export const MEAL_PLAN_TEMPLATES = {
     durationDays: 21,
     mealSlots: DEFAULT_SLOTS,
     nutritionTemplate: {
-      calories: 2000, protein_g: 75, carbs_g: 300, fat_g: 45, fiber_g: 35, sugar_g: 60, sodium_mg: 1800, satfat_g: 12
+      calories: 2000,
+      protein_g: 75,
+      carbs_g: 300,
+      fat_g: 45,
+      fiber_g: 35,
+      sugar_g: 60,
+      sodium_mg: 1800,
+      satfat_g: 12,
     },
     constraints: {
       excludeTags: [
-        "meat","poultry","fish","seafood","dairy","eggs","refined","ultra-processed",
-        "dessert","added-sugar","sweetener","caffeine","alcohol","leavened-bread",
+        "meat",
+        "poultry",
+        "fish",
+        "seafood",
+        "dairy",
+        "eggs",
+        "refined",
+        "ultra-processed",
+        "dessert",
+        "added-sugar",
+        "sweetener",
+        "caffeine",
+        "alcohol",
+        "leavened-bread",
       ],
       includeTags: [
-        "vegan","plant-based","whole-grain","legumes","vegetables","fruits","nuts","seeds",
-        "herbs","spices","unleavened"
+        "vegan",
+        "plant-based",
+        "whole-grain",
+        "legumes",
+        "vegetables",
+        "fruits",
+        "nuts",
+        "seeds",
+        "herbs",
+        "spices",
+        "unleavened",
       ],
       denyIngredients: [
-        "chicken","beef","lamb","pork","fish","shrimp","milk","cheese","yogurt","butter","egg",
-        "sugar","honey","maple syrup","agave","stevia","white flour","enriched flour","yeast",
-        "baking powder","coffee","black/green tea","alcohol",
+        "chicken",
+        "beef",
+        "lamb",
+        "pork",
+        "fish",
+        "shrimp",
+        "milk",
+        "cheese",
+        "yogurt",
+        "butter",
+        "egg",
+        "sugar",
+        "honey",
+        "maple syrup",
+        "agave",
+        "stevia",
+        "white flour",
+        "enriched flour",
+        "yeast",
+        "baking powder",
+        "coffee",
+        "black/green tea",
+        "alcohol",
       ],
-      cookingMethodsPrefer: ["saute","steam","roast","raw","stew"],
+      cookingMethodsPrefer: ["saute", "steam", "roast", "raw", "stew"],
     },
     selectors: {
       breakfast: [
@@ -116,13 +182,26 @@ export const MEAL_PLAN_TEMPLATES = {
   balanced: {
     id: "balanced",
     name: "Balanced (7–14 days)",
-    summary: "Well-rounded plan with lean protein, whole grains, and plenty of veg.",
+    summary:
+      "Well-rounded plan with lean protein, whole grains, and plenty of veg.",
     color: "blue",
-    tags: ["general","family-friendly"],
+    tags: ["general", "family-friendly"],
     durationDays: 7,
     mealSlots: DEFAULT_SLOTS,
-    nutritionTemplate: { calories: 2000, protein_g: 100, carbs_g: 250, fat_g: 67, fiber_g: 30, sugar_g: 50, sodium_mg: 2000, satfat_g: 18 },
-    constraints: { includeTags: ["whole-grain","vegetables","lean-protein"], excludeTags: ["ultra-processed"] },
+    nutritionTemplate: {
+      calories: 2000,
+      protein_g: 100,
+      carbs_g: 250,
+      fat_g: 67,
+      fiber_g: 30,
+      sugar_g: 50,
+      sodium_mg: 2000,
+      satfat_g: 18,
+    },
+    constraints: {
+      includeTags: ["whole-grain", "vegetables", "lean-protein"],
+      excludeTags: ["ultra-processed"],
+    },
     selectors: {
       breakfast: [{ query: "eggs or oats + fruit", minScore: 0.5 }],
       lunch: [{ query: "grain bowl + veg + protein", minScore: 0.55 }],
@@ -139,8 +218,20 @@ export const MEAL_PLAN_TEMPLATES = {
     tags: ["heart-healthy"],
     durationDays: 14,
     mealSlots: DEFAULT_SLOTS,
-    nutritionTemplate: { calories: 2000, protein_g: 90, carbs_g: 260, fat_g: 70, fiber_g: 32, sugar_g: 50, sodium_mg: 1900, satfat_g: 16 },
-    constraints: { includeTags: ["olive-oil","legumes","whole-grain","fish"], excludeTags: ["ultra-processed"] },
+    nutritionTemplate: {
+      calories: 2000,
+      protein_g: 90,
+      carbs_g: 260,
+      fat_g: 70,
+      fiber_g: 32,
+      sugar_g: 50,
+      sodium_mg: 1900,
+      satfat_g: 16,
+    },
+    constraints: {
+      includeTags: ["olive-oil", "legumes", "whole-grain", "fish"],
+      excludeTags: ["ultra-processed"],
+    },
     selectors: {
       breakfast: [{ query: "olive oil toast + tomato + herb", minScore: 0.5 }],
       lunch: [{ query: "bean salad + whole grain", minScore: 0.55 }],
@@ -152,13 +243,26 @@ export const MEAL_PLAN_TEMPLATES = {
   highProtein: {
     id: "highProtein",
     name: "High-Protein (7 days)",
-    summary: "Prioritizes protein with balanced carbs/fats for training or satiety.",
+    summary:
+      "Prioritizes protein with balanced carbs/fats for training or satiety.",
     color: "scarlet",
-    tags: ["fitness","satiety"],
+    tags: ["fitness", "satiety"],
     durationDays: 7,
     mealSlots: DEFAULT_SLOTS,
-    nutritionTemplate: { calories: 2100, protein_g: 150, carbs_g: 200, fat_g: 70, fiber_g: 30, sugar_g: 45, sodium_mg: 2000, satfat_g: 18 },
-    constraints: { includeTags: ["lean-protein"], excludeTags: ["ultra-processed"] },
+    nutritionTemplate: {
+      calories: 2100,
+      protein_g: 150,
+      carbs_g: 200,
+      fat_g: 70,
+      fiber_g: 30,
+      sugar_g: 45,
+      sodium_mg: 2000,
+      satfat_g: 18,
+    },
+    constraints: {
+      includeTags: ["lean-protein"],
+      excludeTags: ["ultra-processed"],
+    },
     selectors: {
       breakfast: [{ query: "eggs + veg or tofu scramble", minScore: 0.55 }],
       lunch: [{ query: "protein bowl + veg + whole grain", minScore: 0.6 }],
@@ -170,13 +274,26 @@ export const MEAL_PLAN_TEMPLATES = {
   vegan: {
     id: "vegan",
     name: "Vegan (14 days)",
-    summary: "100% plant-based (allows leaven & natural sweeteners); flexible beyond Daniel Fast.",
+    summary:
+      "100% plant-based (allows leaven & natural sweeteners); flexible beyond Daniel Fast.",
     color: "purple",
     tags: ["plant-based"],
     durationDays: 14,
     mealSlots: DEFAULT_SLOTS,
-    nutritionTemplate: { calories: 2000, protein_g: 85, carbs_g: 300, fat_g: 60, fiber_g: 35, sugar_g: 60, sodium_mg: 1900, satfat_g: 14 },
-    constraints: { includeTags: ["vegan"], excludeTags: ["animal-product","ultra-processed"] },
+    nutritionTemplate: {
+      calories: 2000,
+      protein_g: 85,
+      carbs_g: 300,
+      fat_g: 60,
+      fiber_g: 35,
+      sugar_g: 60,
+      sodium_mg: 1900,
+      satfat_g: 14,
+    },
+    constraints: {
+      includeTags: ["vegan"],
+      excludeTags: ["animal-product", "ultra-processed"],
+    },
     selectors: {
       breakfast: [{ query: "tofu scramble or oats", minScore: 0.5 }],
       lunch: [{ query: "legume bowl + veg + grain", minScore: 0.55 }],
@@ -189,122 +306,271 @@ export const MEAL_PLAN_TEMPLATES = {
   westAfricanHome: {
     id: "westAfricanHome",
     name: "West African Home Kitchen (7 days)",
-    summary: "Jollof, waakye, egusi, suya spice, pepper soup, fufu, leafy greens, yams & cassava.",
+    summary:
+      "Jollof, waakye, egusi, suya spice, pepper soup, fufu, leafy greens, yams & cassava.",
     color: "gold",
-    tags: ["west-african","home-kitchen","stew","greens","yams","cassava"],
+    tags: ["west-african", "home-kitchen", "stew", "greens", "yams", "cassava"],
     durationDays: 7,
     mealSlots: DEFAULT_SLOTS,
-    nutritionTemplate: { calories: 2050, protein_g: 100, carbs_g: 270, fat_g: 65, fiber_g: 32, sugar_g: 48, sodium_mg: 1900, satfat_g: 18 },
+    nutritionTemplate: {
+      calories: 2050,
+      protein_g: 100,
+      carbs_g: 270,
+      fat_g: 65,
+      fiber_g: 32,
+      sugar_g: 48,
+      sodium_mg: 1900,
+      satfat_g: 18,
+    },
     constraints: {
-      includeTags: ["west-african","stew","soup","greens","yams","cassava","suya","pepper","palm-oil","egusi","okra"],
+      includeTags: [
+        "west-african",
+        "stew",
+        "soup",
+        "greens",
+        "yams",
+        "cassava",
+        "suya",
+        "pepper",
+        "palm-oil",
+        "egusi",
+        "okra",
+      ],
       excludeTags: ["ultra-processed"],
-      cookingMethodsPrefer: ["stew","boil","grill","smoke","rotisserie"]
+      cookingMethodsPrefer: ["stew", "boil", "grill", "smoke", "rotisserie"],
     },
     selectors: {
       breakfast: [{ query: "akamu or millet porridge + fruit", minScore: 0.5 }],
-      lunch:     [{ query: "jollof rice + grilled lamb or goat + greens", minScore: 0.6 }],
-      dinner:    [{ query: "egusi or okra stew + fufu or eba + fish/lamb/goat", minScore: 0.65 }],
-      snack:     [{ query: "suya skewers or puff-puff alt (baked) or fruit", minScore: 0.5 }],
+      lunch: [
+        { query: "jollof rice + grilled lamb or goat + greens", minScore: 0.6 },
+      ],
+      dinner: [
+        {
+          query: "egusi or okra stew + fufu or eba + fish/lamb/goat",
+          minScore: 0.65,
+        },
+      ],
+      snack: [
+        {
+          query: "suya skewers or puff-puff alt (baked) or fruit",
+          minScore: 0.5,
+        },
+      ],
     },
-    meta: { cuisineBias: [{ tag: "west-african", weight: 2.0 }] }
+    meta: { cuisineBias: [{ tag: "west-african", weight: 2.0 }] },
   },
 
   streetFoodMode: {
     id: "streetFoodMode",
     name: "Street Food Mode (7 days)",
-    summary: "Handhelds & bowls for busy weeks: skewers, wraps, fritters, roti, rice bowls.",
+    summary:
+      "Handhelds & bowls for busy weeks: skewers, wraps, fritters, roti, rice bowls.",
     color: "blue",
-    tags: ["street-food","handheld","bowls","quick"],
+    tags: ["street-food", "handheld", "bowls", "quick"],
     durationDays: 7,
     mealSlots: DEFAULT_SLOTS,
-    nutritionTemplate: { calories: 2000, protein_g: 100, carbs_g: 250, fat_g: 67, fiber_g: 28, sugar_g: 45, sodium_mg: 2000, satfat_g: 18 },
+    nutritionTemplate: {
+      calories: 2000,
+      protein_g: 100,
+      carbs_g: 250,
+      fat_g: 67,
+      fiber_g: 28,
+      sugar_g: 45,
+      sodium_mg: 2000,
+      satfat_g: 18,
+    },
     constraints: {
-      includeTags: ["street-food","food-truck","skewers","wrap","roti","bowl","kebab","suya"],
+      includeTags: [
+        "street-food",
+        "food-truck",
+        "skewers",
+        "wrap",
+        "roti",
+        "bowl",
+        "kebab",
+        "suya",
+      ],
       cookingTimeMaxMin: 40,
-      excludeTags: ["ultra-processed"]
+      excludeTags: ["ultra-processed"],
     },
     selectors: {
-      lunch:  [{ query: "kebab wrap + salad + yogurt-alt", minScore: 0.6 }],
-      dinner: [{ query: "grilled skewers + rice bowl + pickles", minScore: 0.6 }],
+      lunch: [{ query: "kebab wrap + salad + yogurt-alt", minScore: 0.6 }],
+      dinner: [
+        { query: "grilled skewers + rice bowl + pickles", minScore: 0.6 },
+      ],
     },
-    meta: { preferQuick: true }
+    meta: { preferQuick: true },
   },
 
   foodTruckServiceWeek: {
     id: "foodTruckServiceWeek",
     name: "Food Truck Service Week (prep & service)",
-    summary: "Batch on weekend; service-friendly menus midweek. Rotisserie/flat-top friendly.",
+    summary:
+      "Batch on weekend; service-friendly menus midweek. Rotisserie/flat-top friendly.",
     color: "scarlet",
-    tags: ["food-truck","batch","service"],
+    tags: ["food-truck", "batch", "service"],
     durationDays: 7,
     mealSlots: DEFAULT_SLOTS,
-    nutritionTemplate: { calories: 2050, protein_g: 110, carbs_g: 240, fat_g: 70, fiber_g: 28, sugar_g: 45, sodium_mg: 2100, satfat_g: 18 },
+    nutritionTemplate: {
+      calories: 2050,
+      protein_g: 110,
+      carbs_g: 240,
+      fat_g: 70,
+      fiber_g: 28,
+      sugar_g: 45,
+      sodium_mg: 2100,
+      satfat_g: 18,
+    },
     constraints: {
-      includeTags: ["food-truck","batch","rotisserie","flat-top","hold-well","reheat-friendly"],
+      includeTags: [
+        "food-truck",
+        "batch",
+        "rotisserie",
+        "flat-top",
+        "hold-well",
+        "reheat-friendly",
+      ],
       excludeTags: ["ultra-processed"],
     },
     selectors: {
-      dinner: [{ query: "rotisserie lamb or goat + rice/flatbread + slaw", minScore: 0.6 }],
+      dinner: [
+        {
+          query: "rotisserie lamb or goat + rice/flatbread + slaw",
+          minScore: 0.6,
+        },
+      ],
     },
-    meta: { createBatchDrafts: true }
+    meta: { createBatchDrafts: true },
   },
 
   feastPassover: {
     id: "feastPassover",
     name: "Feast Mode: Passover (7 days, chametz filtered)",
-    summary: "Unleavened focus. Chametz filtered. Rotisserie/roast whole & shared meals.",
+    summary:
+      "Unleavened focus. Chametz filtered. Rotisserie/roast whole & shared meals.",
     color: "gold",
-    tags: ["feast","passover","unleavened","chametz-filtered"],
+    tags: ["feast", "passover", "unleavened", "chametz-filtered"],
     durationDays: 7,
     mealSlots: DEFAULT_SLOTS,
-    nutritionTemplate: { calories: 2000, protein_g: 100, carbs_g: 230, fat_g: 70, fiber_g: 30, sugar_g: 45, sodium_mg: 1900, satfat_g: 18 },
+    nutritionTemplate: {
+      calories: 2000,
+      protein_g: 100,
+      carbs_g: 230,
+      fat_g: 70,
+      fiber_g: 30,
+      sugar_g: 45,
+      sodium_mg: 1900,
+      satfat_g: 18,
+    },
     constraints: {
-      includeTags: ["unleavened","roast","rotisserie","whole-animal","bitter-herbs","greens"],
-      excludeTags: ["chametz","leaven","leavening-agent","pasta","bread","beer","waffle","pancake"],
-      denyIngredients: ["yeast","baking powder","baking soda (as leavening)"],
+      includeTags: [
+        "unleavened",
+        "roast",
+        "rotisserie",
+        "whole-animal",
+        "bitter-herbs",
+        "greens",
+      ],
+      excludeTags: [
+        "chametz",
+        "leaven",
+        "leavening-agent",
+        "pasta",
+        "bread",
+        "beer",
+        "waffle",
+        "pancake",
+      ],
+      denyIngredients: ["yeast", "baking powder", "baking soda (as leavening)"],
     },
     selectors: {
       dinner: [
-        { query: "rotisserie lamb shoulder + bitter herbs + unleavened flatbread", minScore: 0.7 },
-        { query: "roast goat + greens + unleavened sides", minScore: 0.65 }
-      ]
+        {
+          query:
+            "rotisserie lamb shoulder + bitter herbs + unleavened flatbread",
+          minScore: 0.7,
+        },
+        { query: "roast goat + greens + unleavened sides", minScore: 0.65 },
+      ],
     },
-    meta: { passoverMode: true }
+    meta: { passoverMode: true },
   },
 
   feastSukkot: {
     id: "feastSukkot",
     name: "Feast Mode: Sukkot (Harvest • 7 days)",
-    summary: "Harvest flavors, open-air cooking, grills/skewers, shared platters.",
+    summary:
+      "Harvest flavors, open-air cooking, grills/skewers, shared platters.",
     color: "green",
-    tags: ["feast","harvest","grill","skewers","shared"],
+    tags: ["feast", "harvest", "grill", "skewers", "shared"],
     durationDays: 7,
     mealSlots: DEFAULT_SLOTS,
-    nutritionTemplate: { calories: 2100, protein_g: 110, carbs_g: 260, fat_g: 70, fiber_g: 32, sugar_g: 50, sodium_mg: 2000, satfat_g: 18 },
-    constraints: { includeTags: ["grill","skewers","greens","harvest","stew"], excludeTags: ["ultra-processed"] },
+    nutritionTemplate: {
+      calories: 2100,
+      protein_g: 110,
+      carbs_g: 260,
+      fat_g: 70,
+      fiber_g: 32,
+      sugar_g: 50,
+      sodium_mg: 2000,
+      satfat_g: 18,
+    },
+    constraints: {
+      includeTags: ["grill", "skewers", "greens", "harvest", "stew"],
+      excludeTags: ["ultra-processed"],
+    },
     selectors: {
-      dinner: [{ query: "skewers + greens + grains or flatbread", minScore: 0.6 }],
+      dinner: [
+        { query: "skewers + greens + grains or flatbread", minScore: 0.6 },
+      ],
     },
   },
 
   fusionCurryDoner: {
     id: "fusionCurryDoner",
     name: "Fusion Lab: Curry × Döner Lamb",
-    summary: "Experimental fusion: Indian curry aromatics married to German döner-style lamb.",
+    summary:
+      "Experimental fusion: Indian curry aromatics married to German döner-style lamb.",
     color: "purple",
-    tags: ["fusion","lab","kebab","curry","lamb"],
+    tags: ["fusion", "lab", "kebab", "curry", "lamb"],
     durationDays: 3,
-    mealSlots: ["Lunch","Dinner"],
-    nutritionTemplate: { calories: 2050, protein_g: 110, carbs_g: 240, fat_g: 70, fiber_g: 28, sugar_g: 45, sodium_mg: 2000, satfat_g: 18 },
+    mealSlots: ["Lunch", "Dinner"],
+    nutritionTemplate: {
+      calories: 2050,
+      protein_g: 110,
+      carbs_g: 240,
+      fat_g: 70,
+      fiber_g: 28,
+      sugar_g: 45,
+      sodium_mg: 2000,
+      satfat_g: 18,
+    },
     constraints: {
-      includeTags: ["lamb","kebab","curry","wrap","rice-bowl","pickles","yogurt-alt"],
+      includeTags: [
+        "lamb",
+        "kebab",
+        "curry",
+        "wrap",
+        "rice-bowl",
+        "pickles",
+        "yogurt-alt",
+      ],
       excludeTags: ["ultra-processed"],
     },
     selectors: {
-      lunch:  [{ query: "doner lamb wrap + curry sauce + slaw", minScore: 0.65 }],
-      dinner: [{ query: "curry lamb bowl + rice + pickled veg", minScore: 0.65 }],
+      lunch: [
+        { query: "doner lamb wrap + curry sauce + slaw", minScore: 0.65 },
+      ],
+      dinner: [
+        { query: "curry lamb bowl + rice + pickled veg", minScore: 0.65 },
+      ],
     },
-    meta: { cuisineBias: [{ tag: "fusion", weight: 1.2 }, { tag: "food-truck", weight: 1.1 }] }
+    meta: {
+      cuisineBias: [
+        { tag: "fusion", weight: 1.2 },
+        { tag: "food-truck", weight: 1.1 },
+      ],
+    },
   },
 };
 
@@ -315,8 +581,10 @@ export function validateTemplate(t /** @type {MealPlanTemplate} */) {
   const errs = [];
   if (!t?.id) errs.push("missing id");
   if (!t?.name) errs.push("missing name");
-  if (!Number.isFinite(t?.durationDays) || t.durationDays <= 0) errs.push("invalid durationDays");
-  if (!Array.isArray(t?.mealSlots) || !t.mealSlots.length) errs.push("missing mealSlots");
+  if (!Number.isFinite(t?.durationDays) || t.durationDays <= 0)
+    errs.push("invalid durationDays");
+  if (!Array.isArray(t?.mealSlots) || !t.mealSlots.length)
+    errs.push("missing mealSlots");
   if (!t?.nutritionTemplate) errs.push("missing nutritionTemplate");
   if (!t?.constraints) errs.push("missing constraints");
   if (!t?.selectors) errs.push("missing selectors");
@@ -328,14 +596,15 @@ export function listTemplates({ q = "", tag, feastOnly = false } = {}) {
   let out = all;
   if (q) {
     const needle = q.toLowerCase();
-    out = out.filter(t =>
-      t.name.toLowerCase().includes(needle) ||
-      t.summary.toLowerCase().includes(needle) ||
-      (t.tags || []).some(x => x.toLowerCase().includes(needle))
+    out = out.filter(
+      (t) =>
+        t.name.toLowerCase().includes(needle) ||
+        t.summary.toLowerCase().includes(needle) ||
+        (t.tags || []).some((x) => x.toLowerCase().includes(needle))
     );
   }
-  if (tag) out = out.filter(t => (t.tags || []).includes(tag));
-  if (feastOnly) out = out.filter(t => (t.tags || []).includes("feast"));
+  if (tag) out = out.filter((t) => (t.tags || []).includes(tag));
+  if (feastOnly) out = out.filter((t) => (t.tags || []).includes("feast"));
   return out.sort((a, b) => a.name.localeCompare(b.name));
 }
 
@@ -374,10 +643,16 @@ export function generatePlanDraftFromTemplate(templateId, opts = {}) {
   const start = opts.startDate ? new Date(opts.startDate) : today;
 
   // Dynamic duration (allow 7/10/14/21 via opts or template default)
-  const days = Math.max(1, Number.isFinite(opts.days) ? opts.days : t.durationDays || 7);
+  const days = Math.max(
+    1,
+    Number.isFinite(opts.days) ? opts.days : t.durationDays || 7
+  );
 
   // Dynamic slots (respect Sabbath: lighter cook on Fri night/Sat if sabbathSafe)
-  const baseSlots = Array.isArray(opts.mealSlots) && opts.mealSlots.length ? opts.mealSlots : t.mealSlots;
+  const baseSlots =
+    Array.isArray(opts.mealSlots) && opts.mealSlots.length
+      ? opts.mealSlots
+      : t.mealSlots;
   const sabbathSafe = opts.sabbathSafe ?? true;
 
   // Theme color mapping (blue/purple/scarlet/gold/green)
@@ -401,7 +676,7 @@ export function generatePlanDraftFromTemplate(templateId, opts = {}) {
       cuisineBias: null,
       preferQuick: !!t.meta?.preferQuick,
       passoverMode: false,
-      sabbathSafe: !!sabbathSafe
+      sabbathSafe: !!sabbathSafe,
     },
     startsOn: new Date(start),
     endsOn: new Date(start.getTime() + (days - 1) * DAY),
@@ -464,7 +739,7 @@ export async function applyMealPlanTemplate(templateId, opts = {}) {
       cuisineBias: draft.meta?.cuisineBias || null,
       preferQuick: !!draft.meta?.preferQuick,
       sabbathSafe: !!draft.meta?.sabbathSafe,
-      budgetTier: draft.meta?.budgetTier || null
+      budgetTier: draft.meta?.budgetTier || null,
     });
   } catch {
     // Silent fallback; user can fill manually
@@ -491,7 +766,10 @@ export function recommendTemplates(context = {}) {
     ].filter(Boolean);
   }
 
-  const goals = new Set([...(context.goals || []), ...(prefs?.meals?.goals || [])]);
+  const goals = new Set([
+    ...(context.goals || []),
+    ...(prefs?.meals?.goals || []),
+  ]);
   const quickWant = goals.has("quick") || !!prefs?.meals?.preferQuick;
 
   // Cuisine bias (from context or live)
@@ -504,11 +782,12 @@ export function recommendTemplates(context = {}) {
   const budgetTier = context.budgetTier || prefs?.meals?.budgetTier || "medium";
 
   let ranked = pool
-    .map(t => {
+    .map((t) => {
       let score = 0;
 
       // Cuisine emphasis
-      if (t.tags?.includes("west-african")) score += (biasMap["west-african"] ?? 0.5) * 2.0;
+      if (t.tags?.includes("west-african"))
+        score += (biasMap["west-african"] ?? 0.5) * 2.0;
       if (t.tags?.includes("food-truck") || t.tags?.includes("street-food"))
         score += (biasMap["food-truck"] ?? 0.5) * 1.0;
 
@@ -517,7 +796,8 @@ export function recommendTemplates(context = {}) {
       if (goals.has("fast") && t.tags?.includes("fast")) score += 1.2;
 
       // Quick preference
-      if (quickWant && (t.tags?.includes("street-food") || t.meta?.preferQuick)) score += 1.1;
+      if (quickWant && (t.tags?.includes("street-food") || t.meta?.preferQuick))
+        score += 1.1;
 
       // Pantry batch-friendly
       if (pantryHint.batch && t.meta?.createBatchDrafts) score += 0.6;
@@ -532,7 +812,7 @@ export function recommendTemplates(context = {}) {
       return { t, score };
     })
     .sort((a, b) => b.score - a.score)
-    .map(x => x.t);
+    .map((x) => x.t);
 
   // Ensure variety up top
   const uniq = [];
@@ -578,17 +858,25 @@ function softenIfSabbath(dateObj, slots) {
     if (dow !== 5 && dow !== 6) return slots;
     // Replace Dinner Fri (5) and Lunch Sat (6) with “Leftovers” note slots still named the same
     return slots;
-  } catch { return slots; }
+  } catch {
+    return slots;
+  }
 }
 
 // Sprinkle “Leftovers” items after batch candidates to reduce cook load
 function sprinkleLeftovers(draft) {
-  const firstDinner = draft.days?.[0]?.slots?.find(s => /dinner/i.test(s.name));
+  const firstDinner = draft.days?.[0]?.slots?.find((s) =>
+    /dinner/i.test(s.name)
+  );
   if (!firstDinner) return;
   for (let i = 1; i < draft.days.length; i += 2) {
-    const s = draft.days[i].slots.find(x => /lunch/i.test(x.name));
+    const s = draft.days[i].slots.find((x) => /lunch/i.test(x.name));
     if (s) {
-      s.items.push({ type: "note", ref: "leftovers:from-previous-dinner", quantity: 1 });
+      s.items.push({
+        type: "note",
+        ref: "leftovers:from-previous-dinner",
+        quantity: 1,
+      });
       s.tags = Array.from(new Set([...(s.tags || []), "leftovers"]));
     }
   }
@@ -597,7 +885,7 @@ function sprinkleLeftovers(draft) {
 function normalizeBias(arr) {
   // Accept [{tag, weight}] or null → collapse to map
   const out = {};
-  for (const it of (arr || [])) {
+  for (const it of arr || []) {
     if (!it?.tag) continue;
     out[it.tag] = (out[it.tag] || 0) + (Number(it.weight) || 1);
   }
@@ -613,7 +901,8 @@ function budgetCompatibility(template, tier = "medium") {
     if (template.id === "streetFoodMode") return 0.6;
     if (template.id === "balanced" || template.id === "vegan") return 0.3;
   } else if (t === "high") {
-    if (template.id === "feastSukkot" || template.id === "foodTruckServiceWeek") return 0.5;
+    if (template.id === "feastSukkot" || template.id === "foodTruckServiceWeek")
+      return 0.5;
   }
   return 0;
 }
@@ -622,10 +911,17 @@ function inventoryHint(householdId) {
   try {
     const snap = householdId ? InventoryStore?.peek?.(householdId) : null;
     const items = snap?.items || [];
-    const cookedGrains = items.some(i => /rice|quinoa|millet/i.test(i.name) && (i.qty || 0) > 0);
-    const cookedProteins = items.some(i => /(chicken|beef|lamb|goat|fish|tofu)/i.test(i.name) && (i.qty || 0) > 0);
+    const cookedGrains = items.some(
+      (i) => /rice|quinoa|millet/i.test(i.name) && (i.qty || 0) > 0
+    );
+    const cookedProteins = items.some(
+      (i) =>
+        /(chicken|beef|lamb|goat|fish|tofu)/i.test(i.name) && (i.qty || 0) > 0
+    );
     return { batch: cookedGrains || cookedProteins };
-  } catch { return { batch: false }; }
+  } catch {
+    return { batch: false };
+  }
 }
 
 /* ----------------------------------------------------------------------------
@@ -655,22 +951,32 @@ export function toMealPlanEngineOptions(templateId) {
 async function personalizeDraft(draft, opts = {}) {
   try {
     // Cuisine bias (live)
-    const bias = await profileCuisineBias?.getCuisineBias?.({ householdId: opts.householdId });
+    const bias = await profileCuisineBias?.getCuisineBias?.({
+      householdId: opts.householdId,
+    });
     if (bias) {
       // convert to array of {tag, weight} to keep consistent with rest of system
-      draft.meta.cuisineBias = Object.entries(bias).map(([k, v]) => ({ tag: k === "westAfrican" ? "west-african" : k, weight: v }));
+      draft.meta.cuisineBias = Object.entries(bias).map(([k, v]) => ({
+        tag: k === "westAfrican" ? "west-african" : k,
+        weight: v,
+      }));
     }
   } catch {}
 
   // Budget tier
   const prefs = PreferencesStore?.getState?.() || {};
-  draft.meta.budgetTier = opts.budgetTier || prefs?.meals?.budgetTier || "medium";
+  draft.meta.budgetTier =
+    opts.budgetTier || prefs?.meals?.budgetTier || "medium";
 
   // Prefer quick?
-  if (opts.preferQuick || prefs?.meals?.preferQuick) draft.meta.preferQuick = true;
+  if (opts.preferQuick || prefs?.meals?.preferQuick)
+    draft.meta.preferQuick = true;
 
   // Emit personalization event so UI can surface explainer/chips
-  eventBus.emit?.("mealplan.draft.personalized", { id: draft.id, meta: draft.meta });
+  eventBus.emit?.("mealplan.draft.personalized", {
+    id: draft.id,
+    meta: draft.meta,
+  });
 }
 
 /* ----------------------------------------------------------------------------
@@ -681,6 +987,8 @@ try {
     eventBus.emit?.("mealplan.templates.recommended.invalidate", {});
   });
   eventBus.on?.("inventory.snapshot.updated", ({ householdId }) => {
-    eventBus.emit?.("mealplan.templates.recommended.invalidate", { householdId });
+    eventBus.emit?.("mealplan.templates.recommended.invalidate", {
+      householdId,
+    });
   });
 } catch {}

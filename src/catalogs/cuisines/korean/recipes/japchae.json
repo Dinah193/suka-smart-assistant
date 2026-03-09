@@ -1,0 +1,543 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-21T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.korean.recipes.japchae",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Japchae (Korean Glass Noodles)",
+    "subtitle": "Sweet potato noodles stir-fried with vegetables and savory-sweet soy-sesame seasoning.",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa.catalogs.cuisines.korean",
+      "notes": "Canonical SSA Japchae: dangmyeon + sesame-soy seasoning, with beef option and fully vegetarian option. Includes make-ahead and weeknight workflow."
+    }
+  },
+
+  "classification": {
+    "cuisine": "korean",
+    "category": "noodles",
+    "mealArchetypes": [
+      "korean.meal.noodles",
+      "korean.meal.family_style",
+      "korean.meal.banchan"
+    ],
+    "servingStyles": ["family_style", "banchan", "buffet", "meal_prep"],
+    "plannerTags": [
+      "korean",
+      "japchae",
+      "glass_noodles",
+      "dangmyeon",
+      "stir_fry",
+      "sesame",
+      "soy",
+      "make_ahead",
+      "party_friendly",
+      "vegetable_forward"
+    ],
+    "subprofiles": ["korean.home_cooking", "korean.holiday_food"]
+  },
+
+  "summary": "Classic japchae: glossy dangmyeon noodles tossed with sautéed vegetables and a soy-sesame-garlic seasoning. Serve warm or room temp.",
+
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 320, "unit": "g" },
+    "notes": "Makes ~4 generous servings or 6 as a side/banchan."
+  },
+
+  "time": {
+    "activeMins": 30,
+    "handsOffMins": 15,
+    "totalMins": 45
+  },
+
+  "difficulty": "intermediate",
+
+  "signals": {
+    "weeknightFriendly": "medium",
+    "batchFriendly": true,
+    "leftoversGood": true,
+    "freezerFriendly": "none",
+    "partyFood": true
+  },
+
+  "tasteProfile": {
+    "sweet": 3,
+    "salty": 3,
+    "umami": 4,
+    "sour": 1,
+    "heat": 0,
+    "notes": [
+      "savory-sweet",
+      "toasty sesame",
+      "garlic",
+      "springy noodles",
+      "vegetable-forward"
+    ]
+  },
+
+  "equipment": {
+    "required": [
+      { "id": "equipment.large_pot", "label": "Large pot", "required": true },
+      { "id": "equipment.colander", "label": "Colander", "required": true },
+      {
+        "id": "equipment.large_skillet_or_wok",
+        "label": "Large skillet or wok",
+        "required": true
+      },
+      {
+        "id": "equipment.mixing_bowl",
+        "label": "Large mixing bowl",
+        "required": true
+      },
+      { "id": "equipment.knife", "label": "Knife", "required": true },
+      {
+        "id": "equipment.cutting_board",
+        "label": "Cutting board",
+        "required": true
+      }
+    ],
+    "recommended": [
+      "equipment.tongs",
+      "equipment.kitchen_scale",
+      "equipment.microplane",
+      "equipment.mandoline"
+    ],
+    "optional": [
+      {
+        "id": "equipment.nonstick_skillet",
+        "label": "Nonstick skillet (for eggs)",
+        "required": false,
+        "notes": "Only needed if making optional egg garnish (jidan)."
+      }
+    ]
+  },
+
+  "dietFlags": ["diet.omnivore", "diet.vegetarian_option"],
+
+  "allergens": {
+    "contains": ["allergen.soy", "allergen.sesame", "allergen.egg_optional"],
+    "notes": [
+      "Use gluten-free soy sauce/tamari if needed (check labels).",
+      "Egg garnish is optional."
+    ]
+  },
+
+  "ingredientGroups": [
+    {
+      "id": "group.noodles",
+      "label": "Noodles",
+      "items": ["ingredient.dangmyeon"]
+    },
+    {
+      "id": "group.veg",
+      "label": "Vegetables",
+      "items": [
+        "ingredient.spinach",
+        "ingredient.onion",
+        "ingredient.carrot",
+        "ingredient.mushrooms",
+        "ingredient.bell_pepper_optional",
+        "ingredient.scallions"
+      ]
+    },
+    {
+      "id": "group.protein_optional",
+      "label": "Protein (Optional)",
+      "items": ["ingredient.beef", "ingredient.tofu_optional"]
+    },
+    {
+      "id": "group.sauce",
+      "label": "Seasoning Sauce",
+      "items": [
+        "ingredient.soy_sauce",
+        "ingredient.sugar",
+        "ingredient.sesame_oil",
+        "ingredient.garlic",
+        "ingredient.toasted_sesame_seeds",
+        "ingredient.black_pepper",
+        "ingredient.salt"
+      ]
+    },
+    {
+      "id": "group.garnish_optional",
+      "label": "Garnish (Optional)",
+      "items": ["ingredient.egg_optional"]
+    }
+  ],
+
+  "ingredients": [
+    {
+      "id": "ingredient.dangmyeon",
+      "label": "Sweet potato starch noodles (dangmyeon)",
+      "role": "noodles",
+      "amount": { "value": 250, "unit": "g" },
+      "notes": "Sometimes labeled 'Korean glass noodles' or 'sweet potato noodles'."
+    },
+
+    {
+      "id": "ingredient.spinach",
+      "label": "Spinach",
+      "role": "vegetable",
+      "amount": { "value": 170, "unit": "g" },
+      "notes": "About 6 oz; can use baby spinach."
+    },
+    {
+      "id": "ingredient.onion",
+      "label": "Yellow onion, thinly sliced",
+      "role": "vegetable",
+      "amount": { "value": 200, "unit": "g" }
+    },
+    {
+      "id": "ingredient.carrot",
+      "label": "Carrot, julienned",
+      "role": "vegetable",
+      "amount": { "value": 140, "unit": "g" }
+    },
+    {
+      "id": "ingredient.mushrooms",
+      "label": "Mushrooms, sliced (shiitake preferred; cremini ok)",
+      "role": "vegetable",
+      "amount": { "value": 150, "unit": "g" },
+      "notes": "If using dried shiitake, rehydrate and slice; save soaking liquid for soups."
+    },
+    {
+      "id": "ingredient.bell_pepper_optional",
+      "label": "Red bell pepper, thinly sliced (optional)",
+      "role": "vegetable",
+      "amount": { "value": 120, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.scallions",
+      "label": "Scallions, sliced (white + green parts separated if desired)",
+      "role": "aromatic",
+      "amount": { "value": 35, "unit": "g" },
+      "optional": true
+    },
+
+    {
+      "id": "ingredient.beef",
+      "label": "Beef (sirloin or ribeye), thinly sliced",
+      "role": "protein",
+      "amount": { "value": 200, "unit": "g" },
+      "optional": true,
+      "notes": "Optional. For vegetarian, skip beef and optionally add tofu or more mushrooms."
+    },
+    {
+      "id": "ingredient.tofu_optional",
+      "label": "Firm tofu, pressed and sliced (optional vegetarian protein)",
+      "role": "protein",
+      "amount": { "value": 220, "unit": "g" },
+      "optional": true,
+      "notes": "If using, pan-sear separately and fold in at the end."
+    },
+
+    {
+      "id": "ingredient.soy_sauce",
+      "label": "Soy sauce",
+      "role": "seasoning",
+      "amount": { "value": 60, "unit": "ml" },
+      "notes": "About 4 tbsp; use tamari for gluten-free."
+    },
+    {
+      "id": "ingredient.sugar",
+      "label": "Sugar (white or light brown)",
+      "role": "sweetener",
+      "amount": { "value": 18, "unit": "g" },
+      "notes": "About 1 1/2 tbsp; adjust to taste."
+    },
+    {
+      "id": "ingredient.sesame_oil",
+      "label": "Toasted sesame oil",
+      "role": "fat",
+      "amount": { "value": 15, "unit": "ml" },
+      "notes": "About 1 tbsp; add more to finish if desired."
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": "About 3–4 cloves."
+    },
+    {
+      "id": "ingredient.toasted_sesame_seeds",
+      "label": "Toasted sesame seeds",
+      "role": "garnish",
+      "amount": { "value": 6, "unit": "g" }
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1.5, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.salt",
+      "label": "Salt (to taste)",
+      "role": "seasoning",
+      "amount": { "value": 3, "unit": "g" },
+      "optional": true,
+      "notes": "Final seasoning depends on soy sauce brand and saltiness."
+    },
+
+    {
+      "id": "ingredient.neutral_oil",
+      "label": "Neutral oil (canola/avocado/grapeseed) for stir-frying",
+      "role": "fat",
+      "amount": { "value": 30, "unit": "ml" }
+    },
+
+    {
+      "id": "ingredient.egg_optional",
+      "label": "Egg (optional garnish: thin omelet strips)",
+      "role": "garnish",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    }
+  ],
+
+  "methods": ["method.boil", "method.blanch", "method.stir_fry", "method.toss"],
+
+  "safety": {
+    "notes": [
+      "Cook beef to safe doneness; thin slices cook quickly—avoid overcooking to prevent toughness.",
+      "Rinse noodles after boiling to prevent sticking and overcooking; toss with a little oil if holding."
+    ]
+  },
+
+  "storage": {
+    "fridge": {
+      "maxDays": 4,
+      "notes": "Japchae keeps well; best re-warmed gently with a splash of water."
+    },
+    "reheat": {
+      "notes": [
+        "Stovetop: add 1–2 tbsp water, cover, warm over medium-low, then uncover to evaporate.",
+        "Microwave: cover and heat in short bursts; stir between bursts."
+      ]
+    }
+  },
+
+  "pairings": {
+    "banchan": [
+      "dish.kimchi",
+      "dish.pickled_radish",
+      "dish.cucumber_kimchi_optional"
+    ],
+    "mains": ["dish.bulgogi", "dish.galbi_optional"],
+    "soups": ["dish.miyeokguk_optional"]
+  },
+
+  "planner": {
+    "signals": {
+      "makeAhead": true,
+      "serveWarmOrRoomTemp": true
+    },
+    "roles": {
+      "noodles": ["ingredient.dangmyeon"],
+      "veg": [
+        "ingredient.spinach",
+        "ingredient.onion",
+        "ingredient.carrot",
+        "ingredient.mushrooms"
+      ],
+      "protein": ["ingredient.beef", "ingredient.tofu_optional"]
+    }
+  },
+
+  "adaptations": [
+    {
+      "id": "adapt.vegetarian",
+      "label": "Vegetarian japchae",
+      "when": { "diet": ["vegetarian"] },
+      "changes": {
+        "notes": [
+          "Skip beef; add tofu or extra mushrooms.",
+          "Boost umami with a small amount of mushroom powder or a dash of fish-free seaweed broth (optional)."
+        ]
+      }
+    },
+    {
+      "id": "adapt.weeknight_fast",
+      "label": "Weeknight fast workflow",
+      "when": { "preference": ["weeknight"] },
+      "changes": {
+        "notes": [
+          "Use pre-julienned carrots + sliced mushrooms; skip egg garnish.",
+          "Stir-fry vegetables together (instead of separately) to reduce steps—keep heat high and move fast."
+        ]
+      }
+    },
+    {
+      "id": "adapt.low_sugar",
+      "label": "Lower sugar",
+      "when": { "preference": ["low_sugar"] },
+      "changes": {
+        "notes": [
+          "Reduce sugar to 1–2 tsp and add extra sesame + garlic for balance.",
+          "Optional: add 1 tsp rice vinegar for brightness."
+        ]
+      }
+    }
+  ],
+
+  "variations": [
+    {
+      "id": "var.add_peppers",
+      "label": "Add bell pepper + scallions",
+      "notes": [
+        "Adds color and aroma; keep slices thin so they soften quickly."
+      ]
+    },
+    {
+      "id": "var.more_sesame",
+      "label": "Extra sesame-forward",
+      "notes": [
+        "Finish with an additional 1 tsp sesame oil and extra sesame seeds."
+      ]
+    }
+  ],
+
+  "notes": [
+    "Traditional workflow often sautés each vegetable separately to preserve color and texture; SSA version provides both traditional and faster weeknight approaches.",
+    "Dangmyeon firms up as it cools—reheat gently with a splash of water to loosen."
+  ],
+
+  "steps": [
+    {
+      "id": "step.01_prep_sauce",
+      "title": "Mix the seasoning sauce",
+      "instructions": [
+        "In a small bowl, mix soy sauce, sugar, sesame oil, minced garlic, sesame seeds, and a pinch of black pepper.",
+        "Set aside. You’ll use part for noodles and part to season vegetables/protein."
+      ],
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "checks": ["Sugar is mostly dissolved; sauce smells nutty-garlicky."]
+    },
+    {
+      "id": "step.02_prep_veg",
+      "title": "Prep vegetables (and optional beef/tofu)",
+      "instructions": [
+        "Slice onion thinly; julienne carrot; slice mushrooms; optionally slice bell pepper and scallions.",
+        "If using beef: slice thin and toss with 1–2 tsp of the sauce to season briefly.",
+        "If using tofu: press, slice, and plan to sear it separately."
+      ],
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "checks": ["Vegetables are uniformly cut for even cooking."]
+    },
+    {
+      "id": "step.03_blanch_spinach",
+      "title": "Blanch spinach",
+      "instructions": [
+        "Bring a pot of water to a boil. Blanch spinach 20–30 seconds until wilted bright green.",
+        "Drain and rinse under cold water. Squeeze out excess water.",
+        "Season lightly with a tiny pinch of salt and a few drops of sesame oil (optional)."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Blanch spinach", "seconds": 30 }],
+      "checks": [
+        "Spinach is bright green, not dull/overcooked; well-squeezed to avoid watery japchae."
+      ]
+    },
+    {
+      "id": "step.04_cook_noodles",
+      "title": "Cook dangmyeon noodles",
+      "instructions": [
+        "In boiling water, cook dangmyeon per package (typically 6–8 minutes) until translucent and chewy.",
+        "Drain and rinse briefly with cool water to stop cooking.",
+        "Shake off water well, then toss noodles with 1–2 tsp of the sauce to prevent sticking.",
+        "Optional: snip noodles with kitchen shears into shorter lengths for easier eating."
+      ],
+      "activeMins": 8,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Boil noodles", "minutes": 7 }],
+      "checks": [
+        "Noodles are translucent, springy, not mushy; lightly coated so they don’t clump."
+      ]
+    },
+    {
+      "id": "step.05_stir_fry_components",
+      "title": "Stir-fry vegetables (and optional beef/tofu)",
+      "instructions": [
+        "Heat a large skillet/wok over medium-high. Add a small splash of neutral oil.",
+        "Stir-fry onion 2–3 minutes until softened; remove to bowl.",
+        "Stir-fry carrot 1–2 minutes; remove.",
+        "Stir-fry mushrooms 2–3 minutes until softened and lightly browned; remove.",
+        "Optional beef: quickly stir-fry 1–2 minutes until just cooked; remove.",
+        "Optional tofu: sear slices until golden; remove.",
+        "Weeknight shortcut: stir-fry all vegetables together 4–6 minutes (high heat, keep moving)."
+      ],
+      "activeMins": 12,
+      "handsOffMins": 0,
+      "timers": [
+        { "label": "Onion sauté", "minutes": 3 },
+        { "label": "Carrot sauté", "minutes": 2 },
+        { "label": "Mushroom sauté", "minutes": 3 }
+      ],
+      "checks": [
+        "Vegetables are tender-crisp (not soggy). Beef (if used) is not overcooked."
+      ]
+    },
+    {
+      "id": "step.06_combine_and_toss",
+      "title": "Combine everything and toss",
+      "instructions": [
+        "Add noodles to the skillet (or a big mixing bowl). Add cooked vegetables, spinach, and optional beef/tofu.",
+        "Add remaining sauce gradually, tossing well. Taste and adjust: more soy for salt, a pinch more sugar for balance, or a touch more sesame oil for aroma.",
+        "Warm through 1–2 minutes if needed, stirring gently to avoid tearing noodles."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "checks": [
+        "Noodles are evenly seasoned and glossy; vegetables are distributed; taste is balanced savory-sweet."
+      ]
+    },
+    {
+      "id": "step.07_garnish_and_serve",
+      "title": "Garnish and serve",
+      "instructions": [
+        "Optional egg garnish (jidan): beat egg, cook a thin omelet, slice into thin strips, and top the japchae.",
+        "Top with extra sesame seeds and scallions if desired.",
+        "Serve warm or at room temperature."
+      ],
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "checks": ["Final dish is glossy, fragrant with sesame, and not watery."]
+    }
+  ],
+
+  "compat": {
+    "cuisineId": "cuisines.korean",
+    "dishId": "dish.japchae",
+    "sourcePaths": ["src/catalogs/cuisines/korean/recipes/japchae.json"],
+    "search": {
+      "aliases": [
+        "chapchae",
+        "잡채",
+        "korean glass noodles",
+        "sweet potato noodles stir fry"
+      ],
+      "keywords": [
+        "japchae",
+        "dangmyeon",
+        "glass noodles",
+        "sesame",
+        "soy sauce",
+        "korean noodles",
+        "stir-fried noodles",
+        "party dish",
+        "make ahead"
+      ]
+    }
+  }
+}

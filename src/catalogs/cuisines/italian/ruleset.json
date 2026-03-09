@@ -1,0 +1,430 @@
+{
+  "$schema": "../../../schemas/ruleset.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T01:12:00.000Z",
+  "kind": "cuisine_ruleset",
+
+  "meta": {
+    "id": "cuisines.italian.ruleset",
+    "type": "cuisine_ruleset",
+    "label": "Italian Cuisine Ruleset",
+    "cuisineId": "cuisines.italian",
+    "status": "canonical",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa-core",
+      "notes": [
+        "Deterministic cuisine rules for Italian adaptations, tagging, and planner scoring.",
+        "Designed to work with SSA rule engines (planner + recipe adapter) using JSONPath-like paths."
+      ]
+    }
+  },
+
+  "scope": {
+    "kind": "cuisine",
+    "cuisineId": "cuisines.italian",
+    "locales": ["en-US"]
+  },
+
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true,
+    "tokens": {
+      "stopWords": [
+        "a",
+        "an",
+        "the",
+        "and",
+        "or",
+        "with",
+        "style",
+        "classic",
+        "traditional"
+      ]
+    },
+    "ingredientAliases": {
+      "tomato.crushed_tomatoes": [
+        "crushed tomatoes",
+        "passata (crushed)",
+        "pomodoro"
+      ],
+      "tomato.passata": ["passata", "tomato puree", "tomato purée"],
+      "tomato.paste": ["tomato paste", "concentrato di pomodoro"],
+      "aromatic.garlic": ["garlic", "aglio"],
+      "aromatic.onion": ["onion", "cipolla"],
+      "herb.basil": ["basil", "fresh basil", "basil leaves", "basilico"],
+      "herb.oregano": ["oregano", "origano"],
+      "fat.olive_oil": [
+        "olive oil",
+        "extra virgin olive oil",
+        "evoo",
+        "olio d'oliva"
+      ],
+      "cheese.parmesan": [
+        "parmesan",
+        "parmigiano reggiano",
+        "parmigiano",
+        "grated parmesan"
+      ],
+      "cheese.pecorino_romano": ["pecorino", "pecorino romano"],
+      "cheese.mozzarella": ["mozzarella", "fresh mozzarella", "fior di latte"],
+      "cheese.ricotta": ["ricotta"],
+      "protein.beef": ["ground beef", "beef", "minced beef"],
+      "protein.pork": ["pork", "ground pork", "minced pork"],
+      "protein.chicken": ["chicken", "chicken breast", "chicken thighs"],
+      "starch.pasta": [
+        "pasta",
+        "spaghetti",
+        "penne",
+        "rigatoni",
+        "linguine",
+        "fusilli"
+      ],
+      "starch.lasagna_noodles": [
+        "lasagna noodles",
+        "lasagne sheets",
+        "lasagna sheets"
+      ],
+      "bread.breadcrumbs": ["breadcrumbs", "bread crumbs", "pangrattato"],
+      "wine.red": ["red wine", "vino rosso"],
+      "wine.white": ["white wine", "vino bianco"],
+      "broth.chicken": ["chicken stock", "chicken broth"],
+      "broth.vegetable": ["vegetable stock", "vegetable broth"]
+    },
+    "dishAliases": {
+      "dish.spaghetti_marinara": [
+        "spaghetti marinara",
+        "spaghetti al pomodoro",
+        "spaghetti pomodoro"
+      ],
+      "dish.meatballs_marinara": [
+        "meatballs in marinara",
+        "polpette al sugo",
+        "spaghetti and meatballs"
+      ],
+      "dish.chicken_parmesan": [
+        "chicken parmesan",
+        "chicken parm",
+        "chicken parmigiana"
+      ],
+      "dish.lasagna": ["lasagna", "lasagne", "lasagne al forno"],
+      "dish.minestrone": ["minestrone", "minestrone soup"]
+    },
+    "equipmentAliases": {
+      "tool.stockpot": ["stockpot", "large pot", "soup pot"],
+      "tool.saucepan": ["saucepan", "pot", "medium pot"],
+      "tool.skillet": ["skillet", "frying pan", "pan"],
+      "tool.sheet_pan": ["sheet pan", "baking sheet", "tray"],
+      "tool.baking_dish": ["baking dish", "casserole dish", "lasagna pan"],
+      "tool.oven": ["oven"]
+    },
+    "methodAliases": {
+      "technique.simmer": ["simmer", "gentle simmer", "low simmer"],
+      "technique.saute": ["saute", "sauté", "soften", "sweat"],
+      "technique.brown": ["brown", "sear", "color"],
+      "technique.bake": ["bake", "oven bake", "roast"],
+      "technique.bread": ["bread", "breaded", "coat"],
+      "technique.fry": ["fry", "pan-fry", "shallow fry"],
+      "technique.layer": ["layer", "assemble layers"]
+    }
+  },
+
+  "globals": {
+    "planner": {
+      "defaultServingStyles": ["family_style", "plates", "bowls"],
+      "weeknightBias": "medium",
+      "leftoversStrategy": "planned",
+      "batchCookingBias": "high"
+    },
+    "italian": {
+      "identity": {
+        "balance": ["acid", "salt", "fat", "umami"],
+        "signatureFats": ["fat.olive_oil"],
+        "signatureCheeses": ["cheese.parmesan", "cheese.pecorino_romano"],
+        "signatureHerbs": ["herb.basil", "herb.oregano"]
+      }
+    }
+  },
+
+  "rules": [
+    {
+      "id": "italian.tag.pasta_category",
+      "enabled": true,
+      "priority": 10,
+      "title": "Tag pasta dishes",
+      "description": "If classification/category or keywords indicate pasta, apply pasta/italian tags and boost planner score.",
+      "tags": ["tagging", "planner"],
+      "source": "ssa-core",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "matches",
+            "path": "$.classification.category",
+            "regex": "(?i)pasta"
+          },
+          {
+            "type": "intersects",
+            "path": "$.classification.plannerTags",
+            "values": ["pasta"]
+          },
+          {
+            "type": "matches",
+            "path": "$.meta.name",
+            "regex": "(?i)\\b(pasta|spaghetti|penne|rigatoni|linguine|lasagna|gnocchi)\\b"
+          },
+          {
+            "type": "matches",
+            "path": "$.title",
+            "regex": "(?i)\\b(pasta|spaghetti|penne|rigatoni|linguine|lasagna|gnocchi)\\b"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "cuisine.italian" },
+          { "type": "addTag", "value": "category.pasta" },
+          { "type": "addTag", "value": "planner.pasta" },
+          { "type": "scoreAdjust", "scoreDelta": 0.35 }
+        ]
+      }
+    },
+
+    {
+      "id": "italian.tag.sauce.marinara_like",
+      "enabled": true,
+      "priority": 12,
+      "title": "Tag tomato-sauce-forward recipes",
+      "description": "If core ingredients include tomatoes + garlic/olive oil, tag as tomato-sauce-forward and weeknight-friendly.",
+      "tags": ["tagging", "planner", "flavor"],
+      "source": "ssa-core",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "exists", "path": "$.ingredients" },
+          {
+            "type": "matches",
+            "path": "$.ingredients",
+            "regex": "(?i)tomato|passata|marinara|pomodoro"
+          },
+          {
+            "type": "matches",
+            "path": "$.ingredients",
+            "regex": "(?i)garlic|aglio"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "flavor.tomato_forward" },
+          { "type": "addTag", "value": "method.simmer" },
+          { "type": "addTag", "value": "weeknight.possible" },
+          { "type": "scoreAdjust", "scoreDelta": 0.2 }
+        ]
+      }
+    },
+
+    {
+      "id": "italian.tag.baked_pasta_or_casserole",
+      "enabled": true,
+      "priority": 15,
+      "title": "Tag baked pasta / casseroles as batch & leftovers strong",
+      "description": "If recipe has bake steps or mentions lasagna/baked ziti, boost batch/leftovers and set planner signals.",
+      "tags": ["planner", "batch", "leftovers"],
+      "source": "ssa-core",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "matches",
+            "path": "$.steps",
+            "regex": "(?i)\\bbake\\b|oven"
+          },
+          {
+            "type": "matches",
+            "path": "$.meta.name",
+            "regex": "(?i)\\b(lasagna|baked ziti|al forno)\\b"
+          },
+          {
+            "type": "matches",
+            "path": "$.title",
+            "regex": "(?i)\\b(lasagna|baked ziti|al forno)\\b"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "method.bake" },
+          { "type": "addTag", "value": "planner.batch_friendly" },
+          { "type": "addTag", "value": "planner.leftovers_good" },
+          { "type": "set", "path": "$.signals.batchFriendly", "value": true },
+          { "type": "set", "path": "$.signals.leftoversGood", "value": true },
+          { "type": "scoreAdjust", "scoreDelta": 0.5 }
+        ]
+      }
+    },
+
+    {
+      "id": "italian.preference.use.olive_oil_default",
+      "enabled": true,
+      "priority": 20,
+      "title": "Default to olive oil for Italian sauté/simmer starts",
+      "description": "If a recipe is Italian and uses a generic oil, prefer olive oil in planner context.",
+      "tags": ["adapter", "substitution"],
+      "source": "ssa-core",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "hasTag", "value": "cuisine.italian" },
+          {
+            "type": "matches",
+            "path": "$.ingredients",
+            "regex": "(?i)\\b(vegetable oil|canola oil|neutral oil)\\b"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.planner.preferFats",
+            "value": ["fat.olive_oil"]
+          },
+          { "type": "addTag", "value": "preference.fat.olive_oil" }
+        ]
+      }
+    },
+
+    {
+      "id": "italian.preference.finish_with_hard_cheese",
+      "enabled": true,
+      "priority": 25,
+      "title": "Encourage parmesan/pecorino finishing",
+      "description": "If recipe includes tomato sauce or pasta, suggest finishing with parmesan or pecorino (unless dairy-free).",
+      "tags": ["planner", "suggestion"],
+      "source": "ssa-core",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "any",
+            "conditions": [
+              { "type": "hasTag", "value": "planner.pasta" },
+              { "type": "hasTag", "value": "flavor.tomato_forward" }
+            ]
+          },
+          {
+            "op": "not",
+            "conditions": [
+              {
+                "type": "intersects",
+                "path": "$.dietFlags",
+                "values": ["diet.dairy_free", "diet.vegan"]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.planner.finishSuggestions",
+            "value": [
+              {
+                "id": "cheese.parmesan",
+                "note": "Grate fresh at the end for aroma + umami."
+              },
+              {
+                "id": "cheese.pecorino_romano",
+                "note": "Sharper saltiness—great for cacio e pepe vibes."
+              }
+            ]
+          },
+          { "type": "addTag", "value": "finish.hard_cheese" },
+          { "type": "scoreAdjust", "scoreDelta": 0.1 }
+        ]
+      }
+    },
+
+    {
+      "id": "italian.safety.allergen.gluten_notice_for_pasta",
+      "enabled": true,
+      "priority": 30,
+      "title": "Surface gluten allergen when pasta/breadcrumbs are present",
+      "description": "If ingredients include pasta/noodles/breadcrumbs, add an allergen tag and emit a safety event.",
+      "tags": ["safety", "allergen"],
+      "source": "ssa-core",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "matches",
+            "path": "$.ingredients",
+            "regex": "(?i)\\b(pasta|spaghetti|penne|rigatoni|lasagna|breadcrumbs|bread crumbs)\\b"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "allergen.gluten" },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "safety.allergenDetected",
+              "payload": {
+                "allergen": "gluten",
+                "reason": "Detected pasta/breadcrumb indicators in ingredients.",
+                "cuisineId": "cuisines.italian"
+              }
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "italian.planner.weeknight_shortcut.jarred_sauce",
+      "enabled": true,
+      "priority": 40,
+      "title": "Weeknight shortcut: jarred marinara acceptable (planner note)",
+      "description": "For weeknight contexts, allow jarred marinara as a deterministic shortcut with a flavor-boost note.",
+      "tags": ["planner", "weeknight", "shortcut"],
+      "source": "ssa-core",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "hasTag", "value": "weeknight.possible" },
+          { "type": "hasTag", "value": "flavor.tomato_forward" }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.planner.weeknightShortcuts",
+            "value": [
+              {
+                "id": "shortcut.jarred_marinara",
+                "note": "Use a good jarred marinara; bloom garlic + olive oil first, then add sauce to boost flavor."
+              }
+            ]
+          },
+          { "type": "addTag", "value": "shortcut.allowed" },
+          { "type": "scoreAdjust", "scoreDelta": 0.15 }
+        ]
+      }
+    }
+  ]
+}

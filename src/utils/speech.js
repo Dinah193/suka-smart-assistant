@@ -23,14 +23,19 @@ let eventBus = {
   on: () => () => {},
 };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
 const isBrowser =
-  typeof window !== "undefined" && typeof document !== "undefined" && typeof navigator !== "undefined";
+  typeof window !== "undefined" &&
+  typeof document !== "undefined" &&
+  typeof navigator !== "undefined";
 
-const hasSpeech = isBrowser && "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+const hasSpeech =
+  isBrowser &&
+  "speechSynthesis" in window &&
+  "SpeechSynthesisUtterance" in window;
 
 /* -------------------------------------------------------------------------- */
 /* Event helpers                                                              */
@@ -83,7 +88,8 @@ export function setDefaults({ volume, rate, pitch, maxCharsPerChunk } = {}) {
   if (Number.isFinite(volume)) prefs.volume = clamp(volume, 0, 1);
   if (Number.isFinite(rate)) prefs.rate = clamp(rate, 0.1, 3); // keep humane
   if (Number.isFinite(pitch)) prefs.pitch = clamp(pitch, 0, 2);
-  if (Number.isFinite(maxCharsPerChunk)) prefs.maxCharsPerChunk = Math.max(40, Math.floor(maxCharsPerChunk));
+  if (Number.isFinite(maxCharsPerChunk))
+    prefs.maxCharsPerChunk = Math.max(40, Math.floor(maxCharsPerChunk));
   emit("speech.prefs.changed", {
     volume: prefs.volume,
     rate: prefs.rate,
@@ -185,7 +191,10 @@ function refreshVoices() {
       voicesReadyResolve(cachedVoices);
       emit("speech.voices.ready", {
         count: cachedVoices.length,
-        langs: Array.from(new Set(cachedVoices.map((v) => v.lang))).slice(0, 12),
+        langs: Array.from(new Set(cachedVoices.map((v) => v.lang))).slice(
+          0,
+          12
+        ),
       });
     }
   } catch {}
@@ -208,7 +217,9 @@ export function listVoicesSync() {
 export async function listVoices() {
   refreshVoices();
   // Small safety timeout to avoid hanging forever on broken engines
-  const timeout = new Promise((res) => setTimeout(() => res(cachedVoices.slice()), 1200));
+  const timeout = new Promise((res) =>
+    setTimeout(() => res(cachedVoices.slice()), 1200)
+  );
   const v = await Promise.race([voicesReadyPromise, timeout]);
   return (v || []).slice();
 }
@@ -226,12 +237,20 @@ function chooseVoice(hint = prefs.voiceHint) {
 
   let candidates = voices;
 
-  if (lang) candidates = candidates.filter((v) => v.lang.toLowerCase().startsWith(lang));
-  if (nameSub) candidates = candidates.filter((v) => v.name.toLowerCase().includes(nameSub));
+  if (lang)
+    candidates = candidates.filter((v) =>
+      v.lang.toLowerCase().startsWith(lang)
+    );
+  if (nameSub)
+    candidates = candidates.filter((v) =>
+      v.name.toLowerCase().includes(nameSub)
+    );
 
   if (!candidates.length && lang) {
     // fallback: match language loosely (e.g., 'en' matches 'en-US')
-    candidates = voices.filter((v) => v.lang.toLowerCase().startsWith(lang.slice(0, 2)));
+    candidates = voices.filter((v) =>
+      v.lang.toLowerCase().startsWith(lang.slice(0, 2))
+    );
   }
 
   // Prefer localService voices for latency
@@ -261,7 +280,9 @@ class SpeechManager {
     }
 
     const raw = safeString(text);
-    const toSpeak = prefs.privacy.streamerSafe ? redactForStreamerSafe(raw) : raw;
+    const toSpeak = prefs.privacy.streamerSafe
+      ? redactForStreamerSafe(raw)
+      : raw;
     if (!toSpeak) {
       emit("speech.skipped", { reason: "empty_after_redact" });
       return false;
@@ -279,7 +300,9 @@ class SpeechManager {
     } = options;
 
     const chunks = chunkText(
-      injectPunctuationPauses ? injectPauses(toSpeak, prefs.punctuationPauseMs) : toSpeak,
+      injectPunctuationPauses
+        ? injectPauses(toSpeak, prefs.punctuationPauseMs)
+        : toSpeak,
       prefs.maxCharsPerChunk
     );
 
@@ -369,7 +392,9 @@ class SpeechManager {
       emit("speech.start", {
         id: next.id,
         tag: next.opts.tag,
-        voice: v ? { name: v.name, lang: v.lang, local: !!v.localService } : null,
+        voice: v
+          ? { name: v.name, lang: v.lang, local: !!v.localService }
+          : null,
       });
     };
     u.onend = async () => {
@@ -393,7 +418,11 @@ class SpeechManager {
     try {
       window.speechSynthesis.speak(u);
     } catch (err) {
-      emit("speech.error", { id: next.id, tag: next.opts.tag, message: err?.message || String(err) });
+      emit("speech.error", {
+        id: next.id,
+        tag: next.opts.tag,
+        message: err?.message || String(err),
+      });
       this.speaking = false;
       this.current = null;
       setTimeout(() => this.#pump(), prefs.pauseBetweenChunksMs);

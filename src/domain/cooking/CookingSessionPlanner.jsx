@@ -22,7 +22,7 @@
 
 import React, { useState } from "react";
 
-import { emitEvent } from "../../services/eventBus";
+import { emitEvent } from "../../services/events/eventBus";
 import { saveArtifactToVault } from "../../services/vault/VaultSavePipeline";
 import { createCookingSession } from "./RecipeSessionEngine";
 import { COMPLIANCE_STATUS } from "../../services/compliance/ComplianceContract";

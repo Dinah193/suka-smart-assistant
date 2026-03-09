@@ -18,7 +18,7 @@
   let eventBus = { emit() {}, on() {}, off() {} };
   try {
     // Try default export, then named, then raw module
-    const eb = require("@/services/eventBus");
+    const eb = require("@/services/events/eventBus");
     eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
   } catch (_e) {}
 
@@ -46,7 +46,9 @@
   // Intl.RelativeTimeFormat with fallback
   const rtf = (locale) => {
     try {
-      return new Intl.RelativeTimeFormat(locale || undefined, { numeric: "auto" });
+      return new Intl.RelativeTimeFormat(locale || undefined, {
+        numeric: "auto",
+      });
     } catch {
       return null;
     }
@@ -118,10 +120,15 @@
     const MS = String(d.millis).padStart(3, "0");
 
     if (withDays) {
-      return `${sign}${d.days}d ${String(d.hours).padStart(2, "0")}:${MM}:${SS}${showMillis ? "." + MS : ""}`;
+      return `${sign}${d.days}d ${String(d.hours).padStart(
+        2,
+        "0"
+      )}:${MM}:${SS}${showMillis ? "." + MS : ""}`;
     }
 
-    return `${sign}${HH}:${MM}${maxUnit === "m" ? "" : ":" + SS}${showMillis ? "." + MS : ""}`;
+    return `${sign}${HH}:${MM}${maxUnit === "m" ? "" : ":" + SS}${
+      showMillis ? "." + MS : ""
+    }`;
   }
 
   /* ------------------------------ Human duration ---------------------------- */
@@ -151,7 +158,13 @@
     } = opts;
 
     if (style === "clock") {
-      const base = toDigitalClock(ms, { padHours, showDays, showMillis, clampZero, maxUnit });
+      const base = toDigitalClock(ms, {
+        padHours,
+        showDays,
+        showMillis,
+        clampZero,
+        maxUnit,
+      });
       return suffix ? `${base} ${suffix}` : base;
     }
 
@@ -162,17 +175,18 @@
     if (d.minutes) parts.push(`${d.minutes}m`);
     if (d.seconds || parts.length === 0) parts.push(`${d.seconds}s`);
 
-    let s = style === "long"
-      ? parts
-          .map((p) => {
-            const v = parseInt(p, 10);
-            if (p.endsWith("d")) return `${v} day${v === 1 ? "" : "s"}`;
-            if (p.endsWith("h")) return `${v} hour${v === 1 ? "" : "s"}`;
-            if (p.endsWith("m")) return `${v} minute${v === 1 ? "" : "s"}`;
-            return `${v} second${v === 1 ? "" : "s"}`;
-          })
-          .join(", ")
-      : parts.join(" ");
+    let s =
+      style === "long"
+        ? parts
+            .map((p) => {
+              const v = parseInt(p, 10);
+              if (p.endsWith("d")) return `${v} day${v === 1 ? "" : "s"}`;
+              if (p.endsWith("h")) return `${v} hour${v === 1 ? "" : "s"}`;
+              if (p.endsWith("m")) return `${v} minute${v === 1 ? "" : "s"}`;
+              return `${v} second${v === 1 ? "" : "s"}`;
+            })
+            .join(", ")
+        : parts.join(" ");
 
     // Negative durations (elapsed) when suffix not given
     if (!suffix && d.sign < 0) {
@@ -332,7 +346,12 @@
    *  - "time:countdown:tick" { id, remainingMs, label, done:boolean }
    *  - "time:countdown:done" { id }
    */
-  function makeCountdownTicker({ id, until, interval = 1000, showDays = false } = {}) {
+  function makeCountdownTicker({
+    id,
+    until,
+    interval = 1000,
+    showDays = false,
+  } = {}) {
     let handle = null;
     const endAt = typeof until === "number" ? until : toTs(until);
 
@@ -341,7 +360,12 @@
       const remaining = endAt - now;
       const done = remaining <= 0;
       const label = countdownLabel(remaining, { showDays, clampZero: true });
-      eventBus.emit("time:countdown:tick", { id, remainingMs: remaining, label, done });
+      eventBus.emit("time:countdown:tick", {
+        id,
+        remainingMs: remaining,
+        label,
+        done,
+      });
       if (done) {
         eventBus.emit("time:countdown:done", { id });
         stop();

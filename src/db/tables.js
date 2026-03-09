@@ -27,15 +27,24 @@ try {
   // Soft fallback for SSR/non-browser contexts; methods will throw on use
   Dexie = class MockDexie {
     constructor() {}
-    version() { return { stores() {} }; }
-    table() { throw new Error("Dexie is unavailable outside the browser environment."); }
-    open() { return Promise.resolve(this); }
+    version() {
+      return { stores() {} };
+    }
+    table() {
+      throw new Error("Dexie is unavailable outside the browser environment.");
+    }
+    open() {
+      return Promise.resolve(this);
+    }
   };
 }
 
-let eventBus = { emit: (...a) => console.debug("[db:tables:eventBus.emit]", ...a), on: () => () => {} };
+let eventBus = {
+  emit: (...a) => console.debug("[db:tables:eventBus.emit]", ...a),
+  on: () => () => {},
+};
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -47,8 +56,8 @@ try {
 let HubPacketFormatter = null;
 let FamilyFundConnector = null;
 try {
-  HubPacketFormatter = require("@/hub/HubPacketFormatter");
-  FamilyFundConnector = require("@/hub/FamilyFundConnector");
+  HubPacketFormatter = require("@/services/hub/HubPacketFormatter");
+  FamilyFundConnector = require("@/services/hub/FamilyFundConnector");
 } catch {}
 
 const nowISO = () => new Date().toISOString();
@@ -61,11 +70,13 @@ async function exportToHubIfEnabled(payload) {
     if (!HubPacketFormatter || !FamilyFundConnector) return;
     // Prefer a generic formatter; fall back to pass-through if unavailable.
     const packet =
-      (HubPacketFormatter.formatDbEvent && HubPacketFormatter.formatDbEvent(payload)) ||
+      (HubPacketFormatter.formatDbEvent &&
+        HubPacketFormatter.formatDbEvent(payload)) ||
       (HubPacketFormatter.format && HubPacketFormatter.format(payload)) ||
       null;
     if (!packet) return;
-    await (FamilyFundConnector.send?.(packet) || FamilyFundConnector.post?.(packet));
+    await (FamilyFundConnector.send?.(packet) ||
+      FamilyFundConnector.post?.(packet));
   } catch {
     // fail silent by design
   }
@@ -74,7 +85,8 @@ async function exportToHubIfEnabled(payload) {
 /* --------------------------------- Utils ---------------------------------- */
 function createId(prefix = "id") {
   try {
-    if (typeof crypto !== "undefined" && crypto.randomUUID) return `${prefix}_${crypto.randomUUID()}`;
+    if (typeof crypto !== "undefined" && crypto.randomUUID)
+      return `${prefix}_${crypto.randomUUID()}`;
   } catch {}
   // Fallback
   const rnd = Math.random().toString(36).slice(2);
@@ -82,7 +94,8 @@ function createId(prefix = "id") {
 }
 
 function assertNonEmptyString(name, v) {
-  if (typeof v !== "string" || v.trim() === "") throw new Error(`${name} must be a non-empty string`);
+  if (typeof v !== "string" || v.trim() === "")
+    throw new Error(`${name} must be a non-empty string`);
 }
 
 function emit(type, data) {
@@ -121,10 +134,18 @@ function getDB() {
 }
 
 /* --------------------------------- Tables --------------------------------- */
-function plays() { return getDB().table("plays"); }
-function playHistory() { return getDB().table("playHistory"); }
-function favorites() { return getDB().table("favorites"); }
-function scheduleTemplates() { return getDB().table("scheduleTemplates"); }
+function plays() {
+  return getDB().table("plays");
+}
+function playHistory() {
+  return getDB().table("playHistory");
+}
+function favorites() {
+  return getDB().table("favorites");
+}
+function scheduleTemplates() {
+  return getDB().table("scheduleTemplates");
+}
 
 /* --------------------------------- Plays ---------------------------------- */
 /**
@@ -165,7 +186,9 @@ async function updatePlayStatus(id, status, patch = {}) {
   const record = {
     ...existing,
     status: status.toLowerCase(),
-    stepIndex: Number.isInteger(patch.stepIndex) ? patch.stepIndex : existing.stepIndex,
+    stepIndex: Number.isInteger(patch.stepIndex)
+      ? patch.stepIndex
+      : existing.stepIndex,
     timers: Array.isArray(patch.timers) ? patch.timers : existing.timers,
     updatedAt: nowISO(),
   };
@@ -199,7 +222,10 @@ async function logPlayHistory(entry = {}) {
   const id = entry.id || createId("hist");
   const startedAt = entry.startedAt || nowISO();
   const endedAt = entry.endedAt || nowISO();
-  const durationMs = Math.max(0, new Date(endedAt).getTime() - new Date(startedAt).getTime());
+  const durationMs = Math.max(
+    0,
+    new Date(endedAt).getTime() - new Date(startedAt).getTime()
+  );
 
   const record = {
     id,
@@ -209,7 +235,9 @@ async function logPlayHistory(entry = {}) {
     endedAt,
     durationMs,
     outcome: (entry.outcome || "completed").toLowerCase(),
-    stepsCompleted: Number.isInteger(entry.stepsCompleted) ? entry.stepsCompleted : undefined,
+    stepsCompleted: Number.isInteger(entry.stepsCompleted)
+      ? entry.stepsCompleted
+      : undefined,
     notes: entry.notes || undefined,
     meta: entry.meta || {},
     createdAt: nowISO(),
@@ -235,13 +263,24 @@ async function toggleFavorite(fav = {}) {
   // Natural key: domain+kind+targetId
   const existing = await favorites()
     .where("[domain+kind+targetId]")
-    .equals([String(fav.domain).toLowerCase(), String(fav.kind).toLowerCase(), String(fav.targetId)])
+    .equals([
+      String(fav.domain).toLowerCase(),
+      String(fav.kind).toLowerCase(),
+      String(fav.targetId),
+    ])
     .first()
     .catch(() => null);
 
   if (existing) {
     await favorites().delete(existing.id);
-    const payload = { table: "favorites", op: "delete", id: existing.id, domain: existing.domain, kind: existing.kind, targetId: existing.targetId };
+    const payload = {
+      table: "favorites",
+      op: "delete",
+      id: existing.id,
+      domain: existing.domain,
+      kind: existing.kind,
+      targetId: existing.targetId,
+    };
     emit("db.favorite.removed", payload);
     exportToHubIfEnabled(payload);
     return { favorite: null, removed: true };
@@ -278,11 +317,15 @@ async function upsertScheduleTemplate(tpl = {}) {
     id: tpl.id || createId("tpl"),
     domain: String(tpl.domain).toLowerCase(),
     title: tpl.title,
-    rrule: tpl.rrule,           // e.g., "FREQ=WEEKLY;BYDAY=MO,WE,FR;BYHOUR=18;BYMINUTE=0;COUNT=12"
+    rrule: tpl.rrule, // e.g., "FREQ=WEEKLY;BYDAY=MO,WE,FR;BYHOUR=18;BYMINUTE=0;COUNT=12"
     tzid: tpl.tzid || undefined,
     startTime: tpl.startTime || undefined, // ISO date-time of first occurrence or preferred local time
-    durationMs: Number.isFinite(tpl.durationMs) ? Math.max(0, tpl.durationMs) : undefined,
-    alarmMinutesBefore: Number.isFinite(tpl.alarmMinutesBefore) ? Math.max(0, tpl.alarmMinutesBefore) : undefined,
+    durationMs: Number.isFinite(tpl.durationMs)
+      ? Math.max(0, tpl.durationMs)
+      : undefined,
+    alarmMinutesBefore: Number.isFinite(tpl.alarmMinutesBefore)
+      ? Math.max(0, tpl.alarmMinutesBefore)
+      : undefined,
     enabled: tpl.enabled !== false,
     lastRunAt: tpl.lastRunAt || undefined,
     nextRunAt: tpl.nextRunAt || undefined,

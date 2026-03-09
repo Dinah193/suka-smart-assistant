@@ -1,0 +1,131 @@
+{
+  "id": "creole_red_beans_and_rice",
+  "name": "Creole Red Beans and Rice",
+  "servings": 8,
+  "ingredients": [
+    {
+      "item": "dried red kidney beans",
+      "amount": 1,
+      "unit": "lb",
+      "prep": "rinsed and picked over"
+    },
+    {
+      "item": "water",
+      "amount": 8,
+      "unit": "cups",
+      "prep": "for soaking (or use quick-soak method)"
+    },
+
+    { "item": "neutral oil", "amount": 1, "unit": "tbsp" },
+    {
+      "item": "andouille sausage",
+      "amount": 1,
+      "unit": "lb",
+      "prep": "sliced into rounds"
+    },
+    {
+      "item": "smoked ham hock",
+      "amount": 1,
+      "unit": "each",
+      "prep": "or smoked turkey neck/wing for a lighter option"
+    },
+
+    { "item": "yellow onion", "amount": 1, "unit": "large", "prep": "diced" },
+    {
+      "item": "green bell pepper",
+      "amount": 1,
+      "unit": "large",
+      "prep": "diced"
+    },
+    { "item": "celery", "amount": 3, "unit": "stalks", "prep": "diced" },
+    { "item": "garlic", "amount": 5, "unit": "cloves", "prep": "minced" },
+
+    {
+      "item": "tomato paste",
+      "amount": 1,
+      "unit": "tbsp",
+      "prep": "optional; small amount for Creole-style depth"
+    },
+    {
+      "item": "diced tomatoes",
+      "amount": 0.5,
+      "unit": "can",
+      "prep": "14-15 oz; optional, use if you like tomato-forward Creole beans"
+    },
+
+    { "item": "bay leaves", "amount": 2, "unit": "each" },
+    { "item": "dried thyme", "amount": 1, "unit": "tsp" },
+    { "item": "dried oregano", "amount": 0.5, "unit": "tsp" },
+    { "item": "paprika", "amount": 1, "unit": "tsp" },
+    { "item": "Creole seasoning", "amount": 2, "unit": "tsp" },
+    { "item": "black pepper", "amount": 0.75, "unit": "tsp" },
+    {
+      "item": "kosher salt",
+      "amount": 1,
+      "unit": "tsp",
+      "prep": "add to taste near the end (smoked meats are salty)"
+    },
+
+    {
+      "item": "chicken stock",
+      "amount": 6,
+      "unit": "cups",
+      "prep": "or water; add more as needed"
+    },
+    { "item": "Worcestershire sauce", "amount": 1, "unit": "tsp" },
+    { "item": "hot sauce", "amount": 1, "unit": "to_taste" },
+
+    {
+      "item": "green onions",
+      "amount": 4,
+      "unit": "stalks",
+      "prep": "sliced (garnish)"
+    },
+    {
+      "item": "fresh parsley",
+      "amount": 0.25,
+      "unit": "cup",
+      "prep": "chopped (garnish)"
+    },
+
+    { "item": "cooked white rice", "amount": 8, "unit": "servings" }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "text": "Soak beans (preferred): Place beans in a large bowl, cover with about 8 cups water, and soak 8–12 hours. Drain and rinse. Quick-soak option: cover beans with water, boil 2 minutes, remove from heat, cover 1 hour, then drain and rinse."
+    },
+    {
+      "order": 2,
+      "text": "Brown sausage: Heat oil in a heavy pot over medium-high heat. Add sausage and cook until browned. Transfer sausage to a plate; leave drippings in the pot."
+    },
+    {
+      "order": 3,
+      "text": "Sweat the trinity: Reduce heat to medium. Add onion, bell pepper, and celery. Cook until softened, scraping up browned bits. Add garlic and cook 30–60 seconds."
+    },
+    {
+      "order": 4,
+      "text": "Optional tomato depth: If using tomato paste, stir it in and cook 1 minute. If using diced tomatoes, add them now and cook 1–2 minutes."
+    },
+    {
+      "order": 5,
+      "text": "Simmer: Add drained beans, ham hock, bay leaves, thyme, oregano, paprika, Creole seasoning, black pepper, Worcestershire, and enough stock to cover beans by 1–2 inches. Bring to a gentle boil, then reduce to a steady simmer."
+    },
+    {
+      "order": 6,
+      "text": "Cook until creamy: Simmer partially covered until beans are tender and the liquid thickens, stirring occasionally and adding more stock as needed to keep beans covered."
+    },
+    {
+      "order": 7,
+      "text": "Mash for texture: Remove ham hock. Shred any meat and return to the pot. Mash a portion of beans against the side/bottom of the pot to create a creamy base, then stir to combine."
+    },
+    {
+      "order": 8,
+      "text": "Return sausage and season: Stir browned sausage back in and simmer 10–15 minutes. Taste and add salt as needed (start small). Add hot sauce to taste."
+    },
+    {
+      "order": 9,
+      "text": "Serve: Spoon red beans over hot cooked rice. Garnish with green onions and parsley."
+    }
+  ]
+}

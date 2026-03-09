@@ -37,7 +37,7 @@ try {
 
 let eventBus = { emit: () => {}, on: () => () => {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -70,9 +70,16 @@ function isoNow() {
 
 function uuid(prefix = "tlm") {
   try {
-    return globalThis?.crypto?.randomUUID?.() || `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    return (
+      globalThis?.crypto?.randomUUID?.() ||
+      `${prefix}_${Date.now().toString(36)}_${Math.random()
+        .toString(36)
+        .slice(2, 8)}`
+    );
   } catch {
-    return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    return `${prefix}_${Date.now().toString(36)}_${Math.random()
+      .toString(36)
+      .slice(2, 8)}`;
   }
 }
 
@@ -86,12 +93,21 @@ function emit(type, data) {
 
 async function exportToHubIfEnabled(payload) {
   // Telemetry is optional to export, but supported.
-  if (!featureFlags?.familyFundMode || !HubPacketFormatter || !FamilyFundConnector) return;
+  if (
+    !featureFlags?.familyFundMode ||
+    !HubPacketFormatter ||
+    !FamilyFundConnector
+  )
+    return;
   try {
-    const packet = HubPacketFormatter.formatTelemetryChange?.(payload) || payload;
+    const packet =
+      HubPacketFormatter.formatTelemetryChange?.(payload) || payload;
     await FamilyFundConnector.send?.(packet);
   } catch (err) {
-    console.warn("[TelemetryRepo] Hub export failed (silent):", err?.message || err);
+    console.warn(
+      "[TelemetryRepo] Hub export failed (silent):",
+      err?.message || err
+    );
   }
 }
 
@@ -104,7 +120,9 @@ function ensureDB() {
     typeof db.telemetry === "object" &&
     typeof db.metrics === "object";
   if (!ok) {
-    throw new Error("Dexie tables 'telemetry' and 'metrics' are required. Ensure '@/db' defines them.");
+    throw new Error(
+      "Dexie tables 'telemetry' and 'metrics' are required. Ensure '@/db' defines them."
+    );
   }
 }
 
@@ -126,7 +144,8 @@ function saneNumber(n, fallback = 0) {
  *  - free-form object (e.g., { reason, tempC, humidity, doneness:"medium" })
  */
 function normalizeActualEvent(input = {}) {
-  if (!input || typeof input !== "object") return { ok: false, error: "Invalid telemetry payload." };
+  if (!input || typeof input !== "object")
+    return { ok: false, error: "Invalid telemetry payload." };
 
   const now = isoNow();
   const allowed = new Set([
@@ -174,7 +193,8 @@ function normalizeActualEvent(input = {}) {
  * labels: free-form tagging for later aggregations
  */
 function normalizeMetric(input = {}) {
-  if (!input || typeof input !== "object") return { ok: false, error: "Invalid metric payload." };
+  if (!input || typeof input !== "object")
+    return { ok: false, error: "Invalid metric payload." };
 
   const now = isoNow();
   const key = String(input.key || "").trim();
@@ -193,7 +213,8 @@ function normalizeMetric(input = {}) {
     resourceId: input.resourceId || null,
     deviceId: input.deviceId || null,
 
-    labels: input.labels && typeof input.labels === "object" ? input.labels : {},
+    labels:
+      input.labels && typeof input.labels === "object" ? input.labels : {},
     createdAt: input.createdAt || now,
   };
 
@@ -235,7 +256,8 @@ const TelemetryRepo = {
    */
   async recordActuals(list = []) {
     ensureDB();
-    if (!Array.isArray(list) || !list.length) return { ok: false, error: "Nothing to record." };
+    if (!Array.isArray(list) || !list.length)
+      return { ok: false, error: "Nothing to record." };
     const ready = [];
     for (const e of list) {
       const res = normalizeActualEvent(e);
@@ -245,10 +267,17 @@ const TelemetryRepo = {
 
     try {
       const ids = await db.telemetry.bulkPut(ready);
-      const payload = { action: "actual.bulkRecord", count: ready.length, ids: ready.map(r => r.id) };
+      const payload = {
+        action: "actual.bulkRecord",
+        count: ready.length,
+        ids: ready.map((r) => r.id),
+      };
       emit("telemetry.actuals_bulk_recorded", payload);
       await exportToHubIfEnabled(payload);
-      return { ok: true, data: Array.isArray(ids) ? ids : ready.map(r => r.id) };
+      return {
+        ok: true,
+        data: Array.isArray(ids) ? ids : ready.map((r) => r.id),
+      };
     } catch (err) {
       console.error("[TelemetryRepo.recordActuals] failed:", err);
       return { ok: false, error: err?.message || String(err) };
@@ -273,16 +302,16 @@ const TelemetryRepo = {
     try {
       let coll = db.telemetry.toCollection();
 
-      if (stepId) coll = coll.and(r => r.stepId === stepId);
-      if (sessionId) coll = coll.and(r => r.sessionId === sessionId);
+      if (stepId) coll = coll.and((r) => r.stepId === stepId);
+      if (sessionId) coll = coll.and((r) => r.sessionId === sessionId);
       if (kind) {
         const set = new Set(Array.isArray(kind) ? kind : [kind]);
-        coll = coll.and(r => set.has(r.kind));
+        coll = coll.and((r) => set.has(r.kind));
       }
       if (from || to) {
         const fromT = from ? new Date(from).getTime() : null;
         const toT = to ? new Date(to).getTime() : null;
-        coll = coll.and(r => {
+        coll = coll.and((r) => {
           const t = new Date(r.ts).getTime();
           if (fromT && t < fromT) return false;
           if (toT && t >= toT) return false;
@@ -292,7 +321,10 @@ const TelemetryRepo = {
 
       const arr = await coll.sortBy("ts");
       const slice = arr.slice(offset, offset + limit);
-      return { ok: true, data: { total: arr.length, items: slice, offset, limit } };
+      return {
+        ok: true,
+        data: { total: arr.length, items: slice, offset, limit },
+      };
     } catch (err) {
       console.error("[TelemetryRepo.getActuals] failed:", err);
       return { ok: false, error: err?.message || String(err) };
@@ -368,7 +400,8 @@ const TelemetryRepo = {
    */
   async logMetrics(list = []) {
     ensureDB();
-    if (!Array.isArray(list) || !list.length) return { ok: false, error: "Nothing to log." };
+    if (!Array.isArray(list) || !list.length)
+      return { ok: false, error: "Nothing to log." };
     const ready = [];
     for (const m of list) {
       const res = normalizeMetric(m);
@@ -378,10 +411,17 @@ const TelemetryRepo = {
 
     try {
       const ids = await db.metrics.bulkPut(ready);
-      const payload = { action: "metric.bulkLog", count: ready.length, ids: ready.map(r => r.id) };
+      const payload = {
+        action: "metric.bulkLog",
+        count: ready.length,
+        ids: ready.map((r) => r.id),
+      };
       emit("telemetry.metrics_bulk_logged", payload);
       await exportToHubIfEnabled(payload);
-      return { ok: true, data: Array.isArray(ids) ? ids : ready.map(r => r.id) };
+      return {
+        ok: true,
+        data: Array.isArray(ids) ? ids : ready.map((r) => r.id),
+      };
     } catch (err) {
       console.error("[TelemetryRepo.logMetrics] failed:", err);
       return { ok: false, error: err?.message || String(err) };
@@ -409,15 +449,15 @@ const TelemetryRepo = {
 
       if (key) {
         const set = new Set(Array.isArray(key) ? key : [key]);
-        coll = coll.and(r => set.has(r.key));
+        coll = coll.and((r) => set.has(r.key));
       }
-      if (stepId) coll = coll.and(r => r.stepId === stepId);
-      if (sessionId) coll = coll.and(r => r.sessionId === sessionId);
-      if (domain) coll = coll.and(r => r.domain === domain);
+      if (stepId) coll = coll.and((r) => r.stepId === stepId);
+      if (sessionId) coll = coll.and((r) => r.sessionId === sessionId);
+      if (domain) coll = coll.and((r) => r.domain === domain);
       if (from || to) {
         const fromT = from ? new Date(from).getTime() : null;
         const toT = to ? new Date(to).getTime() : null;
-        coll = coll.and(r => {
+        coll = coll.and((r) => {
           const t = new Date(r.ts).getTime();
           if (fromT && t < fromT) return false;
           if (toT && t >= toT) return false;
@@ -427,7 +467,10 @@ const TelemetryRepo = {
 
       const arr = await coll.sortBy("ts");
       const slice = arr.slice(offset, offset + limit);
-      return { ok: true, data: { total: arr.length, items: slice, offset, limit } };
+      return {
+        ok: true,
+        data: { total: arr.length, items: slice, offset, limit },
+      };
     } catch (err) {
       console.error("[TelemetryRepo.getMetrics] failed:", err);
       return { ok: false, error: err?.message || String(err) };
@@ -459,11 +502,16 @@ const TelemetryRepo = {
    * prune({ beforeISO, tables?:["telemetry"|"metrics"], limit?: n })
    * Deletes old telemetry/metrics to control local storage size.
    */
-  async prune({ beforeISO, tables = ["telemetry", "metrics"], limit = 10000 } = {}) {
+  async prune({
+    beforeISO,
+    tables = ["telemetry", "metrics"],
+    limit = 10000,
+  } = {}) {
     ensureDB();
     if (!beforeISO) return { ok: false, error: "beforeISO is required." };
     const cutoff = new Date(beforeISO).getTime();
-    if (!Number.isFinite(cutoff)) return { ok: false, error: "Invalid beforeISO." };
+    if (!Number.isFinite(cutoff))
+      return { ok: false, error: "Invalid beforeISO." };
 
     try {
       let deleted = 0;
@@ -471,7 +519,7 @@ const TelemetryRepo = {
         if (tables.includes("telemetry")) {
           const items = await db.telemetry
             .toCollection()
-            .and(r => new Date(r.ts).getTime() < cutoff)
+            .and((r) => new Date(r.ts).getTime() < cutoff)
             .limit(limit)
             .primaryKeys();
           if (items.length) {
@@ -482,7 +530,7 @@ const TelemetryRepo = {
         if (tables.includes("metrics")) {
           const items = await db.metrics
             .toCollection()
-            .and(r => new Date(r.ts).getTime() < cutoff)
+            .and((r) => new Date(r.ts).getTime() < cutoff)
             .limit(limit)
             .primaryKeys();
           if (items.length) {
@@ -507,9 +555,24 @@ const TelemetryRepo = {
   /**
    * markStart({ stepId, sessionId, domain, resourceId, deviceId, data })
    */
-  async markStart({ stepId, sessionId = null, domain = null, resourceId = null, deviceId = null, data = {} } = {}) {
+  async markStart({
+    stepId,
+    sessionId = null,
+    domain = null,
+    resourceId = null,
+    deviceId = null,
+    data = {},
+  } = {}) {
     if (!stepId) return { ok: false, error: "stepId required." };
-    return this.recordActual({ kind: "step.start", stepId, sessionId, domain, resourceId, deviceId, data });
+    return this.recordActual({
+      kind: "step.start",
+      stepId,
+      sessionId,
+      domain,
+      resourceId,
+      deviceId,
+      data,
+    });
   },
 
   async markPause(stepId, data = {}) {
@@ -530,14 +593,23 @@ const TelemetryRepo = {
   async markEnd({ stepId, sessionId = null, data = {} } = {}) {
     if (!stepId) return { ok: false, error: "stepId required." };
     const nowISO = isoNow();
-    const startRes = await this.getActuals({ stepId, kind: "step.start", limit: 1 });
+    const startRes = await this.getActuals({
+      stepId,
+      kind: "step.start",
+      limit: 1,
+    });
     let durationSec = saneNumber(data?.durationSec, 0);
     if (startRes.ok && startRes.data.items.length) {
       const startISO = startRes.data.items[0].ts;
       durationSec = durationSec || computeDurationSec(startISO, nowISO);
     }
     const payload = { ...data, durationSec };
-    return this.recordActual({ kind: "step.end", stepId, sessionId, data: payload });
+    return this.recordActual({
+      kind: "step.end",
+      stepId,
+      sessionId,
+      data: payload,
+    });
   },
 
   /**
@@ -545,13 +617,23 @@ const TelemetryRepo = {
    */
   async note(stepId, text, extra = {}) {
     if (!stepId) return { ok: false, error: "stepId required." };
-    return this.recordActual({ kind: "note", stepId, data: { text: String(text || ""), ...extra } });
+    return this.recordActual({
+      kind: "note",
+      stepId,
+      data: { text: String(text || ""), ...extra },
+    });
   },
 
   /**
    * sensorSnapshot({ stepId?, sessionId?, keyVals: { tempC, humidityPct, ... }, deviceId?, resourceId? })
    */
-  async sensorSnapshot({ stepId = null, sessionId = null, keyVals = {}, deviceId = null, resourceId = null } = {}) {
+  async sensorSnapshot({
+    stepId = null,
+    sessionId = null,
+    keyVals = {},
+    deviceId = null,
+    resourceId = null,
+  } = {}) {
     return this.recordActual({
       kind: "sensor.snapshot",
       stepId,
@@ -575,20 +657,34 @@ const TelemetryRepo = {
     if (!acts.ok) return acts;
     if (!mets.ok) return mets;
 
-    const starts = acts.data.items.filter(a => a.kind === "step.start").map(a => a.ts);
-    const ends = acts.data.items.filter(a => a.kind === "step.end").map(a => a.ts);
+    const starts = acts.data.items
+      .filter((a) => a.kind === "step.start")
+      .map((a) => a.ts);
+    const ends = acts.data.items
+      .filter((a) => a.kind === "step.end")
+      .map((a) => a.ts);
     const firstStart = starts.length ? new Date(starts[0]).toISOString() : null;
-    const lastEnd = ends.length ? new Date(ends[ends.length - 1]).toISOString() : null;
+    const lastEnd = ends.length
+      ? new Date(ends[ends.length - 1]).toISOString()
+      : null;
 
     let durationSec = 0;
-    if (firstStart && lastEnd) durationSec = computeDurationSec(firstStart, lastEnd);
+    if (firstStart && lastEnd)
+      durationSec = computeDurationSec(firstStart, lastEnd);
 
     // Example aggregates: min/max/avg for numeric metrics by key
     const byKey = new Map();
     for (const m of mets.data.items) {
       if (typeof m.value !== "number") continue;
       const k = m.key;
-      if (!byKey.has(k)) byKey.set(k, { min: m.value, max: m.value, sum: m.value, n: 1, unit: m.unit || null });
+      if (!byKey.has(k))
+        byKey.set(k, {
+          min: m.value,
+          max: m.value,
+          sum: m.value,
+          n: 1,
+          unit: m.unit || null,
+        });
       else {
         const agg = byKey.get(k);
         agg.min = Math.min(agg.min, m.value);
@@ -602,7 +698,14 @@ const TelemetryRepo = {
       metrics[k] = { min: v.min, max: v.max, avg: v.sum / v.n, unit: v.unit };
     }
 
-    const summary = { stepId, firstStart, lastEnd, durationSec, metricsCount: mets.data.items.length, metrics };
+    const summary = {
+      stepId,
+      firstStart,
+      lastEnd,
+      durationSec,
+      metricsCount: mets.data.items.length,
+      metrics,
+    };
     return { ok: true, data: summary };
   },
 };

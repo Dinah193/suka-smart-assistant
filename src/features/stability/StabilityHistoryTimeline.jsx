@@ -50,7 +50,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from "react";
-import eventBus from "@/services/eventBus";
+import eventBus from "@/services/events/eventBus";
 
 /**
  * @typedef {Object} StabilityHistoryMeta
@@ -88,7 +88,9 @@ function StabilityHistoryTimeline({
   onSelectEntry,
   className = "",
 }) {
-  const [history, setHistory] = useState(/** @type {StabilityHistoryEntry[]} */ ([]));
+  const [history, setHistory] = useState(
+    /** @type {StabilityHistoryEntry[]} */ ([])
+  );
   const [loading, setLoading] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState(
     /** @type {StabilityHistoryEntry|null} */ (null)
@@ -129,7 +131,9 @@ function StabilityHistoryTimeline({
         .catch((err) => {
           // eslint-disable-next-line no-console
           console.warn("[StabilityHistoryTimeline] fetchHistory failed", err);
-          setErrorMsg("Unable to load full history. Showing recent local events only.");
+          setErrorMsg(
+            "Unable to load full history. Showing recent local events only."
+          );
         })
         .finally(() => {
           if (!cancelled) setLoading(false);
@@ -156,7 +160,9 @@ function StabilityHistoryTimeline({
       const session =
         payload?.data?.session || payload?.session || payload?.data || {};
       const domain = session.domain || "unknown";
-      const status = session.status || (type === "session.aborted" ? "aborted" : "completed");
+      const status =
+        session.status ||
+        (type === "session.aborted" ? "aborted" : "completed");
 
       const scoreGuess = estimateScoreFromSession(session, type);
       const healthStatus = classifyHealth(scoreGuess);
@@ -176,7 +182,8 @@ function StabilityHistoryTimeline({
           sessionsStarted: 1,
           sessionsCompleted: status === "completed" ? 1 : 0,
           guardFailures: Array.isArray(session?.analytics?.adjustments)
-            ? session.analytics.adjustments.filter((a) => a?.type === "guard").length
+            ? session.analytics.adjustments.filter((a) => a?.type === "guard")
+                .length
             : 0,
           notes:
             type === "session.completed"
@@ -367,9 +374,9 @@ function StabilityHistoryTimeline({
       )}
 
       <p className="mt-3 text-[11px] text-slate-500">
-        This timeline reflects historical stability snapshots for your
-        household sessions. It does not interrupt the SessionRunner; it simply
-        listens to session events and analytics records.
+        This timeline reflects historical stability snapshots for your household
+        sessions. It does not interrupt the SessionRunner; it simply listens to
+        session events and analytics records.
       </p>
 
       {selectedEntry && (
@@ -460,9 +467,7 @@ function StabilityHistoryDetailModal({ entry, onClose }) {
               <p className="text-xs uppercase tracking-wide text-slate-500 mb-0.5">
                 Stability score
               </p>
-              <p className="text-sm font-semibold text-slate-900">
-                {scorePct}
-              </p>
+              <p className="text-sm font-semibold text-slate-900">{scorePct}</p>
             </div>
             <div>
               <p className="text-xs uppercase tracking-wide text-slate-500 mb-0.5">
@@ -489,9 +494,7 @@ function StabilityHistoryDetailModal({ entry, onClose }) {
                 {typeof entry.meta.sessionsStarted === "number" && (
                   <>
                     <dt>Sessions started</dt>
-                    <dd className="text-right">
-                      {entry.meta.sessionsStarted}
-                    </dd>
+                    <dd className="text-right">{entry.meta.sessionsStarted}</dd>
                   </>
                 )}
                 {typeof entry.meta.sessionsCompleted === "number" && (
@@ -505,9 +508,7 @@ function StabilityHistoryDetailModal({ entry, onClose }) {
                 {typeof entry.meta.guardFailures === "number" && (
                   <>
                     <dt>Guard failures</dt>
-                    <dd className="text-right">
-                      {entry.meta.guardFailures}
-                    </dd>
+                    <dd className="text-right">{entry.meta.guardFailures}</dd>
                   </>
                 )}
                 {typeof entry.meta.battery === "number" && (
@@ -613,7 +614,8 @@ function buildDemoHistory() {
         sessionsStarted: 3,
         sessionsCompleted: 2,
         guardFailures: 1,
-        notes: "One early-morning gardening session was deferred due to quiet hours.",
+        notes:
+          "One early-morning gardening session was deferred due to quiet hours.",
       },
     },
     {

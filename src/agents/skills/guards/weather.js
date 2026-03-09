@@ -30,7 +30,7 @@
  *      (allow / warn / block) + suggestions.
  */
 
-import { emit } from '../../../services/eventBus';
+import { emit } from "../../../services/events/eventBus";
 
 /**
  * @typedef {'ok'|'rain'|'storm'|'danger'|'heat'|'cold'|'snow'|'wind'} WeatherSeverity
@@ -93,14 +93,15 @@ import { emit } from '../../../services/eventBus';
  * @returns {NormalizedWeatherSnapshot|null}
  */
 export function normalizeWeatherSnapshot(raw) {
-  if (!raw || typeof raw !== 'object') {
+  if (!raw || typeof raw !== "object") {
     return null;
   }
 
   // Attempt to pull some common fields from various weather APIs
   const tempF = extractTempF(raw);
   const windMph = extractWindMph(raw);
-  const { precipitationType, precipitationIntensity } = extractPrecipitation(raw);
+  const { precipitationType, precipitationIntensity } =
+    extractPrecipitation(raw);
   const alerts = extractAlerts(raw);
   const lastUpdated = extractLastUpdated(raw);
 
@@ -109,7 +110,7 @@ export function normalizeWeatherSnapshot(raw) {
     windMph,
     precipitationType,
     precipitationIntensity,
-    alerts
+    alerts,
   });
 
   /** @type {NormalizedWeatherSnapshot} */
@@ -121,7 +122,7 @@ export function normalizeWeatherSnapshot(raw) {
     precipitationIntensity,
     alerts,
     lastUpdated,
-    raw
+    raw,
   };
 
   return snapshot;
@@ -149,12 +150,12 @@ export function evaluateWeather(rawOrSnapshot, options = {}) {
   /** @type {WeatherEvaluationResult} */
   const baseResult = {
     isSafe: true,
-    decision: 'allow',
-    severity: 'ok',
-    reasonCode: 'ok',
+    decision: "allow",
+    severity: "ok",
+    reasonCode: "ok",
     suggestions: [],
     warnings: [],
-    snapshot: null
+    snapshot: null,
   };
 
   const snapshot =
@@ -166,10 +167,12 @@ export function evaluateWeather(rawOrSnapshot, options = {}) {
     const res = {
       ...baseResult,
       isSafe: true, // allow but warn; guards can choose to be more strict if desired
-      decision: 'warn',
-      reasonCode: 'noData',
-      warnings: ['Weather data unavailable; treating conditions as safe by default.'],
-      snapshot: null
+      decision: "warn",
+      reasonCode: "noData",
+      warnings: [
+        "Weather data unavailable; treating conditions as safe by default.",
+      ],
+      snapshot: null,
     };
     safeEmitWeatherEvaluated(res);
     return res;
@@ -187,57 +190,59 @@ export function evaluateWeather(rawOrSnapshot, options = {}) {
 
   // Start from severity classification
   /** @type {'allow'|'warn'|'block'} */
-  let decision = 'allow';
+  let decision = "allow";
   /** @type {string} */
-  let reasonCode = 'ok';
+  let reasonCode = "ok";
 
-  if (severity === 'danger' || severity === 'storm') {
-    decision = 'block';
-    reasonCode = severity === 'storm' ? 'storm' : 'danger';
+  if (severity === "danger" || severity === "storm") {
+    decision = "block";
+    reasonCode = severity === "storm" ? "storm" : "danger";
     suggestions.push(
-      'Avoid outdoor or travel-related tasks.',
-      'Consider indoor tasks or reschedule this session.'
+      "Avoid outdoor or travel-related tasks.",
+      "Consider indoor tasks or reschedule this session."
     );
-  } else if (severity === 'rain' || severity === 'snow') {
-    decision = requiresOutdoor || involvesTravel ? 'warn' : 'allow';
-    reasonCode = 'precipitation';
-    if (requiresOutdoor) {
-      suggestions.push('Consider swapping to an indoor task until precipitation eases.');
-    }
-    if (involvesTravel) {
-      suggestions.push('Allow extra travel time and use caution on roads.');
-    }
-  } else if (severity === 'heat' || severity === 'cold') {
-    decision = requiresOutdoor ? 'warn' : 'allow';
-    reasonCode = 'extremeTemp';
+  } else if (severity === "rain" || severity === "snow") {
+    decision = requiresOutdoor || involvesTravel ? "warn" : "allow";
+    reasonCode = "precipitation";
     if (requiresOutdoor) {
       suggestions.push(
-        'Limit time outside and take breaks.',
-        'Stay hydrated and watch for signs of heat or cold stress.'
+        "Consider swapping to an indoor task until precipitation eases."
       );
     }
-  } else if (severity === 'wind') {
-    decision = requiresOutdoor ? 'warn' : 'allow';
-    reasonCode = 'wind';
+    if (involvesTravel) {
+      suggestions.push("Allow extra travel time and use caution on roads.");
+    }
+  } else if (severity === "heat" || severity === "cold") {
+    decision = requiresOutdoor ? "warn" : "allow";
+    reasonCode = "extremeTemp";
     if (requiresOutdoor) {
       suggestions.push(
-        'Secure loose items before starting outdoor tasks.',
-        'Avoid working under large tree branches or unstable structures.'
+        "Limit time outside and take breaks.",
+        "Stay hydrated and watch for signs of heat or cold stress."
+      );
+    }
+  } else if (severity === "wind") {
+    decision = requiresOutdoor ? "warn" : "allow";
+    reasonCode = "wind";
+    if (requiresOutdoor) {
+      suggestions.push(
+        "Secure loose items before starting outdoor tasks.",
+        "Avoid working under large tree branches or unstable structures."
       );
     }
   } else {
     // severity === 'ok'
-    decision = 'allow';
-    reasonCode = 'ok';
+    decision = "allow";
+    reasonCode = "ok";
   }
 
   // Extra pass: refine decision based on comfort ranges if provided
   if (snapshot.tempF != null && o.comfortTempRangeF) {
     const { min, max } = o.comfortTempRangeF;
     if (snapshot.tempF < min || snapshot.tempF > max) {
-      if (decision === 'allow') {
-        decision = 'warn';
-        reasonCode = 'extremeTemp';
+      if (decision === "allow") {
+        decision = "warn";
+        reasonCode = "extremeTemp";
       }
       suggestions.push(
         `Temperature (${snapshot.tempF}°F) is outside the comfort range (${min}–${max}°F).`
@@ -246,9 +251,9 @@ export function evaluateWeather(rawOrSnapshot, options = {}) {
   }
 
   if (snapshot.windMph != null && o.maxWindMph != null) {
-    if (snapshot.windMph > o.maxWindMph && decision !== 'block') {
-      decision = 'warn';
-      reasonCode = 'wind';
+    if (snapshot.windMph > o.maxWindMph && decision !== "block") {
+      decision = "warn";
+      reasonCode = "wind";
       suggestions.push(
         `Wind speed (${snapshot.windMph} mph) is above your preferred limit (${o.maxWindMph} mph).`
       );
@@ -257,14 +262,14 @@ export function evaluateWeather(rawOrSnapshot, options = {}) {
 
   // Alerts override: if there are severe alerts, we may upgrade to block/warn
   if (snapshot.alerts && snapshot.alerts.length) {
-    if (decision === 'allow') {
-      decision = requiresOutdoor || involvesTravel ? 'warn' : 'allow';
-      reasonCode = 'alerts';
+    if (decision === "allow") {
+      decision = requiresOutdoor || involvesTravel ? "warn" : "allow";
+      reasonCode = "alerts";
     }
-    warnings.push('Weather alerts present; review local guidance.');
+    warnings.push("Weather alerts present; review local guidance.");
   }
 
-  const isSafe = decision !== 'block';
+  const isSafe = decision !== "block";
 
   const result = {
     ...baseResult,
@@ -274,7 +279,7 @@ export function evaluateWeather(rawOrSnapshot, options = {}) {
     reasonCode,
     suggestions,
     warnings,
-    snapshot
+    snapshot,
   };
 
   safeEmitWeatherEvaluated(result);
@@ -310,68 +315,78 @@ export function toGuardWeatherSnapshot(raw) {
  * @param {string[]} params.alerts
  * @returns {WeatherSeverity}
  */
-function classifySeverity({ tempF, windMph, precipitationType, precipitationIntensity, alerts }) {
+function classifySeverity({
+  tempF,
+  windMph,
+  precipitationType,
+  precipitationIntensity,
+  alerts,
+}) {
   // Alerts can elevate severity to danger, but we assume guard-level logic can be stricter.
   if (Array.isArray(alerts) && alerts.length) {
-    const lowered = alerts.join(' ').toLowerCase();
+    const lowered = alerts.join(" ").toLowerCase();
     if (
-      lowered.includes('tornado') ||
-      lowered.includes('hurricane') ||
-      lowered.includes('flash flood') ||
-      lowered.includes('severe thunderstorm') ||
-      lowered.includes('blizzard')
+      lowered.includes("tornado") ||
+      lowered.includes("hurricane") ||
+      lowered.includes("flash flood") ||
+      lowered.includes("severe thunderstorm") ||
+      lowered.includes("blizzard")
     ) {
-      return 'danger';
+      return "danger";
     }
   }
 
   // Strong precipitation
   if (
-    precipitationType === 'rain' &&
-    (precipitationIntensity === 'moderate' || precipitationIntensity === 'heavy')
+    precipitationType === "rain" &&
+    (precipitationIntensity === "moderate" ||
+      precipitationIntensity === "heavy")
   ) {
-    return 'rain';
+    return "rain";
   }
 
   if (
-    precipitationType === 'snow' &&
-    (precipitationIntensity === 'moderate' || precipitationIntensity === 'heavy')
+    precipitationType === "snow" &&
+    (precipitationIntensity === "moderate" ||
+      precipitationIntensity === "heavy")
   ) {
-    return 'snow';
+    return "snow";
   }
 
   // Extreme temps (very rough bands; adjust to your locale)
-  if (typeof tempF === 'number') {
-    if (tempF >= 100) return 'heat';
-    if (tempF <= 20) return 'cold';
+  if (typeof tempF === "number") {
+    if (tempF >= 100) return "heat";
+    if (tempF <= 20) return "cold";
   }
 
   // High winds (heuristic)
-  if (typeof windMph === 'number' && windMph >= 35) {
-    return 'wind';
+  if (typeof windMph === "number" && windMph >= 35) {
+    return "wind";
   }
 
   // Light precipitation
   if (
-    precipitationType === 'rain' &&
-    (precipitationIntensity === 'light' || precipitationIntensity === 'moderate')
+    precipitationType === "rain" &&
+    (precipitationIntensity === "light" ||
+      precipitationIntensity === "moderate")
   ) {
-    return 'rain';
+    return "rain";
   }
 
   if (
-    precipitationType === 'snow' &&
-    (precipitationIntensity === 'light' || precipitationIntensity === 'moderate')
+    precipitationType === "snow" &&
+    (precipitationIntensity === "light" ||
+      precipitationIntensity === "moderate")
   ) {
-    return 'snow';
+    return "snow";
   }
 
   // If alerts exist but we didn't classify them as "danger" already, treat situation as "storm"
   if (Array.isArray(alerts) && alerts.length) {
-    return 'storm';
+    return "storm";
   }
 
-  return 'ok';
+  return "ok";
 }
 
 /* -------------------------------------------------------------------------- */
@@ -385,7 +400,7 @@ function classifySeverity({ tempF, windMph, precipitationType, precipitationInte
  * @returns {number|null}
  */
 function extractTempF(raw) {
-  if (!raw || typeof raw !== 'object') return null;
+  if (!raw || typeof raw !== "object") return null;
 
   // Common patterns:
   // - raw.temp (°F)
@@ -396,7 +411,7 @@ function extractTempF(raw) {
     raw.temperature,
     raw.apparentTemperature,
     raw.feels_like,
-    raw.current && raw.current.temp
+    raw.current && raw.current.temp,
   ]);
 
   if (!Number.isFinite(maybe)) return null;
@@ -419,7 +434,7 @@ function extractTempF(raw) {
  * @returns {number|null}
  */
 function extractWindMph(raw) {
-  if (!raw || typeof raw !== 'object') return null;
+  if (!raw || typeof raw !== "object") return null;
 
   // Common shapes:
   // - raw.windSpeed (mph)
@@ -428,7 +443,7 @@ function extractWindMph(raw) {
   const maybe = getFirstDefined([
     raw.windSpeed,
     raw.wind && raw.wind.speed,
-    raw.current && raw.current.windSpeed
+    raw.current && raw.current.windSpeed,
   ]);
 
   if (!Number.isFinite(maybe)) return null;
@@ -450,15 +465,15 @@ function extractWindMph(raw) {
  * @returns {{ precipitationType: PrecipitationType, precipitationIntensity: PrecipitationIntensity }}
  */
 function extractPrecipitation(raw) {
-  if (!raw || typeof raw !== 'object') {
+  if (!raw || typeof raw !== "object") {
     return {
-      precipitationType: 'none',
-      precipitationIntensity: 'none'
+      precipitationType: "none",
+      precipitationIntensity: "none",
     };
   }
 
-  let precipitationType = /** @type {PrecipitationType} */ ('none');
-  let precipitationIntensity = /** @type {PrecipitationIntensity} */ ('none');
+  let precipitationType = /** @type {PrecipitationType} */ ("none");
+  let precipitationIntensity = /** @type {PrecipitationIntensity} */ ("none");
 
   // Try to read a condition code/description
   const description = String(
@@ -466,33 +481,36 @@ function extractPrecipitation(raw) {
       raw.description,
       raw.weather && raw.weather.description,
       raw.current && raw.current.summary,
-      raw.current && raw.current.weather && raw.current.weather[0] && raw.current.weather[0].description
-    ]) || ''
+      raw.current &&
+        raw.current.weather &&
+        raw.current.weather[0] &&
+        raw.current.weather[0].description,
+    ]) || ""
   ).toLowerCase();
 
   const intensity = getFirstDefined([
     raw.precipIntensity,
     raw.precipitationIntensity,
-    raw.current && raw.current.precipIntensity
+    raw.current && raw.current.precipIntensity,
   ]);
 
-  if (description.includes('rain') || description.includes('drizzle')) {
-    precipitationType = 'rain';
-  } else if (description.includes('snow') || description.includes('sleet')) {
-    precipitationType = description.includes('sleet') ? 'sleet' : 'snow';
+  if (description.includes("rain") || description.includes("drizzle")) {
+    precipitationType = "rain";
+  } else if (description.includes("snow") || description.includes("sleet")) {
+    precipitationType = description.includes("sleet") ? "sleet" : "snow";
   }
 
   if (Number.isFinite(intensity)) {
     const val = Number(intensity);
-    if (val <= 0.01) precipitationIntensity = 'light';
-    else if (val <= 0.1) precipitationIntensity = 'moderate';
-    else precipitationIntensity = 'heavy';
+    if (val <= 0.01) precipitationIntensity = "light";
+    else if (val <= 0.1) precipitationIntensity = "moderate";
+    else precipitationIntensity = "heavy";
   } else if (description) {
-    if (description.includes('light')) precipitationIntensity = 'light';
-    else if (description.includes('heavy') || description.includes('storm')) {
-      precipitationIntensity = 'heavy';
-    } else if (precipitationType !== 'none') {
-      precipitationIntensity = 'moderate';
+    if (description.includes("light")) precipitationIntensity = "light";
+    else if (description.includes("heavy") || description.includes("storm")) {
+      precipitationIntensity = "heavy";
+    } else if (precipitationType !== "none") {
+      precipitationIntensity = "moderate";
     }
   }
 
@@ -506,7 +524,7 @@ function extractPrecipitation(raw) {
  * @returns {string[]}
  */
 function extractAlerts(raw) {
-  if (!raw || typeof raw !== 'object') return [];
+  if (!raw || typeof raw !== "object") return [];
 
   // Potential shapes:
   // - raw.alerts: string[]
@@ -521,27 +539,27 @@ function extractAlerts(raw) {
 
   if (Array.isArray(alertsField)) {
     for (const item of alertsField) {
-      if (typeof item === 'string') {
+      if (typeof item === "string") {
         alerts.push(item);
-      } else if (item && typeof item === 'object') {
-        const title = item.title || item.event || '';
-        const desc = item.description || item.message || '';
-        const text = [title, desc].filter(Boolean).join(': ');
+      } else if (item && typeof item === "object") {
+        const title = item.title || item.event || "";
+        const desc = item.description || item.message || "";
+        const text = [title, desc].filter(Boolean).join(": ");
         if (text) alerts.push(String(text));
       }
     }
     return alerts;
   }
 
-  if (typeof alertsField === 'string') {
+  if (typeof alertsField === "string") {
     alerts.push(alertsField);
     return alerts;
   }
 
-  if (alertsField && typeof alertsField === 'object') {
-    const title = alertsField.title || alertsField.event || '';
-    const desc = alertsField.description || alertsField.message || '';
-    const text = [title, desc].filter(Boolean).join(': ');
+  if (alertsField && typeof alertsField === "object") {
+    const title = alertsField.title || alertsField.event || "";
+    const desc = alertsField.description || alertsField.message || "";
+    const text = [title, desc].filter(Boolean).join(": ");
     if (text) alerts.push(String(text));
   }
 
@@ -555,24 +573,24 @@ function extractAlerts(raw) {
  * @returns {string|null}
  */
 function extractLastUpdated(raw) {
-  if (!raw || typeof raw !== 'object') return null;
+  if (!raw || typeof raw !== "object") return null;
 
   const ts = getFirstDefined([
     raw.lastUpdated,
     raw.updated_at,
     raw.current && raw.current.time,
-    raw.current && raw.current.dt
+    raw.current && raw.current.dt,
   ]);
 
   if (!ts) return null;
 
-  if (typeof ts === 'number') {
+  if (typeof ts === "number") {
     // Assume UNIX seconds
     const d = new Date(ts * 1000);
     return Number.isNaN(d.getTime()) ? null : d.toISOString();
   }
 
-  if (typeof ts === 'string') {
+  if (typeof ts === "string") {
     const d = new Date(ts);
     return Number.isNaN(d.getTime()) ? null : d.toISOString();
   }
@@ -612,12 +630,12 @@ function getFirstDefined(arr) {
  */
 function safeEmitWeatherEvaluated(result) {
   try {
-    if (typeof emit !== 'function') return;
+    if (typeof emit !== "function") return;
     emit({
-      type: 'weather.evaluated',
+      type: "weather.evaluated",
       ts: new Date().toISOString(),
-      source: 'guards.weather',
-      data: result
+      source: "guards.weather",
+      data: result,
     });
   } catch (_err) {
     // Never crash guard logic because of eventBus failures.

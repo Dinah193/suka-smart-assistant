@@ -1,0 +1,497 @@
+{
+  "schema": "ssa.cuisine.dishes.catalog.v1",
+  "version": "1.0.0",
+  "cuisineId": "cajun",
+  "normalization": {
+    "strategy": "lowercase_trim",
+    "stripPunctuation": true,
+    "foldDiacritics": true,
+    "collapseWhitespace": true,
+    "aliasSeparators": [",", ";", "/", "|"],
+    "stopwords": ["the", "a", "an", "and", "of", "with"]
+  },
+  "indexes": {
+    "primaryKey": "id",
+    "unique": ["id"],
+    "search": ["name", "aliases", "keywords", "tags"],
+    "facets": ["course", "archetypeId"]
+  },
+  "items": [
+    {
+      "id": "cajun_chicken_sausage_gumbo",
+      "name": "Chicken & Sausage Gumbo",
+      "archetypeId": "gumbo_stew",
+      "course": "main",
+      "summary": "Dark roux gumbo with chicken, andouille, the Cajun trinity, and okra; served over rice.",
+      "tags": [
+        "cajun",
+        "gumbo",
+        "roux",
+        "stew",
+        "okra",
+        "andouille",
+        "trinity",
+        "rice"
+      ],
+      "keywords": [
+        "gumbo",
+        "chicken gumbo",
+        "andouille gumbo",
+        "okra gumbo",
+        "dark roux"
+      ],
+      "aliases": [
+        "chicken and sausage gumbo",
+        "chicken sausage gumbo",
+        "gumbo ya-ya (style)"
+      ],
+      "ingredients": [
+        "chicken",
+        "andouille sausage",
+        "okra",
+        "onion",
+        "bell pepper",
+        "celery",
+        "garlic",
+        "cajun seasoning",
+        "stock",
+        "roux (flour + fat)",
+        "bay leaf",
+        "rice"
+      ],
+      "techniques": ["make_roux", "saute_trinity", "simmer", "stew", "thicken"],
+      "allergens": ["gluten"],
+      "leftoversFriendly": true,
+      "timeMinutesEstimate": 120,
+      "skillFocus": ["roux_mastery", "stew_building", "seasoning_balance"]
+    },
+    {
+      "id": "cajun_seafood_gumbo_okra",
+      "name": "Seafood Gumbo (with Okra)",
+      "archetypeId": "gumbo_stew",
+      "course": "main",
+      "summary": "Roux-based seafood gumbo with shrimp and/or crab, okra, and the trinity; served over rice.",
+      "tags": ["cajun", "gumbo", "seafood", "okra", "roux", "trinity", "rice"],
+      "keywords": [
+        "seafood gumbo",
+        "shrimp gumbo",
+        "okra gumbo",
+        "crab gumbo",
+        "dark roux"
+      ],
+      "aliases": [
+        "shrimp gumbo",
+        "seafood okra gumbo",
+        "gumbo aux fruits de mer"
+      ],
+      "ingredients": [
+        "shrimp",
+        "crab (optional)",
+        "okra",
+        "onion",
+        "bell pepper",
+        "celery",
+        "garlic",
+        "seafood stock",
+        "roux (flour + fat)",
+        "bay leaf",
+        "rice"
+      ],
+      "techniques": [
+        "make_roux",
+        "saute_trinity",
+        "simmer",
+        "stew",
+        "finish_seafood_gently"
+      ],
+      "allergens": ["shellfish", "gluten"],
+      "leftoversFriendly": true,
+      "timeMinutesEstimate": 105,
+      "skillFocus": ["roux_mastery", "seafood_timing", "texture_control"]
+    },
+    {
+      "id": "cajun_jambalaya",
+      "name": "Jambalaya",
+      "archetypeId": "rice_one_pot",
+      "course": "main",
+      "summary": "One-pot rice dish with smoked sausage and chicken (often shrimp), seasoned with Cajun spices and aromatics.",
+      "tags": [
+        "cajun",
+        "rice",
+        "one-pot",
+        "andouille",
+        "chicken",
+        "shrimp_optional",
+        "trinity"
+      ],
+      "keywords": ["jambalaya", "cajun rice", "one pot rice", "andouille rice"],
+      "aliases": ["chicken and sausage jambalaya", "cajun jambalaya"],
+      "ingredients": [
+        "rice",
+        "chicken",
+        "andouille sausage",
+        "shrimp (optional)",
+        "onion",
+        "bell pepper",
+        "celery",
+        "garlic",
+        "tomatoes (optional)",
+        "stock",
+        "cajun seasoning"
+      ],
+      "techniques": [
+        "brown_meats",
+        "saute_trinity",
+        "toast_rice",
+        "simmer_absorption"
+      ],
+      "allergens": [],
+      "leftoversFriendly": true,
+      "timeMinutesEstimate": 75,
+      "skillFocus": ["one_pot_rice", "fond_building", "liquid_ratio"]
+    },
+    {
+      "id": "cajun_crawfish_etouffee",
+      "name": "Crawfish Étouffée",
+      "archetypeId": "smothered_stew",
+      "course": "main",
+      "summary": "Smothered trinity in butter and flour, finished with crawfish and served over rice.",
+      "tags": [
+        "cajun",
+        "etouffee",
+        "crawfish",
+        "smothered",
+        "butter",
+        "rice",
+        "trinity"
+      ],
+      "keywords": ["etouffee", "crawfish etouffee", "smothered sauce"],
+      "aliases": ["crawfish étouffée", "etouffee over rice"],
+      "ingredients": [
+        "crawfish tails",
+        "butter",
+        "flour",
+        "onion",
+        "bell pepper",
+        "celery",
+        "garlic",
+        "stock",
+        "cajun seasoning",
+        "green onion",
+        "rice"
+      ],
+      "techniques": [
+        "make_blond_roux",
+        "smother_trinity",
+        "simmer",
+        "finish_crawfish_gently"
+      ],
+      "allergens": ["shellfish", "gluten", "dairy"],
+      "leftoversFriendly": true,
+      "timeMinutesEstimate": 50,
+      "skillFocus": ["roux_control", "smothering", "sauce_texture"]
+    },
+    {
+      "id": "cajun_shrimp_etouffee",
+      "name": "Shrimp Étouffée",
+      "archetypeId": "smothered_stew",
+      "course": "main",
+      "summary": "Buttery smothered sauce with shrimp, trinity, and Cajun seasoning; served over rice.",
+      "tags": ["cajun", "etouffee", "shrimp", "butter", "rice", "trinity"],
+      "keywords": ["shrimp etouffee", "etouffee", "smothered shrimp"],
+      "aliases": ["shrimp étouffée"],
+      "ingredients": [
+        "shrimp",
+        "butter",
+        "flour",
+        "onion",
+        "bell pepper",
+        "celery",
+        "garlic",
+        "stock",
+        "cajun seasoning",
+        "green onion",
+        "rice"
+      ],
+      "techniques": [
+        "make_blond_roux",
+        "smother_trinity",
+        "simmer",
+        "finish_shrimp_gently"
+      ],
+      "allergens": ["shellfish", "gluten", "dairy"],
+      "leftoversFriendly": true,
+      "timeMinutesEstimate": 45,
+      "skillFocus": ["roux_control", "seafood_timing", "sauce_texture"]
+    },
+    {
+      "id": "cajun_red_beans_and_rice",
+      "name": "Red Beans & Rice",
+      "archetypeId": "beans_and_rice",
+      "course": "main",
+      "summary": "Slow-simmered red beans with smoked pork or sausage, aromatic vegetables, and Cajun seasoning; served over rice.",
+      "tags": ["cajun", "beans", "rice", "smoked_meat", "stew", "trinity"],
+      "keywords": ["red beans and rice", "cajun beans", "new orleans beans"],
+      "aliases": ["red beans & rice", "cajun red beans"],
+      "ingredients": [
+        "red beans",
+        "andouille sausage (or smoked meat)",
+        "onion",
+        "bell pepper",
+        "celery",
+        "garlic",
+        "bay leaf",
+        "cajun seasoning",
+        "stock_or_water",
+        "rice"
+      ],
+      "techniques": [
+        "soak_or_quick_soak",
+        "simmer",
+        "mash_to_thicken",
+        "season_to_finish"
+      ],
+      "allergens": [],
+      "leftoversFriendly": true,
+      "timeMinutesEstimate": 150,
+      "skillFocus": ["bean_cookery", "thickening_by_mashing", "slow_simmer"]
+    },
+    {
+      "id": "cajun_dirty_rice",
+      "name": "Dirty Rice",
+      "archetypeId": "rice_skillet",
+      "course": "side",
+      "summary": "Seasoned rice cooked with the trinity and minced meats (often liver/gizzards), creating the classic 'dirty' color.",
+      "tags": ["cajun", "rice", "side", "trinity", "spiced", "skillet"],
+      "keywords": ["dirty rice", "cajun rice", "rice dressing"],
+      "aliases": ["rice dressing", "dirty rice dressing"],
+      "ingredients": [
+        "rice",
+        "ground meat (beef/pork)",
+        "chicken liver (optional)",
+        "onion",
+        "bell pepper",
+        "celery",
+        "garlic",
+        "cajun seasoning",
+        "green onion"
+      ],
+      "techniques": [
+        "saute_trinity",
+        "brown_meat",
+        "fold_rice",
+        "seasoning_balance"
+      ],
+      "allergens": [],
+      "leftoversFriendly": true,
+      "timeMinutesEstimate": 45,
+      "skillFocus": ["saute_building", "seasoning_balance", "rice_folding"]
+    },
+    {
+      "id": "cajun_boudin",
+      "name": "Boudin",
+      "archetypeId": "sausage_emulsion",
+      "course": "appetizer",
+      "summary": "Cajun rice-and-meat sausage, seasoned and stuffed; served warm or grilled.",
+      "tags": ["cajun", "sausage", "boudin", "rice", "snack", "party"],
+      "keywords": ["boudin", "cajun boudin", "rice sausage"],
+      "aliases": ["boudin sausage", "cajun rice sausage"],
+      "ingredients": [
+        "pork (or mixed meats)",
+        "rice",
+        "onion",
+        "bell pepper",
+        "celery",
+        "garlic",
+        "cajun seasoning",
+        "sausage casings"
+      ],
+      "techniques": [
+        "simmer_meat",
+        "grind_or_chop",
+        "mix_with_rice",
+        "stuff_casings",
+        "poach_or_grill"
+      ],
+      "allergens": [],
+      "leftoversFriendly": true,
+      "timeMinutesEstimate": 120,
+      "skillFocus": ["sausage_making", "stuffing", "seasoning_balance"]
+    },
+    {
+      "id": "cajun_shrimp_creole",
+      "name": "Shrimp Creole (Cajun-style)",
+      "archetypeId": "tomato_sauce_stew",
+      "course": "main",
+      "summary": "Tomato-based, trinity-forward sauce with shrimp and Cajun spice; served over rice.",
+      "tags": ["cajun", "shrimp", "tomato", "stew", "rice", "trinity"],
+      "keywords": ["shrimp creole", "tomato shrimp", "creole shrimp over rice"],
+      "aliases": ["shrimp creole over rice"],
+      "ingredients": [
+        "shrimp",
+        "onion",
+        "bell pepper",
+        "celery",
+        "garlic",
+        "tomatoes",
+        "stock",
+        "cajun seasoning",
+        "bay leaf",
+        "rice"
+      ],
+      "techniques": [
+        "saute_trinity",
+        "simmer_tomato_sauce",
+        "finish_shrimp_gently"
+      ],
+      "allergens": ["shellfish"],
+      "leftoversFriendly": true,
+      "timeMinutesEstimate": 45,
+      "skillFocus": ["sauce_building", "seafood_timing", "seasoning_balance"]
+    },
+    {
+      "id": "cajun_maque_choux",
+      "name": "Maque Choux",
+      "archetypeId": "vegetable_skillet_side",
+      "course": "side",
+      "summary": "Cajun corn dish sautéed with onion, bell pepper, and sometimes bacon/cream; sweet-savory side.",
+      "tags": ["cajun", "side", "corn", "trinity", "skillet"],
+      "keywords": ["maque choux", "cajun corn", "corn side"],
+      "aliases": ["cajun maque choux", "maquechoux"],
+      "ingredients": [
+        "corn",
+        "onion",
+        "bell pepper",
+        "celery (optional)",
+        "garlic",
+        "butter_or_bacon_fat",
+        "cajun seasoning"
+      ],
+      "techniques": ["saute", "sweat", "reduce"],
+      "allergens": ["dairy"],
+      "leftoversFriendly": true,
+      "timeMinutesEstimate": 30,
+      "skillFocus": ["sauteing", "sweet_savory_balance", "pan_control"]
+    },
+    {
+      "id": "cajun_blackened_catfish",
+      "name": "Blackened Catfish",
+      "archetypeId": "blackened_fish",
+      "course": "main",
+      "summary": "Spice-crusted catfish seared hot (blackened) and served with rice or vegetables.",
+      "tags": ["cajun", "fish", "blackened", "spice_crust", "seared"],
+      "keywords": [
+        "blackened catfish",
+        "cajun blackened fish",
+        "spice seared fish"
+      ],
+      "aliases": ["blackened fish", "cajun blackened catfish"],
+      "ingredients": [
+        "catfish",
+        "cajun seasoning",
+        "butter_or_oil",
+        "lemon (optional)"
+      ],
+      "techniques": ["blacken_sear", "high_heat_pan_sear"],
+      "allergens": ["fish", "dairy"],
+      "leftoversFriendly": false,
+      "timeMinutesEstimate": 20,
+      "skillFocus": ["high_heat_control", "spice_crust", "pan_searing"]
+    },
+    {
+      "id": "cajun_rice_and_gravy",
+      "name": "Cajun Rice & Gravy",
+      "archetypeId": "smothered_gravy",
+      "course": "main",
+      "summary": "Smothered meat (often beef or pork) in rich brown gravy, served over rice.",
+      "tags": ["cajun", "smothered", "gravy", "rice", "comfort_food"],
+      "keywords": ["rice and gravy", "cajun gravy", "smothered meat"],
+      "aliases": ["cajun rice & gravy", "smothered steak and gravy over rice"],
+      "ingredients": [
+        "beef_or_pork",
+        "onion",
+        "bell pepper (optional)",
+        "celery (optional)",
+        "garlic",
+        "stock",
+        "flour (optional)",
+        "cajun seasoning",
+        "rice"
+      ],
+      "techniques": ["brown_meat", "deglaze", "smother", "simmer", "thicken"],
+      "allergens": ["gluten"],
+      "leftoversFriendly": true,
+      "timeMinutesEstimate": 120,
+      "skillFocus": ["browning", "gravy_building", "slow_braise"]
+    },
+    {
+      "id": "cajun_fried_catfish",
+      "name": "Fried Catfish",
+      "archetypeId": "fried_fish",
+      "course": "main",
+      "summary": "Cornmeal-crusted catfish fried crisp; classic Cajun/Southern plate.",
+      "tags": ["cajun", "fish", "fried", "cornmeal", "crispy"],
+      "keywords": ["fried catfish", "cornmeal fried fish", "cajun fried fish"],
+      "aliases": ["cornmeal fried catfish", "cajun fried catfish"],
+      "ingredients": [
+        "catfish",
+        "cornmeal",
+        "flour (optional)",
+        "cajun seasoning",
+        "oil_for_frying"
+      ],
+      "techniques": ["dredge", "deep_fry_or_pan_fry"],
+      "allergens": ["fish", "gluten"],
+      "leftoversFriendly": false,
+      "timeMinutesEstimate": 30,
+      "skillFocus": ["frying", "dredging", "oil_temperature_control"]
+    },
+    {
+      "id": "cajun_crawfish_boil",
+      "name": "Crawfish Boil",
+      "archetypeId": "seafood_boil",
+      "course": "main",
+      "summary": "Seasoned boil with crawfish, corn, and potatoes; a communal Cajun classic.",
+      "tags": ["cajun", "crawfish", "boil", "corn", "potatoes", "party"],
+      "keywords": ["crawfish boil", "cajun boil", "seafood boil"],
+      "aliases": ["crawfish boil party", "boiled crawfish"],
+      "ingredients": [
+        "crawfish",
+        "boil_seasoning",
+        "corn",
+        "potatoes",
+        "lemon",
+        "garlic"
+      ],
+      "techniques": ["boil", "soak_in_seasoning", "serve_family_style"],
+      "allergens": ["shellfish"],
+      "leftoversFriendly": false,
+      "timeMinutesEstimate": 60,
+      "skillFocus": ["boil_planning", "seasoning_control", "timing_batches"]
+    },
+    {
+      "id": "cajun_beignets",
+      "name": "Beignets",
+      "archetypeId": "fried_dough_dessert",
+      "course": "dessert",
+      "summary": "Puffy fried dough squares dusted with powdered sugar.",
+      "tags": ["cajun", "dessert", "fried", "dough", "sweet"],
+      "keywords": ["beignets", "fried dough", "new orleans beignets"],
+      "aliases": ["cajun beignets", "new orleans beignets"],
+      "ingredients": [
+        "flour",
+        "yeast",
+        "milk_or_water",
+        "sugar",
+        "salt",
+        "oil_for_frying",
+        "powdered_sugar"
+      ],
+      "techniques": ["mix_dough", "proof", "roll_and_cut", "deep_fry", "dust"],
+      "allergens": ["gluten", "dairy"],
+      "leftoversFriendly": false,
+      "timeMinutesEstimate": 120,
+      "skillFocus": ["yeast_dough", "proofing", "frying"]
+    }
+  ]
+}

@@ -6,7 +6,9 @@ import { QUICKADD_EVENTS, genId, nowIso, clamp01 } from "./quickAddContracts";
 /* --------------------------- soft imports helpers -------------------------- */
 async function safeImport(path) {
   try {
-    const mod = await import(path);
+    // Vite can't statically analyze variable dynamic imports.
+    // This suppresses the warning while keeping your soft-import behavior.
+    const mod = await import(/* @vite-ignore */ path);
     return mod?.default ?? mod;
   } catch {
     return null;
@@ -21,8 +23,8 @@ async function getEventBus() {
   const candidates = [
     "@/services/events/eventBus",
     "@/services/events/eventBus.js",
-    "@/services/eventBus",
-    "@/services/eventBus.js",
+    "@/services/events/eventBus",
+    "@/services/events/eventBus.js",
   ];
   for (const p of candidates) {
     const mod = await safeImport(p);

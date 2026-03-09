@@ -9,7 +9,7 @@ try {
 
 let eventBus = null;
 try {
-  eventBus = require("@/services/eventBus").eventBus || null;
+  eventBus = require("@/services/events/eventBus").eventBus || null;
 } catch {}
 
 let automation = null;
@@ -22,7 +22,11 @@ const clamp = (n, min = 0, max = 100) => Math.max(min, Math.min(max, n));
 const pct = (num, den) => (den ? Math.round((num / den) * 100) : 0);
 const asUsd = (v) =>
   typeof v === "number" && !Number.isNaN(v)
-    ? v.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 2 })
+    ? v.toLocaleString(undefined, {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 2,
+      })
     : "—";
 
 const toCompactJson = (obj) => {
@@ -41,12 +45,22 @@ const badgeColorByScore = (score) => {
   return "bg-rose-600";
 };
 
-const trendColor = (delta) => (delta > 0 ? "text-emerald-600" : delta < 0 ? "text-rose-600" : "text-gray-500");
+const trendColor = (delta) =>
+  delta > 0
+    ? "text-emerald-600"
+    : delta < 0
+    ? "text-rose-600"
+    : "text-gray-500";
 
 /* ----------------------------- Subcomponents (UI) ----------------------------- */
 const ProgressBar = ({ value = 0, label, className = "" }) => (
   <div className={`w-full ${className}`}>
-    {label ? <div className="flex items-center justify-between text-xs mb-1"><span>{label}</span><span>{clamp(value)}%</span></div> : null}
+    {label ? (
+      <div className="flex items-center justify-between text-xs mb-1">
+        <span>{label}</span>
+        <span>{clamp(value)}%</span>
+      </div>
+    ) : null}
     <div className="w-full h-2 rounded-full bg-gray-200 overflow-hidden">
       <div
         className="h-2 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500"
@@ -67,14 +81,24 @@ const Pill = ({ children, tone = "default", title }) => {
   return (
     <span
       title={title}
-      className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs mr-1.5 mb-1 border ${toneMap[tone] || toneMap.default}`}
+      className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs mr-1.5 mb-1 border ${
+        toneMap[tone] || toneMap.default
+      }`}
     >
       {children}
     </span>
   );
 };
 
-const FactorRow = ({ icon: IconComp, label, weight = 1, score = 0, impact = 0, note, children }) => {
+const FactorRow = ({
+  icon: IconComp,
+  label,
+  weight = 1,
+  score = 0,
+  impact = 0,
+  note,
+  children,
+}) => {
   return (
     <div className="rounded-lg border p-3 mb-2">
       <div className="flex items-start justify-between gap-3">
@@ -84,11 +108,16 @@ const FactorRow = ({ icon: IconComp, label, weight = 1, score = 0, impact = 0, n
             <div className="font-medium text-sm">{label}</div>
             <span className="text-[10px] text-gray-500">wt {weight}</span>
           </div>
-          {note ? <div className="text-xs text-gray-600 mt-1">{note}</div> : null}
+          {note ? (
+            <div className="text-xs text-gray-600 mt-1">{note}</div>
+          ) : null}
         </div>
         <div className="text-right">
           <div className="text-sm font-semibold">{clamp(score)}%</div>
-          <div className={`text-[10px] ${trendColor(impact)}`}>{impact >= 0 ? "+" : ""}{impact} impact</div>
+          <div className={`text-[10px] ${trendColor(impact)}`}>
+            {impact >= 0 ? "+" : ""}
+            {impact} impact
+          </div>
         </div>
       </div>
       <ProgressBar value={score} className="mt-2" />
@@ -148,13 +177,16 @@ const DeciderExplainBadge = ({ decision, size = "sm", onOpen, onClose }) => {
 
   const totalScore = clamp(decision?.totalScore ?? 0);
   const badgeTone = badgeColorByScore(totalScore);
-  const hasIssues = (decision?.warnings?.length || 0) + (decision?.blockers?.length || 0) > 0;
+  const hasIssues =
+    (decision?.warnings?.length || 0) + (decision?.blockers?.length || 0) > 0;
 
   const macroSummary = useMemo(() => {
     const n = decision?.nutrition || {};
     const parts = [];
-    if (typeof n.calories === "number") parts.push(`${Math.round(n.calories)} kcal`);
-    if (typeof n.protein === "number") parts.push(`${Math.round(n.protein)}g P`);
+    if (typeof n.calories === "number")
+      parts.push(`${Math.round(n.calories)} kcal`);
+    if (typeof n.protein === "number")
+      parts.push(`${Math.round(n.protein)}g P`);
     if (typeof n.carbs === "number") parts.push(`${Math.round(n.carbs)}g C`);
     if (typeof n.fat === "number") parts.push(`${Math.round(n.fat)}g F`);
     return parts.join(" • ");
@@ -164,7 +196,10 @@ const DeciderExplainBadge = ({ decision, size = "sm", onOpen, onClose }) => {
     setOpen(true);
     onOpen?.(decision);
     try {
-      eventBus?.emit?.("meals.decider.explain.opened", { id: decision?.id, ts: Date.now() });
+      eventBus?.emit?.("meals.decider.explain.opened", {
+        id: decision?.id,
+        ts: Date.now(),
+      });
       automation?.runTemplate?.("meals.decider.explain.opened", { decision });
     } catch {}
   };
@@ -173,7 +208,10 @@ const DeciderExplainBadge = ({ decision, size = "sm", onOpen, onClose }) => {
     setOpen(false);
     onClose?.(decision);
     try {
-      eventBus?.emit?.("meals.decider.explain.closed", { id: decision?.id, ts: Date.now() });
+      eventBus?.emit?.("meals.decider.explain.closed", {
+        id: decision?.id,
+        ts: Date.now(),
+      });
     } catch {}
   };
 
@@ -198,9 +236,15 @@ const DeciderExplainBadge = ({ decision, size = "sm", onOpen, onClose }) => {
     try {
       await navigator.clipboard.writeText(toCompactJson(decision));
       // optional toast if you have it globally
-      eventBus?.emit?.("toast", { level: "success", message: "Explanation copied to clipboard." });
+      eventBus?.emit?.("toast", {
+        level: "success",
+        message: "Explanation copied to clipboard.",
+      });
     } catch {
-      eventBus?.emit?.("toast", { level: "error", message: "Could not copy explanation." });
+      eventBus?.emit?.("toast", {
+        level: "error",
+        message: "Could not copy explanation.",
+      });
     }
   };
 
@@ -221,7 +265,9 @@ const DeciderExplainBadge = ({ decision, size = "sm", onOpen, onClose }) => {
     <button
       type="button"
       onClick={handleOpen}
-      className={`inline-flex items-center gap-2 text-white ${badgeTone} ${size === "sm" ? "px-2.5 py-1.5 text-xs" : "px-3 py-2 text-sm"} rounded-full shadow transition hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
+      className={`inline-flex items-center gap-2 text-white ${badgeTone} ${
+        size === "sm" ? "px-2.5 py-1.5 text-xs" : "px-3 py-2 text-sm"
+      } rounded-full shadow transition hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
       aria-haspopup="dialog"
       aria-expanded={open}
       aria-controls={`decider-explain-${decision?.id || "x"}`}
@@ -230,7 +276,9 @@ const DeciderExplainBadge = ({ decision, size = "sm", onOpen, onClose }) => {
       <HelpCircle className="w-4 h-4 opacity-90" />
       <span className="font-semibold">{totalScore}</span>
       <span className="opacity-90">Why?</span>
-      <ChevronDown className={`w-4 h-4 ${open ? "rotate-180" : ""} transition-transform`} />
+      <ChevronDown
+        className={`w-4 h-4 ${open ? "rotate-180" : ""} transition-transform`}
+      />
     </button>
   );
 
@@ -246,14 +294,20 @@ const DeciderExplainBadge = ({ decision, size = "sm", onOpen, onClose }) => {
         <div className="text-xs text-gray-600 mt-1">
           Slot: <span className="font-medium">{decision?.slot || "—"}</span>
           {decision?.date ? <> • {decision.date}</> : null}
-          {typeof decision?.budget?.estCost === "number" ? <> • Est: {asUsd(decision.budget.estCost)}</> : null}
+          {typeof decision?.budget?.estCost === "number" ? (
+            <> • Est: {asUsd(decision.budget.estCost)}</>
+          ) : null}
         </div>
       </div>
       <div className="text-right">
-        <div className={`inline-flex items-center px-2 py-0.5 rounded-md text-white ${badgeTone}`}>
+        <div
+          className={`inline-flex items-center px-2 py-0.5 rounded-md text-white ${badgeTone}`}
+        >
           Score: <span className="font-semibold ml-1">{totalScore}</span>
         </div>
-        <div className="mt-1 text-[10px] text-gray-500">Higher = better overall fit</div>
+        <div className="mt-1 text-[10px] text-gray-500">
+          Higher = better overall fit
+        </div>
       </div>
     </div>
   );
@@ -270,19 +324,49 @@ const DeciderExplainBadge = ({ decision, size = "sm", onOpen, onClose }) => {
           <MacroIcon className="w-4 h-4" />
           <div className="font-medium">Nutrition</div>
           {typeof n.macroMatchPct === "number" ? (
-            <Pill tone={n.macroMatchPct >= 70 ? "ok" : n.macroMatchPct >= 50 ? "warn" : "bad"}>
+            <Pill
+              tone={
+                n.macroMatchPct >= 70
+                  ? "ok"
+                  : n.macroMatchPct >= 50
+                  ? "warn"
+                  : "bad"
+              }
+            >
               Macro match {clamp(n.macroMatchPct)}%
             </Pill>
           ) : null}
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-          <div className="flex items-center gap-2"><ProteinIcon className="w-4 h-4" />{typeof n.protein === "number" ? `${Math.round(n.protein)}g protein` : "—"}</div>
-          <div className="flex items-center gap-2"><CarbIcon className="w-4 h-4" />{typeof n.carbs === "number" ? `${Math.round(n.carbs)}g carbs` : "—"}</div>
-          <div className="flex items-center gap-2"><FatIcon className="w-4 h-4" />{typeof n.fat === "number" ? `${Math.round(n.fat)}g fat` : "—"}</div>
-          <div className="flex items-center gap-2"><Salad className="w-4 h-4" />{typeof n.calories === "number" ? `${Math.round(n.calories)} kcal` : "—"}</div>
+          <div className="flex items-center gap-2">
+            <ProteinIcon className="w-4 h-4" />
+            {typeof n.protein === "number"
+              ? `${Math.round(n.protein)}g protein`
+              : "—"}
+          </div>
+          <div className="flex items-center gap-2">
+            <CarbIcon className="w-4 h-4" />
+            {typeof n.carbs === "number"
+              ? `${Math.round(n.carbs)}g carbs`
+              : "—"}
+          </div>
+          <div className="flex items-center gap-2">
+            <FatIcon className="w-4 h-4" />
+            {typeof n.fat === "number" ? `${Math.round(n.fat)}g fat` : "—"}
+          </div>
+          <div className="flex items-center gap-2">
+            <Salad className="w-4 h-4" />
+            {typeof n.calories === "number"
+              ? `${Math.round(n.calories)} kcal`
+              : "—"}
+          </div>
         </div>
-        {typeof n.macroMatchPct === "number" ? <ProgressBar value={n.macroMatchPct} className="mt-2" /> : null}
-        {macroSummary ? <div className="text-xs text-gray-600 mt-2">{macroSummary}</div> : null}
+        {typeof n.macroMatchPct === "number" ? (
+          <ProgressBar value={n.macroMatchPct} className="mt-2" />
+        ) : null}
+        {macroSummary ? (
+          <div className="text-xs text-gray-600 mt-2">{macroSummary}</div>
+        ) : null}
       </div>
     );
   };
@@ -292,23 +376,33 @@ const DeciderExplainBadge = ({ decision, size = "sm", onOpen, onClose }) => {
     const have = inv.haveCount || 0;
     const miss = inv.missingCount || 0;
     const total = have + miss;
-    const m = typeof inv.matchPct === "number" ? inv.matchPct : pct(have, total);
+    const m =
+      typeof inv.matchPct === "number" ? inv.matchPct : pct(have, total);
     return (
       <div className="rounded-lg border p-3">
         <div className="flex items-center gap-2 mb-2">
           <ClipboardList className="w-4 h-4" />
           <div className="font-medium">Inventory Fit</div>
-          <Pill tone={m >= 70 ? "ok" : m >= 50 ? "warn" : "bad"}>{clamp(m)}% on hand</Pill>
+          <Pill tone={m >= 70 ? "ok" : m >= 50 ? "warn" : "bad"}>
+            {clamp(m)}% on hand
+          </Pill>
         </div>
         <div className="text-sm text-gray-700">
-          You have <span className="font-medium">{have}</span> / {total || "—"} ingredients.
+          You have <span className="font-medium">{have}</span> / {total || "—"}{" "}
+          ingredients.
         </div>
         {Array.isArray(inv.keyHits) && inv.keyHits.length ? (
           <div className="mt-2">
             {inv.keyHits.slice(0, 6).map((k) => (
-              <Pill key={k} tone="info">{k}</Pill>
+              <Pill key={k} tone="info">
+                {k}
+              </Pill>
             ))}
-            {inv.keyHits.length > 6 ? <span className="text-xs text-gray-500 ml-1">+{inv.keyHits.length - 6} more</span> : null}
+            {inv.keyHits.length > 6 ? (
+              <span className="text-xs text-gray-500 ml-1">
+                +{inv.keyHits.length - 6} more
+              </span>
+            ) : null}
           </div>
         ) : null}
         <ProgressBar value={m} className="mt-2" />
@@ -324,13 +418,18 @@ const DeciderExplainBadge = ({ decision, size = "sm", onOpen, onClose }) => {
         <div className="flex items-center gap-2 mb-2">
           <Wallet className="w-4 h-4" />
           <div className="font-medium">Budget</div>
-          <Pill tone={tone}>{b.inBudget ? "Within budget" : "Over budget"}</Pill>
+          <Pill tone={tone}>
+            {b.inBudget ? "Within budget" : "Over budget"}
+          </Pill>
         </div>
         <div className="text-sm">
-          Estimated cost: <span className="font-medium">{asUsd(b.estCost)}</span>
+          Estimated cost:{" "}
+          <span className="font-medium">{asUsd(b.estCost)}</span>
           {typeof b.deltaToBudget === "number" ? (
             <span className={`ml-2 ${trendColor(-b.deltaToBudget)}`}>
-              {b.deltaToBudget > 0 ? `+${asUsd(b.deltaToBudget)} over` : `${asUsd(Math.abs(b.deltaToBudget))} under`}
+              {b.deltaToBudget > 0
+                ? `+${asUsd(b.deltaToBudget)} over`
+                : `${asUsd(Math.abs(b.deltaToBudget))} under`}
             </span>
           ) : null}
         </div>
@@ -341,34 +440,88 @@ const DeciderExplainBadge = ({ decision, size = "sm", onOpen, onClose }) => {
   const CalendarBlock = () => {
     const c = decision?.calendar || {};
     const sabbath = !!c.sabbathGuard;
-    const tone = (c.fitPct ?? 0) >= 70 ? "ok" : (c.fitPct ?? 0) >= 50 ? "warn" : "bad";
+    const tone =
+      (c.fitPct ?? 0) >= 70 ? "ok" : (c.fitPct ?? 0) >= 50 ? "warn" : "bad";
     return (
       <div className="rounded-lg border p-3">
         <div className="flex items-center gap-2 mb-2">
           <CalendarClock className="w-4 h-4" />
           <div className="font-medium">Calendar Fit</div>
-          {typeof c.fitPct === "number" ? <Pill tone={tone}>{clamp(c.fitPct)}% fit</Pill> : null}
-          {sabbath ? <Pill tone="ok" title="Sabbath guard respects rest window"><ShieldCheck className="w-3 h-3 mr-1" />Sabbath Guard</Pill> : null}
-          {c.feastDay ? <Pill tone="info" title="Feast day context from your Israelite calendar">{c.feastDay}</Pill> : null}
+          {typeof c.fitPct === "number" ? (
+            <Pill tone={tone}>{clamp(c.fitPct)}% fit</Pill>
+          ) : null}
+          {sabbath ? (
+            <Pill tone="ok" title="Sabbath guard respects rest window">
+              <ShieldCheck className="w-3 h-3 mr-1" />
+              Sabbath Guard
+            </Pill>
+          ) : null}
+          {c.feastDay ? (
+            <Pill
+              tone="info"
+              title="Feast day context from your Israelite calendar"
+            >
+              {c.feastDay}
+            </Pill>
+          ) : null}
         </div>
         {Array.isArray(c.conflictNotes) && c.conflictNotes.length ? (
           <ul className="text-xs text-amber-700 list-disc ml-4">
-            {c.conflictNotes.map((n, i) => <li key={i}>{n}</li>)}
+            {c.conflictNotes.map((n, i) => (
+              <li key={i}>{n}</li>
+            ))}
           </ul>
-        ) : <div className="text-xs text-gray-600">No time conflicts detected.</div>}
-        {typeof c.fitPct === "number" ? <ProgressBar value={c.fitPct} className="mt-2" /> : null}
+        ) : (
+          <div className="text-xs text-gray-600">
+            No time conflicts detected.
+          </div>
+        )}
+        {typeof c.fitPct === "number" ? (
+          <ProgressBar value={c.fitPct} className="mt-2" />
+        ) : null}
       </div>
     );
   };
 
   const FactorsBlock = () => (
     <div>
-      {(factors.length ? factors : [
-        { id: "nutrition", label: "Nutrition", score: decision?.nutrition?.macroMatchPct ?? 0, weight: 3, impact: 0, note: "Macro & calorie alignment." },
-        { id: "inventory", label: "Inventory", score: decision?.inventory?.matchPct ?? 0, weight: 3, impact: 0, note: "What you already have." },
-        { id: "budget", label: "Budget", score: decision?.budget?.inBudget ? 100 : 40, weight: 2, impact: (decision?.budget?.inBudget ? +5 : -10), note: "Budget conformance." },
-        { id: "calendar", label: "Calendar", score: decision?.calendar?.fitPct ?? 0, weight: 2, impact: 0, note: "Time fit, Sabbath guard, feast days." },
-      ]).map((f) => {
+      {(factors.length
+        ? factors
+        : [
+            {
+              id: "nutrition",
+              label: "Nutrition",
+              score: decision?.nutrition?.macroMatchPct ?? 0,
+              weight: 3,
+              impact: 0,
+              note: "Macro & calorie alignment.",
+            },
+            {
+              id: "inventory",
+              label: "Inventory",
+              score: decision?.inventory?.matchPct ?? 0,
+              weight: 3,
+              impact: 0,
+              note: "What you already have.",
+            },
+            {
+              id: "budget",
+              label: "Budget",
+              score: decision?.budget?.inBudget ? 100 : 40,
+              weight: 2,
+              impact: decision?.budget?.inBudget ? +5 : -10,
+              note: "Budget conformance.",
+            },
+            {
+              id: "calendar",
+              label: "Calendar",
+              score: decision?.calendar?.fitPct ?? 0,
+              weight: 2,
+              impact: 0,
+              note: "Time fit, Sabbath guard, feast days.",
+            },
+          ]
+      ).map((f) => {
         const Icon = factorIconMap[f.label] || Info;
         return (
           <FactorRow
@@ -388,7 +541,10 @@ const DeciderExplainBadge = ({ decision, size = "sm", onOpen, onClose }) => {
   const MetaBar = () => (
     <div className="flex flex-wrap items-center gap-2">
       {(decision?.tags || []).slice(0, 8).map((t) => (
-        <Pill key={t} tone="default"><Tag className="w-3 h-3 mr-1" />{t}</Pill>
+        <Pill key={t} tone="default">
+          <Tag className="w-3 h-3 mr-1" />
+          {t}
+        </Pill>
       ))}
       {decision?.provenance?.source ? (
         <Pill tone="info">
@@ -418,7 +574,9 @@ const DeciderExplainBadge = ({ decision, size = "sm", onOpen, onClose }) => {
             <XCircle className="w-4 h-4" /> Blockers
           </div>
           <ul className="list-disc ml-5 text-sm text-rose-800">
-            {decision.blockers.map((b, i) => <li key={i}>{b}</li>)}
+            {decision.blockers.map((b, i) => (
+              <li key={i}>{b}</li>
+            ))}
           </ul>
         </div>
       ) : null}
@@ -429,7 +587,9 @@ const DeciderExplainBadge = ({ decision, size = "sm", onOpen, onClose }) => {
             <TriangleAlert className="w-4 h-4" /> Warnings
           </div>
           <ul className="list-disc ml-5 text-sm text-amber-900">
-            {decision.warnings.map((w, i) => <li key={i}>{w}</li>)}
+            {decision.warnings.map((w, i) => (
+              <li key={i}>{w}</li>
+            ))}
           </ul>
         </div>
       ) : null}
@@ -440,7 +600,9 @@ const DeciderExplainBadge = ({ decision, size = "sm", onOpen, onClose }) => {
             <CheckCircle2 className="w-4 h-4" /> Next-best actions
           </div>
           <ul className="list-disc ml-5 text-sm text-emerald-900">
-            {decision.nudges.map((n, i) => <li key={i}>{n}</li>)}
+            {decision.nudges.map((n, i) => (
+              <li key={i}>{n}</li>
+            ))}
           </ul>
         </div>
       ) : null}
@@ -515,14 +677,22 @@ const DeciderExplainBadge = ({ decision, size = "sm", onOpen, onClose }) => {
             </div>
 
             {/* Issues & Nudges */}
-            {hasIssues ? <div className="mt-4"><Issues /></div> : null}
+            {hasIssues ? (
+              <div className="mt-4">
+                <Issues />
+              </div>
+            ) : null}
 
             {/* Provenance footer */}
             {decision?.provenance ? (
               <div className="mt-4 text-xs text-gray-500">
                 Provenance: {decision.provenance.source || "—"}
-                {decision.provenance.author ? ` • by ${decision.provenance.author}` : ""}
-                {decision.provenance.license ? ` • ${decision.provenance.license}` : ""}
+                {decision.provenance.author
+                  ? ` • by ${decision.provenance.author}`
+                  : ""}
+                {decision.provenance.license
+                  ? ` • ${decision.provenance.license}`
+                  : ""}
               </div>
             ) : null}
           </div>

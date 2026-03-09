@@ -1,0 +1,584 @@
+{
+  "$schema": "../../../schemas/ruleset.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-21T00:00:00.000Z",
+  "kind": "cuisine_ruleset",
+
+  "meta": {
+    "id": "cuisines.korean.ruleset",
+    "type": "cuisine_ruleset",
+    "label": "Korean Cuisine Ruleset",
+    "cuisineId": "cuisines.korean",
+    "status": "canonical",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa.catalogs.cuisines.korean",
+      "notes": [
+        "Deterministic cuisine rules for Korean dish selection, tagging, scoring, and adaptation hints.",
+        "Designed to work with SSA planners and recipe adapter pipelines."
+      ]
+    }
+  },
+
+  "scope": {
+    "kind": "cuisine",
+    "cuisineId": "cuisines.korean",
+    "locales": ["en-US"]
+  },
+
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true,
+    "tokens": {
+      "stopWords": [
+        "the",
+        "a",
+        "an",
+        "and",
+        "or",
+        "with",
+        "of",
+        "style",
+        "korean",
+        "traditional",
+        "authentic"
+      ]
+    },
+    "ingredientAliases": {
+      "ingredient.gochujang": [
+        "gochujang",
+        "korean chili paste",
+        "korean chile paste"
+      ],
+      "ingredient.gochugaru": [
+        "gochugaru",
+        "korean chili flakes",
+        "korean chile flakes"
+      ],
+      "ingredient.ganjang": [
+        "ganjang",
+        "korean soy sauce",
+        "soy sauce (korean)"
+      ],
+      "ingredient.dwenjang": ["doenjang", "dwenjang", "korean soybean paste"],
+      "ingredient.ssamjang": ["ssamjang", "wrap sauce", "korean wrap sauce"],
+      "ingredient.kimchi": [
+        "kimchi",
+        "baechu kimchi",
+        "fermented napa cabbage"
+      ],
+      "ingredient.napa_cabbage": ["napa cabbage", "chinese cabbage", "baechu"],
+      "ingredient.korean_rice": [
+        "short grain rice",
+        "short-grain rice",
+        "sushi rice",
+        "korean rice"
+      ],
+      "ingredient.dashi_anchovy_kelp": [
+        "anchovy kelp stock",
+        "dashima stock",
+        "kelp anchovy broth"
+      ],
+      "ingredient.gim": ["gim", "korean seaweed", "roasted seaweed sheets"],
+      "ingredient.sesame_oil": ["sesame oil", "toasted sesame oil"],
+      "ingredient.sesame_seeds": ["sesame seeds", "toasted sesame seeds"],
+      "ingredient.scallions": ["scallions", "green onions", "spring onions"],
+      "ingredient.perilla_leaves": ["perilla leaves", "kkaennip", "kkaenip"],
+      "ingredient.rice_cake_tteok": [
+        "tteok",
+        "rice cakes",
+        "korean rice cakes"
+      ],
+      "ingredient.korean_glass_noodles": [
+        "dangmyeon",
+        "sweet potato noodles",
+        "glass noodles (korean)"
+      ],
+      "ingredient.korean_chili": [
+        "cheongyang chili",
+        "korean green chili",
+        "spicy korean pepper"
+      ]
+    },
+    "dishAliases": {
+      "dish.kimchi": ["kimchi", "baechu kimchi"],
+      "dish.bulgogi": ["bulgogi", "korean bbq beef", "korean marinated beef"],
+      "dish.kimchi_jjigae": ["kimchi jjigae", "kimchi stew"],
+      "dish.bibimbap": ["bibimbap", "mixed rice bowl"],
+      "dish.japchae": ["japchae", "glass noodle stir-fry"],
+      "dish.tteokbokki": ["tteokbokki", "spicy rice cakes"],
+      "dish.doenjang_jjigae": ["doenjang jjigae", "soybean paste stew"],
+      "dish.sundubu_jjigae": ["sundubu jjigae", "soft tofu stew"],
+      "dish.gimbap": ["gimbap", "kimbap", "seaweed rice rolls"],
+      "dish.samgyeopsal": ["samgyeopsal", "korean pork belly bbq"],
+      "dish.galbi": ["galbi", "kalbi", "korean short ribs"]
+    },
+    "equipmentAliases": {
+      "equipment.rice_cooker": ["rice cooker"],
+      "equipment.wok": ["wok"],
+      "equipment.skillet": ["skillet", "frying pan"],
+      "equipment.cast_iron_skillet": ["cast iron skillet", "cast iron pan"],
+      "equipment.pot": ["pot", "saucepot"],
+      "equipment.lidded_pot": ["lidded pot", "pot with lid"],
+      "equipment.fermentation_jar": [
+        "fermentation jar",
+        "kimchi container",
+        "kimchi jar"
+      ],
+      "equipment.mixing_bowl": ["mixing bowl"],
+      "equipment.sheet_pan": ["sheet pan", "baking tray"]
+    },
+    "methodAliases": {
+      "method.ferment": ["ferment", "fermentation"],
+      "method.simmer": ["simmer", "stew", "braise (light)"],
+      "method.marinate": ["marinate", "season and rest"],
+      "method.sear": ["sear", "pan sear"],
+      "method.grill": ["grill", "bbq", "barbecue"],
+      "method.stir_fry": ["stir fry", "stir-fry"],
+      "method.assemble": ["assemble", "build bowl", "roll"],
+      "method.blanch": ["blanch", "parboil"]
+    }
+  },
+
+  "globals": {
+    "cuisine": {
+      "id": "cuisines.korean",
+      "label": "Korean",
+      "defaultServingStyles": ["family_style", "bowls"],
+      "defaultHeatScalar": 2,
+      "commonAllergens": [
+        "allergen.soy",
+        "allergen.sesame",
+        "allergen.shellfish"
+      ],
+      "signatureTags": ["korean", "banchan", "jjigae", "bbq", "rice_bowl"]
+    },
+    "plateModelDefaults": {
+      "archetypeIds": [
+        "korean.meal.rice_soup_banchan",
+        "korean.meal.stew_set",
+        "korean.meal.bbq_ssam"
+      ],
+      "roles": {
+        "starch": ["ingredient.korean_rice"],
+        "protein": [
+          "ingredient.beef",
+          "ingredient.pork",
+          "ingredient.chicken",
+          "ingredient.tofu"
+        ],
+        "veg": [
+          "ingredient.napa_cabbage",
+          "ingredient.scallions",
+          "ingredient.vegetables_mixed"
+        ],
+        "sauce": [
+          "ingredient.gochujang",
+          "ingredient.dwenjang",
+          "ingredient.ssamjang"
+        ],
+        "garnish": ["ingredient.sesame_seeds", "ingredient.gim"]
+      }
+    }
+  },
+
+  "rules": [
+    {
+      "id": "korean.tag.base.korean",
+      "enabled": true,
+      "priority": 10,
+      "title": "Tag all Korean cuisine items as korean",
+      "description": "Ensures consistent cuisine tagging for browse/search and planner scoring.",
+      "tags": ["tagging", "cuisine"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "type": "eq",
+        "path": "$.classification.cuisineId",
+        "value": "cuisines.korean"
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "korean" },
+          { "type": "addTag", "value": "cuisine.korean" }
+        ]
+      }
+    },
+
+    {
+      "id": "korean.tag.banchan",
+      "enabled": true,
+      "priority": 20,
+      "title": "Tag banchan (side dishes)",
+      "description": "If a dish is categorized as banchan OR has plannerTag banchan, add banchan tags.",
+      "tags": ["tagging"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          { "type": "eq", "path": "$.category", "value": "banchan" },
+          {
+            "type": "intersects",
+            "path": "$.plannerTags",
+            "values": ["banchan"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "banchan" },
+          { "type": "addTag", "value": "side" },
+          { "type": "scoreAdjust", "scoreDelta": 0.25 }
+        ]
+      }
+    },
+
+    {
+      "id": "korean.tag.jjigae_stew",
+      "enabled": true,
+      "priority": 30,
+      "title": "Tag jjigae/stew dishes",
+      "description": "Detect stew/jjigae by category or keywords and tag for planner filtering.",
+      "tags": ["tagging", "stews"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          { "type": "eq", "path": "$.category", "value": "stew" },
+          { "type": "matches", "path": "$.label", "regex": "(?i)jjigae|stew" },
+          {
+            "type": "intersects",
+            "path": "$.plannerTags",
+            "values": ["stew", "jjigae"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "jjigae" },
+          { "type": "addTag", "value": "stew" },
+          { "type": "addTag", "value": "comfort" },
+          { "type": "scoreAdjust", "scoreDelta": 0.35 }
+        ]
+      }
+    },
+
+    {
+      "id": "korean.score.weeknight_fast",
+      "enabled": true,
+      "priority": 40,
+      "title": "Boost weeknight-possible dishes under 45 minutes total",
+      "description": "If dish signals weeknightPossible or total time <= 45, boost in weeknight planning contexts.",
+      "tags": ["scoring", "weeknight"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.signals.weeknightPossible",
+            "value": true
+          },
+          { "type": "lte", "path": "$.time.totalMins", "value": 45 }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "weeknight" },
+          { "type": "scoreAdjust", "scoreDelta": 0.5 }
+        ]
+      }
+    },
+
+    {
+      "id": "korean.score.batch_friendly",
+      "enabled": true,
+      "priority": 50,
+      "title": "Boost batch-friendly dishes",
+      "description": "If dish signals batchFriendly, increase score and tag as make_ahead/batch.",
+      "tags": ["scoring", "batch"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "type": "eq",
+        "path": "$.signals.batchFriendly",
+        "value": true
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "batch" },
+          { "type": "addTag", "value": "make_ahead" },
+          { "type": "scoreAdjust", "scoreDelta": 0.4 }
+        ]
+      }
+    },
+
+    {
+      "id": "korean.score.leftovers_good",
+      "enabled": true,
+      "priority": 60,
+      "title": "Boost leftovers-good dishes",
+      "description": "If dish signals leftoversGood, tag and add a small score bump.",
+      "tags": ["scoring", "leftovers"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "type": "eq",
+        "path": "$.signals.leftoversGood",
+        "value": true
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "leftovers" },
+          { "type": "scoreAdjust", "scoreDelta": 0.2 }
+        ]
+      }
+    },
+
+    {
+      "id": "korean.score.freezer_friendly",
+      "enabled": true,
+      "priority": 70,
+      "title": "Boost freezer-friendly dishes",
+      "description": "If dish signals freezerFriendly, tag and boost for freezer planning contexts.",
+      "tags": ["scoring", "freezer"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "type": "eq",
+        "path": "$.signals.freezerFriendly",
+        "value": true
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "freezer" },
+          { "type": "scoreAdjust", "scoreDelta": 0.25 }
+        ]
+      }
+    },
+
+    {
+      "id": "korean.tag.bbq_and_grill",
+      "enabled": true,
+      "priority": 80,
+      "title": "Tag BBQ / grill-driven Korean dishes",
+      "description": "If techniques include grill/sear or planner tags include bbq, mark as bbq and boost for grill nights.",
+      "tags": ["tagging", "bbq"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.techniques",
+            "values": ["method.grill", "method.sear"]
+          },
+          { "type": "intersects", "path": "$.plannerTags", "values": ["bbq"] }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "bbq" },
+          { "type": "addTag", "value": "grill" },
+          { "type": "scoreAdjust", "scoreDelta": 0.35 }
+        ]
+      }
+    },
+
+    {
+      "id": "korean.heat.map.scalar",
+      "enabled": true,
+      "priority": 90,
+      "title": "Normalize heat scalar into planner context",
+      "description": "Set planner.heatScalar based on heatTypical (0–5) when available for downstream adapters.",
+      "tags": ["planner", "normalization"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "type": "exists",
+        "path": "$.heatTypical"
+      },
+      "then": {
+        "actions": [
+          { "type": "set", "path": "$.planner.heatScalar", "value": 0 }
+        ]
+      }
+    },
+
+    {
+      "id": "korean.allergen.soy_tag",
+      "enabled": true,
+      "priority": 110,
+      "title": "If allergens include soy, tag soy",
+      "description": "Helps SSA meal planner filters and safety banners.",
+      "tags": ["allergens", "tagging"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "$.allergens",
+        "values": ["allergen.soy"]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "allergen.soy" },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ssa.allergen.detected",
+              "payload": { "allergen": "allergen.soy" }
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "korean.allergen.sesame_tag",
+      "enabled": true,
+      "priority": 120,
+      "title": "If allergens include sesame, tag sesame",
+      "description": "Helps SSA meal planner filters and safety banners.",
+      "tags": ["allergens", "tagging"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "$.allergens",
+        "values": ["allergen.sesame"]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "allergen.sesame" },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ssa.allergen.detected",
+              "payload": { "allergen": "allergen.sesame" }
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "korean.allergen.shellfish_tag",
+      "enabled": true,
+      "priority": 130,
+      "title": "If allergens include shellfish, tag shellfish",
+      "description": "Useful for kimchi (shrimp/fish sauce) and many broths.",
+      "tags": ["allergens", "tagging"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "$.allergens",
+        "values": ["allergen.shellfish"]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "allergen.shellfish" },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ssa.allergen.detected",
+              "payload": { "allergen": "allergen.shellfish" }
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "korean.adapt.no_rice_cooker",
+      "enabled": true,
+      "priority": 200,
+      "title": "If no rice cooker, suggest stovetop rice method",
+      "description": "Adapter hint: when the kitchen lacks rice cooker and dish uses korean rice, emit an adaptation event.",
+      "tags": ["adaptation", "equipment"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.ingredientsCore",
+            "values": ["ingredient.korean_rice"]
+          },
+          {
+            "type": "matches",
+            "path": "$.kitchen.equipmentMissing",
+            "regex": "(?i)equipment\\.rice_cooker"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ssa.recipe.adaptation.suggested",
+              "payload": {
+                "reason": "missing_equipment",
+                "missing": ["equipment.rice_cooker"],
+                "suggest": "Use stovetop absorption method for short-grain rice (rinse, soak optional, 1:1.1–1:1.2 water, low simmer, rest covered).",
+                "cuisineId": "cuisines.korean"
+              }
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "korean.adapt.no_fermentation_jar",
+      "enabled": true,
+      "priority": 210,
+      "title": "If no fermentation jar, allow container fallback for kimchi",
+      "description": "Adapter hint: if making fermented dishes without a fermentation jar, allow food-safe container fallback.",
+      "tags": ["adaptation", "fermentation"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.techniques",
+            "values": ["method.ferment"]
+          },
+          {
+            "type": "matches",
+            "path": "$.kitchen.equipmentMissing",
+            "regex": "(?i)equipment\\.fermentation_jar"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ssa.recipe.adaptation.suggested",
+              "payload": {
+                "reason": "missing_equipment",
+                "missing": ["equipment.fermentation_jar"],
+                "suggest": "Use a food-safe container with a loose lid (burp daily) or a zip bag method; keep below 75°F; refrigerate when flavor is right.",
+                "cuisineId": "cuisines.korean"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

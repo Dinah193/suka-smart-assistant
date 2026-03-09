@@ -1,5 +1,4 @@
-// C:\Users\larho\suka-smart-assistant\src\features\calculators\gardenAnimal\AnimalFeedCalculator\AnimalFeedCalculator.view.jsx
-
+// File: src/features/calculators/gardenAnimal/AnimalFeedCalculator/AnimalFeedCalculator.view.jsx
 /**
  * AnimalFeedCalculator.view.jsx
  * ---------------------------------------------------------------------------
@@ -8,25 +7,27 @@
  * How this fits into SSA:
  * - Sits on route: /tier2/animals/calculators/feed (see config node).
  * - Lets the user:
- *    • Pick a planning horizon and context.
- *    • Run the AnimalFeedCalculator shim to compute rations + projections.
- *    • Review daily feed usage and projected shortages.
- *    • Trigger a “Feed Session Now” via SessionRunner (through hooks).
+ *   • Pick a planning horizon and context.
+ *   • Run the AnimalFeedCalculator shim to compute rations + projections.
+ *   • Review daily feed usage and projected shortages.
+ *   • Trigger a “Feed Session Now” via SessionRunner (through hooks).
  *
  * - The actual time-based execution is handled by SessionRunner:
- *    • This view calls useAnimalFeedSessionLaunchers().launchFeedSessionNow(result)
- *      which should:
- *        - build a Session object (domain: "animals")
- *        - persist to Dexie
- *        - emit session.requested
- *        - optionally export to Hub (if familyFundMode)
- *    • The global SessionRunner (mounted at App root) then opens its modal,
- *      keeps timers alive across navigation, and handles wake-lock/notifications.
+ *   • This view calls useAnimalFeedSessionLaunchers().launchFeedSessionNow(result)
+ *     which should:
+ *       - build a Session object (domain: "animals")
+ *       - persist to Dexie
+ *       - emit session.requested
+ *       - optionally export to Hub (if familyFundMode)
+ *   • The global SessionRunner (mounted at App root) then opens its modal,
+ *     keeps timers alive across navigation, and handles wake-lock/notifications.
  */
 
 import React, { useState } from "react";
+
 // Shim: logic computing feed requirements over time
 import { runAnimalFeedCalculatorShim } from "./AnimalFeedCalculator.shim";
+
 // Hooks: launch Now sessions for SessionRunner (you’ll wire this in hooks file)
 import { useAnimalFeedSessionLaunchers } from "./AnimalFeedCalculator.hooks";
 
@@ -47,7 +48,7 @@ import { useAnimalFeedSessionLaunchers } from "./AnimalFeedCalculator.hooks";
  *   };
  * }} props
  */
-export default function AnimalFeedCalculatorView(props) {
+function AnimalFeedCalculatorView(props) {
   const [planningHorizonDays, setPlanningHorizonDays] = useState(
     props.initialContext?.planningHorizonDays || 7
   );
@@ -69,7 +70,7 @@ export default function AnimalFeedCalculatorView(props) {
   const hasAnimals = Array.isArray(props.animals) && props.animals.length > 0;
 
   const { launchFeedSessionNow } = useAnimalFeedSessionLaunchers({
-    feedPlanResult: result
+    feedPlanResult: result,
   });
 
   async function handleRunCalculation() {
@@ -86,18 +87,19 @@ export default function AnimalFeedCalculatorView(props) {
         planningHorizonDays,
         unitSystem,
         farmLocation,
-        notes
+        notes,
       },
-      exportToHub
+      exportToHub,
     };
 
     try {
-      const res /** @type {AnimalFeedShimResponse} */ =
-        await runAnimalFeedCalculatorShim(req);
+      /** @type {AnimalFeedShimResponse} */
+      // eslint-disable-next-line no-unused-vars
+      const res = await runAnimalFeedCalculatorShim(req);
 
-      if (!res.ok || !res.result) {
-        setError(res.error || "Unable to compute feed plan.");
-        setWarnings(res.warnings || []);
+      if (!res?.ok || !res?.result) {
+        setError(res?.error || "Unable to compute feed plan.");
+        setWarnings(res?.warnings || []);
         setResult(null);
       } else {
         setResult(res.result);
@@ -124,7 +126,7 @@ export default function AnimalFeedCalculatorView(props) {
   const dailyFeedPlan = result?.dailyFeedPlan || [];
 
   const hasShortages = demandProjection.some(
-    (d) => (d.projectedShortageKg || 0) > 0
+    (d) => (d?.projectedShortageKg || 0) > 0
   );
 
   return (
@@ -138,6 +140,7 @@ export default function AnimalFeedCalculatorView(props) {
             you can buy or mix feed before you run out.
           </p>
         </div>
+
         <div className="afc-header-actions">
           <button
             type="button"
@@ -147,6 +150,7 @@ export default function AnimalFeedCalculatorView(props) {
           >
             {isCalculating ? "Calculating…" : "Run Feed Plan"}
           </button>
+
           <button
             type="button"
             className="afc-btn afc-btn-ghost"
@@ -166,6 +170,7 @@ export default function AnimalFeedCalculatorView(props) {
       {/* Context / Inputs Panel */}
       <div className="afc-panel afc-panel-context">
         <h2 className="afc-panel-title">Planning Context</h2>
+
         {!hasAnimals && (
           <div className="afc-alert afc-alert-warning">
             <strong>No animals found.</strong> Connect this calculator to your
@@ -183,9 +188,7 @@ export default function AnimalFeedCalculatorView(props) {
               className="afc-input"
               value={planningHorizonDays}
               onChange={(e) =>
-                setPlanningHorizonDays(
-                  Math.max(1, Number(e.target.value) || 1)
-                )
+                setPlanningHorizonDays(Math.max(1, Number(e.target.value) || 1))
               }
             />
             <span className="afc-field-help">
@@ -244,6 +247,7 @@ export default function AnimalFeedCalculatorView(props) {
               />
               <span>Export summary to Family Fund Hub (if enabled)</span>
             </label>
+
             <span className="afc-field-help">
               When familyFundMode is on, a compact analytics summary will be
               exported after each successful run.
@@ -260,6 +264,7 @@ export default function AnimalFeedCalculatorView(props) {
               <strong>Error:</strong> {error}
             </div>
           )}
+
           {warnings.length > 0 && (
             <div className="afc-alert afc-alert-info">
               <strong>Warnings:</strong>
@@ -286,34 +291,42 @@ export default function AnimalFeedCalculatorView(props) {
               View Detailed Rations
             </button>
           </div>
+
           <div className="afc-grid afc-grid-4">
             <div className="afc-kpi-card">
               <span className="afc-kpi-label">Total As-Fed / Day</span>
               <span className="afc-kpi-value">
                 {analytics.totalAsFedKgPerDay != null
-                  ? `${analytics.totalAsFedKgPerDay.toFixed(1)} kg`
+                  ? `${Number(analytics.totalAsFedKgPerDay).toFixed(1)} kg`
                   : "–"}
               </span>
               <span className="afc-kpi-hint">All animals combined.</span>
             </div>
+
             <div className="afc-kpi-card">
               <span className="afc-kpi-label">Total Dry Matter / Day</span>
               <span className="afc-kpi-value">
                 {analytics.totalDryMatterKgPerDay != null
-                  ? `${analytics.totalDryMatterKgPerDay.toFixed(1)} kg`
+                  ? `${Number(analytics.totalDryMatterKgPerDay).toFixed(1)} kg`
                   : "–"}
               </span>
-              <span className="afc-kpi-hint">Used for ration quality checks.</span>
+              <span className="afc-kpi-hint">
+                Used for ration quality checks.
+              </span>
             </div>
+
             <div className="afc-kpi-card">
               <span className="afc-kpi-label">Estimated Cost / Day</span>
               <span className="afc-kpi-value">
                 {analytics.estimatedFeedCostPerDay != null
-                  ? `$${analytics.estimatedFeedCostPerDay.toFixed(2)}`
+                  ? `$${Number(analytics.estimatedFeedCostPerDay).toFixed(2)}`
                   : "–"}
               </span>
-              <span className="afc-kpi-hint">Based on inventory cost data.</span>
+              <span className="afc-kpi-hint">
+                Based on inventory cost data.
+              </span>
             </div>
+
             <div className="afc-kpi-card">
               <span className="afc-kpi-label">Earliest Projected Shortage</span>
               <span
@@ -345,6 +358,7 @@ export default function AnimalFeedCalculatorView(props) {
             ends. Red rows mean your animals will out-eat your current
             inventory.
           </p>
+
           <div className="afc-table-wrapper">
             <table className="afc-table">
               <thead>
@@ -358,16 +372,17 @@ export default function AnimalFeedCalculatorView(props) {
               </thead>
               <tbody>
                 {demandProjection.map((row) => {
-                  const shortage = row.projectedShortageKg || 0;
+                  const shortage = row?.projectedShortageKg || 0;
                   const danger = shortage > 0;
+
                   return (
                     <tr
-                      key={row.feedItemId}
+                      key={row.feedItemId || row.name}
                       className={danger ? "afc-row-danger" : ""}
                     >
                       <td>{row.name}</td>
-                      <td>{(row.currentInventoryKg || 0).toFixed(1)}</td>
-                      <td>{(row.projectedUsageKg || 0).toFixed(1)}</td>
+                      <td>{Number(row.currentInventoryKg || 0).toFixed(1)}</td>
+                      <td>{Number(row.projectedUsageKg || 0).toFixed(1)}</td>
                       <td>{shortage > 0 ? shortage.toFixed(1) : "—"}</td>
                       <td>{row.estimatedRunoutDate || "—"}</td>
                     </tr>
@@ -379,9 +394,9 @@ export default function AnimalFeedCalculatorView(props) {
 
           {hasShortages && (
             <div className="afc-alert afc-alert-warning afc-mt-md">
-              <strong>Shortages detected.</strong> Consider planning a storehouse
-              refill session, updating your feed mix, or reducing stocking
-              density before you reach these dates.
+              <strong>Shortages detected.</strong> Consider planning a
+              storehouse refill session, updating your feed mix, or reducing
+              stocking density before you reach these dates.
             </div>
           )}
         </div>
@@ -389,7 +404,10 @@ export default function AnimalFeedCalculatorView(props) {
 
       {/* Modal: Detailed per-animal rations (local UI only; SessionRunner lives at app root) */}
       {showDetailsModal && result && (
-        <div className="afc-modal-backdrop" onClick={() => setShowDetailsModal(false)}>
+        <div
+          className="afc-modal-backdrop"
+          onClick={() => setShowDetailsModal(false)}
+        >
           <div
             className="afc-modal"
             onClick={(e) => e.stopPropagation()}
@@ -401,6 +419,7 @@ export default function AnimalFeedCalculatorView(props) {
               <h2 id="afc-modal-title" className="afc-modal-title">
                 Detailed Rations (Daily)
               </h2>
+
               <button
                 type="button"
                 className="afc-modal-close"
@@ -410,14 +429,17 @@ export default function AnimalFeedCalculatorView(props) {
                 ×
               </button>
             </div>
+
             <div className="afc-modal-body">
               {dailyFeedPlan.length === 0 && (
                 <p>No rations generated yet for the current run.</p>
               )}
+
               {dailyFeedPlan.map((plan) => {
-                const subject = result.animals.find(
+                const subject = (result.animals || []).find(
                   (a) => a.id === plan.subjectId
                 );
+
                 return (
                   <div key={plan.rationId} className="afc-ration-card">
                     <div className="afc-ration-header">
@@ -430,19 +452,27 @@ export default function AnimalFeedCalculatorView(props) {
                           {subject?.count || 1} head
                         </p>
                       </div>
+
                       <div className="afc-ration-totals">
                         <span className="afc-pill">
                           As-Fed:{" "}
-                          {plan.totals.asFedKgPerHeadPerDay?.toFixed(2)} kg /
-                          head
+                          {plan?.totals?.asFedKgPerHeadPerDay != null
+                            ? `${Number(
+                                plan.totals.asFedKgPerHeadPerDay
+                              ).toFixed(2)} kg / head`
+                            : "—"}
                         </span>
                         <span className="afc-pill">
                           Dry Matter:{" "}
-                          {plan.totals.dryMatterKgPerHeadPerDay?.toFixed(2)} kg /
-                          head
+                          {plan?.totals?.dryMatterKgPerHeadPerDay != null
+                            ? `${Number(
+                                plan.totals.dryMatterKgPerHeadPerDay
+                              ).toFixed(2)} kg / head`
+                            : "—"}
                         </span>
                       </div>
                     </div>
+
                     <div className="afc-table-wrapper afc-table-compact">
                       <table className="afc-table">
                         <thead>
@@ -456,17 +486,19 @@ export default function AnimalFeedCalculatorView(props) {
                         </thead>
                         <tbody>
                           {(plan.feedItems || []).map((item) => (
-                            <tr key={item.feedItemId}>
+                            <tr key={item.feedItemId || item.name}>
                               <td>{item.name}</td>
                               <td>{item.category || "—"}</td>
                               <td>
                                 {item.asFedKgPerHeadPerDay != null
-                                  ? item.asFedKgPerHeadPerDay.toFixed(2)
+                                  ? Number(item.asFedKgPerHeadPerDay).toFixed(2)
                                   : "—"}
                               </td>
                               <td>
                                 {item.dryMatterKgPerHeadPerDay != null
-                                  ? item.dryMatterKgPerHeadPerDay.toFixed(2)
+                                  ? Number(
+                                      item.dryMatterKgPerHeadPerDay
+                                    ).toFixed(2)
                                   : "—"}
                               </td>
                               <td>{item.notes || "—"}</td>
@@ -475,6 +507,7 @@ export default function AnimalFeedCalculatorView(props) {
                         </tbody>
                       </table>
                     </div>
+
                     {plan.instructions && (
                       <p className="afc-ration-instructions">
                         <strong>Instructions:</strong> {plan.instructions}
@@ -484,6 +517,7 @@ export default function AnimalFeedCalculatorView(props) {
                 );
               })}
             </div>
+
             <div className="afc-modal-footer">
               <button
                 type="button"
@@ -493,6 +527,7 @@ export default function AnimalFeedCalculatorView(props) {
               >
                 Feed Session Now
               </button>
+
               <button
                 type="button"
                 className="afc-btn afc-btn-ghost"
@@ -507,3 +542,7 @@ export default function AnimalFeedCalculatorView(props) {
     </div>
   );
 }
+
+// ✅ Ensure this module *definitely* has a default export (and a named export too).
+export { AnimalFeedCalculatorView };
+export default AnimalFeedCalculatorView;

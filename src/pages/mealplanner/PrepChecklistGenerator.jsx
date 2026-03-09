@@ -11,16 +11,36 @@ let useMealPlanStore = () => ({
 });
 let useBatchStore = () => ({ getActiveBatch: () => null }); // BatchSessionPlanner
 let useRecipeStore = () => ({ getRecipeById: () => null });
-let useInventoryStore = () => ({ reserveForPrep: async () => {}, releaseReservation: async () => {} });
-let usePreferencesStore = () => ({ sabbathAware: true, unitSystem: "imperial" });
+let useInventoryStore = () => ({
+  reserveForPrep: async () => {},
+  releaseReservation: async () => {},
+});
+let usePreferencesStore = () => ({
+  sabbathAware: true,
+  unitSystem: "imperial",
+});
 
-try { eventBus = require("@/services/events/eventBus").eventBus; } catch {}
-try { automation = require("@/services/automation/runtime").automation; } catch {}
-try { useMealPlanStore = require("@/store/MealPlanStore").useMealPlanStore; } catch {}
-try { useBatchStore = require("@/store/BatchStore").useBatchStore; } catch {}
-try { useRecipeStore = require("@/store/RecipeStore").useRecipeStore; } catch {}
-try { useInventoryStore = require("@/store/InventoryStore").useInventoryStore; } catch {}
-try { usePreferencesStore = require("@/store/PreferencesStore").usePreferencesStore; } catch {}
+try {
+  eventBus = require("@/services/events/eventBus").eventBus;
+} catch {}
+try {
+  automation = require("@/services/automation/runtime").automation;
+} catch {}
+try {
+  useMealPlanStore = require("@/store/MealPlanStore").useMealPlanStore;
+} catch {}
+try {
+  useBatchStore = require("@/store/BatchStore").useBatchStore;
+} catch {}
+try {
+  useRecipeStore = require("@/store/RecipeStore").useRecipeStore;
+} catch {}
+try {
+  useInventoryStore = require("@/store/InventoryStore").useInventoryStore;
+} catch {}
+try {
+  usePreferencesStore = require("@/store/PreferencesStore").usePreferencesStore;
+} catch {}
 
 // UI
 import { Button } from "@/components/ui/button";
@@ -29,7 +49,13 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/use-toast";
@@ -93,7 +119,10 @@ function deriveTasksFromRecipe(recipe, context = {}) {
   const tasks = [];
 
   // 1) Thaw / Soak if present
-  if (baseTags.includes("frozen") || (r.meta?.requiresThaw && r.meta.requiresThaw === true)) {
+  if (
+    baseTags.includes("frozen") ||
+    (r.meta?.requiresThaw && r.meta.requiresThaw === true)
+  ) {
     tasks.push(
       prepTask({
         id: `${rId}_thaw`,
@@ -138,7 +167,9 @@ function deriveTasksFromRecipe(recipe, context = {}) {
   // 3) Cut/Chop based on ingredients
   const ing = r.ingredients || [];
   const chopCount = ing.filter((i) =>
-    /onion|pepper|tomato|carrot|celery|garlic|greens|potato|herb/i.test(i.name || "")
+    /onion|pepper|tomato|carrot|celery|garlic|greens|potato|herb/i.test(
+      i.name || ""
+    )
   ).length;
 
   if (chopCount > 0) {
@@ -234,7 +265,12 @@ function deriveTasksFromRecipe(recipe, context = {}) {
 /**
  * Build tasks from selected scope: plan/day/week or active batch session.
  */
-function buildTasksFromScope({ meals = [], recipesById = {}, batch = null, scope = null }) {
+function buildTasksFromScope({
+  meals = [],
+  recipesById = {},
+  batch = null,
+  scope = null,
+}) {
   const tasks = [];
 
   // From meal items
@@ -242,7 +278,12 @@ function buildTasksFromScope({ meals = [], recipesById = {}, batch = null, scope
     for (const slot of m.slots || []) {
       for (const it of slot.items || []) {
         if (it.type === "recipe") {
-          const recipe = recipesById[it.ref] || { id: it.ref, title: it.title, ingredients: [], tags: [] };
+          const recipe = recipesById[it.ref] || {
+            id: it.ref,
+            title: it.title,
+            ingredients: [],
+            tags: [],
+          };
           const t = deriveTasksFromRecipe(recipe, {
             servings: recipe.servings,
             batchMode: Boolean(batch),
@@ -288,18 +329,36 @@ function consolidateTasks(tasks) {
       prev.quantity = (prev.quantity || 1) + (t.quantity || 1);
       prev.durationMin += t.durationMin || 0;
       prev.notes = [prev.notes, t.notes].filter(Boolean).join(" • ");
-      prev.tags = Array.from(new Set([...(prev.tags || []), ...(t.tags || [])]));
+      prev.tags = Array.from(
+        new Set([...(prev.tags || []), ...(t.tags || [])])
+      );
       map.set(k, prev);
     }
   }
   const merged = Array.from(map.values());
   // station order heuristic
-  const order = ["Advance", "Cold", "Sink", "Knife", "Mix", "Stove", "Oven", "Label", "Cleanup", "Prep"];
+  const order = [
+    "Advance",
+    "Cold",
+    "Sink",
+    "Knife",
+    "Mix",
+    "Stove",
+    "Oven",
+    "Label",
+    "Cleanup",
+    "Prep",
+  ];
   const idx = (s) => {
     const i = order.indexOf(s);
     return i === -1 ? 999 : i;
   };
-  merged.sort((a, b) => idx(a.station) - idx(b.station) || (b.isCritical - a.isCritical) || a.title.localeCompare(b.title));
+  merged.sort(
+    (a, b) =>
+      idx(a.station) - idx(b.station) ||
+      b.isCritical - a.isCritical ||
+      a.title.localeCompare(b.title)
+  );
   return merged;
 }
 
@@ -326,10 +385,20 @@ export default function PrepChecklistGenerator({ className }) {
 
   // Refresh on plan events
   useEffect(() => {
-    const off1 = eventBus.on("mealplan.updated", () => setScope(getSelectedScope?.() || null));
-    const off2 = eventBus.on("session.finalized", () => setScope(getSelectedScope?.() || null));
-    const off3 = eventBus.on("preferences.changed", () => setScope(getSelectedScope?.() || null));
-    return () => { off1?.(); off2?.(); off3?.(); };
+    const off1 = eventBus.on("mealplan.updated", () =>
+      setScope(getSelectedScope?.() || null)
+    );
+    const off2 = eventBus.on("session.finalized", () =>
+      setScope(getSelectedScope?.() || null)
+    );
+    const off3 = eventBus.on("preferences.changed", () =>
+      setScope(getSelectedScope?.() || null)
+    );
+    return () => {
+      off1?.();
+      off2?.();
+      off3?.();
+    };
   }, [getSelectedScope]);
 
   // Build tasks
@@ -338,7 +407,10 @@ export default function PrepChecklistGenerator({ className }) {
     return getMealsForScope?.(scope) || [];
   }, [scope, source, getMealsForScope]);
 
-  const batch = useMemo(() => (source === "batch" ? getActiveBatch?.() : null), [source, getActiveBatch]);
+  const batch = useMemo(
+    () => (source === "batch" ? getActiveBatch?.() : null),
+    [source, getActiveBatch]
+  );
 
   const recipesById = useMemo(() => {
     const map = {};
@@ -365,23 +437,43 @@ export default function PrepChecklistGenerator({ className }) {
   // Filter / sort / search
   const tasks = useMemo(() => {
     let t = baseTasks;
-    if (stationFilter !== "all") t = t.filter((x) => x.station === stationFilter);
+    if (stationFilter !== "all")
+      t = t.filter((x) => x.station === stationFilter);
     if (search.trim()) {
       const q = search.toLowerCase();
-      t = t.filter((x) => x.title.toLowerCase().includes(q) || (x.notes || "").toLowerCase().includes(q));
+      t = t.filter(
+        (x) =>
+          x.title.toLowerCase().includes(q) ||
+          (x.notes || "").toLowerCase().includes(q)
+      );
     }
-    if (sortBy === "alpha") t = [...t].sort((a, b) => a.title.localeCompare(b.title));
-    if (sortBy === "critical") t = [...t].sort((a, b) => (b.isCritical - a.isCritical) || a.title.localeCompare(b.title));
+    if (sortBy === "alpha")
+      t = [...t].sort((a, b) => a.title.localeCompare(b.title));
+    if (sortBy === "critical")
+      t = [...t].sort(
+        (a, b) => b.isCritical - a.isCritical || a.title.localeCompare(b.title)
+      );
     // default station sort already applied in consolidateTasks
     return t;
   }, [baseTasks, stationFilter, search, sortBy]);
 
-  const stations = useMemo(() => ["all", ...Array.from(new Set(baseTasks.map((t) => t.station)))], [baseTasks]);
+  const stations = useMemo(
+    () => ["all", ...Array.from(new Set(baseTasks.map((t) => t.station)))],
+    [baseTasks]
+  );
 
-  const allChecked = useMemo(() => tasks.length > 0 && tasks.every((t) => checkState[t.id]), [tasks, checkState]);
-  const someChecked = useMemo(() => tasks.some((t) => checkState[t.id]), [tasks, checkState]);
+  const allChecked = useMemo(
+    () => tasks.length > 0 && tasks.every((t) => checkState[t.id]),
+    [tasks, checkState]
+  );
+  const someChecked = useMemo(
+    () => tasks.some((t) => checkState[t.id]),
+    [tasks, checkState]
+  );
 
-  const sabbathTag = sabbathAware ? <Badge variant="secondary">Sabbath-aware</Badge> : null;
+  const sabbathTag = sabbathAware ? (
+    <Badge variant="secondary">Sabbath-aware</Badge>
+  ) : null;
 
   // Actions
   const toggleAll = (val) => {
@@ -392,7 +484,10 @@ export default function PrepChecklistGenerator({ className }) {
 
   const clearChecks = () => setCheckState({});
 
-  const snapshot = () => JSON.parse(JSON.stringify({ checkState, notes, stationFilter, sortBy } || {}));
+  const snapshot = () =>
+    JSON.parse(
+      JSON.stringify({ checkState, notes, stationFilter, sortBy } || {})
+    );
   const restore = () => {
     const prev = prevSnapshot.current;
     if (!prev) return;
@@ -400,7 +495,10 @@ export default function PrepChecklistGenerator({ className }) {
     setNotes(prev.notes || "");
     setStationFilter(prev.stationFilter || "all");
     setSortBy(prev.sortBy || "station");
-    toast({ title: "Reverted", description: "Restored previous checklist state." });
+    toast({
+      title: "Reverted",
+      description: "Restored previous checklist state.",
+    });
   };
 
   const reserveInventory = async () => {
@@ -410,20 +508,36 @@ export default function PrepChecklistGenerator({ className }) {
       const payload = {
         source,
         scope,
-        tasks: baseTasks.map(({ title, quantity, unit, station }) => ({ title, quantity, unit, station })),
+        tasks: baseTasks.map(({ title, quantity, unit, station }) => ({
+          title,
+          quantity,
+          unit,
+          station,
+        })),
       };
       const res = await reserveForPrep?.(payload);
       reservationRef.current = res?.reservationId || "temp";
       toast({
         title: "Ingredients reserved",
         description: "Inventory quantities reserved for prep.",
-        action: <Button size="sm" variant="outline" onClick={async () => {
-          await releaseReservation?.(reservationRef.current);
-          toast({ title: "Reservation released" });
-        }}>Release</Button>,
+        action: (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={async () => {
+              await releaseReservation?.(reservationRef.current);
+              toast({ title: "Reservation released" });
+            }}
+          >
+            Release
+          </Button>
+        ),
       });
     } catch {
-      toast({ title: "Reserve failed", description: "Could not reserve inventory." });
+      toast({
+        title: "Reserve failed",
+        description: "Could not reserve inventory.",
+      });
     } finally {
       setBusy(false);
     }
@@ -435,13 +549,22 @@ export default function PrepChecklistGenerator({ className }) {
       const groups = {};
       for (const t of tasks) {
         groups[t.station] = groups[t.station] || [];
-        groups[t.station].push({ label: t.title, minutes: Math.max(1, t.durationMin) });
+        groups[t.station].push({
+          label: t.title,
+          minutes: Math.max(1, t.durationMin),
+        });
       }
       await automation.invoke?.("timer.batch.create", { groups });
-      toast({ title: "Timers created", description: "Multi-timer batch started in Timer Panel." });
+      toast({
+        title: "Timers created",
+        description: "Multi-timer batch started in Timer Panel.",
+      });
       eventBus.emit("ui.open", { id: "MultiTimerPanel" });
     } catch {
-      toast({ title: "Timer error", description: "Could not create multi-timers." });
+      toast({
+        title: "Timer error",
+        description: "Could not create multi-timers.",
+      });
     }
   };
 
@@ -453,9 +576,15 @@ export default function PrepChecklistGenerator({ className }) {
         tasks: baseTasks,
         checks: checkState,
       });
-      toast({ title: "Exported", description: `Checklist exported as ${format.toUpperCase()}.` });
+      toast({
+        title: "Exported",
+        description: `Checklist exported as ${format.toUpperCase()}.`,
+      });
     } catch {
-      toast({ title: "Export failed", description: "Could not export checklist." });
+      toast({
+        title: "Export failed",
+        description: "Could not export checklist.",
+      });
     }
   };
 
@@ -465,21 +594,32 @@ export default function PrepChecklistGenerator({ className }) {
         meta: { source, scope, notes },
         tasks: baseTasks,
       });
-      toast({ title: "Shared", description: "Checklist shared with your family group." });
+      toast({
+        title: "Shared",
+        description: "Checklist shared with your family group.",
+      });
     } catch {
-      toast({ title: "Share failed", description: "Could not share checklist." });
+      toast({
+        title: "Share failed",
+        description: "Could not share checklist.",
+      });
     }
   };
 
   const printChecklist = () => {
-    eventBus.emit("export.print", { id: "PrepChecklist", tasks: baseTasks, checks: checkState });
+    eventBus.emit("export.print", {
+      id: "PrepChecklist",
+      tasks: baseTasks,
+      checks: checkState,
+    });
   };
 
-  const openBatch = () => eventBus.emit("ui.open", { id: "BatchSessionPlanner" });
+  const openBatch = () =>
+    eventBus.emit("ui.open", { id: "BatchSessionPlanner" });
   const openVault = () => eventBus.emit("ui.open", { id: "RecipeVault" });
 
   // Empty state
-  const showEmpty = source === "selection" ? (meals.length === 0) : (!batch);
+  const showEmpty = source === "selection" ? meals.length === 0 : !batch;
   if (showEmpty) {
     return (
       <div className={className}>
@@ -494,8 +634,12 @@ export default function PrepChecklistGenerator({ className }) {
           <CardContent className="space-y-3 text-sm text-muted-foreground">
             <p>No meals or batch session found for the current selection.</p>
             <div className="flex flex-wrap gap-2">
-              <Button size="sm" onClick={openVault}>Open Recipe Vault</Button>
-              <Button size="sm" variant="outline" onClick={openBatch}>Open Batch Session Planner</Button>
+              <Button size="sm" onClick={openVault}>
+                Open Recipe Vault
+              </Button>
+              <Button size="sm" variant="outline" onClick={openBatch}>
+                Open Batch Session Planner
+              </Button>
             </div>
             <div className="grid grid-cols-3 gap-3 mt-4">
               <Skeleton className="h-16" />
@@ -517,11 +661,14 @@ export default function PrepChecklistGenerator({ className }) {
             <div>
               <CardTitle className="flex items-center gap-2">
                 Prep Checklist Generator
-                <Badge variant="outline">{source === "batch" ? "Batch Session" : "Plan Selection"}</Badge>
+                <Badge variant="outline">
+                  {source === "batch" ? "Batch Session" : "Plan Selection"}
+                </Badge>
                 {sabbathTag}
               </CardTitle>
               <div className="text-xs text-muted-foreground mt-1">
-                Auto-builds station-based prep tasks from your plan or batch session. Check off, export, or spin up multi-timers.
+                Auto-builds station-based prep tasks from your plan or batch
+                session. Check off, export, or spin up multi-timers.
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -551,7 +698,11 @@ export default function PrepChecklistGenerator({ className }) {
               <SelectValue placeholder="All stations" />
             </SelectTrigger>
             <SelectContent>
-              {stations.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+              {stations.map((s) => (
+                <SelectItem key={s} value={s}>
+                  {s}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
 
@@ -568,10 +719,16 @@ export default function PrepChecklistGenerator({ className }) {
           </Select>
 
           <div className="ml-auto flex items-center gap-2">
-            <Button size="sm" onClick={() => toggleAll(!allChecked)} variant={allChecked ? "secondary" : "default"}>
+            <Button
+              size="sm"
+              onClick={() => toggleAll(!allChecked)}
+              variant={allChecked ? "secondary" : "default"}
+            >
               {allChecked ? "Uncheck All" : "Check All"}
             </Button>
-            <Button size="sm" variant="outline" onClick={clearChecks}>Clear Checks</Button>
+            <Button size="sm" variant="outline" onClick={clearChecks}>
+              Clear Checks
+            </Button>
           </div>
         </div>
       </Card>
@@ -582,30 +739,67 @@ export default function PrepChecklistGenerator({ className }) {
         <Card>
           <CardContent className="pt-4">
             {tasks.length === 0 ? (
-              <div className="text-sm text-muted-foreground">No tasks match current filters.</div>
+              <div className="text-sm text-muted-foreground">
+                No tasks match current filters.
+              </div>
             ) : (
               <ScrollArea className="max-h-[70vh] pr-2">
                 <div className="space-y-2">
                   {tasks.map((t) => (
-                    <div key={t.id} className="flex items-start gap-3 rounded-lg border p-3">
+                    <div
+                      key={t.id}
+                      className="flex items-start gap-3 rounded-lg border p-3"
+                    >
                       <Checkbox
                         checked={!!checkState[t.id]}
-                        onCheckedChange={(v) => setCheckState((cs) => ({ ...cs, [t.id]: !!v }))}
+                        onCheckedChange={(v) =>
+                          setCheckState((cs) => ({ ...cs, [t.id]: !!v }))
+                        }
                         className="mt-0.5"
                         aria-label={`Check ${t.title}`}
                       />
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <div className={cx("font-medium truncate", t.isCritical ? "text-amber-700" : "")}>{t.title}</div>
+                          <div
+                            className={cx(
+                              "font-medium truncate",
+                              t.isCritical ? "text-amber-700" : ""
+                            )}
+                          >
+                            {t.title}
+                          </div>
                           <Badge variant="secondary">{t.station}</Badge>
-                          {t.isCritical && <Badge className="bg-amber-100 text-amber-800">Critical</Badge>}
-                          {t.tags?.slice(0,2).map((tg) => <Badge key={tg} variant="outline">{tg}</Badge>)}
+                          {t.isCritical && (
+                            <Badge className="bg-amber-100 text-amber-800">
+                              Critical
+                            </Badge>
+                          )}
+                          {t.tags?.slice(0, 2).map((tg) => (
+                            <Badge key={tg} variant="outline">
+                              {tg}
+                            </Badge>
+                          ))}
                         </div>
-                        {t.notes && <div className="text-xs text-muted-foreground mt-0.5">{t.notes}</div>}
+                        {t.notes && (
+                          <div className="text-xs text-muted-foreground mt-0.5">
+                            {t.notes}
+                          </div>
+                        )}
                         <div className="text-[11px] text-muted-foreground mt-1">
                           Duration: {t.durationMin} min
-                          {t.quantity ? <> • Qty: {t.quantity}{t.unit ? ` ${t.unit}` : ""}</> : null}
-                          {t.slotRef ? <> • {t.slotRef.date} • {t.slotRef.slot}</> : null}
+                          {t.quantity ? (
+                            <>
+                              {" "}
+                              • Qty: {t.quantity}
+                              {t.unit ? ` ${t.unit}` : ""}
+                            </>
+                          ) : null}
+                          {t.slotRef ? (
+                            <>
+                              {" "}
+                              • {t.slotRef.date} • {t.slotRef.slot}
+                            </>
+                          ) : null}
                         </div>
                       </div>
                     </div>
@@ -623,16 +817,45 @@ export default function PrepChecklistGenerator({ className }) {
               <CardTitle className="text-base">Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button size="sm" className="w-full" onClick={makeTimers}>Create Multi-Timers</Button>
-              <Button size="sm" variant="outline" className="w-full" onClick={reserveInventory} disabled={busy}>
+              <Button size="sm" className="w-full" onClick={makeTimers}>
+                Create Multi-Timers
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full"
+                onClick={reserveInventory}
+                disabled={busy}
+              >
                 {busy ? "Reserving…" : "Reserve Ingredients"}
               </Button>
               <div className="grid grid-cols-3 gap-2">
-                <Button size="sm" variant="secondary" onClick={() => exportChecklist("pdf")}>Export PDF</Button>
-                <Button size="sm" variant="secondary" onClick={() => exportChecklist("csv")}>Export CSV</Button>
-                <Button size="sm" variant="secondary" onClick={printChecklist}>Print</Button>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => exportChecklist("pdf")}
+                >
+                  Export PDF
+                </Button>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => exportChecklist("csv")}
+                >
+                  Export CSV
+                </Button>
+                <Button size="sm" variant="secondary" onClick={printChecklist}>
+                  Print
+                </Button>
               </div>
-              <Button size="sm" variant="ghost" className="w-full" onClick={shareChecklist}>Share to Family</Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="w-full"
+                onClick={shareChecklist}
+              >
+                Share to Family
+              </Button>
             </CardContent>
           </Card>
 
@@ -652,13 +875,23 @@ export default function PrepChecklistGenerator({ className }) {
                   onClick={async () => {
                     prevSnapshot.current = snapshot();
                     try {
-                      await automation.invoke?.("notes.save", { context: { kind: "prepChecklist", scope, source }, notes });
+                      await automation.invoke?.("notes.save", {
+                        context: { kind: "prepChecklist", scope, source },
+                        notes,
+                      });
                       toast({
                         title: "Notes saved",
-                        action: <Button size="sm" variant="outline" onClick={restore}>Undo</Button>,
+                        action: (
+                          <Button size="sm" variant="outline" onClick={restore}>
+                            Undo
+                          </Button>
+                        ),
                       });
                     } catch {
-                      toast({ title: "Save failed", description: "Could not save notes." });
+                      toast({
+                        title: "Save failed",
+                        description: "Could not save notes.",
+                      });
                     }
                   }}
                 >
@@ -670,7 +903,14 @@ export default function PrepChecklistGenerator({ className }) {
                   onClick={() => {
                     prevSnapshot.current = snapshot();
                     setNotes("");
-                    toast({ title: "Notes cleared", action: <Button size="sm" variant="outline" onClick={restore}>Undo</Button> });
+                    toast({
+                      title: "Notes cleared",
+                      action: (
+                        <Button size="sm" variant="outline" onClick={restore}>
+                          Undo
+                        </Button>
+                      ),
+                    });
                   }}
                 >
                   Clear
@@ -685,15 +925,19 @@ export default function PrepChecklistGenerator({ className }) {
             </CardHeader>
             <CardContent className="text-xs text-muted-foreground space-y-2">
               <p>
-                Tasks are derived from recipes (mise, chop, marinade, preheat, boil, sauces, labeling) and consolidated by
-                station. Switch to <Badge variant="outline">Batch Session</Badge> to include BatchSessionPlanner steps.
+                Tasks are derived from recipes (mise, chop, marinade, preheat,
+                boil, sauces, labeling) and consolidated by station. Switch to{" "}
+                <Badge variant="outline">Batch Session</Badge> to include
+                BatchSessionPlanner steps.
               </p>
               <p>
-                Use <Badge variant="secondary">Create Multi-Timers</Badge> to spin up timers grouped by station in your
-                MultiTimerPanel. Reserve ingredients to protect storehouse stock before cooking.
+                Use <Badge variant="secondary">Create Multi-Timers</Badge> to
+                spin up timers grouped by station in your MultiTimerPanel.
+                Reserve ingredients to protect storehouse stock before cooking.
               </p>
               <p>
-                Sabbath-aware agents (if enabled) will insert hands-off holds when scheduling work.
+                Sabbath-aware agents (if enabled) will insert hands-off holds
+                when scheduling work.
               </p>
             </CardContent>
           </Card>
@@ -705,7 +949,9 @@ export default function PrepChecklistGenerator({ className }) {
         <CardContent className="py-3 flex flex-wrap items-center gap-2">
           <div className="text-xs text-muted-foreground">
             {someChecked
-              ? `${Object.values(checkState).filter(Boolean).length} of ${tasks.length} tasks checked`
+              ? `${Object.values(checkState).filter(Boolean).length} of ${
+                  tasks.length
+                } tasks checked`
               : `${tasks.length} tasks ready`}
           </div>
           <Tabs defaultValue="next">
@@ -717,21 +963,35 @@ export default function PrepChecklistGenerator({ className }) {
               <div className="flex flex-wrap gap-2">
                 <Button
                   size="sm"
-                  onClick={() => eventBus.emit("nutrition.suggestSwap", { scope: scope || { type: "selection" } })}
+                  onClick={() =>
+                    eventBus.emit("nutrition.suggestSwap", {
+                      scope: scope || { type: "selection" },
+                    })
+                  }
                 >
                   Suggest Nutrition-Aligned Swaps
                 </Button>
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => eventBus.emit("ui.open", { id: "ShoppingChecklistGenerator", params: { scope } })}
+                  onClick={() =>
+                    eventBus.emit("ui.open", {
+                      id: "ShoppingChecklistGenerator",
+                      params: { scope },
+                    })
+                  }
                 >
                   Generate Shopping List
                 </Button>
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={() => eventBus.emit("ui.open", { id: "BatchInventoryMap", params: { scope } })}
+                  onClick={() =>
+                    eventBus.emit("ui.open", {
+                      id: "BatchInventoryMap",
+                      params: { scope },
+                    })
+                  }
                 >
                   Open Inventory Map
                 </Button>
@@ -739,15 +999,32 @@ export default function PrepChecklistGenerator({ className }) {
             </TabsContent>
             <TabsContent value="ops" className="mt-2">
               <div className="flex flex-wrap gap-2">
-                <Button size="sm" onClick={() => toggleAll(true)}>Mark All Done</Button>
-                <Button size="sm" variant="outline" onClick={() => toggleAll(false)}>Mark All Not Done</Button>
+                <Button size="sm" onClick={() => toggleAll(true)}>
+                  Mark All Done
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => toggleAll(false)}
+                >
+                  Mark All Not Done
+                </Button>
                 <Button
                   size="sm"
                   variant="ghost"
                   onClick={() => {
-                    const done = Object.entries(checkState).filter(([, v]) => v).map(([k]) => k);
-                    eventBus.emit("prep.tasks.completed", { ids: done, scope, source });
-                    toast({ title: "Logged", description: `${done.length} tasks marked complete.` });
+                    const done = Object.entries(checkState)
+                      .filter(([, v]) => v)
+                      .map(([k]) => k);
+                    eventBus.emit("prep.tasks.completed", {
+                      ids: done,
+                      scope,
+                      source,
+                    });
+                    toast({
+                      title: "Logged",
+                      description: `${done.length} tasks marked complete.`,
+                    });
                   }}
                 >
                   Log Completed

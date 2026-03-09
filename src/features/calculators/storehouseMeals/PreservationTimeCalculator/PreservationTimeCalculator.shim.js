@@ -33,8 +33,8 @@
  *   food type, method, jar size, and altitude.
  */
 
-import { emit } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { HubPacketFormatter, FamilyFundConnector } from "@/services/hub";
 
 /**
@@ -57,7 +57,7 @@ function emitEvent(type, data) {
       type,
       ts: new Date().toISOString(),
       source: `calculators/${SHIM_ID}`,
-      data
+      data,
     });
   } catch (err) {
     // Never crash caller because of event issues.
@@ -78,10 +78,13 @@ async function exportToHubIfEnabled(envelopeType, payload) {
       type: envelopeType,
       source: SHIM_ID,
       createdAt: new Date().toISOString(),
-      payload
+      payload,
     });
     await FamilyFundConnector.send(envelope);
-    emitEvent("session.exported", { envelopeType, id: payload?.calculatorId || SHIM_ID });
+    emitEvent("session.exported", {
+      envelopeType,
+      id: payload?.calculatorId || SHIM_ID,
+    });
   } catch (err) {
     // Fail silently for Hub; log in console only.
     console.warn(`[${SHIM_ID}] Hub export failed`, err);
@@ -286,7 +289,11 @@ function adjustProcessingForVolumeAndAltitude(
     if (alt > 900) factor = 1.2;
     if (alt > 1500) factor = 1.3;
 
-    if (method === "pressureCanning" || method === "waterBathCanning" || method === "dehydration") {
+    if (
+      method === "pressureCanning" ||
+      method === "waterBathCanning" ||
+      method === "dehydration"
+    ) {
       minutes *= factor;
       warnings.push(
         "Altitude is above 300m; processing time increased. Always confirm with altitude-adjusted tested guidance."
@@ -309,7 +316,12 @@ function adjustProcessingForVolumeAndAltitude(
  * @param {"veryLow"|"low"|"moderate"|"high"|string|undefined} riskTolerance
  * @returns {{ days: number, label: string, riskBand: "veryLow"|"low"|"moderate"|"high", warnings: string[] }}
  */
-function estimateStorageTimeDays(method, ambientTempC, ambientHumidityPercent, riskTolerance) {
+function estimateStorageTimeDays(
+  method,
+  ambientTempC,
+  ambientHumidityPercent,
+  riskTolerance
+) {
   const warnings = [];
   const rt = riskTolerance || "low";
   const temp = ambientTempC ?? 20;
@@ -323,7 +335,9 @@ function estimateStorageTimeDays(method, ambientTempC, ambientHumidityPercent, r
     case "waterBathCanning":
       baseDays = 365; // common planning target for shelf-stable canned goods.
       riskBand = rt === "veryLow" ? "veryLow" : "low";
-      warnings.push("Storage time assumes seals remain intact and jars are stored in a cool, dark place.");
+      warnings.push(
+        "Storage time assumes seals remain intact and jars are stored in a cool, dark place."
+      );
       break;
 
     case "dehydration":
@@ -346,7 +360,9 @@ function estimateStorageTimeDays(method, ambientTempC, ambientHumidityPercent, r
     case "freezing":
       baseDays = 365; // up to a year for many foods
       riskBand = "low";
-      warnings.push("Freezer temperatures must remain at or below 0°F / -18°C for best quality.");
+      warnings.push(
+        "Freezer temperatures must remain at or below 0°F / -18°C for best quality."
+      );
       break;
 
     case "refrigeration":
@@ -380,7 +396,12 @@ function estimateStorageTimeDays(method, ambientTempC, ambientHumidityPercent, r
   }
 
   // High humidity is bad for most shelf-stable / dehydrated foods.
-  if (humidity > 70 && (method === "dehydration" || method === "curing" || method === "fermentation")) {
+  if (
+    humidity > 70 &&
+    (method === "dehydration" ||
+      method === "curing" ||
+      method === "fermentation")
+  ) {
     baseDays *= 0.8;
     warnings.push(
       "Ambient humidity is high; recommended storage time reduced for dehydrated/fermented/ cured foods."
@@ -392,12 +413,16 @@ function estimateStorageTimeDays(method, ambientTempC, ambientHumidityPercent, r
     case "veryLow":
       baseDays *= 0.6;
       riskBand = "veryLow";
-      warnings.push("Household risk tolerance is set to VERY LOW; storage time reduced.");
+      warnings.push(
+        "Household risk tolerance is set to VERY LOW; storage time reduced."
+      );
       break;
     case "low":
       baseDays *= 0.8;
       riskBand = riskBand === "high" ? "moderate" : "low";
-      warnings.push("Household risk tolerance is set to LOW; storage time slightly reduced.");
+      warnings.push(
+        "Household risk tolerance is set to LOW; storage time slightly reduced."
+      );
       break;
     case "moderate":
       // no change
@@ -451,8 +476,8 @@ function buildSessionTemplateOverride(method, processingMinutes) {
         metadata: {
           tempTargetF: 0,
           donenessCue: "timer",
-          cueNotes: "Ensure all tools are clean and laid out before you begin."
-        }
+          cueNotes: "Ensure all tools are clean and laid out before you begin.",
+        },
       },
       {
         id: "process-items",
@@ -463,8 +488,9 @@ function buildSessionTemplateOverride(method, processingMinutes) {
         metadata: {
           tempTargetF: 0,
           donenessCue: "timer",
-          cueNotes: "Follow a tested preservation recipe for exact times, pressures, and temperatures."
-        }
+          cueNotes:
+            "Follow a tested preservation recipe for exact times, pressures, and temperatures.",
+        },
       },
       {
         id: "cool-and-store",
@@ -475,10 +501,11 @@ function buildSessionTemplateOverride(method, processingMinutes) {
         metadata: {
           tempTargetF: 0,
           donenessCue: "timer",
-          cueNotes: "Do not stack hot jars; allow airflow and avoid rapid temperature shocks."
-        }
-      }
-    ]
+          cueNotes:
+            "Do not stack hot jars; allow airflow and avoid rapid temperature shocks.",
+        },
+      },
+    ],
   };
 }
 
@@ -496,7 +523,7 @@ export async function runPreservationTimeCalculator({ input, source = "ui" }) {
   emitEvent("calculator.run.started", {
     calculatorId: SHIM_ID,
     source,
-    input
+    input,
   });
 
   // Defensive checks
@@ -504,7 +531,7 @@ export async function runPreservationTimeCalculator({ input, source = "ui" }) {
     const errorPayload = {
       calculatorId: SHIM_ID,
       error: "Invalid input; expected an object matching the schema.",
-      source
+      source,
     };
     emitEvent("calculator.run.failed", errorPayload);
     return {
@@ -516,13 +543,13 @@ export async function runPreservationTimeCalculator({ input, source = "ui" }) {
         recommendedStorageTimeLabel: "use immediately / do not store",
         riskBand: "high",
         warnings: ["Invalid input provided to preservation time calculator."],
-        notes: "No calculation was performed due to invalid input."
+        notes: "No calculation was performed due to invalid input.",
       },
       meta: {
         version: SHIM_VERSION,
         computedAt: startedAt,
-        source
-      }
+        source,
+      },
     };
   }
 
@@ -534,7 +561,7 @@ export async function runPreservationTimeCalculator({ input, source = "ui" }) {
     altitudeMeters,
     ambientTemperatureC,
     ambientHumidityPercent,
-    householdRiskTolerance
+    householdRiskTolerance,
   } = input;
 
   const method = preservationMethod || "other";
@@ -579,7 +606,7 @@ export async function runPreservationTimeCalculator({ input, source = "ui" }) {
     warnings,
     notes:
       "Values are for household planning only and are not a substitute for tested, official preservation guidelines.",
-    sessionTemplateOverride
+    sessionTemplateOverride,
   };
 
   const result = {
@@ -589,8 +616,8 @@ export async function runPreservationTimeCalculator({ input, source = "ui" }) {
     meta: {
       version: SHIM_VERSION,
       computedAt: new Date().toISOString(),
-      source
-    }
+      source,
+    },
   };
 
   emitEvent("calculator.run.completed", {
@@ -599,12 +626,14 @@ export async function runPreservationTimeCalculator({ input, source = "ui" }) {
     outputSummary: {
       recommendedProcessingTimeMinutes: output.recommendedProcessingTimeMinutes,
       recommendedStorageTimeDays: output.recommendedStorageTimeDays,
-      riskBand: output.riskBand
-    }
+      riskBand: output.riskBand,
+    },
   });
 
   // Optional Hub export (non-blocking)
-  exportToHubIfEnabled("calculator.result.preservationTime", result).catch(() => {});
+  exportToHubIfEnabled("calculator.result.preservationTime", result).catch(
+    () => {}
+  );
 
   return result;
 }
@@ -615,7 +644,7 @@ export async function runPreservationTimeCalculator({ input, source = "ui" }) {
 const PreservationTimeCalculatorShim = {
   id: SHIM_ID,
   version: SHIM_VERSION,
-  run: runPreservationTimeCalculator
+  run: runPreservationTimeCalculator,
 };
 
 export default PreservationTimeCalculatorShim;

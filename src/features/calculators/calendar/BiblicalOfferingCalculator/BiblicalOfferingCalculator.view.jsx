@@ -19,7 +19,7 @@
 
 import React, { useState } from "react";
 import { runBiblicalOfferingCalculatorShim } from "./BiblicalOfferingCalculator.shim";
-import { emit as emitEvent } from "@/services/eventBus";
+import { emit as emitEvent } from "@/services/events/eventBus";
 
 /**
  * @typedef {import("./BiblicalOfferingCalculator.shim").BiblicalOfferingCalculatorInput} BiblicalOfferingCalculatorInput
@@ -48,7 +48,7 @@ export default function BiblicalOfferingCalculatorView(props) {
       typeof initialInput?.includeGrainDrink === "boolean"
         ? initialInput.includeGrainDrink
         : true,
-    householdContext: initialInput?.householdContext || "study-only"
+    householdContext: initialInput?.householdContext || "study-only",
   }));
 
   /** @type {[BiblicalOfferingCalculatorOutput|null, Function]} */
@@ -96,7 +96,7 @@ export default function BiblicalOfferingCalculatorView(props) {
       const shimRequest = {
         calculatorId: "biblical-offering-calculator",
         nodeKey: "biblical-offering-calculator",
-        input
+        input,
       };
 
       const response = await runBiblicalOfferingCalculatorShim(shimRequest);
@@ -134,27 +134,27 @@ export default function BiblicalOfferingCalculatorView(props) {
       title: result.canonicalSummary?.label || "Offering Study Session",
       source: {
         type: "manual",
-        refId: null
+        refId: null,
       },
       steps,
       prefs: {
         voiceGuidance: true,
         haptic: false,
-        autoAdvance: false
+        autoAdvance: false,
       },
       status: "pending",
       progress: {
         currentStepIndex: 0,
         elapsedSec: 0,
         startedAt: null,
-        pausedAt: null
+        pausedAt: null,
       },
       analytics: {
         skippedSteps: [],
-        adjustments: []
+        adjustments: [],
       },
       createdAt: nowIso,
-      updatedAt: nowIso
+      updatedAt: nowIso,
     };
 
     try {
@@ -162,11 +162,14 @@ export default function BiblicalOfferingCalculatorView(props) {
         type: "session.created",
         ts: nowIso,
         source: "calculators/calendar/BiblicalOfferingCalculator",
-        data: { session }
+        data: { session },
       });
     } catch (err) {
       /* eslint-disable no-console */
-      console.warn("[BiblicalOfferingCalculatorView] Failed to emit session.created:", err);
+      console.warn(
+        "[BiblicalOfferingCalculatorView] Failed to emit session.created:",
+        err
+      );
       /* eslint-enable no-console */
     }
   };
@@ -181,8 +184,8 @@ export default function BiblicalOfferingCalculatorView(props) {
               Biblical Offering Explorer
             </h2>
             <p className="text-xs text-slate-300 sm:text-sm">
-              Choose an offering type, review associated animals and grain/drink patterns,
-              and turn it into a guided household study session.
+              Choose an offering type, review associated animals and grain/drink
+              patterns, and turn it into a guided household study session.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -249,8 +252,9 @@ export default function BiblicalOfferingCalculatorView(props) {
                 className="mt-1 w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-50 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
               />
               <span className="mt-1 block text-[0.7rem] text-slate-400">
-                Separate references with commas or semicolons. When left empty, the calculator
-                will use standard passages for the selected offering.
+                Separate references with commas or semicolons. When left empty,
+                the calculator will use standard passages for the selected
+                offering.
               </span>
             </label>
 
@@ -284,10 +288,14 @@ export default function BiblicalOfferingCalculatorView(props) {
                 onChange={handleHouseholdContextChange}
                 className="mt-1 w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-50 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
               >
-                <option value="study-only">Study only (notes / journaling)</option>
+                <option value="study-only">
+                  Study only (notes / journaling)
+                </option>
                 <option value="storytelling">Storytelling with family</option>
                 <option value="curriculum">Curriculum / lesson planning</option>
-                <option value="household-ritual">Household remembrance pattern</option>
+                <option value="household-ritual">
+                  Household remembrance pattern
+                </option>
               </select>
             </label>
 
@@ -329,8 +337,9 @@ export default function BiblicalOfferingCalculatorView(props) {
                   No offering pattern yet.
                 </p>
                 <p className="mt-1 max-w-md text-xs text-slate-400">
-                  Choose an offering type and calculate. You’ll see canonical summaries,
-                  animal patterns, grain/drink elements, and study prompts here.
+                  Choose an offering type and calculate. You’ll see canonical
+                  summaries, animal patterns, grain/drink elements, and study
+                  prompts here.
                 </p>
               </div>
             )}
@@ -379,7 +388,8 @@ export default function BiblicalOfferingCalculatorView(props) {
                           Animal Patterns
                         </h3>
                         <span className="text-[0.7rem] text-slate-400">
-                          Ideal for curriculum, animal husbandry study, or meat planning.
+                          Ideal for curriculum, animal husbandry study, or meat
+                          planning.
                         </span>
                       </div>
                       <div className="mt-2 overflow-x-auto">
@@ -387,9 +397,15 @@ export default function BiblicalOfferingCalculatorView(props) {
                           <thead>
                             <tr className="border-b border-slate-800 text-[0.7rem] uppercase tracking-wide text-slate-400">
                               <th className="py-1 pr-2 text-left">Species</th>
-                              <th className="py-1 px-2 text-left">Age pattern</th>
-                              <th className="py-1 px-2 text-left">Sex pattern</th>
-                              <th className="py-1 pl-2 text-left">Defect rule</th>
+                              <th className="py-1 px-2 text-left">
+                                Age pattern
+                              </th>
+                              <th className="py-1 px-2 text-left">
+                                Sex pattern
+                              </th>
+                              <th className="py-1 pl-2 text-left">
+                                Defect rule
+                              </th>
                             </tr>
                           </thead>
                           <tbody>
@@ -427,7 +443,8 @@ export default function BiblicalOfferingCalculatorView(props) {
                           Grain &amp; Drink Elements
                         </h3>
                         <span className="text-[0.7rem] text-slate-400">
-                          Connect to breadmaking, wine study, and daily provision.
+                          Connect to breadmaking, wine study, and daily
+                          provision.
                         </span>
                       </div>
                       <ul className="mt-2 space-y-1 text-xs text-slate-200">
@@ -462,7 +479,8 @@ export default function BiblicalOfferingCalculatorView(props) {
                           Study Prompts
                         </h3>
                         <span className="text-[0.7rem] text-slate-400">
-                          Use for journaling, family discussions, or class assignments.
+                          Use for journaling, family discussions, or class
+                          assignments.
                         </span>
                       </div>
                       <ol className="mt-2 space-y-1 text-xs text-slate-200">
@@ -475,7 +493,9 @@ export default function BiblicalOfferingCalculatorView(props) {
                               {idx + 1}.
                             </span>
                             <div className="flex-1">
-                              <p className="text-xs text-slate-100">{p.question}</p>
+                              <p className="text-xs text-slate-100">
+                                {p.question}
+                              </p>
                               <p className="mt-0.5 text-[0.65rem] uppercase tracking-wide text-slate-500">
                                 Focus: {capitalize(p.focus)}
                               </p>
@@ -492,8 +512,8 @@ export default function BiblicalOfferingCalculatorView(props) {
                           Start Study Session Now
                         </button>
                         <p className="text-[0.65rem] text-slate-400">
-                          This sends a study session to the global SessionRunner so you
-                          can move around the app while studying.
+                          This sends a study session to the global SessionRunner
+                          so you can move around the app while studying.
                         </p>
                       </div>
                     </div>

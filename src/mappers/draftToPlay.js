@@ -26,7 +26,7 @@ let eventBus = {
   on: () => () => {},
 };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -38,19 +38,22 @@ try {
 let HubPacketFormatter = null;
 let FamilyFundConnector = null;
 try {
-  HubPacketFormatter = require("@/hub/HubPacketFormatter");
-  FamilyFundConnector = require("@/hub/FamilyFundConnector");
+  HubPacketFormatter = require("@/services/hub/HubPacketFormatter");
+  FamilyFundConnector = require("@/services/hub/FamilyFundConnector");
 } catch {}
 
 /* Optional dev validator (soft import) */
 let validateSessionPlay = null;
 try {
-  validateSessionPlay = require("@/contracts/validators/validateSessionPlay").validateSessionPlay;
+  validateSessionPlay =
+    require("@/contracts/validators/validateSessionPlay").validateSessionPlay;
 } catch {}
 
 /* --------------------------------- Utils ---------------------------------- */
 const isBrowser =
-  typeof window !== "undefined" && typeof document !== "undefined" && typeof navigator !== "undefined";
+  typeof window !== "undefined" &&
+  typeof document !== "undefined" &&
+  typeof navigator !== "undefined";
 
 const nowISO = () => new Date().toISOString();
 
@@ -124,8 +127,20 @@ function computeSessionId(draft) {
 
 /** Normalize domain: supports cooking, cleaning, garden, animals, preservation, storehouse */
 function normalizeDomain(d) {
-  const v = String(d || "").toLowerCase().trim();
-  if (["cooking", "cleaning", "garden", "animals", "animal", "preservation", "storehouse"].includes(v)) {
+  const v = String(d || "")
+    .toLowerCase()
+    .trim();
+  if (
+    [
+      "cooking",
+      "cleaning",
+      "garden",
+      "animals",
+      "animal",
+      "preservation",
+      "storehouse",
+    ].includes(v)
+  ) {
     return v === "animal" ? "animals" : v;
   }
   return "cooking"; // safe default (most-common surface)
@@ -152,8 +167,11 @@ function extractTimers(draft) {
       s.label ||
       s.title ||
       (typeof s.note === "string" ? s.note.slice(0, 40) : `Step ${i + 1}`);
-    const dur =
-      Number.isFinite(s?.durationMs) ? s.durationMs : Number.isFinite(s?.timer?.durationMs) ? s.timer.durationMs : null;
+    const dur = Number.isFinite(s?.durationMs)
+      ? s.durationMs
+      : Number.isFinite(s?.timer?.durationMs)
+      ? s.timer.durationMs
+      : null;
     if (Number.isFinite(dur) && dur >= 0) {
       const timerIdSeed = `t|${i}|${label}|${dur}`;
       timers.push({
@@ -169,7 +187,8 @@ function extractTimers(draft) {
 /** Build initial cursor (step index) */
 function computeStartIndex(draft, requestedIndex) {
   const steps = Array.isArray(draft?.steps) ? draft.steps : [];
-  if (Number.isInteger(requestedIndex)) return clamp(requestedIndex, 0, Math.max(steps.length - 1, 0));
+  if (Number.isInteger(requestedIndex))
+    return clamp(requestedIndex, 0, Math.max(steps.length - 1, 0));
   // If draft carries a hint (e.g., first actionable step), honor it
   if (Number.isInteger(draft?.startAtStepIndex)) {
     return clamp(draft.startAtStepIndex, 0, Math.max(steps.length - 1, 0));
@@ -189,7 +208,10 @@ async function exportToHubIfEnabled(envelope, context = {}) {
     const packet = HubPacketFormatter.formatSessionStart?.(envelope, context);
     if (!packet) return;
     await FamilyFundConnector.send?.(packet);
-    emitTelemetry("hub.export.ok", { sessionId: envelope?.data?.sessionId, domain: envelope?.data?.domain });
+    emitTelemetry("hub.export.ok", {
+      sessionId: envelope?.data?.sessionId,
+      domain: envelope?.data?.domain,
+    });
   } catch (err) {
     // fail silent but log telemetry for dev
     emitTelemetry("hub.export.fail", { message: err?.message || String(err) });
@@ -240,7 +262,9 @@ function draftToPlayStartEnvelope(draft, opts = {}) {
     streamerSafe,
     createdBy: draft?.createdBy || undefined,
     draftKind: draft?.kind || draft?.type || "session",
-    device: isBrowser ? (navigator?.userAgentData?.platform || navigator?.platform || "web") : "server",
+    device: isBrowser
+      ? navigator?.userAgentData?.platform || navigator?.platform || "web"
+      : "server",
   };
 
   const envelope = {
@@ -264,17 +288,25 @@ function draftToPlayStartEnvelope(draft, opts = {}) {
   const shouldValidate =
     typeof opts.validate === "boolean"
       ? opts.validate
-      : process.env.NODE_ENV !== "production" && typeof validateSessionPlay === "function";
+      : process.env.NODE_ENV !== "production" &&
+        typeof validateSessionPlay === "function";
 
   if (shouldValidate && typeof validateSessionPlay === "function") {
     try {
-      const res = validateSessionPlay(envelope, { strict: true, throwOnError: true });
+      const res = validateSessionPlay(envelope, {
+        strict: true,
+        throwOnError: true,
+      });
       if (res?.warnings?.length) {
-        emitTelemetry("draftToPlay.validate.warnings", { warnings: res.warnings.slice(0, 4) });
+        emitTelemetry("draftToPlay.validate.warnings", {
+          warnings: res.warnings.slice(0, 4),
+        });
       }
     } catch (err) {
       // Surface a precise error with a preview
-      emitTelemetry("draftToPlay.validate.error", { message: err?.message || String(err) });
+      emitTelemetry("draftToPlay.validate.error", {
+        message: err?.message || String(err),
+      });
       throw err;
     }
   }
@@ -307,7 +339,9 @@ async function draftToPlayAndEmit(draft, opts = {}) {
       sessionId: envelope.data.sessionId,
     });
   } catch (err) {
-    emitTelemetry("draftToPlay.emit.error", { message: err?.message || String(err) });
+    emitTelemetry("draftToPlay.emit.error", {
+      message: err?.message || String(err),
+    });
     throw err;
   }
 
@@ -324,7 +358,10 @@ async function draftToPlayAndEmit(draft, opts = {}) {
  * Build ONLY (no emit/export) — useful for previews or links.
  */
 function buildOnly(draft, opts = {}) {
-  return draftToPlayStartEnvelope(draft, { ...opts, validate: opts.validate ?? false });
+  return draftToPlayStartEnvelope(draft, {
+    ...opts,
+    validate: opts.validate ?? false,
+  });
 }
 
 /**

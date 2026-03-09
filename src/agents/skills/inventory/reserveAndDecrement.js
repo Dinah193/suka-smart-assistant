@@ -49,7 +49,7 @@
  * }
  */
 
-import { emit } from "@/services/eventBus";
+import { emit } from "@/services/events/eventBus";
 import InventoryLookup from "@/agents/skills/inventory/lookup";
 
 /* ------------------------------- Soft DB load ------------------------------- */
@@ -65,11 +65,7 @@ async function getDb() {
   if (_dbPromise) return _dbPromise;
 
   _dbPromise = (async () => {
-    const candidates = [
-      "@/services/db",
-      "@/db",
-      "@/data/db",
-    ];
+    const candidates = ["@/services/db", "@/db", "@/data/db"];
 
     for (const path of candidates) {
       try {
@@ -81,7 +77,9 @@ async function getDb() {
       }
     }
 
-    console.warn("[inventory.reserveAndDecrement] Dexie DB not found; returning null");
+    console.warn(
+      "[inventory.reserveAndDecrement] Dexie DB not found; returning null"
+    );
     return null;
   })();
 
@@ -97,21 +95,21 @@ async function getInventoryTable() {
   const db = await getDb();
   if (!db) return null;
 
-  const candidates = [
-    db.inventory,
-    db.storehouse,
-    db.storehouseItems,
-  ];
+  const candidates = [db.inventory, db.storehouse, db.storehouseItems];
   for (const t of candidates) {
     if (t && typeof t.where === "function") return t;
   }
 
   if (Array.isArray(db.tables)) {
-    const inv = db.tables.find((t) => /inventory|storehouse/i.test(t.name || ""));
+    const inv = db.tables.find((t) =>
+      /inventory|storehouse/i.test(t.name || "")
+    );
     if (inv) return inv;
   }
 
-  console.warn("[inventory.reserveAndDecrement] No inventory-like table found on DB");
+  console.warn(
+    "[inventory.reserveAndDecrement] No inventory-like table found on DB"
+  );
   return null;
 }
 
@@ -200,7 +198,12 @@ export async function reserveAndDecrement(instructions = [], options = {}) {
     }
 
     if (have < need) {
-      insufficient.push({ instruction, cause: "INSUFFICIENT_STOCK", have, need });
+      insufficient.push({
+        instruction,
+        cause: "INSUFFICIENT_STOCK",
+        have,
+        need,
+      });
     }
   }
 

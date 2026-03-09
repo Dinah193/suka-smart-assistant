@@ -19,6 +19,17 @@
 //   - standalone/local-first
 //   - soft imports for db + eventBus
 //   - no TypeScript
+//
+// Update (Farm-to-table pipeline runs, but doesn’t overwhelm):
+//   - This engine can now *carry* optional farm-to-table pipeline outputs on the MealPlanDraft:
+//       • component demand
+//       • target deltas
+//       • inventory deltas
+//   - BUT the Meal Planner UI should not show these unless user opts in.
+//   - We accomplish this by attaching:
+//       draft.pipeline (optional payload)
+//       draft.visibilityHints.showPipelineByDefault (defaults false)
+//   - Grocery generation remains conservative (does not expand pipeline into extra UI artifacts).
 
 /* ------------------------------ Soft Imports ------------------------------ */
 let db = null;
@@ -57,8 +68,8 @@ function getEventBus() {
   const candidates = [
     "@/services/events/eventBus",
     "@/services/events/eventBus.js",
-    "@/services/eventBus",
-    "@/services/eventBus.js",
+    "@/services/events/eventBus",
+    "@/services/events/eventBus.js",
     "../../services/events/eventBus",
     "../../services/events/eventBus.js",
     "../../../services/events/eventBus",
@@ -100,12 +111,97 @@ async function withRetry(fn, { tries = 2, label = "op" } = {}) {
       if (import.meta?.env?.DEV) {
         console.warn(
           `[MealPlanEngine:${label}] retry ${i + 1}/${tries} failed`,
-          e
+          e,
         );
       }
     }
   }
   throw lastErr;
+}
+
+function safeObj(v) {
+  return v && typeof v === "object" ? v : {};
+}
+function safeStr(v, fallback = "") {
+  if (v == null) return fallback;
+  const s = String(v).trim();
+  return s.length ? s : fallback;
+}
+function safeNum(v, fallback = 0) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+function asArray(v) {
+  if (v == null) return [];
+  return Array.isArray(v) ? v : [v];
+}
+function clamp(n, lo, hi) {
+  const x = Number.isFinite(+n) ? +n : lo;
+  return Math.max(lo, Math.min(hi, x));
+}
+function deepCloneJSON(o) {
+  try {
+    return JSON.parse(JSON.stringify(o ?? null));
+  } catch {
+    return o ?? null;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Farm-to-table pipeline payload (carry + gate visibility)                    */
+/* -------------------------------------------------------------------------- */
+
+function normalizePipeline(pipeline) {
+  const p = safeObj(pipeline);
+
+  const normList = (arr) =>
+    asArray(arr)
+      .map((x) => safeObj(x))
+      .map((x) => ({
+        id: safeStr(x.id, safeStr(x.itemId, "")),
+        label: safeStr(x.label, safeStr(x.name, "")),
+        // support qty/value/delta shapes
+        qty: safeNum(x.qty ?? x.amount?.value ?? x.value ?? x.delta ?? 0, 0),
+        unit: safeStr(x.unit, safeStr(x.amount?.unit, "")),
+        delta: safeNum(x.delta ?? x.change ?? 0, 0),
+        source: safeStr(x.source, ""),
+        why: safeStr(x.why ?? x.reason ?? "", ""),
+        confidence: clamp(safeNum(x.confidence, 0), 0, 1),
+        meta: safeObj(x.meta),
+      }))
+      .filter((x) => x.id || x.label);
+
+  const componentDemand = safeObj(p.componentDemand);
+  const targetDeltas = safeObj(p.targetDeltas);
+  const inventoryDeltas = safeObj(p.inventoryDeltas);
+
+  return {
+    raw: deepCloneJSON(p),
+
+    componentDemand: {
+      items: normList(componentDemand.items ?? componentDemand.list ?? []),
+      summary: safeStr(componentDemand.summary, ""),
+    },
+
+    targetDeltas: {
+      items: normList(targetDeltas.items ?? targetDeltas.list ?? []),
+      summary: safeStr(targetDeltas.summary, ""),
+    },
+
+    inventoryDeltas: {
+      items: normList(inventoryDeltas.items ?? inventoryDeltas.list ?? []),
+      summary: safeStr(inventoryDeltas.summary, ""),
+    },
+  };
+}
+
+function pipelineCounts(p) {
+  if (!p) return { componentDemand: 0, targetDeltas: 0, inventoryDeltas: 0 };
+  return {
+    componentDemand: asArray(p.componentDemand?.items).length,
+    targetDeltas: asArray(p.targetDeltas?.items).length,
+    inventoryDeltas: asArray(p.inventoryDeltas?.items).length,
+  };
 }
 
 /* -------------------------------------------------------------------------- */
@@ -149,6 +245,8 @@ async function withRetry(fn, { tries = 2, label = "op" } = {}) {
  *     { dayIndex: number, meals: [{ slot: "breakfast"|"lunch"|"dinner"|"snack", recipeId?: string, title: string, servings: number, macroEstimate?: {...} }] }
  *   ],
  *   constraintsApplied: object,
+ *   pipeline?: { componentDemand, targetDeltas, inventoryDeltas, raw },
+ *   visibilityHints?: { showPipelineByDefault?: boolean, hasPipeline?: boolean, pipelineCounts?: {...} },
  *   errors?: { code: string, message: string }[]
  * }
  *
@@ -255,20 +353,20 @@ async function getLatestByIndex(tableName, whereField, equalsValue) {
     if (!rows?.length) return null;
     rows.sort((a, b) =>
       String(b.updatedAt || b.appliedAt || b.createdAt || "").localeCompare(
-        String(a.updatedAt || a.appliedAt || a.createdAt || "")
-      )
+        String(a.updatedAt || a.appliedAt || a.createdAt || ""),
+      ),
     );
     return rows[0] || null;
   } catch {
     // fallback: scan
     const rows = await d[tableName].toCollection().toArray();
     const filtered = (rows || []).filter(
-      (r) => String(r?.[whereField] || "") === String(equalsValue || "")
+      (r) => String(r?.[whereField] || "") === String(equalsValue || ""),
     );
     filtered.sort((a, b) =>
       String(b.updatedAt || b.appliedAt || b.createdAt || "").localeCompare(
-        String(a.updatedAt || a.appliedAt || a.createdAt || "")
-      )
+        String(a.updatedAt || a.appliedAt || a.createdAt || ""),
+      ),
     );
     return filtered[0] || null;
   }
@@ -369,13 +467,19 @@ function defaultMealPlanFromTargets(targets, opts = {}) {
   const days = Number(opts.days ?? 7);
   const mealsPerDay = Number(opts.mealsPerDay ?? 3);
 
+  // Farm-to-table pipeline payload is OPTIONAL and gated for UI.
+  const includePipeline = opts.includePipeline !== false;
+  const showPipelineByDefault = Boolean(opts.showPipelineByDefault);
+  const normalizedPipeline =
+    includePipeline && opts.pipeline ? normalizePipeline(opts.pipeline) : null;
+
   // Minimal stub plan: UI/agents can replace recipes later.
   const slots =
     mealsPerDay === 4
       ? ["breakfast", "lunch", "dinner", "snack"]
       : mealsPerDay === 2
-      ? ["lunch", "dinner"]
-      : ["breakfast", "lunch", "dinner"];
+        ? ["lunch", "dinner"]
+        : ["breakfast", "lunch", "dinner"];
 
   const plan = Array.from({ length: days }).map((_, dayIndex) => ({
     dayIndex,
@@ -387,6 +491,8 @@ function defaultMealPlanFromTargets(targets, opts = {}) {
       macroEstimate: targets?.macros ? { ...targets.macros } : {},
     })),
   }));
+
+  const counts = pipelineCounts(normalizedPipeline);
 
   return {
     id: makeId("mealplan"),
@@ -400,12 +506,23 @@ function defaultMealPlanFromTargets(targets, opts = {}) {
     mealsPerDay,
     plan,
     constraintsApplied: targets?.constraints || {},
+    // carry pipeline (but UI should not show unless opted-in)
+    pipeline: normalizedPipeline,
+    visibilityHints: {
+      // Meal Planner should default to NOT showing farm-to-table panels
+      showPipelineByDefault,
+      hasPipeline: Boolean(normalizedPipeline),
+      pipelineCounts: counts,
+      // module token helps VisibilityRulesEngine (if present)
+      module: "meal_planning",
+    },
     errors: [],
   };
 }
 
 function groceryFromMealPlanDraft(mealDraft, opts = {}) {
   // Minimal grocery: derive from meal titles; later you’ll swap for recipe ingredient expansion.
+  // IMPORTANT: do not automatically expand farm-to-table pipeline into grocery UI.
   const items = [];
   const add = (name, qty = 1, unit = "") => {
     const key = String(name).trim().toLowerCase().replace(/\s+/g, "_");
@@ -442,7 +559,7 @@ function groceryFromMealPlanDraft(mealDraft, opts = {}) {
 
   // Apply simple constraints-based removals (avoid list)
   const avoid = (mealDraft?.constraintsApplied?.avoid || []).map((x) =>
-    String(x).toLowerCase()
+    String(x).toLowerCase(),
   );
   const filtered = items.filter((it) => {
     const n = String(it.name || "").toLowerCase();
@@ -497,7 +614,7 @@ function sessionFromGroceryAndMealPlan({ mealDraft, groceryDraft }, opts = {}) {
 
   const timers = [];
   steps.forEach((s) =>
-    (s.timers || []).forEach((t) => timers.push({ ...t, stepId: s.id }))
+    (s.timers || []).forEach((t) => timers.push({ ...t, stepId: s.id })),
   );
 
   return {
@@ -536,7 +653,7 @@ export const MealPlanEngine = {
     const latestTargets = await getLatestByIndex(
       "nutritionTargetsHistory",
       "personId",
-      String(personId)
+      String(personId),
     );
     if (latestTargets)
       _cache.targetsByPerson.set(String(personId), latestTargets);
@@ -544,14 +661,14 @@ export const MealPlanEngine = {
     const latestMeal = await getLatestByIndex(
       "mealPlanDrafts",
       "personId",
-      String(personId)
+      String(personId),
     );
     if (latestMeal) _cache.mealPlanByPerson.set(String(personId), latestMeal);
 
     const latestGrocery = await getLatestByIndex(
       "groceryDrafts",
       "personId",
-      String(personId)
+      String(personId),
     );
     if (latestGrocery)
       _cache.groceryByPerson.set(String(personId), latestGrocery);
@@ -559,7 +676,7 @@ export const MealPlanEngine = {
     const latestSession = await getLatestByIndex(
       "sessionDrafts",
       "personId",
-      String(personId)
+      String(personId),
     );
     if (latestSession)
       _cache.sessionByPerson.set(String(personId), latestSession);
@@ -625,6 +742,11 @@ export const MealPlanEngine = {
   /**
    * Step 2: Regenerate meal plan draft using targets.
    * Emits: mealplan.draft.updated
+   *
+   * Farm-to-table integration (carry + gate):
+   *   Pass optional `pipeline` (component demand / target deltas / inventory deltas).
+   *   By default, we attach it to the draft but set `visibilityHints.showPipelineByDefault=false`.
+   *   UI should only show it when user opts in.
    */
   async regenerateMealPlan({
     householdId,
@@ -632,6 +754,15 @@ export const MealPlanEngine = {
     targetsId,
     days = 7,
     mealsPerDay = 3,
+
+    // NEW (optional): farm-to-table pipeline payload
+    pipeline = null,
+
+    // NEW (optional): UI visibility gate for pipeline panels (defaults false)
+    showPipelineByDefault = false,
+
+    // NEW (optional): allow excluding pipeline from persisted drafts
+    includePipeline = true,
   } = {}) {
     const pid = String(personId || "");
     if (!pid) throw new Error("regenerateMealPlan requires personId");
@@ -639,7 +770,7 @@ export const MealPlanEngine = {
     const targets = _cache.targetsByPerson.get(pid) || null;
     if (!targets)
       throw new Error(
-        "No cached NutritionTargets for person. Apply targets first."
+        "No cached NutritionTargets for person. Apply targets first.",
       );
 
     const draft = defaultMealPlanFromTargets(
@@ -648,7 +779,14 @@ export const MealPlanEngine = {
         householdId: householdId || targets.householdId,
         id: targetsId || targets.id,
       },
-      { days, mealsPerDay }
+      {
+        days,
+        mealsPerDay,
+        pipeline,
+        includePipeline,
+        // critical: Meal Planner should not show pipeline unless user opts in
+        showPipelineByDefault: Boolean(showPipelineByDefault),
+      },
     );
 
     _cache.mealPlanByPerson.set(pid, draft);
@@ -663,6 +801,7 @@ export const MealPlanEngine = {
       targetsId: draft.targetsId,
       mealPlanId: draft.id,
       updatedAt: draft.updatedAt,
+      // keep original payload shape but now includes draft.pipeline + draft.visibilityHints
       draft,
     });
 
@@ -702,7 +841,7 @@ export const MealPlanEngine = {
     // detect shortages
     const { shortages } = await withRetry(
       () => detectInventoryShortages(groceryDraft),
-      { label: "detectInventoryShortages" }
+      { label: "detectInventoryShortages" },
     );
     groceryDraft.shortages = shortages || [];
 
@@ -774,7 +913,7 @@ export const MealPlanEngine = {
 
     const sessionDraft = sessionFromGroceryAndMealPlan(
       { mealDraft: resolvedMeal, groceryDraft: resolvedGrocery },
-      { recipeIds }
+      { recipeIds },
     );
 
     _cache.sessionByPerson.set(pid, sessionDraft);
@@ -867,7 +1006,7 @@ export const MealPlanEngine = {
               timers: Array.isArray(draft.timers) ? draft.timers : [],
               recipeIds: Array.isArray(draft.recipeIds) ? draft.recipeIds : [],
             }),
-          { label: "saveSession" }
+          { label: "saveSession" },
         );
       } else if (d.sessions) {
         // fallback: write sessions directly (keep PK behavior you already use)
@@ -992,6 +1131,15 @@ export const MealPlanEngine = {
     mealsPerDay = 3,
     recipeIds = [],
     autoStart = false,
+
+    // NEW (optional): carry pipeline through into meal plan draft (UI-gated)
+    pipeline = null,
+
+    // NEW (optional): only true when user opts in to see it in Meal Planner UI
+    showPipelineByDefault = false,
+
+    // NEW (optional): allow excluding pipeline from persisted drafts
+    includePipeline = true,
   }) {
     const personId = String(targets?.personId || "");
     if (!personId) throw new Error("runFullChain requires targets.personId");
@@ -1000,18 +1148,25 @@ export const MealPlanEngine = {
       const applied = await this.applyNutritionTargets(targets, {
         autoRegenerate: false,
       });
+
       const meal = await this.regenerateMealPlan({
         householdId: applied.householdId,
         personId,
         targetsId: applied.id,
         days,
         mealsPerDay,
+        pipeline,
+        includePipeline,
+        // default false unless explicitly set by caller/UI
+        showPipelineByDefault: Boolean(showPipelineByDefault),
       });
+
       const grocery = await this.generateGroceryDraft({
         householdId: applied.householdId,
         personId,
         mealPlanId: meal.id,
       });
+
       const sessDraft = await this.createSessionDraft({
         householdId: applied.householdId,
         personId,

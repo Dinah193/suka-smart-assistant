@@ -1,0 +1,522 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-21T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.thai.recipes.red_curry",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Thai Red Curry (Gaeng Phed)",
+    "subtitle": "Rich coconut red curry with red curry paste, tender protein, and vegetables—balanced salty-sweet with a bright finish.",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Thai Catalog",
+      "notes": [
+        "Deterministic canonical red curry recipe for SSA catalogs.",
+        "Designed for store-bought red curry paste with optional fresh boosts.",
+        "Chicken default with tofu/seafood/vegetarian adaptations included."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "thai",
+    "subprofiles": [
+      "thai.curries",
+      "thai.coconut_based",
+      "thai.red_curry_family"
+    ],
+    "category": "curry",
+    "mealArchetypes": ["meal.lunch", "meal.dinner"],
+    "servingStyles": [
+      "serving.bowls",
+      "serving.family_style",
+      "serving.one_pot"
+    ],
+    "plannerTags": [
+      "cuisine.thai",
+      "dish.red_curry",
+      "category.curry",
+      "method.simmer",
+      "method.saute",
+      "flavor.coconut",
+      "flavor.spicy",
+      "flavor.savory_sweet",
+      "weeknight.friendly",
+      "batch.friendly",
+      "leftovers.good"
+    ]
+  },
+
+  "summary": "A classic Thai red curry built by frying red curry paste in coconut cream, simmering with chicken and vegetables, then balancing with fish sauce and palm sugar for a creamy, aromatic bowl best served with jasmine rice.",
+
+  "yield": {
+    "servings": 4,
+    "notes": "Serves 4 with rice; 3 large bowls without sides."
+  },
+
+  "time": {
+    "activeMins": 20,
+    "totalMins": 45,
+    "handsOffMins": 25
+  },
+
+  "difficulty": 4,
+
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": "medium",
+    "notes": [
+      "Freezing is acceptable; coconut milk may separate—reheat gently and whisk.",
+      "Red curry deepens overnight; heat can feel stronger the next day."
+    ]
+  },
+
+  "tasteProfile": {
+    "pillars": ["spicy", "savory", "sweet", "creamy", "aromatic"],
+    "heatTypical": 3,
+    "sweetnessTypical": 2,
+    "notes": "Red curry is typically warmer and rounder than green, with dried chili depth. Paste brands vary widely."
+  },
+
+  "equipment": {
+    "required": [
+      {
+        "id": "equipment.saucepot",
+        "label": "Medium pot or Dutch oven",
+        "required": true,
+        "notes": "A heavy pot helps prevent scorching coconut cream."
+      },
+      {
+        "id": "equipment.knife",
+        "label": "Chef's knife",
+        "required": true
+      },
+      {
+        "id": "equipment.cutting_board",
+        "label": "Cutting board",
+        "required": true
+      }
+    ],
+    "recommended": [
+      "equipment.wooden_spoon",
+      "equipment.whisk",
+      "equipment.measuring_spoons",
+      "equipment.measuring_cups"
+    ],
+    "optional": [
+      {
+        "id": "equipment.microplane",
+        "label": "Microplane (for optional lime zest)",
+        "required": false
+      }
+    ],
+    "minimum": ["equipment.pot", "equipment.knife", "equipment.cutting_board"]
+  },
+
+  "dietFlags": [],
+
+  "allergens": ["allergen.fish", "allergen.shellfish", "allergen.soy"],
+
+  "ingredientGroups": [
+    {
+      "id": "group.curry_base",
+      "label": "Curry base",
+      "items": [
+        "ingredient.coconut_milk",
+        "ingredient.red_curry_paste",
+        "ingredient.fish_sauce",
+        "ingredient.palm_sugar",
+        "ingredient.stock_chicken"
+      ]
+    },
+    {
+      "id": "group.protein",
+      "label": "Protein",
+      "items": [
+        "ingredient.chicken_thigh",
+        "ingredient.tofu_firm",
+        "ingredient.shrimp"
+      ]
+    },
+    {
+      "id": "group.vegetables",
+      "label": "Vegetables",
+      "items": [
+        "ingredient.bell_pepper",
+        "ingredient.bamboo_shoots",
+        "ingredient.green_beans",
+        "ingredient.zucchini",
+        "ingredient.eggplant"
+      ]
+    },
+    {
+      "id": "group.finish",
+      "label": "Finish",
+      "items": [
+        "ingredient.thai_basil",
+        "ingredient.lime_juice",
+        "ingredient.cilantro"
+      ]
+    }
+  ],
+
+  "ingredients": [
+    {
+      "id": "ingredient.coconut_milk",
+      "label": "Coconut milk (full-fat), 2 cans",
+      "role": "base",
+      "amount": { "value": 800, "unit": "ml" },
+      "notes": [
+        "Use the thick cream to fry the paste first; then add remaining liquid."
+      ]
+    },
+    {
+      "id": "ingredient.red_curry_paste",
+      "label": "Red curry paste",
+      "role": "spice",
+      "amount": { "value": 55, "unit": "g" },
+      "notes": [
+        "Start with ~2–3 Tbsp depending on brand. Increase later if desired."
+      ]
+    },
+    {
+      "id": "ingredient.stock_chicken",
+      "label": "Chicken stock (or water)",
+      "role": "base",
+      "amount": { "value": 240, "unit": "ml" },
+      "notes": "Use water if needed; stock adds depth."
+    },
+    {
+      "id": "ingredient.fish_sauce",
+      "label": "Fish sauce",
+      "role": "umami",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "Primary salting agent for Thai curries."
+    },
+    {
+      "id": "ingredient.palm_sugar",
+      "label": "Palm sugar (or light brown sugar)",
+      "role": "sweetener",
+      "amount": { "value": 15, "unit": "g" },
+      "notes": "Balances heat; adjust to taste."
+    },
+    {
+      "id": "ingredient.thai_basil",
+      "label": "Thai basil leaves",
+      "role": "herb",
+      "amount": { "value": 25, "unit": "g" },
+      "notes": "Add off-heat to keep aroma."
+    },
+
+    {
+      "id": "ingredient.chicken_thigh",
+      "label": "Boneless skinless chicken thighs, sliced",
+      "role": "protein",
+      "amount": { "value": 500, "unit": "g" },
+      "notes": "Thighs stay tender with simmering."
+    },
+
+    {
+      "id": "ingredient.bell_pepper",
+      "label": "Bell pepper, sliced",
+      "role": "vegetable",
+      "amount": { "value": 180, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.bamboo_shoots",
+      "label": "Bamboo shoots, drained",
+      "role": "vegetable",
+      "amount": { "value": 200, "unit": "g" },
+      "optional": true,
+      "notes": "Rinse if briny."
+    },
+    {
+      "id": "ingredient.green_beans",
+      "label": "Green beans, trimmed",
+      "role": "vegetable",
+      "amount": { "value": 150, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.zucchini",
+      "label": "Zucchini, half-moons (or Thai eggplant if available)",
+      "role": "vegetable",
+      "amount": { "value": 220, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.eggplant",
+      "label": "Eggplant, bite-size (optional veg)",
+      "role": "vegetable",
+      "amount": { "value": 250, "unit": "g" },
+      "optional": true,
+      "notes": "Use Japanese/Chinese eggplant if Thai eggplant is unavailable."
+    },
+
+    {
+      "id": "ingredient.lime_juice",
+      "label": "Lime juice (to finish)",
+      "role": "finish",
+      "amount": { "value": 15, "unit": "ml" },
+      "optional": true,
+      "notes": "Brightens the curry; add after turning off heat."
+    },
+    {
+      "id": "ingredient.cilantro",
+      "label": "Cilantro (optional garnish)",
+      "role": "garnish",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.prep.mise",
+      "title": "Prep protein and vegetables",
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "instructions": [
+        "Slice chicken into bite-size strips.",
+        "Slice vegetables: bell pepper strips, zucchini half-moons, trim green beans; drain bamboo shoots.",
+        "Pick Thai basil leaves; keep ready for the end."
+      ],
+      "checks": [
+        "Everything is prepped before heating coconut cream (it can scorch if unattended)."
+      ]
+    },
+    {
+      "id": "step.fry.paste",
+      "title": "Fry red curry paste in coconut cream",
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "instructions": [
+        "Spoon the thick coconut cream portion into a pot over medium-high heat.",
+        "Add red curry paste and stir constantly until fragrant and slightly darkened, about 2–3 minutes.",
+        "If coconut milk is thin, use the whole can and cook a little longer, stirring to avoid burning."
+      ],
+      "timers": [{ "label": "Fry curry paste", "minutes": 3 }],
+      "checks": [
+        "Paste smells fragrant (not raw) and nothing is sticking/burning."
+      ]
+    },
+    {
+      "id": "step.build.base",
+      "title": "Build the curry base",
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "instructions": [
+        "Whisk in remaining coconut milk and chicken stock (or water).",
+        "Bring to a gentle simmer."
+      ],
+      "checks": ["Curry is simmering gently, not boiling hard."]
+    },
+    {
+      "id": "step.cook.protein",
+      "title": "Simmer chicken until just cooked",
+      "activeMins": 5,
+      "handsOffMins": 10,
+      "instructions": [
+        "Add chicken to the simmering curry.",
+        "Simmer gently, stirring occasionally, until chicken is cooked through."
+      ],
+      "timers": [{ "label": "Simmer chicken", "minutes": 10 }],
+      "checks": ["Chicken is opaque throughout and tender."]
+    },
+    {
+      "id": "step.add.veg",
+      "title": "Add vegetables and simmer until tender-crisp",
+      "activeMins": 4,
+      "handsOffMins": 10,
+      "instructions": [
+        "Add vegetables (choose what you're using): zucchini/eggplant first, then beans, then bell pepper and bamboo shoots.",
+        "Simmer gently until tender but not mushy."
+      ],
+      "timers": [{ "label": "Simmer vegetables", "minutes": 10 }],
+      "checks": ["Vegetables are cooked but still have shape and color."]
+    },
+    {
+      "id": "step.balance.finish",
+      "title": "Season, balance, and finish with basil",
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "instructions": [
+        "Stir in fish sauce and palm sugar; simmer 1 minute to dissolve.",
+        "Taste and adjust: more fish sauce for salt/umami; more sugar to round heat; more coconut milk to mellow spice.",
+        "Turn off heat. Fold in Thai basil and add lime juice if using."
+      ],
+      "timers": [{ "label": "Dissolve seasoning", "minutes": 1 }],
+      "checks": [
+        "Flavor is balanced: creamy, savory-sweet with clean heat.",
+        "Basil remains bright and aromatic."
+      ]
+    },
+    {
+      "id": "step.serve",
+      "title": "Serve",
+      "activeMins": 2,
+      "handsOffMins": 0,
+      "instructions": [
+        "Serve over jasmine rice.",
+        "Garnish with cilantro if desired.",
+        "Optional: offer lime wedges and chili flakes at the table."
+      ]
+    }
+  ],
+
+  "methods": ["method.saute", "method.simmer", "method.one_pot"],
+
+  "pairings": {
+    "starches": [
+      { "id": "thai.jasmine_rice", "label": "Jasmine rice" },
+      {
+        "id": "thai.rice_noodles",
+        "label": "Rice noodles (optional alternative)"
+      }
+    ],
+    "sides": [
+      { "id": "thai.cucumber_salad", "label": "Cucumber salad" },
+      { "id": "thai.pickled_veg", "label": "Quick pickled vegetables" }
+    ],
+    "notes": "Plain rice is the classic base; crisp, acidic sides help cut coconut richness."
+  },
+
+  "planner": {
+    "dishId": "thai.red_curry",
+    "cuisineId": "cuisines.thai",
+    "defaultMealSlot": "dinner",
+    "leftovers": {
+      "quality": "very_good",
+      "reheat": "gentle_simmer",
+      "notes": "Reheat gently; whisk if coconut separates. Add fresh basil if possible."
+    },
+    "shoppingBoostItems": [
+      "ingredient.coconut_milk",
+      "ingredient.red_curry_paste",
+      "ingredient.thai_basil"
+    ]
+  },
+
+  "storage": {
+    "fridge": {
+      "maxDays": 4,
+      "notes": "Cool quickly and store airtight. Reheat gently to prevent coconut breaking."
+    },
+    "freezer": {
+      "recommended": true,
+      "maxMonths": 2,
+      "notes": "Freeze in portions. Thaw overnight and whisk while reheating."
+    }
+  },
+
+  "safety": {
+    "notes": [
+      "Cool leftovers quickly and refrigerate within 2 hours.",
+      "Simmer chicken until fully cooked."
+    ]
+  },
+
+  "adaptations": [
+    {
+      "id": "adapt.paste_variability",
+      "title": "Curry paste brand variability",
+      "notes": [
+        "Heat/salt varies a lot; start small and add more after a short simmer.",
+        "If curry tastes harsh, simmer a few extra minutes and add coconut milk.",
+        "If curry is flat, adjust fish sauce (umami/salt) and sugar (roundness)."
+      ]
+    }
+  ],
+
+  "variations": [
+    {
+      "id": "var.tofu",
+      "label": "Tofu Red Curry (vegetarian base)",
+      "when": { "dietFlags": ["diet.vegetarian"] },
+      "adapt": {
+        "ingredientSwap": {
+          "ingredient.chicken_thigh": {
+            "use": ["ingredient.tofu_firm"],
+            "notes": "Use 400–500g tofu. Pan-sear cubes first for best texture, then add near the end."
+          },
+          "ingredient.fish_sauce": {
+            "use": [
+              "ingredient.soy_sauce_light",
+              "ingredient.mushroom_seasoning"
+            ],
+            "notes": "Season to taste; keep salty-sweet balance."
+          }
+        }
+      }
+    },
+    {
+      "id": "var.shrimp",
+      "label": "Shrimp Red Curry",
+      "when": { "diet": { "allowShellfish": true } },
+      "adapt": {
+        "add": {
+          "ingredient.shrimp": {
+            "label": "Shrimp, peeled and deveined",
+            "amount": { "value": 400, "unit": "g" },
+            "notes": "Add in the last 3–4 minutes; cook just until opaque."
+          }
+        },
+        "notes": ["Cook shrimp at the end to prevent toughness."]
+      }
+    },
+    {
+      "id": "var.low_heat",
+      "label": "Milder Red Curry",
+      "when": { "preference": { "heat": "low" } },
+      "adapt": {
+        "set": {
+          "ingredient.red_curry_paste": {
+            "amount": { "value": 35, "unit": "g" },
+            "notes": "Start with less paste; add more only if desired."
+          }
+        },
+        "notes": ["Add extra coconut milk if you want it even milder."]
+      }
+    }
+  ],
+
+  "notes": [
+    "Key technique: fry curry paste in coconut cream to bloom aromatics and deepen flavor.",
+    "Add Thai basil off-heat to keep it green and fragrant.",
+    "Vegetables are flexible—keep a mix of tender and crisp textures."
+  ],
+
+  "compat": {
+    "catalog": {
+      "cuisinePath": "src/catalogs/cuisines/thai/recipes/red_curry.json",
+      "dishId": "thai.red_curry"
+    },
+    "search": {
+      "aliases": ["red curry", "gaeng phed", "แกงเผ็ด", "thai red curry"],
+      "keywords": [
+        "coconut milk",
+        "red curry paste",
+        "thai basil",
+        "one pot",
+        "weeknight"
+      ]
+    }
+  },
+
+  "audit": {
+    "createdBy": "ssa.codegen",
+    "createdAt": "2026-01-21T00:00:00.000Z",
+    "reviewed": true,
+    "reviewNotes": [
+      "Schema-required fields present: schemaVersion/meta/ingredients/steps.",
+      "All ingredients include id+label and amount value/unit (or optional flagged).",
+      "All steps include id+title and instructions[] with timers where useful."
+    ]
+  }
+}

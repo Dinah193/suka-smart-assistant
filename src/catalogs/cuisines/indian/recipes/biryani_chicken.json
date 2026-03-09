@@ -1,0 +1,581 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-20T00:00:00.000Z",
+
+  "meta": {
+    "id": "recipes.cuisines.indian.biryani_chicken",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Chicken Biryani",
+    "subtitle": "Layered basmati rice and spiced chicken cooked dum-style for fragrance and depth",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA canonical cuisines/indian/recipes/biryani_chicken.json",
+      "notes": [
+        "Deterministic, home-kitchen biryani: parboiled basmati, marinated chicken, onion-ghee base, dum finish.",
+        "Designed to be robust without specialty equipment; supports oven-dum or stovetop-dum."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.indian",
+    "category": "rice_dish",
+    "mealArchetypes": ["meal.main.rice", "meal.main.protein"],
+    "servingStyles": ["family_style", "one_pot"],
+    "plannerTags": [
+      "cuisine.indian",
+      "dish.biryani",
+      "dish.indian.biryani_chicken",
+      "stew_and_starch",
+      "batch.friendly",
+      "leftovers.good",
+      "weekend.project"
+    ]
+  },
+
+  "summary": "Fragrant layered biryani with yogurt-marinated chicken, caramelized onions, whole spices, and parboiled basmati rice finished dum-style until tender and aromatic.",
+
+  "keywords": [
+    "biryani",
+    "chicken biryani",
+    "dum",
+    "basmati",
+    "one pot",
+    "layered rice"
+  ],
+
+  "tags": [
+    "cuisine.indian",
+    "dish.indian.biryani_chicken",
+    "batch.friendly",
+    "leftovers.good",
+    "weekend.project"
+  ],
+
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 1.5, "unit": "cups" },
+    "notes": "Serves 6 as a main; 8 with raita + salad."
+  },
+
+  "time": {
+    "activeMins": 45,
+    "handsOffMins": 55,
+    "totalMins": 100
+  },
+
+  "difficulty": 5,
+
+  "signals": {
+    "weeknightPossible": false,
+    "batchFriendly": true,
+    "leftoversGood": true,
+    "freezerFriendly": true
+  },
+
+  "dietFlags": [],
+
+  "allergens": {
+    "contains": ["allergen.dairy"],
+    "mayContain": [],
+    "notes": [
+      "Contains dairy (yogurt/ghee). Make dairy-free with coconut yogurt + neutral oil."
+    ]
+  },
+
+  "equipment": {
+    "minimum": [
+      "equip.chef_knife",
+      "equip.cut_board",
+      "equip.large_pot",
+      "equip.colander",
+      "equip.heavy_dutch_oven",
+      "equip.lid",
+      "equip.wooden_spoon",
+      "equip.measuring_cups",
+      "equip.measuring_spoons"
+    ],
+    "recommended": [
+      "equip.kitchen_scale",
+      "equip.fine_mesh_strainer",
+      "equip.oven"
+    ],
+    "optional": [
+      {
+        "id": "equip.instant_pot",
+        "label": "Electric pressure cooker",
+        "required": false,
+        "notes": "Not recommended for classic biryani texture; can be used with caution (risk of mushy rice)."
+      }
+    ]
+  },
+
+  "ingredientGroups": [
+    {
+      "title": "Chicken Marinade",
+      "items": [
+        "ing.chicken_thighs_bone_in",
+        "ing.yogurt_plain",
+        "ing.ginger",
+        "ing.garlic",
+        "spice.turmeric",
+        "spice.cumin",
+        "spice.coriander",
+        "spice.kashmiri_chili",
+        "ing.lemon",
+        "ing.salt_kosher"
+      ]
+    },
+    {
+      "title": "Rice + Whole Spices",
+      "items": [
+        "ing.basmati_rice",
+        "spice.cardamom",
+        "spice.clove",
+        "spice.cinnamon",
+        "spice.bay_leaf",
+        "spice.black_pepper",
+        "ing.salt_kosher"
+      ]
+    },
+    {
+      "title": "Biryani Base + Layering",
+      "items": [
+        "ing.onion",
+        "ing.ghee",
+        "ing.tomatoes_diced",
+        "ing.green_chili",
+        "ing.cilantro",
+        "ing.mint",
+        "spice.garam_masala",
+        "ing.saffron",
+        "ing.milk",
+        "ing.water"
+      ]
+    }
+  ],
+
+  "ingredients": [
+    {
+      "id": "ing.chicken_thighs_bone_in",
+      "label": "Chicken thighs (bone-in, skinless preferred)",
+      "role": "role.protein",
+      "amount": { "value": 2.5, "unit": "lb" },
+      "notes": [
+        "Bone-in thighs stay juicy and flavor the rice.",
+        "Boneless thighs also work; reduce cook time slightly."
+      ]
+    },
+    {
+      "id": "ing.yogurt_plain",
+      "label": "Plain yogurt",
+      "role": "role.marinade",
+      "amount": { "value": 0.75, "unit": "cup" },
+      "notes": ["Use full-fat for stability; whisk smooth."]
+    },
+    {
+      "id": "ing.ginger",
+      "label": "Fresh ginger, grated",
+      "role": "role.aromatic",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic, minced",
+      "role": "role.aromatic",
+      "amount": { "value": 5, "unit": "cloves" }
+    },
+    {
+      "id": "spice.turmeric",
+      "label": "Ground turmeric",
+      "role": "role.spice",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "spice.cumin",
+      "label": "Ground cumin",
+      "role": "role.spice",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "spice.coriander",
+      "label": "Ground coriander",
+      "role": "role.spice",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "spice.kashmiri_chili",
+      "label": "Kashmiri chili powder (or mild chili powder)",
+      "role": "role.spice",
+      "amount": { "value": 1.5, "unit": "tsp" },
+      "notes": ["For more heat, add 1/2 tsp cayenne."]
+    },
+    {
+      "id": "ing.lemon",
+      "label": "Lemon juice",
+      "role": "role.acid",
+      "amount": { "value": 1.5, "unit": "tbsp" }
+    },
+    {
+      "id": "ing.salt_kosher",
+      "label": "Kosher salt",
+      "role": "role.seasoning",
+      "amount": { "value": 2.75, "unit": "tsp" },
+      "notes": ["Split across marinade, rice water, and finishing adjustments."]
+    },
+
+    {
+      "id": "ing.basmati_rice",
+      "label": "Basmati rice, rinsed until water runs mostly clear",
+      "role": "role.starch",
+      "amount": { "value": 2.5, "unit": "cups" },
+      "notes": [
+        "Soak 20–30 minutes for longer grains; drain well before parboiling."
+      ]
+    },
+    {
+      "id": "spice.cardamom",
+      "label": "Green cardamom pods",
+      "role": "role.whole_spice",
+      "amount": { "value": 6, "unit": "each" },
+      "notes": ["Lightly crush to open pods."]
+    },
+    {
+      "id": "spice.clove",
+      "label": "Whole cloves",
+      "role": "role.whole_spice",
+      "amount": { "value": 6, "unit": "each" }
+    },
+    {
+      "id": "spice.cinnamon",
+      "label": "Cinnamon stick",
+      "role": "role.whole_spice",
+      "amount": { "value": 1, "unit": "each" }
+    },
+    {
+      "id": "spice.bay_leaf",
+      "label": "Bay leaves",
+      "role": "role.whole_spice",
+      "amount": { "value": 2, "unit": "each" }
+    },
+    {
+      "id": "spice.black_pepper",
+      "label": "Black peppercorns",
+      "role": "role.whole_spice",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+
+    {
+      "id": "ing.onion",
+      "label": "Yellow onions, thinly sliced",
+      "role": "role.aromatic",
+      "amount": { "value": 3, "unit": "large" },
+      "notes": [
+        "Caramelized onions are key; slice evenly for consistent browning."
+      ]
+    },
+    {
+      "id": "ing.ghee",
+      "label": "Ghee",
+      "role": "role.fat",
+      "amount": { "value": 4, "unit": "tbsp" },
+      "notes": ["Sub neutral oil to reduce dairy."]
+    },
+    {
+      "id": "ing.tomatoes_diced",
+      "label": "Diced tomatoes",
+      "role": "role.base",
+      "amount": { "value": 1, "unit": "cup" },
+      "optional": true,
+      "notes": ["Optional: adds body; omit for a drier, onion-forward base."]
+    },
+    {
+      "id": "ing.green_chili",
+      "label": "Green chilies, slit or chopped",
+      "role": "role.heat",
+      "amount": { "value": 2, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "spice.garam_masala",
+      "label": "Garam masala",
+      "role": "role.spice_finish",
+      "amount": { "value": 1.5, "unit": "tsp" }
+    },
+    {
+      "id": "ing.cilantro",
+      "label": "Fresh cilantro, chopped",
+      "role": "role.herb",
+      "amount": { "value": 0.75, "unit": "cup" }
+    },
+    {
+      "id": "ing.mint",
+      "label": "Fresh mint leaves, chopped",
+      "role": "role.herb",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "optional": true,
+      "notes": ["Strongly recommended for classic aroma."]
+    },
+    {
+      "id": "ing.saffron",
+      "label": "Saffron threads",
+      "role": "role.aroma",
+      "amount": { "value": 0.25, "unit": "tsp" },
+      "optional": true,
+      "notes": ["Optional but adds signature biryani perfume and color."]
+    },
+    {
+      "id": "ing.milk",
+      "label": "Warm milk (for saffron bloom)",
+      "role": "role.aroma",
+      "amount": { "value": 0.25, "unit": "cup" },
+      "optional": true,
+      "notes": ["Use water for dairy-free."]
+    },
+    {
+      "id": "ing.water",
+      "label": "Water (for rice parboil + dum steam)",
+      "role": "role.liquid",
+      "amount": { "value": 3, "unit": "qt" },
+      "notes": [
+        "Used mostly for boiling rice. You’ll only add a small amount to the dum pot."
+      ]
+    }
+  ],
+
+  "methods": [
+    "method.yogurt_marinate",
+    "method.caramelize_onion",
+    "method.parboil_rice",
+    "method.dum"
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_marinate",
+      "title": "Marinate the chicken",
+      "instructions": [
+        "In a bowl, whisk yogurt, ginger, garlic, turmeric, cumin, coriander, Kashmiri chili, lemon juice, and 1 tsp salt.",
+        "Add chicken and coat thoroughly.",
+        "Cover and marinate at least 30 minutes (or up to overnight in the fridge)."
+      ],
+      "activeMins": 8,
+      "handsOffMins": 30,
+      "checks": [
+        "Yogurt should be smooth (no lumps).",
+        "If marinating overnight, reduce salt slightly if you’re salt-sensitive."
+      ]
+    },
+    {
+      "id": "step_02_prep_saffron",
+      "title": "Bloom saffron (optional)",
+      "instructions": [
+        "If using saffron, warm milk (or water) until just hot, not boiling.",
+        "Crush saffron threads between fingers and steep in the warm liquid 10 minutes."
+      ],
+      "activeMins": 2,
+      "handsOffMins": 10,
+      "timers": [{ "label": "Bloom saffron", "minutes": 10 }],
+      "checks": ["Liquid should turn golden and fragrant."]
+    },
+    {
+      "id": "step_03_caramelize_onions",
+      "title": "Caramelize onions",
+      "instructions": [
+        "Heat ghee in a heavy pot or Dutch oven over medium-high heat.",
+        "Add sliced onions and cook 12–18 minutes, stirring frequently, until deep golden-brown.",
+        "Remove about 1/3 of the fried onions to a plate for layering later."
+      ],
+      "activeMins": 12,
+      "handsOffMins": 6,
+      "timers": [{ "label": "Caramelize onions", "minutes": 16 }],
+      "checks": [
+        "Golden-brown is ideal; avoid burning (bitter). Reduce heat if onions darken too fast."
+      ]
+    },
+    {
+      "id": "step_04_cook_chicken_base",
+      "title": "Cook the chicken masala base",
+      "instructions": [
+        "To the remaining onions in the pot, add green chilies (optional) and cook 30 seconds.",
+        "Add marinated chicken and scrape in all marinade.",
+        "Cook 6–8 minutes, turning pieces once, until chicken is opaque on the outside and yogurt sauce thickens.",
+        "If using tomatoes, add them and cook 3 minutes to soften.",
+        "Stir in 1 tsp garam masala and half the cilantro + half the mint. Turn off heat."
+      ],
+      "activeMins": 14,
+      "handsOffMins": 0,
+      "checks": [
+        "You are not fully cooking chicken yet; it finishes during dum.",
+        "Sauce should look glossy and clingy, not watery."
+      ]
+    },
+    {
+      "id": "step_05_soak_and_parboil_rice",
+      "title": "Soak and parboil basmati",
+      "instructions": [
+        "Rinse basmati rice until water runs mostly clear. Soak 20–30 minutes, then drain well.",
+        "Bring a large pot of water to a rolling boil. Add 1.5 tsp salt and whole spices (cardamom, cloves, cinnamon, bay leaves, peppercorns).",
+        "Add drained rice and boil 5–7 minutes until rice is about 70% cooked (still firm in the center).",
+        "Drain immediately and discard whole spices if you prefer (or leave a few for aroma)."
+      ],
+      "activeMins": 10,
+      "handsOffMins": 25,
+      "timers": [
+        { "label": "Soak rice", "minutes": 25 },
+        { "label": "Parboil rice", "minutes": 6 }
+      ],
+      "checks": [
+        "Key texture: grain should break but show a small opaque core.",
+        "Overboiled rice will become mushy during dum."
+      ]
+    },
+    {
+      "id": "step_06_layer",
+      "title": "Layer chicken and rice",
+      "instructions": [
+        "Return the pot with chicken masala to low heat.",
+        "Spread chicken in an even layer at the bottom.",
+        "Add a layer of parboiled rice on top (do not mix).",
+        "Scatter reserved fried onions, remaining cilantro/mint, and remaining garam masala over the rice.",
+        "Drizzle saffron milk (optional) over the top in streaks."
+      ],
+      "activeMins": 8,
+      "handsOffMins": 0,
+      "checks": [
+        "Do not stir—biryani relies on distinct layers.",
+        "If your chicken base looks dry, add 2–3 tbsp water before layering."
+      ]
+    },
+    {
+      "id": "step_07_dum_finish",
+      "title": "Dum-cook until done",
+      "instructions": [
+        "Seal the pot: place a tight lid on top. If your lid is loose, cover the pot with foil first, then lid.",
+        "Cook on very low heat 25–35 minutes until chicken is cooked through and rice is tender.",
+        "Rest 10 minutes off heat before opening."
+      ],
+      "activeMins": 2,
+      "handsOffMins": 45,
+      "timers": [
+        { "label": "Dum-cook", "minutes": 30 },
+        { "label": "Rest", "minutes": 10 }
+      ],
+      "checks": [
+        "If stovetop is unreliable, dum in oven at 350°F for 25–30 minutes (lid on).",
+        "Chicken doneness: juices run clear; internal temp ~165°F at thickest point."
+      ]
+    },
+    {
+      "id": "step_08_fluff_and_serve",
+      "title": "Fluff and serve",
+      "instructions": [
+        "Gently fluff the rice from the top with a fork, lifting some chicken from the bottom without smashing grains.",
+        "Taste and adjust salt if needed.",
+        "Serve with raita or sliced cucumbers, and a squeeze of lemon if desired."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "checks": [
+        "Use a light hand—overmixing breaks grains and muddies layers."
+      ]
+    }
+  ],
+
+  "pairings": {
+    "sides": [
+      "dish.indian.raita",
+      "dish.indian.kachumber_salad",
+      "recipes.cuisines.indian.naan"
+    ],
+    "condiments": ["dish.indian.mango_pickle", "dish.indian.mint_chutney"],
+    "notes": [
+      "A cooling side (raita/cucumber) balances spice and richness.",
+      "Great for gatherings; flavors deepen after resting."
+    ]
+  },
+
+  "storage": {
+    "refrigerator": {
+      "durationDays": 4,
+      "notes": [
+        "Cool quickly and refrigerate.",
+        "Reheat covered with a splash of water to re-steam grains."
+      ]
+    },
+    "freezer": {
+      "durationMonths": 2,
+      "notes": [
+        "Freeze in portions. Thaw overnight in fridge.",
+        "Reheat covered to prevent drying."
+      ]
+    }
+  },
+
+  "safety": {
+    "notes": [
+      "Chicken must reach a safe internal temperature before serving.",
+      "Do not leave cooked biryani at room temperature more than 2 hours."
+    ]
+  },
+
+  "variations": [
+    {
+      "id": "var_oven_dum",
+      "label": "Oven dum method (more consistent)",
+      "adapt": {
+        "notes": [
+          "After layering, cover pot and bake at 350°F for 25–30 minutes.",
+          "Rest 10 minutes before opening."
+        ]
+      }
+    },
+    {
+      "id": "var_dairy_free",
+      "label": "Dairy-free biryani",
+      "adapt": {
+        "notes": [
+          "Use coconut yogurt for marinade and neutral oil instead of ghee.",
+          "Bloom saffron in warm water."
+        ]
+      }
+    },
+    {
+      "id": "var_spicier_hyderabadi_lean",
+      "label": "Spicier (Hyderabadi-leaning)",
+      "adapt": {
+        "notes": [
+          "Add 1 tsp black pepper and 1 tsp extra Kashmiri chili, plus 1/2 tsp cayenne.",
+          "Add 2 tbsp fried onions into the chicken base before layering."
+        ]
+      }
+    }
+  ],
+
+  "planner": {
+    "roles": [{ "role": "role.main.one_pot", "primary": true }],
+    "notes": [
+      "Best as a weekend/project meal; excellent leftovers.",
+      "Pairs well with a cooling yogurt side and a crisp salad."
+    ]
+  },
+
+  "compat": {
+    "cuisineId": "cuisines.indian",
+    "dishId": "dish.indian.biryani_chicken",
+    "aliases": ["chicken biryani", "murgh biryani", "dum biryani"],
+    "index": {
+      "primaryTokens": ["biryani", "chicken", "basmati", "dum"],
+      "secondaryTokens": ["saffron", "fried onions", "yogurt", "garam masala"]
+    }
+  },
+
+  "audit": {
+    "curatedBy": "SSA",
+    "curationTier": "canonical",
+    "lastReviewedAt": "2026-01-20T00:00:00.000Z"
+  }
+}

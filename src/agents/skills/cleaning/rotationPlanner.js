@@ -22,7 +22,7 @@
  * - If `materializeSessions` is true, will call composeRoutine(plan, { ... }) and persist/enqueue.
  */
 
-import { emit } from "@/services/eventBus"; // safe-optional
+import { emit } from "@/services/events/eventBus"; // safe-optional
 let composeRoutine = null; // lazy-loaded to avoid circular deps
 
 /* -------------------------------- Types ----------------------------------- */
@@ -135,11 +135,15 @@ registerCadence("daily", (seed, rule, options) => {
 registerCadence("weekly", (seed, rule, options) => {
   const out = [];
   const at = rule?.at || "09:00";
-  const days = Array.isArray(rule?.byWeekday) && rule.byWeekday.length ? rule.byWeekday : [options.weekStartsOn];
+  const days =
+    Array.isArray(rule?.byWeekday) && rule.byWeekday.length
+      ? rule.byWeekday
+      : [options.weekStartsOn];
   let d = startOfDay(addDays(seed, 1));
   const end = addDays(seed, options.horizonDays + 1);
   while (d < end && out.length < options.maxPerZone) {
-    if (days.includes(d.getDay())) out.push(withLocalTime(d, at, options.timezone));
+    if (days.includes(d.getDay()))
+      out.push(withLocalTime(d, at, options.timezone));
     d = addDays(d, 1);
   }
   return out;
@@ -147,12 +151,17 @@ registerCadence("weekly", (seed, rule, options) => {
 
 /* Built-in: biweekly (every other week on given weekdays) */
 registerCadence("biweekly", (seed, rule, options) => {
-  const base = cadenceMap.get("weekly")(seed, rule, { ...options, horizonDays: options.horizonDays * 2 }); // generate more, filter alt weeks
+  const base = cadenceMap.get("weekly")(seed, rule, {
+    ...options,
+    horizonDays: options.horizonDays * 2,
+  }); // generate more, filter alt weeks
   const out = [];
   for (const dt of base) {
     if (out.length >= options.maxPerZone) break;
     // Even/odd week distance from seed
-    const diffWeeks = Math.floor((startOfDay(dt) - startOfDay(seed)) / (7 * 24 * 3600 * 1000));
+    const diffWeeks = Math.floor(
+      (startOfDay(dt) - startOfDay(seed)) / (7 * 24 * 3600 * 1000)
+    );
     if (diffWeeks % 2 === 1) out.push(dt); // schedule on alternate week from seed
   }
   return out;
@@ -162,12 +171,23 @@ registerCadence("biweekly", (seed, rule, options) => {
 registerCadence("monthly", (seed, rule, options) => {
   const out = [];
   const at = rule?.at || "09:00";
-  const dom = Array.isArray(rule?.byMonthday) && rule.byMonthday.length ? rule.byMonthday : [seed.getDate()];
+  const dom =
+    Array.isArray(rule?.byMonthday) && rule.byMonthday.length
+      ? rule.byMonthday
+      : [seed.getDate()];
   let m = new Date(seed);
   for (let i = 0; i < options.maxPerZone; i++) {
     m = addMonths(m, 1);
     for (const day of dom) {
-      const dt = new Date(m.getFullYear(), m.getMonth(), clampInt(day, 1, daysInMonth(m)), 0, 0, 0, 0);
+      const dt = new Date(
+        m.getFullYear(),
+        m.getMonth(),
+        clampInt(day, 1, daysInMonth(m)),
+        0,
+        0,
+        0,
+        0
+      );
       out.push(withLocalTime(dt, at, options.timezone));
       if (out.length >= options.maxPerZone) break;
     }
@@ -203,7 +223,8 @@ registerCadence("custom", (seed, rule, options) => {
     const days = (parsed.BYDAY || []).map(dayOfWeekFromToken);
     let d = startOfDay(addDays(seed, 1));
     while (d < end && out.length < options.maxPerZone) {
-      if (!days.length || days.includes(d.getDay())) out.push(withLocalTime(d, at, options.timezone));
+      if (!days.length || days.includes(d.getDay()))
+        out.push(withLocalTime(d, at, options.timezone));
       d = addDays(d, 1);
     }
     return out;
@@ -215,7 +236,11 @@ registerCadence("custom", (seed, rule, options) => {
     for (let i = 0; i < options.maxPerZone; i++) {
       m = addMonths(m, 1);
       for (const day of dom.length ? dom : [seed.getDate()]) {
-        const dt = new Date(m.getFullYear(), m.getMonth(), clampInt(day, 1, daysInMonth(m)));
+        const dt = new Date(
+          m.getFullYear(),
+          m.getMonth(),
+          clampInt(day, 1, daysInMonth(m))
+        );
         out.push(withLocalTime(dt, at, options.timezone));
         if (out.length >= options.maxPerZone) break;
       }
@@ -247,7 +272,8 @@ export async function buildRotation(plan, rulesByZoneId = {}, options = {}) {
 
   for (const zone of plan?.zones || []) {
     const rule = sanitize(rulesByZoneId[zone.id] || {});
-    const cadenceFn = cadenceMap.get(rule.cadence || "weekly") || cadenceMap.get("weekly");
+    const cadenceFn =
+      cadenceMap.get(rule.cadence || "weekly") || cadenceMap.get("weekly");
 
     const seedDate = rule.lastDoneAt ? safeDate(rule.lastDoneAt) || seed : seed;
     const candidates = cadenceFn(seedDate, rule, opts);
@@ -272,13 +298,22 @@ export async function buildRotation(plan, rulesByZoneId = {}, options = {}) {
   }
 
   // Sort: by datetime, then priority (high first)
-  slots.sort((a, b) => (a.scheduledAt < b.scheduledAt ? -1 : a.scheduledAt > b.scheduledAt ? 1 : prioRank(b.priority) - prioRank(a.priority)));
+  slots.sort((a, b) =>
+    a.scheduledAt < b.scheduledAt
+      ? -1
+      : a.scheduledAt > b.scheduledAt
+      ? 1
+      : prioRank(b.priority) - prioRank(a.priority)
+  );
 
   let sessions = undefined;
 
   if (opts.materializeSessions) {
     // Lazy import composeRoutine to avoid circular deps if any
-    composeRoutine = composeRoutine || (await softImport("@/agents/skills/cleaning/composeRoutine")).composeRoutine;
+    composeRoutine =
+      composeRoutine ||
+      (await softImport("@/agents/skills/cleaning/composeRoutine"))
+        .composeRoutine;
     if (typeof composeRoutine === "function") {
       sessions = await materialize(plan, slots, opts);
     }
@@ -319,7 +354,11 @@ async function materialize(plan, slots, opts) {
     };
 
     const session = composeRoutine(subPlan, {
-      prefs: opts.composePrefs || { voiceGuidance: true, haptic: true, autoAdvance: false },
+      prefs: opts.composePrefs || {
+        voiceGuidance: true,
+        haptic: true,
+        autoAdvance: false,
+      },
       inventoryHas: opts.inventoryHas,
       equipmentHas: opts.equipmentHas,
       defaultStepDurationSec: 120,
@@ -354,11 +393,13 @@ async function materialize(plan, slots, opts) {
 function adviseGuards(plan, zone, rule, dt, options) {
   const blocks = new Set();
   for (const fn of guardAdvisors) {
-    const res = safeCall(fn, { plan, zone, rule, candidate: dt, options }) || [];
+    const res =
+      safeCall(fn, { plan, zone, rule, candidate: dt, options }) || [];
     for (const b of res) blocks.add(b);
   }
   // quietHours avoidance hint
-  if ((rule?.avoidQuietHours ?? true) && isInQuietHours(dt, options.quietHours)) blocks.add("quietHours");
+  if ((rule?.avoidQuietHours ?? true) && isInQuietHours(dt, options.quietHours))
+    blocks.add("quietHours");
   // sabbath awareness (already added by advisor)
   return Array.from(blocks);
 }
@@ -370,11 +411,13 @@ function isInQuietHours(date, quiet = DEFAULTS.quietHours) {
   const cur = h * 60 + m;
   const { min: sMin, max: eMin } = timeToMinRange(start, end);
   // If window crosses midnight, quiet if cur >= start || cur < end
-  return sMin < eMin ? (cur >= sMin && cur < eMin) : (cur >= sMin || cur < eMin);
+  return sMin < eMin ? cur >= sMin && cur < eMin : cur >= sMin || cur < eMin;
 }
 
 function isSabbath(date, options) {
-  const days = Array.isArray(options?.sabbathDays) ? options.sabbathDays : DEFAULTS.sabbathDays;
+  const days = Array.isArray(options?.sabbathDays)
+    ? options.sabbathDays
+    : DEFAULTS.sabbathDays;
   return days.includes(date.getDay());
 }
 
@@ -382,7 +425,8 @@ function estimateZoneDuration(zone) {
   // quick heuristic: sum task hints if present; else 6 min per task + 1 min header + 1 min wrap
   let total = 120; // header + wrap baseline
   for (const t of zone?.tasks || []) {
-    if (Number.isFinite(t?.durationSec)) total += clampInt(t.durationSec, 10, 8 * 3600);
+    if (Number.isFinite(t?.durationSec))
+      total += clampInt(t.durationSec, 10, 8 * 3600);
     else total += 6 * 60;
   }
   return total;
@@ -392,13 +436,17 @@ function estimateZoneDuration(zone) {
 
 function parseRRULE(s) {
   if (!s || typeof s !== "string") return null;
-  const parts = s.split(";").map((p) => p.trim()).filter(Boolean);
+  const parts = s
+    .split(";")
+    .map((p) => p.trim())
+    .filter(Boolean);
   const out = {};
   for (const p of parts) {
     const [k, v] = p.split("=").map((x) => x.trim());
     if (!k) continue;
     if (k === "BYDAY") out[k] = v.split(",").map((x) => x.trim());
-    else if (k === "BYMONTHDAY") out[k] = v.split(",").map((n) => parseInt(n, 10));
+    else if (k === "BYMONTHDAY")
+      out[k] = v.split(",").map((n) => parseInt(n, 10));
     else if (k === "FREQ") out[k] = v.toUpperCase();
     else if (k === "BYHOUR") out[k] = parseInt(v, 10);
     else if (k === "BYMINUTE") out[k] = parseInt(v, 10);
@@ -417,19 +465,46 @@ function formatTimeFromRRULE(parsed) {
 
 function dayOfWeekFromToken(tok) {
   switch (tok?.toUpperCase()) {
-    case "SU": return 0; case "MO": return 1; case "TU": return 2; case "WE": return 3;
-    case "TH": return 4; case "FR": return 5; case "SA": return 6;
-    default: return NaN;
+    case "SU":
+      return 0;
+    case "MO":
+      return 1;
+    case "TU":
+      return 2;
+    case "WE":
+      return 3;
+    case "TH":
+      return 4;
+    case "FR":
+      return 5;
+    case "SA":
+      return 6;
+    default:
+      return NaN;
   }
 }
 
 /* ------------------------------ Date helpers ------------------------------- */
 
-function addDays(d, n) { const dt = new Date(d); dt.setDate(dt.getDate() + n); return dt; }
-function addMonths(d, n) { const dt = new Date(d); dt.setMonth(dt.getMonth() + n); return dt; }
-function startOfDay(d) { const dt = new Date(d); dt.setHours(0, 0, 0, 0); return dt; }
+function addDays(d, n) {
+  const dt = new Date(d);
+  dt.setDate(dt.getDate() + n);
+  return dt;
+}
+function addMonths(d, n) {
+  const dt = new Date(d);
+  dt.setMonth(dt.getMonth() + n);
+  return dt;
+}
+function startOfDay(d) {
+  const dt = new Date(d);
+  dt.setHours(0, 0, 0, 0);
+  return dt;
+}
 
-function daysInMonth(d) { return new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate(); }
+function daysInMonth(d) {
+  return new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+}
 
 function withLocalTime(date, hhmm = "09:00", tz) {
   // Build local time at hh:mm in the user's timezone (best-effort)
@@ -442,16 +517,42 @@ function withLocalTime(date, hhmm = "09:00", tz) {
 function timeToMinRange(start, end) {
   const [sh, sm] = (start || "21:00").split(":").map((n) => parseInt(n, 10));
   const [eh, em] = (end || "07:00").split(":").map((n) => parseInt(n, 10));
-  return { min: (sh * 60 + (sm || 0)) % (24 * 60), max: (eh * 60 + (em || 0)) % (24 * 60) };
+  return {
+    min: (sh * 60 + (sm || 0)) % (24 * 60),
+    max: (eh * 60 + (em || 0)) % (24 * 60),
+  };
 }
 
-function pad2(n) { return String(n).padStart(2, "0"); }
-function clampInt(n, min, max) { const v = Math.round(Number(n) || 0); return Math.min(Math.max(v, min), max); }
-function safeDate(iso) { const d = new Date(iso); return isFinite(d.getTime()) ? d : null; }
-function sanitize(obj) { if (!obj || typeof obj !== "object") return {}; const o = {}; for (const k of Object.keys(obj)) if (obj[k] !== undefined) o[k] = obj[k]; return o; }
-function applyDefaults(opts) { return { ...DEFAULTS, ...sanitize(opts) }; }
-function safeCall(fn, ...args) { try { return fn?.(...args); } catch { return null; } }
-function prioRank(p) { return p === "high" ? 3 : p === "medium" ? 2 : 1; }
+function pad2(n) {
+  return String(n).padStart(2, "0");
+}
+function clampInt(n, min, max) {
+  const v = Math.round(Number(n) || 0);
+  return Math.min(Math.max(v, min), max);
+}
+function safeDate(iso) {
+  const d = new Date(iso);
+  return isFinite(d.getTime()) ? d : null;
+}
+function sanitize(obj) {
+  if (!obj || typeof obj !== "object") return {};
+  const o = {};
+  for (const k of Object.keys(obj)) if (obj[k] !== undefined) o[k] = obj[k];
+  return o;
+}
+function applyDefaults(opts) {
+  return { ...DEFAULTS, ...sanitize(opts) };
+}
+function safeCall(fn, ...args) {
+  try {
+    return fn?.(...args);
+  } catch {
+    return null;
+  }
+}
+function prioRank(p) {
+  return p === "high" ? 3 : p === "medium" ? 2 : 1;
+}
 
 /* ------------------------------ Soft imports ------------------------------- */
 
@@ -459,7 +560,9 @@ async function softImport(path) {
   try {
     const mod = await import(/* @vite-ignore */ path);
     return mod?.default || mod;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
 /* --------------------------------- Exports -------------------------------- */

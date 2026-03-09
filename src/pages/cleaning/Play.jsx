@@ -26,6 +26,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { emitCanonicalSignal } from "@/services/realtime/canonicalSignalEmitter";
 
 /* ----------------------- Soft/defensive shared imports ---------------------- */
 /**
@@ -53,7 +54,7 @@ try {
  * featureFlags soft-import
  * Supports:
  *  - "@/config/featureFlags.json"
- *  - "../../config/featureFlags.json"
+ *  - "@/config/featureFlags.json"
  */
 let featureFlags = {};
 try {
@@ -63,7 +64,7 @@ try {
 } catch {
   try {
     // eslint-disable-next-line global-require
-    const ff2 = require("../../config/featureFlags.json");
+    const ff2 = require("@/config/featureFlags.json");
     featureFlags = ff2?.default || ff2 || featureFlags;
   } catch {
     // noop
@@ -936,6 +937,20 @@ export default function CleaningPlayPage() {
       checkpointId: session?.checkpoints?.lastCheckpointId || null,
     });
 
+    emitCanonicalSignal({
+      type: "taskStarted",
+      sourceModule: "executor.cleaning.play",
+      urgency: "normal",
+      completionPct: 0,
+      dependencies: ["sessions", "readiness"],
+      payload: {
+        taskId: session.id,
+        name: session.title,
+        domain: "cleaning",
+        action: "session.started",
+      },
+    });
+
     const dur = currentStep?.durationSec || 0;
     if ((timerRemainingSec || 0) <= 0 && dur > 0) setTimerRemainingSec(dur);
     if (featureFlags?.tts && currentStep?.title) trySpeak(currentStep.title);
@@ -1013,6 +1028,20 @@ export default function CleaningPlayPage() {
       checkpointId: session?.checkpoints?.lastCheckpointId || null,
     });
 
+    emitCanonicalSignal({
+      type: "taskCompleted",
+      sourceModule: "executor.cleaning.play",
+      urgency: "normal",
+      completionPct: 100,
+      dependencies: ["sessions", "readiness"],
+      payload: {
+        taskId: session?.id,
+        name: session?.title || "cleaning session",
+        domain: "cleaning",
+        action: "session.completed",
+      },
+    });
+
     try {
       if (wakeLockRef.current?.release) await wakeLockRef.current.release();
     } catch {
@@ -1029,6 +1058,24 @@ export default function CleaningPlayPage() {
       if (list.includes(stepId)) return list;
       return [...list, stepId];
     });
+
+    emitCanonicalSignal({
+      type: "taskCompleted",
+      sourceModule: "executor.cleaning.play",
+      urgency: "normal",
+      completionPct: 100,
+      dependencies: ["sessions", "readiness"],
+      payload: {
+        taskId: `${session?.id || "session"}:${stepId}`,
+        sessionId: session?.id,
+        stepId,
+        stepIndex: currentStepIndex,
+        name: currentStep?.title || stepId,
+        domain: "cleaning",
+        action: "step.completed",
+      },
+    });
+
     scheduleCheckpointSave("step.marked_done");
   }
 

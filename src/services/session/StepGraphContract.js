@@ -1,4 +1,4 @@
-// src/services/sessions/StepGraphContract.js
+// src/services/session/StepGraphContract.js
 //
 // StepGraphContract
 // ------------------
@@ -18,7 +18,7 @@
 
 /* ---------------------------------- Imports ---------------------------------- */
 
-import { emitEvent } from "../eventBus";
+import { emitEvent } from "../events/eventBus";
 
 /**
  * Safe wrapper around the shared event bus.

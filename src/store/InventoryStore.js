@@ -30,15 +30,41 @@ async function safeImportMany(paths = []) {
   }
   return null;
 }
-async function DB() { return await safeImportMany(["@/db/index.js", "@/db", "../db", "../../db"]); }
-async function Units() { return await safeImportMany(["@/shared/units.js", "@/shared/units"]); }
-async function IngredientsIndex() { return await safeImportMany(["@/store/IngredientsIndex.js", "@/store/IngredientsIndex"]); }
-async function n8nClient() { return await safeImportMany(["@/services/n8nClient.js", "@/services/n8nClient"]); }
-async function Ontology() { return await safeImportMany(["@/shared/ontology.js", "@/shared/ontology"]); }
+async function DB() {
+  return await safeImportMany(["@/db/index.js", "@/db", "../db", "../../db"]);
+}
+async function Units() {
+  return await safeImportMany(["@/shared/units.js", "@/shared/units"]);
+}
+async function IngredientsIndex() {
+  return await safeImportMany([
+    "@/store/IngredientsIndex.js",
+    "@/store/IngredientsIndex",
+  ]);
+}
+async function n8nClient() {
+  return await safeImportMany([
+    "@/services/n8nClient.js",
+    "@/services/n8nClient",
+  ]);
+}
+async function Ontology() {
+  return await safeImportMany(["@/shared/ontology.js", "@/shared/ontology"]);
+}
 
-function nowISO() { return new Date().toISOString(); }
-function titleCase(s = "") { return s.replace(/\b\w/g, (m) => m.toUpperCase()); }
-function toKeyish(str = "") { return String(str).toLowerCase().trim().replace(/[^\w\s.-]/g, "").replace(/\s+/g, "."); }
+function nowISO() {
+  return new Date().toISOString();
+}
+function titleCase(s = "") {
+  return s.replace(/\b\w/g, (m) => m.toUpperCase());
+}
+function toKeyish(str = "") {
+  return String(str)
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s.-]/g, "")
+    .replace(/\s+/g, ".");
+}
 const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 
 function safeGetSocket() {
@@ -46,11 +72,17 @@ function safeGetSocket() {
     // eslint-disable-next-line import/no-unresolved
     const sock = require("@/server/services/socket");
     return sock?.socket || sock?.getSocket?.() || null;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 function broadcast(event, payload, ns) {
-  try { window.dispatchEvent?.(new CustomEvent(event, { detail: payload })); } catch {}
-  try { safeGetSocket()?.emit?.(event, payload); } catch {}
+  try {
+    window.dispatchEvent?.(new CustomEvent(event, { detail: payload }));
+  } catch {}
+  try {
+    safeGetSocket()?.emit?.(event, payload);
+  } catch {}
 }
 
 /* ---------------------------------------------
@@ -76,8 +108,16 @@ let EVENTS = {
 const SNAP_KEY = "suka.inventoryStore.v3";
 async function saveSnapshot(snap) {
   const db = await DB();
-  try { await db?.userMeta?.put?.({ key: SNAP_KEY, value: snap, updatedAt: nowISO() }); } catch {}
-  try { localStorage.setItem(SNAP_KEY, JSON.stringify(snap)); } catch {}
+  try {
+    await db?.userMeta?.put?.({
+      key: SNAP_KEY,
+      value: snap,
+      updatedAt: nowISO(),
+    });
+  } catch {}
+  try {
+    localStorage.setItem(SNAP_KEY, JSON.stringify(snap));
+  } catch {}
 }
 async function loadSnapshot() {
   const db = await DB();
@@ -85,7 +125,12 @@ async function loadSnapshot() {
     const doc = await db?.userMeta?.get?.({ key: SNAP_KEY });
     if (doc?.value) return doc.value;
   } catch {}
-  try { const raw = localStorage.getItem(SNAP_KEY); return raw ? JSON.parse(raw) : null; } catch { return null; }
+  try {
+    const raw = localStorage.getItem(SNAP_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
 }
 
 /* ---------------------------------------------
@@ -109,14 +154,25 @@ function normalizeLot(l = {}, baseUnit = "g") {
 // Item (aggregate over lots)
 function normalizeItem(i) {
   const key = toKeyish(i.key || i.name);
-  const lots = Array.isArray(i.lots) ? i.lots.map((l) => normalizeLot(l, i.unit || "g")) : [];
+  const lots = Array.isArray(i.lots)
+    ? i.lots.map((l) => normalizeLot(l, i.unit || "g"))
+    : [];
   // Support legacy quantity/reserved on item: fold into one lot
   const legacyQty = Number(i.quantity ?? 0);
   const legacyRes = Number(i.reserved ?? 0);
   if (legacyQty || legacyRes) {
-    lots.push(normalizeLot({ qty: legacyQty, reserved: legacyRes, unit: i.unit || "g" }, i.unit || "g"));
+    lots.push(
+      normalizeLot(
+        { qty: legacyQty, reserved: legacyRes, unit: i.unit || "g" },
+        i.unit || "g"
+      )
+    );
   }
-  lots.sort((a, b) => new Date(a.expiresISO || "2999-12-31") - new Date(b.expiresISO || "2999-12-31"));
+  lots.sort(
+    (a, b) =>
+      new Date(a.expiresISO || "2999-12-31") -
+      new Date(b.expiresISO || "2999-12-31")
+  );
 
   return {
     key,
@@ -147,7 +203,8 @@ function roundSmart(n) {
   if (Math.abs(n) >= 1) return Math.round(n * 100) / 100;
   return Math.round(n * 1000) / 1000;
 }
-const cmpAvail = (item) => Math.max(0, (item.quantity || 0) - (item.reserved || 0));
+const cmpAvail = (item) =>
+  Math.max(0, (item.quantity || 0) - (item.reserved || 0));
 const isLow = (item) => item.threshold > 0 && cmpAvail(item) <= item.threshold;
 
 /** Convert qty u1 → u2 using Units module if available. */
@@ -175,7 +232,9 @@ function getKeyCandidate(keyOrName, items) {
   if (items[s]) return s;
   const keyish = toKeyish(s);
   if (items[keyish]) return keyish;
-  const match = Object.keys(items).find((k) => items[k].name?.toLowerCase() === s.toLowerCase());
+  const match = Object.keys(items).find(
+    (k) => items[k].name?.toLowerCase() === s.toLowerCase()
+  );
   return match || keyish || null;
 }
 
@@ -184,8 +243,9 @@ function getKeyCandidate(keyOrName, items) {
 ----------------------------------------------*/
 export const useInventoryStore = create((set, get) => ({
   items: /** @type {Record<string, ReturnType<typeof normalizeItem>>} */ ({}),
-  holds: /** @type {Record<string, { id: string, lines: any[], createdAtISO: string, reason?: string }>} */ ({}),
-  meta:  { lastUpdatedISO: null, hydrated: false, version: 3 },
+  holds:
+    /** @type {Record<string, { id: string, lines: any[], createdAtISO: string, reason?: string }>} */ ({}),
+  meta: { lastUpdatedISO: null, hydrated: false, version: 3 },
 
   /* undo/redo (not persisted) */
   _history: [],
@@ -202,8 +262,17 @@ export const useInventoryStore = create((set, get) => ({
     const snap = await loadSnapshot();
     if (snap?.items) {
       const next = {};
-      for (const k of Object.keys(snap.items)) next[k] = normalizeItem(snap.items[k]);
-      set({ items: next, holds: snap.holds || {}, meta: { lastUpdatedISO: snap.updatedAtISO || nowISO(), hydrated: true, version: 3 } });
+      for (const k of Object.keys(snap.items))
+        next[k] = normalizeItem(snap.items[k]);
+      set({
+        items: next,
+        holds: snap.holds || {},
+        meta: {
+          lastUpdatedISO: snap.updatedAtISO || nowISO(),
+          hydrated: true,
+          version: 3,
+        },
+      });
     } else {
       set({ meta: { lastUpdatedISO: nowISO(), hydrated: true, version: 3 } });
     }
@@ -211,8 +280,8 @@ export const useInventoryStore = create((set, get) => ({
     // Import from Dexie supplies/pantry as a best-effort merge
     try {
       const db = await DB();
-      const supplies = await db?.supplies?.toArray?.() || [];
-      const pantry = await db?.pantry?.toArray?.() || [];
+      const supplies = (await db?.supplies?.toArray?.()) || [];
+      const pantry = (await db?.pantry?.toArray?.()) || [];
       const next = { ...get().items };
       for (const s of [...supplies, ...pantry]) {
         const key = toKeyish(s.key || s.name);
@@ -227,7 +296,15 @@ export const useInventoryStore = create((set, get) => ({
           perishDays: s.perishDays ?? prev.perishDays ?? null,
           lots: [
             ...(prev.lots || []),
-            normalizeLot({ qty: Number(s.quantity ?? 0), unit: s.unit || prev.unit || "g", source: "dexie", addedISO: s.updatedAt || nowISO() }, s.unit || "g"),
+            normalizeLot(
+              {
+                qty: Number(s.quantity ?? 0),
+                unit: s.unit || prev.unit || "g",
+                source: "dexie",
+                addedISO: s.updatedAt || nowISO(),
+              },
+              s.unit || "g"
+            ),
           ].filter((l) => l.qty > 0),
           priceHistory: prev.priceHistory || [],
           meta: { ...prev.meta, dexie: true },
@@ -241,7 +318,11 @@ export const useInventoryStore = create((set, get) => ({
   },
 
   persist: async () => {
-    await saveSnapshot({ items: get().items, holds: get().holds, updatedAtISO: nowISO() });
+    await saveSnapshot({
+      items: get().items,
+      holds: get().holds,
+      updatedAtISO: nowISO(),
+    });
   },
 
   /* ---------- CRUD (lot-aware) ---------- */
@@ -250,7 +331,10 @@ export const useInventoryStore = create((set, get) => ({
     const n = normalizeItem(item);
     const prev = get().items;
     get()._pushHistory({ items: prev, holds: get().holds });
-    set({ items: { ...prev, [n.key]: n }, meta: { ...get().meta, lastUpdatedISO: nowISO() } });
+    set({
+      items: { ...prev, [n.key]: n },
+      meta: { ...get().meta, lastUpdatedISO: nowISO() },
+    });
     await get().persist();
     broadcast(EVENTS.INVENTORY.UPDATED, { key: n.key });
     return n;
@@ -261,39 +345,102 @@ export const useInventoryStore = create((set, get) => ({
     if (!key) return null;
     const prev = get().items[key] || normalizeItem({ key, name: key });
     const lotN = normalizeLot(lot, prev.unit);
-    const next = recomputeAggregates({ ...prev, lots: [...prev.lots, lotN].sort((a,b)=> new Date(a.expiresISO||"2999")-new Date(b.expiresISO||"2999")) });
+    const next = recomputeAggregates({
+      ...prev,
+      lots: [...prev.lots, lotN].sort(
+        (a, b) =>
+          new Date(a.expiresISO || "2999") - new Date(b.expiresISO || "2999")
+      ),
+    });
     get()._pushHistory({ items: get().items, holds: get().holds });
-    set((s) => ({ items: { ...s.items, [key]: next }, meta: { ...s.meta, lastUpdatedISO: nowISO() } }));
+    set((s) => ({
+      items: { ...s.items, [key]: next },
+      meta: { ...s.meta, lastUpdatedISO: nowISO() },
+    }));
     await get().persist();
-    broadcast(EVENTS.INVENTORY.UPDATED, { key, lotId: lotN.lotId, action: "addLot" });
+    broadcast(EVENTS.INVENTORY.UPDATED, {
+      key,
+      lotId: lotN.lotId,
+      action: "addLot",
+    });
     return lotN;
   },
 
-  adjustQuantity: async (keyOrName, delta, { unit = null, reason = "manual", expiresISO = null, costPerUnit = null, vendor = null } = {}) => {
+  adjustQuantity: async (
+    keyOrName,
+    delta,
+    {
+      unit = null,
+      reason = "manual",
+      expiresISO = null,
+      costPerUnit = null,
+      vendor = null,
+    } = {}
+  ) => {
     // Positive delta → add lot; negative delta → consume from FIFO lots
     const key = getKeyCandidate(keyOrName, get().items);
-    const baseUnit = (get().items[key]?.unit) || "g";
+    const baseUnit = get().items[key]?.unit || "g";
     let adj = Number(delta || 0);
     if (unit) adj = await convertQty(adj, unit, baseUnit);
 
     if (!key) return null;
-    const prev = get().items[key] || normalizeItem({ key, name: key, unit: baseUnit });
+    const prev =
+      get().items[key] || normalizeItem({ key, name: key, unit: baseUnit });
 
     get()._pushHistory({ items: get().items, holds: get().holds });
 
     if (adj > 0) {
       // Add as a lot so we preserve expiry & pricing
-      const lot = normalizeLot({ qty: adj, unit: baseUnit, expiresISO, costPerUnit, vendor, source: reason }, baseUnit);
-      const next = recomputeAggregates({ ...prev, lots: [...prev.lots, lot].sort((a,b)=> new Date(a.expiresISO||"2999")-new Date(b.expiresISO||"2999")) });
+      const lot = normalizeLot(
+        {
+          qty: adj,
+          unit: baseUnit,
+          expiresISO,
+          costPerUnit,
+          vendor,
+          source: reason,
+        },
+        baseUnit
+      );
+      const next = recomputeAggregates({
+        ...prev,
+        lots: [...prev.lots, lot].sort(
+          (a, b) =>
+            new Date(a.expiresISO || "2999") - new Date(b.expiresISO || "2999")
+        ),
+      });
       // optional price track
       if (Number.isFinite(costPerUnit)) {
-        next.priceHistory = [...(next.priceHistory||[]), { atISO: nowISO(), vendor: vendor || null, unitCost: Number(costPerUnit) }];
+        next.priceHistory = [
+          ...(next.priceHistory || []),
+          {
+            atISO: nowISO(),
+            vendor: vendor || null,
+            unitCost: Number(costPerUnit),
+          },
+        ];
       }
-      set((s) => ({ items: { ...s.items, [key]: next }, meta: { ...s.meta, lastUpdatedISO: nowISO() } }));
+      set((s) => ({
+        items: { ...s.items, [key]: next },
+        meta: { ...s.meta, lastUpdatedISO: nowISO() },
+      }));
       await get().persist();
-      broadcast("inventory:delta", { lines: [{ key, qty: roundSmart(adj), unit: baseUnit, reason }], at: nowISO() });
-      if (next.quantity > (next.threshold || 0) * 3) broadcast(EVENTS.INVENTORY.SURPLUS, { key, quantity: next.quantity, unit: baseUnit });
-      if (isLow(next)) broadcast(EVENTS.INVENTORY.LOW, { key, available: cmpAvail(next), threshold: next.threshold });
+      broadcast("inventory:delta", {
+        lines: [{ key, qty: roundSmart(adj), unit: baseUnit, reason }],
+        at: nowISO(),
+      });
+      if (next.quantity > (next.threshold || 0) * 3)
+        broadcast(EVENTS.INVENTORY.SURPLUS, {
+          key,
+          quantity: next.quantity,
+          unit: baseUnit,
+        });
+      if (isLow(next))
+        broadcast(EVENTS.INVENTORY.LOW, {
+          key,
+          available: cmpAvail(next),
+          threshold: next.threshold,
+        });
       return next;
     } else if (adj < 0) {
       // Consume from earliest-expiring lots first
@@ -309,10 +456,21 @@ export const useInventoryStore = create((set, get) => ({
       }
       const filtered = lots.filter((l) => l.qty > 0 || l.reserved > 0);
       const next = recomputeAggregates({ ...prev, lots: filtered });
-      set((s) => ({ items: { ...s.items, [key]: next }, meta: { ...s.meta, lastUpdatedISO: nowISO() } }));
+      set((s) => ({
+        items: { ...s.items, [key]: next },
+        meta: { ...s.meta, lastUpdatedISO: nowISO() },
+      }));
       await get().persist();
-      broadcast("inventory:delta", { lines: [{ key, qty: roundSmart(adj), unit: baseUnit, reason }], at: nowISO() });
-      if (isLow(next)) broadcast(EVENTS.INVENTORY.LOW, { key, available: cmpAvail(next), threshold: next.threshold });
+      broadcast("inventory:delta", {
+        lines: [{ key, qty: roundSmart(adj), unit: baseUnit, reason }],
+        at: nowISO(),
+      });
+      if (isLow(next))
+        broadcast(EVENTS.INVENTORY.LOW, {
+          key,
+          available: cmpAvail(next),
+          threshold: next.threshold,
+        });
       return next;
     }
     return prev;
@@ -322,11 +480,20 @@ export const useInventoryStore = create((set, get) => ({
     const key = getKeyCandidate(keyOrName, get().items);
     if (!key) return false;
     const cur = get().items[key];
-    const next = { ...cur, threshold: Math.max(0, Number(threshold || 0)), updatedAtISO: nowISO() };
+    const next = {
+      ...cur,
+      threshold: Math.max(0, Number(threshold || 0)),
+      updatedAtISO: nowISO(),
+    };
     get()._pushHistory({ items: get().items, holds: get().holds });
     set((s) => ({ items: { ...s.items, [key]: next } }));
     await get().persist();
-    if (isLow(next)) broadcast(EVENTS.INVENTORY.LOW, { key, available: cmpAvail(next), threshold: next.threshold });
+    if (isLow(next))
+      broadcast(EVENTS.INVENTORY.LOW, {
+        key,
+        available: cmpAvail(next),
+        threshold: next.threshold,
+      });
     return true;
   },
 
@@ -334,7 +501,12 @@ export const useInventoryStore = create((set, get) => ({
     const key = getKeyCandidate(keyOrName, get().items);
     if (!key) return false;
     const cur = get().items[key] || normalizeItem({ key, name: key });
-    const next = { ...cur, location: location || cur.location, bins: Array.isArray(bins) ? bins : cur.bins, updatedAtISO: nowISO() };
+    const next = {
+      ...cur,
+      location: location || cur.location,
+      bins: Array.isArray(bins) ? bins : cur.bins,
+      updatedAtISO: nowISO(),
+    };
     get()._pushHistory({ items: get().items, holds: get().holds });
     set((s) => ({ items: { ...s.items, [key]: next } }));
     await get().persist();
@@ -345,13 +517,16 @@ export const useInventoryStore = create((set, get) => ({
   /* ---------- Reservations (lot & unit aware) ---------- */
   reserveItems: async ({ lines = [], reason = "reserve" } = {}) => {
     // lines: [{ key|name, qty, unit?, reason?, meta? }]
-    if (!Array.isArray(lines) || !lines.length) return { ok: false, reason: "empty" };
+    if (!Array.isArray(lines) || !lines.length)
+      return { ok: false, reason: "empty" };
     const holdId = uuidv4();
     const items = { ...get().items };
     const applied = [];
 
     for (const raw of lines) {
-      const key = getKeyCandidate(raw.key || raw.name, items) || toKeyish(raw.key || raw.name);
+      const key =
+        getKeyCandidate(raw.key || raw.name, items) ||
+        toKeyish(raw.key || raw.name);
       const cur = items[key] || normalizeItem({ key, name: key });
       const baseUnit = cur.unit || "g";
       let q = Number(raw.qty || 0);
@@ -367,13 +542,31 @@ export const useInventoryStore = create((set, get) => ({
         const take = Math.min(avail, need);
         l.reserved = roundSmart(l.reserved + take);
         need = roundSmart(need - take);
-        applied.push({ key, lotId: l.lotId, qty: take, unit: baseUnit, reason: raw.reason || reason, meta: raw.meta || {} });
+        applied.push({
+          key,
+          lotId: l.lotId,
+          qty: take,
+          unit: baseUnit,
+          reason: raw.reason || reason,
+          meta: raw.meta || {},
+        });
         if (need <= 0) break;
       }
       items[key] = recomputeAggregates({ ...cur, lots: nextLots });
     }
 
-    set((s) => ({ items, holds: { ...s.holds, [holdId]: { id: holdId, lines: applied, reason, createdAtISO: nowISO() } } }));
+    set((s) => ({
+      items,
+      holds: {
+        ...s.holds,
+        [holdId]: {
+          id: holdId,
+          lines: applied,
+          reason,
+          createdAtISO: nowISO(),
+        },
+      },
+    }));
     await get().persist();
 
     broadcast(EVENTS.INVENTORY.RESERVED, { id: holdId, lines: applied });
@@ -388,10 +581,15 @@ export const useInventoryStore = create((set, get) => ({
     for (const l of hold.lines) {
       const cur = items[l.key];
       if (!cur) continue;
-      const lots = cur.lots.map((x) => x.lotId === l.lotId ? { ...x, reserved: Math.max(0, roundSmart(x.reserved - l.qty)) } : x);
+      const lots = cur.lots.map((x) =>
+        x.lotId === l.lotId
+          ? { ...x, reserved: Math.max(0, roundSmart(x.reserved - l.qty)) }
+          : x
+      );
       items[l.key] = recomputeAggregates({ ...cur, lots });
     }
-    const holds = { ...get().holds }; delete holds[holdId];
+    const holds = { ...get().holds };
+    delete holds[holdId];
     get()._pushHistory({ items: get().items, holds: get().holds });
     set({ items, holds });
     await get().persist();
@@ -405,29 +603,40 @@ export const useInventoryStore = create((set, get) => ({
 
     const items = { ...get().items };
     for (const l of hold.lines) {
-      const cur = items[l.key] || normalizeItem({ key: l.key, name: l.key, unit: l.unit });
-      const lots = cur.lots.map((x) => {
-        if (x.lotId !== l.lotId) return x;
-        const nextReserved = Math.max(0, roundSmart(x.reserved - l.qty));
-        const nextQty = Math.max(0, roundSmart(x.qty - l.qty));
-        return { ...x, reserved: nextReserved, qty: nextQty };
-      }).filter((x) => x.qty > 0 || x.reserved > 0);
+      const cur =
+        items[l.key] ||
+        normalizeItem({ key: l.key, name: l.key, unit: l.unit });
+      const lots = cur.lots
+        .map((x) => {
+          if (x.lotId !== l.lotId) return x;
+          const nextReserved = Math.max(0, roundSmart(x.reserved - l.qty));
+          const nextQty = Math.max(0, roundSmart(x.qty - l.qty));
+          return { ...x, reserved: nextReserved, qty: nextQty };
+        })
+        .filter((x) => x.qty > 0 || x.reserved > 0);
       items[l.key] = recomputeAggregates({ ...cur, lots });
     }
-    const holds = { ...get().holds }; delete holds[holdId];
+    const holds = { ...get().holds };
+    delete holds[holdId];
 
     get()._pushHistory({ items: get().items, holds: get().holds });
     set({ items, holds });
     await get().persist();
 
-    broadcast(EVENTS.INVENTORY.DEDUCTED, { id: holdId, lines: hold.lines, reason });
+    broadcast(EVENTS.INVENTORY.DEDUCTED, {
+      id: holdId,
+      lines: hold.lines,
+      reason,
+    });
 
     // Optional Dexie write-through (best effort)
     try {
       const db = await DB();
       for (const l of hold.lines) {
         const cur = items[l.key];
-        const rec = await db?.supplies?.get?.({ key: l.key }) || await db?.pantry?.get?.({ key: l.key });
+        const rec =
+          (await db?.supplies?.get?.({ key: l.key })) ||
+          (await db?.pantry?.get?.({ key: l.key }));
         if (rec) {
           rec.quantity = cur.quantity;
           rec.updatedAt = nowISO();
@@ -441,15 +650,27 @@ export const useInventoryStore = create((set, get) => ({
 
   /* ---------- Recipe/Import helpers ---------- */
   /** Generate reservation lines from ingredients via IngredientsIndex (w/ substitutions). */
-  reserveForIngredients: async (ingredients = [], { scale = 1, reason = "recipes", allowSubs = true } = {}) => {
+  reserveForIngredients: async (
+    ingredients = [],
+    { scale = 1, reason = "recipes", allowSubs = true } = {}
+  ) => {
     const idx = await IngredientsIndex();
-    const lines = await idx?.toInventoryLines?.(ingredients, { scale, reason, allowSubs }) || [];
+    const lines =
+      (await idx?.toInventoryLines?.(ingredients, {
+        scale,
+        reason,
+        allowSubs,
+      })) || [];
     return await get().reserveItems({ lines, reason });
   },
 
   reserveForRecipe: async (recipe, { scale = 1, reason = "recipe" } = {}) => {
-    if (!recipe?.ingredients?.length) return { ok: false, reason: "no_ingredients" };
-    return await get().reserveForIngredients(recipe.ingredients, { scale, reason });
+    if (!recipe?.ingredients?.length)
+      return { ok: false, reason: "no_ingredients" };
+    return await get().reserveForIngredients(recipe.ingredients, {
+      scale,
+      reason,
+    });
   },
 
   /* ---------- Surplus / Low detection & restock ---------- */
@@ -458,9 +679,21 @@ export const useInventoryStore = create((set, get) => ({
     const surplus = [];
     for (const k of Object.keys(get().items)) {
       const it = get().items[k];
-      if (isLow(it)) low.push({ key: k, name: it.name, available: cmpAvail(it), threshold: it.threshold, unit: it.unit });
+      if (isLow(it))
+        low.push({
+          key: k,
+          name: it.name,
+          available: cmpAvail(it),
+          threshold: it.threshold,
+          unit: it.unit,
+        });
       if (it.threshold > 0 && it.quantity > it.threshold * 3) {
-        surplus.push({ key: k, name: it.name, quantity: it.quantity, unit: it.unit });
+        surplus.push({
+          key: k,
+          name: it.name,
+          quantity: it.quantity,
+          unit: it.unit,
+        });
       }
     }
     if (low.length) broadcast(EVENTS.INVENTORY.LOW, { items: low });
@@ -479,7 +712,8 @@ export const useInventoryStore = create((set, get) => ({
 
       // Find best vendor (lowest recent unitCost)
       const cheapest = (it.priceHistory || [])
-        .slice().sort((a, b) => (a.unitCost ?? 1e9) - (b.unitCost ?? 1e9))[0];
+        .slice()
+        .sort((a, b) => (a.unitCost ?? 1e9) - (b.unitCost ?? 1e9))[0];
 
       // Heuristic pack suggestion: round to sensible pack sizes (e.g., 250g, 500g, 1kg / 6, 12, 24)
       const unit = it.unit || "g";
@@ -493,8 +727,13 @@ export const useInventoryStore = create((set, get) => ({
       }
 
       out.push({
-        key: k, name: it.name, qty: roundSmart(pack), unit,
-        reason: "low", vendor: cheapest?.vendor || null, estUnitCost: cheapest?.unitCost || null
+        key: k,
+        name: it.name,
+        qty: roundSmart(pack),
+        unit,
+        reason: "low",
+        vendor: cheapest?.vendor || null,
+        estUnitCost: cheapest?.unitCost || null,
       });
     }
     // sort by severity (lowest availability first)
@@ -510,7 +749,11 @@ export const useInventoryStore = create((set, get) => ({
       acc[cat] = acc[cat] || { count: 0, low: 0, soonExpiring: 0 };
       acc[cat].count += 1;
       if (isLow(it)) acc[cat].low += 1;
-      const soon = it.lots.some((l) => l.expiresISO && (new Date(l.expiresISO) - Date.now()) <= 1000 * 60 * 60 * 24 * 7);
+      const soon = it.lots.some(
+        (l) =>
+          l.expiresISO &&
+          new Date(l.expiresISO) - Date.now() <= 1000 * 60 * 60 * 24 * 7
+      );
       if (soon) acc[cat].soonExpiring += 1;
       return acc;
     }, {});
@@ -526,7 +769,12 @@ export const useInventoryStore = create((set, get) => ({
     if (!q) return [];
     const results = [];
     for (const it of Object.values(get().items)) {
-      const hay = [it.key, it.name, it.location, ...(it.meta?.aliases || [])].map((x) => String(x).toLowerCase());
+      const hay = [
+        it.key,
+        it.name,
+        it.location,
+        ...(it.meta?.aliases || []),
+      ].map((x) => String(x).toLowerCase());
       if (hay.some((h) => h.includes(q))) results.push(it);
     }
     return results.sort((a, b) => a.name.localeCompare(b.name));
@@ -538,9 +786,13 @@ export const useInventoryStore = create((set, get) => ({
       const n8n = await n8nClient();
       const payload = { items: get().items, at: nowISO() };
       if (typeof n8n?.runWorkflowByName === "function") {
-        return await n8n.runWorkflowByName(workflowName, payload, { waitForFinish: false });
+        return await n8n.runWorkflowByName(workflowName, payload, {
+          waitForFinish: false,
+        });
       }
-      return await n8n?.runWorkflow?.("inventory-snapshot", payload, { waitForFinish: false });
+      return await n8n?.runWorkflow?.("inventory-snapshot", payload, {
+        waitForFinish: false,
+      });
     } catch (e) {
       return { ok: false, error: String(e?.message || e) };
     }
@@ -554,7 +806,12 @@ export const useInventoryStore = create((set, get) => ({
     const curr = { items: get().items, holds: get().holds };
     const future = get()._future.slice();
     future.push(curr);
-    set({ items: snap.items, holds: snap.holds, _history: hist, _future: future });
+    set({
+      items: snap.items,
+      holds: snap.holds,
+      _history: hist,
+      _future: future,
+    });
     await get().persist();
     broadcast("inventory:undo", {});
   },
@@ -565,7 +822,12 @@ export const useInventoryStore = create((set, get) => ({
     const next = future.pop();
     const hist = get()._history.slice();
     hist.push({ items: get().items, holds: get().holds });
-    set({ items: next.items, holds: next.holds, _history: hist, _future: future });
+    set({
+      items: next.items,
+      holds: next.holds,
+      _history: hist,
+      _future: future,
+    });
     await get().persist();
     broadcast("inventory:redo", {});
   },
@@ -613,3 +875,64 @@ export const useInventoryActions = () =>
    Auto-hydrate on import (non-blocking)
 ----------------------------------------------*/
 useInventoryStore.getState().hydrate?.();
+
+/* -------------------------------------------------------------------------- */
+/* ✅ Namespace export expected by orchestrators (e.g., mealPlanEngine)         */
+/* -------------------------------------------------------------------------- */
+/**
+ * Some orchestrators import `{ Inventory }` from "@/store/InventoryStore".
+ * Provide a stable namespace object without changing existing exports.
+ */
+export const Inventory = {
+  // store / hooks
+  useInventoryStore,
+  useInventoryItems,
+  useInventoryActions,
+
+  // snapshots
+  getState: () => useInventoryStore.getState(),
+  getItems: () => useInventoryStore.getState().items || {},
+  getHolds: () => useInventoryStore.getState().holds || {},
+  getMeta: () => useInventoryStore.getState().meta || {},
+
+  // lifecycle
+  hydrate: (...args) => useInventoryStore.getState().hydrate?.(...args),
+  persist: (...args) => useInventoryStore.getState().persist?.(...args),
+
+  // CRUD
+  upsertItem: (...args) => useInventoryStore.getState().upsertItem?.(...args),
+  addLot: (...args) => useInventoryStore.getState().addLot?.(...args),
+  adjustQuantity: (...args) =>
+    useInventoryStore.getState().adjustQuantity?.(...args),
+  setThreshold: (...args) =>
+    useInventoryStore.getState().setThreshold?.(...args),
+  setLocation: (...args) => useInventoryStore.getState().setLocation?.(...args),
+
+  // reservations
+  reserveItems: (...args) =>
+    useInventoryStore.getState().reserveItems?.(...args),
+  releaseHold: (...args) => useInventoryStore.getState().releaseHold?.(...args),
+  commitHold: (...args) => useInventoryStore.getState().commitHold?.(...args),
+  reserveForIngredients: (...args) =>
+    useInventoryStore.getState().reserveForIngredients?.(...args),
+  reserveForRecipe: (...args) =>
+    useInventoryStore.getState().reserveForRecipe?.(...args),
+
+  // insights / queries
+  detectSurplusLow: (...args) =>
+    useInventoryStore.getState().detectSurplusLow?.(...args),
+  suggestRestockList: (...args) =>
+    useInventoryStore.getState().suggestRestockList?.(...args),
+  auditSnapshot: (...args) =>
+    useInventoryStore.getState().auditSnapshot?.(...args),
+  getByCategory: (...args) =>
+    useInventoryStore.getState().getByCategory?.(...args),
+  search: (...args) => useInventoryStore.getState().search?.(...args),
+
+  // n8n
+  exportToN8n: (...args) => useInventoryStore.getState().exportToN8n?.(...args),
+
+  // undo/redo
+  undo: (...args) => useInventoryStore.getState().undo?.(...args),
+  redo: (...args) => useInventoryStore.getState().redo?.(...args),
+};

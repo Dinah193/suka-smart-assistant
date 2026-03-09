@@ -328,6 +328,17 @@ export async function evaluateGuardsForStep(session, options = {}) {
 }
 
 /**
+ * Back-compat alias:
+ * HouseholdOrchestrator imports `evaluateGuards` from this module.
+ * Keep evaluateGuardsForStep as the canonical implementation.
+ *
+ * @param {Session} session
+ * @param {EvaluateGuardOptions} [options]
+ * @returns {Promise<AggregateGuardResult>}
+ */
+export const evaluateGuards = evaluateGuardsForStep;
+
+/**
  * Optional: Evaluate guards across all steps to pre-compute which steps
  * are runnable under current conditions. This can be used by:
  * - “Now” resolver to pick the next runnable session/step.

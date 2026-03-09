@@ -19,8 +19,8 @@
  */
 
 import { useCallback, useMemo } from "react";
-import { emit } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
 // You can replace this with a real helper later.
 // For now it's a safe no-op so this file is standalone.
@@ -237,8 +237,7 @@ function buildSessionFromRecommendation(recommendation, stabilityResult) {
       {
         id: `${stepIdBase}-prep`,
         title: `Review stability notes for '${title}'`,
-        desc:
-          "Review the stability calculator notes, band, and alerts. Decide what a realistic improvement looks like for the next 30–90 days.",
+        desc: "Review the stability calculator notes, band, and alerts. Decide what a realistic improvement looks like for the next 30–90 days.",
         durationSec: 10 * 60,
         blockers: ["sabbath", "quietHours"],
         metadata: {
@@ -362,9 +361,8 @@ export function useStabilitySessionsFromRecommendations() {
  * }}
  */
 export function useStabilityNowHandler(stabilityResult) {
-  const {
-    nowCandidates,
-  } = useHouseholdStabilityRecommendations(stabilityResult);
+  const { nowCandidates } =
+    useHouseholdStabilityRecommendations(stabilityResult);
 
   const { buildSession } = useStabilitySessionsFromRecommendations();
 

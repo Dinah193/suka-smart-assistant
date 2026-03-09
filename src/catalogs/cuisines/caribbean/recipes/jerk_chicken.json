@@ -1,0 +1,434 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-16T00:00:00.000Z",
+
+  "meta": {
+    "id": "caribbean.jerk_chicken",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Caribbean Jerk Chicken",
+    "subtitle": "Jamaican-style jerk chicken with a smoky-spicy allspice + thyme profile (grill/oven)",
+    "source": {
+      "kind": "curated",
+      "author": "SSA Canonical Catalog",
+      "origin": "caribbean",
+      "attribution": "Modeled from common Jamaican jerk technique: aromatic spice paste + thyme/scallion + heat, cooked over high heat with optional smoke.",
+      "url": null
+    }
+  },
+
+  "classification": {
+    "cuisine": "caribbean",
+    "subprofiles": ["jamaican"],
+    "category": "main",
+    "mealArchetypes": ["grilled_protein_plus_sides", "spice_rub_roast"],
+    "servingStyles": [
+      "family_style",
+      "plated_meals",
+      "holiday_feasts",
+      "cookout"
+    ],
+    "plannerTags": [
+      "caribbean",
+      "jamaican",
+      "jerk",
+      "chicken",
+      "grill",
+      "batch",
+      "spicy"
+    ]
+  },
+
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 2, "unit": "piece" },
+    "notes": "Assumes bone-in chicken pieces. Scale marinade linearly."
+  },
+
+  "time": {
+    "activeMins": 25,
+    "totalMins": 180,
+    "handsOffMins": 135
+  },
+
+  "difficulty": 2,
+
+  "nutritionHints": {
+    "proteinForward": true,
+    "glutenFreeByDefault": true,
+    "dairyFreeByDefault": true
+  },
+
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": false,
+    "leftoversGood": true,
+    "freezerFriendly": true
+  },
+
+  "tasteProfile": {
+    "heatTypical": 4,
+    "heatScale": { "min": 0, "max": 5 },
+    "sweetness": 1,
+    "sourness": 1,
+    "saltiness": 2,
+    "umami": 2,
+    "signature": [
+      "allspice_pimento",
+      "thyme",
+      "scallion",
+      "garlic_ginger",
+      "smoky_char",
+      "scotch_bonnet_heat"
+    ]
+  },
+
+  "equipment": {
+    "recommended": [
+      "grill",
+      "tongs",
+      "instant_read_thermometer",
+      "mixing_bowl",
+      "cutting_board",
+      "chef_knife"
+    ],
+    "minimum": ["oven", "baking_sheet", "stovetop"],
+    "optional": [
+      "food_processor",
+      "smoker_box",
+      "wire_rack",
+      "cast_iron_skillet"
+    ]
+  },
+
+  "dietFlags": ["dairy_free", "gluten_free"],
+  "allergens": [],
+
+  "ingredients": [
+    {
+      "id": "chicken_legs_thighs_mix",
+      "label": "Chicken pieces (bone-in thighs/drumsticks or quarters)",
+      "amount": { "value": 4.0, "unit": "lb" },
+      "role": "protein",
+      "notes": "Skin-on recommended for best char. You can slash thicker pieces to help seasoning penetrate."
+    },
+    {
+      "id": "lime_juice",
+      "label": "Lime juice",
+      "amount": { "value": 3, "unit": "tbsp" },
+      "role": "acid",
+      "notes": "For brightness and to help the jerk paste cling."
+    },
+    {
+      "id": "scallion",
+      "label": "Scallions (rough chopped)",
+      "amount": { "value": 8, "unit": "stalk" },
+      "role": "aromatic"
+    },
+    {
+      "id": "onion",
+      "label": "Onion (rough chopped)",
+      "amount": { "value": 1, "unit": "medium" },
+      "role": "aromatic",
+      "notes": "White or yellow."
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic cloves",
+      "amount": { "value": 6, "unit": "clove" },
+      "role": "aromatic"
+    },
+    {
+      "id": "ginger",
+      "label": "Ginger (rough chopped)",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "role": "aromatic",
+      "notes": "Fresh is preferred; 1 tbsp ground can substitute."
+    },
+    {
+      "id": "thyme",
+      "label": "Thyme (fresh sprigs) or dried",
+      "amount": { "value": 10, "unit": "sprig" },
+      "role": "herb",
+      "notes": "If dried: 1 tbsp."
+    },
+    {
+      "id": "allspice",
+      "label": "Allspice (ground) or crushed berries",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "role": "spice",
+      "notes": "Allspice is the core jerk note."
+    },
+    {
+      "id": "ground_black_pepper",
+      "label": "Black pepper",
+      "amount": { "value": 2, "unit": "tsp" },
+      "role": "spice"
+    },
+    {
+      "id": "ground_cinnamon",
+      "label": "Ground cinnamon",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "role": "spice",
+      "optional": true,
+      "notes": "Optional warm note (some households include it)."
+    },
+    {
+      "id": "ground_nutmeg",
+      "label": "Ground nutmeg",
+      "amount": { "value": 0.25, "unit": "tsp" },
+      "role": "spice",
+      "optional": true
+    },
+    {
+      "id": "ground_cloves",
+      "label": "Ground cloves",
+      "amount": { "value": 0.25, "unit": "tsp" },
+      "role": "spice",
+      "optional": true,
+      "notes": "Use lightly; cloves can dominate."
+    },
+    {
+      "id": "brown_sugar",
+      "label": "Brown sugar",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "role": "sweetener",
+      "notes": "Helps caramelization and balances heat."
+    },
+    {
+      "id": "soy_sauce_or_tamari",
+      "label": "Soy sauce or tamari",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "role": "umami",
+      "notes": "Use tamari for gluten-free."
+    },
+    {
+      "id": "vinegar",
+      "label": "Apple cider vinegar (or white vinegar)",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "role": "acid",
+      "optional": true,
+      "notes": "Adds tang and helps preserve the paste for a day or two."
+    },
+    {
+      "id": "scotch_bonnet",
+      "label": "Scotch bonnet (or habanero)",
+      "amount": { "value": 2, "unit": "each" },
+      "role": "heat",
+      "notes": "2 peppers is hot. For milder: use 1 or remove seeds."
+    },
+    {
+      "id": "salt",
+      "label": "Salt",
+      "amount": { "value": 2, "unit": "tsp" },
+      "role": "seasoning",
+      "notes": "Adjust based on soy sauce saltiness."
+    },
+    {
+      "id": "neutral_oil",
+      "label": "Neutral oil",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "role": "fat",
+      "notes": "Helps paste spread and promotes browning."
+    },
+    {
+      "id": "liquid_smoke",
+      "label": "Liquid smoke",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "role": "smoke",
+      "optional": true,
+      "notes": "Optional if you are baking instead of grilling/smoking."
+    },
+    {
+      "id": "pimento_wood_or_chips",
+      "label": "Pimento wood chips (or hickory/fruitwood chips)",
+      "amount": { "value": 1, "unit": "cup" },
+      "role": "smoke",
+      "optional": true,
+      "notes": "Traditional jerk uses pimento wood. Optional for grill smoke box."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "make_jerk_paste",
+      "title": "Make the jerk seasoning paste",
+      "domain": "cooking",
+      "activeMins": 10,
+      "instructions": [
+        "Add scallions, onion, garlic, ginger, thyme leaves (or dried thyme), allspice, black pepper, brown sugar, soy/tamari, lime juice, salt, oil, and scotch bonnet(s) to a blender/food processor.",
+        "Blend into a thick paste. Add 1–2 tbsp water only if needed to get it moving.",
+        "Optional: add vinegar and/or a tiny splash of liquid smoke if oven-baking and you want smokier flavor.",
+        "Taste carefully (tiny dab). Adjust salt, sugar, or heat to preference."
+      ],
+      "inputs": {
+        "ingredients": [
+          "scallion",
+          "onion",
+          "garlic",
+          "ginger",
+          "thyme",
+          "allspice",
+          "ground_black_pepper",
+          "brown_sugar",
+          "soy_sauce_or_tamari",
+          "lime_juice",
+          "salt",
+          "neutral_oil",
+          "vinegar",
+          "liquid_smoke",
+          "scotch_bonnet"
+        ],
+        "equipment": ["food_processor", "mixing_bowl", "spoon"]
+      }
+    },
+    {
+      "id": "marinate_chicken",
+      "title": "Coat and marinate the chicken",
+      "domain": "cooking",
+      "activeMins": 10,
+      "instructions": [
+        "Pat chicken dry. Optional: make 1–2 shallow slashes in thick areas to help the jerk penetrate.",
+        "Rub jerk paste all over chicken (under the skin where possible).",
+        "Cover and marinate at least 2 hours, ideally overnight (8–24 hours)."
+      ],
+      "timers": [{ "label": "Marinate (minimum)", "mins": 120 }],
+      "inputs": {
+        "ingredients": ["chicken_legs_thighs_mix"],
+        "equipment": ["mixing_bowl", "tongs", "container_with_lid"]
+      }
+    },
+    {
+      "id": "cook",
+      "title": "Cook (grill preferred, oven supported)",
+      "domain": "cooking",
+      "activeMins": 5,
+      "handsOffMins": 45,
+      "instructions": [
+        "GRILL (best): Preheat grill to medium-high (two-zone if possible). Oil grates. If using wood chips, set up smoke box/foil packet.",
+        "Start chicken skin-side down over indirect heat, cover, and cook ~25–35 minutes, turning occasionally to avoid burning.",
+        "Move to direct heat to char and crisp skin, 2–4 minutes per side as needed.",
+        "OVEN (easy): Heat oven to 425°F. Place chicken on a rack over a baking sheet. Roast 35–50 minutes, flipping once halfway. Broil 1–3 minutes to finish char if desired.",
+        "Cook until thickest piece reaches 165°F internal (thighs can go 175–185°F for best texture). Rest 10 minutes."
+      ],
+      "timers": [
+        { "label": "Covered cook / roast", "mins": 40 },
+        { "label": "Rest", "mins": 10 }
+      ],
+      "inputs": {
+        "ingredients": ["pimento_wood_or_chips"],
+        "equipment": [
+          "grill",
+          "oven",
+          "baking_sheet",
+          "wire_rack",
+          "instant_read_thermometer",
+          "tongs"
+        ]
+      }
+    },
+    {
+      "id": "serve",
+      "title": "Serve",
+      "domain": "cooking",
+      "activeMins": 2,
+      "instructions": [
+        "Serve jerk chicken hot with rice and peas, festival bread, or fried plantains.",
+        "Add a squeeze of lime if desired.",
+        "Optional: serve with a cooling side (slaw) to balance the heat."
+      ],
+      "inputs": {
+        "ingredients": ["lime_juice"],
+        "equipment": ["plate"]
+      }
+    }
+  ],
+
+  "pairings": {
+    "starches": [
+      "caribbean.rice_and_peas",
+      "rice",
+      "festival_bread",
+      "caribbean.fried_plantains",
+      "dumplings"
+    ],
+    "vegSides": ["cabbage_slaw", "greens", "salad", "caribbean.callaloo"],
+    "condiments": ["pepper_sauce", "lime_juice", "pikliz"],
+    "drinks": ["caribbean.sorrel_drink", "caribbean.ginger_beer"]
+  },
+
+  "adaptations": [
+    {
+      "id": "caribbean.jerk_chicken.boneless_fast",
+      "label": "Boneless Thighs (Faster)",
+      "when": { "timeMaxTotalMins": 60 },
+      "adapt": {
+        "swapProtein": "chicken_thighs_boneless",
+        "notes": "Marinate 30–60 minutes if needed. Grill or roast 18–25 minutes total. Aim for 175°F for best texture."
+      }
+    },
+    {
+      "id": "caribbean.jerk_chicken.milder",
+      "label": "Milder Jerk",
+      "when": { "tasteMaxHeat": 2 },
+      "adapt": {
+        "reduceHeat": true,
+        "notes": "Use 1 scotch bonnet, remove seeds/ribs, or substitute 1/2 habanero + 1 sweet pepper. Increase brown sugar slightly."
+      }
+    },
+    {
+      "id": "caribbean.jerk_chicken.no_blender",
+      "label": "No Blender / Rustic Chop",
+      "when": { "missingEquipmentAny": ["food_processor", "blender"] },
+      "adapt": {
+        "method": "hand_chop_paste",
+        "notes": "Finely mince aromatics and combine with spices/soy/lime/oil into a rough paste. Massage into chicken and marinate longer (overnight recommended)."
+      }
+    },
+    {
+      "id": "caribbean.jerk_chicken.sheet_pan",
+      "label": "Sheet Pan Jerk Chicken (Oven + Broil)",
+      "when": { "hasEquipmentAll": ["oven"] },
+      "adapt": {
+        "method": "roast_then_broil",
+        "notes": "Roast at 425°F on rack. Broil briefly for char. Add liquid smoke only if desired; real broil char usually suffices."
+      }
+    }
+  ],
+
+  "storage": {
+    "fridge": {
+      "safeDays": 4,
+      "notes": "Cool quickly; store airtight. Reheat until steaming hot."
+    },
+    "freezer": {
+      "safeMonths": 3,
+      "notes": "Freeze cooked chicken portions. Thaw overnight and reheat in oven/air fryer for best texture."
+    },
+    "reheat": {
+      "methods": ["oven", "air_fryer", "microwave"],
+      "notes": "Oven/air fryer restores skin best. Microwave is fastest but softens skin."
+    }
+  },
+
+  "planner": {
+    "defaultSlot": "dinner",
+    "batchPlanHints": {
+      "goodForBatch": true,
+      "prepTasks": [
+        "Make jerk paste",
+        "Trim/scratch chicken pieces",
+        "Marinate chicken"
+      ],
+      "makeAhead": [
+        "Make jerk paste (2–3 days ahead)",
+        "Marinate chicken overnight"
+      ],
+      "cookOnceEatTwice": [
+        "Cook extra for wraps, bowls, or salads the next day"
+      ]
+    }
+  }
+}

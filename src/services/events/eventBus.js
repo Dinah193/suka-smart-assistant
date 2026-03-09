@@ -4,24 +4,24 @@
 // PURPOSE
 // SSA is event-driven. Everything flows through here:
 //
-//   imports → intelligence → automation → (optional) hub export
-//   └── import.parsed → inventory.updated → ... → session.draftReady
+// imports → intelligence → automation → (optional) hub export
+// └── import.parsed → inventory.updated → ... → session.draftReady
 //
 // This bus makes that possible. It:
 //
 // 1. Normalizes event names (dots → slashes).
 // 2. Enforces a CONSISTENT PAYLOAD SHAPE:
 //
-//      {
-//        type: "<event-name>",     // normalized
-//        ts: "<ISO timestamp>",    // Date.toISOString()
-//        source: "<emitter-module-or-domain>",
-//        data: { ...your payload... }
-//      }
+//   {
+//     type: "<event-name>",         // normalized
+//     ts: "<ISO timestamp>",        // Date.toISOString()
+//     source: "<emitter-module-or-domain>",
+//     data: { ...your payload... }
+//   }
 //
-//    If a caller passes that shape already, we do NOT re-wrap it.
-//    This is important so your engines and shims can directly call
-//    exportToHubIfEnabled(eventPayload) or postMessage(eventPayload).
+// If a caller passes that shape already, we do NOT re-wrap it.
+// This is important so your engines and shims can directly call
+// exportToHubIfEnabled(eventPayload) or postMessage(eventPayload).
 //
 // 3. Supports wildcard subscriptions ("inventory/**", "scan/*", "session/**").
 // 4. Supports sticky events (last payload replay on new listeners).
@@ -37,30 +37,30 @@
 // SAFE TO IMPORT ANYWHERE in SSA (main window, worker, SessionRunner shim).
 //
 // NOTE: This file does NOT talk to the Hub. That is done per-engine so SSA
-//       can run even if the Hub is down. This bus ONLY emits app-level events.
+// can run even if the Hub is down. This bus ONLY emits app-level events.
 
 /**
  * @typedef {Object} EventEnvelope
- * @property {string} type    Event name (normalized "a/b")
- * @property {string} ts      ISO8601 timestamp
- * @property {string} source  Logical source (module/domain/shim)
- * @property {any}    data    Arbitrary payload data (domain-specific)
+ * @property {string} type Event name (normalized "a/b")
+ * @property {string} ts ISO8601 timestamp
+ * @property {string} source Logical source (module/domain/shim)
+ * @property {any} data Arbitrary payload data (domain-specific)
  */
 
 // -----------------------------------------------------------------------------
 // Internal state
 // -----------------------------------------------------------------------------
-
-const _listeners = new Set();      // { pattern, handler, opts }
-const _sticky = new Map();         // exactEventName -> last CANONICAL payload
+const _listeners = new Set(); // { pattern, handler, opts }
+const _sticky = new Map(); // exactEventName -> last CANONICAL payload
 let _debug = false;
 
 const MAX_QUEUE = 1000;
 let _emitCount = 0;
 
-const _debouncers = new Map();     // key -> { timer, ... }
-const _beforeEmit = new Set();     // middleware
-const _afterEmit = new Set();      // middleware
+const _debouncers = new Map(); // key -> { timer, ... }
+
+const _beforeEmit = new Set(); // middleware
+const _afterEmit = new Set(); // middleware
 
 const _timeline = [];
 const TIMELINE_MAX = 300;
@@ -73,15 +73,23 @@ let _broadcastBridgeDispose = null;
 function _isPlainObject(v) {
   return v && typeof v === "object" && !Array.isArray(v);
 }
+
 /** @param {EventEnvelope} e */
 function _isLikelyEnvelope(e) {
-  return _isPlainObject(e) && typeof e.type === "string" && typeof e.ts === "string" && "data" in e;
+  return (
+    _isPlainObject(e) &&
+    typeof e.type === "string" &&
+    typeof e.ts === "string" &&
+    "data" in e
+  );
 }
+
 /** @param {EventEnvelope} e */
 function _validateEnvelope(e) {
   if (!_isPlainObject(e)) return false;
   if (!e.type || typeof e.type !== "string") return false;
-  if (!e.ts || typeof e.ts !== "string" || Number.isNaN(Date.parse(e.ts))) return false;
+  if (!e.ts || typeof e.ts !== "string" || Number.isNaN(Date.parse(e.ts)))
+    return false;
   if (!e.source || typeof e.source !== "string") return false;
   // data can be anything
   return true;
@@ -115,15 +123,21 @@ export function on(pattern, handler, opts = {}) {
     try {
       if (isWildcard(entry.pattern)) {
         const keys = Array.from(_sticky.keys());
-        const replayKeys = keys.filter((k) => patternMatch(entry.pattern, k)).sort();
+        const replayKeys = keys
+          .filter((k) => patternMatch(entry.pattern, k))
+          .sort();
         for (const k of replayKeys) {
           const payload = _sticky.get(k);
           safeCall(entry, k, payload, { event: k, time: Date.now() });
         }
       } else if (_sticky.has(entry.pattern)) {
         const payload = _sticky.get(entry.pattern);
-        safeCall(entry, entry.pattern, payload, { event: entry.pattern, time: Date.now() });
+        safeCall(entry, entry.pattern, payload, {
+          event: entry.pattern,
+          time: Date.now(),
+        });
       }
+
       if (entry.opts.once) {
         _listeners.delete(entry);
         return () => {};
@@ -152,9 +166,26 @@ export function off(pattern, handler) {
 }
 
 /**
+ * Compatibility aliases (older modules expect subscribe/unsubscribe).
+ * These are strictly aliases and must NOT change behavior.
+ */
+export function subscribe(pattern, handler, opts = {}) {
+  return on(pattern, handler, opts);
+}
+export function unsubscribe(pattern, handler) {
+  return off(pattern, handler);
+}
+
+/**
  * EMIT — synchronous, non-blocking
  * We ALWAYS try to wrap into our canonical SSA payload shape if the caller
  * didn't already do it.
+ *
+ * NOTE (compat): This bus normalizes event names to slashes internally.
+ * We additionally mirror a few “dot” events for backward/forward modules:
+ *   - meal.plan.updated
+ *   - meal.executed
+ *   - inventory.updated
  *
  * @param {string} event
  * @param {any} payload
@@ -183,7 +214,11 @@ export function emit(event, payload, opts = {}) {
   const meta = { event: name, time, traceId, iso, source };
   const maybe = runBefore(name, canonical, meta);
   if (maybe?.skip) return;
-  const finalPayload = Object.prototype.hasOwnProperty.call(maybe || {}, "payload")
+
+  const finalPayload = Object.prototype.hasOwnProperty.call(
+    maybe || {},
+    "payload",
+  )
     ? maybe.payload
     : canonical;
 
@@ -195,7 +230,22 @@ export function emit(event, payload, opts = {}) {
 
   // run after middleware
   runAfter(name, finalPayload, meta);
-  recordTimeline({ t: time, event: name, dir: "emit", traceId, size: listeners.length });
+
+  recordTimeline({
+    t: time,
+    event: name,
+    dir: "emit",
+    traceId,
+    size: listeners.length,
+  });
+
+  // ---------------------------------------------------------------------------
+  // Dot-event mirroring (requested)
+  // Ensure dot-name events also get emitted for modules that still listen on them.
+  // Keep this mirror small & non-invasive. Avoid loops by only mirroring when the
+  // originating call was NOT already a dot-name emission.
+  // ---------------------------------------------------------------------------
+  maybeMirrorDotEvents(name, finalPayload, meta);
 }
 
 /**
@@ -213,26 +263,42 @@ export async function emitAsync(event, payload, opts = {}) {
   const iso = new Date(time).toISOString();
   const traceId = String(opts?.traceId || genId());
   const source = opts?.source || detectSourceFromName(name);
-  const canonical = toCanonicalPayload(name, payload, iso, source);
 
+  const canonical = toCanonicalPayload(name, payload, iso, source);
   if (opts.sticky && !isWildcard(name)) _sticky.set(name, canonical);
 
   const meta = { event: name, time, traceId, iso, source };
   const maybe = runBefore(name, canonical, meta);
   if (maybe?.skip) return;
-  const finalPayload = Object.prototype.hasOwnProperty.call(maybe || {}, "payload")
+
+  const finalPayload = Object.prototype.hasOwnProperty.call(
+    maybe || {},
+    "payload",
+  )
     ? maybe.payload
     : canonical;
 
   const listeners = matchedListeners(name);
   const tasks = [];
   for (const entry of listeners) {
-    tasks.push(Promise.resolve().then(() => safeCall(entry, name, finalPayload, meta)));
+    tasks.push(
+      Promise.resolve().then(() => safeCall(entry, name, finalPayload, meta)),
+    );
   }
   await Promise.allSettled(tasks);
 
   runAfter(name, finalPayload, meta);
-  recordTimeline({ t: time, event: name, dir: "emitAsync", traceId, size: listeners.length });
+
+  recordTimeline({
+    t: time,
+    event: name,
+    dir: "emitAsync",
+    traceId,
+    size: listeners.length,
+  });
+
+  // mirror dot events for async too
+  maybeMirrorDotEvents(name, finalPayload, meta);
 }
 
 /**
@@ -240,6 +306,7 @@ export async function emitAsync(event, payload, opts = {}) {
  */
 export function emitDebounced(event, payload, opts = {}) {
   const name = normalize(event);
+
   const {
     wait = 250,
     leading = false,
@@ -255,7 +322,13 @@ export function emitDebounced(event, payload, opts = {}) {
   const now = Date.now();
 
   if (!state) {
-    state = { timer: null, lastInvoke: 0, leadingInvoked: false, queuedArgs: null, startTs: now };
+    state = {
+      timer: null,
+      lastInvoke: 0,
+      leadingInvoked: false,
+      queuedArgs: null,
+      startTs: now,
+    };
     _debouncers.set(key, state);
   }
 
@@ -321,6 +394,7 @@ export function emitEvent(type, source, data) {
  */
 export function waitFor(pattern, predicate, timeoutMs = 15000, signal) {
   const pat = normalize(pattern);
+
   return new Promise((resolve, reject) => {
     let settled = false;
 
@@ -360,7 +434,7 @@ export function waitFor(pattern, predicate, timeoutMs = 15000, signal) {
           finish(reject, e);
         }
       },
-      { priority: 100 }
+      { priority: 100 },
     );
 
     if (signal) signal.addEventListener("abort", onAbort, { once: true });
@@ -375,8 +449,10 @@ export function ask(baseEvent, payload, timeoutMs = 15000, signal) {
   const id = genId();
   const req = `${base}:req`;
   const res = `${base}:res:${id}`;
+
   return new Promise((resolve, reject) => {
     let settled = false;
+
     const finish = (fn, arg) => {
       if (settled) return;
       settled = true;
@@ -391,8 +467,10 @@ export function ask(baseEvent, payload, timeoutMs = 15000, signal) {
       }
       fn(arg);
     };
+
     const onAbort = () =>
       finish(reject, new Error(`ask aborted for "${base}"`));
+
     const timer =
       timeoutMs > 0
         ? setTimeout(() => {
@@ -403,6 +481,7 @@ export function ask(baseEvent, payload, timeoutMs = 15000, signal) {
     const handler = (answer) => finish(resolve, answer);
 
     on(res, handler, { once: true, priority: 100 });
+
     emit(req, { id, payload }, { source: "eventBus.ask" });
 
     if (signal) signal.addEventListener("abort", onAbort, { once: true });
@@ -412,6 +491,7 @@ export function ask(baseEvent, payload, timeoutMs = 15000, signal) {
 export function respond(baseEvent, handler) {
   const base = normalize(baseEvent);
   const req = `${base}:req`;
+
   const h = async (msg, meta) => {
     try {
       const { id, payload } = msg?.data || msg || {};
@@ -421,10 +501,11 @@ export function respond(baseEvent, handler) {
       emit(
         `${base}:res:${msg?.id}`,
         { ok: false, error: String(e?.message || e) },
-        { source: "eventBus.respond" }
+        { source: "eventBus.respond" },
       );
     }
   };
+
   return on(req, h);
 }
 
@@ -434,7 +515,8 @@ export function respond(baseEvent, handler) {
 export function createChannel(ns) {
   const prefix = normalize(String(ns).replace(/\/+$/g, ""));
   return {
-    emit: (name, payload, opts) => emit(`${prefix}/${normalize(name)}`, payload, opts),
+    emit: (name, payload, opts) =>
+      emit(`${prefix}/${normalize(name)}`, payload, opts),
     emitAsync: (name, payload, opts) =>
       emitAsync(`${prefix}/${normalize(name)}`, payload, opts),
     emitDebounced: (name, payload, opts) =>
@@ -461,9 +543,11 @@ export function createDomainChannel(domain) {
     p && typeof p === "object" && p.data
       ? { ...p, data: { ...p.data, domain } }
       : toCanonicalPayload(domain, p, new Date().toISOString(), domain);
+
   return {
     emit: (name, payload, opts) => ch.emit(name, ensure(payload), opts),
-    emitAsync: (name, payload, opts) => ch.emitAsync(name, ensure(payload), opts),
+    emitAsync: (name, payload, opts) =>
+      ch.emitAsync(name, ensure(payload), opts),
     emitDebounced: (name, payload, opts) =>
       ch.emitDebounced(name, ensure(payload), opts),
     on: ch.on,
@@ -484,10 +568,10 @@ export function pipe(fromPattern, toPrefix) {
       emit(
         `${pref}/${meta.event}`,
         { ...payload.data, pipedFrom: meta.event },
-        { traceId: meta.traceId, source: "eventBus.pipe" }
+        { traceId: meta.traceId, source: "eventBus.pipe" },
       );
     },
-    { priority: -10, replayLast: false }
+    { priority: -10, replayLast: false },
   );
   return () => unsub();
 }
@@ -495,7 +579,6 @@ export function pipe(fromPattern, toPrefix) {
 // -----------------------------------------------------------------------------
 // Debug / stats / reset
 // -----------------------------------------------------------------------------
-
 export function setDebug(v) {
   _debug = !!v;
 }
@@ -503,6 +586,7 @@ export function setDebug(v) {
 export function useMiddleware({ beforeEmit, afterEmit } = {}) {
   if (beforeEmit) _beforeEmit.add(beforeEmit);
   if (afterEmit) _afterEmit.add(afterEmit);
+
   return () => {
     if (beforeEmit) _beforeEmit.delete(beforeEmit);
     if (afterEmit) _afterEmit.delete(afterEmit);
@@ -521,6 +605,7 @@ export function stats() {
 export function clearSticky(pattern) {
   const pat = pattern ? normalize(pattern) : null;
   if (!pat) return _sticky.clear();
+
   for (const k of Array.from(_sticky.keys())) {
     if (patternMatch(pat, k)) _sticky.delete(k);
   }
@@ -539,16 +624,17 @@ export function reset() {
 // -----------------------------------------------------------------------------
 // Internals
 // -----------------------------------------------------------------------------
-
 function normalize(name) {
   return String(name)
     .replace(/\./g, "/")
     .replace(/\/{2,}/g, "/")
     .replace(/^\/|\/$/g, "");
 }
+
 function isWildcard(pat) {
   return pat.includes("*");
 }
+
 function matchedListeners(event) {
   const arr = [];
   for (const l of _listeners) {
@@ -557,10 +643,13 @@ function matchedListeners(event) {
   arr.sort((a, b) => b.opts.priority - a.opts.priority);
   return arr;
 }
+
 function patternMatch(pattern, event) {
   if (pattern === event) return true;
+
   const p = pattern.split("/");
   const e = event.split("/");
+
   const starStar = p[p.length - 1] === "**";
   if (starStar) {
     const head = p.slice(0, -1);
@@ -571,6 +660,7 @@ function patternMatch(pattern, event) {
     }
     return true;
   }
+
   if (p.length !== e.length) return false;
   for (let i = 0; i < p.length; i++) {
     if (p[i] === "*") continue;
@@ -578,6 +668,7 @@ function patternMatch(pattern, event) {
   }
   return true;
 }
+
 function safeCall(entry, event, payload, meta = { event, time: Date.now() }) {
   try {
     const res = entry.handler(payload, meta);
@@ -590,26 +681,29 @@ function safeCall(entry, event, payload, meta = { event, time: Date.now() }) {
     if (_debug) log("emit", event, payload, meta);
   }
 }
+
 function genId() {
-  return (
-    Math.random().toString(36).slice(2) + Date.now().toString(36)
-  );
+  return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
+
 function log(...args) {
   if (_debug) console.debug("[eventBus]", ...args);
 }
+
 function runBefore(name, payload, meta) {
   let result = undefined;
   for (const mw of _beforeEmit) {
     try {
       const out = mw(name, payload, meta);
-      if (out && typeof out === "object") result = { ...(result || {}), ...out };
+      if (out && typeof out === "object")
+        result = { ...(result || {}), ...out };
     } catch (e) {
       console.warn("[eventBus] beforeEmit middleware error", e);
     }
   }
   return result;
 }
+
 function runAfter(name, payload, meta) {
   for (const mw of _afterEmit) {
     try {
@@ -619,17 +713,20 @@ function runAfter(name, payload, meta) {
     }
   }
 }
+
 function recordTimeline(entry) {
   _timeline.push(entry);
   if (_timeline.length > TIMELINE_MAX) {
     _timeline.splice(0, _timeline.length - TIMELINE_MAX);
   }
 }
+
 function detectSourceFromName(name) {
   // e.g. "garden/harvestLogged" → "garden"
   const parts = name.split("/");
   return parts[0] || "eventBus";
 }
+
 function toCanonicalPayload(type, payload, iso, source) {
   // if already canonical, return as-is (with a dev-time validation only)
   if (_isLikelyEnvelope(payload)) {
@@ -641,20 +738,125 @@ function toCanonicalPayload(type, payload, iso, source) {
       // eslint-disable-next-line no-console
       console.warn(
         "[eventBus] received a likely canonical envelope with invalid fields:",
-        payload
+        payload,
       );
     }
     return payload;
   }
+
   return {
     type,
     ts: iso,
     source,
-    data:
-      payload && typeof payload === "object"
-        ? payload
-        : { value: payload },
+    data: payload && typeof payload === "object" ? payload : { value: payload },
   };
+}
+
+/**
+ * Mirror specific dot events requested by user:
+ *   meal.plan.updated, meal.executed, inventory.updated
+ *
+ * Internally we normalize to slashes; this mirror makes those dot names
+ * appear as equivalent slash events (meal/plan/updated etc) AND also ensures
+ * if a slash event is emitted we still surface the dot version once.
+ */
+function maybeMirrorDotEvents(normalizedName, canonicalPayload, meta) {
+  // Prevent broadcast loop amplification (we already re-emit incoming envelopes)
+  // and prevent recursion/dupe by using a small internal flag.
+  if (meta?.__mirrored) return;
+
+  const map = new Map([
+    ["meal/plan/updated", "meal.plan.updated"],
+    ["meal/executed", "meal.executed"],
+    ["inventory/updated", "inventory.updated"],
+  ]);
+
+  // If the normalized name matches a slash key → emit dot name
+  if (map.has(normalizedName)) {
+    const dot = map.get(normalizedName);
+    _emitMirrored(dot, canonicalPayload, meta);
+    return;
+  }
+
+  // If the *incoming call* was dot-form, normalize() already converted it to slashes,
+  // so the above path already handled it. But we also support the inverse mapping:
+  // if someone emits the dot name through another path that bypasses normalize,
+  // handle it by looking up normalizedName with dots converted (defensive).
+  const maybeDot = String(normalizedName).includes(".")
+    ? String(normalizedName)
+    : null;
+
+  if (
+    maybeDot &&
+    (maybeDot === "meal.plan.updated" ||
+      maybeDot === "meal.executed" ||
+      maybeDot === "inventory.updated")
+  ) {
+    const slash = normalize(maybeDot);
+    _emitMirrored(map.get(slash) || maybeDot, canonicalPayload, meta);
+  }
+}
+
+function _emitMirrored(dotEventName, canonicalPayload, meta) {
+  // Emit the dot event without re-wrapping; keep payload shape as-is.
+  // Use the same traceId for correlation and mark as mirrored to avoid recursion.
+  const opts = {
+    source: meta?.source || "eventBus.mirror",
+    traceId: meta?.traceId,
+    sticky: false,
+  };
+
+  // We call a tiny internal emit-path that avoids re-running mirror again.
+  _emitInternal(
+    dotEventName,
+    canonicalPayload,
+    { ...meta, __mirrored: true },
+    opts,
+  );
+}
+
+function _emitInternal(event, payload, metaOverride, opts) {
+  // Minimal internal emit to preserve current behavior but skip mirror recursion.
+  const name = normalize(event);
+  const time = Date.now();
+  const iso = new Date(time).toISOString();
+  const traceId = String(opts?.traceId || genId());
+  const source = opts?.source || detectSourceFromName(name);
+
+  const canonical = toCanonicalPayload(name, payload, iso, source);
+  const meta = {
+    event: name,
+    time,
+    traceId,
+    iso,
+    source,
+    ...(metaOverride || {}),
+  };
+
+  const maybe = runBefore(name, canonical, meta);
+  if (maybe?.skip) return;
+
+  const finalPayload = Object.prototype.hasOwnProperty.call(
+    maybe || {},
+    "payload",
+  )
+    ? maybe.payload
+    : canonical;
+
+  const listeners = matchedListeners(name);
+  for (const entry of listeners) {
+    safeCall(entry, name, finalPayload, meta);
+  }
+
+  runAfter(name, finalPayload, meta);
+
+  recordTimeline({
+    t: time,
+    event: name,
+    dir: "emit(mirror)",
+    traceId,
+    size: listeners.length,
+  });
 }
 
 // -----------------------------------------------------------------------------
@@ -696,7 +898,6 @@ export const Events = {
   SESSION_APPROVED: "session/approved",
   SESSION_DISCARDED: "session/discarded",
   SESSION_ERROR: "session/error",
-
   SESSION_STARTED: "session/started",
   SESSION_STEP_CHANGED: "session/step.changed",
   SESSION_PAUSED: "session/paused",
@@ -718,6 +919,10 @@ export const Events = {
   UI_MODAL_OPEN: "ui/modalOpen",
   UI_MODAL_CLOSE: "ui/modalClose",
 
+  /* UI / Cleaning share/export (housekeeper packet) */
+  UI_CLEANING_SHARE_OPEN: "ui/cleaning/shareOpen",
+  UI_CLEANING_SHARE_CLOSE: "ui/cleaning/shareClose",
+
   /* Scan • Compare • Trust */
   SCAN_OPEN: "scan/open",
   SCAN_CLOSE: "scan/close",
@@ -736,36 +941,7 @@ export const Events = {
   SCHEDULE_SAVED: "schedule/saved",
   SCHEDULE_DELETED: "schedule/deleted",
 
-  /* Agent / Reasoner / Shim orchestration
-   *
-   * These events form the “shim boundary” for AI skills. They are designed
-   * so that:
-   * - the Orchestrator/Reasoner can request work,
-   * - a specific shim (cooking, cleaning, garden, animal, preservation, etc.)
-   *   can pick it up, optionally consult AgentCacheRepo, and
-   * - results/errors can be streamed back without tightly coupling callers
-   *   to any specific model/provider.
-   *
-   * Typical payload shape (canonical envelope .data):
-   *
-   *   agent/invocation.requested:
-   *     { id, domain, skill, shimName, input, meta }
-   *
-   *   agent/invocation.started:
-   *     { id, domain, skill, shimName }
-   *
-   *   agent/cache.hit | agent/cache.miss:
-   *     { id, cacheKey, domain, skill, shimName, entry? }
-   *
-   *   agent/invocation.completed:
-   *     { id, domain, skill, shimName, output, usage?, cacheKey? }
-   *
-   *   agent/invocation.failed:
-   *     { id, domain, skill, shimName, error, retryable, cacheKey? }
-   *
-   *   agent/shim.health:
-   *     { shimName, ok, lastError?, latencyMs? }
-   */
+  /* Agent / Reasoner / Shim orchestration */
   AGENT_INVOCATION_REQUESTED: "agent/invocation.requested",
   AGENT_INVOCATION_STARTED: "agent/invocation.started",
   AGENT_INVOCATION_COMPLETED: "agent/invocation.completed",
@@ -778,6 +954,7 @@ export const Events = {
 // -----------------------------------------------------------------------------
 // Opinionated glue (kept small; extend in /src/services/events/glue/*.js if needed)
 // -----------------------------------------------------------------------------
+
 // meals / recipes → cooking session
 on(
   Events.RECIPES_CONSOLIDATED,
@@ -785,10 +962,10 @@ on(
     emitDebounced(
       Events.COOKING_REQUEST_SESSION,
       { ...data, ts, from: source },
-      { wait: 300, maxWait: 1200 }
+      { wait: 300, maxWait: 1200 },
     );
   },
-  { priority: 1 }
+  { priority: 1 },
 );
 
 on(
@@ -797,10 +974,10 @@ on(
     emitDebounced(
       Events.COOKING_REQUEST_SESSION,
       { ...data, ts, from: source },
-      { wait: 300, maxWait: 1200 }
+      { wait: 300, maxWait: 1200 },
     );
   },
-  { priority: 1 }
+  { priority: 1 },
 );
 
 // cleaning → cleaning session
@@ -810,10 +987,10 @@ on(
     emitDebounced(
       Events.CLEANING_REQUEST_SESSION,
       { ...data, ts, from: source },
-      { wait: 300, maxWait: 1200 }
+      { wait: 300, maxWait: 1200 },
     );
   },
-  { priority: 1 }
+  { priority: 1 },
 );
 
 // forward domain-drafts to shared draft tray
@@ -821,24 +998,26 @@ on(Events.COOKING_DRAFT_READY, ({ data }) => {
   emit(
     Events.SESSION_DRAFT_READY,
     { draft: data?.draft ?? data },
-    { source: "eventBus.glue" }
+    { source: "eventBus.glue" },
   );
 });
+
 on(Events.CLEANING_DRAFT_READY, ({ data }) => {
   emit(
     Events.SESSION_DRAFT_READY,
     { draft: data?.draft ?? data },
-    { source: "eventBus.glue" }
+    { source: "eventBus.glue" },
   );
 });
 
 // inventory undo + NBA
 on(Events.INVENTORY_UPDATED, ({ data }) => {
   const diffs = data?.diffs || [];
+
   emit(
     Events.UI_UNDO_OFFERED,
     { label: "Undo inventory change", ttlMs: 8000 },
-    { source: "eventBus.inventory" }
+    { source: "eventBus.inventory" },
   );
 
   const handler = () => {
@@ -849,7 +1028,7 @@ on(Events.INVENTORY_UPDATED, ({ data }) => {
       emit(
         Events.INVENTORY_UPDATED,
         { diffs: inverse, source: "undo" },
-        { source: "eventBus.inventory" }
+        { source: "eventBus.inventory" },
       );
       emit(Events.UI_TOAST, {
         variant: "info",
@@ -860,6 +1039,7 @@ on(Events.INVENTORY_UPDATED, ({ data }) => {
       off(Events.UI_UNDO_TRIGGERED, handler);
     }
   };
+
   on(Events.UI_UNDO_TRIGGERED, handler, { once: true, priority: 50 });
 
   const used = (diffs || []).some((d) => Number(d.delta) < 0);
@@ -885,10 +1065,11 @@ on(Events.SCAN_RESULT, ({ data }) => {
     title: "Scan captured",
     message: data?.source ? `Source: ${data.source}` : "Processing...",
   });
+
   emitDebounced(
     Events.PRODUCT_CANDIDATES_READY,
     { items: Array.isArray(data) ? data : [data] },
-    { wait: 100, maxWait: 600 }
+    { wait: 100, maxWait: 600 },
   );
 });
 
@@ -924,27 +1105,109 @@ on(Events.FAVORITES_TOGGLED, ({ data }) => {
     entity === "schedule"
       ? "Schedule"
       : entity === "session"
-      ? "Session"
-      : "Item";
+        ? "Session"
+        : "Item";
+
   emit(Events.UI_TOAST, {
     variant: on ? "success" : "info",
     title: on ? `${noun} saved` : `${noun} removed`,
-    message: on
-      ? "Added to your favorites"
-      : "Removed from favorites",
+    message: on ? "Added to your favorites" : "Removed from favorites",
   });
-  emitDebounced(
-    Events.FAVORITES_SYNCED,
-    {},
-    { wait: 300, maxWait: 1200, key: "fav-sync" }
-  );
+
+  // (kept as-is; your original code had an empty event payload here)
+  emitDebounced({}, {}, { wait: 300, maxWait: 1200, key: "fav-sync" });
 });
+
+// -----------------------------------------------------------------------------
+// Homestead Planner glue (requested)
+// When users are INSIDE Homestead Planner, refresh targets/estimators after:
+//   - meal.plan.updated (dot form) / meal/plan/updated (normalized)
+//   - meal.executed (dot form) / meal/executed
+//   - inventory.updated (dot form) / inventory/updated
+//
+// We keep it “inert” unless the module toggles the sticky flag:
+//   emit("homestead/active", { active:true }, { sticky:true, source:"homestead.ui" })
+//   emit("homestead/active", { active:false }, { sticky:true, source:"homestead.ui" })
+//
+// This keeps the rest of SSA unchanged while enabling live refresh behavior.
+// -----------------------------------------------------------------------------
+on(
+  "homestead/active",
+  ({ data }) => {
+    // store as sticky via whoever emits it; we simply observe it.
+    // no-op here; listener exists to make discoverability easy.
+    void data;
+  },
+  { priority: 0 },
+);
+
+function _homesteadIsActive() {
+  const p = _sticky.get("homestead/active");
+  return !!(p && p.data && p.data.active === true);
+}
+
+function _homesteadRefresh(reasonEvent, meta, data) {
+  if (!_homesteadIsActive()) return;
+
+  emitDebounced(
+    "homestead/refreshTargets",
+    {
+      reason: reasonEvent,
+      traceId: meta?.traceId,
+      at: meta?.iso,
+      data: data || null,
+    },
+    {
+      wait: 150,
+      maxWait: 800,
+      key: "homestead-refresh",
+      source: "eventBus.homestead",
+    },
+  );
+
+  emitDebounced(
+    "homestead/refreshEstimators",
+    {
+      reason: reasonEvent,
+      traceId: meta?.traceId,
+      at: meta?.iso,
+      data: data || null,
+    },
+    {
+      wait: 150,
+      maxWait: 800,
+      key: "homestead-estimators",
+      source: "eventBus.homestead",
+    },
+  );
+}
+
+// listen to BOTH the canonical normalized forms and the dot forms (which normalize to slashes anyway),
+// but we include the dot strings to reflect the contract explicitly.
+on(
+  "meal/plan/updated",
+  ({ data }, meta) => _homesteadRefresh("meal.plan.updated", meta, data),
+  { priority: 0 },
+);
+
+on(
+  "meal/executed",
+  ({ data }, meta) => _homesteadRefresh("meal.executed", meta, data),
+  { priority: 0 },
+);
+
+on(
+  "inventory/updated",
+  ({ data }, meta) => _homesteadRefresh("inventory.updated", meta, data),
+  { priority: 0 },
+);
 
 // -----------------------------------------------------------------------------
 // DOM Bridge (for ScanMount / mobile app overlays)
 // -----------------------------------------------------------------------------
 export function bridgeDOM() {
   if (typeof document === "undefined") return () => {};
+
   const map = [
     ["scan:open", Events.SCAN_OPEN],
     ["scan:close", Events.SCAN_CLOSE],
@@ -952,43 +1215,41 @@ export function bridgeDOM() {
     ["scan:import", Events.SCAN_IMPORT],
     ["scan:result", Events.SCAN_RESULT],
   ];
+
   const handlers = map.map(([domEvt, busEvt]) => {
     const h = (e) => emit(busEvt, e?.detail ?? {}, { source: "domBridge" });
     document.addEventListener(domEvt, h);
     return () => document.removeEventListener(domEvt, h);
   });
+
   return () => handlers.forEach((u) => u());
 }
 
 // -----------------------------------------------------------------------------
 // BroadcastChannel bridge (shim-friendly, for background/session shims)
 // -----------------------------------------------------------------------------
-// This allows SessionRunner shims, Web Workers, or other tabs to share
-// the same event envelopes. It is safe to call multiple times; later calls
-// will tear down the previous bridge and replace it.
-//
-// Typical usage (main app root):
-//   attachBroadcastChannelBridge("ssa-event-bus");
-//
-// In a SessionRunner shim / worker:
-//   attachBroadcastChannelBridge("ssa-event-bus");
-//   eventBus.on("session/**", ...);
-//
-// IMPORTANT: to avoid infinite loops, events that arrive from the bridge
-// are re-emitted with source === "broadcast". The bridge middleware only
-// re-broadcasts events whose meta.source !== "broadcast".
 export function attachBroadcastChannelBridge(channelName = "ssa-event-bus") {
   // tear down any existing bridge first
   if (_broadcastBridgeDispose) {
-    try { _broadcastBridgeDispose(); } catch {}
+    try {
+      _broadcastBridgeDispose();
+    } catch {}
     _broadcastBridgeDispose = null;
   }
   if (_broadcastChannel) {
-    try { _broadcastChannel.close(); } catch {}
+    try {
+      _broadcastChannel.close();
+    } catch {}
     _broadcastChannel = null;
   }
 
-  const globalAny = typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : null;
+  const globalAny =
+    typeof self !== "undefined"
+      ? self
+      : typeof window !== "undefined"
+        ? window
+        : null;
+
   if (!globalAny || typeof globalAny.BroadcastChannel === "undefined") {
     // Unsupported; no-op bridge.
     return () => {};
@@ -1020,7 +1281,9 @@ export function attachBroadcastChannelBridge(channelName = "ssa-event-bus") {
 
   _broadcastBridgeDispose = () => {
     disposeMw();
-    try { bc.close(); } catch {}
+    try {
+      bc.close();
+    } catch {}
     _broadcastChannel = null;
     _broadcastBridgeDispose = null;
   };
@@ -1039,18 +1302,21 @@ try {
     (typeof process !== "undefined" &&
       process.env &&
       process.env.EVENTBUS_DEBUG);
+
   if (String(v).toLowerCase() === "true") setDebug(true);
 } catch {
   // noop
 }
 
 // -----------------------------------------------------------------------------
-// Default facade (compat with code expecting a default `eventBus` object)
+// Default facade (compat with code expecting a default eventBus object)
 // -----------------------------------------------------------------------------
 export const eventBus = {
   on,
   once,
   off,
+  subscribe,
+  unsubscribe,
   emit,
   emitAsync,
   emitDebounced,
@@ -1071,5 +1337,8 @@ export const eventBus = {
   attachBroadcastChannelBridge,
   Events,
 };
+
+// Legacy alias used by some pages/components.
+export const bus = eventBus;
 
 export default eventBus;

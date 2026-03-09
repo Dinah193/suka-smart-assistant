@@ -23,7 +23,7 @@
 // Those responsibilities live in VaultSavePipeline and SessionEngines.
 
 import React, { useEffect, useMemo, useState } from "react";
-import { emitEvent } from "../../services/eventBus";
+import { emitEvent } from "../../services/events/eventBus";
 
 const MODULE_SOURCE = "features.compliance.HouseholdComplianceWizard";
 

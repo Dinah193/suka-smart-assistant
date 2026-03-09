@@ -1,4 +1,4 @@
-// C:\Users\larho\suka-smart-assistant\src\agents\shims\inventoryAgent.js
+// C:\Users\larho\suka-smart-assistant\src\agents\shims\inventoryShim.js
 
 /**
  * Inventory Shim
@@ -43,32 +43,32 @@
  * @property {Array<Object>} [debug]
  */
 
-import dayjs from 'dayjs';
-import { emit } from '@/services/eventBus';
-import { familyFundMode } from '@/services/featureFlags';
+import dayjs from "dayjs";
+import { emit } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
 // Reasoner runtime support
-import { enforceBudget } from '@/services/reasoner/budget';
-import { isGated } from '@/services/reasoner/gating';
-import { checkConfidence } from '@/services/reasoner/confidence';
-import { applyFreshnessRules } from '@/services/reasoner/freshness';
-import { getCachedResponse, setCachedResponse } from '@/services/reasoner/cache/memo';
-import { inventoryShimKey } from '@/services/reasoner/cache/keys';
-import { selectModeForIntent } from '@/services/reasoner/modes/map';
-import { validateResponse } from '@/services/reasoner/validate';
-import { buildSystemPrompt } from '@/services/reasoner/prompts/system';
-import { buildTemplatePrompt } from '@/services/reasoner/prompts/templates';
-import { callReasoner } from '@/services/reasoner/core';
+import { enforceBudget } from "@/reasoner/budget";
+import { isGated } from "@/reasoner/gating";
+import { checkConfidence } from "@/reasoner/confidence";
+import { applyFreshnessRules } from "@/reasoner/freshness";
+import { getCachedResponse, setCachedResponse } from "@/reasoner/cache/memo";
+import { inventoryShimKey } from "@/reasoner/cache/keys";
+import { selectModeForIntent } from "@/reasoner/modes/map";
+import { validateResponse } from "@/reasoner/modes/validate";
+import { buildSystemPrompt } from "@/reasoner/prompts/system";
+import { buildTemplatePrompt } from "@/reasoner/prompts/templates";
+import { callReasoner } from "@/reasoner/core";
 
 // Context selectors
-import { selectInventoryContext } from '@/services/selectors/inventorySelectors';
+import { selectInventoryContext } from "@/services/selectors/inventorySelectors";
 
 // Hub export (optional)
-import { HubPacketFormatter } from '@/services/hub/HubPacketFormatter';
-import { FamilyFundConnector } from '@/services/hub/FamilyFundConnector';
+import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
+import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
 
 const isoNow = () => dayjs().toISOString();
-const lower = (s) => (s == null ? '' : String(s).toLowerCase().trim());
+const lower = (s) => (s == null ? "" : String(s).toLowerCase().trim());
 
 /* ---------------------------------------------------------------------------
  * Inventory & Torah / allergy hints (fed into Reasoner as structured hints)
@@ -78,15 +78,15 @@ const lower = (s) => (s == null ? '' : String(s).toLowerCase().trim());
  * Shellfish identification keys for Torah / allergy-aware badge logic.
  */
 const SHELLFISH_KEYS = [
-  'shrimp',
-  'prawn',
-  'crab',
-  'lobster',
-  'clam',
-  'oyster',
-  'scallop',
-  'mussel',
-  'shellfish',
+  "shrimp",
+  "prawn",
+  "crab",
+  "lobster",
+  "clam",
+  "oyster",
+  "scallop",
+  "mussel",
+  "shellfish",
 ];
 
 /**
@@ -94,19 +94,19 @@ const SHELLFISH_KEYS = [
  */
 const FEFO_HINTS = {
   description:
-    'Use FEFO: First-Expiry-First-Out. Among badge-compliant lots, prioritize the earliest expiryISO date.',
-  defaultExpiryFallback: '2100-01-01T00:00:00.000Z',
-  fields: ['lot', 'qty', 'unit', 'expiryISO', 'tags'],
+    "Use FEFO: First-Expiry-First-Out. Among badge-compliant lots, prioritize the earliest expiryISO date.",
+  defaultExpiryFallback: "2100-01-01T00:00:00.000Z",
+  fields: ["lot", "qty", "unit", "expiryISO", "tags"],
 };
 
 /**
  * Torah badge / allergy policies (high-level guidance, not implementation).
  */
 const TORAH_BADGE_POLICY = {
-  coreBadge: 'Torah-aligned (household profile)',
-  shellfishBadge: 'Shellfish',
+  coreBadge: "Torah-aligned (household profile)",
+  shellfishBadge: "Shellfish",
   description:
-    'When household shellfishAllowed=false, lots or items with Shellfish badge should be excluded from suggestions or FEFO picks. When shellfishAllowed=true, they may be included, but still clearly tagged.',
+    "When household shellfishAllowed=false, lots or items with Shellfish badge should be excluded from suggestions or FEFO picks. When shellfishAllowed=true, they may be included, but still clearly tagged.",
 };
 
 /**
@@ -118,36 +118,36 @@ const TORAH_BADGE_POLICY = {
  * @returns {string}
  */
 function normalizeIntent(rawIntentOrCommand) {
-  const s = lower(rawIntentOrCommand || '');
+  const s = lower(rawIntentOrCommand || "");
 
   const map = {
-    analyze: 'inventory.analyze',
-    analyse: 'inventory.analyze',
-    audit: 'inventory.analyze',
-    review: 'inventory.analyze',
-    'scan-receipts': 'inventory.analyze',
-    plan: 'inventory.analyze',
+    analyze: "inventory.analyze",
+    analyse: "inventory.analyze",
+    audit: "inventory.analyze",
+    review: "inventory.analyze",
+    "scan-receipts": "inventory.analyze",
+    plan: "inventory.analyze",
 
-    createlot: 'inventory.createLot',
-    'inventory.createlot': 'inventory.createLot',
+    createlot: "inventory.createLot",
+    "inventory.createlot": "inventory.createLot",
 
-    updatelot: 'inventory.updateLot',
-    'inventory.updatelot': 'inventory.updateLot',
+    updatelot: "inventory.updateLot",
+    "inventory.updatelot": "inventory.updateLot",
 
-    applyops: 'inventory.applyOps',
-    'inventory.applyops': 'inventory.applyOps',
+    applyops: "inventory.applyOps",
+    "inventory.applyops": "inventory.applyOps",
 
-    undo: 'inventory.undo',
-    'inventory.undo': 'inventory.undo',
+    undo: "inventory.undo",
+    "inventory.undo": "inventory.undo",
 
-    pickfefo: 'inventory.pickLotsFEFO',
-    picklotsfefo: 'inventory.pickLotsFEFO',
-    'inventory.picklotsfefo': 'inventory.pickLotsFEFO',
+    pickfefo: "inventory.pickLotsFEFO",
+    picklotsfefo: "inventory.pickLotsFEFO",
+    "inventory.picklotsfefo": "inventory.pickLotsFEFO",
   };
 
   if (map[s]) return map[s];
 
-  if (s.startsWith('inventory.')) return s;
+  if (s.startsWith("inventory.")) return s;
   return `inventory.${s}`;
 }
 
@@ -189,11 +189,11 @@ function normalizeInventoryOutput(intent, raw) {
   const warnings = [];
   const debug = [];
 
-  if (!raw || typeof raw !== 'object') {
+  if (!raw || typeof raw !== "object") {
     return {
       data: {
-        summary: 'Reasoner returned empty result.',
-        message: '',
+        summary: "Reasoner returned empty result.",
+        message: "",
         warnings: [],
         actions: [],
         nextBestAction: null,
@@ -201,8 +201,9 @@ function normalizeInventoryOutput(intent, raw) {
       },
       warnings: [
         {
-          type: 'emptyResult',
-          message: 'Reasoner returned no structured payload for inventory intent.',
+          type: "emptyResult",
+          message:
+            "Reasoner returned no structured payload for inventory intent.",
         },
       ],
       debug,
@@ -211,38 +212,40 @@ function normalizeInventoryOutput(intent, raw) {
 
   const baseSummary =
     raw.summary ||
-    (intent === 'inventory.analyze'
-      ? 'Inventory analyzed.'
-      : intent === 'inventory.createLot'
-      ? 'Lot creation plan generated.'
-      : intent === 'inventory.updateLot'
-      ? 'Lot update plan generated.'
-      : intent === 'inventory.applyOps'
-      ? 'Batch inventory operations planned.'
-      : intent === 'inventory.undo'
-      ? 'Undo plan generated.'
-      : intent === 'inventory.pickLotsFEFO'
-      ? 'FEFO pick suggestion generated.'
-      : 'Inventory output ready.');
+    (intent === "inventory.analyze"
+      ? "Inventory analyzed."
+      : intent === "inventory.createLot"
+      ? "Lot creation plan generated."
+      : intent === "inventory.updateLot"
+      ? "Lot update plan generated."
+      : intent === "inventory.applyOps"
+      ? "Batch inventory operations planned."
+      : intent === "inventory.undo"
+      ? "Undo plan generated."
+      : intent === "inventory.pickLotsFEFO"
+      ? "FEFO pick suggestion generated."
+      : "Inventory output ready.");
 
-  const message = typeof raw.message === 'string' ? raw.message : '';
+  const message = typeof raw.message === "string" ? raw.message : "";
   const actions = Array.isArray(raw.actions) ? raw.actions : [];
   const nextBestAction =
-    raw.nextBestAction && typeof raw.nextBestAction === 'object' ? raw.nextBestAction : null;
+    raw.nextBestAction && typeof raw.nextBestAction === "object"
+      ? raw.nextBestAction
+      : null;
   const extraWarnings = Array.isArray(raw.warnings) ? raw.warnings : [];
-  const extraData = raw.data && typeof raw.data === 'object' ? raw.data : {};
+  const extraData = raw.data && typeof raw.data === "object" ? raw.data : {};
 
-  if (raw.nextBestAction && typeof raw.nextBestAction !== 'object') {
+  if (raw.nextBestAction && typeof raw.nextBestAction !== "object") {
     warnings.push({
-      type: 'invalidNextBestAction',
+      type: "invalidNextBestAction",
       message:
-        'nextBestAction must be an object or null; Reasoner returned a non-object, dropping it.',
+        "nextBestAction must be an object or null; Reasoner returned a non-object, dropping it.",
     });
   }
 
   // For analyze, ensure we surface key lists with stable defaults
   const normalizedData =
-    intent === 'inventory.analyze'
+    intent === "inventory.analyze"
       ? {
           summary: baseSummary,
           message,
@@ -283,7 +286,7 @@ function normalizeInventoryOutput(intent, raw) {
   const data = normalizedData;
 
   debug.push({
-    type: 'inventoryShim.normalize',
+    type: "inventoryShim.normalize",
     ts: isoNow(),
     intent,
     rawKeys: Object.keys(raw || {}),
@@ -306,32 +309,35 @@ export async function invokeShim(req) {
   const debug = [];
 
   try {
-    if (!req || typeof req !== 'object') {
+    if (!req || typeof req !== "object") {
       return {
         ok: false,
-        mode: 'none',
+        mode: "none",
         data: {},
         warnings: [
-          { type: 'badRequest', message: 'ShimRequest is required and must be an object.' },
+          {
+            type: "badRequest",
+            message: "ShimRequest is required and must be an object.",
+          },
         ],
         debug,
       };
     }
 
     // Domain for inventory is "storehouse"
-    const domain = req.domain || 'storehouse';
-    const intent = normalizeIntent(req.intent || '');
+    const domain = req.domain || "storehouse";
+    const intent = normalizeIntent(req.intent || "");
     const input = req.input || {};
     const runtime = req.runtime || {};
 
-    if (domain !== 'storehouse') {
+    if (domain !== "storehouse") {
       return {
         ok: false,
-        mode: 'none',
+        mode: "none",
         data: {},
         warnings: [
           {
-            type: 'badDomain',
+            type: "badDomain",
             message: `Inventory shim only supports domain="storehouse", received "${domain}".`,
           },
         ],
@@ -341,29 +347,29 @@ export async function invokeShim(req) {
 
     // Emit early invocation event
     emit({
-      type: 'reasoner.invoked',
+      type: "reasoner.invoked",
       ts: startedAt,
-      source: 'agents/shims/inventory',
+      source: "agents/shims/inventory",
       data: { intent, domain, runtime },
     });
 
     // Gating
     if (isGated({ domain, intent, runtime })) {
       warnings.push({
-        type: 'gated',
+        type: "gated",
         message: `Reasoner calls gated for intent "${intent}".`,
       });
 
       emit({
-        type: 'reasoner.gated',
+        type: "reasoner.gated",
         ts: isoNow(),
-        source: 'agents/shims/inventory',
+        source: "agents/shims/inventory",
         data: { intent, domain },
       });
 
       return {
         ok: false,
-        mode: 'none',
+        mode: "none",
         data: {},
         warnings,
         debug,
@@ -376,20 +382,20 @@ export async function invokeShim(req) {
         domain,
         intent,
         input,
-      }) || 'inventory.analyze.v1';
+      }) || "inventory.analyze.v1";
 
     // Budget enforcement
     const budgetInfo = enforceBudget({ domain, intent, mode, runtime });
     if (!budgetInfo.ok) {
       warnings.push({
-        type: 'budgetExceeded',
-        message: budgetInfo.message || 'Budget exceeded for inventory shim.',
+        type: "budgetExceeded",
+        message: budgetInfo.message || "Budget exceeded for inventory shim.",
       });
 
       emit({
-        type: 'reasoner.budgetExceeded',
+        type: "reasoner.budgetExceeded",
         ts: isoNow(),
-        source: 'agents/shims/inventory',
+        source: "agents/shims/inventory",
         data: { intent, domain, mode, budgetInfo },
       });
 
@@ -406,7 +412,7 @@ export async function invokeShim(req) {
     const context = await selectInventoryContext({ input, runtime, intent });
 
     debug.push({
-      type: 'context.loaded',
+      type: "context.loaded",
       ts: isoNow(),
       keys: Object.keys(context || {}),
     });
@@ -440,17 +446,25 @@ export async function invokeShim(req) {
     };
 
     // Cache key + lookup
-    const cacheKey = inventoryShimKey({ intent, mode, payload: reasonerPayload });
+    const cacheKey = inventoryShimKey({
+      intent,
+      mode,
+      payload: reasonerPayload,
+    });
     const cached = await getCachedResponse(cacheKey);
     if (cached) {
       emit({
-        type: 'reasoner.cachedHit',
+        type: "reasoner.cachedHit",
         ts: isoNow(),
-        source: 'agents/shims/inventory',
+        source: "agents/shims/inventory",
         data: { intent, mode, cacheKey },
       });
 
-      const { data, warnings: w2, debug: d2 } = normalizeInventoryOutput(intent, cached);
+      const {
+        data,
+        warnings: w2,
+        debug: d2,
+      } = normalizeInventoryOutput(intent, cached);
       if (w2?.length) warnings.push(...w2);
       if (d2?.length) debug.push(...d2);
 
@@ -464,28 +478,28 @@ export async function invokeShim(req) {
     }
 
     emit({
-      type: 'reasoner.cachedMiss',
+      type: "reasoner.cachedMiss",
       ts: isoNow(),
-      source: 'agents/shims/inventory',
+      source: "agents/shims/inventory",
       data: { intent, mode, cacheKey },
     });
 
     // Build prompts
     const systemPrompt = buildSystemPrompt({
-      domain: 'storehouse',
+      domain: "storehouse",
       mode,
       extra: {
         inventoryInstruction:
-          'You are an inventory planner. Use shellfishKeys, fefo, and torahBadgePolicy hints ' +
-          'to propose Torah-aware, allergy-safe inventory suggestions. ' +
-          'For FEFO, when suggesting lots to pick, prioritize earlier expiryISO dates among lots ' +
-          'that satisfy household badge requirements. When designing createLot/updateLot/applyOps/undo ' +
-          'plans, output structured actions rather than natural language only.',
+          "You are an inventory planner. Use shellfishKeys, fefo, and torahBadgePolicy hints " +
+          "to propose Torah-aware, allergy-safe inventory suggestions. " +
+          "For FEFO, when suggesting lots to pick, prioritize earlier expiryISO dates among lots " +
+          "that satisfy household badge requirements. When designing createLot/updateLot/applyOps/undo " +
+          "plans, output structured actions rather than natural language only.",
       },
     });
 
     const userPrompt = buildTemplatePrompt({
-      domain: 'storehouse',
+      domain: "storehouse",
       mode,
       intent,
       payload: reasonerPayload,
@@ -510,31 +524,39 @@ export async function invokeShim(req) {
 
     if (!confidence.ok) {
       warnings.push({
-        type: 'lowConfidence',
-        message: confidence.message || 'Reasoner confidence below threshold for inventory intent.',
+        type: "lowConfidence",
+        message:
+          confidence.message ||
+          "Reasoner confidence below threshold for inventory intent.",
       });
 
       emit({
-        type: 'reasoner.lowConfidence',
+        type: "reasoner.lowConfidence",
         ts: isoNow(),
-        source: 'agents/shims/inventory',
+        source: "agents/shims/inventory",
         data: { intent, mode, confidence },
       });
     }
 
     // Schema validation
-    const validation = validateResponse({ domain, intent, mode, raw: rawResult });
+    const validation = validateResponse({
+      domain,
+      intent,
+      mode,
+      raw: rawResult,
+    });
     if (!validation.ok) {
       warnings.push({
-        type: 'invalidSchema',
-        message: validation.message || 'Reasoner output failed schema validation.',
+        type: "invalidSchema",
+        message:
+          validation.message || "Reasoner output failed schema validation.",
         details: validation.errors || [],
       });
 
       emit({
-        type: 'reasoner.invalidSchema',
+        type: "reasoner.invalidSchema",
         ts: isoNow(),
-        source: 'agents/shims/inventory',
+        source: "agents/shims/inventory",
         data: { intent, mode, errors: validation.errors || [] },
       });
 
@@ -548,14 +570,18 @@ export async function invokeShim(req) {
     }
 
     emit({
-      type: 'reasoner.validated',
+      type: "reasoner.validated",
       ts: isoNow(),
-      source: 'agents/shims/inventory',
+      source: "agents/shims/inventory",
       data: { intent, mode },
     });
 
     // Normalize into SSA inventory payload
-    const { data, warnings: w3, debug: d3 } = normalizeInventoryOutput(intent, rawResult);
+    const {
+      data,
+      warnings: w3,
+      debug: d3,
+    } = normalizeInventoryOutput(intent, rawResult);
     if (w3?.length) warnings.push(...w3);
     if (d3?.length) debug.push(...d3);
 
@@ -564,24 +590,24 @@ export async function invokeShim(req) {
 
     // Emit domain-level event
     const domainEventType =
-      intent === 'inventory.analyze'
-        ? 'inventory.analyzed'
-        : intent === 'inventory.createLot'
-        ? 'inventory.lot.create.planned'
-        : intent === 'inventory.updateLot'
-        ? 'inventory.lot.update.planned'
-        : intent === 'inventory.applyOps'
-        ? 'inventory.ops.planned'
-        : intent === 'inventory.undo'
-        ? 'inventory.undo.planned'
-        : intent === 'inventory.pickLotsFEFO'
-        ? 'inventory.fefo.pick.suggested'
-        : 'inventory.output.ready';
+      intent === "inventory.analyze"
+        ? "inventory.analyzed"
+        : intent === "inventory.createLot"
+        ? "inventory.lot.create.planned"
+        : intent === "inventory.updateLot"
+        ? "inventory.lot.update.planned"
+        : intent === "inventory.applyOps"
+        ? "inventory.ops.planned"
+        : intent === "inventory.undo"
+        ? "inventory.undo.planned"
+        : intent === "inventory.pickLotsFEFO"
+        ? "inventory.fefo.pick.suggested"
+        : "inventory.output.ready";
 
     emit({
       type: domainEventType,
       ts: isoNow(),
-      source: 'agents/shims/inventory',
+      source: "agents/shims/inventory",
       data: {
         intent,
         mode,
@@ -593,7 +619,7 @@ export async function invokeShim(req) {
     if (
       familyFundMode &&
       runtime?.exportToHub &&
-      (intent === 'inventory.analyze' || intent === 'inventory.applyOps')
+      (intent === "inventory.analyze" || intent === "inventory.applyOps")
     ) {
       try {
         const packet = HubPacketFormatter.formatInventory({
@@ -606,15 +632,16 @@ export async function invokeShim(req) {
         await FamilyFundConnector.export(packet);
 
         emit({
-          type: 'session.exported',
+          type: "session.exported",
           ts: isoNow(),
-          source: 'agents/shims/inventory',
-          data: { intent, mode, packetType: 'inventory' },
+          source: "agents/shims/inventory",
+          data: { intent, mode, packetType: "inventory" },
         });
       } catch (e) {
         warnings.push({
-          type: 'hubExportFailed',
-          message: e?.message || 'Failed to export inventory data to Family Fund Hub.',
+          type: "hubExportFailed",
+          message:
+            e?.message || "Failed to export inventory data to Family Fund Hub.",
         });
       }
     }
@@ -631,26 +658,26 @@ export async function invokeShim(req) {
     const stack = err?.stack || null;
 
     emit({
-      type: 'reasoner.error',
+      type: "reasoner.error",
       ts: isoNow(),
-      source: 'agents/shims/inventory',
+      source: "agents/shims/inventory",
       data: { message, stack },
     });
 
     return {
       ok: false,
-      mode: 'none',
+      mode: "none",
       data: {},
       warnings: [
         {
-          type: 'shimError',
+          type: "shimError",
           message,
         },
       ],
       debug: [
         ...debug,
         {
-          type: 'exception',
+          type: "exception",
           ts: isoNow(),
           message,
           stack,
@@ -683,17 +710,17 @@ export async function invokeShim(req) {
 export async function handleInventoryCommand(command, payload = {}) {
   // Backwards-compatible: allow object form { command, payload }
   let cmd = command;
-  if (typeof command === 'object' && command) {
+  if (typeof command === "object" && command) {
     if (command.payload && !Object.keys(payload || {}).length) {
       // eslint-disable-next-line no-param-reassign
       payload = command.payload;
     }
-    cmd = command.command || command.type || 'analyze';
+    cmd = command.command || command.type || "analyze";
   }
 
-  const normalized = normalizeIntent(cmd || '');
+  const normalized = normalizeIntent(cmd || "");
   return invokeShim({
-    domain: 'storehouse',
+    domain: "storehouse",
     intent: normalized,
     input: payload,
     runtime: payload?.runtime || {},
@@ -707,8 +734,8 @@ export async function handleInventoryCommand(command, payload = {}) {
 
 export async function analyze(input = {}) {
   return invokeShim({
-    domain: 'storehouse',
-    intent: 'inventory.analyze',
+    domain: "storehouse",
+    intent: "inventory.analyze",
     input,
     runtime: input.runtime || {},
   });
@@ -716,8 +743,8 @@ export async function analyze(input = {}) {
 
 export async function createLot(input = {}) {
   return invokeShim({
-    domain: 'storehouse',
-    intent: 'inventory.createLot',
+    domain: "storehouse",
+    intent: "inventory.createLot",
     input,
     runtime: input.runtime || {},
   });
@@ -725,8 +752,8 @@ export async function createLot(input = {}) {
 
 export async function updateLot(input = {}) {
   return invokeShim({
-    domain: 'storehouse',
-    intent: 'inventory.updateLot',
+    domain: "storehouse",
+    intent: "inventory.updateLot",
     input,
     runtime: input.runtime || {},
   });
@@ -734,8 +761,8 @@ export async function updateLot(input = {}) {
 
 export async function applyOps(input = {}) {
   return invokeShim({
-    domain: 'storehouse',
-    intent: 'inventory.applyOps',
+    domain: "storehouse",
+    intent: "inventory.applyOps",
     input,
     runtime: input.runtime || {},
   });
@@ -743,8 +770,8 @@ export async function applyOps(input = {}) {
 
 export async function undo(input = {}) {
   return invokeShim({
-    domain: 'storehouse',
-    intent: 'inventory.undo',
+    domain: "storehouse",
+    intent: "inventory.undo",
     input,
     runtime: input.runtime || {},
   });
@@ -752,8 +779,8 @@ export async function undo(input = {}) {
 
 export async function pickLotsFEFO(input = {}) {
   return invokeShim({
-    domain: 'storehouse',
-    intent: 'inventory.pickLotsFEFO',
+    domain: "storehouse",
+    intent: "inventory.pickLotsFEFO",
     input,
     runtime: input.runtime || {},
   });

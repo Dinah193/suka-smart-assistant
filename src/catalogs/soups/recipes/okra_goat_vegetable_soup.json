@@ -1,0 +1,407 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00Z",
+
+  "meta": {
+    "id": "soups.okra_goat_vegetable_soup",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Okra + Goat Vegetable Soup",
+    "subtitle": "Hearty goat soup with okra and vegetables • pantry-friendly • freezer/batch cooking ready",
+    "source": {
+      "kind": "ssa-canonical",
+      "notes": "SSA baseline aligned with your existing direction: goat + okra + mixed vegetables with optional tomato, corn, and pasta/rice. Built for 'use what you have' logic and batch cooking."
+    }
+  },
+
+  "classification": {
+    "cuisine": "soups",
+    "category": "soup",
+    "subprofiles": [
+      "goat",
+      "okra",
+      "hearty",
+      "stovetop",
+      "batch-cooking",
+      "freezer-friendly",
+      "use-what-you-have"
+    ],
+    "mealArchetypes": ["lunch", "dinner"],
+    "servingStyles": ["bowl"],
+    "plannerTags": [
+      "goat soup",
+      "okra soup",
+      "vegetable soup",
+      "batch cooking",
+      "freezer meal",
+      "comfort food"
+    ]
+  },
+
+  "yield": {
+    "servings": 10,
+    "servingSize": { "value": 2, "unit": "cups" },
+    "notes": "Makes ~18–20 cups depending on vegetable volume and simmer."
+  },
+
+  "time": {
+    "activeMins": 35,
+    "handsOffMins": 85,
+    "totalMins": 120
+  },
+
+  "difficulty": "intermediate",
+
+  "equipment": {
+    "minimum": [
+      "large heavy pot or Dutch oven",
+      "knife",
+      "cutting board",
+      "stirring spoon",
+      "ladle"
+    ],
+    "recommended": [
+      "fine mesh strainer (optional)",
+      "tongs",
+      "instant-read thermometer (optional)"
+    ],
+    "optional": ["pressure cooker (for faster goat tenderizing)", "skimmer"]
+  },
+
+  "dietFlags": [],
+  "allergens": ["wheat"],
+
+  "signals": {
+    "batchCooking": true,
+    "freezerFriendly": true,
+    "useWhatYouHave": true,
+    "highSatiety": true,
+    "highProtein": true
+  },
+
+  "tasteProfile": {
+    "richness": "high",
+    "savory": "high",
+    "heat": "optional",
+    "notes": "Deep, brothy goat flavor with tomato-forward warmth (optional), thickened slightly by okra. Flexible vegetables for a hearty bowl."
+  },
+
+  "ingredients": [
+    {
+      "id": "goat_meat",
+      "label": "Goat meat, bone-in chunks (stew pieces)",
+      "role": "protein",
+      "amount": { "value": 900, "unit": "g" },
+      "notes": "About 2 lb. Shoulder/leg chunks work well. Bone-in adds flavor."
+    },
+    {
+      "id": "salt_for_goat",
+      "label": "Salt (for seasoning goat early)",
+      "role": "seasoning",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "About 1 teaspoon; adjust later based on broth."
+    },
+    {
+      "id": "black_pepper_for_goat",
+      "label": "Black pepper (for seasoning goat early)",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "About 1/2 teaspoon."
+    },
+    {
+      "id": "oil",
+      "label": "Neutral oil or olive oil",
+      "role": "cook",
+      "amount": { "value": 30, "unit": "g" },
+      "notes": "About 2 tablespoons."
+    },
+    {
+      "id": "onion",
+      "label": "Yellow onion, diced",
+      "role": "aromatic",
+      "amount": { "value": 250, "unit": "g" },
+      "notes": "About 1 large."
+    },
+    {
+      "id": "carrots",
+      "label": "Carrots, diced",
+      "role": "vegetable",
+      "amount": { "value": 250, "unit": "g" },
+      "notes": "About 3 medium."
+    },
+    {
+      "id": "celery_optional",
+      "label": "Celery, diced (optional)",
+      "role": "vegetable",
+      "amount": { "value": 150, "unit": "g" },
+      "optional": true,
+      "notes": "About 3 stalks. Can replace with bell pepper if preferred."
+    },
+    {
+      "id": "bell_pepper_optional",
+      "label": "Bell pepper, diced (optional)",
+      "role": "vegetable",
+      "amount": { "value": 150, "unit": "g" },
+      "optional": true,
+      "notes": "Use instead of or in addition to celery."
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": "About 4 cloves."
+    },
+    {
+      "id": "tomato_paste_optional",
+      "label": "Tomato paste (optional, for depth)",
+      "role": "flavor",
+      "amount": { "value": 30, "unit": "g" },
+      "optional": true,
+      "notes": "About 2 tablespoons."
+    },
+    {
+      "id": "diced_tomatoes_optional",
+      "label": "Diced tomatoes (canned) (optional)",
+      "role": "base",
+      "amount": { "value": 400, "unit": "g" },
+      "optional": true,
+      "notes": "One 14–15 oz can. Makes it more tomato-forward."
+    },
+    {
+      "id": "broth_or_water",
+      "label": "Water or broth (goat stock, beef stock, or chicken stock)",
+      "role": "liquid",
+      "amount": { "value": 2400, "unit": "g" },
+      "notes": "About 10 cups. Start with 8 cups and add more if needed."
+    },
+    {
+      "id": "bay_leaf_optional",
+      "label": "Bay leaf (optional)",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "thyme",
+      "label": "Dried thyme (or fresh thyme)",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1 teaspoon dried."
+    },
+    {
+      "id": "paprika_optional",
+      "label": "Smoked paprika (optional)",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "g" },
+      "optional": true,
+      "notes": "About 1 teaspoon. Adds smoked depth without bacon."
+    },
+    {
+      "id": "cayenne_optional",
+      "label": "Cayenne pepper (optional)",
+      "role": "seasoning",
+      "amount": { "value": 0.5, "unit": "g" },
+      "optional": true,
+      "notes": "Pinch to taste."
+    },
+    {
+      "id": "okra",
+      "label": "Okra, sliced (fresh or frozen)",
+      "role": "vegetable",
+      "amount": { "value": 400, "unit": "g" },
+      "notes": "About 4 cups sliced. Frozen works great."
+    },
+    {
+      "id": "potatoes_optional",
+      "label": "Potatoes, diced (optional)",
+      "role": "starch",
+      "amount": { "value": 500, "unit": "g" },
+      "optional": true,
+      "notes": "About 3 medium. Adds body and makes it more filling."
+    },
+    {
+      "id": "corn_optional",
+      "label": "Sweet corn (optional)",
+      "role": "vegetable",
+      "amount": { "value": 150, "unit": "g" },
+      "optional": true,
+      "notes": "Frozen or canned; adds sweetness and color."
+    },
+    {
+      "id": "peas_optional",
+      "label": "Green peas (optional)",
+      "role": "vegetable",
+      "amount": { "value": 120, "unit": "g" },
+      "optional": true,
+      "notes": "Frozen peas are easiest; add near the end."
+    },
+    {
+      "id": "lima_beans_optional",
+      "label": "Baby lima beans or black beans (optional)",
+      "role": "protein",
+      "amount": { "value": 250, "unit": "g" },
+      "optional": true,
+      "notes": "About 1 1/2 cups cooked or one drained can."
+    },
+    {
+      "id": "macaroni_optional",
+      "label": "Macaroni (optional; cook in-soup or separately)",
+      "role": "starch",
+      "amount": { "value": 140, "unit": "g" },
+      "optional": true,
+      "notes": "About 1 cup dry. For best leftovers, cook separately."
+    },
+    {
+      "id": "salt_finish",
+      "label": "Salt (to finish)",
+      "role": "seasoning",
+      "amount": { "value": 4, "unit": "g" },
+      "notes": "Adjust to taste at the end depending on broth and tomatoes."
+    },
+    {
+      "id": "black_pepper_finish",
+      "label": "Black pepper (to finish)",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "g" }
+    },
+    {
+      "id": "vinegar_or_lemon_optional",
+      "label": "Lemon juice or vinegar (optional, brightness)",
+      "role": "finish",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true,
+      "notes": "1–2 teaspoons at the end helps balance okra + goat richness."
+    },
+    {
+      "id": "parsley_optional",
+      "label": "Fresh parsley or green onion, chopped (optional garnish)",
+      "role": "finish",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Season goat and brown (optional but recommended)",
+      "instructions": [
+        "Pat goat dry. Season with the early salt and pepper.",
+        "Heat oil in a large pot over medium-high heat.",
+        "Brown goat pieces in batches (do not overcrowd), 2–3 minutes per side. Transfer browned goat to a plate."
+      ],
+      "activeMins": 18,
+      "timers": [{ "label": "Brown goat (per batch)", "mins": 6 }]
+    },
+    {
+      "id": "step_02",
+      "title": "Sweat aromatics",
+      "instructions": [
+        "Reduce heat to medium. Add onion, carrots, and celery and/or bell pepper (if using).",
+        "Cook 6–8 minutes until softened, scraping browned bits from the pot.",
+        "Add garlic and cook 30 seconds until fragrant."
+      ],
+      "activeMins": 10,
+      "timers": [
+        { "label": "Cook aromatics", "mins": 8 },
+        { "label": "Cook garlic", "seconds": 30 }
+      ]
+    },
+    {
+      "id": "step_03",
+      "title": "Bloom tomato paste and spices (optional)",
+      "instructions": [
+        "If using tomato paste, stir it in and cook 1–2 minutes to deepen flavor.",
+        "Stir in thyme, smoked paprika (optional), and cayenne (optional) for 30 seconds."
+      ],
+      "activeMins": 3,
+      "timers": [{ "label": "Bloom paste/spices", "mins": 2 }]
+    },
+    {
+      "id": "step_04",
+      "title": "Simmer goat until tender",
+      "instructions": [
+        "Return goat to the pot. Add water/broth and bay leaf (optional).",
+        "If using diced tomatoes, add them now.",
+        "Bring to a gentle simmer, cover, and cook 60–75 minutes until goat is tender."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 70,
+      "timers": [{ "label": "Simmer goat", "mins": 70 }]
+    },
+    {
+      "id": "step_05",
+      "title": "Add vegetables (okra + hearty veg)",
+      "instructions": [
+        "Stir in okra. If using potatoes or beans, add them now.",
+        "Simmer 15–20 minutes until potatoes are tender and okra has thickened the broth slightly."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 18,
+      "timers": [{ "label": "Simmer vegetables", "mins": 18 }]
+    },
+    {
+      "id": "step_06",
+      "title": "Optional: add corn/peas and pasta",
+      "instructions": [
+        "If using corn and/or peas, add during the last 5 minutes to warm through.",
+        "If using macaroni: either cook it directly in the soup (8–10 minutes) or cook separately and add per bowl for best leftovers."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 9,
+      "timers": [{ "label": "Cook pasta (optional)", "mins": 9 }]
+    },
+    {
+      "id": "step_07",
+      "title": "Season and serve",
+      "instructions": [
+        "Taste and adjust with finishing salt and pepper.",
+        "Add lemon juice or vinegar (optional) to brighten.",
+        "Serve hot with parsley/green onion (optional)."
+      ],
+      "activeMins": 4
+    }
+  ],
+
+  "planner": {
+    "useWhatYouHaveLogic": {
+      "vegOptions": [
+        "Add what you have: sweet corn, peas, lima beans, carrots, potatoes, diced tomatoes, bell peppers, greens (add at the end).",
+        "Frozen mixed vegetables work in a pinch—add during the last 10–15 minutes."
+      ],
+      "okraHandling": [
+        "Okra thickens naturally. If you want less thick: rinse frozen okra, add later, and avoid aggressive stirring.",
+        "If you want thicker: simmer okra longer and stir more often."
+      ],
+      "goatTenderizing": [
+        "If goat is tough, extend simmer by 15–30 minutes.",
+        "Pressure cooker option: cook goat in broth ~35 minutes at pressure, then finish soup on stovetop with vegetables."
+      ],
+      "starchOptions": [
+        "Potatoes make it heartier; macaroni makes it 'stew-soup' and kid-friendly.",
+        "For gluten-free: use rice or GF pasta cooked separately."
+      ]
+    },
+    "batchCooking": {
+      "recommendedBatchMultiplier": 2,
+      "bestPractices": [
+        "For freezer: freeze without pasta for best texture; add fresh pasta when reheating.",
+        "Cool quickly; portion into 2-cup servings for easy meals."
+      ]
+    }
+  },
+
+  "storage": {
+    "fridge": "Refrigerate up to 4 days. Soup thickens; add broth/water when reheating.",
+    "freezer": "Freeze up to 3 months (best without pasta).",
+    "reheat": "Reheat gently to a simmer. Add a splash of broth/water to loosen."
+  },
+
+  "audit": {
+    "tested": true,
+    "testNotes": "Schema-compliant: schemaVersion+meta present; ingredients include id+label+amount; steps include id+title+instructions; uses only allowed top-level properties per current recipe.schema.json."
+  }
+}

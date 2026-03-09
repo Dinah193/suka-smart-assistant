@@ -45,7 +45,7 @@ const BASE_MICRONUTRIENTS = {
     upperLimit: 4000,
     sourceStandard: "approx-RDA",
     tags: ["boneHealth", "immuneSupport"],
-    basePriority: 85
+    basePriority: 85,
   },
   calcium: {
     nutrientId: "calcium",
@@ -57,7 +57,7 @@ const BASE_MICRONUTRIENTS = {
     upperLimit: 2500,
     sourceStandard: "approx-RDA",
     tags: ["boneHealth"],
-    basePriority: 90
+    basePriority: 90,
   },
   magnesium: {
     nutrientId: "magnesium",
@@ -69,7 +69,7 @@ const BASE_MICRONUTRIENTS = {
     upperLimit: 700,
     sourceStandard: "approx-RDA",
     tags: ["boneHealth", "metabolicHealth", "nerve"],
-    basePriority: 75
+    basePriority: 75,
   },
   "vitamin-k": {
     nutrientId: "vitamin-k",
@@ -81,7 +81,7 @@ const BASE_MICRONUTRIENTS = {
     upperLimit: 0, // not well-defined; 0 means “no explicit UL”
     sourceStandard: "approx-AI",
     tags: ["boneHealth", "bloodHealth"],
-    basePriority: 65
+    basePriority: 65,
   },
   iron: {
     nutrientId: "iron",
@@ -93,7 +93,7 @@ const BASE_MICRONUTRIENTS = {
     upperLimit: 45,
     sourceStandard: "approx-RDA",
     tags: ["bloodHealth"],
-    basePriority: 80
+    basePriority: 80,
   },
   "vitamin-b12": {
     nutrientId: "vitamin-b12",
@@ -105,7 +105,7 @@ const BASE_MICRONUTRIENTS = {
     upperLimit: 0,
     sourceStandard: "approx-RDA",
     tags: ["bloodHealth", "brainHealth"],
-    basePriority: 70
+    basePriority: 70,
   },
   folate: {
     nutrientId: "folate",
@@ -117,7 +117,7 @@ const BASE_MICRONUTRIENTS = {
     upperLimit: 1000,
     sourceStandard: "approx-RDA",
     tags: ["bloodHealth", "pregnancy"],
-    basePriority: 80
+    basePriority: 80,
   },
   "vitamin-c": {
     nutrientId: "vitamin-c",
@@ -129,7 +129,7 @@ const BASE_MICRONUTRIENTS = {
     upperLimit: 2000,
     sourceStandard: "approx-RDA",
     tags: ["immuneSupport"],
-    basePriority: 70
+    basePriority: 70,
   },
   zinc: {
     nutrientId: "zinc",
@@ -141,7 +141,7 @@ const BASE_MICRONUTRIENTS = {
     upperLimit: 40,
     sourceStandard: "approx-RDA",
     tags: ["immuneSupport", "metabolicHealth"],
-    basePriority: 65
+    basePriority: 65,
   },
   "omega-3": {
     nutrientId: "omega-3",
@@ -153,8 +153,8 @@ const BASE_MICRONUTRIENTS = {
     upperLimit: 0,
     sourceStandard: "approx-AI",
     tags: ["heartHealth", "brainHealth"],
-    basePriority: 60
-  }
+    basePriority: 60,
+  },
 };
 
 /**
@@ -201,7 +201,7 @@ export function normalizeMicronutrientInput(rawInput) {
       isElderly:
         typeof profile.isElderly === "boolean"
           ? profile.isElderly
-          : profile.ageYears >= 60
+          : profile.ageYears >= 60,
     },
     unitSystem,
     dietaryPattern: input.dietaryPattern || {
@@ -210,7 +210,7 @@ export function normalizeMicronutrientInput(rawInput) {
       avoidsShellfish: true,
       avoidsDairy: false,
       avoidsGluten: false,
-      otherRestrictions: []
+      otherRestrictions: [],
     },
     healthFocus: {
       boneHealth: !!healthFocus.boneHealth,
@@ -218,7 +218,7 @@ export function normalizeMicronutrientInput(rawInput) {
       immuneSupport: !!healthFocus.immuneSupport,
       heartHealth: !!healthFocus.heartHealth,
       brainHealth: !!healthFocus.brainHealth,
-      metabolicHealth: !!healthFocus.metabolicHealth
+      metabolicHealth: !!healthFocus.metabolicHealth,
     },
     constraints: {
       limitSodium: !!constraints.limitSodium,
@@ -228,7 +228,7 @@ export function normalizeMicronutrientInput(rawInput) {
       liverIssues: !!constraints.liverIssues,
       medicationInteractions: Array.isArray(constraints.medicationInteractions)
         ? constraints.medicationInteractions
-        : []
+        : [],
     },
     rounding: {
       gramsDecimals:
@@ -240,7 +240,7 @@ export function normalizeMicronutrientInput(rawInput) {
       microgramsDecimals:
         typeof rounding.microgramsDecimals === "number"
           ? rounding.microgramsDecimals
-          : 0
+          : 0,
     },
     ssaIntegration: {
       autosaveProfile:
@@ -254,8 +254,8 @@ export function normalizeMicronutrientInput(rawInput) {
       allowLinkToInventoryGaps:
         typeof ssaIntegration.allowLinkToInventoryGaps === "boolean"
           ? ssaIntegration.allowLinkToInventoryGaps
-          : true
-    }
+          : true,
+    },
   };
 }
 
@@ -277,8 +277,10 @@ function resolveProfileAdjustedTargets(profile) {
 
     const sex = profile.sex || "unspecified";
     const age = profile.ageYears || 30;
-    const pregnant = profile.pregnancyStatus && profile.pregnancyStatus !== "none";
-    const lactating = profile.lactationStatus && profile.lactationStatus !== "none";
+    const pregnant =
+      profile.pregnancyStatus && profile.pregnancyStatus !== "none";
+    const lactating =
+      profile.lactationStatus && profile.lactationStatus !== "none";
     const isChild = age < 18;
     const isElderly = !!profile.isElderly || age >= 60;
 
@@ -351,7 +353,11 @@ function applyHealthFocusAdjustments(targets, healthFocus) {
     let priority = typeof t.priority === "number" ? t.priority : t.basePriority;
 
     if (healthFocus.boneHealth) {
-      if (["calcium", "vitamin-d", "magnesium", "vitamin-k"].includes(t.nutrientId)) {
+      if (
+        ["calcium", "vitamin-d", "magnesium", "vitamin-k"].includes(
+          t.nutrientId
+        )
+      ) {
         amount *= 1.1;
         priority += 15;
         reasons.push("bone health focus");
@@ -512,7 +518,7 @@ function buildAggregateSummary(targets, healthFocus, cautionNotes) {
     totalMicronutrientsTracked,
     emphasisAreas,
     cautionNotes,
-    bmiCategoryHint: null // can be filled in by BMI integration if available
+    bmiCategoryHint: null, // can be filled in by BMI integration if available
   };
 }
 
@@ -538,8 +544,7 @@ function buildAggregateSummary(targets, healthFocus, cautionNotes) {
  */
 export function runMicronutrientCalculator(rawInput, options = {}) {
   const calculatorId = options.calculatorId || "health.micronutrients";
-  const nodeId =
-    options.nodeId || "pg.health.micronutrientCalculator";
+  const nodeId = options.nodeId || "pg.health.micronutrientCalculator";
   const version = options.version || "1.0.0";
 
   const input = normalizeMicronutrientInput(rawInput || {});
@@ -575,7 +580,7 @@ export function runMicronutrientCalculator(rawInput, options = {}) {
     sourceStandard: t.sourceStandard || "approx",
     emphasisReasons: t.emphasisReasons || [],
     tags: t.tags || [],
-    notes: t.notes || []
+    notes: t.notes || [],
   }));
 
   const aggregate = buildAggregateSummary(targets, healthFocus, cautionNotes);
@@ -585,17 +590,32 @@ export function runMicronutrientCalculator(rawInput, options = {}) {
     dailyTargets,
     aggregate,
     warnings: cautionNotes,
-    notes: []
+    notes: [],
   };
 
   const meta = {
     calculatorId,
     nodeId,
     generatedAt: new Date().toISOString(),
-    version
+    version,
   };
 
   return { input, output, meta };
+}
+
+/**
+ * Compatibility export:
+ * Hooks import `calculateMicronutrientTargets` from this shim.
+ *
+ * This returns the `output` payload (dailyTargets + aggregate + warnings/notes),
+ * which is typically what UIs mean by "targets".
+ *
+ * @param {any} rawInput
+ * @param {Object} [options]
+ * @returns {any} output (targets) shape
+ */
+export function calculateMicronutrientTargets(rawInput, options = {}) {
+  return runMicronutrientCalculator(rawInput, options).output;
 }
 
 /**
@@ -608,7 +628,7 @@ export function listSupportedMicronutrients() {
     nutrientId: n.nutrientId,
     label: n.label,
     group: n.group,
-    unit: n.unit
+    unit: n.unit,
   }));
 }
 
@@ -629,7 +649,7 @@ export function buildDefaultMicronutrientInput(overrides = {}) {
       height: null,
       pregnancyStatus: "none",
       lactationStatus: "none",
-      isElderly: false
+      isElderly: false,
     },
     unitSystem: "imperial",
     dietaryPattern: {
@@ -638,7 +658,7 @@ export function buildDefaultMicronutrientInput(overrides = {}) {
       avoidsShellfish: true,
       avoidsDairy: false,
       avoidsGluten: false,
-      otherRestrictions: []
+      otherRestrictions: [],
     },
     healthFocus: {
       boneHealth: true,
@@ -646,7 +666,7 @@ export function buildDefaultMicronutrientInput(overrides = {}) {
       immuneSupport: true,
       heartHealth: false,
       brainHealth: false,
-      metabolicHealth: false
+      metabolicHealth: false,
     },
     constraints: {
       limitSodium: false,
@@ -654,18 +674,18 @@ export function buildDefaultMicronutrientInput(overrides = {}) {
       limitSaturatedFat: false,
       kidneyIssues: false,
       liverIssues: false,
-      medicationInteractions: []
+      medicationInteractions: [],
     },
     rounding: {
       gramsDecimals: 1,
       milligramsDecimals: 0,
-      microgramsDecimals: 0
+      microgramsDecimals: 0,
     },
     ssaIntegration: {
       autosaveProfile: true,
       allowLinkToMealPlanner: true,
-      allowLinkToInventoryGaps: true
-    }
+      allowLinkToInventoryGaps: true,
+    },
   };
 
   return deepClone({
@@ -673,30 +693,31 @@ export function buildDefaultMicronutrientInput(overrides = {}) {
     ...(overrides || {}),
     profile: {
       ...base.profile,
-      ...(overrides.profile || {})
+      ...(overrides.profile || {}),
     },
     healthFocus: {
       ...base.healthFocus,
-      ...(overrides.healthFocus || {})
+      ...(overrides.healthFocus || {}),
     },
     constraints: {
       ...base.constraints,
-      ...(overrides.constraints || {})
+      ...(overrides.constraints || {}),
     },
     rounding: {
       ...base.rounding,
-      ...(overrides.rounding || {})
+      ...(overrides.rounding || {}),
     },
     ssaIntegration: {
       ...base.ssaIntegration,
-      ...(overrides.ssaIntegration || {})
-    }
+      ...(overrides.ssaIntegration || {}),
+    },
   });
 }
 
 export default {
   runMicronutrientCalculator,
+  calculateMicronutrientTargets,
   normalizeMicronutrientInput,
   listSupportedMicronutrients,
-  buildDefaultMicronutrientInput
+  buildDefaultMicronutrientInput,
 };

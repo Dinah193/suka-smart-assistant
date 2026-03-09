@@ -22,11 +22,9 @@
  */
 
 import React, { useState, useEffect, useMemo } from "react";
-import { emit as emitEvent } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
-import {
-  runScripturalYearLengthCalculator,
-} from "./ScripturalYearLengthCalculator.shim";
+import { emit as emitEvent } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
+import { runScripturalYearLengthCalculator } from "./ScripturalYearLengthCalculator.shim";
 
 // Small helpers --------------------------------------------------------------
 
@@ -219,8 +217,8 @@ const ScripturalYearLengthCalculatorView = () => {
         <div>
           <h2 className="ssa-card__title">Scriptural Year Length</h2>
           <p className="ssa-card__subtitle">
-            Define how your scriptural year is structured so the rest of SSA
-            can align feasts, planting, and storehouse seasons.
+            Define how your scriptural year is structured so the rest of SSA can
+            align feasts, planting, and storehouse seasons.
           </p>
         </div>
         <button
@@ -234,7 +232,10 @@ const ScripturalYearLengthCalculatorView = () => {
       </div>
 
       {/* Form */}
-      <form className="ssa-form ssa-grid ssa-grid--2col" onSubmit={handleCompute}>
+      <form
+        className="ssa-form ssa-grid ssa-grid--2col"
+        onSubmit={handleCompute}
+      >
         <div className="ssa-form__field">
           <label className="ssa-form__label" htmlFor="cycleType">
             Cycle Type
@@ -501,8 +502,8 @@ const ScripturalYearLengthCalculatorView = () => {
             <div className="ssa-modal__body">
               <p className="ssa-modal__lead">
                 Use this overview to line up feasts, planting seasons, and
-                preservation sessions. Other calculators can consume this
-                layout through the Planning Graph.
+                preservation sessions. Other calculators can consume this layout
+                through the Planning Graph.
               </p>
 
               <div className="ssa-grid ssa-grid--2col">
@@ -528,8 +529,7 @@ const ScripturalYearLengthCalculatorView = () => {
                       {result.anchorDates?.midYearMarker || "—"}
                     </li>
                     <li>
-                      <strong>End:</strong>{" "}
-                      {result.anchorDates?.yearEnd || "—"}
+                      <strong>End:</strong> {result.anchorDates?.yearEnd || "—"}
                     </li>
                   </ul>
                 </div>

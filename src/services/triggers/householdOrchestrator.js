@@ -10,14 +10,19 @@
    Safe dynamic imports (no hard crashes)
 ----------------------------------------*/
 async function safeImport(path) {
-  try { return await import(/* @vite-ignore */ path); }
-  catch { return {}; }
+  try {
+    return await import(/* @vite-ignore */ path);
+  } catch {
+    return {};
+  }
 }
 
 // Try multiple candidate paths (helps when some modules are folders with index.js)
 async function safeImportMany(paths = []) {
   for (const p of paths) {
-    try { return await import(/* @vite-ignore */ p); } catch {}
+    try {
+      return await import(/* @vite-ignore */ p);
+    } catch {}
   }
   return {};
 }
@@ -64,8 +69,16 @@ const FALLBACK_EVENTS = {
     HEAT_ALERT: "WEATHER.HEAT.ALERT",
     RAIN_WINDOW: "WEATHER.RAIN.WINDOW",
   },
-  DAY: { MORNING: "DAY.MORNING", AFTERNOON: "DAY.AFTERNOON", EVENING: "DAY.EVENING" },
-  SABBATH: { PREP: "SABBATH.PREP.WINDOW", START: "SABBATH.START", END: "SABBATH.END" },
+  DAY: {
+    MORNING: "DAY.MORNING",
+    AFTERNOON: "DAY.AFTERNOON",
+    EVENING: "DAY.EVENING",
+  },
+  SABBATH: {
+    PREP: "SABBATH.PREP.WINDOW",
+    START: "SABBATH.START",
+    END: "SABBATH.END",
+  },
 };
 let EVENTS = FALLBACK_EVENTS;
 
@@ -77,7 +90,7 @@ let EVENTS = FALLBACK_EVENTS;
     "@/ai/automation/events",
   ]);
   if (mod?.default || Object.keys(mod || {}).length) {
-    EVENTS = (mod.default || mod);
+    EVENTS = mod.default || mod;
   }
 })();
 
@@ -87,15 +100,25 @@ let EVENTS = FALLBACK_EVENTS;
 function ensureAgentContract(agent, name = "agent") {
   const a = agent?.default || agent || {};
   if (typeof a.estimatePlan !== "function") {
-    a.estimatePlan = async () => ({ summary: `${name}: no estimatePlan`, suggestions: [] });
-    console.warn(`[${name}] missing estimatePlan(ctx, options) — using fallback`);
+    a.estimatePlan = async () => ({
+      summary: `${name}: no estimatePlan`,
+      suggestions: [],
+    });
+    console.warn(
+      `[${name}] missing estimatePlan(ctx, options) — using fallback`
+    );
   }
   if (typeof a.generatePlan !== "function") {
     a.generatePlan = async () => ({ plan: [], emits: [] });
-    console.warn(`[${name}] missing generatePlan(ctx, options) — using fallback`);
+    console.warn(
+      `[${name}] missing generatePlan(ctx, options) — using fallback`
+    );
   }
   if (typeof a.handleCommand !== "function") {
-    a.handleCommand = async () => ({ ok: false, note: `${name}: no handleCommand` });
+    a.handleCommand = async () => ({
+      ok: false,
+      note: `${name}: no handleCommand`,
+    });
   }
   return a;
 }
@@ -150,21 +173,34 @@ async function buildAgents() {
     preservationRaw,
     mealPlanningRaw,
   ] = await Promise.all([
-    safeImportMany(["@/agents/cookingAgent.js", "@/agents/cookingAgent"]),
-    safeImportMany(["@/agents/cleaningAgent.js", "@/agents/cleaningAgent", "@/agents/cleaningRoutineAgent.js"]),
-    safeImportMany(["@/agents/gardeningAgent.js", "@/agents/gardeningAgent"]),
-    safeImportMany(["@/agents/gardenHarvestAgent.js", "@/agents/gardenHarvestAgent"]),
-    safeImportMany(["@/agents/preservationAgent.js", "@/agents/preservationAgent"]),
-    safeImportMany(["@/agents/mealPlanningAgent.js", "@/agents/mealPlanningAgent"]),
+    safeImportMany(["@/agents/cookingShim.js", "@/agents/cookingAgent"]),
+    safeImportMany([
+      "@/agents/cleaningShim.js",
+      "@/agents/cleaningAgent",
+      "@/agents/cleaningRoutineShim.js",
+    ]),
+    safeImportMany(["@/agents/gardeningShim.js", "@/agents/gardeningAgent"]),
+    safeImportMany([
+      "@/agents/gardenHarvestShim.js",
+      "@/agents/gardenHarvestAgent",
+    ]),
+    safeImportMany([
+      "@/agents/preservationShim.js",
+      "@/agents/preservationAgent",
+    ]),
+    safeImportMany([
+      "@/agents/mealPlanningShim.js",
+      "@/agents/mealPlanningAgent",
+    ]),
   ]);
 
   return {
-    cooking:       ensureAgentContract(cookingRaw, "CookingAgent"),
-    cleaning:      ensureAgentContract(cleaningRaw, "CleaningAgent"),
-    gardening:     ensureAgentContract(gardeningRaw, "GardeningAgent"),
+    cooking: ensureAgentContract(cookingRaw, "CookingAgent"),
+    cleaning: ensureAgentContract(cleaningRaw, "CleaningAgent"),
+    gardening: ensureAgentContract(gardeningRaw, "GardeningAgent"),
     gardenHarvest: ensureAgentContract(gardenHarvestRaw, "GardenHarvestAgent"),
-    preservation:  ensureAgentContract(preservationRaw, "PreservationAgent"),
-    mealPlanning:  ensureAgentContract(mealPlanningRaw, "MealPlanningAgent"),
+    preservation: ensureAgentContract(preservationRaw, "PreservationAgent"),
+    mealPlanning: ensureAgentContract(mealPlanningRaw, "MealPlanningAgent"),
   };
 }
 
@@ -177,11 +213,15 @@ const FALLBACK_PLAYBOOKS = [
     when: ({ events, ctx }) =>
       events.includes(EVENTS.SESSION.PLANNED.COOKING) && ctx.tod !== "evening",
     then: async ({ agents, ctx }) => {
-      const est = await agents.cleaning.estimatePlan(ctx, { preset: "kitchen-reset-10min" });
+      const est = await agents.cleaning.estimatePlan(ctx, {
+        preset: "kitchen-reset-10min",
+      });
       return {
         nudge: {
           title: "Quick kitchen reset for smoother batch cooking later",
-          message: est?.summary || "Clear counters, empty sink, stage tools (≈10 min).",
+          message:
+            est?.summary ||
+            "Clear counters, empty sink, stage tools (≈10 min).",
           actions: [{ id: "start-reset", label: "Start 10-min timer" }],
           priority: 0.82,
           next: EVENTS.SESSION.STARTED.CLEANING,
@@ -193,18 +233,26 @@ const FALLBACK_PLAYBOOKS = [
     id: "harvest->preserve->meal",
     when: ({ events }) => events.includes(EVENTS.GARDEN.HARVEST_WINDOW),
     then: async ({ agents, ctx }) => {
-      const harvest = await agents.gardenHarvest.estimatePlan(ctx, { window: "this-week" });
-      const preserve = await agents.preservation.estimatePlan(ctx, { inputs: harvest?.surplus ?? [] });
-      const meals = await agents.mealPlanning.estimatePlan(ctx, { prefer: harvest?.fresh ?? [] });
+      const harvest = await agents.gardenHarvest.estimatePlan(ctx, {
+        window: "this-week",
+      });
+      const preserve = await agents.preservation.estimatePlan(ctx, {
+        inputs: harvest?.surplus ?? [],
+      });
+      const meals = await agents.mealPlanning.estimatePlan(ctx, {
+        prefer: harvest?.fresh ?? [],
+      });
 
       return {
         nudge: {
           title: "Garden is ready — use it well",
-          message: `Harvest: ${harvest?.summary || "window open"}. Preserve: ${preserve?.summary || "options ready"}. Meals: ${meals?.summary || "suggested from fresh picks"}.`,
+          message: `Harvest: ${harvest?.summary || "window open"}. Preserve: ${
+            preserve?.summary || "options ready"
+          }. Meals: ${meals?.summary || "suggested from fresh picks"}.`,
           actions: [
             { id: "schedule-harvest", label: "Schedule harvest" },
-            { id: "queue-preserve",   label: "Queue preservation" },
-            { id: "add-meals",        label: "Add meals" },
+            { id: "queue-preserve", label: "Queue preservation" },
+            { id: "add-meals", label: "Add meals" },
           ],
           priority: 0.89,
           next: EVENTS.SESSION.PLANNED.GARDENING,
@@ -219,13 +267,21 @@ const FALLBACK_PLAYBOOKS = [
       return events.includes(EVENTS.SABBATH.PREP) && sab;
     },
     then: async ({ agents, ctx }) => {
-      const cook = await agents.cooking.estimatePlan(ctx, { preset: "sabbath" });
-      const clean = await agents.cleaning.estimatePlan(ctx, { preset: "high-visibility-rooms" });
+      const cook = await agents.cooking.estimatePlan(ctx, {
+        preset: "sabbath",
+      });
+      const clean = await agents.cleaning.estimatePlan(ctx, {
+        preset: "high-visibility-rooms",
+      });
       return {
         nudge: {
           title: "Shabbat prep flow",
-          message: `${cook?.summary || "Plan & prep meals today."} ${clean?.summary || "Quick tidy and bathrooms."}`,
-          actions: [{ id: "open-prep-checklist", label: "Open prep checklist" }],
+          message: `${cook?.summary || "Plan & prep meals today."} ${
+            clean?.summary || "Quick tidy and bathrooms."
+          }`,
+          actions: [
+            { id: "open-prep-checklist", label: "Open prep checklist" },
+          ],
           priority: 0.95,
           next: EVENTS.SESSION.PLANNED.COOKING,
         },
@@ -253,7 +309,9 @@ function presentNudge(nudge, emit) {
   // Notify any UI listeners
   emit?.("automation/nudge", nudge);
   try {
-    window.dispatchEvent?.(new CustomEvent("automation:nudge", { detail: nudge }));
+    window.dispatchEvent?.(
+      new CustomEvent("automation:nudge", { detail: nudge })
+    );
   } catch {}
 
   // Minimal console breadcrumb for dev
@@ -263,18 +321,31 @@ function presentNudge(nudge, emit) {
 // Exported so buttons can call back into the app if you wire them
 export async function handleNudgeAction(actionId, meta = {}) {
   try {
-    const [{ TimerManager }, { ReminderManager }, socketMod] = await Promise.all([
-      safeImportMany(["@/managers/TimerManager.js", "@/managers/TimerManager"]),
-      safeImportMany(["@/managers/ReminderManager.js", "@/managers/ReminderManager"]),
-      safeImportMany(["@/server/services/socket.js", "@/server/services/socket"]),
-    ]);
+    const [{ TimerManager }, { ReminderManager }, socketMod] =
+      await Promise.all([
+        safeImportMany([
+          "@/managers/TimerManager.js",
+          "@/managers/TimerManager",
+        ]),
+        safeImportMany([
+          "@/managers/ReminderManager.js",
+          "@/managers/ReminderManager",
+        ]),
+        safeImportMany([
+          "@/server/services/socket.js",
+          "@/server/services/socket",
+        ]),
+      ]);
 
     switch (actionId) {
       case "start-reset":
         TimerManager?.start?.({ label: "Kitchen reset", minutes: 10 });
         break;
       case "schedule-harvest":
-        ReminderManager?.create?.({ title: "Harvest window", when: "next-available-morning" });
+        ReminderManager?.create?.({
+          title: "Harvest window",
+          when: "next-available-morning",
+        });
         break;
       case "queue-preserve":
         // Optionally call preservation agent generate
@@ -286,7 +357,10 @@ export async function handleNudgeAction(actionId, meta = {}) {
         socketMod?.socket?.emit?.("ui/open", { path: "/cooking", tab: "prep" });
         break;
       case "open-cleaning-checklist":
-        socketMod?.socket?.emit?.("ui/open", { path: "/cleaning", tab: "today" });
+        socketMod?.socket?.emit?.("ui/open", {
+          path: "/cleaning",
+          tab: "today",
+        });
         break;
       case "add-to-shopping-list":
         // Hook your shopping list service if present
@@ -313,7 +387,8 @@ function mapCookingTriggersToNudges(triggers = [], settings = {}) {
       case "CALENDAR_SYNC":
         nudges.push({
           title: "Approval granted — syncing your plan",
-          message: t.reason || "Updating calendar with the latest tasks and sessions.",
+          message:
+            t.reason || "Updating calendar with the latest tasks and sessions.",
           priority: 0.92,
           actions: [],
         });
@@ -349,7 +424,8 @@ function mapCookingTriggersToNudges(triggers = [], settings = {}) {
       case "PREHEAT_APPLIANCE":
         nudges.push({
           title: "Preheat now",
-          message: t.reason || "It’s time to preheat so you’re not waiting later.",
+          message:
+            t.reason || "It’s time to preheat so you’re not waiting later.",
           priority: 0.9,
           actions: [{ id: "open-prep-checklist", label: "Prep steps" }],
         });
@@ -359,7 +435,8 @@ function mapCookingTriggersToNudges(triggers = [], settings = {}) {
         if (!avoidSaturday || new Date().getDay() !== 6) {
           nudges.push({
             title: "Start thawing",
-            message: t.reason || "Move frozen items to the fridge so they’re ready.",
+            message:
+              t.reason || "Move frozen items to the fridge so they’re ready.",
             priority: 0.86,
             actions: [{ id: "open-prep-checklist", label: "See plan" }],
           });
@@ -378,7 +455,10 @@ function mapCookingTriggersToNudges(triggers = [], settings = {}) {
       case "NOTIFY_PREHEAT_DONE":
       case "NOTIFY_TEMP_TARGET":
         nudges.push({
-          title: t.type === "NOTIFY_PREHEAT_DONE" ? "Oven preheated" : "Target temp reached",
+          title:
+            t.type === "NOTIFY_PREHEAT_DONE"
+              ? "Oven preheated"
+              : "Target temp reached",
           message: t.reason || "You can move to the next step now.",
           priority: 0.88,
           actions: [{ id: "open-prep-checklist", label: "Next step" }],
@@ -388,7 +468,8 @@ function mapCookingTriggersToNudges(triggers = [], settings = {}) {
       case "START_PREP_ON_ARRIVAL":
         nudges.push({
           title: "Welcome home — let’s get a head start",
-          message: t.reason || "You’ve got a meal coming up; want to start prep?",
+          message:
+            t.reason || "You’ve got a meal coming up; want to start prep?",
           priority: 0.9,
           actions: [{ id: "open-prep-checklist", label: "Start prep" }],
         });
@@ -427,11 +508,16 @@ function mapCleaningTriggersToNudges(trigs, settings) {
       nudges.push({
         title: "Cleaning supply running low",
         message: t.message,
-        priority: t.severity === "high" ? 0.92 : t.severity === "medium" ? 0.78 : 0.6,
+        priority:
+          t.severity === "high" ? 0.92 : t.severity === "medium" ? 0.78 : 0.6,
         actions: [
-          { id: "add-to-shopping-list", label: "Add to shopping list", meta: { item: t?.meta?.name || t.key } },
+          {
+            id: "add-to-shopping-list",
+            label: "Add to shopping list",
+            meta: { item: t?.meta?.name || t.key },
+          },
         ],
-        suggestedWindows: t.suggestedWindows?.filter(w => {
+        suggestedWindows: t.suggestedWindows?.filter((w) => {
           if (!avoidSaturday) return true;
           const d = new Date(w.startISO);
           return d.getDay() !== 6; // skip Saturday
@@ -443,17 +529,18 @@ function mapCleaningTriggersToNudges(trigs, settings) {
         title: "Confirm or update cleaning supply",
         message: t.message,
         priority: 0.55,
-        actions: [{ id: "open-cleaning-checklist", label: "Open cleaning dashboard" }],
+        actions: [
+          { id: "open-cleaning-checklist", label: "Open cleaning dashboard" },
+        ],
       });
     }
     if (t.type === "ZONE_OVERDUE") {
       nudges.push({
         title: `Cleaning due: ${t.key.split(":")[1]}`,
         message: t.message,
-        priority: t.severity === "high" ? 0.9 : t.severity === "medium" ? 0.75 : 0.6,
-        actions: [
-          { id: "open-cleaning-checklist", label: "Open checklist" },
-        ],
+        priority:
+          t.severity === "high" ? 0.9 : t.severity === "medium" ? 0.75 : 0.6,
+        actions: [{ id: "open-cleaning-checklist", label: "Open checklist" }],
         suggestedWindows: t.suggestedWindows,
       });
     }
@@ -463,7 +550,7 @@ function mapCleaningTriggersToNudges(trigs, settings) {
   if ((trigs?.restockNeeded || []).length) {
     nudges.push({
       title: "Restock cleaning supplies",
-      message: `Low: ${(trigs.restockNeeded).join(", ")}`,
+      message: `Low: ${trigs.restockNeeded.join(", ")}`,
       priority: 0.8,
       actions: [{ id: "add-to-shopping-list", label: "Add all to list" }],
     });
@@ -473,7 +560,7 @@ function mapCleaningTriggersToNudges(trigs, settings) {
       title: "Zones overdue",
       message: `Needs attention: ${trigs.zonesDue.join(", ")}`,
       priority: 0.7,
-      actions: [{ id: "open-cleaning-checklist", label: "Open checklist" } ],
+      actions: [{ id: "open-cleaning-checklist", label: "Open checklist" }],
     });
   }
 
@@ -557,20 +644,29 @@ export default function householdOrchestrator({ ctx, emit, options = {} }) {
       };
 
       const trigs = detect(envelope, {
-        tz: ctxSnap?.tz || Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
-        user: { dietaryTags: ctxSnap?.user?.dietaryTags || [], appliancePrefs: ctxSnap?.user?.appliancePrefs || [] },
+        tz:
+          ctxSnap?.tz ||
+          Intl.DateTimeFormat().resolvedOptions().timeZone ||
+          "UTC",
+        user: {
+          dietaryTags: ctxSnap?.user?.dietaryTags || [],
+          appliancePrefs: ctxSnap?.user?.appliancePrefs || [],
+        },
         config: {}, // allow global overrides here later
         services: {
           calendar: ctxSnap?.calendar?.service,
           parse: await safeImportMany([
             "@/services/planning/parseRecipeSteps.js",
             "@/services/planning/parseRecipeSteps",
-          ]).then(m => m?.default || m),
-        }
+          ]).then((m) => m?.default || m),
+        },
       });
 
       if (Array.isArray(trigs) && trigs.length) {
-        const nudges = mapCookingTriggersToNudges(trigs, ctxSnap?.settings || {});
+        const nudges = mapCookingTriggersToNudges(
+          trigs,
+          ctxSnap?.settings || {}
+        );
         // De-dupe within this pass by title+message
         const seen = new Set();
         for (const n of nudges) {
@@ -581,7 +677,10 @@ export default function householdOrchestrator({ ctx, emit, options = {} }) {
         }
       }
     } catch (e) {
-      console.warn("[householdOrchestrator] cooking detector error:", e?.message || e);
+      console.warn(
+        "[householdOrchestrator] cooking detector error:",
+        e?.message || e
+      );
     }
   };
 
@@ -619,7 +718,6 @@ export default function householdOrchestrator({ ctx, emit, options = {} }) {
       }
 
       // TODO: add inventory/garden detectors similarly (when those services are ready)
-
     } catch (e) {
       console.warn("[householdOrchestrator] detector error:", e?.message || e);
     }
@@ -635,18 +733,37 @@ export default function householdOrchestrator({ ctx, emit, options = {} }) {
 
     const now = new Date();
     const dayparts = [
-      { name: EVENTS.DAY.MORNING,   h: 8 },
+      { name: EVENTS.DAY.MORNING, h: 8 },
       { name: EVENTS.DAY.AFTERNOON, h: 13 },
-      { name: EVENTS.DAY.EVENING,   h: 18 },
+      { name: EVENTS.DAY.EVENING, h: 18 },
     ];
     // Find next event today or tomorrow
     let next = null;
     for (const dp of dayparts) {
-      const t = new Date(now.getFullYear(), now.getMonth(), now.getDate(), dp.h, 0, 0, 0);
-      if (t > now) { next = { when: t, name: dp.name }; break; }
+      const t = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        dp.h,
+        0,
+        0,
+        0
+      );
+      if (t > now) {
+        next = { when: t, name: dp.name };
+        break;
+      }
     }
     if (!next) {
-      const t = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 8, 0, 0, 0);
+      const t = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() + 1,
+        8,
+        0,
+        0,
+        0
+      );
       next = { when: t, name: EVENTS.DAY.MORNING };
     }
 
@@ -673,32 +790,46 @@ export default function householdOrchestrator({ ctx, emit, options = {} }) {
 
         // Garden plan from vision
         try {
-          const garden = await safeImportMany(["@/agents/gardeningAgent.js", "@/agents/gardeningAgent"]);
+          const garden = await safeImportMany([
+            "@/agents/gardeningShim.js",
+            "@/agents/gardeningAgent",
+          ]);
           await garden?.default?.handleCommand?.("planFromVision", {
-            vision, month: new Date().getMonth() + 1,
+            vision,
+            month: new Date().getMonth() + 1,
           });
         } catch {}
 
         // Animals plan from vision
         try {
-          const animals = await safeImportMany(["@/agents/animalAgent.js", "@/agents/animalAgent"]);
+          const animals = await safeImportMany([
+            "@/agents/animalShim.js",
+            "@/agents/animalAgent",
+          ]);
           await animals?.default?.handleCommand?.("planFromVision", { vision });
         } catch {}
 
         // Cleaning routine from vision time budget
         try {
-          const cleaning = await safeImportMany(["@/agents/cleaningAgent.js", "@/agents/cleaningAgent", "@/agents/cleaningRoutineAgent.js"]);
+          const cleaning = await safeImportMany([
+            "@/agents/cleaningShim.js",
+            "@/agents/cleaningAgent",
+            "@/agents/cleaningRoutineShim.js",
+          ]);
           await cleaning?.default?.handleCommand?.("buildRoutine", {
-            rooms: ["Kitchen","Bath","Entry","Living"], // starter
+            rooms: ["Kitchen", "Bath", "Entry", "Living"], // starter
             duration: Math.max(30, Number(vision?.weeklyHours || 0) * 6), // heuristic
-            intensity: vision?.profileKey === "agrarian-offgrid" ? "deep" : "standard",
+            intensity:
+              vision?.profileKey === "agrarian-offgrid" ? "deep" : "standard",
           });
         } catch {}
 
         // Persist a household snapshot / notify UI
         emit?.("household/planUpdated", { when, from: "vision" });
         try {
-          window.dispatchEvent?.(new CustomEvent("household:planUpdated", { detail: { when } }));
+          window.dispatchEvent?.(
+            new CustomEvent("household:planUpdated", { detail: { when } })
+          );
         } catch {}
 
         // Intuition: this often implies future cooking/cleaning sessions
@@ -711,9 +842,13 @@ export default function householdOrchestrator({ ctx, emit, options = {} }) {
 
         // Update inventory requirements
         try {
-          const inv = await safeImportMany(["@/agents/inventoryAgent.js", "@/agents/inventoryAgent"]);
+          const inv = await safeImportMany([
+            "@/agents/inventoryShim.js",
+            "@/agents/inventoryAgent",
+          ]);
           await inv?.default?.handleCommand?.("syncRequirements", {
-            required: merged?.items, source: "recipeConsolidator",
+            required: merged?.items,
+            source: "recipeConsolidator",
           });
         } catch {}
 
@@ -732,20 +867,35 @@ export default function householdOrchestrator({ ctx, emit, options = {} }) {
         // If agrarian/hybrid, request garden & animals to cover gaps
         if (/(agrarian|hybrid)/i.test(String(visionKey || ""))) {
           try {
-            const garden = await safeImportMany(["@/agents/gardeningAgent.js", "@/agents/gardeningAgent"]);
-            await garden?.default?.handleCommand?.("cropNeedsFromRecipes", { items: merged?.items || [] });
+            const garden = await safeImportMany([
+              "@/agents/gardeningShim.js",
+              "@/agents/gardeningAgent",
+            ]);
+            await garden?.default?.handleCommand?.("cropNeedsFromRecipes", {
+              items: merged?.items || [],
+            });
           } catch {}
           try {
-            const animals = await safeImportMany(["@/agents/animalAgent.js", "@/agents/animalAgent"]);
-            await animals?.default?.handleCommand?.("proteinPlanFromRecipes", { items: merged?.items || [] });
+            const animals = await safeImportMany([
+              "@/agents/animalShim.js",
+              "@/agents/animalAgent",
+            ]);
+            await animals?.default?.handleCommand?.("proteinPlanFromRecipes", {
+              items: merged?.items || [],
+            });
           } catch {}
         }
 
-        emit?.("household/planUpdated", { from: "recipes", count: recipes?.length || 0 });
+        emit?.("household/planUpdated", {
+          from: "recipes",
+          count: recipes?.length || 0,
+        });
         try {
-          window.dispatchEvent?.(new CustomEvent("household:planUpdated", {
-            detail: { from: "recipes", count: recipes?.length || 0 }
-          }));
+          window.dispatchEvent?.(
+            new CustomEvent("household:planUpdated", {
+              detail: { from: "recipes", count: recipes?.length || 0 },
+            })
+          );
         } catch {}
 
         // Intuition: consolidated recipes usually mean a planned cooking session
@@ -759,7 +909,7 @@ export default function householdOrchestrator({ ctx, emit, options = {} }) {
         emitEvent(EVENTS.APPROVAL.RECEIVED);
         if (status === "approved") {
           emitEvent(EVENTS.APPROVAL.APPROVED);
-          if (["cooking","cleaning","gardening"].includes(domain)) {
+          if (["cooking", "cleaning", "gardening"].includes(domain)) {
             emitEvent(EVENTS.SESSION.PLANNED[domain.toUpperCase()]);
           }
         } else if (status === "rejected") {
@@ -768,10 +918,10 @@ export default function householdOrchestrator({ ctx, emit, options = {} }) {
       }
 
       // Bubble certain direct signals to playbooks:
-      if (type === "garden/harvestWindow") emitEvent(EVENTS.GARDEN.HARVEST_WINDOW);
-      if (type === "weather/frostAlert")   emitEvent(EVENTS.WEATHER.FROST_ALERT);
-      if (type === "sabbath/prep")         emitEvent(EVENTS.SABBATH.PREP);
-
+      if (type === "garden/harvestWindow")
+        emitEvent(EVENTS.GARDEN.HARVEST_WINDOW);
+      if (type === "weather/frostAlert") emitEvent(EVENTS.WEATHER.FROST_ALERT);
+      if (type === "sabbath/prep") emitEvent(EVENTS.SABBATH.PREP);
     } catch (e) {
       console.warn("[householdOrchestrator] error:", e?.message || e);
     }

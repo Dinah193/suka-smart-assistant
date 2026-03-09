@@ -35,21 +35,31 @@ let eventBus = {
   on: () => () => {},
 };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
-} catch { /* noop for tests */ }
+} catch {
+  /* noop for tests */
+}
 
-let featureFlags = { familyFundMode: false, quietHours: { enabled: false, start: 22, end: 6 }, sabbathGuard: false };
+let featureFlags = {
+  familyFundMode: false,
+  quietHours: { enabled: false, start: 22, end: 6 },
+  sabbathGuard: false,
+};
 try {
   const ff = require("@/config/featureFlags");
   featureFlags = ff?.default || ff || featureFlags;
-} catch { /* noop */ }
+} catch {
+  /* noop */
+}
 
 let HubPacketFormatter, FamilyFundConnector;
 try {
   HubPacketFormatter = require("@/services/hub/HubPacketFormatter");
   FamilyFundConnector = require("@/services/hub/FamilyFundConnector");
-} catch { /* optional */ }
+} catch {
+  /* optional */
+}
 
 /* ---------------------------------- Types ---------------------------------- */
 /**
@@ -109,7 +119,9 @@ module.exports = {
     const out = await _suggest(session, options);
 
     eventBus.emit({
-      type: out.suggestions.length ? "scheduling.options.generated" : "scheduling.options.none",
+      type: out.suggestions.length
+        ? "scheduling.options.generated"
+        : "scheduling.options.none",
       ts,
       source,
       data: {
@@ -131,21 +143,31 @@ async function _suggest(session, options) {
   // Defensive checks
   const errs = [];
   if (!session || typeof session !== "object") errs.push("missing-session");
-  if (!session?.deadlineISO || Number.isNaN(Date.parse(session.deadlineISO))) errs.push("invalid-deadline");
-  if (!Number.isFinite(session?.taskMinutes) || session.taskMinutes <= 0) errs.push("invalid-taskMinutes");
-  if (errs.length) return { suggestions: [], meta: { errors: errs, searched: 0, deadlineISO: session?.deadlineISO || null } };
+  if (!session?.deadlineISO || Number.isNaN(Date.parse(session.deadlineISO)))
+    errs.push("invalid-deadline");
+  if (!Number.isFinite(session?.taskMinutes) || session.taskMinutes <= 0)
+    errs.push("invalid-taskMinutes");
+  if (errs.length)
+    return {
+      suggestions: [],
+      meta: {
+        errors: errs,
+        searched: 0,
+        deadlineISO: session?.deadlineISO || null,
+      },
+    };
 
   const ctx = await buildContext(session, options);
 
   // Strategy registry (order matters: cheaper/tighter-fit first)
   const strategies = [
     suggestEarlierSlots,
-    suggestLaterSlotsPostDeadline,         // late but near-term
-    suggestShortenVariant,                 // trims buffer/setup/cleanup safely
-    suggestSplitVariant,                   // split across two free windows
-    suggestResourceSubstitution,           // swap resource to find availability
-    suggestPolicyAwareWindow,              // near quiet/sabbath edges if allowed
-    suggestDeadlineExtension,              // as a last resort
+    suggestLaterSlotsPostDeadline, // late but near-term
+    suggestShortenVariant, // trims buffer/setup/cleanup safely
+    suggestSplitVariant, // split across two free windows
+    suggestResourceSubstitution, // swap resource to find availability
+    suggestPolicyAwareWindow, // near quiet/sabbath edges if allowed
+    suggestDeadlineExtension, // as a last resort
     ...(Array.isArray(options.extraStrategies) ? options.extraStrategies : []),
   ];
 
@@ -156,7 +178,9 @@ async function _suggest(session, options) {
       const got = await strat(session, ctx);
       if (Array.isArray(got) && got.length) suggestions.push(...got);
       if (suggestions.length >= ctx.maxAlternates) break;
-    } catch { /* ignore bad strategy */ }
+    } catch {
+      /* ignore bad strategy */
+    }
   }
 
   // De-dup & normalize scores 0..100
@@ -166,7 +190,10 @@ async function _suggest(session, options) {
 
   return {
     suggestions,
-    meta: { searched: ctx.stats.searchedWindows, deadlineISO: ctx.deadline.toISOString() },
+    meta: {
+      searched: ctx.stats.searchedWindows,
+      deadlineISO: ctx.deadline.toISOString(),
+    },
   };
 }
 
@@ -175,11 +202,21 @@ async function _suggest(session, options) {
 /** Find multiple free slots before the deadline */
 async function suggestEarlierSlots(_session, ctx) {
   const duration = ctx.totalMinutes;
-  const windows = await enumerateFreeWindows(ctx.earliestStart, ctx.deadline, ctx, ctx.granularityMin, duration, ctx.maxAlternates);
+  const windows = await enumerateFreeWindows(
+    ctx.earliestStart,
+    ctx.deadline,
+    ctx,
+    ctx.granularityMin,
+    duration,
+    ctx.maxAlternates
+  );
   ctx.stats.searchedWindows += windows.length;
   return windows.map((w, i) => ({
     kind: "slot",
-    label: i === 0 ? "First available slot before deadline" : "Alternate slot before deadline",
+    label:
+      i === 0
+        ? "First available slot before deadline"
+        : "Alternate slot before deadline",
     score: 90 - i * 5,
     schedule: { startISO: w.start.toISOString(), endISO: w.end.toISOString() },
     deltas: {},
@@ -190,7 +227,14 @@ async function suggestEarlierSlots(_session, ctx) {
 /** Offer near-term windows *after* the deadline (if acceptable) */
 async function suggestLaterSlotsPostDeadline(_session, ctx) {
   const horizonEnd = addMinutes(ctx.deadline, ctx.searchHorizonMin);
-  const windows = await enumerateFreeWindows(ctx.deadline, horizonEnd, ctx, ctx.granularityMin, ctx.totalMinutes, Math.ceil(ctx.maxAlternates / 2));
+  const windows = await enumerateFreeWindows(
+    ctx.deadline,
+    horizonEnd,
+    ctx,
+    ctx.granularityMin,
+    ctx.totalMinutes,
+    Math.ceil(ctx.maxAlternates / 2)
+  );
   ctx.stats.searchedWindows += windows.length;
   return windows.map((w, i) => ({
     kind: "slot",
@@ -220,7 +264,10 @@ async function suggestShortenVariant(session, ctx) {
     if (current <= 0) continue;
 
     // Try a 25% trim for this segment (at least 5 minutes if possible)
-    const cut = Math.max(0, Math.min(current, Math.max(5, Math.round(current * 0.25))));
+    const cut = Math.max(
+      0,
+      Math.min(current, Math.max(5, Math.round(current * 0.25)))
+    );
     const variant = { ...session, [key]: Math.max(0, current - cut) };
 
     const fits = await checkVariantFits(variant, ctx);
@@ -239,7 +286,7 @@ async function suggestShortenVariant(session, ctx) {
   }
 
   // Ultimate compression attempt: trim *all* non-task minutes by up to 30% total
-  if (out.length === 0 && (prep + setup + cleanup + buffer) > 0) {
+  if (out.length === 0 && prep + setup + cleanup + buffer > 0) {
     const compressBy = Math.floor((prep + setup + cleanup + buffer) * 0.3);
     if (compressBy > 0) {
       const variant = compressNonTask(session, compressBy);
@@ -268,31 +315,62 @@ async function suggestSplitVariant(session, ctx) {
   if (earlyChunk === 0 || lateChunk === 0) return [];
 
   // Find an early window for prep+setup
-  const earlyWins = await enumerateFreeWindows(ctx.earliestStart, addMinutes(ctx.deadline, -lateChunk), ctx, ctx.granularityMin, earlyChunk, 1);
+  const earlyWins = await enumerateFreeWindows(
+    ctx.earliestStart,
+    addMinutes(ctx.deadline, -lateChunk),
+    ctx,
+    ctx.granularityMin,
+    earlyChunk,
+    1
+  );
   ctx.stats.searchedWindows += earlyWins.length;
   if (!earlyWins.length) return [];
 
   const earlyEnd = earlyWins[0].end;
   // Then find a window for lateChunk between earlyEnd and deadline
-  const lateWins = await enumerateFreeWindows(earlyEnd, ctx.deadline, ctx, ctx.granularityMin, lateChunk, 1);
+  const lateWins = await enumerateFreeWindows(
+    earlyEnd,
+    ctx.deadline,
+    ctx,
+    ctx.granularityMin,
+    lateChunk,
+    1
+  );
   ctx.stats.searchedWindows += lateWins.length;
   if (!lateWins.length) return [];
 
-  return [{
-    kind: "split",
-    label: "Split: prep/setup earlier, main work later",
-    score: 68,
-    schedule: { startISO: earlyWins[0].start.toISOString(), endISO: lateWins[0].end.toISOString() },
-    deltas: { split: [{ startISO: earlyWins[0].start.toISOString(), endISO: earlyWins[0].end.toISOString() },
-                      { startISO: lateWins[0].start.toISOString(),  endISO: lateWins[0].end.toISOString() }] },
-    risks: ["requires-two-returns", "may-increase-context-switching"],
-  }];
+  return [
+    {
+      kind: "split",
+      label: "Split: prep/setup earlier, main work later",
+      score: 68,
+      schedule: {
+        startISO: earlyWins[0].start.toISOString(),
+        endISO: lateWins[0].end.toISOString(),
+      },
+      deltas: {
+        split: [
+          {
+            startISO: earlyWins[0].start.toISOString(),
+            endISO: earlyWins[0].end.toISOString(),
+          },
+          {
+            startISO: lateWins[0].start.toISOString(),
+            endISO: lateWins[0].end.toISOString(),
+          },
+        ],
+      },
+      risks: ["requires-two-returns", "may-increase-context-switching"],
+    },
+  ];
 }
 
 /** Swap a required resource with an allowed substitute to unlock windows */
 async function suggestResourceSubstitution(session, ctx) {
   const subs = ctx.resourceSubstitutions;
-  const req = Array.isArray(session.requiredResources) ? session.requiredResources : [];
+  const req = Array.isArray(session.requiredResources)
+    ? session.requiredResources
+    : [];
   if (!req.length || !subs || !Object.keys(subs).length) return [];
 
   const out = [];
@@ -303,7 +381,7 @@ async function suggestResourceSubstitution(session, ctx) {
     for (const alt of alts) {
       const variant = {
         ...session,
-        requiredResources: req.map(x => (x === r ? alt : x)),
+        requiredResources: req.map((x) => (x === r ? alt : x)),
       };
       const fits = await checkVariantFits(variant, ctx);
       if (fits) {
@@ -328,7 +406,11 @@ async function suggestPolicyAwareWindow(_session, ctx) {
   const out = [];
   // Try just after quiet hours end each day up to deadline
   if (ctx.quietHours.enabled) {
-    const candidates = buildPolicyEdgeStarts(ctx.earliestStart, ctx.deadline, ctx.quietHours.end);
+    const candidates = buildPolicyEdgeStarts(
+      ctx.earliestStart,
+      ctx.deadline,
+      ctx.quietHours.end
+    );
     for (const cand of candidates) {
       const end = addMinutes(cand, ctx.totalMinutes);
       const free = await isWindowFree(cand, end, ctx);
@@ -352,27 +434,42 @@ async function suggestPolicyAwareWindow(_session, ctx) {
 async function suggestDeadlineExtension(_session, ctx) {
   // Find earliest slot after deadline within horizon and compute minimal extension
   const horizonEnd = addMinutes(ctx.deadline, ctx.searchHorizonMin);
-  const windows = await enumerateFreeWindows(ctx.deadline, horizonEnd, ctx, ctx.granularityMin, ctx.totalMinutes, 1);
+  const windows = await enumerateFreeWindows(
+    ctx.deadline,
+    horizonEnd,
+    ctx,
+    ctx.granularityMin,
+    ctx.totalMinutes,
+    1
+  );
   ctx.stats.searchedWindows += windows.length;
   if (!windows.length) return [];
 
   const w = windows[0];
   const extension = Math.ceil((w.end - ctx.deadline) / 60000);
-  return [{
-    kind: "deadline-extension",
-    label: `Request deadline extension of ${extension} minutes`,
-    score: 55,
-    schedule: { startISO: w.start.toISOString(), endISO: w.end.toISOString() },
-    deltas: { deadlineDeltaMin: extension },
-    risks: ["requires-approval"],
-  }];
+  return [
+    {
+      kind: "deadline-extension",
+      label: `Request deadline extension of ${extension} minutes`,
+      score: 55,
+      schedule: {
+        startISO: w.start.toISOString(),
+        endISO: w.end.toISOString(),
+      },
+      deltas: { deadlineDeltaMin: extension },
+      risks: ["requires-approval"],
+    },
+  ];
 }
 
 /* --------------------------------- Context --------------------------------- */
 
 async function buildContext(session, options) {
   const now = options.now instanceof Date ? options.now : new Date();
-  const earliestStart = addMinutes(now, clampNonNegInt(session.earliestStartOffsetMin ?? 0));
+  const earliestStart = addMinutes(
+    now,
+    clampNonNegInt(session.earliestStartOffsetMin ?? 0)
+  );
   const deadline = new Date(session.deadlineISO);
 
   const prep = clampNonNegInt(session.prepMinutes ?? 0);
@@ -391,11 +488,22 @@ async function buildContext(session, options) {
     fetchCalendarBlocks: options.fetchCalendarBlocks,
     fetchResourceLocks: options.fetchResourceLocks,
     fetchAstronomy: options.fetchAstronomy,
-    quietHours: normalizeQuietHours(options.quietHours ?? featureFlags.quietHours),
+    quietHours: normalizeQuietHours(
+      options.quietHours ?? featureFlags.quietHours
+    ),
     sabbath: normalizeSabbath(options.sabbath, featureFlags.sabbathGuard),
-    granularityMin: Math.max(1, Math.min(60, Math.floor(options.granularityMin ?? 5))),
-    maxAlternates: Math.max(1, Math.min(12, Math.floor(options.maxAlternates ?? 6))),
-    searchHorizonMin: Math.max(30, Math.min(24 * 60, Math.floor(options.searchHorizonMin ?? 240))),
+    granularityMin: Math.max(
+      1,
+      Math.min(60, Math.floor(options.granularityMin ?? 5))
+    ),
+    maxAlternates: Math.max(
+      1,
+      Math.min(12, Math.floor(options.maxAlternates ?? 6))
+    ),
+    searchHorizonMin: Math.max(
+      30,
+      Math.min(24 * 60, Math.floor(options.searchHorizonMin ?? 240))
+    ),
     resourceSubstitutions: options.resourceSubstitutions || {},
     stats: { searchedWindows: 0 },
   };
@@ -403,16 +511,35 @@ async function buildContext(session, options) {
 
 /* ----------------------------- Window Finding ------------------------------ */
 
-async function enumerateFreeWindows(rangeStart, rangeEnd, ctx, stepMin, durationMin, limit) {
+async function enumerateFreeWindows(
+  rangeStart,
+  rangeEnd,
+  ctx,
+  stepMin,
+  durationMin,
+  limit
+) {
   const blocked = await gatherBlocked(rangeStart, rangeEnd, ctx);
   const merged = mergeIntervals(blocked);
-  return findKFitSlots(rangeStart, rangeEnd, merged, durationMin, stepMin, limit);
+  return findKFitSlots(
+    rangeStart,
+    rangeEnd,
+    merged,
+    durationMin,
+    stepMin,
+    limit
+  );
 }
 
 async function gatherBlocked(start, end, ctx) {
   const [calendarBlocks, resourceLocks, policyBlocks] = await Promise.all([
     resolveCalendarBlocks(start, end, ctx.fetchCalendarBlocks),
-    resolveResourceLocks(Array.isArray(ctx.requiredResources) ? ctx.requiredResources : null, start, end, ctx.fetchResourceLocks),
+    resolveResourceLocks(
+      Array.isArray(ctx.requiredResources) ? ctx.requiredResources : null,
+      start,
+      end,
+      ctx.fetchResourceLocks
+    ),
     resolvePolicyBlocks(start, end, ctx),
   ]);
   return [...calendarBlocks, ...resourceLocks, ...policyBlocks].map(toInterval);
@@ -420,25 +547,48 @@ async function gatherBlocked(start, end, ctx) {
 
 async function resolveCalendarBlocks(start, end, fetcher) {
   if (typeof fetcher !== "function") return [];
-  const res = await safeCall(async () => await fetcher(start.toISOString(), end.toISOString()), []);
+  const res = await safeCall(
+    async () => await fetcher(start.toISOString(), end.toISOString()),
+    []
+  );
   return Array.isArray(res) ? res : [];
 }
 async function resolveResourceLocks(resources, start, end, fetcher) {
   if (!resources || !resources.length) return [];
   if (typeof fetcher !== "function") return [];
-  const res = await safeCall(async () => await fetcher(resources, start.toISOString(), end.toISOString()), []);
+  const res = await safeCall(
+    async () =>
+      await fetcher(resources, start.toISOString(), end.toISOString()),
+    []
+  );
   return Array.isArray(res) ? res : [];
 }
 async function resolvePolicyBlocks(start, end, ctx) {
   const blocks = [];
-  if (ctx.quietHours.enabled) blocks.push(...buildQuietHourBlocks(start, end, ctx.quietHours.start, ctx.quietHours.end));
-  if (ctx.sabbath.enabled) blocks.push(...await buildSabbathBlocks(start, end, ctx.fetchAstronomy));
+  if (ctx.quietHours.enabled)
+    blocks.push(
+      ...buildQuietHourBlocks(
+        start,
+        end,
+        ctx.quietHours.start,
+        ctx.quietHours.end
+      )
+    );
+  if (ctx.sabbath.enabled)
+    blocks.push(...(await buildSabbathBlocks(start, end, ctx.fetchAstronomy)));
   return blocks;
 }
 
 /* ------------------------------ Fit Utilities ------------------------------ */
 
-function findKFitSlots(start, deadline, blocked, durationMin, granularityMin, k) {
+function findKFitSlots(
+  start,
+  deadline,
+  blocked,
+  durationMin,
+  granularityMin,
+  k
+) {
   const res = [];
   const durationMs = durationMin * 60 * 1000;
   const stepMs = granularityMin * 60 * 1000;
@@ -460,7 +610,10 @@ function findKFitSlots(start, deadline, blocked, durationMin, granularityMin, k)
     if (jumped) continue;
 
     const candidateEnd = new Date(cursor.getTime() + durationMs);
-    if (!intersectsAny(cursor, candidateEnd, blocked) && candidateEnd <= deadline) {
+    if (
+      !intersectsAny(cursor, candidateEnd, blocked) &&
+      candidateEnd <= deadline
+    ) {
       res.push({ start: new Date(cursor), end: candidateEnd });
       // advance by duration to find next distinct window
       cursor = new Date(candidateEnd.getTime() + stepMs);
@@ -494,9 +647,19 @@ async function checkVariantFits(variantSession, ctx) {
 
   if (total <= 0) return null;
 
-  const windows = await enumerateFreeWindows(ctx.earliestStart, ctx.deadline, ctx, ctx.granularityMin, total, 1);
+  const windows = await enumerateFreeWindows(
+    ctx.earliestStart,
+    ctx.deadline,
+    ctx,
+    ctx.granularityMin,
+    total,
+    1
+  );
   if (!windows.length) return null;
-  return { startISO: windows[0].start.toISOString(), endISO: windows[0].end.toISOString() };
+  return {
+    startISO: windows[0].start.toISOString(),
+    endISO: windows[0].end.toISOString(),
+  };
 }
 
 /* ------------------------------ Policy Helpers ----------------------------- */
@@ -522,7 +685,8 @@ function normalizeQuietHours(qh) {
 }
 
 function normalizeSabbath(opt, flagEnabled) {
-  if (!flagEnabled && !opt?.enabled) return { enabled: false, dayStart: 18, dayEnd: 18 };
+  if (!flagEnabled && !opt?.enabled)
+    return { enabled: false, dayStart: 18, dayEnd: 18 };
   const enabled = opt?.enabled ?? true;
   const dayStart = toHour(opt?.dayStart, 18);
   const dayEnd = toHour(opt?.dayEnd, 18);
@@ -540,10 +704,22 @@ async function buildSabbathBlocks(start, end, fetchAstronomy) {
       const sat = addDays(fri, 1);
       let startISO, endISO;
       if (typeof fetchAstronomy === "function") {
-        const friAstro = await safeCall(async () => await fetchAstronomy(fri), {});
-        const satAstro = await safeCall(async () => await fetchAstronomy(sat), {});
-        startISO = friAstro?.sunsetISO || friAstro?.sundownISO || setHour(fri, 18).toISOString();
-        endISO = satAstro?.sundownISO || satAstro?.sunsetISO || setHour(sat, 18).toISOString();
+        const friAstro = await safeCall(
+          async () => await fetchAstronomy(fri),
+          {}
+        );
+        const satAstro = await safeCall(
+          async () => await fetchAstronomy(sat),
+          {}
+        );
+        startISO =
+          friAstro?.sunsetISO ||
+          friAstro?.sundownISO ||
+          setHour(fri, 18).toISOString();
+        endISO =
+          satAstro?.sundownISO ||
+          satAstro?.sunsetISO ||
+          setHour(sat, 18).toISOString();
       } else {
         startISO = setHour(fri, 18).toISOString();
         endISO = setHour(sat, 18).toISOString();
@@ -558,7 +734,12 @@ async function buildSabbathBlocks(start, end, fetchAstronomy) {
 /* --------------------------------- Utils ---------------------------------- */
 
 function compressNonTask(session, totalCut) {
-  const keys = ["bufferMinutes", "cleanupMinutes", "setupMinutes", "prepMinutes"];
+  const keys = [
+    "bufferMinutes",
+    "cleanupMinutes",
+    "setupMinutes",
+    "prepMinutes",
+  ];
   const out = { ...session };
   let remaining = totalCut;
 
@@ -577,7 +758,13 @@ function dedupeSuggestions(arr) {
   const seen = new Set();
   const out = [];
   for (const s of arr) {
-    const key = JSON.stringify([s.kind, s.schedule?.startISO, s.schedule?.endISO, s.label, s.deltas]);
+    const key = JSON.stringify([
+      s.kind,
+      s.schedule?.startISO,
+      s.schedule?.endISO,
+      s.label,
+      s.deltas,
+    ]);
     if (seen.has(key)) continue;
     seen.add(key);
     // clamp score
@@ -591,17 +778,37 @@ function clampNonNegInt(n) {
   const v = Math.floor(Number(n) || 0);
   return v < 0 ? 0 : v;
 }
-async function safeCall(fn, fallback) { try { return await fn(); } catch { return fallback; } }
+async function safeCall(fn, fallback) {
+  try {
+    return await fn();
+  } catch {
+    return fallback;
+  }
+}
 
-function addMinutes(date, min) { return new Date(date.getTime() + min * 60 * 1000); }
-function startOfDay(d) { const x = new Date(d); x.setHours(0,0,0,0); return x; }
-function setHour(d, hour) { const x = new Date(d); x.setHours(hour,0,0,0); return x; }
-function addDays(d, n) { return new Date(d.getTime() + n * 24 * 60 * 60 * 1000); }
+function addMinutes(date, min) {
+  return new Date(date.getTime() + min * 60 * 1000);
+}
+function startOfDay(d) {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  return x;
+}
+function setHour(d, hour) {
+  const x = new Date(d);
+  x.setHours(hour, 0, 0, 0);
+  return x;
+}
+function addDays(d, n) {
+  return new Date(d.getTime() + n * 24 * 60 * 60 * 1000);
+}
 function trimBlocksToRange(blocks, start, end) {
   return blocks
-    .map(b => ({ start: b.start < start ? new Date(start) : b.start,
-                 end: b.end > end ? new Date(end) : b.end }))
-    .filter(b => b.end > b.start);
+    .map((b) => ({
+      start: b.start < start ? new Date(start) : b.start,
+      end: b.end > end ? new Date(end) : b.end,
+    }))
+    .filter((b) => b.end > b.start);
 }
 function toHour(val, def) {
   const n = Number(val);
@@ -616,7 +823,12 @@ function toInterval(x) {
 }
 function mergeIntervals(intervals) {
   const arr = intervals
-    .filter(iv => iv?.start instanceof Date && iv?.end instanceof Date && iv.end > iv.start)
+    .filter(
+      (iv) =>
+        iv?.start instanceof Date &&
+        iv?.end instanceof Date &&
+        iv.end > iv.start
+    )
     .sort((a, b) => a.start - b.start);
 
   const merged = [];
@@ -624,7 +836,8 @@ function mergeIntervals(intervals) {
     if (!merged.length || iv.start > merged[merged.length - 1].end) {
       merged.push({ start: new Date(iv.start), end: new Date(iv.end) });
     } else {
-      if (iv.end > merged[merged.length - 1].end) merged[merged.length - 1].end = new Date(iv.end);
+      if (iv.end > merged[merged.length - 1].end)
+        merged[merged.length - 1].end = new Date(iv.end);
     }
   }
   return merged;

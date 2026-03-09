@@ -3,22 +3,26 @@
 
 const isBrowser = typeof window !== "undefined";
 const DEBUG = (() => {
-  try { return (localStorage.getItem("suka:debug:bus") || "") === "1"; } catch { return false; }
+  try {
+    return (localStorage.getItem("suka:debug:bus") || "") === "1";
+  } catch {
+    return false;
+  }
 })();
 
 // ----------------------------- Internal state ------------------------------
-let externalBus = null;                     // your real eventBus if available
+let externalBus = null; // your real eventBus if available
 let ready = false;
-let queuedEmits = [];                       // [{ evt, payload }]
-let queuedSubs = [];                        // [{ evt, handler, opts }]
-let wildcardSubs = [];                      // same shape, for patterns containing '*'
+let queuedEmits = []; // [{ evt, payload }]
+let queuedSubs = []; // [{ evt, handler, opts }]
+let wildcardSubs = []; // same shape, for patterns containing '*'
 let crossTab = { enabled: false, bc: null, filter: null }; // BroadcastChannel relay
 
 // Try to load external bus defensively (works with CJS/ESM and named/default exports)
 (function tryLoadExternal() {
   try {
     // eslint-disable-next-line global-require
-    const mod = require("@/services/eventBus");
+    const mod = require("@/services/events/eventBus");
     const eb = (mod && (mod.default || mod.eventBus || mod)) || null;
     if (eb) setExternalBus(eb);
   } catch (_e) {
@@ -27,7 +31,9 @@ let crossTab = { enabled: false, bc: null, filter: null }; // BroadcastChannel r
 })();
 
 // ------------------------------ Utilities ----------------------------------
-function log(...args) { if (DEBUG) console.log("[safeBus]", ...args); }
+function log(...args) {
+  if (DEBUG) console.log("[safeBus]", ...args);
+}
 
 function matchPattern(pattern, event) {
   // Supports "a.b.*", "*.refresh", "*" (match all)
@@ -35,7 +41,8 @@ function matchPattern(pattern, event) {
   const p = String(pattern).split(".");
   const e = String(event).split(".");
   for (let i = 0; i < Math.max(p.length, e.length); i++) {
-    const segP = p[i], segE = e[i];
+    const segP = p[i],
+      segE = e[i];
     if (segP === "*") continue;
     if (segP !== segE) return false;
   }
@@ -59,12 +66,16 @@ export function setExternalBus(bus) {
 
     // Re-register queued subscriptions on the real bus
     queuedSubs.forEach(({ evt, handler, opts }) => {
-      try { externalBus.on?.(evt, handler, opts); } catch {}
+      try {
+        externalBus.on?.(evt, handler, opts);
+      } catch {}
     });
     // Wire wildcard listeners via our adapter layer (we’ll keep them in wildcardSubs)
     // Emit queued messages
     queuedEmits.forEach(({ evt, payload }) => {
-      try { externalBus.emit?.(evt, payload); } catch {}
+      try {
+        externalBus.emit?.(evt, payload);
+      } catch {}
     });
     queuedSubs = [];
     queuedEmits = [];
@@ -84,7 +95,10 @@ export function emit(event, payload) {
   try {
     if (crossTab.enabled) {
       const bc = ensureBroadcastChannel();
-      if (bc && (!crossTab.filter || crossTab.filter(event, payload) !== false)) {
+      if (
+        bc &&
+        (!crossTab.filter || crossTab.filter(event, payload) !== false)
+      ) {
         bc.postMessage({ event, payload, ts: Date.now() });
       }
     }
@@ -100,7 +114,9 @@ export function emit(event, payload) {
     externalBus.emit?.(event, payload);
     // Fan-out to wildcard listeners (they're managed by safeBus)
     wildcardSubs.forEach(({ evt: pattern, handler }) => {
-      try { if (matchPattern(pattern, event)) handler(payload, event); } catch {}
+      try {
+        if (matchPattern(pattern, event)) handler(payload, event);
+      } catch {}
     });
   } catch (e) {
     if (DEBUG) console.warn("[safeBus] emit failed", event, e);
@@ -124,7 +140,9 @@ export function on(event, handler, opts = {}) {
     log("queued on", event);
     return () => {
       // Remove from queue if still queued
-      queuedSubs = queuedSubs.filter(s => !(s.evt === event && s.handler === handler));
+      queuedSubs = queuedSubs.filter(
+        (s) => !(s.evt === event && s.handler === handler)
+      );
     };
   }
 
@@ -133,7 +151,12 @@ export function on(event, handler, opts = {}) {
     const ret = externalBus.on?.(event, handler, opts);
     // Some buses return a disposer; others require explicit .off
     if (typeof ret === "function") unsubscribe = ret;
-    else unsubscribe = () => { try { externalBus.off?.(event, handler); } catch {} };
+    else
+      unsubscribe = () => {
+        try {
+          externalBus.off?.(event, handler);
+        } catch {}
+      };
   } catch {
     // fall back to no-op
   }
@@ -142,20 +165,30 @@ export function on(event, handler, opts = {}) {
 
 export function off(event, handler) {
   // Remove wildcard
-  wildcardSubs = wildcardSubs.filter(s => !(s.evt === event && s.handler === handler));
+  wildcardSubs = wildcardSubs.filter(
+    (s) => !(s.evt === event && s.handler === handler)
+  );
 
   if (!ready || !externalBus) {
     // Remove from queued subscriptions
-    queuedSubs = queuedSubs.filter(s => !(s.evt === event && s.handler === handler));
+    queuedSubs = queuedSubs.filter(
+      (s) => !(s.evt === event && s.handler === handler)
+    );
     return;
   }
-  try { externalBus.off?.(event, handler); } catch {}
+  try {
+    externalBus.off?.(event, handler);
+  } catch {}
 }
 
 // One-shot listener
 export function once(event, handler, opts) {
   const wrap = (payload, evtName) => {
-    try { handler(payload, evtName); } finally { un(); }
+    try {
+      handler(payload, evtName);
+    } finally {
+      un();
+    }
   };
   const un = on(event, wrap, opts);
   return un;
@@ -168,13 +201,17 @@ export function waitFor(event, predicate = null, { timeoutMs = 0 } = {}) {
     const un = on(event, (payload, evtName) => {
       if (done) return;
       if (predicate && !predicate(payload, evtName)) return;
-      done = true; un(); resolve({ event: evtName, payload });
+      done = true;
+      un();
+      resolve({ event: evtName, payload });
     });
     let t;
     if (timeoutMs > 0) {
       t = setTimeout(() => {
         if (done) return;
-        done = true; un(); reject(new Error("waitFor timeout"));
+        done = true;
+        un();
+        reject(new Error("waitFor timeout"));
       }, timeoutMs);
     }
   });
@@ -199,7 +236,9 @@ export function enableCrossTabRelay({ enabled = true, filter = null } = {}) {
   crossTab.filter = typeof filter === "function" ? filter : null;
 
   if (!enabled && crossTab.bc) {
-    try { crossTab.bc.close(); } catch {}
+    try {
+      crossTab.bc.close();
+    } catch {}
     crossTab.bc = null;
     return;
   }
@@ -209,10 +248,14 @@ export function enableCrossTabRelay({ enabled = true, filter = null } = {}) {
     const { event, payload } = ev.data || {};
     // Avoid echo loops: we just forward to local listeners; no re-broadcast
     wildcardSubs.forEach(({ evt: pattern, handler }) => {
-      try { if (matchPattern(pattern, event)) handler(payload, event); } catch {}
+      try {
+        if (matchPattern(pattern, event)) handler(payload, event);
+      } catch {}
     });
     if (ready && externalBus) {
-      try { externalBus.emit?.(event, payload); } catch {}
+      try {
+        externalBus.emit?.(event, payload);
+      } catch {}
     } else {
       // if bus not ready, queue it
       queuedEmits.push({ evt: event, payload });
@@ -225,7 +268,11 @@ export function enableCrossTabRelay({ enabled = true, filter = null } = {}) {
 export function useBus(event, handler, deps = []) {
   // Lazy require to avoid hard React dep in non-React contexts
   let ReactRef;
-  try { ReactRef = require("react"); } catch { ReactRef = null; }
+  try {
+    ReactRef = require("react");
+  } catch {
+    ReactRef = null;
+  }
 
   if (!ReactRef) {
     // Non-React runtime: register once immediately (best effort)
@@ -279,7 +326,11 @@ export function toast(kind = "info", message = "", meta = {}) {
 const api = {
   setExternalBus,
   getBus,
-  emit, on, off, once, waitFor,
+  emit,
+  on,
+  off,
+  once,
+  waitFor,
   scoped,
   enableCrossTabRelay,
   useBus,

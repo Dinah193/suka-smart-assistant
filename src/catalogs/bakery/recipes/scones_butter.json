@@ -1,0 +1,224 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "type": "recipe",
+    "id": "bakery.scones_butter",
+    "slug": "scones_butter",
+    "name": "Butter Scones (Biscuit-Adjacent Bakery Baseline)",
+    "version": "1.0.0",
+    "status": "canonical",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-18T00:00:00.000Z",
+    "updatedAt": "2026-01-18T00:00:00.000Z",
+    "locale": "en-US",
+    "difficulty": "beginner",
+    "tags": [
+      "bakery",
+      "scones",
+      "butter",
+      "biscuit-adjacent",
+      "breakfast",
+      "brunch",
+      "quick-bake",
+      "freezer-friendly",
+      "grab-and-go"
+    ],
+    "allergens": ["wheat", "dairy", "eggs"],
+    "description": "Classic butter scones: tender, lightly sweet, biscuit-adjacent crumb with crisp edges. Built as a bakery baseline with optional add-ins and a reliable cold-butter mixing method. Includes both commercial flour and fine fresh-milled flour guidance (choose one)."
+  },
+  "equipment": [
+    { "id": "oven", "label": "Oven" },
+    { "id": "sheet_pan", "label": "Sheet pan" },
+    { "id": "parchment_paper", "label": "Parchment paper" },
+    { "id": "mixing_bowl_large", "label": "Large mixing bowl" },
+    { "id": "whisk", "label": "Whisk" },
+    {
+      "id": "pastry_cutter",
+      "label": "Pastry cutter (or fork) (optional)",
+      "optional": true
+    },
+    {
+      "id": "box_grater",
+      "label": "Box grater (optional, for frozen butter method)",
+      "optional": true
+    },
+    { "id": "bench_scraper", "label": "Bench scraper" },
+    { "id": "kitchen_scale", "label": "Kitchen scale (recommended)" },
+    { "id": "measuring_cups", "label": "Measuring cups/spoons" },
+    { "id": "cooling_rack", "label": "Cooling rack" }
+  ],
+  "ingredients": [
+    {
+      "id": "flour_commercial_option",
+      "label": "Commercial flour option (use this OR the fresh-milled option): all-purpose flour",
+      "amount": { "value": 300, "unit": "g" },
+      "notes": "About 2 1/2 cups. Weighing is best."
+    },
+    {
+      "id": "flour_freshmilled_option",
+      "label": "Fresh-milled flour option (use this OR the commercial option): fine-milled, sifted",
+      "amount": { "value": 300, "unit": "g" },
+      "notes": "Sift coarse bran for tenderness. Fresh-milled absorbs more; you may need +15–45 ml extra cream/milk."
+    },
+    {
+      "id": "sugar",
+      "label": "Granulated sugar",
+      "amount": { "value": 60, "unit": "g" },
+      "notes": "About 1/4 cup + 1 tbsp. For less sweet scones, use 40 g."
+    },
+    {
+      "id": "baking_powder",
+      "label": "Baking powder",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": "About 1 tbsp."
+    },
+    {
+      "id": "salt",
+      "label": "Kosher salt",
+      "amount": { "value": 5, "unit": "g" },
+      "notes": "About 1 tsp."
+    },
+    {
+      "id": "butter_cold",
+      "label": "Unsalted butter, very cold",
+      "amount": { "value": 113, "unit": "g" },
+      "notes": "About 1/2 cup (1 stick). Cold butter creates flake/tenderness."
+    },
+
+    {
+      "id": "cream_heavy",
+      "label": "Heavy cream (plus more for brushing)",
+      "amount": { "value": 240, "unit": "ml" },
+      "notes": "About 1 cup. Substitute: 180 ml milk + 60 ml cream."
+    },
+    {
+      "id": "egg",
+      "label": "Large egg",
+      "amount": { "value": 1, "unit": "each" },
+      "notes": "Adds structure and tenderness."
+    },
+    {
+      "id": "vanilla_extract_optional",
+      "label": "Vanilla extract (optional)",
+      "amount": { "value": 5, "unit": "ml" },
+      "notes": "About 1 tsp.",
+      "optional": true
+    },
+
+    {
+      "id": "liquid_adjustment_optional",
+      "label": "Extra cream/milk (fresh-milled adjustment)",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "Add 15 ml at a time if dough is too dry; up to ~60 ml total depending on flour.",
+      "optional": true
+    },
+
+    {
+      "id": "addins_optional_note",
+      "label": "Optional add-ins (choose one family)",
+      "amount": { "value": 1, "unit": "each" },
+      "notes": "Keep add-ins to ~120–180 g total to avoid heavy/dense scones.",
+      "optional": true
+    },
+    {
+      "id": "addins_dried_fruit_optional",
+      "label": "Dried fruit (raisins/currants/cranberries) (optional)",
+      "amount": { "value": 120, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "addins_chocolate_optional",
+      "label": "Chocolate chips (optional)",
+      "amount": { "value": 120, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "addins_nuts_optional",
+      "label": "Chopped nuts (pecans/walnuts/almonds) (optional)",
+      "amount": { "value": 80, "unit": "g" },
+      "optional": true
+    },
+
+    {
+      "id": "finishing_sugar_optional",
+      "label": "Coarse sugar (optional, for topping)",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": "Sprinkle before baking for bakery-style crunch.",
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_preheat",
+      "title": "Preheat and prep pan",
+      "body": "Heat oven to 400°F (205°C). Line a sheet pan with parchment. Keeping everything cold improves texture."
+    },
+    {
+      "id": "step_02_choose_flour",
+      "title": "Choose your flour option",
+      "body": "Use either the commercial flour option OR the fresh-milled flour option (not both). For fresh-milled flour, fine-mill and sift coarse bran for best tenderness."
+    },
+    {
+      "id": "step_03_mix_dry",
+      "title": "Mix dry ingredients",
+      "body": "In a large bowl, whisk chosen flour, sugar, baking powder, and salt."
+    },
+    {
+      "id": "step_04_cut_in_butter",
+      "title": "Cut in cold butter",
+      "body": "Cut butter into small cubes (or grate frozen butter). Work butter into dry ingredients until you have pea-sized pieces plus some flatter shards. Those butter pieces create flake and tenderness."
+    },
+    {
+      "id": "step_05_mix_wet",
+      "title": "Mix wet ingredients",
+      "body": "In a small bowl, whisk cream, egg, and vanilla (if using)."
+    },
+    {
+      "id": "step_06_combine_gently",
+      "title": "Combine (minimal mixing)",
+      "body": "Pour wet into dry and fold just until a shaggy dough forms. If adding mix-ins, fold them in now with minimal turns. Do not knead—overworking makes tough scones."
+    },
+    {
+      "id": "step_07_adjust_freshmilled",
+      "title": "Adjust dough for fresh-milled flour (if needed)",
+      "body": "If using fresh-milled flour and dough is dry/crumbly and won’t come together, add extra cream/milk 15 ml at a time until it holds together when pressed. If dough is sticky, dust lightly with flour."
+    },
+    {
+      "id": "step_08_pat_and_fold",
+      "title": "Pat, fold (lamination-lite), and shape",
+      "body": "Turn dough onto a lightly floured surface. Pat into a 2 cm (3/4 in) thick rectangle, fold into thirds, rotate, and pat again. Repeat once more for a more layered crumb (optional but recommended). Pat into a circle about 20 cm (8 in) wide and ~2.5 cm (1 in) thick."
+    },
+    {
+      "id": "step_09_cut_chill",
+      "title": "Cut and chill",
+      "body": "Cut into 8 wedges (or 10 smaller wedges). Transfer to the pan with space between. Chill 10–15 minutes (or freeze 5–10 minutes) to firm butter for better rise."
+    },
+    {
+      "id": "step_10_brush_top",
+      "title": "Brush and top",
+      "body": "Brush tops lightly with cream. Sprinkle coarse sugar if using."
+    },
+    {
+      "id": "step_11_bake",
+      "title": "Bake",
+      "body": "Bake 16–22 minutes until risen and golden brown on edges and tops. Avoid overbaking; scones should be tender."
+    },
+    {
+      "id": "step_12_cool",
+      "title": "Cool",
+      "body": "Cool on pan 5 minutes, then move to a rack. Best served warm or same day."
+    }
+  ],
+  "notes": [
+    "Biscuit-adjacent logic: cold butter + minimal mixing = tenderness; optional folds add light layering without full lamination.",
+    "Fresh-milled flour: sift coarse bran and expect higher absorption; a small liquid adjustment may be needed.",
+    "Make-ahead/freezer: Freeze unbaked scones on a tray, then bag airtight. Bake from frozen: add 2–5 minutes to bake time.",
+    "Flavor variants: lemon zest + blueberries, cinnamon chip, cranberry-orange, chocolate chunk—keep add-ins moderate."
+  ],
+  "storage": {
+    "roomTemp": "Airtight: 1–2 days (best day-of).",
+    "refrigerator": "Airtight: up to 4 days (rewarm for best texture).",
+    "freezer": "Baked: up to 2 months. Unbaked: up to 2 months; bake from frozen."
+  }
+}

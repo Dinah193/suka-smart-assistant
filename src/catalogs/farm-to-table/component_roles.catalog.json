@@ -1,0 +1,424 @@
+{
+  "$schema": "../../schemas/catalog.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-24T00:00:00.000Z",
+  "meta": {
+    "id": "farm_to_table.component_roles",
+    "type": "catalog",
+    "domain": "farm-to-table",
+    "locale": "en-US",
+    "name": "Farm-to-Table • Component Roles Catalog",
+    "label": "Component Roles",
+    "subtitle": "Canonical roles used to classify farm-to-table components for planners, substitutions, plate models, and recipe adaptation.",
+    "source": {
+      "kind": "catalog",
+      "name": "src/catalogs/farm-to-table/component_roles.catalog.json",
+      "notes": [
+        "Role IDs are canonical SSA IDs; keep stable for deterministic planners.",
+        "Tags use SSA token conventions (lowercase, dot/underscore/hyphen).",
+        "Use role.* tags across recipes/components to enable matching."
+      ]
+    }
+  },
+  "scope": {
+    "kind": "module",
+    "module": "farm-to-table",
+    "locale": "en-US"
+  },
+  "defaults": {
+    "namespace": "role",
+    "statusDefault": "active",
+    "ui": {
+      "sortBy": "rank",
+      "groupBy": "group"
+    }
+  },
+  "items": [
+    {
+      "id": "role.base",
+      "label": "Base / Liquid",
+      "group": "Foundations",
+      "rank": 1,
+      "status": "active",
+      "tags": [
+        "role.base",
+        "role.foundation",
+        "use.soups",
+        "use.sauces",
+        "use.stews"
+      ]
+    },
+    {
+      "id": "role.protein",
+      "label": "Protein",
+      "group": "Macronutrients",
+      "rank": 2,
+      "status": "active",
+      "tags": ["role.protein", "macro.protein", "planner.anchor", "use.main"]
+    },
+    {
+      "id": "role.starch",
+      "label": "Starch / Carb Base",
+      "group": "Macronutrients",
+      "rank": 3,
+      "status": "active",
+      "tags": [
+        "role.starch",
+        "macro.carbs",
+        "planner.anchor",
+        "use.sides",
+        "use.bowls"
+      ]
+    },
+    {
+      "id": "role.vegetable",
+      "label": "Vegetable",
+      "group": "Macronutrients",
+      "rank": 4,
+      "status": "active",
+      "tags": [
+        "role.vegetable",
+        "macro.fiber",
+        "use.sides",
+        "use.main",
+        "planner.balance"
+      ]
+    },
+    {
+      "id": "role.greens",
+      "label": "Leafy Greens",
+      "group": "Macronutrients",
+      "rank": 5,
+      "status": "active",
+      "tags": [
+        "role.greens",
+        "role.vegetable",
+        "macro.fiber",
+        "use.sides",
+        "planner.balance"
+      ]
+    },
+    {
+      "id": "role.fat",
+      "label": "Fat",
+      "group": "Macronutrients",
+      "rank": 6,
+      "status": "active",
+      "tags": [
+        "role.fat",
+        "macro.fat",
+        "use.cooking",
+        "use.finishing",
+        "planner.balance"
+      ]
+    },
+    {
+      "id": "role.sweetener",
+      "label": "Sweetener",
+      "group": "Flavor Builders",
+      "rank": 7,
+      "status": "active",
+      "tags": ["role.sweetener", "flavor.sweet", "use.baking", "use.sauces"]
+    },
+
+    {
+      "id": "role.aromatic",
+      "label": "Aromatic",
+      "group": "Flavor Builders",
+      "rank": 10,
+      "status": "active",
+      "tags": [
+        "role.aromatic",
+        "flavor.aromatic",
+        "use.base",
+        "use.soups",
+        "use.stews"
+      ]
+    },
+    {
+      "id": "role.herb",
+      "label": "Herb",
+      "group": "Flavor Builders",
+      "rank": 11,
+      "status": "active",
+      "tags": ["role.herb", "flavor.herbal", "use.finishing", "use.sauces"]
+    },
+    {
+      "id": "role.spice",
+      "label": "Spice",
+      "group": "Flavor Builders",
+      "rank": 12,
+      "status": "active",
+      "tags": ["role.spice", "flavor.spiced", "use.seasoning"]
+    },
+    {
+      "id": "role.seasoning",
+      "label": "Seasoning (Salt/Umami)",
+      "group": "Flavor Builders",
+      "rank": 13,
+      "status": "active",
+      "tags": ["role.seasoning", "flavor.salt", "flavor.umami", "use.seasoning"]
+    },
+    {
+      "id": "role.heat",
+      "label": "Heat / Chili",
+      "group": "Flavor Builders",
+      "rank": 14,
+      "status": "active",
+      "tags": ["role.heat", "flavor.spicy", "use.heat", "heat.scale"]
+    },
+    {
+      "id": "role.acid",
+      "label": "Acid / Brightener",
+      "group": "Flavor Builders",
+      "rank": 15,
+      "status": "active",
+      "tags": ["role.acid", "flavor.bright", "use.finishing", "use.marinade"]
+    },
+    {
+      "id": "role.smoke",
+      "label": "Smoke / Char",
+      "group": "Flavor Builders",
+      "rank": 16,
+      "status": "active",
+      "tags": ["role.smoke", "flavor.smoky", "use.bbq", "use.grill"]
+    },
+    {
+      "id": "role.bitterness",
+      "label": "Bitter / Balancer",
+      "group": "Flavor Builders",
+      "rank": 17,
+      "status": "active",
+      "tags": ["role.bitterness", "flavor.bitter", "use.balance"]
+    },
+
+    {
+      "id": "role.thickener",
+      "label": "Thickener",
+      "group": "Texture & Structure",
+      "rank": 30,
+      "status": "active",
+      "tags": ["role.thickener", "texture.thick", "use.soups", "use.sauces"]
+    },
+    {
+      "id": "role.binder",
+      "label": "Binder",
+      "group": "Texture & Structure",
+      "rank": 31,
+      "status": "active",
+      "tags": ["role.binder", "texture.bind", "use.baking", "use.frying"]
+    },
+    {
+      "id": "role.emulsifier",
+      "label": "Emulsifier",
+      "group": "Texture & Structure",
+      "rank": 32,
+      "status": "active",
+      "tags": [
+        "role.emulsifier",
+        "texture.emulsion",
+        "use.dressings",
+        "use.sauces"
+      ]
+    },
+    {
+      "id": "role.leavening",
+      "label": "Leavening",
+      "group": "Texture & Structure",
+      "rank": 33,
+      "status": "active",
+      "tags": ["role.leavening", "baking.leavening", "use.baking"]
+    },
+    {
+      "id": "role.structure",
+      "label": "Structure (Flour/Gluten/Starch)",
+      "group": "Texture & Structure",
+      "rank": 34,
+      "status": "active",
+      "tags": ["role.structure", "baking.structure", "use.baking"]
+    },
+    {
+      "id": "role.tenderizer",
+      "label": "Tenderizer",
+      "group": "Texture & Structure",
+      "rank": 35,
+      "status": "active",
+      "tags": [
+        "role.tenderizer",
+        "texture.tender",
+        "use.marinade",
+        "use.baking"
+      ]
+    },
+    {
+      "id": "role.crisping_agent",
+      "label": "Crisping Agent",
+      "group": "Texture & Structure",
+      "rank": 36,
+      "status": "active",
+      "tags": [
+        "role.crisping_agent",
+        "texture.crisp",
+        "use.frying",
+        "use.baking"
+      ]
+    },
+    {
+      "id": "role.gelatinizer",
+      "label": "Gelatinizer (Pectin/Gelatin)",
+      "group": "Texture & Structure",
+      "rank": 37,
+      "status": "active",
+      "tags": ["role.gelatinizer", "texture.gel", "use.dessert", "use.jams"]
+    },
+
+    {
+      "id": "role.condiment",
+      "label": "Condiment",
+      "group": "Finishing & Serving",
+      "rank": 50,
+      "status": "active",
+      "tags": ["role.condiment", "use.finishing", "use.sandwiches", "use.bowls"]
+    },
+    {
+      "id": "role.sauce",
+      "label": "Sauce",
+      "group": "Finishing & Serving",
+      "rank": 51,
+      "status": "active",
+      "tags": ["role.sauce", "use.finishing", "use.dipping", "use.dressings"]
+    },
+    {
+      "id": "role.dressing",
+      "label": "Dressing",
+      "group": "Finishing & Serving",
+      "rank": 52,
+      "status": "active",
+      "tags": ["role.dressing", "use.salads", "use.bowls", "texture.emulsion"]
+    },
+    {
+      "id": "role.garnish",
+      "label": "Garnish",
+      "group": "Finishing & Serving",
+      "rank": 53,
+      "status": "active",
+      "tags": ["role.garnish", "use.finishing", "use.presentation"]
+    },
+    {
+      "id": "role.topping",
+      "label": "Topping",
+      "group": "Finishing & Serving",
+      "rank": 54,
+      "status": "active",
+      "tags": ["role.topping", "use.finishing", "use.dessert", "use.breakfast"]
+    },
+    {
+      "id": "role.spread",
+      "label": "Spread",
+      "group": "Finishing & Serving",
+      "rank": 55,
+      "status": "active",
+      "tags": ["role.spread", "use.sandwiches", "use.toast", "use.wraps"]
+    },
+
+    {
+      "id": "role.mix_in",
+      "label": "Mix-in / Add-in",
+      "group": "Baking & Desserts",
+      "rank": 70,
+      "status": "active",
+      "tags": ["role.mix_in", "use.baking", "dessert.mixins"]
+    },
+    {
+      "id": "role.fruit",
+      "label": "Fruit",
+      "group": "Baking & Desserts",
+      "rank": 71,
+      "status": "active",
+      "tags": ["role.fruit", "use.snacks", "use.dessert", "use.breakfast"]
+    },
+    {
+      "id": "role.chocolate",
+      "label": "Chocolate / Cocoa",
+      "group": "Baking & Desserts",
+      "rank": 72,
+      "status": "active",
+      "tags": [
+        "role.chocolate",
+        "dessert.chocolate",
+        "use.baking",
+        "use.dessert"
+      ]
+    },
+
+    {
+      "id": "role.preserve",
+      "label": "Preserve (Canned/Pickled/Jam)",
+      "group": "Preservation",
+      "rank": 90,
+      "status": "active",
+      "tags": [
+        "role.preserve",
+        "preserve.general",
+        "use.storage",
+        "use.condiments"
+      ]
+    },
+    {
+      "id": "role.ferment",
+      "label": "Ferment",
+      "group": "Preservation",
+      "rank": 91,
+      "status": "active",
+      "tags": [
+        "role.ferment",
+        "preserve.ferment",
+        "use.storage",
+        "use.condiments"
+      ]
+    },
+    {
+      "id": "role.dehydrated",
+      "label": "Dehydrated",
+      "group": "Preservation",
+      "rank": 92,
+      "status": "active",
+      "tags": ["role.dehydrated", "preserve.dehydrated", "use.storage"]
+    },
+    {
+      "id": "role.frozen",
+      "label": "Frozen",
+      "group": "Preservation",
+      "rank": 93,
+      "status": "active",
+      "tags": ["role.frozen", "preserve.frozen", "use.storage"]
+    },
+
+    {
+      "id": "role.animal_byproduct",
+      "label": "Animal Byproduct (Stock/Fat/Meal)",
+      "group": "Homestead",
+      "rank": 110,
+      "status": "active",
+      "tags": [
+        "role.animal_byproduct",
+        "homestead.animals",
+        "use.rendering",
+        "use.fertilizer"
+      ]
+    },
+    {
+      "id": "role.garden_input",
+      "label": "Garden Input (Compost/Fertilizer)",
+      "group": "Homestead",
+      "rank": 111,
+      "status": "active",
+      "tags": [
+        "role.garden_input",
+        "homestead.garden",
+        "use.fertilizer",
+        "use.compost"
+      ]
+    }
+  ]
+}

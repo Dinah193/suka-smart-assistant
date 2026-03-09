@@ -1,0 +1,366 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "meta": {
+    "id": "recipe.ghanaian.light_soup",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Ghanaian Light Soup",
+    "subtitle": "Clear, spicy tomato-pepper soup with aromatics and optional goat, beef, or fish",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa",
+      "notes": [
+        "Canonical Ghana-style 'light soup' (nkwan) base: tomatoes, onions, peppers, ginger/garlic.",
+        "Designed for SSA planners: adaptable protein, heat-scalable, and stew-and-starch serving model."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "cuisines.ghanaian",
+    "category": "category.soup_stew",
+    "mealArchetypes": ["archetype.stew_and_starch", "archetype.one_pot"],
+    "servingStyles": ["stew_and_starch", "family_style", "one_pot"],
+    "plannerTags": [
+      "cuisine.ghanaian",
+      "dish.light_soup",
+      "tomato_pepper_base",
+      "spicy",
+      "one_pot",
+      "stew_and_starch",
+      "dairy_free",
+      "gluten_free"
+    ]
+  },
+  "yield": {
+    "servings": 6,
+    "notes": "Serves 6 with fufu/banku/rice balls; serves 8 as a starter."
+  },
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 55,
+    "totalMins": 80
+  },
+  "difficulty": "intermediate",
+  "signals": {
+    "onePot": true,
+    "leftoversGood": true,
+    "freezerFriendly": true,
+    "weeknightPossible": false,
+    "heatAdjustable": true,
+    "proteinOptional": true
+  },
+  "tasteProfile": {
+    "signatureNotes": [
+      "bright tomato",
+      "pepper heat",
+      "ginger-garlic aroma",
+      "clear savory broth"
+    ],
+    "heat": 3,
+    "salt": 3,
+    "acid": 3,
+    "sweet": 1,
+    "umami": 2
+  },
+  "equipment": {
+    "minimum": [
+      "tool.pot_heavy_lid",
+      "tool.spoon_wood",
+      "tool.knife",
+      "tool.board"
+    ],
+    "recommended": [
+      "tool.blender",
+      "tool.fine_mesh_sieve",
+      "tool.tongs",
+      "tool.thermometer_instant"
+    ]
+  },
+  "dietFlags": ["diet.dairy_free", "diet.gluten_free"],
+  "allergens": [],
+  "ingredients": [
+    {
+      "id": "ingredient.protein_goat_or_beef_or_chicken",
+      "label": "Protein (optional): goat, beef, or chicken pieces",
+      "role": "protein",
+      "amount": { "value": 2, "unit": "lb" },
+      "optional": true,
+      "notes": [
+        "Goat is classic; beef and chicken are common.",
+        "If using fish, see the variation and add later to avoid breaking apart."
+      ]
+    },
+    {
+      "id": "ingredient.onion_yellow",
+      "label": "Onion, quartered",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "large" }
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic",
+      "role": "aromatic",
+      "amount": { "value": 4, "unit": "clove" }
+    },
+    {
+      "id": "ingredient.ginger",
+      "label": "Ginger",
+      "role": "aromatic",
+      "amount": { "value": 1.5, "unit": "tbsp" },
+      "notes": "Freshly grated is best."
+    },
+    {
+      "id": "ingredient.tomatoes",
+      "label": "Tomatoes (Roma/plum), chopped",
+      "role": "base",
+      "amount": { "value": 6, "unit": "each" },
+      "notes": "Or substitute 1 can (28 oz) crushed tomatoes."
+    },
+    {
+      "id": "ingredient.tomato_paste",
+      "label": "Tomato paste",
+      "role": "umami",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true,
+      "notes": "Optional but recommended for deeper color and flavor."
+    },
+    {
+      "id": "ingredient.red_bell_pepper",
+      "label": "Red bell pepper",
+      "role": "base",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": "Optional but common; adds sweetness and body."
+    },
+    {
+      "id": "ingredient.hot_pepper_scotch_bonnet",
+      "label": "Hot pepper (scotch bonnet or habanero)",
+      "role": "heat",
+      "amount": { "value": 2, "unit": "each" },
+      "notes": [
+        "Use whole for controllable heat; blend for stronger heat.",
+        "Start with 1 pepper if you’re sensitive to heat."
+      ]
+    },
+    {
+      "id": "ingredient.oil_neutral",
+      "label": "Neutral oil",
+      "role": "fat",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true,
+      "notes": "Optional; some versions start with a small amount of oil for the base."
+    },
+    {
+      "id": "ingredient.stock_chicken_or_beef_or_veg",
+      "label": "Stock (chicken/beef) or water",
+      "role": "liquid",
+      "amount": { "value": 10, "unit": "cup" },
+      "notes": "Light soup is meant to be thinner/clearer than groundnut or palm nut soups."
+    },
+    {
+      "id": "ingredient.bay_leaf",
+      "label": "Bay leaves",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.thyme_dried",
+      "label": "Dried thyme",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.salt",
+      "label": "Salt",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Adjust based on stock and protein seasoning."
+    },
+    {
+      "id": "ingredient.shrimp_powder_or_dawadawa",
+      "label": "Shrimp powder or fermented locust beans (dawadawa/iru) (optional)",
+      "role": "umami",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": "Optional traditional umami booster; use lightly."
+    },
+    {
+      "id": "ingredient.lime_or_lemon",
+      "label": "Lime or lemon (optional)",
+      "role": "finish",
+      "amount": { "value": 0.5, "unit": "each" },
+      "optional": true,
+      "notes": "Optional squeeze at the end for brightness."
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.ls_01_blend_base",
+      "title": "Blend the tomato-pepper base",
+      "instructions": [
+        "In a blender, combine onion, tomatoes, garlic, ginger, bell pepper (if using), and hot peppers.",
+        "Blend until smooth. Add a splash of water only if needed to move the blender.",
+        "For milder heat: keep one hot pepper whole and do not blend it."
+      ],
+      "activeMins": 8,
+      "handsOffMins": 0,
+      "checks": ["Base is smooth with no large chunks."]
+    },
+    {
+      "id": "step.ls_02_start_pot",
+      "title": "Start the soup and build the broth",
+      "instructions": [
+        "Heat the pot over medium heat. If using oil, add it and warm briefly.",
+        "Add tomato paste (optional) and stir 1–2 minutes to toast it lightly.",
+        "Pour in the blended base carefully.",
+        "Add thyme, bay leaves (optional), black pepper, and shrimp powder/dawadawa (optional).",
+        "Simmer uncovered 10–15 minutes to cook out rawness and develop flavor."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 15,
+      "timers": [
+        { "label": "Toast tomato paste (optional)", "minutes": 2 },
+        { "label": "Simmer base to develop flavor", "minutes": 15 }
+      ],
+      "checks": ["Base smells cooked (not raw) and darkens slightly."]
+    },
+    {
+      "id": "step.ls_03_add_stock_and_protein",
+      "title": "Add stock and simmer until protein is tender",
+      "instructions": [
+        "Add stock/water and bring to a gentle boil, then reduce to a steady simmer.",
+        "If using goat/beef/chicken: add it now (or add pre-cooked pieces).",
+        "Simmer until the protein is tender and the broth tastes cohesive.",
+        "Skim foam if needed for a cleaner broth."
+      ],
+      "activeMins": 7,
+      "handsOffMins": 35,
+      "timers": [{ "label": "Simmer until tender", "minutes": 35 }],
+      "checks": [
+        "Protein is tender (goat/beef may need longer depending on cut).",
+        "Broth is clear-ish and flavorful."
+      ]
+    },
+    {
+      "id": "step.ls_04_adjust_consistency_and_season",
+      "title": "Adjust seasoning and final consistency",
+      "instructions": [
+        "Taste and add salt gradually (stock varies).",
+        "If the soup is thicker than desired, add a bit more water/stock to keep it 'light'.",
+        "Optional: add a squeeze of lime/lemon for brightness right before serving."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "checks": [
+        "Heat/salt are balanced.",
+        "Consistency is brothy and pourable (not thick)."
+      ]
+    },
+    {
+      "id": "step.ls_05_serve",
+      "title": "Serve",
+      "instructions": [
+        "Serve hot with fufu, banku, kenkey, or rice balls (omotuo).",
+        "For extra heat, serve with a small side of fresh pepper sauce."
+      ],
+      "activeMins": 2,
+      "handsOffMins": 0
+    }
+  ],
+  "pairings": {
+    "starches": [
+      "dish.ghanaian.fufu",
+      "dish.ghanaian.banku",
+      "dish.ghanaian.kenkey",
+      "dish.ghanaian.omotuo_rice_balls"
+    ],
+    "condiments": ["dish.ghanaian.shito", "dish.ghanaian.fresh_pepper_sauce"]
+  },
+  "storage": {
+    "fridge": {
+      "durationDays": 4,
+      "notes": "Cool quickly and refrigerate within 2 hours. Reheat gently to preserve broth clarity."
+    },
+    "freezer": {
+      "durationDays": 90,
+      "notes": "Freeze in portions. Thaw overnight; reheat gently and adjust salt after reheating."
+    },
+    "reheat": {
+      "notes": "Reheat at a gentle simmer; add a splash of water/stock if needed."
+    }
+  },
+  "planner": {
+    "leftovers": {
+      "goodFor": ["quick_dinners", "lunch_boxes"],
+      "remixNotes": [
+        "Thin leftovers and serve over rice for a fast meal.",
+        "Add fresh herbs (cilantro/parsley) at serving if desired."
+      ]
+    }
+  },
+  "notes": [
+    "Light soup should remain brothy—avoid reducing too aggressively after adding stock.",
+    "Heat control tip: use whole hot peppers and remove once the soup reaches your preferred heat.",
+    "If using fish, add during the last 8–10 minutes to prevent it from breaking apart."
+  ],
+  "variations": [
+    {
+      "id": "variation.fish_light_soup",
+      "label": "Fish light soup",
+      "when": { "protein": "fish" },
+      "adapt": {
+        "notes": "Use firm fish steaks/fillets. Simmer base and stock first; add fish for the last 8–10 minutes. Keep simmer gentle."
+      }
+    },
+    {
+      "id": "variation.goat_long_simmer",
+      "label": "Goat light soup (long simmer)",
+      "when": { "protein": "goat" },
+      "adapt": {
+        "notes": "Goat often needs longer simmer (45–90 minutes depending on cut). Add additional water/stock as needed to keep it brothy."
+      }
+    },
+    {
+      "id": "variation.mild_light_soup",
+      "label": "Milder light soup",
+      "when": { "heatPreference": "low" },
+      "adapt": {
+        "notes": "Use 1 hot pepper whole (do not blend). Remove after 10 minutes of simmering with stock."
+      }
+    }
+  ],
+  "methods": ["method.simmer", "method.stew", "method.blend"],
+  "compat": {
+    "cuisineId": "cuisines.ghanaian",
+    "dishId": "dish.ghanaian.light_soup",
+    "search": {
+      "aliases": [
+        "ghanaian light soup",
+        "light soup",
+        "nkwan",
+        "pepper soup ghana",
+        "tomato pepper soup"
+      ],
+      "keywords": [
+        "tomato",
+        "pepper",
+        "ginger",
+        "garlic",
+        "broth",
+        "stew",
+        "west african",
+        "ghanaian"
+      ]
+    }
+  }
+}

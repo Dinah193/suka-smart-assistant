@@ -1,6 +1,7 @@
 // C:\Users\larho\suka-smart-assistant\src\features\session\SessionRunnerModal.jsx
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useSessionRunner } from "./useSessionRunner";
 import { DOMAIN_META } from "./sessionSelectors"; // if you created this; otherwise re-create a local map
 
@@ -151,6 +152,13 @@ function getDefaultTitleForDomain(domainKey) {
  *   • reverse planning (target completion)
  *   • saving favorites
  *   • saving recurring schedules
+ *
+ * ✅ IMPORTANT CHANGE (minimal):
+ * - Render as a true modal via createPortal(document.body) so it NEVER appears
+ *   at the bottom of pages due to layout/overflow contexts.
+ * - Lock body scroll while open.
+ * - Close on ESC.
+ * - Optional: click backdrop to close (kept conservative).
  */
 export default function SessionRunnerModal({
   isOpen,
@@ -194,15 +202,14 @@ export default function SessionRunnerModal({
   const [saveScheduleBusy, setSaveScheduleBusy] = useState(false);
 
   const domainMeta = useMemo(() => {
-    if (!activeSession) return DOMAIN_META[builderDomain] || DOMAIN_META.generic;
+    if (!activeSession)
+      return DOMAIN_META[builderDomain] || DOMAIN_META.generic;
     return DOMAIN_META[activeSession.domain] || DOMAIN_META.generic;
   }, [activeSession, builderDomain]);
 
   const isFavorite =
     activeSession &&
     favorites?.some((fav) => fav.sessionId === activeSession.id);
-
-  if (!isOpen) return null;
 
   const handleClose = () => {
     onClose && onClose();
@@ -248,13 +255,17 @@ export default function SessionRunnerModal({
       const rawSession = buildRawSessionFromBuilder();
 
       if (scheduleMode === "reverse" && scheduleTargetCompletion) {
-        await startReverseGeneratedSession(rawSession, scheduleTargetCompletion, {
-          scheduleOptions: {
-            mode: "reverse",
-            targetCompletion: scheduleTargetCompletion,
-          },
-          source: DEFAULT_SOURCE,
-        });
+        await startReverseGeneratedSession(
+          rawSession,
+          scheduleTargetCompletion,
+          {
+            scheduleOptions: {
+              mode: "reverse",
+              targetCompletion: scheduleTargetCompletion,
+            },
+            source: DEFAULT_SOURCE,
+          }
+        );
       } else if (scheduleMode === "scheduled" && scheduleStartsAt) {
         await startSession(rawSession, {
           scheduleOptions: {
@@ -299,9 +310,7 @@ export default function SessionRunnerModal({
         domain: activeSession.domain || "generic",
         sessionTemplateId: activeSession.id,
         recurrenceRule: scheduleRRule,
-        startsAt:
-          activeSession.schedule?.startsAt ||
-          new Date().toISOString(),
+        startsAt: activeSession.schedule?.startsAt || new Date().toISOString(),
         meta: {
           createdFrom: "SessionRunnerModal",
         },
@@ -351,15 +360,66 @@ export default function SessionRunnerModal({
     return { start, end, target, mode: schedule.mode || "now" };
   })();
 
-  return (
-    <div className="ssa-session-modal-backdrop">
-      <div className="ssa-session-modal">
+  // ✅ Minimal: true modal behavior + scroll lock + ESC
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const prevOverflow = document?.body?.style?.overflow;
+    try {
+      document.body.style.overflow = "hidden";
+    } catch {}
+
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") handleClose();
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      try {
+        document.body.style.overflow = prevOverflow || "";
+      } catch {}
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  const modalMarkup = (
+    <div
+      className="ssa-session-modal-backdrop"
+      // ✅ Backdrop click closes (only if user clicks the backdrop itself)
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) handleClose();
+      }}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 9999,
+        background: "rgba(0,0,0,0.35)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 16,
+      }}
+    >
+      <div
+        className="ssa-session-modal"
+        role="dialog"
+        aria-modal="true"
+        style={{
+          width: "min(1100px, 100%)",
+          maxHeight: "min(92vh, 900px)",
+          overflow: "auto",
+          background: "#fff",
+          borderRadius: 16,
+          boxShadow: "0 30px 80px rgba(0,0,0,0.25)",
+        }}
+      >
         {/* Header */}
         <div className="ssa-session-modal-header">
           <div className="ssa-session-modal-title">
-            <span className="ssa-session-modal-icon">
-              {domainMeta.icon}
-            </span>
+            <span className="ssa-session-modal-icon">{domainMeta.icon}</span>
             <div className="ssa-session-modal-heading-text">
               <h2>
                 {activeSession
@@ -377,6 +437,7 @@ export default function SessionRunnerModal({
             type="button"
             className="ssa-session-modal-close"
             onClick={handleClose}
+            aria-label="Close"
           >
             ✕
           </button>
@@ -742,4 +803,7 @@ export default function SessionRunnerModal({
       </div>
     </div>
   );
+
+  // ✅ The ONLY structural change: portal to body so it cannot "sit at page bottom"
+  return createPortal(modalMarkup, document.body);
 }

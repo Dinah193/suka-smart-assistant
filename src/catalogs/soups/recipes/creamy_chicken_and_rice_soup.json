@@ -1,0 +1,343 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00Z",
+
+  "meta": {
+    "id": "soups.creamy_chicken_and_rice_soup",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Creamy Chicken and Rice Soup",
+    "subtitle": "Thick, filling, and family-friendly • great for batch cooking",
+    "source": {
+      "kind": "ssa-canonical",
+      "notes": "SSA baseline designed for 'use what you have' logic: rotisserie/leftover chicken, optional veggies, dairy or dairy-free creamy finish."
+    }
+  },
+
+  "classification": {
+    "cuisine": "soups",
+    "category": "soup",
+    "subprofiles": [
+      "comfort",
+      "family-friendly",
+      "stovetop",
+      "freezer-friendly-with-notes",
+      "batch-cooking",
+      "use-what-you-have"
+    ],
+    "mealArchetypes": ["lunch", "dinner"],
+    "servingStyles": ["bowl"],
+    "plannerTags": [
+      "chicken soup",
+      "rice soup",
+      "creamy soup",
+      "batch cooking",
+      "kid friendly"
+    ]
+  },
+
+  "yield": {
+    "servings": 8,
+    "servingSize": { "value": 2, "unit": "cups" },
+    "notes": "Makes ~14–16 cups depending on simmer and rice absorption."
+  },
+
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 30,
+    "totalMins": 55
+  },
+
+  "difficulty": "beginner",
+
+  "equipment": {
+    "minimum": [
+      "large pot or Dutch oven",
+      "knife",
+      "cutting board",
+      "stirring spoon",
+      "measuring cup"
+    ],
+    "recommended": [
+      "whisk",
+      "fine mesh strainer (optional)",
+      "instant-read thermometer (optional)"
+    ],
+    "optional": ["immersion blender (optional for thicker base)"]
+  },
+
+  "dietFlags": [],
+  "allergens": ["dairy"],
+
+  "signals": {
+    "kidFriendly": true,
+    "freezerFriendly": true,
+    "useWhatYouHave": true,
+    "batchCooking": true,
+    "highSatiety": true
+  },
+
+  "tasteProfile": {
+    "richness": "medium-to-high",
+    "savory": "high",
+    "notes": "Classic chicken soup comfort with creamy body, tender rice, and gentle aromatics."
+  },
+
+  "ingredients": [
+    {
+      "id": "butter_or_oil",
+      "label": "Butter or olive oil",
+      "role": "cook",
+      "amount": { "value": 30, "unit": "g" },
+      "notes": "About 2 tablespoons. Use butter for classic flavor."
+    },
+    {
+      "id": "onion",
+      "label": "Yellow onion, diced",
+      "role": "aromatic",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "About 1 medium."
+    },
+    {
+      "id": "carrots",
+      "label": "Carrots, diced",
+      "role": "vegetable",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "About 2 medium."
+    },
+    {
+      "id": "celery",
+      "label": "Celery, diced",
+      "role": "vegetable",
+      "amount": { "value": 150, "unit": "g" },
+      "notes": "About 3 stalks."
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": "About 3 cloves."
+    },
+    {
+      "id": "thyme_optional",
+      "label": "Dried thyme or Italian seasoning (optional)",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "g" },
+      "optional": true,
+      "notes": "About 1/2 teaspoon."
+    },
+    {
+      "id": "bay_leaf_optional",
+      "label": "Bay leaf (optional)",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "flour",
+      "label": "All-purpose flour",
+      "role": "thickener",
+      "amount": { "value": 35, "unit": "g" },
+      "notes": "About 1/4 cup. Forms a roux for a creamy base."
+    },
+    {
+      "id": "broth",
+      "label": "Chicken broth or stock (low-sodium preferred)",
+      "role": "liquid",
+      "amount": { "value": 1900, "unit": "g" },
+      "notes": "About 8 cups. Use stock for richer body."
+    },
+    {
+      "id": "milk",
+      "label": "Whole milk",
+      "role": "finish",
+      "amount": { "value": 480, "unit": "g" },
+      "notes": "About 2 cups. Add after thickening; keep gentle heat."
+    },
+    {
+      "id": "cream_optional",
+      "label": "Heavy cream (optional richer finish)",
+      "role": "finish",
+      "amount": { "value": 120, "unit": "g" },
+      "optional": true,
+      "notes": "About 1/2 cup. Can replace part of the milk."
+    },
+    {
+      "id": "coconut_milk_optional",
+      "label": "Unsweetened coconut milk (optional dairy-free finish)",
+      "role": "finish",
+      "amount": { "value": 320, "unit": "g" },
+      "optional": true,
+      "notes": "About 1 1/3 cups. If used, omit milk/cream and add at the end."
+    },
+    {
+      "id": "rice",
+      "label": "White rice, uncooked (long-grain preferred)",
+      "role": "starch",
+      "amount": { "value": 180, "unit": "g" },
+      "notes": "About 1 cup. Long-grain stays less sticky; see planner notes for alternatives."
+    },
+    {
+      "id": "chicken_cooked",
+      "label": "Cooked chicken, shredded or diced",
+      "role": "protein",
+      "amount": { "value": 450, "unit": "g" },
+      "notes": "About 3–4 cups. Great use for rotisserie or leftover roast chicken."
+    },
+    {
+      "id": "salt",
+      "label": "Salt",
+      "role": "seasoning",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": "Start with ~1 1/4 teaspoons; adjust at end based on broth."
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "About 1/2 teaspoon."
+    },
+    {
+      "id": "lemon_optional",
+      "label": "Lemon juice (optional, brightness)",
+      "role": "finish",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true,
+      "notes": "1–2 teaspoons to taste."
+    },
+    {
+      "id": "parsley_optional",
+      "label": "Fresh parsley, chopped (optional)",
+      "role": "finish",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "peas_optional",
+      "label": "Frozen peas (optional)",
+      "role": "vegetable",
+      "amount": { "value": 120, "unit": "g" },
+      "optional": true,
+      "notes": "Stir in at the end for color/sweetness."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Sweat aromatics",
+      "instructions": [
+        "Melt butter (or heat oil) in a large pot over medium heat.",
+        "Add onion, carrots, and celery. Cook 8–10 minutes until softened.",
+        "Add garlic and cook 30 seconds until fragrant."
+      ],
+      "activeMins": 12,
+      "timers": [
+        { "label": "Cook onion/carrots/celery", "mins": 9 },
+        { "label": "Cook garlic", "seconds": 30 }
+      ]
+    },
+    {
+      "id": "step_02",
+      "title": "Make the roux (thickening base)",
+      "instructions": [
+        "Sprinkle flour over the vegetables and stir well.",
+        "Cook 1–2 minutes, stirring, to remove raw flour taste (do not let it brown heavily)."
+      ],
+      "activeMins": 3,
+      "timers": [{ "label": "Cook flour", "mins": 2 }]
+    },
+    {
+      "id": "step_03",
+      "title": "Add broth and simmer",
+      "instructions": [
+        "Slowly pour in the broth while stirring to prevent lumps.",
+        "Add thyme/Italian seasoning and bay leaf (optional).",
+        "Bring to a gentle simmer and cook 10 minutes to thicken slightly."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 10,
+      "timers": [{ "label": "Simmer to thicken", "mins": 10 }]
+    },
+    {
+      "id": "step_04",
+      "title": "Cook the rice",
+      "instructions": [
+        "Stir in uncooked rice.",
+        "Simmer 15–18 minutes (or until rice is tender), stirring occasionally so rice doesn’t stick."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 16,
+      "timers": [{ "label": "Cook rice", "mins": 16 }]
+    },
+    {
+      "id": "step_05",
+      "title": "Add chicken and creamy finish",
+      "instructions": [
+        "Lower heat. Stir in cooked chicken.",
+        "Stir in milk (and cream if using). Warm gently 3–5 minutes—avoid a hard boil after adding dairy.",
+        "If using coconut milk instead (dairy-free), add it now and warm gently."
+      ],
+      "activeMins": 8,
+      "timers": [{ "label": "Warm with milk/cream", "mins": 4 }]
+    },
+    {
+      "id": "step_06",
+      "title": "Season and serve",
+      "instructions": [
+        "Remove bay leaf (if used). Taste and adjust salt and pepper.",
+        "Add peas (optional) and warm 1–2 minutes.",
+        "Finish with parsley (optional) and a small squeeze of lemon juice (optional) for brightness.",
+        "Serve hot."
+      ],
+      "activeMins": 5,
+      "timers": [{ "label": "Warm peas", "mins": 2 }]
+    }
+  ],
+
+  "planner": {
+    "useWhatYouHaveLogic": {
+      "swaps": [
+        "Rice: long-grain white is most stable; jasmine works; brown rice needs longer cook; wild rice blend needs longer and more liquid.",
+        "Chicken: any cooked chicken works; leftover turkey also works.",
+        "Vegetables: add diced potato, corn, green beans, or spinach if you have them (add tender greens at the end)."
+      ],
+      "thicknessControl": [
+        "Soup thickens as rice sits. Loosen with extra broth or water when reheating.",
+        "For extra-thick, slightly increase flour to 45g or simmer uncovered a few minutes after adding milk."
+      ]
+    },
+    "batchCooking": {
+      "recommendedBatchMultiplier": 2,
+      "freezerPortionSizeCups": 2,
+      "bestPractices": [
+        "For best freezing, consider cooking rice separately and adding to bowls when serving (prevents over-soft rice after thaw).",
+        "If freezing the full soup, freeze before adding dairy; add milk/cream when reheating for best texture."
+      ]
+    },
+    "familyFriendlyNotes": [
+      "Keep seasoning gentle; offer hot sauce/pepper at the table for adults.",
+      "Dice vegetables small for kid-friendly texture."
+    ]
+  },
+
+  "storage": {
+    "fridge": "Refrigerate up to 4 days. Soup thickens as rice absorbs liquid; add broth/water on reheat.",
+    "freezer": "Freeze up to 3 months. Best results: freeze without dairy, and/or keep rice separate for texture.",
+    "reheat": "Reheat gently to a simmer, stirring often. Avoid hard boiling after adding dairy."
+  },
+
+  "notes": [
+    "If you prefer a super-smooth creamy base, you can briefly blend a portion of the soup (before adding chicken) and then stir it back in—optional technique.",
+    "Low-sodium broth helps prevent over-salting; always final-season at the end."
+  ],
+
+  "audit": {
+    "tested": true,
+    "testNotes": "Schema-compliant: schemaVersion+meta present; ingredients include id+label+amount; steps include id+title+instructions; no disallowed custom top-level properties."
+  }
+}

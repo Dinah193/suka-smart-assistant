@@ -28,8 +28,8 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import * as eventBus from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import * as eventBus from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { HubPacketFormatter, FamilyFundConnector } from "@/services/hub";
 
 // Prefer named emit if present, otherwise fall back to a generic export.
@@ -56,7 +56,8 @@ function subscribe(handler) {
   if (typeof eventBus.subscribe === "function") {
     const sub = eventBus.subscribe(handler);
     if (typeof sub === "function") return sub;
-    if (sub && typeof sub.unsubscribe === "function") return () => sub.unsubscribe();
+    if (sub && typeof sub.unsubscribe === "function")
+      return () => sub.unsubscribe();
   }
   console.warn(
     "[PreservationTimeCalculator.hooks] No eventBus.on/subscribe; events will not be received."
@@ -75,7 +76,11 @@ function buildSessionFromCalculatorResult(calculatorResult) {
 
   const { output } = calculatorResult;
   const template = output.sessionTemplateOverride;
-  if (!template || !Array.isArray(template.steps) || template.steps.length === 0) {
+  if (
+    !template ||
+    !Array.isArray(template.steps) ||
+    template.steps.length === 0
+  ) {
     return null;
   }
 
@@ -87,7 +92,7 @@ function buildSessionFromCalculatorResult(calculatorResult) {
     title: template.title || "Preservation session",
     source: {
       type: "manual",
-      refId: null
+      refId: null,
     },
     steps: template.steps.map((step, index) => ({
       id: step.id || `step-${index + 1}`,
@@ -98,27 +103,27 @@ function buildSessionFromCalculatorResult(calculatorResult) {
       metadata: step.metadata || {
         tempTargetF: 0,
         donenessCue: "timer",
-        cueNotes: ""
-      }
+        cueNotes: "",
+      },
     })),
     prefs: {
       voiceGuidance: true,
       haptic: true,
-      autoAdvance: false
+      autoAdvance: false,
     },
     status: "pending",
     progress: {
       currentStepIndex: 0,
       elapsedSec: 0,
       startedAt: null,
-      pausedAt: null
+      pausedAt: null,
     },
     analytics: {
       skippedSteps: [],
-      adjustments: []
+      adjustments: [],
     },
     createdAt,
-    updatedAt: createdAt
+    updatedAt: createdAt,
   };
 }
 
@@ -141,14 +146,15 @@ export function usePreservationSessionBuilder(calculatorResult) {
     [calculatorResult]
   );
 
-  const rebuild = useCallback(() => buildSessionFromCalculatorResult(calculatorResult), [
-    calculatorResult
-  ]);
+  const rebuild = useCallback(
+    () => buildSessionFromCalculatorResult(calculatorResult),
+    [calculatorResult]
+  );
 
   return {
     sessionDraft,
     canBuildSession: !!sessionDraft,
-    rebuild
+    rebuild,
   };
 }
 
@@ -167,7 +173,10 @@ export function usePreservationSessionBuilder(calculatorResult) {
  * @param {object|null} sessionDraft
  * @param {string} [sourceTag="PreservationTimeCalculatorView"]
  */
-export function usePreservationNowLauncher(sessionDraft, sourceTag = "PreservationTimeCalculator") {
+export function usePreservationNowLauncher(
+  sessionDraft,
+  sourceTag = "PreservationTimeCalculator"
+) {
   const [isLaunching, setIsLaunching] = useState(false);
 
   const launchNow = useCallback(() => {
@@ -188,8 +197,8 @@ export function usePreservationNowLauncher(sessionDraft, sourceTag = "Preservati
         ts,
         source: sourceTag,
         data: {
-          session: sessionDraft
-        }
+          session: sessionDraft,
+        },
       });
 
       // Optional “optimistic” started event – comment out if you want
@@ -200,11 +209,14 @@ export function usePreservationNowLauncher(sessionDraft, sourceTag = "Preservati
         source: `${sourceTag}.hooks`,
         data: {
           sessionId: sessionDraft.id,
-          domain: sessionDraft.domain
-        }
+          domain: sessionDraft.domain,
+        },
       });
     } catch (err) {
-      console.error("[usePreservationNowLauncher] Failed to emit session.requested", err);
+      console.error(
+        "[usePreservationNowLauncher] Failed to emit session.requested",
+        err
+      );
     } finally {
       setIsLaunching(false);
     }
@@ -212,7 +224,7 @@ export function usePreservationNowLauncher(sessionDraft, sourceTag = "Preservati
 
   return {
     launchNow,
-    isLaunching
+    isLaunching,
   };
 }
 
@@ -230,7 +242,7 @@ async function exportPreservationSessionToHub(sessionEvent) {
       domain: "preservation",
       eventType: sessionEvent.type,
       timestamp: sessionEvent.ts,
-      payload: sessionEvent.data
+      payload: sessionEvent.data,
     });
 
     await FamilyFundConnector.send(envelope);
@@ -242,8 +254,8 @@ async function exportPreservationSessionToHub(sessionEvent) {
       data: {
         domain: "preservation",
         originalEventType: sessionEvent.type,
-        sessionId: sessionEvent.data?.sessionId || null
-      }
+        sessionId: sessionEvent.data?.sessionId || null,
+      },
     });
   } catch (err) {
     // Fail silently per spec (no user-facing error, but log to console).
@@ -288,8 +300,8 @@ export function usePreservationSessionExport() {
           ...evt,
           data: {
             ...evt.data,
-            sessionId
-          }
+            sessionId,
+          },
         };
 
         await exportPreservationSessionToHub(normalizedEvent);
@@ -337,7 +349,7 @@ export function usePreservationSessionStatus() {
   const [state, setState] = useState({
     activeSessionId: null,
     status: "idle",
-    lastUpdated: null
+    lastUpdated: null,
   });
 
   useEffect(() => {
@@ -379,7 +391,7 @@ export function usePreservationSessionStatus() {
       setState({
         activeSessionId: sessionId,
         status: statusUpdate,
-        lastUpdated: evt.ts || new Date().toISOString()
+        lastUpdated: evt.ts || new Date().toISOString(),
       });
     };
 

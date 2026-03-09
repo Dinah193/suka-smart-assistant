@@ -33,8 +33,8 @@
  * -----------------------------------------------------------------------------
  */
 
-import eventBus from "../../../services/eventBus"; // Optional: used for debug emits; safe if unused
-import { featureFlags } from "../../../services/featureFlags";
+import eventBus from "../../../services/events/eventBus"; // Optional: used for debug emits; safe if unused
+import { featureFlags } from "../../../config/featureFlags";
 
 /**
  * @typedef {Object} SessionStep
@@ -100,9 +100,10 @@ export async function evaluateSabbathGuard(session, stepIndex, ctx = {}) {
   }
 
   // 2) If the relevant step (or any step for session start) doesn't declare sabbath, allow.
-  const shouldApply = stepIndex >= 0
-    ? hasBlocker(session?.steps?.[stepIndex], "sabbath")
-    : session?.steps?.some(s => hasBlocker(s, "sabbath"));
+  const shouldApply =
+    stepIndex >= 0
+      ? hasBlocker(session?.steps?.[stepIndex], "sabbath")
+      : session?.steps?.some((s) => hasBlocker(s, "sabbath"));
 
   if (!shouldApply) {
     return { allowed: true, guard: "sabbath" };
@@ -167,7 +168,10 @@ export async function isSabbathActive(at, ctx = {}) {
   }
 
   // Try precise sunset rule when requested and provider available.
-  if (settings.startRule === "sunset" && typeof ctx.sunTimesProvider === "function") {
+  if (
+    settings.startRule === "sunset" &&
+    typeof ctx.sunTimesProvider === "function"
+  ) {
     const { startsAt, endsAt } = computeSabbathWindowBySunset(at, ctx);
     const active = at >= startsAt && at < endsAt;
     return { active, startsAt, endsAt };
@@ -185,7 +189,10 @@ function isGuardGloballyEnabled() {
   // Hook for a future feature flag (e.g., featureFlags.sabbathGuard)
   // Default: enabled.
   try {
-    if (featureFlags && Object.prototype.hasOwnProperty.call(featureFlags, "sabbathGuard")) {
+    if (
+      featureFlags &&
+      Object.prototype.hasOwnProperty.call(featureFlags, "sabbathGuard")
+    ) {
       return !!featureFlags.sabbathGuard;
     }
   } catch {
@@ -230,10 +237,10 @@ function computeSabbathWindowBySunset(at, ctx) {
   const dow = at.getDay(); // 0=Sun, 5=Fri, 6=Sat
 
   // Build dates for Friday and Saturday of the current "Sabbath week"
-  const friday = shiftLocalDate(local, (5 - dow));
-  const saturday = shiftLocalDate(local, (6 - dow));
+  const friday = shiftLocalDate(local, 5 - dow);
+  const saturday = shiftLocalDate(local, 6 - dow);
 
-  const fridayIso = `${friday}T00:00:00`;     // local-calendar date; provider should interpret locally
+  const fridayIso = `${friday}T00:00:00`; // local-calendar date; provider should interpret locally
   const saturdayIso = `${saturday}T00:00:00`; // same
 
   const lat = toNumberOrNull(ctx.coords?.lat);
@@ -274,8 +281,8 @@ function computeSabbathWindowBySunset(at, ctx) {
 function computeSabbathWindowFixed(at, settings) {
   const local = toLocalYmd(at);
   const dow = at.getDay(); // 0=Sun ... 6=Sat
-  const fridayYmd = shiftLocalDate(local, (5 - dow));
-  const saturdayYmd = shiftLocalDate(local, (6 - dow));
+  const fridayYmd = shiftLocalDate(local, 5 - dow);
+  const saturdayYmd = shiftLocalDate(local, 6 - dow);
 
   const startsAt = localDateTime(fridayYmd, settings.fixedStartHourLocal);
   const endsAt = localDateTime(saturdayYmd, settings.fixedEndHourLocal);
@@ -310,7 +317,7 @@ function pad2(n) {
  */
 function shiftLocalDate(ymd, deltaDays) {
   const [y, m, d] = ymd.split("-").map(Number);
-  const dt = new Date(y, (m - 1), d);
+  const dt = new Date(y, m - 1, d);
   dt.setDate(dt.getDate() + deltaDays);
   return toLocalYmd(dt);
 }
@@ -322,7 +329,7 @@ function shiftLocalDate(ymd, deltaDays) {
  */
 function localDateTime(ymd, hourLocal) {
   const [y, m, d] = ymd.split("-").map(Number);
-  return new Date(y, (m - 1), d, clampHour(hourLocal), 0, 0, 0);
+  return new Date(y, m - 1, d, clampHour(hourLocal), 0, 0, 0);
 }
 
 function clampHour(h) {
@@ -346,7 +353,12 @@ function validIso(s) {
 function safeEmitDebug(type, data) {
   try {
     if (eventBus && typeof eventBus.emit === "function") {
-      eventBus.emit({ type, ts: new Date().toISOString(), source: "sabbathGuard", data });
+      eventBus.emit({
+        type,
+        ts: new Date().toISOString(),
+        source: "sabbathGuard",
+        data,
+      });
     }
   } catch {
     // no-op

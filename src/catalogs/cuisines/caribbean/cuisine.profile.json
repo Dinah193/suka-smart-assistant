@@ -1,0 +1,723 @@
+{
+  "$schema": "../../../schemas/cuisine.profile.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-14T00:00:00.000Z",
+  "meta": {
+    "id": "caribbean",
+    "type": "cuisine_profile",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Caribbean",
+    "name": "Caribbean",
+    "shortName": "Caribbean",
+    "description": "A region-spanning cuisine family rooted in African, Indigenous, European, South Asian, Chinese, and Levantine influences; characterized by bright aromatics, allspice/thyme profiles, chile heat, citrus, coconut, legumes, and slow braises alongside quick-fried street foods.",
+    "regions": [
+      "Greater Antilles",
+      "Lesser Antilles",
+      "Lucayan Archipelago",
+      "Caribbean Coast (diaspora & coastal influences)"
+    ],
+    "primaryCountriesAndIslands": [
+      "Jamaica",
+      "Haiti",
+      "Dominican Republic",
+      "Puerto Rico",
+      "Trinidad & Tobago",
+      "Barbados",
+      "Grenada",
+      "St. Lucia",
+      "St. Vincent & the Grenadines",
+      "Antigua & Barbuda",
+      "Bahamas",
+      "Cuba",
+      "Guyana (Caribbean cultural sphere)",
+      "Suriname (Caribbean cultural sphere)"
+    ],
+    "tags": [
+      "jerk",
+      "sofrito",
+      "rice-and-peas",
+      "plantain",
+      "coconut",
+      "allspice",
+      "thyme",
+      "scotch-bonnet",
+      "tropical",
+      "stew",
+      "braise",
+      "fry",
+      "street-food",
+      "holiday-feasts"
+    ],
+    "icon": "🌴",
+    "colorHint": "#0FA3B1",
+    "heritageNotes": [
+      "Wide internal diversity: Jamaican jerk, Puerto Rican sofrito, Trini curry/roti, Haitian epis, Cuban mojo, Dominican sazón.",
+      "Many dishes vary by island, household, and diaspora access to ingredients."
+    ],
+    "source": {
+      "curation": "SSA canonical catalog",
+      "maintainer": "SSA",
+      "license": "CC-BY-4.0",
+      "attribution": "Suka Smart Assistant Cuisine Catalogs"
+    },
+    "family": {
+      "parent": "global",
+      "siblings": ["west_african", "latin_american", "southern_us", "indian"],
+      "overlapsWith": [
+        {
+          "id": "west_african",
+          "reason": "shared braises, okra, greens, rice/legume patterns"
+        },
+        {
+          "id": "latin_american",
+          "reason": "sofrito, adobo-style seasoning, rice/beans, plantains"
+        },
+        {
+          "id": "indian",
+          "reason": "Trini/Guyanese curries, roti, masala aromatics"
+        }
+      ]
+    },
+    "subprofiles": [
+      {
+        "id": "jamaican",
+        "name": "Jamaican",
+        "signatureNotes": "Allspice + thyme + Scotch bonnet; jerk; rich brown stews; rice & peas; patties.",
+        "commonSauceBases": [
+          "jerk_paste",
+          "brown_stew_gravy",
+          "escovitch_vinegar_pickling"
+        ]
+      },
+      {
+        "id": "puerto_rican",
+        "name": "Puerto Rican (Boricua)",
+        "signatureNotes": "Sofrito + sazón; adobo; rice/beans; roast pork (pernil); plantains.",
+        "commonSauceBases": ["sofrito", "adobo_blend", "recaito"]
+      },
+      {
+        "id": "cuban",
+        "name": "Cuban",
+        "signatureNotes": "Mojo (citrus/garlic), oregano, cumin; black beans; ropa vieja; yuca.",
+        "commonSauceBases": ["mojo", "sofrito"]
+      },
+      {
+        "id": "haitian",
+        "name": "Haitian",
+        "signatureNotes": "Epis base; pikliz; hearty stews and rice/bean dishes; bright acidity.",
+        "commonSauceBases": ["epis", "pikliz_brine"]
+      },
+      {
+        "id": "trini_tobago",
+        "name": "Trinidad & Tobago",
+        "signatureNotes": "Curry-forward; green seasoning; roti; doubles; pepper sauces; chadon beni.",
+        "commonSauceBases": ["green_seasoning", "curry_gravy", "pepper_sauce"]
+      },
+      {
+        "id": "lesser_antilles",
+        "name": "Lesser Antilles (OECS blend)",
+        "signatureNotes": "Saltfish, callaloo, pepperpot-style stews, breadfruit, coconut.",
+        "commonSauceBases": ["green_seasoning", "coconut_stew_base"]
+      }
+    ]
+  },
+  "plannerDefaults": {
+    "servingStyles": [
+      "family_style",
+      "plated_meals",
+      "street_food",
+      "holiday_feasts"
+    ],
+    "weeknightBias": "moderate",
+    "leftoversStrategy": "batch_and_remix",
+    "batchCookingBias": {
+      "level": "high",
+      "bestBatches": [
+        "green_seasoning",
+        "epis",
+        "sofrito",
+        "beans",
+        "jerk_paste"
+      ],
+      "notes": "Caribbean cooking benefits heavily from frozen base cubes and pre-cooked legumes."
+    },
+    "spiceHeatDefault": 3,
+    "saltinessDefault": 3,
+    "sournessDefault": 3,
+    "sweetnessDefault": 2,
+    "umamiDefault": 3,
+    "oilUseDefault": 3,
+    "preferredCookingFats": ["neutral_oil", "coconut_oil", "butter", "ghee"],
+    "primaryStarches": [
+      "rice",
+      "plantain",
+      "yuca",
+      "breadfruit",
+      "cornmeal",
+      "roti",
+      "dumplings"
+    ],
+    "primaryProteins": [
+      "chicken",
+      "goat",
+      "pork",
+      "beef",
+      "fresh_fish",
+      "shrimp",
+      "saltfish",
+      "legumes"
+    ],
+    "defaultMealArchetypes": [
+      "stew_plus_starch_plus_acid",
+      "rice_and_peas_plate",
+      "fried_street_food",
+      "saltfish_and_starch"
+    ]
+  },
+  "pantry": {
+    "staples": {
+      "grainsAndStarches": [
+        "rice",
+        "long_grain_rice",
+        "parboiled_rice",
+        "yuca",
+        "cassava_flour",
+        "cornmeal",
+        "breadfruit",
+        "green_banana",
+        "plantain",
+        "sweet_potato",
+        "yam"
+      ],
+      "legumes": [
+        "kidney_beans",
+        "pigeon_peas",
+        "black_beans",
+        "red_beans",
+        "lentils",
+        "chickpeas"
+      ],
+      "cannedAndJarred": [
+        "coconut_milk",
+        "coconut_cream",
+        "tomato_paste",
+        "crushed_tomatoes",
+        "pickled_peppers",
+        "capers",
+        "olives"
+      ],
+      "oilsAndFats": ["neutral_oil", "coconut_oil", "butter", "ghee"],
+      "spicesAndSeasonings": [
+        "allspice",
+        "thyme",
+        "black_pepper",
+        "cumin",
+        "coriander",
+        "paprika",
+        "curry_powder",
+        "annatto",
+        "bay_leaf",
+        "nutmeg",
+        "cinnamon",
+        "clove",
+        "browning_sauce_or_browned_sugar",
+        "seasoned_salt_or_adobo",
+        "bouillon"
+      ],
+      "vinegarsAndCitrus": [
+        "lime",
+        "lemon",
+        "orange",
+        "sour_orange_substitute",
+        "white_vinegar",
+        "apple_cider_vinegar"
+      ]
+    },
+    "freshCore": [
+      "scallion",
+      "onion",
+      "garlic",
+      "thyme",
+      "hot_pepper",
+      "bell_pepper",
+      "cilantro",
+      "ginger",
+      "limes"
+    ],
+    "proteinsCommon": [
+      "chicken",
+      "goat",
+      "beef",
+      "pork",
+      "saltfish",
+      "fresh_fish",
+      "shrimp",
+      "crab"
+    ],
+    "produceCommon": [
+      "plantain",
+      "yuca",
+      "cabbage",
+      "callaloo_or_spinach",
+      "okra",
+      "pumpkin_or_squash",
+      "carrot",
+      "green_beans",
+      "eggplant",
+      "mango",
+      "pineapple"
+    ],
+    "availabilityNotes": [
+      {
+        "ingredient": "chadon_beni",
+        "fallbacks": ["cilantro", "culantro"],
+        "note": "Chadon beni is stronger than cilantro; use less if substituting with culantro."
+      },
+      {
+        "ingredient": "sour_orange",
+        "fallbacks": ["orange_juice", "lime_juice", "lemon_juice"],
+        "note": "Use a split citrus blend to approximate bitter-sour profile."
+      },
+      {
+        "ingredient": "scotch_bonnet",
+        "fallbacks": ["habanero", "jalapeno"],
+        "note": "Scotch bonnet has a distinct fruitiness; habanero is closest."
+      }
+    ]
+  },
+  "techniques": {
+    "coreMethods": [
+      "marinate_overnight",
+      "wet_rub",
+      "dry_rub",
+      "slow_braise",
+      "stew",
+      "pressure_cook",
+      "char_grill",
+      "smoke",
+      "deep_fry",
+      "shallow_fry",
+      "steam",
+      "pickle_quick",
+      "coconut_simmer"
+    ],
+    "hallmarkProcesses": [
+      {
+        "id": "jerk",
+        "name": "Jerk (paste + smoke/char)",
+        "steps": [
+          "blend_jerk_paste",
+          "marinate",
+          "cook_over_high_heat",
+          "finish_smoke_or_oven"
+        ],
+        "notes": "Traditional pimento wood smoke may be approximated with allspice + smoke source or smoked paprika."
+      },
+      {
+        "id": "browning",
+        "name": "Browning (deep color + flavor)",
+        "steps": [
+          "brown_sugar_or_use_browning_sauce",
+          "sear_protein",
+          "build_gravy"
+        ],
+        "notes": "Used in Jamaican brown stew and similar gravies."
+      },
+      {
+        "id": "green_seasoning_base",
+        "name": "Green seasoning base",
+        "steps": ["blend_herbs_aromatics", "marinate_protein_or_base_pot"],
+        "notes": "Common across several islands; flavor differs by household."
+      }
+    ]
+  },
+  "equipment": {
+    "recommended": [
+      "chef_knife",
+      "cutting_board",
+      "blender_or_food_processor",
+      "heavy_pot_or_dutch_oven",
+      "skillet",
+      "sheet_pan",
+      "mixing_bowls",
+      "tongs",
+      "microplane_or_grater",
+      "citrus_juicer",
+      "rice_cooker",
+      "thermometer"
+    ],
+    "optionalButHelpful": [
+      "pressure_cooker",
+      "grill",
+      "smoker",
+      "mortar_and_pestle",
+      "deep_fryer",
+      "cast_iron_pan"
+    ],
+    "notes": [
+      "SSA recipe adapters can swap pressure-cook for stovetop braise and vice versa based on kitchen capabilities.",
+      "Grill/smoke preferred for jerk, but oven broil/roast variants are acceptable with flavor compensation."
+    ]
+  },
+  "dietAndAllergens": {
+    "commonAllergens": [
+      "fish",
+      "shellfish",
+      "peanut",
+      "tree_nut_coconut",
+      "gluten",
+      "dairy"
+    ],
+    "dietCompatibility": {
+      "vegetarianFriendly": true,
+      "veganFriendly": true,
+      "pescatarianFriendly": true,
+      "halalFriendly": "depends",
+      "kosherFriendly": "depends",
+      "notes": [
+        "Many dishes are easily adapted to vegetarian/vegan using legumes, coconut, and veg stews; watch shrimp/fish sauce, saltfish, and bouillon ingredients."
+      ]
+    }
+  },
+  "signatureDishes": {
+    "core": [
+      {
+        "id": "jerk_chicken",
+        "name": "Jerk Chicken",
+        "subprofiles": ["jamaican"],
+        "difficulty": 2,
+        "heatTypical": 4,
+        "notes": "Char/smoke preferred; oven adaptation common."
+      },
+      {
+        "id": "rice_and_peas",
+        "name": "Rice & Peas (Coconut Rice with Beans)",
+        "subprofiles": ["jamaican", "lesser_antilles"],
+        "difficulty": 1,
+        "heatTypical": 1
+      },
+      {
+        "id": "brown_stew_chicken",
+        "name": "Brown Stew Chicken",
+        "subprofiles": ["jamaican"],
+        "difficulty": 2,
+        "heatTypical": 2
+      },
+      {
+        "id": "oxtail_stew",
+        "name": "Oxtail Stew",
+        "subprofiles": ["jamaican", "barbadian", "lesser_antilles"],
+        "difficulty": 3,
+        "heatTypical": 2,
+        "notes": "Long braise/pressure-cook; rich gravy."
+      },
+      {
+        "id": "curry_goat",
+        "name": "Curry Goat",
+        "subprofiles": ["jamaican", "trini_tobago", "guyanese"],
+        "difficulty": 3,
+        "heatTypical": 3
+      },
+      {
+        "id": "callaloo",
+        "name": "Callaloo",
+        "subprofiles": ["trini_tobago", "lesser_antilles"],
+        "difficulty": 2,
+        "heatTypical": 1,
+        "notes": "Often with coconut; greens/okra/seafood variations."
+      },
+      {
+        "id": "tostones",
+        "name": "Tostones (Fried Green Plantains)",
+        "subprofiles": ["puerto_rican", "dominican", "cuban"],
+        "difficulty": 1,
+        "heatTypical": 0
+      },
+      {
+        "id": "mofongo",
+        "name": "Mofongo",
+        "subprofiles": ["puerto_rican", "dominican"],
+        "difficulty": 3,
+        "heatTypical": 1
+      },
+      {
+        "id": "pernil",
+        "name": "Pernil (Roast Pork Shoulder)",
+        "subprofiles": ["puerto_rican", "dominican"],
+        "difficulty": 3,
+        "heatTypical": 1
+      },
+      {
+        "id": "doubles",
+        "name": "Doubles",
+        "subprofiles": ["trini_tobago"],
+        "difficulty": 3,
+        "heatTypical": 3
+      },
+      {
+        "id": "haitian_griot",
+        "name": "Griot (Haitian Fried Pork)",
+        "subprofiles": ["haitian"],
+        "difficulty": 3,
+        "heatTypical": 2
+      },
+      {
+        "id": "pikliz",
+        "name": "Pikliz",
+        "subprofiles": ["haitian"],
+        "difficulty": 1,
+        "heatTypical": 3
+      },
+      {
+        "id": "ropa_vieja",
+        "name": "Ropa Vieja",
+        "subprofiles": ["cuban"],
+        "difficulty": 3,
+        "heatTypical": 1
+      },
+      {
+        "id": "black_beans_and_rice",
+        "name": "Black Beans & Rice",
+        "subprofiles": ["cuban"],
+        "difficulty": 2,
+        "heatTypical": 0
+      }
+    ],
+    "dessertsAndDrinks": [
+      { "id": "rum_cake", "name": "Rum Cake", "difficulty": 2 },
+      {
+        "id": "sweet_potato_pudding",
+        "name": "Sweet Potato Pudding",
+        "difficulty": 2
+      },
+      {
+        "id": "sorrel_drink",
+        "name": "Sorrel (Hibiscus) Drink",
+        "difficulty": 1
+      },
+      { "id": "ginger_beer", "name": "Ginger Beer", "difficulty": 2 }
+    ]
+  },
+  "pairingRules": {
+    "typicalStarches": [
+      "rice",
+      "rice_and_peas",
+      "roti",
+      "dumplings",
+      "yuca",
+      "plantain",
+      "breadfruit"
+    ],
+    "typicalVegSides": ["cabbage", "greens", "salad", "okra", "pickled_veg"],
+    "typicalCondiments": ["pepper_sauce", "lime", "pikliz", "mojo", "chutney"],
+    "typicalFlavorPairings": [
+      {
+        "with": "coconut_milk",
+        "pair": ["thyme", "scallion", "ginger", "hot_pepper"],
+        "note": "Coconut base supports aromatics and heat."
+      },
+      {
+        "with": "allspice",
+        "pair": ["thyme", "scotch_bonnet", "brown_sugar"],
+        "note": "Classic jerk spectrum."
+      },
+      {
+        "with": "curry_powder",
+        "pair": ["garlic", "ginger", "thyme", "hot_pepper"],
+        "note": "Trini/Jamaican curry profiles vary by blend."
+      }
+    ],
+    "antiPairings": [
+      {
+        "id": "over_sweetening_stews",
+        "avoid": ["excess_sugar_in_braises"],
+        "note": "Browning should deepen flavor, not turn gravies dessert-sweet."
+      }
+    ]
+  },
+  "substitutions": {
+    "ingredientRules": [
+      {
+        "id": "scotch_bonnet_swap",
+        "whenMissing": ["scotch_bonnet"],
+        "use": ["habanero"],
+        "ratio": 1.0,
+        "notes": "Start with less for lower heat; adjust with pepper sauce."
+      },
+      {
+        "id": "chadon_beni_swap",
+        "whenMissing": ["chadon_beni"],
+        "use": ["culantro", "cilantro"],
+        "ratio": 0.75,
+        "notes": "Culantro is potent; cilantro is milder; adjust to taste."
+      },
+      {
+        "id": "sour_orange_swap",
+        "whenMissing": ["sour_orange"],
+        "use": ["orange_juice", "lime_juice"],
+        "ratio": 1.0,
+        "notes": "Combine to approximate the sour-bitter citrus profile."
+      },
+      {
+        "id": "saltfish_low_sodium",
+        "whenHealthFlag": ["low_sodium"],
+        "replace": ["saltfish"],
+        "with": ["fresh_white_fish", "smoked_fish_small_amount"],
+        "notes": "Preserve the seafood note without full sodium load; ensure bouillon is also low-sodium."
+      }
+    ],
+    "methodRules": [
+      {
+        "id": "jerk_without_grill",
+        "whenNoEquipment": ["grill", "smoker"],
+        "adapt": "oven_roast_then_broil",
+        "notes": "Boost flavor with allspice, thyme, smoke element (smoked paprika or a small amount of smoke seasoning)."
+      },
+      {
+        "id": "braise_with_pressure",
+        "whenHasEquipment": ["pressure_cooker"],
+        "adapt": "pressure_cook_then_reduce",
+        "notes": "Use pressure to tenderize; finish by reducing sauce for body."
+      }
+    ]
+  },
+  "planningHints": {
+    "batchFriendly": [
+      {
+        "id": "green_seasoning_batch",
+        "name": "Batch: Green Seasoning / Epis / Sofrito",
+        "makes": "base_condiment",
+        "freezerFriendly": true,
+        "notes": "Blend and freeze in cubes; accelerates weeknight cooking."
+      },
+      {
+        "id": "beans_batch",
+        "name": "Batch: Beans (pigeon peas/black beans/kidney beans)",
+        "makes": "proteins_and_sides",
+        "freezerFriendly": true,
+        "notes": "Cook once; portion for rice dishes, stews, and quick plates."
+      },
+      {
+        "id": "jerk_paste_batch",
+        "name": "Batch: Jerk Paste",
+        "makes": "marinade_sauce",
+        "freezerFriendly": true,
+        "notes": "Freeze in small jars/portions; marinate chicken/fish/tofu."
+      }
+    ],
+    "weeknightShortcuts": [
+      "Use pre-made green seasoning/sofrito cubes.",
+      "Pressure-cook stews, then reduce gravy.",
+      "Cook rice in coconut milk with aromatics; top with quick sautéed protein."
+    ],
+    "seasonality": [
+      {
+        "season": "summer",
+        "focus": ["grilled_jerk", "fresh_fish", "fruit_salsas", "cold_drinks"]
+      },
+      {
+        "season": "winter",
+        "focus": ["oxtail", "goat_curry", "rum_cake", "sorrel_drink"]
+      }
+    ]
+  },
+  "ui": {
+    "heroSuggestions": [
+      {
+        "title": "Jerk Night",
+        "items": ["jerk_chicken", "rice_and_peas", "quick_pickles"]
+      },
+      {
+        "title": "Trini Curry + Roti",
+        "items": ["curry_goat_or_chicken", "roti", "cucumber_chutney"]
+      },
+      {
+        "title": "Spanish Caribbean Plate",
+        "items": ["pernil_or_stew_chicken", "rice", "beans", "tostones"]
+      }
+    ],
+    "searchBoostTerms": [
+      "jerk",
+      "rice and peas",
+      "plantain",
+      "sofrito",
+      "epis",
+      "green seasoning",
+      "curry goat",
+      "oxtail",
+      "pikliz",
+      "mojo",
+      "roti",
+      "doubles",
+      "saltfish"
+    ]
+  },
+  "compat": {
+    "recipeTagDefaults": ["caribbean"],
+    "defaultPlateTemplateIds": [
+      "plate.caribbean.stew_starch_veg",
+      "plate.caribbean.rice_peas_protein",
+      "plate.caribbean.street_food"
+    ],
+    "notes": [
+      "If plate templates are not yet present, SSA should fall back to global templates and apply Caribbean flavor rules."
+    ]
+  },
+  "flavorSystem": {
+    "signatureNotes": "Bright aromatics (scallion/garlic/thyme), allspice + thyme profiles, chile heat (Scotch bonnet/habanero), citrus/vinegar brightness, coconut richness, and deep savory stews (often browned) served with starches.",
+    "aromaticsCore": [
+      "scallion",
+      "onion",
+      "garlic",
+      "thyme",
+      "ginger",
+      "cilantro",
+      "parsley",
+      "chadon_beni"
+    ],
+    "spiceCore": [
+      "allspice",
+      "black_pepper",
+      "cumin",
+      "coriander",
+      "paprika",
+      "annatto",
+      "nutmeg",
+      "cinnamon",
+      "clove"
+    ],
+    "umamiBuilders": [
+      "saltfish",
+      "smoked_meats",
+      "bouillon",
+      "cured_meat",
+      "dried_shrimp",
+      "soy_sauce",
+      "fish_sauce"
+    ],
+    "acidOptions": [
+      "lime",
+      "lemon",
+      "sour_orange",
+      "white_vinegar",
+      "apple_cider_vinegar",
+      "cane_vinegar",
+      "tamarind"
+    ],
+    "sweetBalanceOptions": [
+      "browning_sugar",
+      "molasses",
+      "ripe_plantain",
+      "coconut_milk",
+      "fruit_jams"
+    ],
+    "heatOptions": [
+      "scotch_bonnet",
+      "habanero",
+      "bird_pepper",
+      "pimento_pepper",
+      "pepper_sauce"
+    ]
+  }
+}

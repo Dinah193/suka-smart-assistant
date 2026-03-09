@@ -1,0 +1,426 @@
+{
+  "$schema": "../../schemas/allergens.map.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-13",
+  "notes": [
+    "SSA Allergens Map (shared across cuisines).",
+    "Purpose: normalize allergen terms and common ingredient trigger phrases into canonical allergen IDs.",
+    "How to use (recommended):",
+    "  1) Normalize input text (lowercase/trim/collapse spaces/strip punctuation).",
+    "  2) Match explicit allergen labels (e.g., 'contains milk', 'peanut') via `termMap`.",
+    "  3) Scan ingredient names against `ingredientTriggers` to infer likely allergens.",
+    "Safety: this is a conservative helper. For high-stakes decisions, require explicit ingredient lists and allow user confirmation.",
+    "This catalog is cuisine-agnostic. Cuisine-specific allergen practices belong in cuisine rulesets."
+  ],
+  "meta": {
+    "id": "cuisines_shared.allergens.map",
+    "type": "allergen_map",
+    "domain": "safety",
+    "locale": "en-US",
+    "normalization": {
+      "case": "lower",
+      "trim": true,
+      "collapseWhitespace": true,
+      "stripPunctuation": true
+    }
+  },
+  "canonicalAllergens": {
+    "allergen_milk": {
+      "label": "Milk / Dairy",
+      "group": "major",
+      "severity_hint": "high",
+      "notes": ["Includes milk, cheese, butter, cream, whey, casein."]
+    },
+    "allergen_egg": {
+      "label": "Egg",
+      "group": "major",
+      "severity_hint": "high",
+      "notes": ["Includes egg whites/yolks, mayonnaise (often), albumen."]
+    },
+    "allergen_peanut": {
+      "label": "Peanut",
+      "group": "major",
+      "severity_hint": "high",
+      "notes": ["Peanuts and peanut-derived ingredients."]
+    },
+    "allergen_tree_nut": {
+      "label": "Tree Nuts",
+      "group": "major",
+      "severity_hint": "high",
+      "notes": [
+        "Includes almond, walnut, cashew, pistachio, pecan, hazelnut, macadamia, brazil nut, pine nut."
+      ]
+    },
+    "allergen_wheat": {
+      "label": "Wheat",
+      "group": "major",
+      "severity_hint": "high",
+      "notes": [
+        "Wheat protein/gluten source; different from celiac-safe gluten-free needs."
+      ]
+    },
+    "allergen_gluten": {
+      "label": "Gluten",
+      "group": "dietary",
+      "severity_hint": "high",
+      "notes": ["Includes wheat, barley, rye and many derived ingredients."]
+    },
+    "allergen_soy": {
+      "label": "Soy",
+      "group": "major",
+      "severity_hint": "high",
+      "notes": ["Soybeans, soy sauce, tofu, tempeh, many processed foods."]
+    },
+    "allergen_fish": {
+      "label": "Fish",
+      "group": "major",
+      "severity_hint": "high",
+      "notes": ["Includes finfish and many fish-derived sauces/ingredients."]
+    },
+    "allergen_shellfish": {
+      "label": "Shellfish",
+      "group": "major",
+      "severity_hint": "high",
+      "notes": ["Crustaceans and mollusks; treat as high-risk."]
+    },
+    "allergen_sesame": {
+      "label": "Sesame",
+      "group": "major",
+      "severity_hint": "high",
+      "notes": ["Sesame seeds, tahini, sesame oil (often)."]
+    },
+    "allergen_mustard": {
+      "label": "Mustard",
+      "group": "regional",
+      "severity_hint": "medium",
+      "notes": [
+        "Common allergen in some regions; includes mustard seed/powder."
+      ]
+    },
+    "allergen_celery": {
+      "label": "Celery",
+      "group": "regional",
+      "severity_hint": "medium",
+      "notes": ["Common allergen in some regions; celery salt, celery seed."]
+    },
+    "allergen_sulfites": {
+      "label": "Sulfites",
+      "group": "additive",
+      "severity_hint": "medium",
+      "notes": [
+        "Often in wine, dried fruits, some vinegars and processed foods."
+      ]
+    },
+    "allergen_lupin": {
+      "label": "Lupin",
+      "group": "regional",
+      "severity_hint": "medium",
+      "notes": ["Lupin flour/beans; can cross-react with peanut."]
+    },
+    "allergen_mollusk": {
+      "label": "Mollusks",
+      "group": "major",
+      "severity_hint": "high",
+      "notes": ["Clams, mussels, oysters, scallops, squid, octopus."]
+    },
+    "allergen_crustacean": {
+      "label": "Crustaceans",
+      "group": "major",
+      "severity_hint": "high",
+      "notes": ["Shrimp, crab, lobster, crawfish."]
+    }
+  },
+
+  "termMap": {
+    "milk": ["allergen_milk"],
+    "dairy": ["allergen_milk"],
+    "lactose": ["allergen_milk"],
+    "whey": ["allergen_milk"],
+    "casein": ["allergen_milk"],
+
+    "egg": ["allergen_egg"],
+    "eggs": ["allergen_egg"],
+    "albumen": ["allergen_egg"],
+
+    "peanut": ["allergen_peanut"],
+    "peanuts": ["allergen_peanut"],
+
+    "tree nut": ["allergen_tree_nut"],
+    "tree nuts": ["allergen_tree_nut"],
+    "almond": ["allergen_tree_nut"],
+    "walnut": ["allergen_tree_nut"],
+    "cashew": ["allergen_tree_nut"],
+    "pistachio": ["allergen_tree_nut"],
+    "pecan": ["allergen_tree_nut"],
+    "hazelnut": ["allergen_tree_nut"],
+    "macadamia": ["allergen_tree_nut"],
+    "brazil nut": ["allergen_tree_nut"],
+    "pine nut": ["allergen_tree_nut"],
+
+    "wheat": ["allergen_wheat", "allergen_gluten"],
+    "gluten": ["allergen_gluten"],
+    "barley": ["allergen_gluten"],
+    "rye": ["allergen_gluten"],
+
+    "soy": ["allergen_soy"],
+    "soya": ["allergen_soy"],
+
+    "fish": ["allergen_fish"],
+    "shellfish": ["allergen_shellfish"],
+    "sesame": ["allergen_sesame"],
+    "mustard": ["allergen_mustard"],
+    "celery": ["allergen_celery"],
+    "sulfite": ["allergen_sulfites"],
+    "sulfites": ["allergen_sulfites"],
+    "lupin": ["allergen_lupin"]
+  },
+
+  "ingredientTriggers": [
+    {
+      "allergenId": "allergen_milk",
+      "match": "contains_any",
+      "tokens": [
+        "milk",
+        "whole milk",
+        "skim milk",
+        "evaporated milk",
+        "condensed milk",
+        "cream",
+        "heavy cream",
+        "whipping cream",
+        "half and half",
+        "butter",
+        "ghee",
+        "cheese",
+        "yogurt",
+        "kefir",
+        "sour cream",
+        "whey",
+        "casein",
+        "lactose",
+        "milk powder",
+        "dry milk",
+        "buttermilk"
+      ]
+    },
+    {
+      "allergenId": "allergen_egg",
+      "match": "contains_any",
+      "tokens": [
+        "egg",
+        "eggs",
+        "egg white",
+        "egg whites",
+        "egg yolk",
+        "egg yolks",
+        "albumen",
+        "mayonnaise",
+        "mayo"
+      ]
+    },
+    {
+      "allergenId": "allergen_peanut",
+      "match": "contains_any",
+      "tokens": [
+        "peanut",
+        "peanuts",
+        "peanut butter",
+        "groundnut",
+        "groundnuts"
+      ]
+    },
+    {
+      "allergenId": "allergen_tree_nut",
+      "match": "contains_any",
+      "tokens": [
+        "almond",
+        "walnut",
+        "cashew",
+        "pistachio",
+        "pecan",
+        "hazelnut",
+        "filbert",
+        "macadamia",
+        "brazil nut",
+        "pine nut",
+        "nut butter",
+        "almond flour",
+        "almond meal",
+        "marzipan",
+        "praline"
+      ]
+    },
+    {
+      "allergenId": "allergen_wheat",
+      "match": "contains_any",
+      "tokens": [
+        "wheat",
+        "flour",
+        "bread flour",
+        "all purpose flour",
+        "all-purpose flour",
+        "bread",
+        "pasta",
+        "noodles",
+        "breadcrumbs",
+        "cracker",
+        "crackers",
+        "seitan",
+        "couscous",
+        "bulgur"
+      ]
+    },
+    {
+      "allergenId": "allergen_gluten",
+      "match": "contains_any",
+      "tokens": [
+        "gluten",
+        "wheat",
+        "barley",
+        "rye",
+        "malt",
+        "malt extract",
+        "malt syrup",
+        "soy sauce",
+        "teriyaki"
+      ]
+    },
+    {
+      "allergenId": "allergen_soy",
+      "match": "contains_any",
+      "tokens": [
+        "soy",
+        "soya",
+        "soy sauce",
+        "tamari",
+        "tofu",
+        "tempeh",
+        "edamame",
+        "miso",
+        "soybean",
+        "soybeans",
+        "soy milk",
+        "textured vegetable protein",
+        "tvp",
+        "soy lecithin"
+      ]
+    },
+    {
+      "allergenId": "allergen_fish",
+      "match": "contains_any",
+      "tokens": [
+        "fish",
+        "anchovy",
+        "anchovies",
+        "tuna",
+        "salmon",
+        "cod",
+        "tilapia",
+        "sardine",
+        "sardines",
+        "fish sauce",
+        "dashi",
+        "bonito"
+      ]
+    },
+    {
+      "allergenId": "allergen_crustacean",
+      "match": "contains_any",
+      "tokens": [
+        "shrimp",
+        "prawn",
+        "prawns",
+        "crab",
+        "lobster",
+        "crawfish",
+        "crayfish"
+      ]
+    },
+    {
+      "allergenId": "allergen_mollusk",
+      "match": "contains_any",
+      "tokens": [
+        "clam",
+        "clams",
+        "mussel",
+        "mussels",
+        "oyster",
+        "oysters",
+        "scallop",
+        "scallops",
+        "squid",
+        "octopus"
+      ]
+    },
+    {
+      "allergenId": "allergen_shellfish",
+      "match": "contains_any",
+      "tokens": [
+        "shellfish",
+        "shrimp",
+        "prawn",
+        "crab",
+        "lobster",
+        "crawfish",
+        "crayfish",
+        "clam",
+        "mussel",
+        "oyster",
+        "scallop",
+        "squid",
+        "octopus"
+      ]
+    },
+    {
+      "allergenId": "allergen_sesame",
+      "match": "contains_any",
+      "tokens": ["sesame", "tahini", "sesame seeds", "sesame oil"]
+    },
+    {
+      "allergenId": "allergen_mustard",
+      "match": "contains_any",
+      "tokens": ["mustard", "mustard seed", "mustard seeds", "mustard powder"]
+    },
+    {
+      "allergenId": "allergen_celery",
+      "match": "contains_any",
+      "tokens": ["celery", "celery seed", "celery salt"]
+    },
+    {
+      "allergenId": "allergen_sulfites",
+      "match": "contains_any",
+      "tokens": [
+        "sulfite",
+        "sulfites",
+        "wine",
+        "red wine",
+        "white wine",
+        "dried apricot",
+        "dried apricots",
+        "dried fruit",
+        "vinegar",
+        "balsamic vinegar"
+      ]
+    },
+    {
+      "allergenId": "allergen_lupin",
+      "match": "contains_any",
+      "tokens": ["lupin", "lupini", "lupin flour", "lupini beans"]
+    }
+  ],
+
+  "confidenceRules": {
+    "explicit_term": {
+      "score": 0.95,
+      "notes": "Matched from termMap or label text (e.g., 'contains milk')."
+    },
+    "ingredient_trigger": {
+      "score": 0.75,
+      "notes": "Matched a trigger token in ingredient name."
+    },
+    "derived_or_ambiguous": {
+      "score": 0.6,
+      "notes": "Likely allergen via derived ingredients; should request user confirmation (e.g., 'mayo' often contains egg)."
+    }
+  }
+}

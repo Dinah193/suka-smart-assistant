@@ -1,0 +1,1252 @@
+{
+  "$schema": "./methods.keys.schema.json",
+  "keysetId": "ssa.methods",
+  "version": "1.0.0",
+  "generatedAt": "2026-01-10T03:46:56Z",
+  "notes": [
+    "Methods Keys define canonical identifiers and field names for cooking and preservation methods across SSA.",
+    "Use these keys for method catalogs, session runner step graphs, preservation batch logs, and planner feasibility checks.",
+    "Keys are stable: do not rename ids; deprecate with replacementId when needed."
+  ],
+  "enums": {
+    "domains": [
+      "cooking",
+      "preservation",
+      "planner",
+      "sessions",
+      "catalogs",
+      "equipment",
+      "safety"
+    ],
+    "entities": [
+      "method",
+      "step",
+      "checkpoint",
+      "equipment",
+      "parameter",
+      "constraint",
+      "output",
+      "input"
+    ],
+    "valueTypes": [
+      "string",
+      "number",
+      "boolean",
+      "array",
+      "object",
+      "enum"
+    ],
+    "sensitivity": [
+      "public",
+      "internal",
+      "private"
+    ],
+    "lifecycle": [
+      "active",
+      "deprecated"
+    ],
+    "methodKinds": [
+      "cook",
+      "preserve",
+      "prep",
+      "clean",
+      "store"
+    ],
+    "stepKinds": [
+      "action",
+      "wait",
+      "check",
+      "timer",
+      "decision",
+      "note"
+    ],
+    "parameterKinds": [
+      "time",
+      "temperature",
+      "pressure",
+      "ratio",
+      "speed",
+      "ph",
+      "salinity",
+      "humidity",
+      "weight",
+      "volume"
+    ],
+    "hazardKinds": [
+      "burn",
+      "cut",
+      "pressure",
+      "botulism",
+      "cross_contamination",
+      "allergen",
+      "chemical",
+      "fire",
+      "electrical"
+    ],
+    "safetyLevels": [
+      "info",
+      "caution",
+      "warning",
+      "critical"
+    ]
+  },
+  "keys": [
+    {
+      "id": "method.id",
+      "label": "Method ID",
+      "domain": "catalogs",
+      "entity": "method",
+      "valueType": "string",
+      "description": "Stable method identifier (e.g., cook.saute, preserve.pressure_canning).",
+      "required": true,
+      "aliases": [
+        "id",
+        "methodId"
+      ],
+      "examples": [
+        "preserve.freeze"
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "method.label",
+      "label": "Method Label",
+      "domain": "catalogs",
+      "entity": "method",
+      "valueType": "string",
+      "description": "Human-friendly method name.",
+      "required": true,
+      "aliases": [
+        "name",
+        "title"
+      ],
+      "examples": [
+        "Pressure Canning"
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "method.kind",
+      "label": "Method Kind",
+      "domain": "catalogs",
+      "entity": "method",
+      "valueType": "enum",
+      "description": "Method kind: cook/preserve/prep/clean/store.",
+      "required": true,
+      "aliases": [
+        "type"
+      ],
+      "examples": [
+        "preserve"
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "method.description",
+      "label": "Method Description",
+      "domain": "catalogs",
+      "entity": "method",
+      "valueType": "string",
+      "description": "Short description for UI.",
+      "required": false,
+      "aliases": [
+        "desc"
+      ],
+      "examples": [
+        "High-temperature canning for low-acid foods."
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "method.tags",
+      "label": "Method Tags",
+      "domain": "catalogs",
+      "entity": "method",
+      "valueType": "array",
+      "description": "Tags for filtering and planner logic (low_acid, shelf_stable, fast, etc.).",
+      "required": false,
+      "aliases": [
+        "tagIds"
+      ],
+      "examples": [
+        [
+          "shelf_stable",
+          "low_acid"
+        ]
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "method.equipment.required",
+      "label": "Required Equipment",
+      "domain": "equipment",
+      "entity": "equipment",
+      "valueType": "array",
+      "description": "Equipment ids required to perform the method.",
+      "required": true,
+      "aliases": [
+        "requiredEquipment"
+      ],
+      "examples": [
+        [
+          "equip.pressure_canner",
+          "equip.jar_lifter"
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "method.equipment.optional",
+      "label": "Optional Equipment",
+      "domain": "equipment",
+      "entity": "equipment",
+      "valueType": "array",
+      "description": "Optional equipment ids that improve results.",
+      "required": false,
+      "aliases": [
+        "optionalEquipment"
+      ],
+      "examples": [
+        [
+          "equip.digital_thermometer"
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "method.equipment.capacity",
+      "label": "Equipment Capacity",
+      "domain": "equipment",
+      "entity": "equipment",
+      "valueType": "object",
+      "description": "Capacity constraints by equipment (jars, volume, weight).",
+      "required": false,
+      "aliases": [
+        "capacity"
+      ],
+      "examples": [
+        {
+          "equip.pressure_canner": {
+            "maxJarsQuarts": 7
+          }
+        }
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "method.parameters",
+      "label": "Method Parameters",
+      "domain": "catalogs",
+      "entity": "parameter",
+      "valueType": "array",
+      "description": "Parameter definitions used by the method (time/temp/pressure).",
+      "required": true,
+      "aliases": [
+        "params"
+      ],
+      "examples": [
+        [
+          {
+            "id": "proc_time",
+            "kind": "time",
+            "unit": "min"
+          }
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "param.id",
+      "label": "Parameter ID",
+      "domain": "catalogs",
+      "entity": "parameter",
+      "valueType": "string",
+      "description": "Stable parameter identifier within a method.",
+      "required": true,
+      "aliases": [
+        "id",
+        "paramId"
+      ],
+      "examples": [
+        "proc_time"
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "param.kind",
+      "label": "Parameter Kind",
+      "domain": "catalogs",
+      "entity": "parameter",
+      "valueType": "enum",
+      "description": "Parameter kind (time/temperature/pressure/etc.).",
+      "required": true,
+      "aliases": [
+        "type"
+      ],
+      "examples": [
+        "temperature"
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "param.unit",
+      "label": "Parameter Unit",
+      "domain": "catalogs",
+      "entity": "parameter",
+      "valueType": "string",
+      "description": "Unit id for the parameter (min, hr, f, c, psi).",
+      "required": true,
+      "aliases": [
+        "unitId"
+      ],
+      "examples": [
+        "min"
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "param.default",
+      "label": "Default Value",
+      "domain": "catalogs",
+      "entity": "parameter",
+      "valueType": "number",
+      "description": "Default numeric value.",
+      "required": false,
+      "aliases": [
+        "defaultValue"
+      ],
+      "examples": [
+        10
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "param.range",
+      "label": "Allowed Range",
+      "domain": "catalogs",
+      "entity": "parameter",
+      "valueType": "object",
+      "description": "Allowed range (min/max) for numeric parameters.",
+      "required": false,
+      "aliases": [
+        "minmax",
+        "bounds"
+      ],
+      "examples": [
+        {
+          "min": 0,
+          "max": 180
+        }
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "param.by_altitude",
+      "label": "Altitude Adjustment",
+      "domain": "catalogs",
+      "entity": "parameter",
+      "valueType": "object",
+      "description": "Optional altitude adjustments (e.g., canning time/pressure).",
+      "required": false,
+      "aliases": [
+        "altitudeAdjustments"
+      ],
+      "examples": [
+        {
+          "ft": [
+            {
+              "min": 0,
+              "max": 1000,
+              "addMinutes": 0
+            },
+            {
+              "min": 1001,
+              "max": 3000,
+              "addMinutes": 5
+            }
+          ]
+        }
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "method.inputs",
+      "label": "Method Inputs",
+      "domain": "catalogs",
+      "entity": "input",
+      "valueType": "array",
+      "description": "Inputs required by the method (components, water, salt, etc.).",
+      "required": true,
+      "aliases": [
+        "inputs"
+      ],
+      "examples": [
+        [
+          {
+            "componentGroup": "subgroup.vegetable.low_acid",
+            "role": "ingredient"
+          }
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "method.outputs",
+      "label": "Method Outputs",
+      "domain": "catalogs",
+      "entity": "output",
+      "valueType": "array",
+      "description": "Outputs produced (preserved items, jars, portions).",
+      "required": true,
+      "aliases": [
+        "outputs"
+      ],
+      "examples": [
+        [
+          {
+            "type": "inventory_item",
+            "storageMode": "canned",
+            "labelTemplate": "{component} - {date}"
+          }
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "io.component_id",
+      "label": "Component ID",
+      "domain": "catalogs",
+      "entity": "input",
+      "valueType": "string",
+      "description": "Component id required/produced.",
+      "required": false,
+      "aliases": [
+        "componentId"
+      ],
+      "examples": [
+        "comp.tomatoes"
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "io.component_group",
+      "label": "Component Group",
+      "domain": "catalogs",
+      "entity": "input",
+      "valueType": "string",
+      "description": "Substitution group or component group id required/produced.",
+      "required": false,
+      "aliases": [
+        "componentGroup"
+      ],
+      "examples": [
+        "subgroup.grain.rice"
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "io.quantity",
+      "label": "Quantity",
+      "domain": "catalogs",
+      "entity": "input",
+      "valueType": "number",
+      "description": "Quantity amount for IO item.",
+      "required": false,
+      "aliases": [
+        "qty",
+        "amount"
+      ],
+      "examples": [
+        2
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "io.unit_id",
+      "label": "Unit ID",
+      "domain": "catalogs",
+      "entity": "input",
+      "valueType": "string",
+      "description": "Unit id for IO quantity.",
+      "required": false,
+      "aliases": [
+        "unit",
+        "uom"
+      ],
+      "examples": [
+        "lb"
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "io.storage_mode",
+      "label": "Storage Mode",
+      "domain": "catalogs",
+      "entity": "output",
+      "valueType": "string",
+      "description": "Storage mode for outputs (dry, fridge, freezer, canned, cellar).",
+      "required": false,
+      "aliases": [
+        "storageMode"
+      ],
+      "examples": [
+        "freezer"
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "method.step_graph",
+      "label": "Step Graph",
+      "domain": "sessions",
+      "entity": "step",
+      "valueType": "object",
+      "description": "Canonical step graph definition for a method.",
+      "required": true,
+      "aliases": [
+        "stepGraph",
+        "graph"
+      ],
+      "examples": [
+        {
+          "nodes": [
+            {
+              "id": "n1",
+              "kind": "action"
+            }
+          ],
+          "edges": []
+        }
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "step.id",
+      "label": "Step ID",
+      "domain": "sessions",
+      "entity": "step",
+      "valueType": "string",
+      "description": "Stable step id within step graph.",
+      "required": true,
+      "aliases": [
+        "id",
+        "stepId"
+      ],
+      "examples": [
+        "prep.wash"
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "step.kind",
+      "label": "Step Kind",
+      "domain": "sessions",
+      "entity": "step",
+      "valueType": "enum",
+      "description": "Kind: action/wait/check/timer/decision/note.",
+      "required": true,
+      "aliases": [
+        "type"
+      ],
+      "examples": [
+        "timer"
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "step.title",
+      "label": "Step Title",
+      "domain": "sessions",
+      "entity": "step",
+      "valueType": "string",
+      "description": "Short step title for UI.",
+      "required": true,
+      "aliases": [
+        "label"
+      ],
+      "examples": [
+        "Bring to a boil"
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "step.instructions",
+      "label": "Step Instructions",
+      "domain": "sessions",
+      "entity": "step",
+      "valueType": "string",
+      "description": "Instructions for the step (may be markdown).",
+      "required": false,
+      "aliases": [
+        "text",
+        "details"
+      ],
+      "examples": [
+        "Heat on medium-high until boiling."
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "step.estimated_time_s",
+      "label": "Estimated Time (sec)",
+      "domain": "sessions",
+      "entity": "step",
+      "valueType": "number",
+      "description": "Estimated duration in seconds.",
+      "required": false,
+      "aliases": [
+        "etaSeconds"
+      ],
+      "examples": [
+        300
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "step.timers",
+      "label": "Timers",
+      "domain": "sessions",
+      "entity": "step",
+      "valueType": "array",
+      "description": "Timer definitions to start during step.",
+      "required": false,
+      "aliases": [
+        "timerDefs"
+      ],
+      "examples": [
+        [
+          {
+            "label": "Simmer",
+            "seconds": 900
+          }
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "step.requires_equipment",
+      "label": "Step Equipment",
+      "domain": "sessions",
+      "entity": "step",
+      "valueType": "array",
+      "description": "Equipment ids needed for this step.",
+      "required": false,
+      "aliases": [
+        "equipment"
+      ],
+      "examples": [
+        [
+          "equip.pot",
+          "equip.stove"
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "step.inputs",
+      "label": "Step Inputs",
+      "domain": "sessions",
+      "entity": "step",
+      "valueType": "array",
+      "description": "Inputs used in this step (component refs, quantities).",
+      "required": false,
+      "aliases": [
+        "ingredients"
+      ],
+      "examples": [
+        [
+          {
+            "componentId": "comp.onion",
+            "qty": 1,
+            "unit": "each"
+          }
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "step.outputs",
+      "label": "Step Outputs",
+      "domain": "sessions",
+      "entity": "step",
+      "valueType": "array",
+      "description": "Outputs produced in this step (intermediate mixtures, jars filled).",
+      "required": false,
+      "aliases": [
+        "produces"
+      ],
+      "examples": [
+        [
+          {
+            "label": "Filled jars",
+            "count": 7,
+            "unit": "each"
+          }
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "step.checkpoints",
+      "label": "Safety/Quality Checkpoints",
+      "domain": "sessions",
+      "entity": "checkpoint",
+      "valueType": "array",
+      "description": "Checkpoints to verify (temps, seals, cleanliness).",
+      "required": false,
+      "aliases": [
+        "checks"
+      ],
+      "examples": [
+        [
+          {
+            "id": "chk.seal",
+            "level": "critical"
+          }
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "checkpoint.id",
+      "label": "Checkpoint ID",
+      "domain": "safety",
+      "entity": "checkpoint",
+      "valueType": "string",
+      "description": "Stable checkpoint id (chk.clean_hands, chk.seal, chk.temp_165f).",
+      "required": true,
+      "aliases": [
+        "id",
+        "checkId"
+      ],
+      "examples": [
+        "chk.temp_165f"
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "checkpoint.level",
+      "label": "Safety Level",
+      "domain": "safety",
+      "entity": "checkpoint",
+      "valueType": "enum",
+      "description": "Severity level for checkpoint.",
+      "required": true,
+      "aliases": [
+        "severity"
+      ],
+      "examples": [
+        "critical"
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "checkpoint.hazards",
+      "label": "Hazards",
+      "domain": "safety",
+      "entity": "checkpoint",
+      "valueType": "array",
+      "description": "Hazard tags addressed by this checkpoint.",
+      "required": false,
+      "aliases": [
+        "hazardKinds"
+      ],
+      "examples": [
+        [
+          "botulism",
+          "pressure"
+        ]
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "checkpoint.prompt",
+      "label": "Checkpoint Prompt",
+      "domain": "safety",
+      "entity": "checkpoint",
+      "valueType": "string",
+      "description": "User-facing prompt question/instruction.",
+      "required": true,
+      "aliases": [
+        "prompt"
+      ],
+      "examples": [
+        "Verify internal temperature reached 165°F."
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "checkpoint.pass_criteria",
+      "label": "Pass Criteria",
+      "domain": "safety",
+      "entity": "checkpoint",
+      "valueType": "object",
+      "description": "Machine-readable pass criteria (e.g., temp >= 165F).",
+      "required": false,
+      "aliases": [
+        "criteria"
+      ],
+      "examples": [
+        {
+          "param": "temp",
+          "op": ">=",
+          "value": 165,
+          "unit": "f"
+        }
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "checkpoint.failure_actions",
+      "label": "Failure Actions",
+      "domain": "safety",
+      "entity": "checkpoint",
+      "valueType": "array",
+      "description": "Suggested actions if checkpoint fails.",
+      "required": false,
+      "aliases": [
+        "actions"
+      ],
+      "examples": [
+        [
+          "Continue cooking and re-check in 5 min."
+        ]
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "planner.method.feasible",
+      "label": "Method Feasible Flag",
+      "domain": "planner",
+      "entity": "constraint",
+      "valueType": "boolean",
+      "description": "Whether method is feasible given readiness/equipment/time.",
+      "required": false,
+      "aliases": [
+        "feasible"
+      ],
+      "examples": [
+        true
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "planner.method.blockers",
+      "label": "Method Blockers",
+      "domain": "planner",
+      "entity": "constraint",
+      "valueType": "array",
+      "description": "List of blockers preventing method execution.",
+      "required": false,
+      "aliases": [
+        "blockers"
+      ],
+      "examples": [
+        [
+          "missing_equip.pressure_canner"
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "planner.method.readiness_required",
+      "label": "Readiness Required",
+      "domain": "planner",
+      "entity": "constraint",
+      "valueType": "string",
+      "description": "Readiness tier required (L0-L4).",
+      "required": false,
+      "aliases": [
+        "readiness"
+      ],
+      "examples": [
+        "L2"
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "planner.method.time_cost_s",
+      "label": "Time Cost (sec)",
+      "domain": "planner",
+      "entity": "constraint",
+      "valueType": "number",
+      "description": "Estimated total time cost.",
+      "required": false,
+      "aliases": [
+        "timeCostSeconds"
+      ],
+      "examples": [
+        7200
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "planner.method.active_steps",
+      "label": "Active Steps Count",
+      "domain": "planner",
+      "entity": "constraint",
+      "valueType": "number",
+      "description": "Estimated active steps count for complexity.",
+      "required": false,
+      "aliases": [
+        "activeSteps"
+      ],
+      "examples": [
+        18
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "planner.method.concurrent_timers",
+      "label": "Concurrent Timers",
+      "domain": "planner",
+      "entity": "constraint",
+      "valueType": "number",
+      "description": "Estimated concurrent timers needed.",
+      "required": false,
+      "aliases": [
+        "timers"
+      ],
+      "examples": [
+        3
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "planner.method.equipment_gap",
+      "label": "Equipment Gap",
+      "domain": "planner",
+      "entity": "constraint",
+      "valueType": "array",
+      "description": "Equipment ids missing for feasibility.",
+      "required": false,
+      "aliases": [
+        "equipmentMissing"
+      ],
+      "examples": [
+        [
+          "equip.dehydrator"
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "preservation.batch.id",
+      "label": "Preservation Batch ID",
+      "domain": "preservation",
+      "entity": "method",
+      "valueType": "string",
+      "description": "Batch id for preservation run.",
+      "required": true,
+      "aliases": [
+        "batchId"
+      ],
+      "examples": [
+        "pb_01H..."
+      ],
+      "sensitivity": "private",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "preservation.batch.method_id",
+      "label": "Batch Method ID",
+      "domain": "preservation",
+      "entity": "method",
+      "valueType": "string",
+      "description": "Method id used for batch.",
+      "required": true,
+      "aliases": [
+        "methodId"
+      ],
+      "examples": [
+        "preserve.pressure_canning"
+      ],
+      "sensitivity": "private",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "preservation.batch.inputs",
+      "label": "Batch Inputs",
+      "domain": "preservation",
+      "entity": "input",
+      "valueType": "array",
+      "description": "Inputs consumed in batch.",
+      "required": true,
+      "aliases": [
+        "inputs"
+      ],
+      "examples": [
+        [
+          {
+            "componentId": "comp.green_beans",
+            "qty": 10,
+            "unit": "lb"
+          }
+        ]
+      ],
+      "sensitivity": "private",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "preservation.batch.outputs",
+      "label": "Batch Outputs",
+      "domain": "preservation",
+      "entity": "output",
+      "valueType": "array",
+      "description": "Outputs produced in batch.",
+      "required": true,
+      "aliases": [
+        "outputs"
+      ],
+      "examples": [
+        [
+          {
+            "label": "Green beans (quart)",
+            "count": 7,
+            "unit": "each"
+          }
+        ]
+      ],
+      "sensitivity": "private",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "preservation.batch.process_log",
+      "label": "Process Log",
+      "domain": "preservation",
+      "entity": "step",
+      "valueType": "array",
+      "description": "Step-level log from session runner (timestamps, checkpoint results).",
+      "required": false,
+      "aliases": [
+        "log",
+        "steps"
+      ],
+      "examples": [
+        [
+          {
+            "stepId": "proc.pressurize",
+            "at": "2026-01-09T20:00:00Z"
+          }
+        ]
+      ],
+      "sensitivity": "private",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "preservation.batch.safety_results",
+      "label": "Safety Results",
+      "domain": "preservation",
+      "entity": "checkpoint",
+      "valueType": "array",
+      "description": "Checkpoint results for batch.",
+      "required": false,
+      "aliases": [
+        "checkResults"
+      ],
+      "examples": [
+        [
+          {
+            "checkId": "chk.seal",
+            "passed": true
+          }
+        ]
+      ],
+      "sensitivity": "private",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "equipment.id",
+      "label": "Equipment ID",
+      "domain": "equipment",
+      "entity": "equipment",
+      "valueType": "string",
+      "description": "Equipment id used by methods (equip.pressure_canner).",
+      "required": true,
+      "aliases": [
+        "id",
+        "equipmentId"
+      ],
+      "examples": [
+        "equip.pressure_canner"
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "equipment.label",
+      "label": "Equipment Label",
+      "domain": "equipment",
+      "entity": "equipment",
+      "valueType": "string",
+      "description": "Human-friendly equipment name.",
+      "required": true,
+      "aliases": [
+        "name"
+      ],
+      "examples": [
+        "Pressure Canner"
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "equipment.tags",
+      "label": "Equipment Tags",
+      "domain": "equipment",
+      "entity": "equipment",
+      "valueType": "array",
+      "description": "Tags for features/capabilities (electric, stovetop, large_batch).",
+      "required": false,
+      "aliases": [
+        "tagIds"
+      ],
+      "examples": [
+        [
+          "stovetop",
+          "pressure"
+        ]
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "equipment.capacity",
+      "label": "Equipment Capacity",
+      "domain": "equipment",
+      "entity": "equipment",
+      "valueType": "object",
+      "description": "Capacity constraints for planning.",
+      "required": false,
+      "aliases": [
+        "capacity"
+      ],
+      "examples": [
+        {
+          "maxJarsQuarts": 7
+        }
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "equipment.readiness_tier",
+      "label": "Equipment Readiness Tier",
+      "domain": "equipment",
+      "entity": "equipment",
+      "valueType": "string",
+      "description": "Readiness tier required to safely operate this equipment.",
+      "required": false,
+      "aliases": [
+        "tier"
+      ],
+      "examples": [
+        "L2"
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    }
+  ]
+}

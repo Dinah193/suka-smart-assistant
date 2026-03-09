@@ -1,0 +1,187 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "type": "recipe",
+    "id": "desserts.classic_chocolate_chip_cookies",
+    "slug": "classic_chocolate_chip_cookies",
+    "name": "Classic Chocolate Chip Cookies",
+    "version": "1.0.0",
+    "status": "canonical",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-18T00:00:00.000Z",
+    "updatedAt": "2026-01-18T00:00:00.000Z",
+    "locale": "en-US",
+    "difficulty": "beginner",
+    "tags": [
+      "dessert",
+      "cookie",
+      "classic",
+      "chocolate-chip",
+      "baking",
+      "family",
+      "kid-friendly",
+      "baseline",
+      "freezer-friendly"
+    ],
+    "allergens": ["wheat", "eggs", "dairy"],
+    "description": "A reliable, universal classic chocolate chip cookie with crisp edges and a chewy center. Includes both standard all-purpose flour and fresh-milled flour guidance (choose one)."
+  },
+  "equipment": [
+    { "id": "oven", "label": "Oven" },
+    { "id": "sheet_pan", "label": "Baking sheet / sheet pan" },
+    {
+      "id": "parchment_paper",
+      "label": "Parchment paper or silicone baking mat"
+    },
+    { "id": "mixing_bowl_large", "label": "Large mixing bowl" },
+    { "id": "mixing_bowl_medium", "label": "Medium mixing bowl" },
+    { "id": "whisk", "label": "Whisk" },
+    { "id": "spatula", "label": "Rubber spatula" },
+    { "id": "measuring_cups", "label": "Measuring cups/spoons" },
+    { "id": "kitchen_scale", "label": "Kitchen scale (recommended)" },
+    { "id": "cookie_scoop", "label": "Cookie scoop (about 2 tbsp / #40)" },
+    { "id": "wire_rack", "label": "Cooling rack" }
+  ],
+  "ingredients": [
+    {
+      "id": "butter_unsalted",
+      "label": "Unsalted butter, softened (not melted)",
+      "amount": { "value": 227, "unit": "g" }
+    },
+    {
+      "id": "sugar_brown_light",
+      "label": "Light brown sugar, packed",
+      "amount": { "value": 200, "unit": "g" }
+    },
+    {
+      "id": "sugar_granulated",
+      "label": "Granulated sugar",
+      "amount": { "value": 150, "unit": "g" }
+    },
+    {
+      "id": "egg_large",
+      "label": "Large eggs",
+      "amount": { "value": 2, "unit": "each" }
+    },
+    {
+      "id": "vanilla_extract",
+      "label": "Vanilla extract",
+      "amount": { "value": 10, "unit": "ml" }
+    },
+
+    {
+      "id": "flour_ap_option",
+      "label": "All-purpose flour (Option A — use this OR the fresh-milled option)",
+      "amount": { "value": 360, "unit": "g" },
+      "notes": "About 3 cups if spooned/leveled, but weighing is best."
+    },
+    {
+      "id": "flour_freshmilled_option",
+      "label": "Fresh-milled flour, fine-milled (Option B — use this OR the AP option)",
+      "amount": { "value": 360, "unit": "g" },
+      "notes": "Fresh-milled flour often absorbs more. If dough is dry/crumbly, add 1–3 tbsp (15–45 ml) milk or water during mixing."
+    },
+
+    {
+      "id": "baking_soda",
+      "label": "Baking soda",
+      "amount": { "value": 5, "unit": "g" }
+    },
+    {
+      "id": "salt_kosher",
+      "label": "Kosher salt",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "If using fine table salt, reduce to ~4 g."
+    },
+    {
+      "id": "chocolate_chips_semisweet",
+      "label": "Semi-sweet chocolate chips",
+      "amount": { "value": 340, "unit": "g" }
+    },
+    {
+      "id": "walnuts_optional",
+      "label": "Chopped walnuts or pecans (optional)",
+      "amount": { "value": 100, "unit": "g" },
+      "notes": "Optional mix-in; toast for more flavor."
+    },
+    {
+      "id": "milk_or_water_adjustment",
+      "label": "Milk or water (only if needed for fresh-milled flour dough)",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "Start with 15 ml (1 tbsp) and only add if dough is crumbly/dry; up to ~45 ml may be needed depending on flour."
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_prep",
+      "title": "Prep pans and oven",
+      "body": "Heat oven to 350°F (175°C). Line 2 baking sheets with parchment (or silicone mats)."
+    },
+    {
+      "id": "step_02_choose_flour",
+      "title": "Choose your flour option",
+      "body": "Use either the all-purpose flour ingredient OR the fresh-milled flour ingredient (not both). If using fresh-milled flour, rest the dough at least 60 minutes for hydration and add a little milk/water if needed."
+    },
+    {
+      "id": "step_03_whisk_dry",
+      "title": "Whisk dry ingredients",
+      "body": "In a medium bowl, whisk together your chosen flour, baking soda, and salt. Set aside."
+    },
+    {
+      "id": "step_04_cream_butter_sugars",
+      "title": "Cream butter and sugars",
+      "body": "In a large bowl, beat softened butter with brown sugar and granulated sugar until lightened and fluffy, 2–3 minutes. Scrape the bowl well."
+    },
+    {
+      "id": "step_05_add_eggs_vanilla",
+      "title": "Add eggs and vanilla",
+      "body": "Add eggs one at a time, mixing until fully incorporated after each. Mix in vanilla. Scrape the bowl again."
+    },
+    {
+      "id": "step_06_add_dry",
+      "title": "Add dry ingredients",
+      "body": "Add the dry ingredients to the wet mixture and fold until just combined—no dry streaks. Do not overmix."
+    },
+    {
+      "id": "step_07_adjust_if_needed",
+      "title": "Adjust hydration if using fresh-milled flour",
+      "body": "If using fresh-milled flour and the dough looks crumbly or too stiff, add milk or water 15 ml (1 tbsp) at a time until thick but scoopable (often 15–45 ml total). If dough becomes greasy/too soft, chill 15–30 minutes."
+    },
+    {
+      "id": "step_08_fold_in_chips",
+      "title": "Fold in chocolate (and nuts if using)",
+      "body": "Fold in chocolate chips (and nuts, if using) until evenly distributed."
+    },
+    {
+      "id": "step_09_rest",
+      "title": "Rest the dough (baseline cookie logic)",
+      "body": "Cover and rest 30–60 minutes at room temperature, or refrigerate 1–24 hours for deeper flavor and better texture. Fresh-milled flour benefits from at least 60 minutes rest."
+    },
+    {
+      "id": "step_10_scoop",
+      "title": "Scoop and space",
+      "body": "Scoop dough into 2-tbsp portions (about 35–40 g each) and place 2–3 inches apart on prepared sheets. For thicker cookies, form tall mounds rather than balls."
+    },
+    {
+      "id": "step_11_bake",
+      "title": "Bake",
+      "body": "Bake 10–12 minutes, rotating the pan halfway if needed. Pull cookies when edges are set and lightly golden, but centers still look slightly underdone—carryover heat finishes them."
+    },
+    {
+      "id": "step_12_cool",
+      "title": "Cool to set texture",
+      "body": "Cool on the baking sheet 5 minutes, then transfer to a rack to cool completely."
+    },
+    {
+      "id": "step_13_store_freeze",
+      "title": "Store or freeze",
+      "body": "Store airtight at room temperature 3–5 days. To freeze dough: scoop portions, freeze on a tray until firm, then bag airtight up to 2–3 months. Bake from frozen at 350°F (175°C), adding 1–2 minutes."
+    }
+  ],
+  "notes": [
+    "Fresh-milled flour varies a lot. If your grind is coarse, consider sifting out the largest bran for a more classic cookie texture.",
+    "Texture control: more brown sugar increases chew; more granulated sugar increases crispness. This recipe balances both.",
+    "Doneness control: pull early for chewy centers; bake 1–2 minutes longer for crisper cookies."
+  ]
+}

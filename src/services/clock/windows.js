@@ -30,7 +30,7 @@ import {
 
 let eventBus = { emit: () => {}, on: () => () => {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -97,7 +97,9 @@ export function computeSuccessWindow(input) {
   const base = baseHardWindow(timeZone, earliestStartUTC, latestFinishUTC);
 
   // 2) Apply availability union (if provided) → intersect with base
-  const availUnion = unionIntervals(availability.length ? normalizeIntervals(availability) : [base]);
+  const availUnion = unionIntervals(
+    availability.length ? normalizeIntervals(availability) : [base]
+  );
   let feasible = intersectMany([base, ...availUnion]);
 
   // 3) Subtract DND & Busy
@@ -133,15 +135,27 @@ export function computeSuccessWindow(input) {
 
     if (wantStart >= fStart && wantEnd <= fEnd) {
       // Fits as-is
-      resultCandidates.push({ start: new Date(wantStart).toISOString(), end: new Date(wantEnd).toISOString(), reason: "fits" });
+      resultCandidates.push({
+        start: new Date(wantStart).toISOString(),
+        end: new Date(wantEnd).toISOString(),
+        reason: "fits",
+      });
       break;
     }
 
     // Slide inside feasible window (choose nearest placement keeping duration)
-    const slideStart = clamp(wantStart, fStart, Math.max(fEnd - needMs, fStart));
+    const slideStart = clamp(
+      wantStart,
+      fStart,
+      Math.max(fEnd - needMs, fStart)
+    );
     const slideEnd = slideStart + needMs;
     if (slideEnd <= fEnd) {
-      resultCandidates.push({ start: new Date(slideStart).toISOString(), end: new Date(slideEnd).toISOString(), reason: "slid" });
+      resultCandidates.push({
+        start: new Date(slideStart).toISOString(),
+        end: new Date(slideEnd).toISOString(),
+        reason: "slid",
+      });
       break;
     }
   }
@@ -191,7 +205,9 @@ export function buildReadinessLadder({ t0UTC, rules = [], extras = {} }) {
   const ladder = [];
 
   for (const r of defaultRules) {
-    const at = new Date(new Date(t0UTC).getTime() + r.offsetSec * 1000).toISOString();
+    const at = new Date(
+      new Date(t0UTC).getTime() + r.offsetSec * 1000
+    ).toISOString();
     ladder.push({
       id: r.id,
       label: r.label,
@@ -214,8 +230,14 @@ export function buildReadinessLadder({ t0UTC, rules = [], extras = {} }) {
   // Unique labels if requested
   const final = extras?.enforceUniqueLabels ? uniquifyLabels(ladder) : ladder;
 
-  final.sort((a, b) => new Date(a.atUTC).getTime() - new Date(b.atUTC).getTime());
-  emit("clock.readiness_ladder_built", { action: "buildReadinessLadder", t0UTC, count: final.length });
+  final.sort(
+    (a, b) => new Date(a.atUTC).getTime() - new Date(b.atUTC).getTime()
+  );
+  emit("clock.readiness_ladder_built", {
+    action: "buildReadinessLadder",
+    t0UTC,
+    count: final.length,
+  });
 
   return { ok: true, data: final };
 }
@@ -225,12 +247,16 @@ export function buildReadinessLadder({ t0UTC, rules = [], extras = {} }) {
  * - Given a ladder and "nowUTC", picks the next due item and T-minus label.
  */
 export function nextChecklistItem(ladder, nowUTC = isoNow()) {
-  if (!Array.isArray(ladder)) return { ok: false, error: "ladder must be an array" };
+  if (!Array.isArray(ladder))
+    return { ok: false, error: "ladder must be an array" };
   const now = new Date(nowUTC).getTime();
-  const upcoming = ladder.find((i) => new Date(i.atUTC).getTime() > now) || null;
+  const upcoming =
+    ladder.find((i) => new Date(i.atUTC).getTime() > now) || null;
   if (!upcoming) return { ok: true, data: null };
 
-  const deltaSec = Math.round((new Date(upcoming.atUTC).getTime() - now) / 1000);
+  const deltaSec = Math.round(
+    (new Date(upcoming.atUTC).getTime() - now) / 1000
+  );
   return {
     ok: true,
     data: {
@@ -246,7 +272,11 @@ export function nextChecklistItem(ladder, nowUTC = isoNow()) {
  * - Utility to convert local availability windows (e.g., “9:00–18:00” local)
  *   into UTC intervals for a given reference day in timeZone.
  */
-export function deriveAvailabilityForDay({ timeZone, referenceUTC = isoNow(), windows = [] }) {
+export function deriveAvailabilityForDay({
+  timeZone,
+  referenceUTC = isoNow(),
+  windows = [],
+}) {
   const startDayUTC = startOfZonedDayUTC(referenceUTC, timeZone);
   const endDayUTC = endOfZonedDayUTC(referenceUTC, timeZone);
 
@@ -257,17 +287,29 @@ export function deriveAvailabilityForDay({ timeZone, referenceUTC = isoNow(), wi
     const [eH, eM] = (w.end || "24:00").split(":").map(Number);
 
     const sLocal = wallLocalFromDay(startDayUTC, timeZone, sH, sM);
-    const eLocal = wallLocalFromDay(startDayUTC, timeZone, eH, eM >= 60 ? 59 : eM);
+    const eLocal = wallLocalFromDay(
+      startDayUTC,
+      timeZone,
+      eH,
+      eM >= 60 ? 59 : eM
+    );
 
     const sUTC = fromZonedToUTC(sLocal, timeZone).utcISO;
     const eUTC = fromZonedToUTC(eLocal, timeZone).utcISO;
 
-    const clamped = intersect(toInterval({ start: sUTC, end: eUTC }), toInterval({ start: startDayUTC, end: endDayUTC }));
+    const clamped = intersect(
+      toInterval({ start: sUTC, end: eUTC }),
+      toInterval({ start: startDayUTC, end: endDayUTC })
+    );
     if (clamped) intervals.push(clamped);
   }
 
   const merged = unionIntervals(intervals);
-  emit("clock.availability_derived", { action: "deriveAvailabilityForDay", count: merged.length, timeZone });
+  emit("clock.availability_derived", {
+    action: "deriveAvailabilityForDay",
+    count: merged.length,
+    timeZone,
+  });
   return merged;
 }
 
@@ -276,11 +318,36 @@ export function deriveAvailabilityForDay({ timeZone, referenceUTC = isoNow(), wi
  * -------------------------------------------------------------------------- */
 
 const DEFAULT_LADDER_RULES = [
-  { id: "check-inventory", label: "Check required items on hand", offsetSec: -45 * 60, criticality: "soft" },
-  { id: "prep-surface", label: "Clear & stage workspace", offsetSec: -20 * 60, criticality: "soft" },
-  { id: "preheat-or-water", label: "Preheat / Start water to boil", offsetSec: -12 * 60, criticality: "hard" },
-  { id: "gather-tools", label: "Gather tools & equipment", offsetSec: -8 * 60, criticality: "soft" },
-  { id: "final-brief", label: "Re-read first 2 steps", offsetSec: -3 * 60, criticality: "soft" },
+  {
+    id: "check-inventory",
+    label: "Check required items on hand",
+    offsetSec: -45 * 60,
+    criticality: "soft",
+  },
+  {
+    id: "prep-surface",
+    label: "Clear & stage workspace",
+    offsetSec: -20 * 60,
+    criticality: "soft",
+  },
+  {
+    id: "preheat-or-water",
+    label: "Preheat / Start water to boil",
+    offsetSec: -12 * 60,
+    criticality: "hard",
+  },
+  {
+    id: "gather-tools",
+    label: "Gather tools & equipment",
+    offsetSec: -8 * 60,
+    criticality: "soft",
+  },
+  {
+    id: "final-brief",
+    label: "Re-read first 2 steps",
+    offsetSec: -3 * 60,
+    criticality: "soft",
+  },
   { id: "t0", label: "Start session (T0)", offsetSec: 0, criticality: "hard" },
 ];
 
@@ -330,7 +397,9 @@ function spanMs(i) {
 
 function unionIntervals(intervals) {
   if (!intervals.length) return [];
-  const sorted = [...intervals].sort((a, b) => new Date(a.start) - new Date(b.start));
+  const sorted = [...intervals].sort(
+    (a, b) => new Date(a.start) - new Date(b.start)
+  );
   const merged = [];
   let cur = { ...sorted[0] };
   for (let k = 1; k < sorted.length; k++) {
@@ -347,7 +416,9 @@ function unionIntervals(intervals) {
 }
 
 function intersect(a, b) {
-  const s = new Date(Math.max(new Date(a.start), new Date(b.start))).toISOString();
+  const s = new Date(
+    Math.max(new Date(a.start), new Date(b.start))
+  ).toISOString();
   const eMs = Math.min(new Date(a.end).getTime(), new Date(b.end).getTime());
   if (eMs <= new Date(s).getTime()) return null;
   return { start: s, end: new Date(eMs).toISOString() };
@@ -380,9 +451,17 @@ function subtract(A, B) {
   if (bE <= aS || bS >= aE) return [A];
 
   // Left piece
-  if (bS > aS) res.push({ start: new Date(aS).toISOString(), end: new Date(bS).toISOString() });
+  if (bS > aS)
+    res.push({
+      start: new Date(aS).toISOString(),
+      end: new Date(bS).toISOString(),
+    });
   // Right piece
-  if (bE < aE) res.push({ start: new Date(bE).toISOString(), end: new Date(aE).toISOString() });
+  if (bE < aE)
+    res.push({
+      start: new Date(bE).toISOString(),
+      end: new Date(aE).toISOString(),
+    });
   return res;
 }
 
@@ -460,7 +539,12 @@ function wallLocalFromDay(dayStartUTC, timeZone, hour, minute) {
 
 function emit(type, data) {
   try {
-    eventBus.emit({ type, ts: isoNow(), source: "services/clock/windows", data });
+    eventBus.emit({
+      type,
+      ts: isoNow(),
+      source: "services/clock/windows",
+      data,
+    });
   } catch {}
 }
 

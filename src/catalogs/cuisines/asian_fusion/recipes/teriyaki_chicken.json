@@ -1,0 +1,490 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "meta": {
+    "id": "asian_fusion.teriyaki_chicken",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Teriyaki Chicken",
+    "subtitle": "Glossy soy-ginger glaze with a weeknight-fast cook time",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA canonical cuisine recipes",
+      "notes": [
+        "Designed for Asian Fusion overlay planning.",
+        "Uses amount{value,unit} across all ingredients for schema compliance.",
+        "Steps use id+title+instructions[] (rich form), with timers using minutes fields."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "cuisines.asian_fusion",
+    "subprofiles": ["asian_fusion.japanese_inspired", "asian_fusion.weeknight"],
+    "category": "main",
+    "mealArchetypes": [
+      "archetype.bowl",
+      "archetype.protein_plus_rice",
+      "archetype.weeknight_fast"
+    ],
+    "servingStyles": ["bowls", "plates", "family_style"],
+    "plannerTags": [
+      "cuisine.asian_fusion",
+      "method.pan_sear",
+      "sauce.teriyaki",
+      "weeknight.friendly",
+      "leftovers.good"
+    ]
+  },
+  "summary": "Tender, pan-seared chicken coated in a quick teriyaki glaze—sweet-salty, ginger-garlic forward, and perfect over rice with crisp vegetables.",
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 1, "unit": "bowl" },
+    "notes": "Serves 4 with rice and a vegetable side. Increase chicken to 2 lb for hearty servings."
+  },
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 10,
+    "totalMins": 30
+  },
+  "difficulty": "beginner",
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": "sauce_only",
+    "makeAhead": ["marinade_optional", "sauce_mix"],
+    "kidFriendly": true
+  },
+  "tasteProfile": {
+    "salty": 3,
+    "sweet": 3,
+    "sour": 1,
+    "umami": 4,
+    "spicy": 0,
+    "aromatics": ["ginger", "garlic", "scallion"],
+    "finish": ["sesame", "green_onion"]
+  },
+  "equipment": {
+    "required": [
+      {
+        "id": "equipment.skillet",
+        "label": "Large skillet or sauté pan",
+        "required": true,
+        "notes": "Use a wide pan to reduce steaming and build a glossy glaze."
+      },
+      {
+        "id": "equipment.saucepan",
+        "label": "Small saucepan (optional)",
+        "required": false,
+        "notes": "You can reduce the sauce directly in the skillet; saucepan is optional for tighter control."
+      },
+      {
+        "id": "equipment.knife",
+        "label": "Chef's knife",
+        "required": true
+      },
+      {
+        "id": "equipment.cutting_board",
+        "label": "Cutting board",
+        "required": true
+      }
+    ],
+    "recommended": [
+      "equipment.rice_cooker",
+      "equipment.instant_read_thermometer",
+      "equipment.whisk"
+    ],
+    "minimum": [
+      "equipment.skillet",
+      "equipment.knife",
+      "equipment.cutting_board"
+    ],
+    "optional": [
+      {
+        "id": "equipment.microplane",
+        "label": "Microplane or fine grater",
+        "required": false,
+        "notes": "Great for quick ginger/garlic prep."
+      }
+    ]
+  },
+  "dietFlags": ["diet.dairy_free"],
+  "allergens": {
+    "contains": ["allergen.soy"],
+    "mayContain": ["allergen.sesame"],
+    "notes": [
+      "Use tamari for gluten-free (verify certified GF).",
+      "Swap sesame oil and garnish if sesame-sensitive."
+    ]
+  },
+  "keywords": [
+    "teriyaki",
+    "chicken teriyaki",
+    "soy ginger glaze",
+    "asian fusion bowl",
+    "weeknight dinner",
+    "meal prep"
+  ],
+  "tags": [
+    "cuisine.asian_fusion",
+    "dish.teriyaki_chicken",
+    "category.main",
+    "serving.bowls",
+    "method.pan_sear",
+    "method.reduce",
+    "weeknight.friendly",
+    "leftovers.good",
+    "batch.friendly"
+  ],
+  "methods": ["method.pan_sear", "method.simmer", "method.reduce"],
+  "pairings": {
+    "serveWith": [
+      "dish.steamed_rice",
+      "dish.cucumber_quick_pickles",
+      "dish.stir_fry_vegetables",
+      "dish.steamed_broccoli"
+    ],
+    "notes": "Add quick pickles or a crunchy veg for contrast to the sweet-salty glaze."
+  },
+  "storage": {
+    "refrigerator": {
+      "maxDays": 4,
+      "notes": "Store chicken and rice separately when possible for best texture."
+    },
+    "freezer": {
+      "maxDays": 60,
+      "notes": "Freeze cooked chicken with sauce; thaw overnight and reheat gently with a splash of water."
+    },
+    "reheat": {
+      "methods": ["skillet", "microwave"],
+      "notes": "Reheat gently to avoid drying. Add a teaspoon or two of water to loosen glaze."
+    }
+  },
+  "safety": {
+    "handling": [
+      "Avoid cross-contamination when prepping raw chicken.",
+      "Cook chicken to a safe internal temperature (165°F / 74°C) unless your household standard differs."
+    ],
+    "notes": "If using thighs, they can be cooked a bit higher for tenderness (170–180°F / 77–82°C)."
+  },
+  "planner": {
+    "primaryDishId": "asian_fusion.teriyaki_chicken_rice_bowl",
+    "suggestedSides": [
+      "asian_fusion.quick_pickled_cucumbers",
+      "asian_fusion.miso_ginger_soup"
+    ],
+    "leftoversRemix": [
+      "Chop leftovers for teriyaki fried rice.",
+      "Use as a wrap filling with shredded cabbage and a squeeze of lime."
+    ]
+  },
+  "ingredientGroups": [
+    {
+      "id": "group.protein",
+      "label": "Protein",
+      "items": ["ingredient.chicken_thighs_boneless_skinless"]
+    },
+    {
+      "id": "group.sauce",
+      "label": "Teriyaki Sauce",
+      "items": [
+        "ingredient.soy_sauce",
+        "ingredient.water",
+        "ingredient.brown_sugar",
+        "ingredient.honey",
+        "ingredient.rice_vinegar",
+        "ingredient.ginger_fresh",
+        "ingredient.garlic_fresh",
+        "ingredient.sesame_oil",
+        "ingredient.cornstarch",
+        "ingredient.scallions"
+      ]
+    },
+    {
+      "id": "group.to_cook",
+      "label": "To Cook",
+      "items": ["ingredient.neutral_oil", "ingredient.black_pepper"]
+    },
+    {
+      "id": "group.to_serve",
+      "label": "To Serve (Optional)",
+      "items": [
+        "ingredient.rice_cooked",
+        "ingredient.sesame_seeds",
+        "ingredient.lime"
+      ]
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "ingredient.chicken_thighs_boneless_skinless",
+      "label": "Boneless, skinless chicken thighs",
+      "role": "protein",
+      "amount": { "value": 680, "unit": "g" },
+      "notes": "About 1.5 lb. Breast works too—reduce cook time to avoid drying."
+    },
+    {
+      "id": "ingredient.soy_sauce",
+      "label": "Soy sauce",
+      "role": "umami",
+      "amount": { "value": 80, "unit": "ml" },
+      "notes": "About 1/3 cup. Use tamari for gluten-free."
+    },
+    {
+      "id": "ingredient.water",
+      "label": "Water",
+      "role": "sauce_base",
+      "amount": { "value": 60, "unit": "ml" },
+      "notes": "Helps the sauce simmer and reduce without burning early."
+    },
+    {
+      "id": "ingredient.brown_sugar",
+      "label": "Brown sugar",
+      "role": "sweetener",
+      "amount": { "value": 25, "unit": "g" },
+      "notes": "About 2 Tbsp packed."
+    },
+    {
+      "id": "ingredient.honey",
+      "label": "Honey",
+      "role": "sweetener",
+      "amount": { "value": 15, "unit": "g" },
+      "notes": "About 2 tsp; optional but adds shine and rounded sweetness."
+    },
+    {
+      "id": "ingredient.rice_vinegar",
+      "label": "Rice vinegar",
+      "role": "acid",
+      "amount": { "value": 15, "unit": "ml" },
+      "notes": "About 1 Tbsp. Substitute apple cider vinegar in a pinch."
+    },
+    {
+      "id": "ingredient.ginger_fresh",
+      "label": "Fresh ginger, grated",
+      "role": "aromatic",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": "About 1 Tbsp grated."
+    },
+    {
+      "id": "ingredient.garlic_fresh",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 9, "unit": "g" },
+      "notes": "About 3 cloves."
+    },
+    {
+      "id": "ingredient.sesame_oil",
+      "label": "Toasted sesame oil",
+      "role": "finish_fat",
+      "amount": { "value": 5, "unit": "ml" },
+      "notes": "About 1 tsp; add at the end for aroma."
+    },
+    {
+      "id": "ingredient.cornstarch",
+      "label": "Cornstarch",
+      "role": "thickener",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": "About 1 Tbsp. Mix into a slurry with a little of the sauce or water."
+    },
+    {
+      "id": "ingredient.neutral_oil",
+      "label": "Neutral oil (avocado, canola, grapeseed)",
+      "role": "cooking_fat",
+      "amount": { "value": 15, "unit": "ml" },
+      "notes": "About 1 Tbsp."
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "About 1/2 tsp; adjust to taste."
+    },
+    {
+      "id": "ingredient.scallions",
+      "label": "Scallions (green onions), sliced",
+      "role": "garnish",
+      "amount": { "value": 30, "unit": "g" },
+      "notes": "About 2–3 scallions. Use part white/part green."
+    },
+    {
+      "id": "ingredient.sesame_seeds",
+      "label": "Sesame seeds",
+      "role": "garnish",
+      "amount": { "value": 6, "unit": "g" },
+      "optional": true,
+      "notes": "About 2 tsp; toast briefly for extra aroma."
+    },
+    {
+      "id": "ingredient.rice_cooked",
+      "label": "Cooked rice, to serve",
+      "role": "starch",
+      "amount": { "value": 600, "unit": "g" },
+      "optional": true,
+      "notes": "About 4 cups cooked. Substitute quinoa or cauliflower rice."
+    },
+    {
+      "id": "ingredient.lime",
+      "label": "Lime wedges, to serve",
+      "role": "acid_finish",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": "A squeeze brightens the glaze and balances sweetness."
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_prep_sauce",
+      "title": "Mix the teriyaki base",
+      "domain": "prep",
+      "activeMins": 5,
+      "handsOffMins": 0,
+      "instructions": [
+        "In a bowl, whisk together soy sauce, water, brown sugar, honey (if using), and rice vinegar.",
+        "Stir in grated ginger and minced garlic.",
+        "In a small cup, mix cornstarch with 1–2 Tbsp of the sauce mixture to form a smooth slurry; set aside."
+      ],
+      "checks": [
+        "Sauce tastes sweet-salty and slightly sharp; adjust sugar or vinegar to preference.",
+        "Cornstarch slurry is smooth (no lumps)."
+      ]
+    },
+    {
+      "id": "step_02_sear_chicken",
+      "title": "Sear the chicken",
+      "domain": "cook",
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "instructions": [
+        "Pat chicken dry; season lightly with black pepper.",
+        "Heat a large skillet over medium-high heat. Add neutral oil.",
+        "Add chicken in a single layer (work in batches if needed). Sear until browned on the first side, 4–5 minutes.",
+        "Flip and cook 3–4 minutes more until mostly cooked through."
+      ],
+      "timers": [
+        { "label": "Sear first side", "minutes": 5 },
+        { "label": "Cook second side", "minutes": 4 }
+      ],
+      "temperature": {
+        "type": "stovetop",
+        "value": 205,
+        "unit": "c",
+        "notes": "Target a lively sizzle; reduce heat if garlic in pan starts to burn later."
+      },
+      "checks": [
+        "Chicken has good browning (fond) on the pan.",
+        "If chicken is very thick, extend cook time 1–2 minutes."
+      ]
+    },
+    {
+      "id": "step_03_glaze_and_reduce",
+      "title": "Add sauce and reduce to a glossy glaze",
+      "domain": "cook",
+      "activeMins": 6,
+      "handsOffMins": 4,
+      "instructions": [
+        "Reduce heat to medium. Pour in the teriyaki sauce base (not the slurry yet). Scrape up browned bits from the pan.",
+        "Simmer 2–3 minutes to meld flavors.",
+        "Stir the slurry again, then drizzle it into the pan while stirring. Simmer until the sauce thickens and coats the chicken, 2–4 minutes.",
+        "Turn off heat and stir in toasted sesame oil."
+      ],
+      "timers": [
+        { "label": "Simmer sauce base", "minutes": 3 },
+        { "label": "Thicken with slurry", "minutes": 3 }
+      ],
+      "checks": [
+        "Sauce is glossy and coats the back of a spoon.",
+        "If sauce gets too thick, add 1–2 Tbsp water and stir to loosen."
+      ]
+    },
+    {
+      "id": "step_04_finish_and_serve",
+      "title": "Finish and serve",
+      "domain": "serve",
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "instructions": [
+        "Slice chicken if desired, or serve whole pieces over rice.",
+        "Spoon extra glaze over the top. Garnish with scallions and sesame seeds (optional).",
+        "Serve with lime wedges (optional) and a crisp vegetable side."
+      ],
+      "checks": [
+        "Taste and adjust: add a squeeze of lime or a splash of vinegar if it feels too sweet.",
+        "Add chili crisp or red pepper flakes if you want heat."
+      ]
+    }
+  ],
+  "notes": [
+    "Shortcut: Use bottled teriyaki sauce, then add fresh ginger/garlic and reduce to thicken.",
+    "For extra shine and cling, keep the simmer gentle after adding slurry to avoid breaking the glaze.",
+    "If using chicken breast, pull earlier and glaze briefly to prevent dryness."
+  ],
+  "variations": [
+    {
+      "id": "variation_gluten_free",
+      "label": "Gluten-free teriyaki chicken",
+      "when": { "dietFlagsIncludeAny": ["diet.gluten_free"] },
+      "adapt": {
+        "swap": [{ "from": "ingredient.soy_sauce", "to": "ingredient.tamari" }],
+        "notes": "Verify tamari is certified gluten-free. Avoid some imitation soy sauces."
+      }
+    },
+    {
+      "id": "variation_spicy",
+      "label": "Spicy teriyaki chicken",
+      "when": {
+        "tagsIncludeAny": ["flavor.spicy", "heat.pref_medium", "heat.pref_high"]
+      },
+      "adapt": {
+        "add": [
+          {
+            "ingredient": "ingredient.chili_crisp",
+            "amount": { "value": 15, "unit": "g" },
+            "notes": "Stir in at the end or serve on the side."
+          }
+        ],
+        "notes": "You can also add 1–2 tsp sriracha to the sauce base."
+      }
+    },
+    {
+      "id": "variation_vegetable_heavy",
+      "label": "Teriyaki chicken & vegetables",
+      "when": { "signals": { "moreVegetables": true } },
+      "adapt": {
+        "add": [
+          {
+            "ingredient": "ingredient.broccoli_florets",
+            "amount": { "value": 250, "unit": "g" },
+            "notes": "Steam/blanch first or stir-fry quickly."
+          },
+          {
+            "ingredient": "ingredient.bell_pepper",
+            "amount": { "value": 150, "unit": "g" },
+            "notes": "Slice thin; add after chicken sears."
+          }
+        ],
+        "notes": "Cook vegetables before thickening the sauce; then glaze everything together."
+      }
+    }
+  ],
+  "compat": {
+    "cuisineId": "cuisines.asian_fusion",
+    "dishId": "asian_fusion.teriyaki_chicken_rice_bowl",
+    "ingredientAliasesUsed": [
+      "ingredient.soy_sauce",
+      "ingredient.ginger_fresh",
+      "ingredient.garlic_fresh"
+    ],
+    "recommendedRecipeTags": [
+      "cuisine.asian_fusion",
+      "method.pan_sear",
+      "sauce.teriyaki"
+    ],
+    "normalization": {
+      "titleCaseFold": true,
+      "keywordsCaseFold": true
+    }
+  }
+}

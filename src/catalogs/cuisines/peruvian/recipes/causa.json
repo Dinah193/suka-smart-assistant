@@ -1,0 +1,513 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.peruvian.recipes.causa",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Causa Rellena",
+    "subtitle": "Chilled layered mashed potato terrine with ají amarillo, lime, and savory filling",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalogs",
+      "notes": [
+        "Canonical home method for causa: yellow potato base seasoned with ají amarillo + lime, layered with tuna/chicken/avocado filling.",
+        "Designed for deterministic adaptation: mayo/yogurt swap, tuna/chicken/vegetarian fillings, gluten-free by default."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "Peruvian",
+    "subprofiles": ["cuisines.peruvian", "cold_dish", "pepper.aji_amarillo"],
+    "category": "main",
+    "mealArchetypes": [
+      "meal_archetype.chilled_platter",
+      "meal_archetype.lunch",
+      "meal_archetype.make_ahead"
+    ],
+    "servingStyles": ["chilled", "layered", "party_platter", "slices"],
+    "plannerTags": [
+      "cuisine.peruvian",
+      "cold_dish",
+      "make_ahead",
+      "no_bake",
+      "party_friendly",
+      "lunch",
+      "potato_based",
+      "pepper.aji_amarillo",
+      "lime_forward",
+      "avocado",
+      "salad_style"
+    ]
+  },
+
+  "summary": "Causa rellena is a chilled Peruvian layered dish: ají amarillo–lime mashed potatoes wrapped around a creamy filling (tuna or chicken), often layered with avocado and topped with egg, olives, and herbs.",
+
+  "yield": {
+    "servings": 6,
+    "notes": "Serves 6 as a lunch/main or 8–10 as an appetizer."
+  },
+
+  "time": {
+    "activeMins": 35,
+    "handsOffMins": 30,
+    "totalMins": 65
+  },
+
+  "difficulty": 3,
+
+  "signals": {
+    "batchFriendly": true,
+    "leftoversFriendly": true,
+    "weeknightPossible": "Yes, especially with canned tuna or leftover chicken.",
+    "freezerFriendly": false
+  },
+
+  "tasteProfile": {
+    "primary": ["bright", "savory", "creamy", "pepper_fruity", "citrus"],
+    "heat": {
+      "typical": 2,
+      "range": [0, 4],
+      "note": "Heat depends on ají amarillo paste. Causa is usually mildly spicy."
+    },
+    "aromatics": ["red_onion_optional", "cilantro_optional"],
+    "texture": ["silky_potato", "creamy_filling", "chilled_firm_layers"]
+  },
+
+  "equipment": {
+    "minimum": [
+      "equipment.stovetop",
+      "equipment.stockpot_or_saucepot",
+      "equipment.potato_masher_or_ricer",
+      "equipment.mixing_bowls",
+      "equipment.knife",
+      "equipment.cutting_board"
+    ],
+    "recommended": [
+      "equipment.ring_mold_or_springform",
+      "equipment.rubber_spatula",
+      "equipment.food_processor"
+    ],
+    "optional": [
+      {
+        "id": "equipment.piping_bag",
+        "label": "Piping bag",
+        "notes": "Nice for clean layers and decorative topping."
+      }
+    ]
+  },
+
+  "dietFlags": [
+    "diet.gluten_free",
+    "diet.contains_egg_optional",
+    "diet.contains_fish_optional"
+  ],
+  "allergens": {
+    "mayContain": ["allergen.egg", "allergen.fish", "allergen.dairy_optional"],
+    "notes": [
+      "Tuna filling contains fish; mayo and egg garnish contain egg.",
+      "Dairy is optional (some versions add butter)."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "ingredient.potatoes_yellow",
+      "label": "Yellow potatoes (Yukon gold preferred), peeled",
+      "role": "base",
+      "amount": { "value": 3, "unit": "lb" },
+      "notes": "Peruvian yellow potatoes are traditional; Yukon gold works very well."
+    },
+    {
+      "id": "ingredient.salt_kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 2.5, "unit": "tsp" },
+      "notes": "Includes salting the potato water and seasoning the mash."
+    },
+    {
+      "id": "ingredient.aji_amarillo_paste",
+      "label": "Ají amarillo paste",
+      "role": "heat_flavor",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "notes": "Start at 1 tbsp for mild; increase to 3 tbsp for a stronger ají presence."
+    },
+    {
+      "id": "ingredient.lime_juice",
+      "label": "Fresh lime juice",
+      "role": "acid",
+      "amount": { "value": 3, "unit": "tbsp" },
+      "notes": "Key flavor. Add gradually and taste as you go."
+    },
+    {
+      "id": "ingredient.oil_neutral",
+      "label": "Neutral oil (or mild olive oil)",
+      "role": "fat",
+      "amount": { "value": 3, "unit": "tbsp" },
+      "notes": "Helps create a smooth, cohesive potato layer."
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "optional": true,
+      "amount": { "value": 0.25, "unit": "tsp" }
+    },
+
+    {
+      "id": "ingredient.tuna_canned",
+      "label": "Canned tuna, drained",
+      "role": "filling_protein",
+      "amount": { "value": 12, "unit": "oz" },
+      "notes": "Two 6-oz cans. Substitute shredded chicken for a 'causa de pollo'."
+    },
+    {
+      "id": "ingredient.mayonnaise",
+      "label": "Mayonnaise",
+      "role": "filling_binder",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "notes": "Adjust for creaminess. Can swap part with Greek yogurt."
+    },
+    {
+      "id": "ingredient.red_onion",
+      "label": "Red onion, very finely diced",
+      "role": "filling_crunch",
+      "optional": true,
+      "amount": { "value": 0.25, "unit": "cup" },
+      "notes": "Optional but common; soak in cold water 5 minutes to mellow."
+    },
+    {
+      "id": "ingredient.celery",
+      "label": "Celery, finely diced",
+      "role": "filling_crunch",
+      "optional": true,
+      "amount": { "value": 0.25, "unit": "cup" }
+    },
+    {
+      "id": "ingredient.lime_juice_filling",
+      "label": "Fresh lime juice (for filling)",
+      "role": "acid",
+      "amount": { "value": 1.5, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.aji_amarillo_paste_filling",
+      "label": "Ají amarillo paste (for filling)",
+      "role": "heat_flavor",
+      "optional": true,
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": "Optional—keeps filling aligned with the potato base flavor."
+    },
+    {
+      "id": "ingredient.salt_filling",
+      "label": "Salt (for filling)",
+      "role": "seasoning",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.black_pepper_filling",
+      "label": "Black pepper (for filling)",
+      "role": "seasoning",
+      "optional": true,
+      "amount": { "value": 0.25, "unit": "tsp" }
+    },
+
+    {
+      "id": "ingredient.avocado",
+      "label": "Avocados, sliced",
+      "role": "layer",
+      "optional": true,
+      "amount": { "value": 2, "unit": "each" },
+      "notes": "Classic layer. Toss lightly with lime to prevent browning."
+    },
+
+    {
+      "id": "ingredient.eggs",
+      "label": "Eggs, hard-boiled (garnish)",
+      "role": "garnish",
+      "optional": true,
+      "amount": { "value": 2, "unit": "each" }
+    },
+    {
+      "id": "ingredient.olives_black",
+      "label": "Black olives (garnish)",
+      "role": "garnish",
+      "optional": true,
+      "amount": { "value": 0.33, "unit": "cup" }
+    },
+    {
+      "id": "ingredient.cilantro",
+      "label": "Cilantro or parsley, chopped (garnish)",
+      "role": "herb_finish",
+      "optional": true,
+      "amount": { "value": 2, "unit": "tbsp" }
+    }
+  ],
+
+  "ingredientGroups": [
+    {
+      "id": "group.potato_base",
+      "label": "Ají-lime potato base",
+      "items": [
+        "ingredient.potatoes_yellow",
+        "ingredient.salt_kosher",
+        "ingredient.aji_amarillo_paste",
+        "ingredient.lime_juice",
+        "ingredient.oil_neutral",
+        "ingredient.black_pepper"
+      ]
+    },
+    {
+      "id": "group.filling",
+      "label": "Filling (tuna salad style)",
+      "items": [
+        "ingredient.tuna_canned",
+        "ingredient.mayonnaise",
+        "ingredient.red_onion",
+        "ingredient.celery",
+        "ingredient.lime_juice_filling",
+        "ingredient.aji_amarillo_paste_filling",
+        "ingredient.salt_filling",
+        "ingredient.black_pepper_filling"
+      ]
+    },
+    {
+      "id": "group.layers_garnish",
+      "label": "Layers & garnish",
+      "items": [
+        "ingredient.avocado",
+        "ingredient.eggs",
+        "ingredient.olives_black",
+        "ingredient.cilantro"
+      ]
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.001_cook_potatoes",
+      "title": "Boil potatoes until tender",
+      "instructions": [
+        "Cut potatoes into large chunks for even cooking.",
+        "Place in a pot, cover with cold water, and add 2 tsp salt.",
+        "Bring to a boil, then reduce to a steady simmer until potatoes are very tender.",
+        "Drain thoroughly and let steam-dry 3–5 minutes to remove excess moisture."
+      ],
+      "timers": [
+        { "label": "Boil/simmer potatoes", "minutes": 18 },
+        { "label": "Steam-dry after draining", "minutes": 4 }
+      ],
+      "checks": [
+        "Potatoes mash easily with no firm centers.",
+        "Excess water is steamed off to prevent a watery causa."
+      ]
+    },
+    {
+      "id": "step.002_mash_and_season",
+      "title": "Mash potatoes and season with ají + lime",
+      "instructions": [
+        "Mash hot potatoes until smooth (a ricer yields the silkiest texture).",
+        "While still warm, mix in ají amarillo paste, lime juice, and oil.",
+        "Season with salt to taste (start with remaining 1/2 tsp, then adjust). Add black pepper if desired.",
+        "Mix until cohesive and smooth. Cool the potato mixture until just warm (easy to handle)."
+      ],
+      "checks": [
+        "Potato base is smooth and cohesive, not gluey.",
+        "Flavor is balanced: salty + bright lime + fruity ají."
+      ]
+    },
+    {
+      "id": "step.003_make_filling",
+      "title": "Mix the filling",
+      "instructions": [
+        "In a bowl, flake tuna well.",
+        "Stir in mayonnaise, lime juice, optional ají amarillo for flavor continuity, and salt/pepper.",
+        "Fold in finely diced onion and celery if using.",
+        "Taste and adjust: add more lime for brightness or a touch more mayo for creaminess."
+      ],
+      "checks": [
+        "Filling is creamy but not runny (should hold shape when layered).",
+        "Salt/acid balance is pleasant when chilled."
+      ]
+    },
+    {
+      "id": "step.004_prepare_mold",
+      "title": "Prepare your mold or shaping method",
+      "instructions": [
+        "Option A (best): Line a ring mold or springform with plastic wrap for easy unmolding.",
+        "Option B: Use a loaf pan lined with plastic wrap for a terrine style.",
+        "Option C: Free-form: shape individual portions using a small ring mold or by hand."
+      ],
+      "checks": [
+        "Mold is lined or lightly oiled so the causa releases cleanly."
+      ]
+    },
+    {
+      "id": "step.005_layer_causa",
+      "title": "Layer the causa",
+      "instructions": [
+        "Press half of the potato mixture into the mold as an even base layer.",
+        "Add sliced avocado (optional) as a middle layer.",
+        "Spread filling evenly over the avocado (or directly over potato).",
+        "Top with the remaining potato mixture and smooth the surface.",
+        "Cover and chill until firm enough to slice cleanly."
+      ],
+      "timers": [{ "label": "Chill to set", "minutes": 30 }],
+      "checks": [
+        "Layers are even and compact (no large gaps).",
+        "Top surface is smooth for clean presentation."
+      ]
+    },
+    {
+      "id": "step.006_garnish_and_serve",
+      "title": "Garnish and serve chilled",
+      "instructions": [
+        "Unmold onto a plate, remove plastic wrap, and slice into portions.",
+        "Garnish with hard-boiled egg and black olives (optional).",
+        "Sprinkle chopped herbs if desired. Serve chilled or cool room temperature."
+      ],
+      "checks": [
+        "Slices hold together neatly.",
+        "Garnish is fresh and balanced."
+      ]
+    }
+  ],
+
+  "pairings": {
+    "sides": ["simple_salad", "choclo_or_corn", "plantain_chips"],
+    "condiments": ["peruvian.aji_verde", "lime_wedges"],
+    "drinks": ["peruvian.chicha_morada", "sparkling_water", "iced_tea"]
+  },
+
+  "storage": {
+    "refrigerate": {
+      "duration": "3 days",
+      "notes": "Keep tightly covered. Avocado layer may brown slightly; lime helps slow browning."
+    },
+    "freeze": {
+      "duration": "not recommended",
+      "notes": "Potato texture becomes watery/grainy when thawed."
+    },
+    "foodSafety": {
+      "notes": [
+        "Keep chilled (≤40°F / 4°C) for serving and storage.",
+        "Do not leave at room temperature for more than 2 hours (1 hour if very warm)."
+      ]
+    }
+  },
+
+  "planner": {
+    "prepTasks": [
+      { "task": "Boil and drain potatoes", "mins": 25 },
+      { "task": "Mash and season potato base", "mins": 10 },
+      { "task": "Mix filling", "mins": 8 },
+      { "task": "Layer and chill", "mins": 5 }
+    ],
+    "makeAheadNotes": [
+      "Causa is best after chilling—great for events.",
+      "Potato base can be made a few hours ahead; keep covered to prevent drying."
+    ],
+    "scalingNotes": [
+      "Double for a 9x13 platter or two loaf pans.",
+      "For individual portions, use a 3-inch ring mold and chill briefly before unmolding."
+    ]
+  },
+
+  "methods": [
+    "technique.boil",
+    "technique.mash",
+    "technique.mix",
+    "technique.chill",
+    "technique.layer"
+  ],
+
+  "compat": {
+    "cuisineId": "cuisines.peruvian",
+    "dishId": "peruvian.causa_rellena",
+    "search": {
+      "aliases": [
+        "causa",
+        "causa rellena",
+        "peruvian potato terrine",
+        "aji amarillo potato"
+      ],
+      "keywords": [
+        "ají amarillo",
+        "lime",
+        "potato",
+        "tuna",
+        "chicken",
+        "avocado",
+        "layered",
+        "chilled",
+        "party"
+      ]
+    }
+  },
+
+  "notes": [
+    "Texture tip: Steam-drying potatoes prevents watery layers and helps the causa slice cleanly.",
+    "If potato mix feels too soft, chill 10–15 minutes before layering; it firms as it cools.",
+    "If you prefer a richer potato base, add 1–2 tbsp butter, but keep an eye on softness."
+  ],
+
+  "variations": [
+    {
+      "id": "variation.causa_de_pollo",
+      "label": "Causa de Pollo (chicken filling)",
+      "when": { "protein": ["chicken"] },
+      "adapt": {
+        "notes": [
+          "Replace tuna with 3 cups shredded cooked chicken.",
+          "Add 1 tsp Dijon mustard (optional) for depth.",
+          "Use a splash of reserved chicken stock if filling is too thick."
+        ]
+      }
+    },
+    {
+      "id": "variation.vegetarian",
+      "label": "Vegetarian (chickpea or hearts of palm filling)",
+      "when": { "diet": ["vegetarian"] },
+      "adapt": {
+        "notes": [
+          "Use 2 cups mashed chickpeas or chopped hearts of palm + diced veggies.",
+          "Bind with mayo or a vegan mayo alternative.",
+          "Add extra lime and a pinch of cumin for savory depth."
+        ]
+      }
+    },
+    {
+      "id": "variation.mayo_light",
+      "label": "Lighter filling (yogurt blend)",
+      "when": { "preference": ["lighter"] },
+      "adapt": {
+        "notes": [
+          "Replace half the mayo with plain Greek yogurt.",
+          "Increase salt slightly and add more lime to keep flavor bright."
+        ]
+      }
+    },
+    {
+      "id": "variation.spicy",
+      "label": "Spicier ají-forward causa",
+      "when": { "heat": ["high"] },
+      "adapt": {
+        "notes": [
+          "Increase ají amarillo paste in potato base to 3 tbsp.",
+          "Add 1 tbsp ají amarillo to filling and taste.",
+          "Serve with ají verde on the side."
+        ]
+      }
+    }
+  ],
+
+  "safety": {
+    "notes": [
+      "Chilled dishes with mayo should be kept cold during service.",
+      "If transporting, use an insulated cooler with ice packs."
+    ]
+  }
+}

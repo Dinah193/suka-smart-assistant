@@ -1,0 +1,588 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.french_country.recipes.beef_stew",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "French Country Beef Stew",
+    "subtitle": "Rustic red-wine–style braise with root vegetables (Bourguignon-adjacent).",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa.cuisines.french_country",
+      "notes": [
+        "Canonical SSA recipe: deterministic steps, adapter-friendly timers/checks, and stable ids.",
+        "Designed for Dutch oven on stovetop + oven; includes stovetop-only adaptation notes."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.french_country",
+    "category": "main",
+    "mealArchetypes": ["archetype.stew_and_starch", "archetype.one_pot"],
+    "servingStyles": ["one_pot", "family_style", "plated_meals"],
+    "plannerTags": [
+      "cuisine.french_country",
+      "dish.beef_stew",
+      "method.braise",
+      "method.simmer",
+      "batch.friendly",
+      "freezer.friendly",
+      "leftovers.friendly",
+      "comfort_food",
+      "cold_weather"
+    ]
+  },
+
+  "summary": "A classic French-country beef stew: deeply browned beef, aromatic mirepoix, wine-and-stock braise, and tender vegetables. Make ahead friendly and even better the next day.",
+
+  "yield": {
+    "servings": 6,
+    "notes": "Serves 6 generously, or 8 with bread/noodles and a salad."
+  },
+
+  "time": {
+    "activeMins": 35,
+    "handsOffMins": 135,
+    "totalMins": 170
+  },
+
+  "difficulty": "intermediate",
+
+  "signals": {
+    "batchFriendly": true,
+    "leftoversGood": true,
+    "freezerFriendly": "excellent",
+    "weeknightPossible": false,
+    "notes": [
+      "Plan for a longer braise; active time is mainly browning and prep.",
+      "Flavor improves after resting overnight."
+    ]
+  },
+
+  "tasteProfile": {
+    "saltiness": 3,
+    "sourness": 1,
+    "sweetness": 1,
+    "umami": 4,
+    "heat": 0,
+    "herbaceous": 2,
+    "richness": 4,
+    "notes": [
+      "Deep savory beef flavor with gentle wine acidity and herb aroma.",
+      "Optional mushroom add-in boosts umami."
+    ]
+  },
+
+  "equipment": {
+    "recommended": [
+      "equipment.dutch_oven",
+      "equipment.thermometer_instant",
+      "equipment.wooden_spoon",
+      "equipment.knife",
+      "equipment.cutting_board"
+    ],
+    "minimum": [
+      "equipment.large_pot_heavy_bottom",
+      "equipment.stove",
+      "equipment.knife",
+      "equipment.cutting_board"
+    ],
+    "optional": [
+      {
+        "id": "equipment.oven",
+        "label": "Oven",
+        "required": false,
+        "notes": "Oven braise is steadier and less likely to scorch; recommended if available."
+      },
+      {
+        "id": "equipment.mesh_strainer",
+        "label": "Fine mesh strainer",
+        "required": false,
+        "notes": "Optional for a smoother sauce."
+      }
+    ]
+  },
+
+  "dietFlags": ["diet.gluten_free_optional"],
+  "allergens": {
+    "common": [],
+    "notes": [
+      "Gluten present only if flour is used for thickening. Use cornstarch slurry or reduce instead."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "ingredient.beef_chuck",
+      "label": "Beef chuck roast, cut into 1.5-inch cubes",
+      "role": "protein",
+      "amount": { "value": 2.5, "unit": "lb" },
+      "notes": [
+        "Other good cuts: boneless short rib, brisket point.",
+        "Trim large hard fat; keep some marbling for flavor."
+      ]
+    },
+    {
+      "id": "ingredient.kosher_salt",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": [
+        "Start here and adjust at the end—stock and reduction concentrate salt."
+      ]
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.flour_all_purpose",
+      "label": "All-purpose flour",
+      "role": "thickener",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "notes": [
+        "Optional. For gluten-free: omit and thicken by reduction or cornstarch slurry."
+      ],
+      "optional": true
+    },
+    {
+      "id": "ingredient.olive_oil",
+      "label": "Olive oil",
+      "role": "fat",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.butter_unsalted",
+      "label": "Unsalted butter",
+      "role": "fat",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "notes": "Optional for finishing or sautéing mushrooms/pearl onions.",
+      "optional": true
+    },
+    {
+      "id": "ingredient.onion_yellow",
+      "label": "Yellow onion, diced",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "each" }
+    },
+    {
+      "id": "ingredient.carrots",
+      "label": "Carrots, cut into 1-inch chunks",
+      "role": "vegetable",
+      "amount": { "value": 3, "unit": "each" }
+    },
+    {
+      "id": "ingredient.celery",
+      "label": "Celery stalks, sliced",
+      "role": "vegetable",
+      "amount": { "value": 2, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 4, "unit": "cloves" }
+    },
+    {
+      "id": "ingredient.tomato_paste",
+      "label": "Tomato paste",
+      "role": "umami",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "notes": ["Browning the paste deepens flavor and color."]
+    },
+    {
+      "id": "ingredient.red_wine_dry",
+      "label": "Dry red wine",
+      "role": "braise_liquid",
+      "amount": { "value": 2, "unit": "cup" },
+      "notes": [
+        "Choose a dry wine you’d drink. Substitute: more stock + 1–2 tbsp balsamic (optional)."
+      ],
+      "optional": true
+    },
+    {
+      "id": "ingredient.beef_stock",
+      "label": "Beef stock (or chicken stock)",
+      "role": "braise_liquid",
+      "amount": { "value": 3, "unit": "cup" }
+    },
+    {
+      "id": "ingredient.bay_leaf",
+      "label": "Bay leaves",
+      "role": "herb",
+      "amount": { "value": 2, "unit": "each" }
+    },
+    {
+      "id": "ingredient.thyme",
+      "label": "Fresh thyme",
+      "role": "herb",
+      "amount": { "value": 6, "unit": "sprigs" },
+      "notes": "Or 1 tsp dried thyme."
+    },
+    {
+      "id": "ingredient.rosemary",
+      "label": "Fresh rosemary",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "sprig" },
+      "notes": "Optional but great with beef; remove before serving.",
+      "optional": true
+    },
+    {
+      "id": "ingredient.mushrooms",
+      "label": "Cremini mushrooms, quartered",
+      "role": "vegetable",
+      "amount": { "value": 12, "unit": "oz" },
+      "notes": ["Optional but classic. Add later so they keep texture."],
+      "optional": true
+    },
+    {
+      "id": "ingredient.pearl_onions",
+      "label": "Pearl onions (fresh or frozen)",
+      "role": "vegetable",
+      "amount": { "value": 1, "unit": "cup" },
+      "notes": "Optional, very Bourguignon-style.",
+      "optional": true
+    },
+    {
+      "id": "ingredient.potatoes_yukon_gold",
+      "label": "Yukon gold potatoes, cut into 1.5-inch chunks",
+      "role": "starch",
+      "amount": { "value": 1.5, "unit": "lb" },
+      "notes": [
+        "Optional if serving with mashed potatoes/noodles/bread instead."
+      ],
+      "optional": true
+    },
+    {
+      "id": "ingredient.parsley",
+      "label": "Fresh parsley, chopped",
+      "role": "garnish",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.vinegar_red_wine",
+      "label": "Red wine vinegar",
+      "role": "acid",
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": "Optional finishing brightness if stew tastes flat.",
+      "optional": true
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_prep_and_dry",
+      "title": "Prep beef and aromatics",
+      "activeMins": 12,
+      "handsOffMins": 0,
+      "instructions": [
+        "Pat beef very dry (browning requires dry surface).",
+        "Season beef with salt and pepper.",
+        "Dice onion, cut carrots/celery, mince garlic, and portion herbs."
+      ],
+      "checks": [
+        "Beef surface is dry (not wet).",
+        "Vegetables are similar size for even cooking."
+      ]
+    },
+    {
+      "id": "step_02_dredge_optional",
+      "title": "Optional: light flour dredge for thicker sauce",
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "instructions": [
+        "If using flour: sprinkle over beef and toss to lightly coat.",
+        "Shake off excess—too much flour can make sauce pasty."
+      ],
+      "checks": ["Beef has a light dusting, not a heavy coating."]
+    },
+    {
+      "id": "step_03_brown_beef",
+      "title": "Brown the beef deeply (build flavor)",
+      "activeMins": 12,
+      "handsOffMins": 0,
+      "instructions": [
+        "Heat a Dutch oven (or heavy pot) over medium-high heat. Add olive oil.",
+        "Brown beef in batches (do not crowd). Sear 2–3 minutes per side until deep brown.",
+        "Transfer browned beef to a bowl and repeat with remaining beef."
+      ],
+      "timers": [{ "label": "Batch sear (estimate)", "minutes": 12 }],
+      "checks": [
+        "Browning is dark golden to brown (not gray).",
+        "Fond (browned bits) is forming on the pot bottom."
+      ]
+    },
+    {
+      "id": "step_04_saute_mirepoix_and_paste",
+      "title": "Cook vegetables and brown tomato paste",
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "instructions": [
+        "Lower heat to medium. Add onion (and celery if using) with a pinch of salt; cook 3–4 minutes.",
+        "Add carrots and cook 3 minutes more.",
+        "Add garlic and cook 30 seconds until fragrant.",
+        "Stir in tomato paste and cook 1–2 minutes, scraping and stirring, until it darkens slightly."
+      ],
+      "timers": [
+        { "label": "Vegetable sauté", "minutes": 7 },
+        { "label": "Tomato paste bloom", "minutes": 2 }
+      ],
+      "checks": [
+        "Garlic is fragrant, not browned/burnt.",
+        "Tomato paste has darkened slightly (brick-red)."
+      ]
+    },
+    {
+      "id": "step_05_deglaze",
+      "title": "Deglaze with wine (or stock) and dissolve the fond",
+      "activeMins": 5,
+      "handsOffMins": 0,
+      "instructions": [
+        "Pour in red wine (if using). Bring to a simmer while scraping up browned bits from the bottom.",
+        "Simmer 2–3 minutes to reduce slightly and cook off harsh alcohol edge.",
+        "If not using wine: deglaze with 1 cup stock instead."
+      ],
+      "timers": [{ "label": "Deglaze + reduce", "minutes": 3 }],
+      "checks": ["Bottom of pot is mostly clean (fond dissolved into liquid)."]
+    },
+    {
+      "id": "step_06_braise_start",
+      "title": "Add stock, herbs, and beef; bring to a gentle simmer",
+      "activeMins": 5,
+      "handsOffMins": 0,
+      "instructions": [
+        "Add stock, bay leaves, thyme, and optional rosemary.",
+        "Return beef (and any collected juices) to the pot.",
+        "Bring to a gentle simmer (small bubbles), not a hard boil."
+      ],
+      "checks": [
+        "Liquid level comes close to covering beef; add a splash more stock if needed.",
+        "Simmer is gentle (low bubbling)."
+      ]
+    },
+    {
+      "id": "step_07_braise_until_tender",
+      "title": "Braise until beef is fork-tender",
+      "activeMins": 3,
+      "handsOffMins": 105,
+      "instructions": [
+        "Cover and braise until beef is tender: 1.5–2 hours.",
+        "Preferred method: oven braise at 325°F (163°C) for steady heat.",
+        "Stovetop method: keep on the lowest simmer and stir occasionally to prevent scorching."
+      ],
+      "temperature": {
+        "type": "oven",
+        "value": 325,
+        "unit": "F",
+        "notes": "If oven braising. Stovetop: maintain a gentle simmer."
+      },
+      "timers": [
+        { "label": "Braise (check at 90 min)", "minutes": 90 },
+        { "label": "Braise (estimate additional)", "minutes": 30 }
+      ],
+      "checks": [
+        "Beef yields easily to a fork (not chewy).",
+        "Sauce is developing body and color."
+      ]
+    },
+    {
+      "id": "step_08_add_veg_late",
+      "title": "Add potatoes/mushrooms/pearl onions (optional) and finish simmer",
+      "activeMins": 5,
+      "handsOffMins": 30,
+      "instructions": [
+        "If using potatoes: add them now (so they don’t disintegrate).",
+        "If using mushrooms and/or pearl onions: add now for the final 20–30 minutes.",
+        "Simmer uncovered or partially covered until vegetables are tender."
+      ],
+      "timers": [{ "label": "Finish simmer with vegetables", "minutes": 25 }],
+      "checks": [
+        "Potatoes are tender but not falling apart.",
+        "Mushrooms are cooked through and still have shape."
+      ]
+    },
+    {
+      "id": "step_09_adjust_and_thicken",
+      "title": "Adjust thickness and seasoning",
+      "activeMins": 8,
+      "handsOffMins": 0,
+      "instructions": [
+        "Remove bay leaves and herb stems.",
+        "Taste and adjust salt and pepper.",
+        "If sauce is thin: simmer uncovered 5–10 minutes to reduce.",
+        "Gluten-free thickening option: stir 1 tbsp cornstarch with 2 tbsp cold water, then drizzle in while simmering until slightly thickened.",
+        "Optional brightness: add 1 tsp red wine vinegar (or a squeeze of lemon) if flavors feel flat."
+      ],
+      "timers": [{ "label": "Reduce (optional)", "minutes": 8 }],
+      "checks": [
+        "Sauce lightly coats a spoon.",
+        "Seasoning tastes balanced (savory, not overly salty)."
+      ]
+    },
+    {
+      "id": "step_10_rest_and_serve",
+      "title": "Rest briefly, then serve",
+      "activeMins": 2,
+      "handsOffMins": 10,
+      "instructions": [
+        "Let stew rest 10 minutes off heat (flavor settles).",
+        "Serve with chopped parsley and a side: crusty bread, noodles, mashed potatoes, or rice."
+      ],
+      "timers": [{ "label": "Rest", "minutes": 10 }],
+      "checks": ["Stew has cooled slightly and thickened a bit."]
+    }
+  ],
+
+  "methods": [
+    "method.sear",
+    "method.braise",
+    "method.deglaze",
+    "method.reduce"
+  ],
+
+  "pairings": {
+    "sides": [
+      "dishes.french_country.crusty_bread",
+      "dishes.french_country.mashed_potatoes",
+      "dishes.french_country.green_salad_vinaigrette",
+      "dishes.french_country.egg_noodles"
+    ],
+    "notes": [
+      "A sharp green salad balances the richness.",
+      "If serving with bread, use the stew as the centerpiece meal."
+    ]
+  },
+
+  "storage": {
+    "refrigerate": {
+      "maxDays": 4,
+      "notes": [
+        "Cool quickly and refrigerate. Flavor improves overnight.",
+        "Skim solidified fat next day for a cleaner sauce (optional)."
+      ]
+    },
+    "freeze": {
+      "maxMonths": 3,
+      "notes": [
+        "Freeze in meal-size portions. Thaw overnight in fridge.",
+        "Potatoes can change texture after freezing; if freezer-focused, omit potatoes and serve with fresh starch later."
+      ]
+    },
+    "reheat": {
+      "notes": [
+        "Reheat gently at a simmer. Add a splash of stock/water if too thick.",
+        "Avoid hard boiling to keep beef tender."
+      ]
+    }
+  },
+
+  "safety": {
+    "core": [
+      "Brown in batches to avoid steaming and undercooked surfaces.",
+      "Maintain a gentle simmer during braise to prevent toughening and scorching.",
+      "Cool leftovers promptly and reheat to steaming hot."
+    ]
+  },
+
+  "notes": [
+    "If you don’t want wine: use all stock and optionally add 1–2 tsp vinegar at the end for balance.",
+    "If stew tastes bitter: reduce less aggressively and add a small pinch of sugar or extra carrots (natural sweetness).",
+    "For deeper flavor: make a day ahead and reheat; skim fat and adjust seasoning just before serving."
+  ],
+
+  "variations": [
+    {
+      "id": "variation.no_wine",
+      "label": "No-wine French beef stew",
+      "when": { "preferences": ["no_alcohol"] },
+      "adapt": {
+        "notes": [
+          "Replace wine with additional stock. Finish with 1–2 tsp red wine vinegar (or lemon) for brightness."
+        ]
+      }
+    },
+    {
+      "id": "variation.gluten_free",
+      "label": "Gluten-free thickening",
+      "when": { "dietaryPrefs": ["diet.gluten_free"] },
+      "adapt": {
+        "notes": [
+          "Skip flour. Thicken by reducing uncovered, or use a cornstarch slurry at the end."
+        ]
+      }
+    },
+    {
+      "id": "variation.oven_braise_preferred",
+      "label": "Oven braise (preferred stability)",
+      "when": { "hasEquipment": ["equipment.oven", "equipment.dutch_oven"] },
+      "adapt": {
+        "notes": [
+          "After deglazing and returning beef, cover and braise at 325°F for 90–120 minutes.",
+          "Less stirring needed; lower risk of scorching."
+        ]
+      }
+    }
+  ],
+
+  "planner": {
+    "leftovers": {
+      "remixIdeas": [
+        "Beef stew pot pie (top with biscuits or puff pastry)",
+        "Stew over baked potatoes",
+        "Stew as a filling for savory hand pies"
+      ]
+    },
+    "shopping": {
+      "pantryFirst": [
+        "ingredient.kosher_salt",
+        "ingredient.black_pepper",
+        "ingredient.tomato_paste",
+        "ingredient.bay_leaf"
+      ],
+      "niceToHave": [
+        "ingredient.red_wine_dry",
+        "ingredient.thyme",
+        "ingredient.mushrooms",
+        "ingredient.pearl_onions"
+      ]
+    }
+  },
+
+  "compat": {
+    "cuisineId": "cuisines.french_country",
+    "dishId": "dishes.french_country.beef_stew",
+    "search": {
+      "aliases": [
+        "beef stew",
+        "french beef stew",
+        "country beef stew",
+        "boeuf bourguignon",
+        "bœuf bourguignon",
+        "bourguignon-style stew"
+      ],
+      "keywords": [
+        "braised beef",
+        "red wine stew",
+        "mirepoix",
+        "dutch oven",
+        "cold weather",
+        "make ahead"
+      ]
+    },
+    "normalization": {
+      "recommendedIdCase": "lower",
+      "ingredientIdStyle": "ingredient.*",
+      "methodIdStyle": "method.*",
+      "equipmentIdStyle": "equipment.*"
+    }
+  }
+}

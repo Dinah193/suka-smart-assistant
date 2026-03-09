@@ -70,8 +70,8 @@
  * -----------------------------------------------------------------------------
  */
 
-import eventBus from "../../../services/eventBus";
-import { featureFlags } from "../../../services/featureFlags";
+import eventBus from "../../../services/events/eventBus";
+import { featureFlags } from "../../../config/featureFlags";
 
 /**
  * @typedef {Object} SessionStep
@@ -182,7 +182,9 @@ export async function evaluateWeatherGuard(session, stepIndex, ctx = {}) {
   const { lat, lon } = ctx.coords || {};
   if (!provider || !isFinite(lat) || !isFinite(lon)) {
     if (!ctx.settings?.failClosed) {
-      safeEmitDebug("guard.weather.missing_provider_or_coords", { sessionId: safeId(session) });
+      safeEmitDebug("guard.weather.missing_provider_or_coords", {
+        sessionId: safeId(session),
+      });
       return { allowed: true, guard: "weather" };
     }
     return {
@@ -220,7 +222,10 @@ export async function evaluateWeatherGuard(session, stepIndex, ctx = {}) {
   // Find the next lift time from hourly forecast
   let retryAt = null;
   try {
-    const hours = Math.max(1, Math.min(72, Number(ctx.settings?.horizonHours) || 24));
+    const hours = Math.max(
+      1,
+      Math.min(72, Number(ctx.settings?.horizonHours) || 24)
+    );
     const forecast = (await provider.forecastHourly(lat, lon, hours)) || [];
     retryAt = findNextAcceptableTs(forecast, policy);
   } catch (e) {
@@ -253,20 +258,31 @@ function isGuardEnabled(settings) {
     typeof settings?.enabled === "boolean" ? settings.enabled : undefined;
   if (typeof fromSettings === "boolean") return fromSettings;
   try {
-    if (featureFlags && Object.prototype.hasOwnProperty.call(featureFlags, "weatherGuard")) {
+    if (
+      featureFlags &&
+      Object.prototype.hasOwnProperty.call(featureFlags, "weatherGuard")
+    ) {
       return !!featureFlags.weatherGuard;
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return true;
 }
 
 function resolveStep(session, stepIndex) {
-  if (!session || !Array.isArray(session.steps) || session.steps.length === 0) return null;
-  if (typeof stepIndex === "number" && stepIndex >= 0 && stepIndex < session.steps.length) {
+  if (!session || !Array.isArray(session.steps) || session.steps.length === 0)
+    return null;
+  if (
+    typeof stepIndex === "number" &&
+    stepIndex >= 0 &&
+    stepIndex < session.steps.length
+  ) {
     return session.steps[stepIndex];
   }
   const idx =
-    Number.isFinite(session?.progress?.currentStepIndex) && session.progress.currentStepIndex >= 0
+    Number.isFinite(session?.progress?.currentStepIndex) &&
+    session.progress.currentStepIndex >= 0
       ? session.progress.currentStepIndex
       : 0;
   return session.steps[idx] || null;
@@ -300,9 +316,10 @@ function hasExplicitWeatherMetadata(step) {
  */
 function derivePolicy(session, step, settings) {
   const base = withPolicyDefaults(settings);
-  const domainDefaults = (settings?.defaultsByDomain && session?.domain)
-    ? settings.defaultsByDomain[session.domain]
-    : null;
+  const domainDefaults =
+    settings?.defaultsByDomain && session?.domain
+      ? settings.defaultsByDomain[session.domain]
+      : null;
 
   // Reasonable domain defaults
   const guessedOutdoor =
@@ -310,20 +327,19 @@ function derivePolicy(session, step, settings) {
     (session?.domain === "garden" || session?.domain === "animals");
 
   /** @type {WeatherPolicy} */
-  const policy = Object.assign(
-    {},
-    base,
-    domainDefaults || {},
-    { outdoor: guessedOutdoor }
-  );
+  const policy = Object.assign({}, base, domainDefaults || {}, {
+    outdoor: guessedOutdoor,
+  });
 
   // Metadata overrides (if provided)
   const m = step?.metadata || {};
   if (typeof m.minTempF === "number") policy.minTempF = m.minTempF;
   if (typeof m.maxTempF === "number") policy.maxTempF = m.maxTempF;
   if (typeof m.maxWindMph === "number") policy.maxWindMph = m.maxWindMph;
-  if (typeof m.allowLightRain === "boolean") policy.allowLightRain = m.allowLightRain;
-  if (typeof m.disallowThunder === "boolean") policy.disallowThunder = m.disallowThunder;
+  if (typeof m.allowLightRain === "boolean")
+    policy.allowLightRain = m.allowLightRain;
+  if (typeof m.disallowThunder === "boolean")
+    policy.disallowThunder = m.disallowThunder;
   if (m.heatSensitive === true) policy.heatSensitive = true;
   if (m.coldSensitive === true) policy.coldSensitive = true;
   if (typeof m.outdoor === "boolean") policy.outdoor = m.outdoor;
@@ -339,9 +355,9 @@ function derivePolicy(session, step, settings) {
 function withPolicyDefaults(settings) {
   const base = settings?.basePolicy || {
     outdoor: false,
-    minTempF: 32,         // freezing default
-    maxTempF: 95,         // heat safety default
-    maxWindMph: 30,       // high-wind default
+    minTempF: 32, // freezing default
+    maxTempF: 95, // heat safety default
+    maxWindMph: 30, // high-wind default
     allowLightRain: false,
     disallowThunder: true,
     heatSensitive: false,
@@ -375,17 +391,37 @@ function evaluateAgainstPolicy(wx, policy) {
   const precipIntensity = wx?.precip?.intensity || "none";
 
   // Temperature checks
-  if (isFiniteNum(policy.minTempF) && isFiniteNum(tempF) && tempF < policy.minTempF) {
-    violations.push({ code: "too_cold", detail: { tempF, min: policy.minTempF } });
+  if (
+    isFiniteNum(policy.minTempF) &&
+    isFiniteNum(tempF) &&
+    tempF < policy.minTempF
+  ) {
+    violations.push({
+      code: "too_cold",
+      detail: { tempF, min: policy.minTempF },
+    });
   }
-  if (isFiniteNum(policy.maxTempF) && isFiniteNum(tempF) && tempF > policy.maxTempF) {
-    violations.push({ code: "too_hot", detail: { tempF, max: policy.maxTempF } });
+  if (
+    isFiniteNum(policy.maxTempF) &&
+    isFiniteNum(tempF) &&
+    tempF > policy.maxTempF
+  ) {
+    violations.push({
+      code: "too_hot",
+      detail: { tempF, max: policy.maxTempF },
+    });
   }
 
   // Wind checks (use gust if higher)
-  const windEff = Math.max(isFiniteNum(wind) ? wind : 0, isFiniteNum(gust) ? gust : 0);
+  const windEff = Math.max(
+    isFiniteNum(wind) ? wind : 0,
+    isFiniteNum(gust) ? gust : 0
+  );
   if (isFiniteNum(policy.maxWindMph) && windEff > policy.maxWindMph) {
-    violations.push({ code: "too_windy", detail: { windMph: wind, gustMph: gust, max: policy.maxWindMph } });
+    violations.push({
+      code: "too_windy",
+      detail: { windMph: wind, gustMph: gust, max: policy.maxWindMph },
+    });
   }
 
   // Thunder always disallowed if policy says so
@@ -395,15 +431,30 @@ function evaluateAgainstPolicy(wx, policy) {
 
   // Precipitation policy
   if (precipType && precipType !== "none") {
-    const lightOK = policy.allowLightRain && precipIntensity === "light" && precipType === "rain";
+    const lightOK =
+      policy.allowLightRain &&
+      precipIntensity === "light" &&
+      precipType === "rain";
     if (!lightOK) {
-      violations.push({ code: "precipitation", detail: { type: precipType, intensity: precipIntensity } });
+      violations.push({
+        code: "precipitation",
+        detail: { type: precipType, intensity: precipIntensity },
+      });
     }
   }
 
   // Optional sensitivity checks
-  if (policy.heatSensitive && isFiniteNum(tempF) && tempF >= 90 && isFiniteNum(humid) && humid >= 65) {
-    violations.push({ code: "heat_index_risk", detail: { tempF, humidityPct: humid } });
+  if (
+    policy.heatSensitive &&
+    isFiniteNum(tempF) &&
+    tempF >= 90 &&
+    isFiniteNum(humid) &&
+    humid >= 65
+  ) {
+    violations.push({
+      code: "heat_index_risk",
+      detail: { tempF, humidityPct: humid },
+    });
   }
   if (policy.coldSensitive && isFiniteNum(tempF) && tempF <= 40) {
     violations.push({ code: "cold_stress_risk", detail: { tempF } });
@@ -427,28 +478,41 @@ function findNextAcceptableTs(hourly, policy) {
 }
 
 function buildMessageFromViolations(vs, wx, retryAtIso) {
-  if (!Array.isArray(vs) || vs.length === 0) return "Weather restrictions in effect.";
-  const parts = vs.map(v => {
+  if (!Array.isArray(vs) || vs.length === 0)
+    return "Weather restrictions in effect.";
+  const parts = vs.map((v) => {
     switch (v.code) {
       case "too_cold":
-        return `Too cold (${fmtNum(v.detail?.tempF)}°F). Minimum is ${fmtNum(v.detail?.min)}°F.`;
+        return `Too cold (${fmtNum(v.detail?.tempF)}°F). Minimum is ${fmtNum(
+          v.detail?.min
+        )}°F.`;
       case "too_hot":
-        return `Too hot (${fmtNum(v.detail?.tempF)}°F). Maximum is ${fmtNum(v.detail?.max)}°F.`;
+        return `Too hot (${fmtNum(v.detail?.tempF)}°F). Maximum is ${fmtNum(
+          v.detail?.max
+        )}°F.`;
       case "too_windy":
-        return `Too windy (wind ${fmtNum(v.detail?.windMph)} mph, gust ${fmtNum(v.detail?.gustMph)} mph). Max allowed ${fmtNum(v.detail?.max)} mph.`;
+        return `Too windy (wind ${fmtNum(v.detail?.windMph)} mph, gust ${fmtNum(
+          v.detail?.gustMph
+        )} mph). Max allowed ${fmtNum(v.detail?.max)} mph.`;
       case "thunder_present":
         return "Thunderstorms detected nearby.";
       case "precipitation":
-        return `Precipitation: ${v.detail?.type || "unknown"}${v.detail?.intensity ? " (" + v.detail.intensity + ")" : ""}.`;
+        return `Precipitation: ${v.detail?.type || "unknown"}${
+          v.detail?.intensity ? " (" + v.detail.intensity + ")" : ""
+        }.`;
       case "heat_index_risk":
-        return `Heat/humidity risk (${fmtNum(v.detail?.tempF)}°F, ${fmtNum(v.detail?.humidityPct)}% RH).`;
+        return `Heat/humidity risk (${fmtNum(v.detail?.tempF)}°F, ${fmtNum(
+          v.detail?.humidityPct
+        )}% RH).`;
       case "cold_stress_risk":
         return `Cold stress risk (${fmtNum(v.detail?.tempF)}°F).`;
       default:
         return "Unfavorable weather conditions.";
     }
   });
-  const tail = retryAtIso ? ` Next possible window around ${humanTime(new Date(retryAtIso))}.` : "";
+  const tail = retryAtIso
+    ? ` Next possible window around ${humanTime(new Date(retryAtIso))}.`
+    : "";
   return parts.join(" ") + tail;
 }
 
@@ -473,7 +537,10 @@ function safeId(session) {
 
 function humanTime(dt) {
   try {
-    return new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(dt);
+    return new Intl.DateTimeFormat(undefined, {
+      hour: "numeric",
+      minute: "2-digit",
+    }).format(dt);
   } catch {
     return dt.toLocaleTimeString();
   }
@@ -482,7 +549,12 @@ function humanTime(dt) {
 function safeEmitDebug(type, data) {
   try {
     if (eventBus && typeof eventBus.emit === "function") {
-      eventBus.emit({ type, ts: new Date().toISOString(), source: "weatherGuard", data });
+      eventBus.emit({
+        type,
+        ts: new Date().toISOString(),
+        source: "weatherGuard",
+        data,
+      });
     }
   } catch {
     // no-op
@@ -530,7 +602,10 @@ export async function nextWeatherLiftTime(ctx = {}) {
     const { lat, lon } = ctx.coords || {};
     if (!provider || !isFinite(lat) || !isFinite(lon)) return null;
 
-    const hours = Math.max(1, Math.min(72, Number(ctx.settings?.horizonHours) || 24));
+    const hours = Math.max(
+      1,
+      Math.min(72, Number(ctx.settings?.horizonHours) || 24)
+    );
     const forecast = (await provider.forecastHourly(lat, lon, hours)) || [];
     return findNextAcceptableTs(forecast, policy);
   } catch {

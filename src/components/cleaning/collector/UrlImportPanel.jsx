@@ -1,7 +1,13 @@
 /* eslint-disable no-console */
 // src/components/cleaning/collector/UrlImportPanel.jsx
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Link as LinkIcon,
   Upload,
@@ -26,9 +32,13 @@ let CleaningPlanManager = null;
 try {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   // @ts-ignore
-  CleaningPlanManager = require("../../../managers/CleaningPlanManager").default || require("../../../managers/CleaningPlanManager");
+  CleaningPlanManager =
+    require("../../../managers/CleaningPlanManager").default ||
+    require("../../../managers/CleaningPlanManager");
 } catch (e) {
-  console.warn("[UrlImportPanel] CleaningPlanManager not available, using stub.");
+  console.warn(
+    "[UrlImportPanel] CleaningPlanManager not available, using stub."
+  );
   CleaningPlanManager = {
     addFromSource: async () => ({ id: `stub:${Date.now()}` }),
     upsertManyFromSource: async () => ({ ids: [], duplicates: [] }),
@@ -49,7 +59,7 @@ let eventBus = null;
 try {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   // @ts-ignore
-  eventBus = require("@/services/eventBus").eventBus || null;
+  eventBus = require("@/services/events/eventBus").eventBus || null;
 } catch (e) {
   console.warn("[UrlImportPanel] eventBus not available.");
 }
@@ -58,7 +68,9 @@ let useSettingsContext = null;
 try {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   // @ts-ignore
-  useSettingsContext = require("@/components/context/SettingsContext.jsx").useSettingsContext || null;
+  useSettingsContext =
+    require("@/components/context/SettingsContext.jsx").useSettingsContext ||
+    null;
 } catch (e) {
   // Allow null; we’ll guard for Sabbath
 }
@@ -67,7 +79,8 @@ let InlineToastAnchor = null;
 try {
   // meals/common path exists in your repo; safe to reuse for unified UX
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  InlineToastAnchor = require("@/components/meals/common/InlineToastAnchor.jsx").default || null;
+  InlineToastAnchor =
+    require("@/components/meals/common/InlineToastAnchor.jsx").default || null;
 } catch (e) {
   // noop
 }
@@ -75,7 +88,8 @@ try {
 let NBAInvokeButton = null;
 try {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  NBAInvokeButton = require("@/components/meals/common/NBAInvokeButton.jsx").default || null;
+  NBAInvokeButton =
+    require("@/components/meals/common/NBAInvokeButton.jsx").default || null;
 } catch (e) {
   // noop
 }
@@ -162,7 +176,11 @@ function extractTasksFromHtml(html) {
         .replace(/<[^>]+>/g, " ")
         .replace(/\s+/g, " ")
         .trim();
-      if (/\b(wipe|scrub|vacuum|mop|sweep|dust|wash|degrease|rinse|soak|sanitize|disinfect|polish|declutter)\b/i.test(text)) {
+      if (
+        /\b(wipe|scrub|vacuum|mop|sweep|dust|wash|degrease|rinse|soak|sanitize|disinfect|polish|declutter)\b/i.test(
+          text
+        )
+      ) {
         items.push(text);
       }
     }
@@ -215,7 +233,9 @@ async function safeFetch(url) {
 }
 
 function makeSourceRecord({ url, tasks, title }) {
-  const key = `${url}|${tasks.map((t) => t.title).join("|")}|${title || ""}`.toLowerCase();
+  const key = `${url}|${tasks.map((t) => t.title).join("|")}|${
+    title || ""
+  }`.toLowerCase();
   return {
     id: `source:${Date.now()}`,
     url,
@@ -252,13 +272,19 @@ const TagChips = ({ value = [], onChange }) => {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleAdd()}
         />
-        <button onClick={handleAdd} className="px-2 py-1 text-sm rounded bg-gray-100 hover:bg-gray-200 border">
+        <button
+          onClick={handleAdd}
+          className="px-2 py-1 text-sm rounded bg-gray-100 hover:bg-gray-200 border"
+        >
           Add
         </button>
       </div>
       <div className="flex flex-wrap gap-2">
         {(value || []).map((t) => (
-          <span key={t} className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-gray-100 border">
+          <span
+            key={t}
+            className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-gray-100 border"
+          >
             {t}
             <button onClick={() => remove(t)} className="hover:text-red-600">
               <X size={14} />
@@ -272,7 +298,16 @@ const TagChips = ({ value = [], onChange }) => {
 
 /* ------------------------------ Main component ------------------------------- */
 
-const DEFAULT_FREQ = ["Suggested", "Daily", "Weekly", "Biweekly", "Monthly", "Quarterly", "Annual", "Deep (Set Cadence)"];
+const DEFAULT_FREQ = [
+  "Suggested",
+  "Daily",
+  "Weekly",
+  "Biweekly",
+  "Monthly",
+  "Quarterly",
+  "Annual",
+  "Deep (Set Cadence)",
+];
 
 export default function UrlImportPanel() {
   const urlRef = useRef(null);
@@ -320,49 +355,47 @@ export default function UrlImportPanel() {
     });
   };
 
-  const parseOne = useCallback(
-    async (singleUrl) => {
-      const trimmed = (singleUrl || "").trim();
-      if (!trimmed) return null;
+  const parseOne = useCallback(async (singleUrl) => {
+    const trimmed = (singleUrl || "").trim();
+    if (!trimmed) return null;
 
-      const fetched = await safeFetch(trimmed);
-      if (!fetched.ok) {
-        // If fetch blocked, allow manual paste path: user can paste HTML into bulk field later.
-        return {
-          url: trimmed,
-          title: null,
-          html: null,
-          tasks: [
-            {
-              title: "Open the article and paste the bullet list here (fetch blocked by CORS).",
-              area: "General",
-              frequency: "Suggested",
-              estMinutes: 1,
-              tags: ["todo"],
-              requiresManual: true,
-            },
-          ],
-          fingerprint: hashFingerprint(`${trimmed}|blocked`),
-          version: 1,
-        };
-      }
-
-      const html = fetched.html || "";
-      // Try to extract <title>
-      let pageTitle = null;
-      const mt = html.match(/<title[^>]*>(.*?)<\/title>/is);
-      if (mt && mt[1]) pageTitle = mt[1].replace(/\s+/g, " ").trim();
-
-      const tasks = extractTasksFromHtml(html);
-      const rec = makeSourceRecord({
+    const fetched = await safeFetch(trimmed);
+    if (!fetched.ok) {
+      // If fetch blocked, allow manual paste path: user can paste HTML into bulk field later.
+      return {
         url: trimmed,
-        tasks,
-        title: pageTitle,
-      });
-      return rec;
-    },
-    []
-  );
+        title: null,
+        html: null,
+        tasks: [
+          {
+            title:
+              "Open the article and paste the bullet list here (fetch blocked by CORS).",
+            area: "General",
+            frequency: "Suggested",
+            estMinutes: 1,
+            tags: ["todo"],
+            requiresManual: true,
+          },
+        ],
+        fingerprint: hashFingerprint(`${trimmed}|blocked`),
+        version: 1,
+      };
+    }
+
+    const html = fetched.html || "";
+    // Try to extract <title>
+    let pageTitle = null;
+    const mt = html.match(/<title[^>]*>(.*?)<\/title>/is);
+    if (mt && mt[1]) pageTitle = mt[1].replace(/\s+/g, " ").trim();
+
+    const tasks = extractTasksFromHtml(html);
+    const rec = makeSourceRecord({
+      url: trimmed,
+      tasks,
+      title: pageTitle,
+    });
+    return rec;
+  }, []);
 
   const handleParseUrl = useCallback(async () => {
     if (sabbathGuardEnabled && isSabbathNow()) {
@@ -376,7 +409,11 @@ export default function UrlImportPanel() {
       const rec = await parseOne(u);
       if (rec) {
         setImports((prev) => upsertRec(prev, rec));
-        if (eventBus?.emit) eventBus.emit("collector:cleaning:urlImported", { url: u, fingerprint: rec.fingerprint });
+        if (eventBus?.emit)
+          eventBus.emit("collector:cleaning:urlImported", {
+            url: u,
+            fingerprint: rec.fingerprint,
+          });
       }
     } finally {
       setBusy(false);
@@ -401,7 +438,10 @@ export default function UrlImportPanel() {
         next.forEach((rec) => (agg = upsertRec(agg, rec)));
         return agg;
       });
-      if (eventBus?.emit) eventBus.emit("collector:cleaning:bulkImported", { count: next.length });
+      if (eventBus?.emit)
+        eventBus.emit("collector:cleaning:bulkImported", {
+          count: next.length,
+        });
     } finally {
       setBusy(false);
       setBulk("");
@@ -410,7 +450,9 @@ export default function UrlImportPanel() {
 
   const selectedImports = useMemo(() => {
     const map = new Map(imports.map((i) => [i.fingerprint, i]));
-    return Array.from(selectedIds).map((fid) => map.get(fid)).filter(Boolean);
+    return Array.from(selectedIds)
+      .map((fid) => map.get(fid))
+      .filter(Boolean);
   }, [imports, selectedIds]);
 
   const handleSaveSelected = useCallback(async () => {
@@ -441,7 +483,10 @@ export default function UrlImportPanel() {
 
       const result = await (CleaningPlanManager.upsertManyFromSource
         ? CleaningPlanManager.upsertManyFromSource(payload)
-        : Promise.resolve({ ids: payload.map(() => `stub:${Date.now()}`), duplicates: [] }));
+        : Promise.resolve({
+            ids: payload.map(() => `stub:${Date.now()}`),
+            duplicates: [],
+          }));
 
       setLastSaved({ at: Date.now(), count: payload.length });
       setUndoStack((prev) => [
@@ -454,7 +499,10 @@ export default function UrlImportPanel() {
         },
       ]);
 
-      if (automation?.templates?.scheduleDwellTimers && automation.runTemplate) {
+      if (
+        automation?.templates?.scheduleDwellTimers &&
+        automation.runTemplate
+      ) {
         // Optional: schedule dwell timers for any parsed tasks that include dwell
         payload.forEach((p) => {
           p.tasks.forEach((t) => {
@@ -494,7 +542,8 @@ export default function UrlImportPanel() {
         if (CleaningPlanManager.deleteByFingerprints) {
           await CleaningPlanManager.deleteByFingerprints(fps);
         }
-        if (eventBus?.emit) eventBus.emit("collector:cleaning:undo", { count: fps.length });
+        if (eventBus?.emit)
+          eventBus.emit("collector:cleaning:undo", { count: fps.length });
       }
     } catch (e) {
       console.warn("[UrlImportPanel] undo failed or unsupported:", e.message);
@@ -512,7 +561,9 @@ export default function UrlImportPanel() {
         source: "UrlImportPanel",
       });
     }
-    alert("Session seeded from selected imports. Open the Cleaning Session Planner to review.");
+    alert(
+      "Session seeded from selected imports. Open the Cleaning Session Planner to review."
+    );
   }, [selectedImports]);
 
   const handleSchedule = useCallback(() => {
@@ -553,9 +604,12 @@ export default function UrlImportPanel() {
         <div className="flex items-center gap-3">
           <ListChecks />
           <div>
-            <h2 className="text-lg font-semibold">Import cleaning checklists from the web</h2>
+            <h2 className="text-lg font-semibold">
+              Import cleaning checklists from the web
+            </h2>
             <p className="text-sm text-gray-500">
-              Paste a link (or many) and I’ll extract actionable tasks with areas, cadence, estimates & tags.
+              Paste a link (or many) and I’ll extract actionable tasks with
+              areas, cadence, estimates & tags.
             </p>
           </div>
         </div>
@@ -567,7 +621,9 @@ export default function UrlImportPanel() {
               Sabbath guard
             </span>
           ) : null}
-          {InlineToastAnchor ? <InlineToastAnchor id="cleaning-url-import" /> : null}
+          {InlineToastAnchor ? (
+            <InlineToastAnchor id="cleaning-url-import" />
+          ) : null}
         </div>
       </div>
 
@@ -617,9 +673,13 @@ export default function UrlImportPanel() {
       {/* Bulk URLs */}
       <div className="mt-4">
         <div className="flex items-center justify-between">
-          <label className="text-sm font-medium">Bulk paste (one URL per line)</label>
+          <label className="text-sm font-medium">
+            Bulk paste (one URL per line)
+          </label>
           <button
-            onClick={() => setBulk((prev) => (prev ? prev : "https://\nhttps://\nhttps://"))}
+            onClick={() =>
+              setBulk((prev) => (prev ? prev : "https://\nhttps://\nhttps://"))
+            }
             className="text-xs text-gray-600 hover:text-gray-900 inline-flex items-center gap-1"
           >
             <HelpCircle size={14} /> Example
@@ -652,7 +712,10 @@ https://blog.com/weekly-routines"
         <div className="mt-4 rounded-lg border bg-gray-50 p-3 text-xs text-gray-700 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ExternalLink size={14} />
-            <span>Tip: Steamers cut degreasing time by ~30%. Consider a compact steam cleaner.</span>
+            <span>
+              Tip: Steamers cut degreasing time by ~30%. Consider a compact
+              steam cleaner.
+            </span>
           </div>
           <a
             href="https://example.com/steam-cleaner"
@@ -691,7 +754,9 @@ https://blog.com/weekly-routines"
         </div>
 
         {!imports.length ? (
-          <div className="mt-3 text-sm text-gray-500">No imports yet. Paste a link to get started.</div>
+          <div className="mt-3 text-sm text-gray-500">
+            No imports yet. Paste a link to get started.
+          </div>
         ) : (
           <div className="mt-3 space-y-4">
             {imports.map((rec) => (
@@ -703,7 +768,11 @@ https://blog.com/weekly-routines"
                 onRemove={() => removeImport(rec.fingerprint)}
                 onChange={(updated) => {
                   setImports((prev) =>
-                    prev.map((x) => (x.fingerprint === rec.fingerprint ? { ...x, ...updated } : x))
+                    prev.map((x) =>
+                      x.fingerprint === rec.fingerprint
+                        ? { ...x, ...updated }
+                        : x
+                    )
                   );
                 }}
               />
@@ -740,7 +809,8 @@ https://blog.com/weekly-routines"
         </button>
         {lastSaved ? (
           <span className="text-xs text-gray-500 ml-auto">
-            Last saved {new Date(lastSaved.at).toLocaleTimeString()} • {lastSaved.count} record(s)
+            Last saved {new Date(lastSaved.at).toLocaleTimeString()} •{" "}
+            {lastSaved.count} record(s)
           </span>
         ) : null}
       </div>
@@ -805,7 +875,10 @@ function ImportCard({ rec, selected, onToggle, onRemove, onChange }) {
               ))}
             </div>
           ) : (
-            <div className="text-sm text-gray-500">No tasks were detected. Paste the checklist bullets into Bulk and parse again.</div>
+            <div className="text-sm text-gray-500">
+              No tasks were detected. Paste the checklist bullets into Bulk and
+              parse again.
+            </div>
           )}
         </div>
       ) : null}
@@ -849,7 +922,15 @@ function TaskRow({ value, onChange }) {
             onChange={(e) => setArea(e.target.value)}
             className="w-full rounded border px-2 py-2 text-sm"
           >
-            {["General", "Kitchen", "Bathroom", "Bedroom", "Living Room", "Laundry", "Entry/Hall"].map((a) => (
+            {[
+              "General",
+              "Kitchen",
+              "Bathroom",
+              "Bedroom",
+              "Living Room",
+              "Laundry",
+              "Entry/Hall",
+            ].map((a) => (
               <option key={a} value={a}>
                 {a}
               </option>
@@ -895,14 +976,17 @@ function BookmarkletHint() {
     "javascript:(()=>{const u=location.href;navigator.clipboard.writeText(u).then(()=>alert('Copied URL to clipboard. Open Suka → Paste into bulk.'))})();";
   return (
     <details className="text-xs ml-auto">
-      <summary className="cursor-pointer text-gray-600 hover:text-gray-900">Optional: bookmarklet</summary>
+      <summary className="cursor-pointer text-gray-600 hover:text-gray-900">
+        Optional: bookmarklet
+      </summary>
       <div className="mt-2 rounded border bg-gray-50 p-2">
         Drag this to your bookmarks bar:{" "}
         <a href={code} className="underline">
           Suka: copy URL
         </a>
         <div className="mt-1 text-[11px] text-gray-500">
-          Click it while viewing a checklist article → then paste in the bulk box here.
+          Click it while viewing a checklist article → then paste in the bulk
+          box here.
         </div>
       </div>
     </details>

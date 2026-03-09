@@ -1,0 +1,503 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-21T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.korean.recipes.tteokbokki",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Tteokbokki (Spicy Korean Rice Cakes)",
+    "subtitle": "Chewy rice cakes simmered in a bold gochujang-gochugaru sauce; classic street-food style.",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa.catalogs.cuisines.korean",
+      "notes": "Canonical SSA tteokbokki with fish cake optional, broth or water base, and pantry-friendly substitutions (ramen add-in, cheese, soy-only mild version)."
+    }
+  },
+
+  "classification": {
+    "cuisine": "korean",
+    "category": "street_food",
+    "mealArchetypes": [
+      "korean.meal.street_food",
+      "korean.meal.snack",
+      "korean.meal.quick_bowl"
+    ],
+    "servingStyles": ["street_food", "snacks", "bowls", "family_style"],
+    "plannerTags": [
+      "korean",
+      "tteokbokki",
+      "rice_cakes",
+      "gochujang",
+      "gochugaru",
+      "spicy",
+      "street_food",
+      "quick",
+      "comfort_food"
+    ],
+    "subprofiles": ["korean.street_food", "korean.home_cooking"]
+  },
+
+  "summary": "Classic spicy tteokbokki: garaetteok rice cakes simmered until tender-chewy in a savory-sweet chili sauce. Customize with fish cake, eggs, ramen, or cheese.",
+
+  "yield": {
+    "servings": 3,
+    "servingSize": { "value": 350, "unit": "g" },
+    "notes": "Serves 2–3 as a main snack/bowl or 4 as a side."
+  },
+
+  "time": {
+    "activeMins": 15,
+    "handsOffMins": 10,
+    "totalMins": 25
+  },
+
+  "difficulty": "beginner",
+
+  "signals": {
+    "weeknightFriendly": "high",
+    "batchFriendly": "medium",
+    "leftoversGood": "medium",
+    "freezerFriendly": "none",
+    "kidFriendly": "depends_on_heat"
+  },
+
+  "tasteProfile": {
+    "sweet": 3,
+    "salty": 3,
+    "umami": 4,
+    "sour": 0,
+    "heat": 4,
+    "notes": [
+      "spicy-sweet",
+      "gochujang depth",
+      "chewy rice cakes",
+      "savory broth"
+    ]
+  },
+
+  "equipment": {
+    "required": [
+      {
+        "id": "equipment.saucepan",
+        "label": "Medium saucepan or shallow pot",
+        "required": true
+      },
+      {
+        "id": "equipment.spatula_or_wooden_spoon",
+        "label": "Spatula or wooden spoon",
+        "required": true
+      },
+      {
+        "id": "equipment.measuring_spoons",
+        "label": "Measuring spoons",
+        "required": true
+      }
+    ],
+    "recommended": ["equipment.kitchen_scale", "equipment.ladle"],
+    "optional": [
+      {
+        "id": "equipment.fine_mesh_strainer",
+        "label": "Fine mesh strainer (for rinsing rice cakes)",
+        "required": false
+      }
+    ]
+  },
+
+  "dietFlags": [
+    "diet.omnivore",
+    "diet.pescatarian_option",
+    "diet.vegetarian_option"
+  ],
+
+  "allergens": {
+    "contains": [
+      "allergen.soy",
+      "allergen.fish_optional",
+      "allergen.wheat_optional",
+      "allergen.dairy_optional",
+      "allergen.egg_optional"
+    ],
+    "notes": [
+      "Fish cake (eomuk) commonly contains fish and sometimes wheat.",
+      "If using ramen, contains wheat.",
+      "Cheese add-on contains dairy.",
+      "Hard-boiled eggs are optional."
+    ]
+  },
+
+  "ingredientGroups": [
+    {
+      "id": "group.base",
+      "label": "Base",
+      "items": ["ingredient.rice_cakes_garaetteok", "ingredient.broth_or_water"]
+    },
+    {
+      "id": "group.sauce",
+      "label": "Sauce",
+      "items": [
+        "ingredient.gochujang",
+        "ingredient.gochugaru",
+        "ingredient.soy_sauce",
+        "ingredient.sugar",
+        "ingredient.garlic",
+        "ingredient.sesame_oil_optional"
+      ]
+    },
+    {
+      "id": "group.add_ins",
+      "label": "Add-ins (Optional)",
+      "items": [
+        "ingredient.fish_cake_optional",
+        "ingredient.cabbage_optional",
+        "ingredient.scallions",
+        "ingredient.egg_optional",
+        "ingredient.ramen_optional",
+        "ingredient.cheese_optional"
+      ]
+    },
+    {
+      "id": "group.finish",
+      "label": "Finish",
+      "items": ["ingredient.toasted_sesame_seeds_optional"]
+    }
+  ],
+
+  "ingredients": [
+    {
+      "id": "ingredient.rice_cakes_garaetteok",
+      "label": "Korean rice cakes (garaetteok), stick or sliced",
+      "role": "starch",
+      "amount": { "value": 450, "unit": "g" },
+      "notes": [
+        "If refrigerated/frozen or hard: soak in warm water 10–15 minutes before cooking.",
+        "Fresh rice cakes need less soak time—just a quick rinse."
+      ]
+    },
+    {
+      "id": "ingredient.broth_or_water",
+      "label": "Anchovy-kelp broth or water",
+      "role": "liquid",
+      "amount": { "value": 600, "unit": "ml" },
+      "notes": [
+        "Broth gives best depth. Water works; boost umami with a little soy + garlic and optionally a pinch of mushroom powder."
+      ]
+    },
+
+    {
+      "id": "ingredient.gochujang",
+      "label": "Gochujang (Korean red chili paste)",
+      "role": "sauce_base",
+      "amount": { "value": 45, "unit": "g" },
+      "notes": "About 2 1/2 tbsp; adjust to desired heat and thickness."
+    },
+    {
+      "id": "ingredient.gochugaru",
+      "label": "Gochugaru (Korean chili flakes)",
+      "role": "spice",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true,
+      "notes": "About 1 tbsp. For milder, reduce or omit."
+    },
+    {
+      "id": "ingredient.soy_sauce",
+      "label": "Soy sauce",
+      "role": "seasoning",
+      "amount": { "value": 15, "unit": "ml" },
+      "notes": "About 1 tbsp; use tamari if gluten-free."
+    },
+    {
+      "id": "ingredient.sugar",
+      "label": "Sugar (white or light brown)",
+      "role": "sweetener",
+      "amount": { "value": 18, "unit": "g" },
+      "notes": "About 1 1/2 tbsp; balances heat."
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": "About 2 cloves."
+    },
+
+    {
+      "id": "ingredient.fish_cake_optional",
+      "label": "Korean fish cake (eomuk), sliced",
+      "role": "protein",
+      "amount": { "value": 120, "unit": "g" },
+      "optional": true,
+      "notes": "Classic add-in. If unavailable, skip or substitute tofu puffs."
+    },
+    {
+      "id": "ingredient.cabbage_optional",
+      "label": "Green cabbage, thinly sliced",
+      "role": "vegetable",
+      "amount": { "value": 120, "unit": "g" },
+      "optional": true,
+      "notes": "Adds sweetness and volume."
+    },
+    {
+      "id": "ingredient.scallions",
+      "label": "Scallions, sliced",
+      "role": "garnish",
+      "amount": { "value": 25, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.egg_optional",
+      "label": "Hard-boiled eggs (optional)",
+      "role": "protein",
+      "amount": { "value": 2, "unit": "each" },
+      "optional": true,
+      "notes": "Peel and add near the end to warm through."
+    },
+    {
+      "id": "ingredient.ramen_optional",
+      "label": "Instant ramen noodles (optional)",
+      "role": "starch",
+      "amount": { "value": 85, "unit": "g" },
+      "optional": true,
+      "notes": "Add in the last 3–4 minutes of simmering. Don’t use the seasoning packet unless you want extra salt."
+    },
+    {
+      "id": "ingredient.cheese_optional",
+      "label": "Mozzarella or mild melting cheese (optional)",
+      "role": "finish",
+      "amount": { "value": 80, "unit": "g" },
+      "optional": true,
+      "notes": "Top at the end and cover 1–2 minutes to melt (rose tteokbokki vibe)."
+    },
+
+    {
+      "id": "ingredient.sesame_oil_optional",
+      "label": "Toasted sesame oil (optional finish)",
+      "role": "finish",
+      "amount": { "value": 5, "unit": "ml" },
+      "optional": true,
+      "notes": "About 1 tsp."
+    },
+    {
+      "id": "ingredient.toasted_sesame_seeds_optional",
+      "label": "Toasted sesame seeds (optional finish)",
+      "role": "finish",
+      "amount": { "value": 3, "unit": "g" },
+      "optional": true
+    }
+  ],
+
+  "methods": ["method.simmer", "method.stir", "method.reduce"],
+
+  "safety": {
+    "notes": [
+      "Stir often as sauce thickens to prevent sticking/scorching.",
+      "If using eggs, use properly cooked and refrigerated eggs; warm through without overcooking.",
+      "Use caution: sauce can splatter as it thickens."
+    ]
+  },
+
+  "storage": {
+    "fridge": {
+      "maxDays": 2,
+      "notes": "Best eaten fresh. Rice cakes firm up in the fridge; reheat with extra water/broth."
+    },
+    "reheat": {
+      "notes": [
+        "Stovetop: add 2–4 tbsp water/broth, cover, warm over medium-low, stirring occasionally until chewy again.",
+        "Microwave: add a splash of water, cover, heat in short bursts; stir between bursts."
+      ]
+    }
+  },
+
+  "planner": {
+    "signals": {
+      "quickCook": true,
+      "spiceForward": true
+    },
+    "roles": {
+      "starch": [
+        "ingredient.rice_cakes_garaetteok",
+        "ingredient.ramen_optional"
+      ],
+      "protein": ["ingredient.fish_cake_optional", "ingredient.egg_optional"],
+      "veg": ["ingredient.cabbage_optional", "ingredient.scallions"]
+    }
+  },
+
+  "adaptations": [
+    {
+      "id": "adapt.mild_kids",
+      "label": "Milder (kid-friendly) version",
+      "when": { "preference": ["low_heat"] },
+      "changes": {
+        "notes": [
+          "Reduce gochujang to ~1.5 tbsp and omit gochugaru.",
+          "Increase sugar slightly (up to 2 tbsp) and add extra cabbage for natural sweetness.",
+          "Serve with melted cheese to mellow heat."
+        ]
+      }
+    },
+    {
+      "id": "adapt.vegetarian",
+      "label": "Vegetarian tteokbokki",
+      "when": { "diet": ["vegetarian"] },
+      "changes": {
+        "notes": [
+          "Use water or vegetable broth instead of anchovy-kelp broth.",
+          "Skip fish cake; add cabbage, mushrooms, or tofu puffs.",
+          "Use tamari if avoiding wheat."
+        ]
+      }
+    },
+    {
+      "id": "adapt.rose_creamy",
+      "label": "Rosé / creamy tteokbokki",
+      "when": { "preference": ["creamy"] },
+      "changes": {
+        "notes": [
+          "After sauce thickens and rice cakes are tender, add 60–120 ml milk or light cream and simmer 1–2 minutes.",
+          "Top with cheese and cover to melt."
+        ]
+      }
+    }
+  ],
+
+  "variations": [
+    {
+      "id": "var.add_ramen",
+      "label": "Rabokki (ramen + tteokbokki)",
+      "notes": [
+        "Add ramen noodles in the last 3–4 minutes; loosen sauce with extra water as needed."
+      ]
+    },
+    {
+      "id": "var.add_cheese",
+      "label": "Cheese tteokbokki",
+      "notes": [
+        "Top with mozzarella and cover briefly to melt; balances heat and adds comfort-food appeal."
+      ]
+    }
+  ],
+
+  "notes": [
+    "If sauce thickens too quickly before rice cakes are tender, add 60–120 ml more broth/water and continue simmering.",
+    "If sauce is too thin, simmer uncovered a few more minutes; stir to prevent sticking.",
+    "For best texture, serve immediately; leftover rice cakes will firm and need rehydration on reheat."
+  ],
+
+  "steps": [
+    {
+      "id": "step.01_soak_rice_cakes",
+      "title": "Rinse and soak rice cakes (if needed)",
+      "instructions": [
+        "Rinse rice cakes under cool water to remove surface starch.",
+        "If rice cakes are hard (refrigerated/frozen), soak in warm water 10–15 minutes to soften slightly, then drain."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 10,
+      "timers": [{ "label": "Soak rice cakes (if hard)", "minutes": 12 }],
+      "checks": ["Rice cakes feel pliable (not rock-hard) before simmering."]
+    },
+    {
+      "id": "step.02_make_sauce_base",
+      "title": "Build the sauce",
+      "instructions": [
+        "In a saucepan, add broth (or water), gochujang, soy sauce, sugar, minced garlic, and gochugaru (if using).",
+        "Whisk until gochujang dissolves and the liquid is evenly red."
+      ],
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "checks": [
+        "No large clumps of gochujang remain; sauce base tastes spicy-sweet and savory."
+      ]
+    },
+    {
+      "id": "step.03_simmer_add_ins",
+      "title": "Simmer with add-ins (optional fish cake/cabbage)",
+      "instructions": [
+        "Bring sauce to a gentle boil over medium heat.",
+        "Add sliced fish cake and/or cabbage if using.",
+        "Simmer 2–3 minutes to start softening vegetables and flavor the broth."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Simmer add-ins", "minutes": 3 }],
+      "checks": [
+        "Sauce is bubbling gently; cabbage begins to soften (if used)."
+      ]
+    },
+    {
+      "id": "step.04_add_rice_cakes_and_reduce",
+      "title": "Cook rice cakes until chewy-tender and sauce thickens",
+      "instructions": [
+        "Add drained rice cakes to the simmering sauce.",
+        "Simmer 8–12 minutes, stirring frequently, until rice cakes are chewy-tender and sauce thickens and coats them.",
+        "If sauce thickens too fast, add a splash more broth/water and keep simmering."
+      ],
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Simmer rice cakes", "minutes": 10 }],
+      "checks": [
+        "Rice cakes are tender-chewy all the way through (no hard core).",
+        "Sauce coats rice cakes and leaves trails on the pan when stirred."
+      ]
+    },
+    {
+      "id": "step.05_optional_ramen_eggs",
+      "title": "Optional: add ramen and/or eggs",
+      "instructions": [
+        "If adding ramen: stir ramen noodles into the sauce for the last 3–4 minutes, loosening with a splash of water if needed.",
+        "If adding hard-boiled eggs: add eggs in the last 2 minutes to warm through."
+      ],
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "timers": [
+        { "label": "Cook ramen (optional)", "minutes": 4 },
+        { "label": "Warm eggs (optional)", "minutes": 2 }
+      ],
+      "checks": ["Ramen is tender; sauce remains glossy and not overly salty."]
+    },
+    {
+      "id": "step.06_finish_and_serve",
+      "title": "Finish and serve",
+      "instructions": [
+        "Turn off heat. Optionally drizzle sesame oil and sprinkle sesame seeds.",
+        "Top with scallions.",
+        "Optional cheese: scatter cheese on top and cover 1–2 minutes to melt, then serve immediately."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 2,
+      "timers": [{ "label": "Melt cheese (optional)", "minutes": 2 }],
+      "checks": [
+        "Sauce is thick and glossy; rice cakes are chewy; final taste is balanced spicy-sweet."
+      ]
+    }
+  ],
+
+  "compat": {
+    "cuisineId": "cuisines.korean",
+    "dishId": "dish.tteokbokki",
+    "sourcePaths": ["src/catalogs/cuisines/korean/recipes/tteokbokki.json"],
+    "search": {
+      "aliases": [
+        "tteokbokki",
+        "topokki",
+        "ddeokbokki",
+        "떡볶이",
+        "spicy rice cakes"
+      ],
+      "keywords": [
+        "tteokbokki",
+        "rice cakes",
+        "gochujang",
+        "gochugaru",
+        "korean street food",
+        "spicy-sweet",
+        "rabokki",
+        "cheese tteokbokki"
+      ]
+    }
+  }
+}

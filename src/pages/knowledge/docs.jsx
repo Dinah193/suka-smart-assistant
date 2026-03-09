@@ -1,6 +1,13 @@
 /* eslint-disable no-console */
 // C:\Users\larho\suka-smart-assistant\src\pages\knowledge\docs.jsx
-import React, { useCallback, useEffect, useMemo, useRef, useState, Suspense } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  Suspense,
+} from "react";
 
 /**
  * knowledge/docs.jsx — Knowledge Docs Hub
@@ -31,7 +38,9 @@ import React, { useCallback, useEffect, useMemo, useRef, useState, Suspense } fr
 // ----------------------------- Soft Imports ---------------------------------
 let eventBus = null;
 try {
-  eventBus = require("@/services/eventBus").default ?? require("@/services/eventBus");
+  eventBus =
+    require("@/services/events/eventBus").default ??
+    require("@/services/events/eventBus");
 } catch {}
 
 let Config = { get: (k, fallback) => fallback };
@@ -83,9 +92,12 @@ function nanoid(len = 12) {
 }
 
 function validateDoc(obj) {
-  if (!obj || typeof obj !== "object") return { ok: false, reason: "not-an-object" };
-  if (!obj.id || typeof obj.id !== "string") return { ok: false, reason: "missing-id" };
-  if (!obj.title || typeof obj.title !== "string") return { ok: false, reason: "missing-title" };
+  if (!obj || typeof obj !== "object")
+    return { ok: false, reason: "not-an-object" };
+  if (!obj.id || typeof obj.id !== "string")
+    return { ok: false, reason: "missing-id" };
+  if (!obj.title || typeof obj.title !== "string")
+    return { ok: false, reason: "missing-title" };
   if (!obj.category || typeof obj.category !== "string")
     return { ok: false, reason: "missing-category" };
   // content can be markdown string or blocks[]; we store as string
@@ -106,7 +118,8 @@ function normalizeDoc(obj) {
     affects: Array.isArray(obj.affects) ? obj.affects.map(String) : [], // signals operational impact
     meta: typeof obj.meta === "object" && obj.meta ? obj.meta : {},
     updatedAt: NOW_ISO(),
-    createdAt: obj.createdAt && isISO(obj.createdAt) ? obj.createdAt : NOW_ISO(),
+    createdAt:
+      obj.createdAt && isISO(obj.createdAt) ? obj.createdAt : NOW_ISO(),
   };
 }
 
@@ -185,7 +198,10 @@ export default function KnowledgeDocsPage() {
         if (!alive) return;
         setItems(Array.isArray(all) ? all : []);
       } catch {
-        setStatus({ kind: "warn", message: "Could not load knowledge docs (degraded mode)." });
+        setStatus({
+          kind: "warn",
+          message: "Could not load knowledge docs (degraded mode).",
+        });
       }
     })();
     return () => {
@@ -200,7 +216,11 @@ export default function KnowledgeDocsPage() {
   }, [items]);
 
   const domains = useMemo(() => {
-    const set = new Set(items.flatMap((i) => Array.isArray(i.domains) ? i.domains : []).filter(Boolean));
+    const set = new Set(
+      items
+        .flatMap((i) => (Array.isArray(i.domains) ? i.domains : []))
+        .filter(Boolean)
+    );
     return ["all", ...Array.from(set).sort()];
   }, [items]);
 
@@ -209,9 +229,15 @@ export default function KnowledgeDocsPage() {
     const needle = q.trim().toLowerCase();
     return items.filter((d) => {
       if (category !== "all" && d.category !== category) return false;
-      if (domain !== "all" && !(Array.isArray(d.domains) && d.domains.includes(domain))) return false;
+      if (
+        domain !== "all" &&
+        !(Array.isArray(d.domains) && d.domains.includes(domain))
+      )
+        return false;
       if (!needle) return true;
-      const hay = `${d.id} ${d.title} ${d.category} ${d.tags?.join(" ")} ${d.domains?.join(" ")} ${d.content}`.toLowerCase();
+      const hay = `${d.id} ${d.title} ${d.category} ${d.tags?.join(
+        " "
+      )} ${d.domains?.join(" ")} ${d.content}`.toLowerCase();
       return hay.includes(needle);
     });
   }, [items, q, category, domain]);
@@ -243,33 +269,48 @@ export default function KnowledgeDocsPage() {
       await upsertDoc(draft);
       setItems((prev) => [draft, ...prev]);
       setActive(draft.id);
-      emitEvent("docs.created", "KnowledgeDocs", { id: draft.id, category: draft.category }, false);
+      emitEvent(
+        "docs.created",
+        "KnowledgeDocs",
+        { id: draft.id, category: draft.category },
+        false
+      );
     } catch {
       setStatus({ kind: "error", message: "Create failed." });
     }
   }, []);
 
-  const onDelete = useCallback(async (id) => {
-    if (!id) return;
-    if (!confirm("Delete this document?")) return;
-    try {
-      await deleteDoc(id);
-      setItems((prev) => prev.filter((x) => x.id !== id));
-      if (active === id) setActive(null);
-      emitEvent("docs.deleted", "KnowledgeDocs", { id }, false);
-    } catch {
-      setStatus({ kind: "error", message: "Delete failed." });
-    }
-  }, [active]);
+  const onDelete = useCallback(
+    async (id) => {
+      if (!id) return;
+      if (!confirm("Delete this document?")) return;
+      try {
+        await deleteDoc(id);
+        setItems((prev) => prev.filter((x) => x.id !== id));
+        if (active === id) setActive(null);
+        emitEvent("docs.deleted", "KnowledgeDocs", { id }, false);
+      } catch {
+        setStatus({ kind: "error", message: "Delete failed." });
+      }
+    },
+    [active]
+  );
 
   const onSave = useCallback(
     async (id, patch) => {
       const src = items.find((x) => x.id === id);
       if (!src) return;
-      const candidate = normalizeDoc({ ...src, ...patch, updatedAt: NOW_ISO() });
+      const candidate = normalizeDoc({
+        ...src,
+        ...patch,
+        updatedAt: NOW_ISO(),
+      });
       const check = validateDoc(candidate);
       if (!check.ok) {
-        setStatus({ kind: "error", message: `Validation failed: ${check.reason}` });
+        setStatus({
+          kind: "error",
+          message: `Validation failed: ${check.reason}`,
+        });
         return;
       }
       try {
@@ -279,7 +320,12 @@ export default function KnowledgeDocsPage() {
         emitEvent(
           "docs.updated",
           "KnowledgeDocs",
-          { id, category: candidate.category, affects: candidate.affects, domains: candidate.domains },
+          {
+            id,
+            category: candidate.category,
+            affects: candidate.affects,
+            domains: candidate.domains,
+          },
           op // only export if operational
         );
       } catch {
@@ -291,16 +337,25 @@ export default function KnowledgeDocsPage() {
 
   const onOpen = useCallback((doc) => {
     setActive(doc.id);
-    emitEvent("docs.viewed", "KnowledgeDocs", { id: doc.id, category: doc.category }, false);
+    emitEvent(
+      "docs.viewed",
+      "KnowledgeDocs",
+      { id: doc.id, category: doc.category },
+      false
+    );
   }, []);
 
   const onExportAll = useCallback(() => {
     try {
-      const blob = new Blob([JSON.stringify(items, null, 2)], { type: "application/json" });
+      const blob = new Blob([JSON.stringify(items, null, 2)], {
+        type: "application/json",
+      });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `ssa-knowledge-docs-${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
+      a.download = `ssa-knowledge-docs-${new Date()
+        .toISOString()
+        .replace(/[:.]/g, "-")}.json`;
       a.click();
       URL.revokeObjectURL(url);
     } catch {
@@ -309,59 +364,72 @@ export default function KnowledgeDocsPage() {
   }, [items]);
 
   const onImportClick = useCallback(() => fileRef.current?.click(), []);
-  const onImportFile = useCallback(async (e) => {
-    try {
-      const file = e.target.files?.[0];
-      if (!file) return;
-      const text = await file.text();
-      let json = null;
+  const onImportFile = useCallback(
+    async (e) => {
       try {
-        json = JSON.parse(text);
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const text = await file.text();
+        let json = null;
+        try {
+          json = JSON.parse(text);
+        } catch {
+          setStatus({ kind: "error", message: "Invalid JSON." });
+          return;
+        }
+        const incoming = Array.isArray(json) ? json : [json];
+        let created = 0;
+        let updated = 0;
+
+        for (const raw of incoming) {
+          const check = validateDoc(raw);
+          if (!check.ok) {
+            console.warn("Skipped invalid doc:", check.reason, raw);
+            continue;
+          }
+          const norm = normalizeDoc(raw);
+          const exists = items.find((d) => d.id === norm.id);
+          await upsertDoc(norm);
+          const op = isOperationalImpact(norm);
+          if (exists) {
+            emitEvent("docs.updated", "KnowledgeDocs", { id: norm.id }, op);
+            updated++;
+          } else {
+            emitEvent("docs.created", "KnowledgeDocs", { id: norm.id }, op);
+            created++;
+          }
+        }
+
+        const fresh = await listDocs();
+        setItems(Array.isArray(fresh) ? fresh : []);
+        setStatus({
+          kind: "ok",
+          message: `Imported ${
+            created + updated
+          } doc(s) (${created} created, ${updated} updated).`,
+        });
+        e.target.value = "";
       } catch {
-        setStatus({ kind: "error", message: "Invalid JSON." });
-        return;
+        setStatus({ kind: "error", message: "Import failed." });
       }
-      const incoming = Array.isArray(json) ? json : [json];
-      let created = 0;
-      let updated = 0;
-
-      for (const raw of incoming) {
-        const check = validateDoc(raw);
-        if (!check.ok) {
-          console.warn("Skipped invalid doc:", check.reason, raw);
-          continue;
-        }
-        const norm = normalizeDoc(raw);
-        const exists = items.find((d) => d.id === norm.id);
-        await upsertDoc(norm);
-        const op = isOperationalImpact(norm);
-        if (exists) {
-          emitEvent("docs.updated", "KnowledgeDocs", { id: norm.id }, op);
-          updated++;
-        } else {
-          emitEvent("docs.created", "KnowledgeDocs", { id: norm.id }, op);
-          created++;
-        }
-      }
-
-      const fresh = await listDocs();
-      setItems(Array.isArray(fresh) ? fresh : []);
-      setStatus({
-        kind: "ok",
-        message: `Imported ${created + updated} doc(s) (${created} created, ${updated} updated).`,
-      });
-      e.target.value = "";
-    } catch {
-      setStatus({ kind: "error", message: "Import failed." });
-    }
-  }, [items]);
+    },
+    [items]
+  );
 
   const onRebuildIndex = useCallback(() => {
-    emitEvent("docs.index.rebuilt", "KnowledgeDocs", { count: items.length }, false);
+    emitEvent(
+      "docs.index.rebuilt",
+      "KnowledgeDocs",
+      { count: items.length },
+      false
+    );
     setStatus({ kind: "ok", message: "Index rebuild signal emitted." });
   }, [items.length]);
 
-  const activeDoc = useMemo(() => items.find((x) => x.id === active) || null, [items, active]);
+  const activeDoc = useMemo(
+    () => items.find((x) => x.id === active) || null,
+    [items, active]
+  );
 
   // ------------------------------- Render -----------------------------------
   return (
@@ -369,23 +437,38 @@ export default function KnowledgeDocsPage() {
       <header className="mb-5 md:mb-7">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div>
-            <h1 className="text-xl md:text-2xl font-semibold">Knowledge Docs</h1>
+            <h1 className="text-xl md:text-2xl font-semibold">
+              Knowledge Docs
+            </h1>
             <p className="text-sm text-neutral-600">
-              SOPs, guides, and references that power SSA intelligence. CRUD emits bus events;
-              operational docs may export to the Hub when enabled.
+              SOPs, guides, and references that power SSA intelligence. CRUD
+              emits bus events; operational docs may export to the Hub when
+              enabled.
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <button className="rounded-xl border px-3 py-2 text-sm hover:shadow" onClick={onNew}>
+            <button
+              className="rounded-xl border px-3 py-2 text-sm hover:shadow"
+              onClick={onNew}
+            >
               New doc
             </button>
-            <button className="rounded-xl border px-3 py-2 text-sm hover:shadow" onClick={onRebuildIndex}>
+            <button
+              className="rounded-xl border px-3 py-2 text-sm hover:shadow"
+              onClick={onRebuildIndex}
+            >
               Rebuild index
             </button>
-            <button className="rounded-xl border px-3 py-2 text-sm hover:shadow" onClick={onExportAll}>
+            <button
+              className="rounded-xl border px-3 py-2 text-sm hover:shadow"
+              onClick={onExportAll}
+            >
               Export JSON
             </button>
-            <button className="rounded-xl border px-3 py-2 text-sm hover:shadow" onClick={onImportClick}>
+            <button
+              className="rounded-xl border px-3 py-2 text-sm hover:shadow"
+              onClick={onImportClick}
+            >
               Import JSON
             </button>
             <input
@@ -430,7 +513,9 @@ export default function KnowledgeDocsPage() {
       <section className="rounded-2xl border p-3 md:p-4 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4">
           <div className="md:col-span-5">
-            <label className="block text-xs text-neutral-600 mb-1">Search</label>
+            <label className="block text-xs text-neutral-600 mb-1">
+              Search
+            </label>
             <input
               className="w-full rounded-xl border px-3 py-2 text-sm"
               placeholder="Find by title, tags, content…"
@@ -439,7 +524,9 @@ export default function KnowledgeDocsPage() {
             />
           </div>
           <div className="md:col-span-3">
-            <label className="block text-xs text-neutral-600 mb-1">Category</label>
+            <label className="block text-xs text-neutral-600 mb-1">
+              Category
+            </label>
             <select
               className="w-full rounded-xl border px-3 py-2 text-sm bg-white"
               value={category}
@@ -453,7 +540,9 @@ export default function KnowledgeDocsPage() {
             </select>
           </div>
           <div className="md:col-span-3">
-            <label className="block text-xs text-neutral-600 mb-1">Domain</label>
+            <label className="block text-xs text-neutral-600 mb-1">
+              Domain
+            </label>
             <select
               className="w-full rounded-xl border px-3 py-2 text-sm bg-white"
               value={domain}
@@ -494,7 +583,9 @@ export default function KnowledgeDocsPage() {
         <div className="xl:col-span-2">
           <div className="rounded-2xl border p-3 md:p-4 min-h-[300px]">
             {!activeDoc ? (
-              <div className="text-sm text-neutral-600">Select a document to preview/edit.</div>
+              <div className="text-sm text-neutral-600">
+                Select a document to preview/edit.
+              </div>
             ) : (
               <DocEditor doc={activeDoc} onSave={onSave} />
             )}
@@ -505,23 +596,28 @@ export default function KnowledgeDocsPage() {
       {/* Help */}
       <section className="mt-8">
         <details className="rounded-2xl border p-3">
-          <summary className="cursor-pointer text-sm font-medium">How docs drive SSA</summary>
+          <summary className="cursor-pointer text-sm font-medium">
+            How docs drive SSA
+          </summary>
           <ul className="list-disc pl-5 text-sm mt-2 space-y-1">
             <li>
-              <strong>Imports →</strong> Video/how-to/recipe/seed pages become docs; normalizers
-              extract equipment, methods, and seasonality as tags/domains.
+              <strong>Imports →</strong> Video/how-to/recipe/seed pages become
+              docs; normalizers extract equipment, methods, and seasonality as
+              tags/domains.
             </li>
             <li>
-              <strong>Intelligence →</strong> Engines consult SOPs/Guides to size sessions
-              (e.g., dehydrator tray counts, canner batch sizes).
+              <strong>Intelligence →</strong> Engines consult SOPs/Guides to
+              size sessions (e.g., dehydrator tray counts, canner batch sizes).
             </li>
             <li>
-              <strong>Automation →</strong> Rules reference doc tags (e.g., <em>quiet-hours</em> +
-              <em>noisy equipment</em>) to defer or convert tasks to notifications.
+              <strong>Automation →</strong> Rules reference doc tags (e.g.,{" "}
+              <em>quiet-hours</em> +<em>noisy equipment</em>) to defer or
+              convert tasks to notifications.
             </li>
             <li>
-              <strong>Hub export (optional) →</strong> Operational docs (affects[]) can be shared to
-              SVFFH so community services align training/quality standards.
+              <strong>Hub export (optional) →</strong> Operational docs
+              (affects[]) can be shared to SVFFH so community services align
+              training/quality standards.
             </li>
           </ul>
         </details>
@@ -554,14 +650,23 @@ function DocListItem({ doc, isActive, onOpen, onDelete }) {
         <div>
           <div className="font-medium">{doc.title}</div>
           <div className="text-xs text-neutral-600">
-            <span className="px-2 py-0.5 border rounded-full">{doc.category}</span>
+            <span className="px-2 py-0.5 border rounded-full">
+              {doc.category}
+            </span>
             {doc.domains?.length ? (
-              <span className="ml-2 text-neutral-500">• {doc.domains.join(", ")}</span>
+              <span className="ml-2 text-neutral-500">
+                • {doc.domains.join(", ")}
+              </span>
             ) : null}
-            {op ? <span className="ml-2 text-emerald-600">• operational</span> : null}
+            {op ? (
+              <span className="ml-2 text-emerald-600">• operational</span>
+            ) : null}
           </div>
         </div>
-        <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="flex items-center gap-1"
+          onClick={(e) => e.stopPropagation()}
+        >
           <button
             className="text-xs rounded-lg border px-2 py-1 hover:shadow text-rose-700"
             onClick={() => onDelete?.(doc.id)}
@@ -574,12 +679,17 @@ function DocListItem({ doc, isActive, onOpen, onDelete }) {
       {doc.tags?.length ? (
         <div className="mt-2 flex flex-wrap gap-1">
           {doc.tags.slice(0, 8).map((t) => (
-            <span key={t} className="text-[11px] px-2 py-0.5 border rounded-full">
+            <span
+              key={t}
+              className="text-[11px] px-2 py-0.5 border rounded-full"
+            >
               #{t}
             </span>
           ))}
           {doc.tags.length > 8 ? (
-            <span className="text-[11px] text-neutral-500">+{doc.tags.length - 8}</span>
+            <span className="text-[11px] text-neutral-500">
+              +{doc.tags.length - 8}
+            </span>
           ) : null}
         </div>
       ) : null}
@@ -597,10 +707,14 @@ function DocEditor({ doc, onSave }) {
     for (const k of ["title", "category", "content"]) {
       if (local[k] !== doc[k]) patch[k] = local[k];
     }
-    if (JSON.stringify(local.domains) !== JSON.stringify(doc.domains)) patch.domains = local.domains;
-    if (JSON.stringify(local.tags) !== JSON.stringify(doc.tags)) patch.tags = local.tags;
-    if (JSON.stringify(local.affects) !== JSON.stringify(doc.affects)) patch.affects = local.affects;
-    if (JSON.stringify(local.meta) !== JSON.stringify(doc.meta)) patch.meta = local.meta;
+    if (JSON.stringify(local.domains) !== JSON.stringify(doc.domains))
+      patch.domains = local.domains;
+    if (JSON.stringify(local.tags) !== JSON.stringify(doc.tags))
+      patch.tags = local.tags;
+    if (JSON.stringify(local.affects) !== JSON.stringify(doc.affects))
+      patch.affects = local.affects;
+    if (JSON.stringify(local.meta) !== JSON.stringify(doc.meta))
+      patch.meta = local.meta;
     if (Object.keys(patch).length === 0) return;
     onSave?.(doc.id, patch);
   }, [doc, local, onSave]);
@@ -668,7 +782,9 @@ function DocEditor({ doc, onSave }) {
       </div>
 
       <div>
-        <div className="block text-xs text-neutral-600 mb-1">Content (Markdown supported)</div>
+        <div className="block text-xs text-neutral-600 mb-1">
+          Content (Markdown supported)
+        </div>
         <textarea
           className="w-full rounded-xl border px-3 py-2 text-sm font-mono min-h-48"
           spellCheck={false}
@@ -683,11 +799,17 @@ function DocEditor({ doc, onSave }) {
         <div className="text-xs text-neutral-600 mb-2">Preview</div>
         <div className="prose prose-sm max-w-none">
           {Markdown ? (
-            <Suspense fallback={<div className="text-xs text-neutral-600">Rendering…</div>}>
+            <Suspense
+              fallback={
+                <div className="text-xs text-neutral-600">Rendering…</div>
+              }
+            >
               <Markdown>{local.content || "_(empty)_"}</Markdown>
             </Suspense>
           ) : (
-            <pre className="text-xs whitespace-pre-wrap">{local.content || "(empty)"}</pre>
+            <pre className="text-xs whitespace-pre-wrap">
+              {local.content || "(empty)"}
+            </pre>
           )}
         </div>
       </div>
@@ -700,18 +822,28 @@ function DocEditor({ doc, onSave }) {
       />
 
       <div className="flex items-center gap-2">
-        <button className="text-xs rounded-lg border px-3 py-2 hover:shadow" onClick={save}>
+        <button
+          className="text-xs rounded-lg border px-3 py-2 hover:shadow"
+          onClick={save}
+        >
           Save changes
         </button>
         <span className="text-[11px] text-neutral-500">
-          Updated {doc.updatedAt ? new Date(doc.updatedAt).toLocaleString() : "—"}
+          Updated{" "}
+          {doc.updatedAt ? new Date(doc.updatedAt).toLocaleString() : "—"}
         </span>
       </div>
     </div>
   );
 }
 
-function LabeledInput({ label, value, onChange, type = "text", className = "" }) {
+function LabeledInput({
+  label,
+  value,
+  onChange,
+  type = "text",
+  className = "",
+}) {
   return (
     <div className={className}>
       <label className="block text-xs text-neutral-600 mb-1">{label}</label>

@@ -21,7 +21,7 @@
 
 import React, { useCallback, useMemo, useState } from "react";
 import { runFeastDayAlignmentCalculator } from "./FeastDayAlignmentCalculator.shim";
-import { emit } from "@/services/eventBus";
+import { emit } from "@/services/events/eventBus";
 
 /**
  * @typedef {import("./FeastDayAlignmentCalculator.schema.json").input} FeastAlignmentInput
@@ -68,7 +68,8 @@ function FeastDayAlignmentCalculatorView(props) {
     }
   }, []);
 
-  const hasMonthStartData = Array.isArray(baseMonthStartData) && baseMonthStartData.length > 0;
+  const hasMonthStartData =
+    Array.isArray(baseMonthStartData) && baseMonthStartData.length > 0;
 
   const selectedFeast = useMemo(() => {
     if (!result || !selectedFeastCode) return null;
@@ -226,8 +227,9 @@ function FeastDayAlignmentCalculatorView(props) {
         <div>
           <h2 className="ssa-panel-title">Feast Day Alignment</h2>
           <p className="ssa-panel-subtitle">
-            Align your chosen Hebrew month-start method with scripture-based feast dates,
-            then spin up preparation sessions across your storehouse, kitchen, and home.
+            Align your chosen Hebrew month-start method with scripture-based
+            feast dates, then spin up preparation sessions across your
+            storehouse, kitchen, and home.
           </p>
         </div>
         <div className="ssa-panel-actions">
@@ -246,8 +248,9 @@ function FeastDayAlignmentCalculatorView(props) {
         <div className="ssa-alert ssa-alert-warning">
           <h3>Month start data required</h3>
           <p>
-            This calculator depends on <strong>Hebrew Month Start Calendar</strong> output.
-            Run that calculator first, then open this tool so it can receive{" "}
+            This calculator depends on{" "}
+            <strong>Hebrew Month Start Calendar</strong> output. Run that
+            calculator first, then open this tool so it can receive{" "}
             <code>baseMonthStartData</code>.
           </p>
         </div>
@@ -276,7 +279,9 @@ function FeastDayAlignmentCalculatorView(props) {
                   type="number"
                   className="ssa-input"
                   value={gregorianYear}
-                  onChange={(e) => setGregorianYear(e.target.valueAsNumber || gregorianYear)}
+                  onChange={(e) =>
+                    setGregorianYear(e.target.valueAsNumber || gregorianYear)
+                  }
                   min={1900}
                   max={2600}
                 />
@@ -303,13 +308,19 @@ function FeastDayAlignmentCalculatorView(props) {
                   className="ssa-select"
                   value={monthStartMethod}
                   onChange={(e) =>
-                    setMonthStartMethod(/** @type {FeastAlignmentInput["monthStartMethod"]} */ (
-                      e.target.value
-                    ))
+                    setMonthStartMethod(
+                      /** @type {FeastAlignmentInput["monthStartMethod"]} */ (
+                        e.target.value
+                      )
+                    )
                   }
                 >
-                  <option value="fullMoon">Full Moon (your system default)</option>
-                  <option value="firstVisibleCrescent">First Visible Crescent</option>
+                  <option value="fullMoon">
+                    Full Moon (your system default)
+                  </option>
+                  <option value="firstVisibleCrescent">
+                    First Visible Crescent
+                  </option>
                   <option value="newMoonDark">Conjunction (Dark Moon)</option>
                   <option value="noMeridianCross">
                     Moon does not cross meridian at night
@@ -317,7 +328,8 @@ function FeastDayAlignmentCalculatorView(props) {
                 </select>
               </label>
               <p className="ssa-help-text">
-                These options should match your Hebrew Month Start calculator rules.
+                These options should match your Hebrew Month Start calculator
+                rules.
               </p>
             </div>
             <div className="ssa-flex ssa-items-center ssa-gap-2">
@@ -342,7 +354,9 @@ function FeastDayAlignmentCalculatorView(props) {
               type="button"
               className="ssa-btn ssa-btn-outline w-full"
               onClick={handlePlanAllPrepSessions}
-              disabled={!result || !result.feasts.some((f) => f.requiresPrepSession)}
+              disabled={
+                !result || !result.feasts.some((f) => f.requiresPrepSession)
+              }
             >
               Plan Prep Sessions for All Major Feasts
             </button>
@@ -360,7 +374,8 @@ function FeastDayAlignmentCalculatorView(props) {
           <div className="ssa-card-body ssa-space-y-2 ssa-max-h-[28rem] ssa-overflow-y-auto">
             {!result && (
               <p className="ssa-text-sm ssa-text-muted">
-                Once you compute feast dates, they will appear here as a scrollable list.
+                Once you compute feast dates, they will appear here as a
+                scrollable list.
               </p>
             )}
             {result &&
@@ -371,12 +386,16 @@ function FeastDayAlignmentCalculatorView(props) {
                   onClick={() => setSelectedFeastCode(feast.code)}
                   className={
                     "ssa-feast-list-item ssa-w-full ssa-text-left" +
-                    (selectedFeastCode === feast.code ? " ssa-feast-list-item--active" : "")
+                    (selectedFeastCode === feast.code
+                      ? " ssa-feast-list-item--active"
+                      : "")
                   }
                 >
                   <div className="ssa-flex ssa-justify-between ssa-items-center">
                     <div>
-                      <div className="ssa-text-sm ssa-font-semibold">{feast.label}</div>
+                      <div className="ssa-text-sm ssa-font-semibold">
+                        {feast.label}
+                      </div>
                       <div className="ssa-text-xs ssa-text-muted">
                         {feast.gregorianStartDate
                           ? feast.gregorianEndDate &&
@@ -409,13 +428,15 @@ function FeastDayAlignmentCalculatorView(props) {
               {selectedFeast ? selectedFeast.label : "Feast Detail & Prep"}
             </h3>
             <p className="ssa-card-subtitle">
-              View Hebrew and Gregorian alignment, plus recommended prep domains.
+              View Hebrew and Gregorian alignment, plus recommended prep
+              domains.
             </p>
           </div>
           <div className="ssa-card-body ssa-space-y-3">
             {!selectedFeast && (
               <p className="ssa-text-sm ssa-text-muted">
-                Select a feast from the middle list to see details and create a prep session.
+                Select a feast from the middle list to see details and create a
+                prep session.
               </p>
             )}
 
@@ -445,8 +466,9 @@ function FeastDayAlignmentCalculatorView(props) {
                     <div className="ssa-label-inline">Hebrew:</div>
                     <div className="ssa-text-sm">
                       Month {selectedFeast.hebrewMonthIndex}, day{" "}
-                      {selectedFeast.hebrewDay} (span {selectedFeast.hebrewSpanDays}{" "}
-                      day{selectedFeast.hebrewSpanDays > 1 ? "s" : ""})
+                      {selectedFeast.hebrewDay} (span{" "}
+                      {selectedFeast.hebrewSpanDays} day
+                      {selectedFeast.hebrewSpanDays > 1 ? "s" : ""})
                     </div>
                   </div>
                   <div>
@@ -499,10 +521,11 @@ function FeastDayAlignmentCalculatorView(props) {
                       : "Prep Session Optional for This Feast"}
                   </button>
                   <p className="ssa-text-xs ssa-text-muted">
-                    When you create a prep session, the SessionRunner will handle timers,
-                    voice cues, and notifications. This panel is your planning “HUD”
-                    for feast alignment; the full-screen SessionRunner modal sits at the
-                    app root so it can keep running even as you navigate elsewhere.
+                    When you create a prep session, the SessionRunner will
+                    handle timers, voice cues, and notifications. This panel is
+                    your planning “HUD” for feast alignment; the full-screen
+                    SessionRunner modal sits at the app root so it can keep
+                    running even as you navigate elsewhere.
                   </p>
                 </div>
               </>

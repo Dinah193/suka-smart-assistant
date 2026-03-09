@@ -1,0 +1,468 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-20T00:00:00.000Z",
+
+  "meta": {
+    "id": "recipes.cuisines.indian.chana_masala",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Chana Masala",
+    "subtitle": "Chickpea curry in a spiced onion-tomato masala",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA canonical cuisines/indian/recipes/chana_masala.json",
+      "notes": [
+        "Deterministic, weeknight-friendly version optimized for canned chickpeas.",
+        "Includes optional dried-chickpea + pressure-cooker variation."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.indian",
+    "category": "curry",
+    "mealArchetypes": ["meal.main.curry", "meal.main.legume"],
+    "servingStyles": ["family_style", "stew_and_starch"],
+    "plannerTags": [
+      "cuisine.indian",
+      "dish.chana_masala",
+      "dish.chole",
+      "diet.vegetarian",
+      "weeknight.friendly",
+      "batch.friendly",
+      "leftovers.good"
+    ]
+  },
+
+  "summary": "A classic North Indian chickpea curry: chickpeas simmered in a deeply flavored onion-tomato masala with warming spices, finished with lemon and cilantro.",
+
+  "keywords": [
+    "chana masala",
+    "chole",
+    "chickpea curry",
+    "masala",
+    "north indian",
+    "weeknight"
+  ],
+
+  "tags": [
+    "cuisine.indian",
+    "dish.chana_masala",
+    "dish.chole",
+    "diet.vegetarian",
+    "weeknight.friendly",
+    "batch.friendly"
+  ],
+
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 1.5, "unit": "cups" },
+    "notes": "Serves 4 as a main with rice/roti; 6 as part of a larger spread."
+  },
+
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 25,
+    "totalMins": 45
+  },
+
+  "difficulty": 3,
+
+  "signals": {
+    "weeknightPossible": true,
+    "batchFriendly": true,
+    "leftoversGood": true,
+    "freezerFriendly": true
+  },
+
+  "dietFlags": ["diet.vegetarian"],
+
+  "allergens": {
+    "contains": [],
+    "mayContain": [],
+    "notes": [
+      "Naturally dairy-free if you do not add ghee or yogurt-based sides."
+    ]
+  },
+
+  "equipment": {
+    "minimum": [
+      "equip.chef_knife",
+      "equip.cut_board",
+      "equip.saucepan",
+      "equip.spatula",
+      "equip.measuring_spoons",
+      "equip.can_opener"
+    ],
+    "recommended": ["equip.microplane", "equip.blender", "equip.spice_grinder"],
+    "optional": [
+      {
+        "id": "equip.pressure_cooker",
+        "label": "Pressure cooker / Instant Pot",
+        "required": false,
+        "notes": "Only needed if using dried chickpeas variation."
+      }
+    ]
+  },
+
+  "ingredientGroups": [
+    {
+      "title": "Masala Base",
+      "items": [
+        "ing.onion",
+        "ing.garlic",
+        "ing.ginger",
+        "ing.tomatoes_crushed",
+        "ing.tomato_paste"
+      ]
+    },
+    {
+      "title": "Spices",
+      "items": [
+        "spice.cumin",
+        "spice.coriander",
+        "spice.turmeric",
+        "spice.kashmiri_chili",
+        "spice.garam_masala",
+        "spice.amchur",
+        "spice.black_pepper"
+      ]
+    },
+    {
+      "title": "Main + Finish",
+      "items": [
+        "ing.chickpeas_canned",
+        "ing.water",
+        "ing.salt_kosher",
+        "ing.lemon",
+        "ing.cilantro"
+      ]
+    }
+  ],
+
+  "ingredients": [
+    {
+      "id": "ing.chickpeas_canned",
+      "label": "Chickpeas (canned), drained and rinsed",
+      "role": "role.protein",
+      "amount": { "value": 2, "unit": "cans" },
+      "notes": ["Use 15 oz / 425 g cans."]
+    },
+    {
+      "id": "ing.onion",
+      "label": "Yellow onion, finely chopped",
+      "role": "role.aromatic",
+      "amount": { "value": 1, "unit": "large" }
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic, minced",
+      "role": "role.aromatic",
+      "amount": { "value": 4, "unit": "cloves" }
+    },
+    {
+      "id": "ing.ginger",
+      "label": "Fresh ginger, grated",
+      "role": "role.aromatic",
+      "amount": { "value": 1, "unit": "tbsp" }
+    },
+    {
+      "id": "ing.oil_neutral",
+      "label": "Neutral oil",
+      "role": "role.fat",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "notes": ["Can substitute ghee (not vegan)."]
+    },
+    {
+      "id": "spice.cumin",
+      "label": "Ground cumin",
+      "role": "role.spice",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "spice.coriander",
+      "label": "Ground coriander",
+      "role": "role.spice",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "spice.turmeric",
+      "label": "Ground turmeric",
+      "role": "role.spice",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "spice.kashmiri_chili",
+      "label": "Kashmiri chili powder (or mild chili powder)",
+      "role": "role.spice",
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": ["Increase to 2 tsp for more heat."]
+    },
+    {
+      "id": "ing.tomato_paste",
+      "label": "Tomato paste",
+      "role": "role.base",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true,
+      "notes": ["Helps deepen color and flavor quickly."]
+    },
+    {
+      "id": "ing.tomatoes_crushed",
+      "label": "Crushed tomatoes",
+      "role": "role.base",
+      "amount": { "value": 1, "unit": "can" },
+      "notes": ["Use 14–15 oz / ~400 g can."]
+    },
+    {
+      "id": "ing.water",
+      "label": "Water",
+      "role": "role.liquid",
+      "amount": { "value": 1.25, "unit": "cups" },
+      "notes": ["Adjust for desired thickness."]
+    },
+    {
+      "id": "ing.salt_kosher",
+      "label": "Kosher salt",
+      "role": "role.seasoning",
+      "amount": { "value": 1.5, "unit": "tsp" },
+      "notes": ["Start with 1 tsp, adjust at the end."]
+    },
+    {
+      "id": "spice.garam_masala",
+      "label": "Garam masala",
+      "role": "role.spice_finish",
+      "amount": { "value": 1.5, "unit": "tsp" }
+    },
+    {
+      "id": "spice.amchur",
+      "label": "Amchur (dry mango powder)",
+      "role": "role.acid",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": ["Or finish with extra lemon juice."]
+    },
+    {
+      "id": "ing.lemon",
+      "label": "Lemon juice",
+      "role": "role.finish",
+      "amount": { "value": 1.5, "unit": "tbsp" }
+    },
+    {
+      "id": "ing.cilantro",
+      "label": "Fresh cilantro, chopped",
+      "role": "role.finish",
+      "amount": { "value": 0.25, "unit": "cup" },
+      "optional": true
+    },
+    {
+      "id": "spice.black_pepper",
+      "label": "Black pepper",
+      "role": "role.seasoning",
+      "amount": { "value": 0.25, "unit": "tsp" },
+      "optional": true
+    }
+  ],
+
+  "methods": [
+    "method.onion_tomato_masala",
+    "method.bloom_spices",
+    "method.simmer"
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_prep",
+      "title": "Prep and rinse chickpeas",
+      "instructions": [
+        "Drain and rinse the chickpeas well.",
+        "Chop onion; mince garlic; grate ginger; chop cilantro (if using)."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 0,
+      "checks": ["Rinsed chickpeas reduce canned taste and excess salt."]
+    },
+    {
+      "id": "step_02_cook_onion",
+      "title": "Cook onions until golden",
+      "instructions": [
+        "Heat oil in a saucepan over medium-high heat.",
+        "Add onion and cook 6–8 minutes, stirring often, until softened and lightly golden at the edges."
+      ],
+      "activeMins": 8,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Cook onions", "minutes": 7 }],
+      "checks": [
+        "Do not rush this: color here builds flavor.",
+        "If onions brown too fast, reduce heat to medium."
+      ]
+    },
+    {
+      "id": "step_03_aromatics_and_spices",
+      "title": "Bloom aromatics and spices",
+      "instructions": [
+        "Add garlic and ginger; cook 30–45 seconds until fragrant.",
+        "Add cumin, coriander, turmeric, and Kashmiri chili powder; stir 15–20 seconds to bloom.",
+        "If using tomato paste, stir it in for 30 seconds."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "timers": [
+        { "label": "Cook aromatics", "seconds": 40 },
+        { "label": "Bloom spices", "seconds": 20 }
+      ],
+      "checks": [
+        "Spices should smell toasted, not burnt.",
+        "If spices stick/darken fast, splash in 1–2 tbsp water to protect them."
+      ]
+    },
+    {
+      "id": "step_04_add_tomatoes",
+      "title": "Cook the tomato masala",
+      "instructions": [
+        "Add crushed tomatoes and stir.",
+        "Simmer 8–10 minutes until the sauce darkens slightly and oil begins to separate at the edges."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 8,
+      "timers": [{ "label": "Simmer tomato masala", "minutes": 9 }],
+      "checks": [
+        "Masala is ready when it looks thicker and less raw.",
+        "If it splatters, lower heat and partially cover."
+      ]
+    },
+    {
+      "id": "step_05_simmer_chickpeas",
+      "title": "Simmer chickpeas",
+      "instructions": [
+        "Add chickpeas, water, salt (start with 1 tsp), and black pepper (optional).",
+        "Bring to a simmer and cook 15 minutes, stirring occasionally.",
+        "For a thicker curry, mash a few spoonfuls of chickpeas against the pot wall and stir back in."
+      ],
+      "activeMins": 4,
+      "handsOffMins": 15,
+      "timers": [{ "label": "Simmer curry", "minutes": 15 }],
+      "checks": [
+        "Taste sauce: chickpeas should be infused and tender.",
+        "Adjust thickness by simmering uncovered (thicker) or adding water (thinner)."
+      ]
+    },
+    {
+      "id": "step_06_finish",
+      "title": "Finish with garam masala and acid",
+      "instructions": [
+        "Turn heat to low.",
+        "Stir in garam masala and amchur (if using).",
+        "Add lemon juice to brighten.",
+        "Taste and adjust salt. Stir in cilantro just before serving."
+      ],
+      "activeMins": 2,
+      "handsOffMins": 0,
+      "checks": [
+        "Garam masala is best added near the end for aroma.",
+        "Acid at the end balances richness and sweetness from onions/tomatoes."
+      ]
+    }
+  ],
+
+  "pairings": {
+    "sides": [
+      "recipes.cuisines.indian.basmati_rice",
+      "recipes.cuisines.indian.roti",
+      "recipes.cuisines.indian.naan"
+    ],
+    "coolingSides": ["dish.indian.raita", "dish.salad.cucumber_onion"],
+    "notes": [
+      "Serve with rice or roti and a cooling side (cucumber, yogurt/raita if not vegan)."
+    ]
+  },
+
+  "storage": {
+    "refrigerator": {
+      "durationDays": 4,
+      "notes": [
+        "Flavor improves overnight.",
+        "Reheat gently with a splash of water if thickened."
+      ]
+    },
+    "freezer": {
+      "durationMonths": 2,
+      "notes": [
+        "Freeze in meal-size portions.",
+        "Thaw overnight and reheat on stovetop for best texture."
+      ]
+    }
+  },
+
+  "safety": {
+    "notes": [
+      "Cool quickly before refrigerating (shallow containers help).",
+      "Reheat to steaming hot throughout."
+    ]
+  },
+
+  "variations": [
+    {
+      "id": "var_dried_chickpeas_pressure_cooker",
+      "label": "Dried chickpeas (pressure cooker)",
+      "when": { "ingredients": "dried_chickpeas" },
+      "adapt": {
+        "notes": [
+          "Soak 1 cup dried chickpeas overnight (or quick-soak).",
+          "Pressure cook with water and a pinch of salt until tender (Instant Pot ~35 min high pressure + natural release).",
+          "Use cooked chickpeas in the recipe; reduce added water slightly since you can use some chickpea cooking liquid."
+        ]
+      }
+    },
+    {
+      "id": "var_restaurant_style_extra_dark",
+      "label": "Restaurant-style deeper color",
+      "when": { "style": "restaurant" },
+      "adapt": {
+        "notes": [
+          "Cook onions darker (deep golden) and simmer tomato masala longer.",
+          "Optional: add 1/2 tsp smoked paprika for deeper color (not traditional everywhere, but works)."
+        ]
+      }
+    },
+    {
+      "id": "var_spicy",
+      "label": "Spicier chana",
+      "when": { "heat": "high" },
+      "adapt": {
+        "notes": [
+          "Increase Kashmiri chili to 2 tsp or add 1/4–1/2 tsp cayenne.",
+          "Add sliced green chili with onions."
+        ]
+      }
+    }
+  ],
+
+  "planner": {
+    "roles": [
+      { "role": "role.curry_or_dal", "primary": true },
+      { "role": "role.protein.legume", "primary": true }
+    ],
+    "notes": [
+      "Excellent for batch cooking and meal prep.",
+      "Pairs well with rice or flatbread and a cooling side."
+    ]
+  },
+
+  "compat": {
+    "cuisineId": "cuisines.indian",
+    "dishId": "dish.indian.chana_masala",
+    "aliases": ["chana masala", "chole", "choley", "chickpea curry"],
+    "index": {
+      "primaryTokens": ["chana", "chole", "chickpea", "masala"],
+      "secondaryTokens": ["garam masala", "amchur", "onion tomato masala"]
+    }
+  },
+
+  "audit": {
+    "curatedBy": "SSA",
+    "curationTier": "canonical",
+    "lastReviewedAt": "2026-01-20T00:00:00.000Z"
+  }
+}

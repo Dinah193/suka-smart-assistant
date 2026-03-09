@@ -27,10 +27,10 @@
  */
 
 import { db } from "../../../services/db";
-import { emitEvent } from "../../../services/eventBus";
-import { familyFundMode } from "../../../services/featureFlags";
-import { HubPacketFormatter } from "../../../services/hub/HubPacketFormatter";
-import { FamilyFundConnector } from "../../../services/hub/FamilyFundConnector";
+import { emitEvent } from "../../../services/events/eventBus";
+import { familyFundMode } from "../../../config/featureFlags";
+import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
+import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
 
 /* -------------------------------------------------------------------------- */
 /* Typedefs                                                                   */
@@ -362,9 +362,18 @@ async function resolveStorageLink(planting) {
 
   // 1) Try Dexie storage profile.
   try {
-    if (planting.storageProfileId && db && db.gardenStorageProfiles && db.gardenStorageProfiles.get) {
+    if (
+      planting.storageProfileId &&
+      db &&
+      db.gardenStorageProfiles &&
+      db.gardenStorageProfiles.get
+    ) {
       profile = await db.gardenStorageProfiles.get(planting.storageProfileId);
-    } else if (db && db.gardenStorageProfiles && db.gardenStorageProfiles.where) {
+    } else if (
+      db &&
+      db.gardenStorageProfiles &&
+      db.gardenStorageProfiles.where
+    ) {
       const byCrop = await db.gardenStorageProfiles
         .where("cropKey")
         .equals(cropKey)
@@ -372,12 +381,21 @@ async function resolveStorageLink(planting) {
       profile = byCrop || null;
     }
 
-    if (profile && profile.locationId && db && db.storehouseLocations && db.storehouseLocations.get) {
+    if (
+      profile &&
+      profile.locationId &&
+      db &&
+      db.storehouseLocations &&
+      db.storehouseLocations.get
+    ) {
       location = await db.storehouseLocations.get(profile.locationId);
     }
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.error("[garden/harvestWindow] Failed to resolve storage profile:", err);
+    console.error(
+      "[garden/harvestWindow] Failed to resolve storage profile:",
+      err
+    );
   }
 
   if (profile) {
@@ -456,7 +474,8 @@ function computeHarvestWindowsForPlanting(planting, frost) {
     : 70;
 
   const tolerance =
-    Number.isFinite(planting.harvestToleranceDays) && planting.harvestToleranceDays > 0
+    Number.isFinite(planting.harvestToleranceDays) &&
+    planting.harvestToleranceDays > 0
       ? planting.harvestToleranceDays
       : 7;
 
@@ -493,7 +512,12 @@ function computeHarvestWindowsForPlanting(planting, frost) {
       variant: "early",
       windowStart: dateToYMD(earlyStart),
       windowEnd: dateToYMD(earlyEnd),
-      targetDate: dateToYMD(addDays(earlyStart, Math.round((earlyEnd - earlyStart) / (2 * 24 * 60 * 60 * 1000)))),
+      targetDate: dateToYMD(
+        addDays(
+          earlyStart,
+          Math.round((earlyEnd - earlyStart) / (2 * 24 * 60 * 60 * 1000))
+        )
+      ),
       blockers: ["weather"],
       notes:
         "Early harvest tends to favor tenderness and flavor over maximum yield.",
@@ -516,7 +540,12 @@ function computeHarvestWindowsForPlanting(planting, frost) {
       variant: "late",
       windowStart: dateToYMD(lateStart),
       windowEnd: dateToYMD(lateEnd),
-      targetDate: dateToYMD(addDays(lateStart, Math.round((lateEnd - lateStart) / (2 * 24 * 60 * 60 * 1000)))),
+      targetDate: dateToYMD(
+        addDays(
+          lateStart,
+          Math.round((lateEnd - lateStart) / (2 * 24 * 60 * 60 * 1000))
+        )
+      ),
       blockers: ["weather"],
       notes:
         "Late harvest maximizes size and yield but can risk overripeness or weather damage.",
@@ -704,8 +733,7 @@ export async function predictHarvestWindows(plantings, options = {}) {
         plantingId: planting.id,
         harvestId,
         optionsCount: swapOptions.length,
-        autoSelectedId:
-          swapOptions.find((opt) => opt.autoSelected)?.id || null,
+        autoSelectedId: swapOptions.find((opt) => opt.autoSelected)?.id || null,
         baseHarvestDate: result.baseHarvestDate,
       });
     } catch (err) {

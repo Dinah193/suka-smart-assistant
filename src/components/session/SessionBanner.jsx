@@ -11,7 +11,8 @@ const BTN =
   "inline-flex items-center gap-2 rounded-2xl px-3 sm:px-4 py-2 text-sm font-medium shadow-sm transition active:translate-y-px focus:outline-none focus:ring-2 focus:ring-offset-2";
 const VAR = {
   primary: "bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-600",
-  subtle: "bg-white text-gray-900 hover:bg-gray-50 border border-gray-200 focus:ring-indigo-600",
+  subtle:
+    "bg-white text-gray-900 hover:bg-gray-50 border border-gray-200 focus:ring-indigo-600",
   ghost: "bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-indigo-600",
   danger: "bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-600",
 };
@@ -21,7 +22,7 @@ const CHIP =
 /* ----------------------------- Defensive imports ---------------------------- */
 let eventBus = { emit: () => {}, on: () => {}, off: () => {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch (_) {}
 
@@ -41,7 +42,9 @@ try {
 /** SAVE SESSION modal (optional, modal-first) */
 let SaveSessionModalLazy = null;
 try {
-  SaveSessionModalLazy = React.lazy(() => import("@/components/sessions/SaveSessionModal.jsx"));
+  SaveSessionModalLazy = React.lazy(() =>
+    import("@/components/session/SaveSessionModal.jsx")
+  );
 } catch (_) {}
 
 /* --------------------------------- Icons ---------------------------------- */
@@ -138,14 +141,19 @@ export default function SessionBanner({
   const [progressPct, setProgressPct] = useState(0);
   const [guards, setGuards] = useState([]); // [{kind, label, detail}]
   const [busy, setBusy] = useState(false);
-  const [sessionMeta, setSessionMeta] = useState({ title: sessionTitleProp || "Active Session", description: "" });
+  const [sessionMeta, setSessionMeta] = useState({
+    title: sessionTitleProp || "Active Session",
+    description: "",
+  });
 
   // internal ticking if orchestrator doesn't emit ticks
   const tickRef = useRef(null);
 
   /* --------------------------- Favorites (SESSIONS) -------------------------- */
   const favApi = useFavoriteSessions ? useFavoriteSessions(domain) : null;
-  const [isFav, setIsFav] = useState(() => (!!sessionId && !!favApi?.isFavorite?.(sessionId)) || false);
+  const [isFav, setIsFav] = useState(
+    () => (!!sessionId && !!favApi?.isFavorite?.(sessionId)) || false
+  );
 
   useEffect(() => {
     if (favApi && sessionId) {
@@ -177,7 +185,11 @@ export default function SessionBanner({
           source: "SessionBanner",
         });
       }
-      toastSafe(isFav ? "Removed from favorite sessions." : "Added to favorite sessions.");
+      toastSafe(
+        isFav
+          ? "Removed from favorite sessions."
+          : "Added to favorite sessions."
+      );
     } catch (e) {
       console.warn("[SessionBanner] toggle favorite session failed", e);
       toastSafe("Could not update favorite sessions.", "error");
@@ -192,7 +204,11 @@ export default function SessionBanner({
       return;
     }
     setSaveOpen(true);
-    eventBus.emit?.("session.save.modal.opened", { domain, sessionId, source: "SessionBanner" });
+    eventBus.emit?.("session.save.modal.opened", {
+      domain,
+      sessionId,
+      source: "SessionBanner",
+    });
   };
 
   /* -------------------------------- Subscriptions ---------------------------- */
@@ -209,7 +225,9 @@ export default function SessionBanner({
         s.title ||
         s.planTitle || // orchestrator may pass-through
         sessionTitleProp ||
-        (s.domain ? `${s.domain[0].toUpperCase()}${s.domain.slice(1)} Session` : "Active Session");
+        (s.domain
+          ? `${s.domain[0].toUpperCase()}${s.domain.slice(1)} Session`
+          : "Active Session");
       setSessionMeta({
         title: metaTitle,
         description: s.description || s.notes || "",
@@ -219,9 +237,10 @@ export default function SessionBanner({
       const st = s.currentStep || s.nextStep || null;
       const index = st?.index ?? st?.idx ?? 0;
       const total = s.totalSteps ?? st?.total ?? 0;
-      const pct = typeof s.progressPct === "number"
-        ? s.progressPct
-        : total > 0
+      const pct =
+        typeof s.progressPct === "number"
+          ? s.progressPct
+          : total > 0
           ? Math.round((index / total) * 100)
           : 0;
 
@@ -232,7 +251,8 @@ export default function SessionBanner({
               title: st.title || "Next step",
               notes: st.notes || "",
               durationSec: st.durationSec ?? st.seconds ?? 0,
-              remainingSec: st.remainingSec ?? st.remaining ?? st.durationSec ?? 0,
+              remainingSec:
+                st.remainingSec ?? st.remaining ?? st.durationSec ?? 0,
               idx: index,
               total,
             }
@@ -245,13 +265,19 @@ export default function SessionBanner({
     };
 
     const onTick = (payload) => {
-      if (payload?.sessionId && sessionId && payload.sessionId !== sessionId) return;
+      if (payload?.sessionId && sessionId && payload.sessionId !== sessionId)
+        return;
       if (typeof payload?.remainingSec === "number") {
-        setStep((prev) => (prev ? { ...prev, remainingSec: payload.remainingSec } : prev));
+        setStep((prev) =>
+          prev ? { ...prev, remainingSec: payload.remainingSec } : prev
+        );
       } else if (typeof payload?.stepRemainingSec === "number") {
-        setStep((prev) => (prev ? { ...prev, remainingSec: payload.stepRemainingSec } : prev));
+        setStep((prev) =>
+          prev ? { ...prev, remainingSec: payload.stepRemainingSec } : prev
+        );
       }
-      if (typeof payload?.progressPct === "number") setProgressPct(Math.max(0, Math.min(100, payload.progressPct)));
+      if (typeof payload?.progressPct === "number")
+        setProgressPct(Math.max(0, Math.min(100, payload.progressPct)));
       if (payload?.etaISO) setEtaISO(payload.etaISO);
     };
 
@@ -262,16 +288,31 @@ export default function SessionBanner({
         weather: "Weather risk",
         biohazard: "Safety hold",
       };
-      pushGuard({ kind: p?.kind || "time", label: labelMap[p?.kind] || "Conflict", detail: p?.detail || "" });
+      pushGuard({
+        kind: p?.kind || "time",
+        label: labelMap[p?.kind] || "Conflict",
+        detail: p?.detail || "",
+      });
     };
 
     const onShortage = (p) => {
-      const items = (p?.items || []).slice(0, 3).map((i) => i?.name || i?.sku || "item").join(", ");
-      pushGuard({ kind: "inventory", label: "Short on supplies", detail: items });
+      const items = (p?.items || [])
+        .slice(0, 3)
+        .map((i) => i?.name || i?.sku || "item")
+        .join(", ");
+      pushGuard({
+        kind: "inventory",
+        label: "Short on supplies",
+        detail: items,
+      });
     };
 
     const onWeather = (p) => {
-      pushGuard({ kind: "weather", label: "Weather alert", detail: p?.title || p?.severity || "" });
+      pushGuard({
+        kind: "weather",
+        label: "Weather alert",
+        detail: p?.title || p?.severity || "",
+      });
     };
 
     const pushGuard = (g) => {
@@ -283,11 +324,18 @@ export default function SessionBanner({
 
     const off1 = eventBus.on?.("session.state.changed", onState) || (() => {});
     const off2 = eventBus.on?.("session.tick", onTick) || (() => {});
-    const off3 = eventBus.on?.("planner.conflict.detected", onConflict) || (() => {});
-    const off4 = eventBus.on?.("inventory.shortage.detected", onShortage) || (() => {});
-    const off5 = eventBus.on?.("weather.alert.updated", onWeather) || (() => {});
+    const off3 =
+      eventBus.on?.("planner.conflict.detected", onConflict) || (() => {});
+    const off4 =
+      eventBus.on?.("inventory.shortage.detected", onShortage) || (() => {});
+    const off5 =
+      eventBus.on?.("weather.alert.updated", onWeather) || (() => {});
     return () => {
-      off1?.(); off2?.(); off3?.(); off4?.(); off5?.();
+      off1?.();
+      off2?.();
+      off3?.();
+      off4?.();
+      off5?.();
     };
   }, [sessionId, sessionIdProp, sessionTitleProp]);
 
@@ -296,7 +344,11 @@ export default function SessionBanner({
     clearInterval(tickRef.current);
     if (!active || !step) return;
     tickRef.current = setInterval(() => {
-      setStep((prev) => (prev ? { ...prev, remainingSec: Math.max(0, (prev.remainingSec ?? 0) - 1) } : prev));
+      setStep((prev) =>
+        prev
+          ? { ...prev, remainingSec: Math.max(0, (prev.remainingSec ?? 0) - 1) }
+          : prev
+      );
     }, 1000);
     return () => clearInterval(tickRef.current);
   }, [active, step?.id]);
@@ -304,14 +356,23 @@ export default function SessionBanner({
   /* --------------------------------- Actions -------------------------------- */
   const start = () => {
     setBusy(true);
-    eventBus.emit?.("session.start.requested", { domain, sessionId, source: "SessionBanner" });
+    eventBus.emit?.("session.start.requested", {
+      domain,
+      sessionId,
+      source: "SessionBanner",
+    });
     setActive(true);
     setBusy(false);
   };
 
   const pause = () => {
     setBusy(true);
-    eventBus.emit?.("session.pause.requested", { domain, sessionId, reason: "user", source: "SessionBanner" });
+    eventBus.emit?.("session.pause.requested", {
+      domain,
+      sessionId,
+      reason: "user",
+      source: "SessionBanner",
+    });
     setActive(false);
     setBusy(false);
   };
@@ -319,7 +380,10 @@ export default function SessionBanner({
   const completeStep = () => {
     setBusy(true);
     eventBus.emit?.("session.step.complete.requested", {
-      domain, sessionId, stepId: step?.id, source: "SessionBanner",
+      domain,
+      sessionId,
+      stepId: step?.id,
+      source: "SessionBanner",
     });
     setBusy(false);
   };
@@ -327,21 +391,36 @@ export default function SessionBanner({
   const skipStep = () => {
     setBusy(true);
     eventBus.emit?.("session.step.advance.requested", {
-      domain, sessionId, stepId: step?.id, reason: "skip", source: "SessionBanner",
+      domain,
+      sessionId,
+      stepId: step?.id,
+      reason: "skip",
+      source: "SessionBanner",
     });
     setBusy(false);
   };
 
   const snooze = (offset = "+10m") => {
     setBusy(true);
-    eventBus.emit?.("session.snooze.requested", { domain, sessionId, offset, source: "SessionBanner" });
+    eventBus.emit?.("session.snooze.requested", {
+      domain,
+      sessionId,
+      offset,
+      source: "SessionBanner",
+    });
     toastSafe(`Snoozed ${offset}.`);
     setBusy(false);
   };
 
   const extend = (offset = "+5m") => {
     setBusy(true);
-    eventBus.emit?.("session.extend.requested", { domain, sessionId, offset, stepId: step?.id, source: "SessionBanner" });
+    eventBus.emit?.("session.extend.requested", {
+      domain,
+      sessionId,
+      offset,
+      stepId: step?.id,
+      source: "SessionBanner",
+    });
     toastSafe(`Extended ${offset}.`);
     setBusy(false);
   };
@@ -358,11 +437,19 @@ export default function SessionBanner({
   };
 
   const openBlockers = () => {
-    eventBus.emit?.("planner.conflicts.panel.open", { domain, sessionId, source: "SessionBanner" });
+    eventBus.emit?.("planner.conflicts.panel.open", {
+      domain,
+      sessionId,
+      source: "SessionBanner",
+    });
   };
 
   const openInventory = () => {
-    eventBus.emit?.("inventory.signals.open", { domain, sessionId, source: "SessionBanner" });
+    eventBus.emit?.("inventory.signals.open", {
+      domain,
+      sessionId,
+      source: "SessionBanner",
+    });
   };
 
   const exportSessionJSON = () => {
@@ -386,7 +473,9 @@ export default function SessionBanner({
         source: "SessionBanner",
         reply: (snapshot) => {
           const data = snapshot || fallback;
-          const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+          const blob = new Blob([JSON.stringify(data, null, 2)], {
+            type: "application/json",
+          });
           const a = document.createElement("a");
           a.href = URL.createObjectURL(blob);
           a.download = `${safeFile(sessionMeta.title || "session")}.json`;
@@ -418,11 +507,16 @@ export default function SessionBanner({
 
   const riskIcon = (k) => {
     switch (k) {
-      case "inventory": return <I.ShoppingCart className="h-3.5 w-3.5" />;
-      case "weather": return <I.CloudLightning className="h-3.5 w-3.5" />;
-      case "time": return <I.Clock className="h-3.5 w-3.5" />;
-      case "appliance": return <I.ThermometerSnowflake className="h-3.5 w-3.5" />;
-      default: return <I.AlertTriangle className="h-3.5 w-3.5" />;
+      case "inventory":
+        return <I.ShoppingCart className="h-3.5 w-3.5" />;
+      case "weather":
+        return <I.CloudLightning className="h-3.5 w-3.5" />;
+      case "time":
+        return <I.Clock className="h-3.5 w-3.5" />;
+      case "appliance":
+        return <I.ThermometerSnowflake className="h-3.5 w-3.5" />;
+      default:
+        return <I.AlertTriangle className="h-3.5 w-3.5" />;
     }
   };
 
@@ -445,15 +539,23 @@ export default function SessionBanner({
             className={cx(BTN, VAR.ghost, "px-2")}
             aria-expanded={!collapsed}
             onClick={() => setCollapsed((v) => !v)}
-            title={collapsed ? "Expand session banner" : "Collapse session banner"}
+            title={
+              collapsed ? "Expand session banner" : "Collapse session banner"
+            }
           >
-            {collapsed ? <I.ChevronUp className="h-4 w-4" /> : <I.ChevronDown className="h-4 w-4" />}
+            {collapsed ? (
+              <I.ChevronUp className="h-4 w-4" />
+            ) : (
+              <I.ChevronDown className="h-4 w-4" />
+            )}
           </button>
 
           {/* Title + index */}
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <span className="truncate font-medium text-gray-900">{bannerTitle}</span>
+              <span className="truncate font-medium text-gray-900">
+                {bannerTitle}
+              </span>
               {total > 0 ? (
                 <span className={CHIP}>
                   <I.Info className="h-3.5 w-3.5" />
@@ -469,45 +571,77 @@ export default function SessionBanner({
             </div>
 
             {!collapsed && (
-              <p className="mt-0.5 line-clamp-2 text-xs text-gray-600">{step?.notes || sessionMeta.description || ""}</p>
+              <p className="mt-0.5 line-clamp-2 text-xs text-gray-600">
+                {step?.notes || sessionMeta.description || ""}
+              </p>
             )}
           </div>
 
           {/* Countdown */}
           <div className="flex items-center gap-2 rounded-2xl border border-gray-200 bg-white px-3 py-1.5">
             <I.Clock className="h-4 w-4 text-gray-700" />
-            <span className="tabular-nums font-mono text-base">{prettyMMSS(step?.remainingSec ?? 0)}</span>
+            <span className="tabular-nums font-mono text-base">
+              {prettyMMSS(step?.remainingSec ?? 0)}
+            </span>
           </div>
 
           {/* Primary controls */}
           {active ? (
-            <button className={cx(BTN, VAR.subtle)} onClick={pause} disabled={busy} aria-label="Pause session">
+            <button
+              className={cx(BTN, VAR.subtle)}
+              onClick={pause}
+              disabled={busy}
+              aria-label="Pause session"
+            >
               <I.Pause className="h-4 w-4" />
               <span className="hidden xs:inline">Pause</span>
             </button>
           ) : (
-            <button className={cx(BTN, VAR.primary)} onClick={start} disabled={busy} aria-label="Resume session">
+            <button
+              className={cx(BTN, VAR.primary)}
+              onClick={start}
+              disabled={busy}
+              aria-label="Resume session"
+            >
               <I.Play className="h-4 w-4" />
               <span className="hidden xs:inline">Resume</span>
             </button>
           )}
 
-          <button className={cx(BTN, VAR.subtle)} onClick={completeStep} disabled={!step || busy} aria-label="Complete step">
+          <button
+            className={cx(BTN, VAR.subtle)}
+            onClick={completeStep}
+            disabled={!step || busy}
+            aria-label="Complete step"
+          >
             <I.Check className="h-4 w-4" />
             <span className="hidden xs:inline">Complete</span>
           </button>
 
-          <button className={cx(BTN, VAR.ghost)} onClick={skipStep} disabled={!step || busy} aria-label="Skip step">
+          <button
+            className={cx(BTN, VAR.ghost)}
+            onClick={skipStep}
+            disabled={!step || busy}
+            aria-label="Skip step"
+          >
             <I.Skip className="h-4 w-4" />
             <span className="hidden xs:inline">Skip</span>
           </button>
 
           <div className="hidden sm:flex items-center gap-2">
-            <button className={cx(BTN, VAR.ghost)} onClick={() => extend("+5m")} aria-label="Add 5 minutes">
+            <button
+              className={cx(BTN, VAR.ghost)}
+              onClick={() => extend("+5m")}
+              aria-label="Add 5 minutes"
+            >
               <I.Plus className="h-4 w-4" />
               +5m
             </button>
-            <button className={cx(BTN, VAR.ghost)} onClick={() => snooze("+10m")} aria-label="Snooze 10 minutes">
+            <button
+              className={cx(BTN, VAR.ghost)}
+              onClick={() => snooze("+10m")}
+              aria-label="Snooze 10 minutes"
+            >
               <I.AlarmPlus className="h-4 w-4" />
               +10m
             </button>
@@ -515,7 +649,13 @@ export default function SessionBanner({
 
           {/* More menu */}
           <details className="relative">
-            <summary className={cx(BTN, VAR.ghost, "cursor-pointer list-none [&::-webkit-details-marker]:hidden")}>
+            <summary
+              className={cx(
+                BTN,
+                VAR.ghost,
+                "cursor-pointer list-none [&::-webkit-details-marker]:hidden"
+              )}
+            >
               <I.MoreHorizontal className="h-4 w-4" />
               <span className="hidden sm:inline">More</span>
             </summary>
@@ -523,14 +663,44 @@ export default function SessionBanner({
               <MenuItem onClick={() => extend("+15m")} label="Extend +15m" />
               <MenuItem onClick={() => extend("+30m")} label="Extend +30m" />
               <div className="h-px bg-gray-100" />
-              <MenuItem onClick={addToCalendar} icon={<I.Calendar className="h-4 w-4" />} label="Add to calendar" />
+              <MenuItem
+                onClick={addToCalendar}
+                icon={<I.Calendar className="h-4 w-4" />}
+                label="Add to calendar"
+              />
               <div className="h-px bg-gray-100" />
-              <MenuItem onClick={openBlockers} icon={<I.AlertTriangle className="h-4 w-4" />} label="Open conflicts panel" />
-              <MenuItem onClick={openInventory} icon={<I.ShoppingCart className="h-4 w-4" />} label="Check inventory signals" />
+              <MenuItem
+                onClick={openBlockers}
+                icon={<I.AlertTriangle className="h-4 w-4" />}
+                label="Open conflicts panel"
+              />
+              <MenuItem
+                onClick={openInventory}
+                icon={<I.ShoppingCart className="h-4 w-4" />}
+                label="Check inventory signals"
+              />
               <div className="h-px bg-gray-100" />
-              <MenuItem onClick={toggleFavoriteSession} icon={isFav ? <I.Star className="h-4 w-4 text-amber-500" /> : <I.StarOff className="h-4 w-4" />} label={isFav ? "Unfavorite session" : "Favorite session"} />
-              <MenuItem onClick={openSaveSession} icon={<I.Save className="h-4 w-4" />} label="Save session…" />
-              <MenuItem onClick={exportSessionJSON} icon={<I.Download className="h-4 w-4" />} label="Export session (.json)" />
+              <MenuItem
+                onClick={toggleFavoriteSession}
+                icon={
+                  isFav ? (
+                    <I.Star className="h-4 w-4 text-amber-500" />
+                  ) : (
+                    <I.StarOff className="h-4 w-4" />
+                  )
+                }
+                label={isFav ? "Unfavorite session" : "Favorite session"}
+              />
+              <MenuItem
+                onClick={openSaveSession}
+                icon={<I.Save className="h-4 w-4" />}
+                label="Save session…"
+              />
+              <MenuItem
+                onClick={exportSessionJSON}
+                icon={<I.Download className="h-4 w-4" />}
+                label="Export session (.json)"
+              />
             </div>
           </details>
         </div>
@@ -551,8 +721,7 @@ export default function SessionBanner({
             ))}
             {guards.length > 4 && (
               <span className={CHIP}>
-                <I.Info className="h-3.5 w-3.5" />
-                +{guards.length - 4} more
+                <I.Info className="h-3.5 w-3.5" />+{guards.length - 4} more
               </span>
             )}
           </div>
@@ -560,8 +729,8 @@ export default function SessionBanner({
       </div>
 
       {/* Save Session modal (lazy preferred) */}
-      {saveOpen && (
-        SaveSessionModalLazy ? (
+      {saveOpen &&
+        (SaveSessionModalLazy ? (
           <Suspense fallback={null}>
             <SaveSessionModalLazy
               isOpen={saveOpen}
@@ -570,7 +739,10 @@ export default function SessionBanner({
               domain={domain}
               sessionId={sessionId}
               onSaved={(saved) => {
-                eventBus.emit?.("session.saved", { from: "SessionBanner", saved });
+                eventBus.emit?.("session.saved", {
+                  from: "SessionBanner",
+                  saved,
+                });
                 toastSafe("Session saved.");
                 setSaveOpen(false);
               }}
@@ -584,13 +756,15 @@ export default function SessionBanner({
             defaultNotes={sessionMeta.description}
             onClose={() => setSaveOpen(false)}
             onSaved={(saved) => {
-              eventBus.emit?.("session.saved", { from: "SessionBanner", saved });
+              eventBus.emit?.("session.saved", {
+                from: "SessionBanner",
+                saved,
+              });
               toastSafe("Session saved.");
               setSaveOpen(false);
             }}
           />
-        )
-      )}
+        ))}
     </div>
   );
 }
@@ -609,7 +783,14 @@ function MenuItem({ onClick, label, icon = null }) {
   );
 }
 
-function InlineSaveSession({ domain, sessionId, defaultTitle, defaultNotes, onClose, onSaved }) {
+function InlineSaveSession({
+  domain,
+  sessionId,
+  defaultTitle,
+  defaultNotes,
+  onClose,
+  onSaved,
+}) {
   const [name, setName] = useState(defaultTitle || "");
   const [notes, setNotes] = useState(defaultNotes || "");
   const [busy, setBusy] = useState(false);
@@ -622,7 +803,10 @@ function InlineSaveSession({ domain, sessionId, defaultTitle, defaultNotes, onCl
     setBusy(true);
     try {
       const payload = { id: sessionId, domain, title: name, notes };
-      eventBus.emit?.("session.save.requested", { payload, source: "SessionBanner" });
+      eventBus.emit?.("session.save.requested", {
+        payload,
+        source: "SessionBanner",
+      });
       onSaved?.(payload);
     } finally {
       setBusy(false);
@@ -633,9 +817,13 @@ function InlineSaveSession({ domain, sessionId, defaultTitle, defaultNotes, onCl
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/30">
       <div className="w-[95vw] max-w-md rounded-2xl bg-white p-6 shadow-xl">
         <h3 className="text-lg font-semibold">Save Session</h3>
-        <p className="mt-1 text-sm text-gray-600">Save this session to your library.</p>
+        <p className="mt-1 text-sm text-gray-600">
+          Save this session to your library.
+        </p>
 
-        <label className="mt-4 block text-sm font-medium text-gray-700">Title</label>
+        <label className="mt-4 block text-sm font-medium text-gray-700">
+          Title
+        </label>
         <input
           className="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
           value={name}
@@ -643,7 +831,9 @@ function InlineSaveSession({ domain, sessionId, defaultTitle, defaultNotes, onCl
           placeholder="Session title"
         />
 
-        <label className="mt-4 block text-sm font-medium text-gray-700">Notes</label>
+        <label className="mt-4 block text-sm font-medium text-gray-700">
+          Notes
+        </label>
         <textarea
           className="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
           rows={3}
@@ -653,8 +843,14 @@ function InlineSaveSession({ domain, sessionId, defaultTitle, defaultNotes, onCl
         />
 
         <div className="mt-6 flex justify-end gap-2">
-          <button className={cx(BTN, VAR.ghost)} onClick={onClose}>Cancel</button>
-          <button className={cx(BTN, VAR.primary)} onClick={submit} disabled={busy}>
+          <button className={cx(BTN, VAR.ghost)} onClick={onClose}>
+            Cancel
+          </button>
+          <button
+            className={cx(BTN, VAR.primary)}
+            onClick={submit}
+            disabled={busy}
+          >
             <I.Save className="h-4 w-4" />
             Save
           </button>
@@ -676,5 +872,8 @@ function dedupeGuards(arr) {
 }
 
 function safeFile(name = "session") {
-  return String(name).toLowerCase().replace(/[^a-z0-9-_]+/gi, "-").replace(/-+/g, "-");
+  return String(name)
+    .toLowerCase()
+    .replace(/[^a-z0-9-_]+/gi, "-")
+    .replace(/-+/g, "-");
 }

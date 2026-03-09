@@ -42,16 +42,15 @@
 // - Add price/quality scoring in `scoreOffers`
 //
 // ASSUMPTIONS
-// - src/services/eventBus.js exists
+// - src/services/events/eventBus.js exists
 // - src/config/featureFlags.js exists
 // - src/services/hub/HubPacketFormatter.js and src/services/hub/FamilyFundConnector.js exist
 // - optional local provider modules can exist in src/commerce/providers/*.js
 //
 // -----------------------------------------------------------------------------
 
-
-import eventBus from "@/services/eventBus.js";
-import featureFlags from "@/config/featureFlags.js";
+import eventBus from "@/services/events/eventBus.js";
+import featureFlags from "@/config/featureFlags.json";
 
 const isBrowser = typeof window !== "undefined";
 
@@ -372,7 +371,10 @@ class CommerceTriggerEngine {
         // provider failed – just move on
         // eslint-disable-next-line no-console
         if (process?.env?.NODE_ENV !== "production") {
-          console.warn(`[CommerceTriggerEngine] provider ${provider.name} failed:`, err?.message);
+          console.warn(
+            `[CommerceTriggerEngine] provider ${provider.name} failed:`,
+            err?.message
+          );
         }
         continue;
       }

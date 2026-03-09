@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://suka.local/agents/prompts/reasoner-contracts/substitutions.delta.schema.json",
+  "$id": "https://suka.local/agents/runtime/reasoner/prompts/reasoner-contracts/substitutions.delta.schema.json",
   "title": "SSA Reasoner – Cooking Substitutions Delta",
   "description": "Delta-style output schema for cooking ingredient substitutions. Used by the Reasoner to propose, refine, or deprecate substitution rules the Session engine can apply when composing cooking sessions.",
   "type": "object",
@@ -48,20 +48,13 @@
           "status": {
             "type": "string",
             "description": "Whether this substitution is newly proposed, already accepted, or deprecated.",
-            "enum": [
-              "proposed",
-              "accepted",
-              "deprecated"
-            ],
+            "enum": ["proposed", "accepted", "deprecated"],
             "default": "proposed"
           },
           "operation": {
             "type": "string",
             "description": "How this delta should be applied to the substitutions knowledge base.",
-            "enum": [
-              "upsert",
-              "remove"
-            ],
+            "enum": ["upsert", "remove"],
             "default": "upsert"
           },
           "baseIngredient": {
@@ -89,9 +82,7 @@
                 }
               }
             },
-            "required": [
-              "name"
-            ]
+            "required": ["name"]
           },
           "substituteIngredient": {
             "type": "object",
@@ -118,9 +109,7 @@
                 }
               }
             },
-            "required": [
-              "name"
-            ]
+            "required": ["name"]
           },
           "ratio": {
             "type": "number",
@@ -140,11 +129,7 @@
           "strength": {
             "type": "string",
             "description": "Qualitative strength of the match.",
-            "enum": [
-              "strong",
-              "medium",
-              "weak"
-            ],
+            "enum": ["strong", "medium", "weak"],
             "default": "medium"
           },
           "origin": {
@@ -154,13 +139,7 @@
             "properties": {
               "sourceType": {
                 "type": "string",
-                "enum": [
-                  "llm",
-                  "rule",
-                  "import",
-                  "user",
-                  "system"
-                ],
+                "enum": ["llm", "rule", "import", "user", "system"],
                 "description": "Type of source that produced this substitution."
               },
               "ref": {
@@ -311,10 +290,5 @@
       }
     }
   },
-  "required": [
-    "schemaVersion",
-    "domain",
-    "generatedAt",
-    "substitutions"
-  ]
+  "required": ["schemaVersion", "domain", "generatedAt", "substitutions"]
 }

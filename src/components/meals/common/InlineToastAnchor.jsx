@@ -36,13 +36,19 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 
 /* ------------------------------- Defensive deps ------------------------------- */
 let Icons = {};
-try { Icons = require("lucide-react"); } catch {}
+try {
+  Icons = require("lucide-react");
+} catch {}
 
 let eventBus = null;
-try { eventBus = require("@/services/eventBus").eventBus || null; } catch {}
+try {
+  eventBus = require("@/services/events/eventBus").eventBus || null;
+} catch {}
 
 let automation = null;
-try { automation = require("@/services/automation/runtime").automation || null; } catch {}
+try {
+  automation = require("@/services/automation/runtime").automation || null;
+} catch {}
 
 const prefersReduceMotion =
   typeof window !== "undefined" &&
@@ -57,12 +63,9 @@ const genId = () => Math.random().toString(36).slice(2, 9);
 const LEVEL_STYLES = {
   success:
     "border-emerald-200 bg-emerald-50 text-emerald-900 [&_.icon]:text-emerald-600",
-  info:
-    "border-blue-200 bg-blue-50 text-blue-900 [&_.icon]:text-blue-600",
-  warn:
-    "border-amber-200 bg-amber-50 text-amber-900 [&_.icon]:text-amber-600",
-  error:
-    "border-rose-200 bg-rose-50 text-rose-900 [&_.icon]:text-rose-600",
+  info: "border-blue-200 bg-blue-50 text-blue-900 [&_.icon]:text-blue-600",
+  warn: "border-amber-200 bg-amber-50 text-amber-900 [&_.icon]:text-amber-600",
+  error: "border-rose-200 bg-rose-50 text-rose-900 [&_.icon]:text-rose-600",
 };
 
 const ICONS_BY_LEVEL = (IconsLib) => ({
@@ -76,21 +79,18 @@ const ICONS_BY_LEVEL = (IconsLib) => ({
 const InlineToastAnchor = React.forwardRef(
   (
     {
-      scope = "default",           // only show events for this scope
-      maxVisible = 3,              // stack size
-      placement = "bottom-right",  // "top-right" | "top-left" | "bottom-right" | "bottom-left"
+      scope = "default", // only show events for this scope
+      maxVisible = 3, // stack size
+      placement = "bottom-right", // "top-right" | "top-left" | "bottom-right" | "bottom-left"
       className = "",
     },
     ref
   ) => {
     const [stack, setStack] = useState([]); // visible toasts
-    const queueRef = useRef([]);            // queued toasts
-    const timersRef = useRef({});           // per-toast timer state
+    const queueRef = useRef([]); // queued toasts
+    const timersRef = useRef({}); // per-toast timer state
 
-    const {
-      X = () => null,
-      RotateCcw = () => null,
-    } = Icons;
+    const { X = () => null, RotateCcw = () => null } = Icons;
 
     const IconMap = useMemo(() => ICONS_BY_LEVEL(Icons), []);
 
@@ -102,8 +102,12 @@ const InlineToastAnchor = React.forwardRef(
 
     /* --------------------------------- Emits ---------------------------------- */
     const emit = (type, payload) => {
-      try { eventBus?.emit?.(type, payload); } catch {}
-      try { automation?.runTemplate?.(type, payload); } catch {}
+      try {
+        eventBus?.emit?.(type, payload);
+      } catch {}
+      try {
+        automation?.runTemplate?.(type, payload);
+      } catch {}
     };
 
     /* ----------------------------- Core operations ---------------------------- */
@@ -114,9 +118,13 @@ const InlineToastAnchor = React.forwardRef(
         level: payload.level || "info",
         title: payload.title || "",
         message: payload.message || "",
-        actions: Array.isArray(payload.actions) ? payload.actions.slice(0, 3) : [],
+        actions: Array.isArray(payload.actions)
+          ? payload.actions.slice(0, 3)
+          : [],
         undoToken: payload.undoToken,
-        timeoutMs: payload.sticky ? 0 : Math.max(1500, payload.timeoutMs || 5000),
+        timeoutMs: payload.sticky
+          ? 0
+          : Math.max(1500, payload.timeoutMs || 5000),
         sticky: !!payload.sticky,
         createdAt: now(),
         meta: payload.meta,
@@ -136,7 +144,8 @@ const InlineToastAnchor = React.forwardRef(
 
     const dequeueIfNeeded = () => {
       setStack((curr) => {
-        if (curr.length >= maxVisible || queueRef.current.length === 0) return curr;
+        if (curr.length >= maxVisible || queueRef.current.length === 0)
+          return curr;
         const next = [...curr, queueRef.current.shift()];
         return next;
       });
@@ -156,7 +165,9 @@ const InlineToastAnchor = React.forwardRef(
     };
 
     const clearAll = () => {
-      Object.values(timersRef.current).forEach((t) => clearInterval(t.interval));
+      Object.values(timersRef.current).forEach((t) =>
+        clearInterval(t.interval)
+      );
       timersRef.current = {};
       setStack([]);
       queueRef.current = [];
@@ -177,21 +188,26 @@ const InlineToastAnchor = React.forwardRef(
             const state = timersRef.current[t.id];
             if (!state || state.paused) return;
             state.remaining = Math.max(0, t.timeoutMs - (now() - state.start));
-            state.progress = t.timeoutMs === 0 ? 0 : 1 - state.remaining / t.timeoutMs;
+            state.progress =
+              t.timeoutMs === 0 ? 0 : 1 - state.remaining / t.timeoutMs;
             if (state.remaining === 0) {
               clearInterval(state.interval);
               delete timersRef.current[t.id];
               closeToast(t.id, "timeout");
             } else {
               // trigger re-render by updating dummy state via setStack no-op clone
-              setStack((curr) => curr.map((x) => (x.id === t.id ? { ...x } : x)));
+              setStack((curr) =>
+                curr.map((x) => (x.id === t.id ? { ...x } : x))
+              );
             }
           }, 100),
         };
       });
       // cleanup on unmount
       return () => {
-        Object.values(timersRef.current).forEach((t) => clearInterval(t.interval));
+        Object.values(timersRef.current).forEach((t) =>
+          clearInterval(t.interval)
+        );
         timersRef.current = {};
       };
     }, [stack]);
@@ -219,12 +235,22 @@ const InlineToastAnchor = React.forwardRef(
 
     /* -------------------------------- Handlers -------------------------------- */
     const handleAction = (toast, actionId) => {
-      emit("inline.toast.action", { id: toast.id, actionId, meta: toast.meta, scope });
+      emit("inline.toast.action", {
+        id: toast.id,
+        actionId,
+        meta: toast.meta,
+        scope,
+      });
       closeToast(toast.id, "action");
     };
 
     const handleUndo = (toast) => {
-      emit("inline.toast.undo", { id: toast.id, undoToken: toast.undoToken, meta: toast.meta, scope });
+      emit("inline.toast.undo", {
+        id: toast.id,
+        undoToken: toast.undoToken,
+        meta: toast.meta,
+        scope,
+      });
       closeToast(toast.id, "action");
     };
 
@@ -241,11 +267,7 @@ const InlineToastAnchor = React.forwardRef(
     /* ---------------------------------- UI ------------------------------------ */
     return (
       <div
-        className={cx(
-          "pointer-events-none fixed z-50",
-          placeCls,
-          className
-        )}
+        className={cx("pointer-events-none fixed z-50", placeCls, className)}
         aria-live="polite"
         aria-relevant="additions text"
       >
@@ -253,7 +275,9 @@ const InlineToastAnchor = React.forwardRef(
           {stack.map((t) => {
             const Icon = IconMap[t.level] || (() => null);
             const timer = timersRef.current[t.id];
-            const progress = timer ? Math.max(0, Math.min(1, timer.progress)) : 0;
+            const progress = timer
+              ? Math.max(0, Math.min(1, timer.progress))
+              : 0;
 
             return (
               <li
@@ -265,9 +289,11 @@ const InlineToastAnchor = React.forwardRef(
                 className={cx(
                   "pointer-events-auto rounded-2xl border shadow-sm p-3 bg-white/80 backdrop-blur",
                   LEVEL_STYLES[t.level] || LEVEL_STYLES.info,
-                  prefersReduceMotion ? "" : "transition-transform duration-200",
+                  prefersReduceMotion ? "" : "transition-transform duration-200"
                 )}
-                style={{ transform: prefersReduceMotion ? undefined : "translateZ(0)" }}
+                style={{
+                  transform: prefersReduceMotion ? undefined : "translateZ(0)",
+                }}
                 role="status"
               >
                 <div className="flex items-start gap-2">
@@ -275,7 +301,11 @@ const InlineToastAnchor = React.forwardRef(
                     <Icon className="w-4 h-4" />
                   </span>
                   <div className="min-w-0 flex-1">
-                    {t.title ? <div className="text-sm font-semibold leading-tight">{t.title}</div> : null}
+                    {t.title ? (
+                      <div className="text-sm font-semibold leading-tight">
+                        {t.title}
+                      </div>
+                    ) : null}
                     {t.message ? (
                       <div className="text-sm leading-snug mt-0.5 break-words">
                         {t.message}
@@ -283,7 +313,7 @@ const InlineToastAnchor = React.forwardRef(
                     ) : null}
 
                     {/* actions */}
-                    {(t.actions?.length || t.undoToken) ? (
+                    {t.actions?.length || t.undoToken ? (
                       <div className="mt-2 flex flex-wrap items-center gap-1.5">
                         {t.undoToken ? (
                           <button
@@ -303,7 +333,8 @@ const InlineToastAnchor = React.forwardRef(
                             className={cx(
                               "inline-flex items-center gap-1 px-2 py-1 rounded-md border text-xs hover:bg-white/60",
                               a.intent === "primary" && "font-medium",
-                              a.intent === "danger" && "border-rose-300 text-rose-800 hover:bg-rose-50"
+                              a.intent === "danger" &&
+                                "border-rose-300 text-rose-800 hover:bg-rose-50"
                             )}
                           >
                             {a.label}
@@ -314,7 +345,10 @@ const InlineToastAnchor = React.forwardRef(
 
                     {/* progress */}
                     {t.timeoutMs > 0 ? (
-                      <div className="mt-2 h-1 w-full rounded-full bg-white/60 overflow-hidden" aria-hidden="true">
+                      <div
+                        className="mt-2 h-1 w-full rounded-full bg-white/60 overflow-hidden"
+                        aria-hidden="true"
+                      >
                         <div
                           className="h-1 bg-current/40"
                           style={{ width: `${progress * 100}%` }}

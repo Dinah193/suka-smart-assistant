@@ -18,7 +18,7 @@
 // If Hub is unavailable, it fails silently (per your rule).
 //
 // ASSUMPTIONS (as requested):
-// - src/services/eventBus.js exists and exposes: on(eventName, handler) and emit(envelope)
+// - src/services/events/eventBus.js exists and exposes: on(eventName, handler) and emit(envelope)
 // - src/config/featureFlags.json exists and can be imported
 // - src/services/hub/HubPacketFormatter.js exists and exports { formatForHub }
 // - src/services/hub/FamilyFundConnector.js exists and exports { sendToHub }
@@ -29,8 +29,8 @@
 // - we keep a single initHubEventBridge() to be called ONCE at app boot (e.g. in main.jsx or App.jsx)
 // -----------------------------------------------------------------------------
 
-import eventBus from "../services/eventBus.js";
-import featureFlags from "../config/featureFlags.json" assert { type: "json" };
+import eventBus from "../services/events/eventBus.js";
+import featureFlags from "@/config/featureFlags.json" assert { type: "json" };
 
 // We will try to import Hub helpers, but we must not crash SSA if they aren't present.
 // This keeps SSA independent from the Hub.
@@ -41,8 +41,8 @@ let FamilyFundConnector = null;
   try {
     // These paths are assumptions based on your project structure.
     // Adjust if yours are slightly different.
-    const fmtMod = await import("../services/hub/HubPacketFormatter.js");
-    const connMod = await import("../services/hub/FamilyFundConnector.js");
+    const fmtMod = await import("@/services/hub/HubPacketFormatter.js");
+    const connMod = await import("@/services/hub/FamilyFundConnector.js");
     HubPacketFormatter = fmtMod?.default || fmtMod;
     FamilyFundConnector = connMod?.default || connMod;
   } catch (err) {
@@ -84,13 +84,13 @@ function mapInventoryUpdated(ssaEvt) {
       changeType: d.changeType || "unknown",
       delta: d.delta ?? null,
       after: d.after ?? null,
-      reason: d.reason || "unspecified"
+      reason: d.reason || "unspecified",
     },
     meta: {
       ts: ssaEvt.ts,
       source: ssaEvt.source,
-      domain: "inventory"
-    }
+      domain: "inventory",
+    },
   };
 }
 
@@ -108,13 +108,13 @@ function mapInventoryShortage(ssaEvt) {
       itemName: d.itemName,
       currentQty: d.currentQty,
       requiredQty: d.requiredQty,
-      suggestedRoutes: d.suggestedRoutes || []
+      suggestedRoutes: d.suggestedRoutes || [],
     },
     meta: {
       ts: ssaEvt.ts,
       source: ssaEvt.source,
-      domain: "inventory"
-    }
+      domain: "inventory",
+    },
   };
 }
 
@@ -132,13 +132,13 @@ function mapMealSessionGenerated(ssaEvt) {
       sourceImportId: d.sourceImportId || null,
       recipes: d.recipes || [],
       inventoryLinks: d.inventoryLinks || [],
-      schedule: d.schedule || null
+      schedule: d.schedule || null,
     },
     meta: {
       ts: ssaEvt.ts,
       source: ssaEvt.source,
-      domain: "meals"
-    }
+      domain: "meals",
+    },
   };
 }
 
@@ -155,13 +155,13 @@ function mapMealExecuted(ssaEvt) {
       sessionId: d.sessionId,
       recipes: d.recipes || [],
       inventoryDeltas: d.inventoryDeltas || [],
-      notes: d.notes || null
+      notes: d.notes || null,
     },
     meta: {
       ts: ssaEvt.ts,
       source: ssaEvt.source,
-      domain: "meals"
-    }
+      domain: "meals",
+    },
   };
 }
 
@@ -179,13 +179,13 @@ function mapCleaningSessionGenerated(ssaEvt) {
       zones: d.zones || [],
       tasks: d.tasks || [],
       estimatedDurationMin: d.estimatedDurationMin || null,
-      sourceImportId: d.sourceImportId || null
+      sourceImportId: d.sourceImportId || null,
     },
     meta: {
       ts: ssaEvt.ts,
       source: ssaEvt.source,
-      domain: "cleaning"
-    }
+      domain: "cleaning",
+    },
   };
 }
 
@@ -202,13 +202,13 @@ function mapCleaningExecuted(ssaEvt) {
       sessionId: d.sessionId,
       zones: d.zones || [],
       completedTasks: d.completedTasks || [],
-      durationMin: d.durationMin || null
+      durationMin: d.durationMin || null,
     },
     meta: {
       ts: ssaEvt.ts,
       source: ssaEvt.source,
-      domain: "cleaning"
-    }
+      domain: "cleaning",
+    },
   };
 }
 
@@ -226,13 +226,13 @@ function mapGardenPlanGenerated(ssaEvt) {
       sourceImportId: d.sourceImportId || null,
       crops: d.crops || [],
       tasks: d.tasks || [],
-      schedule: d.schedule || null
+      schedule: d.schedule || null,
     },
     meta: {
       ts: ssaEvt.ts,
       source: ssaEvt.source,
-      domain: "garden"
-    }
+      domain: "garden",
+    },
   };
 }
 
@@ -251,13 +251,13 @@ function mapGardenHarvestLogged(ssaEvt) {
       quantity: d.quantity,
       unit: d.unit,
       inventoryItemId: d.inventoryItemId || null,
-      preservationSuggested: !!d.preservationSuggested
+      preservationSuggested: !!d.preservationSuggested,
     },
     meta: {
       ts: ssaEvt.ts,
       source: ssaEvt.source,
-      domain: "garden"
-    }
+      domain: "garden",
+    },
   };
 }
 
@@ -275,13 +275,13 @@ function mapAnimalPlanGenerated(ssaEvt) {
       sourceImportId: d.sourceImportId || null,
       species: d.species || null,
       actions: d.actions || [],
-      schedule: d.schedule || null
+      schedule: d.schedule || null,
     },
     meta: {
       ts: ssaEvt.ts,
       source: ssaEvt.source,
-      domain: "animals"
-    }
+      domain: "animals",
+    },
   };
 }
 
@@ -302,13 +302,13 @@ function mapAnimalButcheryLogged(ssaEvt) {
       cuts: d.cuts || [],
       inventoryUpdates: d.inventoryUpdates || [],
       byproducts: d.byproducts || [],
-      notes: d.notes || null
+      notes: d.notes || null,
     },
     meta: {
       ts: ssaEvt.ts,
       source: ssaEvt.source,
-      domain: "animals"
-    }
+      domain: "animals",
+    },
   };
 }
 
@@ -326,13 +326,13 @@ function mapPreservationCompleted(ssaEvt) {
       method: d.method,
       inputs: d.inputs || [],
       outputs: d.outputs || [],
-      notes: d.notes || null
+      notes: d.notes || null,
     },
     meta: {
       ts: ssaEvt.ts,
       source: ssaEvt.source,
-      domain: "preservation"
-    }
+      domain: "preservation",
+    },
   };
 }
 
@@ -428,9 +428,12 @@ async function exportToHubIfEnabled(ssaEventEnvelope) {
         ts: new Date().toISOString(),
         source: "events/eventMappers",
         data: {
-          exportId: finalPacket?.payload?.sessionId || finalPacket?.payload?.itemId || cryptoRandomId(),
-          responseMeta: { mode: "familyFund" }
-        }
+          exportId:
+            finalPacket?.payload?.sessionId ||
+            finalPacket?.payload?.itemId ||
+            cryptoRandomId(),
+          responseMeta: { mode: "familyFund" },
+        },
       });
     }
   } catch (err) {
@@ -442,8 +445,8 @@ async function exportToHubIfEnabled(ssaEventEnvelope) {
       data: {
         exportId: cryptoRandomId(),
         reason: err?.message || "unknown",
-        attempts: 1
-      }
+        attempts: 1,
+      },
     });
   }
 }

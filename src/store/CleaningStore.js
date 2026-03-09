@@ -54,8 +54,14 @@ async function safeImportMany(paths = []) {
   return null;
 }
 
-function safeNowISO() { return new Date().toISOString(); }
-function toISODate(d = new Date()) { const x = new Date(d); x.setHours(0,0,0,0); return x.toISOString(); }
+function safeNowISO() {
+  return new Date().toISOString();
+}
+function toISODate(d = new Date()) {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  return x.toISOString();
+}
 
 /* -------------------- Optional socket (no require) -------------------- */
 async function safeGetSocket() {
@@ -66,23 +72,42 @@ async function safeGetSocket() {
       "@/services/socket.js",
     ]);
     return mod?.socket || mod?.getSocket?.() || null;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 async function broadcast(event, payload) {
-  try { window.dispatchEvent?.(new CustomEvent(event, { detail: payload })); } catch {}
-  try { (await safeGetSocket())?.emit?.(event, payload); } catch {}
+  try {
+    window.dispatchEvent?.(new CustomEvent(event, { detail: payload }));
+  } catch {}
+  try {
+    (await safeGetSocket())?.emit?.(event, payload);
+  } catch {}
 }
 
 let EVENTS = {};
 (async () => {
-  const ont = await safeImportMany(["@/shared/ontology.js", "@/shared/ontology"]);
+  const ont = await safeImportMany([
+    "@/shared/ontology.js",
+    "@/shared/ontology",
+  ]);
   EVENTS = ont?.EVENTS || {};
 })();
 
 /* -------------------- Settings & Sabbath helpers -------------------- */
 async function loadSettings() {
-  const Settings = await safeImportMany(["@/store/SettingsStore.js", "@/store/SettingsStore"]);
-  const get = async (k, d) => { try { const v = await Settings?.get?.(k); return v ?? d; } catch { return d; } };
+  const Settings = await safeImportMany([
+    "@/store/SettingsStore.js",
+    "@/store/SettingsStore",
+  ]);
+  const get = async (k, d) => {
+    try {
+      const v = await Settings?.get?.(k);
+      return v ?? d;
+    } catch {
+      return d;
+    }
+  };
   return {
     quietHours: await get("quietHours", { start: 21, end: 7 }),
     sabbathAvoid: await get("sabbath.avoidSaturday", true),
@@ -90,7 +115,10 @@ async function loadSettings() {
     cleaning: {
       overdueDays: await get("cleaning.overdueDays", 7),
       supplyOverdueDays: await get("cleaning.supplyOverdueDays", 14),
-      defaultRoutineIntensity: await get("cleaning.defaultIntensity", "standard"),
+      defaultRoutineIntensity: await get(
+        "cleaning.defaultIntensity",
+        "standard"
+      ),
     },
   };
 }
@@ -98,7 +126,10 @@ async function loadSettings() {
 // Sabbath window (prefer ontology.sabbath if present)
 async function isSabbath(now = new Date()) {
   try {
-    const ont = await safeImportMany(["@/shared/ontology.js", "@/shared/ontology"]);
+    const ont = await safeImportMany([
+      "@/shared/ontology.js",
+      "@/shared/ontology",
+    ]);
     const win = ont?.sabbath?.(now);
     if (win?.startISO && win?.endISO) {
       return now >= new Date(win.startISO) && now < new Date(win.endISO);
@@ -106,14 +137,31 @@ async function isSabbath(now = new Date()) {
   } catch {}
   // Fallback Fri 18:00 → Sat 18:00
   const day = now.getDay();
-  const fri18 = new Date(now.getFullYear(), now.getMonth(), now.getDate() + ((5 - day + 7) % 7), 18, 0, 0, 0);
-  const sat18 = new Date(now.getFullYear(), now.getMonth(), now.getDate() + ((6 - day + 7) % 7), 18, 0, 0, 0);
+  const fri18 = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + ((5 - day + 7) % 7),
+    18,
+    0,
+    0,
+    0
+  );
+  const sat18 = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + ((6 - day + 7) % 7),
+    18,
+    0,
+    0,
+    0
+  );
   return now >= fri18 && now < sat18;
 }
 function inQuietHours(now, settings) {
   const q = settings?.quietHours || { start: 21, end: 7 };
   const h = now.getHours();
-  if ((q.start ?? 21) < (q.end ?? 7)) return h >= (q.start ?? 21) && h < (q.end ?? 7);
+  if ((q.start ?? 21) < (q.end ?? 7))
+    return h >= (q.start ?? 21) && h < (q.end ?? 7);
   return h >= (q.start ?? 21) || h < (q.end ?? 7);
 }
 
@@ -122,52 +170,109 @@ async function DB() {
   return await safeImportMany(["@/db/index.js", "@/db", "../db", "../../db"]);
 }
 async function cleaningAgent() {
-  return await safeImportMany(["@/agents/cleaningAgent.js", "@/agents/cleaningAgent"]);
+  return await safeImportMany([
+    "@/agents/cleaningShim.js",
+    "@/agents/cleaningAgent",
+  ]);
 }
 async function inventoryAgent() {
-  return await safeImportMany(["@/agents/inventoryAgent.js", "@/agents/inventoryAgent"]);
+  return await safeImportMany([
+    "@/agents/inventoryShim.js",
+    "@/agents/inventoryAgent",
+  ]);
 }
 
 /* -------------------- n8n notifications (optional) -------------------- */
 async function notifyN8n(event, payload) {
-  const n8n = await safeImportMany(["@/services/n8nClient.js", "@/services/n8nClient"]);
+  const n8n = await safeImportMany([
+    "@/services/n8nClient.js",
+    "@/services/n8nClient",
+  ]);
   try {
     if (typeof n8n?.runWorkflowByName === "function") {
-      await n8n.runWorkflowByName("Suka: Cleaning Event", { event, payload }, {
-        idempotencyKey: `${event}:${payload?.sessionId || ""}:${payload?.atISO || ""}`,
-      });
+      await n8n.runWorkflowByName(
+        "Suka: Cleaning Event",
+        { event, payload },
+        {
+          idempotencyKey: `${event}:${payload?.sessionId || ""}:${
+            payload?.atISO || ""
+          }`,
+        }
+      );
     } else {
-      await n8n?.runWorkflow?.("cleaning-event", { event, payload }, { waitForFinish: false });
+      await n8n?.runWorkflow?.(
+        "cleaning-event",
+        { event, payload },
+        { waitForFinish: false }
+      );
     }
   } catch {}
 }
 
 /* -------------------- Utilities -------------------- */
-function daysBetween(a, b) { return Math.abs((a.getTime() - b.getTime()) / 86400000); }
+function daysBetween(a, b) {
+  return Math.abs((a.getTime() - b.getTime()) / 86400000);
+}
 function parseTimeToToday(timeHHMM, base = new Date()) {
-  const [hh, mm] = String(timeHHMM || "10:00").split(":").map(Number);
+  const [hh, mm] = String(timeHHMM || "10:00")
+    .split(":")
+    .map(Number);
   const d = new Date(base);
   d.setHours(hh || 0, mm || 0, 0, 0);
   return d;
 }
 
 const DEFAULT_ZONES = [
-  { id: "Kitchen", name: "Kitchen", priority: 10, cadenceDays: 2, tags: ["high-visibility"], active: true },
-  { id: "Bath", name: "Bathrooms", priority: 10, cadenceDays: 2, tags: ["sanitization"], active: true },
-  { id: "Entry", name: "Entryway", priority: 7, cadenceDays: 3, tags: ["traffic"], active: true },
-  { id: "Living", name: "Living Room", priority: 6, cadenceDays: 4, tags: [], active: true },
+  {
+    id: "Kitchen",
+    name: "Kitchen",
+    priority: 10,
+    cadenceDays: 2,
+    tags: ["high-visibility"],
+    active: true,
+  },
+  {
+    id: "Bath",
+    name: "Bathrooms",
+    priority: 10,
+    cadenceDays: 2,
+    tags: ["sanitization"],
+    active: true,
+  },
+  {
+    id: "Entry",
+    name: "Entryway",
+    priority: 7,
+    cadenceDays: 3,
+    tags: ["traffic"],
+    active: true,
+  },
+  {
+    id: "Living",
+    name: "Living Room",
+    priority: 6,
+    cadenceDays: 4,
+    tags: [],
+    active: true,
+  },
 ];
 
 /* -------------------- Strategy system (Vite-safe) -------------------- */
 // Discover strategy modules (lazy). Drop files in /src/services/cleaning/strategies/*.js to extend.
 const STRATEGY_MODULES = import.meta.glob(
-  ["/src/services/cleaning/strategies/*.js", "/src/services/cleaning/strategies/*.mjs"],
+  [
+    "/src/services/cleaning/strategies/*.js",
+    "/src/services/cleaning/strategies/*.mjs",
+  ],
   { eager: false }
 );
 
 function listStrategies() {
   return Object.keys(STRATEGY_MODULES).map((full) => {
-    const name = full.split("/").pop().replace(/\.(mjs|js)$/i, "");
+    const name = full
+      .split("/")
+      .pop()
+      .replace(/\.(mjs|js)$/i, "");
     return { name, path: full };
   });
 }
@@ -179,7 +284,8 @@ async function loadStrategy(name = "default") {
       const mod = await STRATEGY_MODULES[entry.path]();
       return mod?.default || mod;
     } catch (e) {
-      if (import.meta.env.DEV) console.warn("[CleaningStore] failed to load strategy:", name, e);
+      if (import.meta.env.DEV)
+        console.warn("[CleaningStore] failed to load strategy:", name, e);
     }
   }
   return DefaultCleaningStrategy;
@@ -191,8 +297,12 @@ const DefaultCleaningStrategy = {
   plan({ zones = [], constraints = {}, prefs = {} }) {
     const priority = ["kitchen", "bath", "entry", "bed", "living", "other"];
     const ordered = [...zones].sort((a, b) => {
-      const ai = priority.findIndex((k) => (a.slug || a.name || "").toLowerCase().includes(k));
-      const bi = priority.findIndex((k) => (b.slug || b.name || "").toLowerCase().includes(k));
+      const ai = priority.findIndex((k) =>
+        (a.slug || a.name || "").toLowerCase().includes(k)
+      );
+      const bi = priority.findIndex((k) =>
+        (b.slug || b.name || "").toLowerCase().includes(k)
+      );
       return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
     });
 
@@ -203,7 +313,7 @@ const DefaultCleaningStrategy = {
       supplies: z.supplyHints || [],
       window: constraints?.sabbath
         ? "Outside Sabbath window"
-        : (prefs?.timeWindow || "Anytime"),
+        : prefs?.timeWindow || "Anytime",
       agents: z.agents || [],
     }));
 
@@ -217,7 +327,9 @@ const SabbathAwareStrategy = {
   plan({ zones = [], constraints = {}, prefs = {} }) {
     const base = DefaultCleaningStrategy.plan({ zones, constraints, prefs });
     base.tasks = base.tasks.map((t) => {
-      const heavy = /kitchen|bath|deep|mop|scrub/i.test(`${t.zone} ${t.agents?.join(" ")}`);
+      const heavy = /kitchen|bath|deep|mop|scrub/i.test(
+        `${t.zone} ${t.agents?.join(" ")}`
+      );
       return heavy ? { ...t, window: "Outside Sabbath window" } : t;
     });
     return base;
@@ -233,12 +345,19 @@ const CleaningStore = {
       const zones = await db?.zones?.toArray?.();
       if (!zones || zones.length === 0) {
         for (const z of DEFAULT_ZONES) {
-          await db?.zones?.put?.({ ...z, lastCleanedISO: null, createdAtISO: safeNowISO(), updatedAtISO: safeNowISO() });
+          await db?.zones?.put?.({
+            ...z,
+            lastCleanedISO: null,
+            createdAtISO: safeNowISO(),
+            updatedAtISO: safeNowISO(),
+          });
         }
       }
     } catch {}
     // Publish available strategies (for UI dropdowns)
-    try { window.__cleaningStrategies = listStrategies().map((s) => s.name); } catch {}
+    try {
+      window.__cleaningStrategies = listStrategies().map((s) => s.name);
+    } catch {}
     await broadcast("cleaning:init", { at: safeNowISO() });
     return true;
   },
@@ -251,7 +370,9 @@ const CleaningStore = {
       list = Array.isArray(list) ? list : [];
       if (active != null) list = list.filter((z) => !!z.active === !!active);
       return list.sort((a, b) => (b.priority || 0) - (a.priority || 0));
-    } catch { return []; }
+    } catch {
+      return [];
+    }
   },
 
   async upsertZone(zone) {
@@ -271,7 +392,9 @@ const CleaningStore = {
       await db?.zones?.put?.(doc);
       await broadcast("cleaning:zones:changed", { op: "upsert", id: doc.id });
       return doc;
-    } catch { return null; }
+    } catch {
+      return null;
+    }
   },
 
   async markZoneCleaned(id, { whenISO = safeNowISO() } = {}) {
@@ -284,13 +407,19 @@ const CleaningStore = {
       await db?.zones?.put?.(z);
       await broadcast("cleaning:zones:changed", { op: "markCleaned", id });
       return true;
-    } catch { return false; }
+    } catch {
+      return false;
+    }
   },
 
   /* ---------- Routines ---------- */
   async getRoutine(id) {
     const db = await DB();
-    try { return await db?.cleaningRoutines?.get?.(id); } catch { return null; }
+    try {
+      return await db?.cleaningRoutines?.get?.(id);
+    } catch {
+      return null;
+    }
   },
 
   async upsertRoutine(doc) {
@@ -304,14 +433,16 @@ const CleaningStore = {
       intensity: doc.intensity || "standard",
       presetKey: doc.presetKey || null,
       active: doc.active !== false,
-      tasks: Array.isArray(doc.tasks) ? doc.tasks.map((t, i) => ({
-        id: t.id || `task_${i}`,
-        zone: t.zone || "General",
-        title: t.title || t.text || `Task ${i + 1}`,
-        estMin: Number(t.estMin ?? 5),
-        category: t.category || "cleaning",
-        supplyKey: t.supplyKey || null,
-      })) : [],
+      tasks: Array.isArray(doc.tasks)
+        ? doc.tasks.map((t, i) => ({
+            id: t.id || `task_${i}`,
+            zone: t.zone || "General",
+            title: t.title || t.text || `Task ${i + 1}`,
+            estMin: Number(t.estMin ?? 5),
+            category: t.category || "cleaning",
+            supplyKey: t.supplyKey || null,
+          }))
+        : [],
       updatedAtISO: safeNowISO(),
     };
     if (!doc.id) cleaned.createdAtISO = cleaned.updatedAtISO;
@@ -319,7 +450,9 @@ const CleaningStore = {
       await db?.cleaningRoutines?.put?.(cleaned);
       await broadcast("cleaning:routines:changed", { op: "upsert", id });
       return cleaned;
-    } catch { return null; }
+    } catch {
+      return null;
+    }
   },
 
   /**
@@ -332,7 +465,9 @@ const CleaningStore = {
     const ctx = {}; // hook household context if available
     try {
       const res = await agent?.estimatePlan?.(ctx, {
-        preset: opts.preset || (settings.profileKey === "agrarian-offgrid" ? "deep" : "standard"),
+        preset:
+          opts.preset ||
+          (settings.profileKey === "agrarian-offgrid" ? "deep" : "standard"),
         rooms: opts.rooms || DEFAULT_ZONES.map((z) => z.id),
         duration: Number(opts.duration ?? 30),
         intensity: opts.intensity || settings.cleaning.defaultRoutineIntensity,
@@ -350,7 +485,8 @@ const CleaningStore = {
           name: "Agent Routine",
           rooms: Array.from(new Set(tasks.map((t) => t.zone))),
           durationMin: Number(opts.duration ?? 30),
-          intensity: opts.intensity || settings.cleaning.defaultRoutineIntensity,
+          intensity:
+            opts.intensity || settings.cleaning.defaultRoutineIntensity,
           tasks,
           presetKey: opts.preset || null,
           active: true,
@@ -377,7 +513,8 @@ const CleaningStore = {
   async startSession({ title = "Cleaning Session", preset = null } = {}) {
     const db = await DB();
     const settings = await loadSettings();
-    const sabbath = settings.sabbathAvoid !== false && (await isSabbath(new Date()));
+    const sabbath =
+      settings.sabbathAvoid !== false && (await isSabbath(new Date()));
     const session = {
       id: uuidv4(),
       title: sabbath ? `${title} (gentle)` : title,
@@ -389,10 +526,25 @@ const CleaningStore = {
       meta: { sabbath, source: "CleaningStore" },
     };
     try {
-      await db?.cleaningLogs?.put?.({ id: session.id, atISO: session.startedAtISO, notes: "", tasks: [], meta: { type: "session:start" } });
+      await db?.cleaningLogs?.put?.({
+        id: session.id,
+        atISO: session.startedAtISO,
+        notes: "",
+        tasks: [],
+        meta: { type: "session:start" },
+      });
     } catch {}
-    await broadcast(EVENTS?.SESSION?.STARTED?.CLEANING || "SESSION.STARTED.CLEANING", { sessionId: session.id, at: session.startedAtISO, sabbath });
-    notifyN8n("session.start", { sessionId: session.id, sabbath }).catch(() => {});
+    await broadcast(
+      EVENTS?.SESSION?.STARTED?.CLEANING || "SESSION.STARTED.CLEANING",
+      {
+        sessionId: session.id,
+        at: session.startedAtISO,
+        sabbath,
+      }
+    );
+    notifyN8n("session.start", { sessionId: session.id, sabbath }).catch(
+      () => {}
+    );
     return session;
   },
 
@@ -400,18 +552,55 @@ const CleaningStore = {
     const db = await DB();
     const atISO = safeNowISO();
     try {
-      await db?.cleaningLogs?.put?.({ id: `finish_${sessionId}`, sessionId, atISO, notes: summary, tasks: [], meta: { type: "session:finish" } });
+      await db?.cleaningLogs?.put?.({
+        id: `finish_${sessionId}`,
+        sessionId,
+        atISO,
+        notes: summary,
+        tasks: [],
+        meta: { type: "session:finish" },
+      });
     } catch {}
-    await broadcast(EVENTS?.SESSION?.FINISHED?.CLEANING || "SESSION.FINISHED.CLEANING", { sessionId, at: atISO, summary });
+    await broadcast(
+      EVENTS?.SESSION?.FINISHED?.CLEANING || "SESSION.FINISHED.CLEANING",
+      {
+        sessionId,
+        at: atISO,
+        summary,
+      }
+    );
     notifyN8n("session.finish", { sessionId, summary }).catch(() => {});
     return true;
   },
 
-  async recordTask({ sessionId = null, zone = "General", title, estMin = 5, supplyKey = null, notes = "" }) {
+  async recordTask({
+    sessionId = null,
+    zone = "General",
+    title,
+    estMin = 5,
+    supplyKey = null,
+    notes = "",
+  }) {
     const db = await DB();
-    const item = { id: uuidv4(), zone, title: title || "Task", estMin, supplyKey, notes, doneAtISO: safeNowISO() };
+    const item = {
+      id: uuidv4(),
+      zone,
+      title: title || "Task",
+      estMin,
+      supplyKey,
+      notes,
+      doneAtISO: safeNowISO(),
+    };
     try {
-      await db?.cleaningLogs?.put?.({ id: item.id, sessionId, zone, atISO: item.doneAtISO, tasks: [{ title }], notes, meta: { type: "task" } });
+      await db?.cleaningLogs?.put?.({
+        id: item.id,
+        sessionId,
+        zone,
+        atISO: item.doneAtISO,
+        tasks: [{ title }],
+        notes,
+        meta: { type: "task" },
+      });
       // Mark zone cleaned if it matches a known zone
       const z = await db?.zones?.get?.(zone);
       if (z) {
@@ -420,7 +609,12 @@ const CleaningStore = {
         await db?.zones?.put?.(z);
       }
     } catch {}
-    await broadcast("cleaning:task:recorded", { sessionId, zone, title, at: item.doneAtISO });
+    await broadcast("cleaning:task:recorded", {
+      sessionId,
+      zone,
+      title,
+      at: item.doneAtISO,
+    });
     return item;
   },
 
@@ -435,17 +629,26 @@ const CleaningStore = {
       const scored = (zones || [])
         .filter((z) => z.active !== false)
         .map((z) => {
-          const last = z.lastCleanedISO ? new Date(z.lastCleanedISO) : new Date(0);
+          const last = z.lastCleanedISO
+            ? new Date(z.lastCleanedISO)
+            : new Date(0);
           const days = daysBetween(now, last);
           const cadence = Number(z.cadenceDays || 7);
           const overdue = days - cadence;
           const score = (z.priority || 1) * (overdue > 0 ? overdue : 0);
-          return { ...z, daysSince: Math.floor(days), overdueBy: Math.max(0, Math.floor(overdue)), score };
+          return {
+            ...z,
+            daysSince: Math.floor(days),
+            overdueBy: Math.max(0, Math.floor(overdue)),
+            score,
+          };
         })
         .filter((x) => x.overdueBy >= maxDays || x.overdueBy > 0)
         .sort((a, b) => b.score - a.score);
       return scored.slice(0, limit);
-    } catch { return []; }
+    } catch {
+      return [];
+    }
   },
 
   async detectTriggers() {
@@ -472,27 +675,45 @@ const CleaningStore = {
         if (s.category !== "cleaning") continue;
         const below = Number(s.quantity ?? 0) <= Number(s.threshold ?? 0);
         const last = s.lastUpdated ? new Date(s.lastUpdated) : new Date(0);
-        const old = daysBetween(new Date(), last) > Number(settings.cleaning.supplyOverdueDays ?? 14);
+        const old =
+          daysBetween(new Date(), last) >
+          Number(settings.cleaning.supplyOverdueDays ?? 14);
         if (below || old || !preferMissingOnly) {
           out.push({
             key: s.key || s.name,
             name: s.name,
-            qty: Math.max(1, Number(s.restockQty ?? s.threshold ?? 1) - Number(s.quantity ?? 0)),
+            qty: Math.max(
+              1,
+              Number(s.restockQty ?? s.threshold ?? 1) - Number(s.quantity ?? 0)
+            ),
             unit: s.unit || null,
             reason: below ? "below-threshold" : old ? "stale" : "planned",
           });
         }
       }
       return out;
-    } catch { return []; }
+    } catch {
+      return [];
+    }
   },
 
   async reserveSupplies(lines = []) {
     const inv = await inventoryAgent();
     try {
       if (!lines?.length) return { ok: false, reason: "empty" };
-      await inv?.handleCommand?.("reserveItems", { lines: lines.map((l) => ({ key: l.key || l.name, qty: l.qty, unit: l.unit, reason: l.reason || "cleaning" })) });
-      await broadcast("inventory:delta", { at: safeNowISO(), reason: "cleaning:reserve", lines });
+      await inv?.handleCommand?.("reserveItems", {
+        lines: lines.map((l) => ({
+          key: l.key || l.name,
+          qty: l.qty,
+          unit: l.unit,
+          reason: l.reason || "cleaning",
+        })),
+      });
+      await broadcast("inventory:delta", {
+        at: safeNowISO(),
+        reason: "cleaning:reserve",
+        lines,
+      });
       return { ok: true };
     } catch (e) {
       return { ok: false, error: String(e?.message || e) };
@@ -504,7 +725,9 @@ const CleaningStore = {
     try {
       const agent = await cleaningAgent();
       const ctx = {};
-      const res = await agent?.estimatePlan?.(ctx, { preset: "high-visibility-rooms" });
+      const res = await agent?.estimatePlan?.(ctx, {
+        preset: "high-visibility-rooms",
+      });
       if (Array.isArray(res?.suggestions) && res.suggestions.length) {
         return res.suggestions.slice(0, max).map((s, i) => ({
           id: s.id || `q_${i}`,
@@ -517,9 +740,13 @@ const CleaningStore = {
     } catch {}
     // Fallback: build from overdue zones
     const overdue = await this.getOverdueZones({ graceDays: 0, limit: max });
-    return overdue.map((z, i) => ([
-      { id: `overdue_${z.id}_${i}`, zone: z.id, title: `Tidy ${z.name} (${Math.min(10, 5 + (z.overdueBy || 1))}m)`, estMin: Math.min(10, 5 + (z.overdueBy || 1)), category: "cleaning" },
-    ][0]));
+    return overdue.map((z, i) => ({
+      id: `overdue_${z.id}_${i}`,
+      zone: z.id,
+      title: `Tidy ${z.name} (${Math.min(10, 5 + (z.overdueBy || 1))}m)`,
+      estMin: Math.min(10, 5 + (z.overdueBy || 1)),
+      category: "cleaning",
+    }));
   },
 
   async todaysReminders({ now = new Date() } = {}) {
@@ -550,7 +777,7 @@ const CleaningStore = {
       if ((trig?.zonesDue || []).length) {
         reminders.push({
           atISO: parseTimeToToday("18:30", now).toISOString(),
-          label: `Overdue zones: ${trig.zonesDue.slice(0,3).join(", ")}`,
+          label: `Overdue zones: ${trig.zonesDue.slice(0, 3).join(", ")}`,
           type: "overdue",
           zones: trig.zonesDue,
           gentle: sabbath || quiet,
@@ -563,16 +790,20 @@ const CleaningStore = {
 
   async progressForToday() {
     const db = await DB();
-    const start = new Date(); start.setHours(0,0,0,0);
-    const end = new Date(); end.setHours(23,59,59,999);
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    const end = new Date();
+    end.setHours(23, 59, 59, 999);
     try {
       const all = await db?.cleaningLogs?.toArray?.();
       const today = (all || []).filter((l) => {
         const t = new Date(l.atISO || l.doneAtISO || l.createdAtISO || 0);
-        return t >= start && t <= end && (l.meta?.type === "task");
+        return t >= start && t <= end && l.meta?.type === "task";
       });
       return { tasks: today.length };
-    } catch { return { tasks: 0 }; }
+    } catch {
+      return { tasks: 0 };
+    }
   },
 
   /* ---------- KPI helpers for homepage (4) ---------- */
@@ -583,23 +814,32 @@ const CleaningStore = {
     },
     async listTodayTasks() {
       const db = await DB();
-      const start = new Date(); start.setHours(0,0,0,0);
-      const end = new Date(); end.setHours(23,59,59,999);
+      const start = new Date();
+      start.setHours(0, 0, 0, 0);
+      const end = new Date();
+      end.setHours(23, 59, 59, 999);
       try {
         const all = await db?.cleaningLogs?.toArray?.();
-        return (all || []).filter((l) => {
-          const t = new Date(l.atISO || l.doneAtISO || l.createdAtISO || 0);
-          return t >= start && t <= end && (l.meta?.type === "task");
-        }).map((l) => ({
-          id: l.id,
-          atISO: l.atISO,
-          zone: l.zone || "General",
-          title: l.tasks?.[0]?.title || l.notes || "Task",
-        }));
-      } catch { return []; }
+        return (all || [])
+          .filter((l) => {
+            const t = new Date(l.atISO || l.doneAtISO || l.createdAtISO || 0);
+            return t >= start && t <= end && l.meta?.type === "task";
+          })
+          .map((l) => ({
+            id: l.id,
+            atISO: l.atISO,
+            zone: l.zone || "General",
+            title: l.tasks?.[0]?.title || l.notes || "Task",
+          }));
+      } catch {
+        return [];
+      }
     },
     async overdueZonesCount() {
-      const list = await CleaningStore.getOverdueZones({ graceDays: 0, limit: 999 });
+      const list = await CleaningStore.getOverdueZones({
+        graceDays: 0,
+        limit: 999,
+      });
       return list.length;
     },
     async listOverdueZones({ limit = 10 } = {}) {
@@ -610,16 +850,32 @@ const CleaningStore = {
       try {
         const logs = await db?.cleaningLogs?.toArray?.();
         const todayStr = toISODate(new Date()).slice(0, 10);
-        const starts = new Set((logs || []).filter(l =>
-          l.meta?.type === "session:start" && String(l.atISO).startsWith(todayStr)
-        ).map(l => l.id));
-        const finishes = new Set((logs || []).filter(l =>
-          l.meta?.type === "session:finish" && String(l.atISO).startsWith(todayStr)
-        ).map(l => l.sessionId));
+        const starts = new Set(
+          (logs || [])
+            .filter(
+              (l) =>
+                l.meta?.type === "session:start" &&
+                String(l.atISO).startsWith(todayStr)
+            )
+            .map((l) => l.id)
+        );
+        const finishes = new Set(
+          (logs || [])
+            .filter(
+              (l) =>
+                l.meta?.type === "session:finish" &&
+                String(l.atISO).startsWith(todayStr)
+            )
+            .map((l) => l.sessionId)
+        );
         let active = 0;
-        starts.forEach(id => { if (!finishes.has(id)) active += 1; });
+        starts.forEach((id) => {
+          if (!finishes.has(id)) active += 1;
+        });
         return active;
-      } catch { return 0; }
+      } catch {
+        return 0;
+      }
     },
   },
 
@@ -627,11 +883,14 @@ const CleaningStore = {
   async buildSessionDraft() {
     const settings = await loadSettings();
     const db = await DB();
-    const zones = await db?.zones?.toArray?.() || [];
+    const zones = (await db?.zones?.toArray?.()) || [];
     const constraints = {
       sabbath: settings.sabbathAvoid !== false && (await isSabbath(new Date())),
     };
-    const prefs = { timeWindow: "Anytime", strategy: constraints.sabbath ? "sabbathAware" : "default" };
+    const prefs = {
+      timeWindow: "Anytime",
+      strategy: constraints.sabbath ? "sabbathAware" : "default",
+    };
     const strategy = await loadStrategy(prefs.strategy);
     const plan = strategy.plan({ zones, constraints, prefs });
 
@@ -654,7 +913,10 @@ const CleaningStore = {
 
     // Emit to automation so the SessionDraftDetail modal can open.
     try {
-      const bus = await safeImportMany(["@/services/events/eventBus.js", "@/services/events/eventBus"]);
+      const bus = await safeImportMany([
+        "@/services/events/eventBus.js",
+        "@/services/events/eventBus",
+      ]);
       (bus?.emit || broadcast)("automation/draft/ready", { draft });
     } catch {
       await broadcast("automation/draft/ready", { draft });
@@ -666,7 +928,10 @@ const CleaningStore = {
   async approveDraft(draftId) {
     // We don’t store all drafts here; approval is event-based.
     try {
-      const bus = await safeImportMany(["@/services/events/eventBus.js", "@/services/events/eventBus"]);
+      const bus = await safeImportMany([
+        "@/services/events/eventBus.js",
+        "@/services/events/eventBus",
+      ]);
       (bus?.emit || broadcast)("automation/draft/approve", { id: draftId });
     } catch {
       await broadcast("automation/draft/approve", { id: draftId });
@@ -677,7 +942,10 @@ const CleaningStore = {
   /* ---------- High-level flows ---------- */
   async startQuickReset() {
     const preset = await this.buildRoutine({ preset: "kitchen-reset-10min" });
-    const session = await this.startSession({ title: "Quick Reset", preset: preset?.presetKey || "kitchen-reset-10min" });
+    const session = await this.startSession({
+      title: "Quick Reset",
+      preset: preset?.presetKey || "kitchen-reset-10min",
+    });
     await broadcast("automation/nudge", {
       title: "Quick kitchen reset started",
       message: "10 minutes to clear counters, dishes, and sweep crumbs.",
@@ -697,11 +965,15 @@ if (typeof window !== "undefined") {
     try {
       switch (intent) {
         case "cleaning/session/start": {
-          await CleaningStore.startSession({ title: detail?.title, preset: detail?.preset });
+          await CleaningStore.startSession({
+            title: detail?.title,
+            preset: detail?.preset,
+          });
           break;
         }
         case "cleaning/session/finish": {
-          if (detail?.id) await CleaningStore.finishSession(detail.id, detail?.summary || "");
+          if (detail?.id)
+            await CleaningStore.finishSession(detail.id, detail?.summary || "");
           break;
         }
         case "cleaning/task/record": {
@@ -755,6 +1027,11 @@ if (typeof window !== "undefined") {
 
 /* -------------------- Export -------------------- */
 export default CleaningStore;
+
+// ✅ Fix for build error:
+// CleaningSettingsPage imports a *named* useCleaningStore from "@/store/CleaningStore".
+// Provide a named export that points at the default object store.
+export const useCleaningStore = CleaningStore;
 
 export const Cleaning = {
   init: () => CleaningStore.init(),

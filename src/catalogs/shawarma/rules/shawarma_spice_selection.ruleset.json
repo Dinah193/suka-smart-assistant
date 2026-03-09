@@ -1,0 +1,558 @@
+{
+  "$schema": "../../../schemas/ruleset.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+  "kind": "ruleset",
+  "meta": {
+    "id": "rulesets.shawarma.spice_selection",
+    "type": "ruleset",
+    "label": "Shawarma Spice Selection",
+    "status": "canonical",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Catalog",
+      "notes": [
+        "Deterministic rules to select a shawarma spice blend based on protein/target, cook method, and user flavor goals.",
+        "Outputs recommended blend IDs, dosing ranges, and small adjustments (heat/smoke/brightness) as event-guidance and set actions."
+      ]
+    }
+  },
+  "scope": {
+    "kind": "module",
+    "locales": ["en-US"]
+  },
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true,
+    "tokens": {
+      "stopWords": [
+        "and",
+        "or",
+        "the",
+        "a",
+        "an",
+        "of",
+        "to",
+        "with",
+        "for",
+        "into"
+      ]
+    },
+    "ingredientAliases": {
+      "ing.sumac": ["sumac", "sumach"],
+      "ing.paprika_smoked": ["smoked paprika", "smoky paprika"],
+      "ing.paprika": ["paprika", "sweet paprika"],
+      "ing.cayenne": ["cayenne", "cayenne pepper"],
+      "ing.chili_flakes": [
+        "red pepper flakes",
+        "crushed red pepper",
+        "chili flakes"
+      ],
+      "ing.black_pepper": ["black pepper", "pepper"],
+      "ing.garlic_powder": ["garlic powder"],
+      "ing.onion_powder": ["onion powder"]
+    },
+    "methodAliases": {
+      "method.roast": ["roast", "oven roast", "bake", "oven bake", "sheet pan"],
+      "method.grill": [
+        "grill",
+        "bbq",
+        "barbecue",
+        "charcoal grill",
+        "gas grill"
+      ],
+      "method.sear": ["sear", "pan sear", "skillet", "cast iron"],
+      "method.broil": ["broil", "oven broil"],
+      "method.air_fry": ["air fry", "air-fry", "airfryer"],
+      "method.smoke": ["smoke", "smoked"]
+    }
+  },
+  "globals": {
+    "blendIds": {
+      "classic": "shawarma.spice_blends.shawarma_classic_blend",
+      "chicken": "shawarma.spice_blends.shawarma_chicken_blend",
+      "beef": "shawarma.spice_blends.shawarma_beef_blend",
+      "lamb": "shawarma.spice_blends.shawarma_lamb_blend",
+      "vegetable": "shawarma.spice_blends.shawarma_vegetable_blend"
+    },
+    "doseGuidance": {
+      "perKg": {
+        "meat": { "minG": 12, "idealG": 18, "maxG": 28 },
+        "lamb": { "minG": 14, "idealG": 22, "maxG": 32 },
+        "veg": { "minG": 10, "idealG": 16, "maxG": 26 }
+      }
+    },
+    "flavorGoals": {
+      "heat": ["heat", "spicy", "hot"],
+      "smoky": ["smoky", "smoke", "bbq"],
+      "bright": ["bright", "citrus", "tangy", "fresh"],
+      "herby": ["herby", "herb", "green"],
+      "warm": ["warm_spice", "warm", "cozy"]
+    }
+  },
+  "rules": [
+    {
+      "id": "shawarma.spice.select.by_target_vegetables",
+      "enabled": true,
+      "priority": 10,
+      "title": "Vegetables default to Vegetable Shawarma Blend",
+      "description": "Vegetables do best with brighter herbs/sumac and less heavy warming spice.",
+      "tags": ["shawarma", "spice", "selection", "vegetables"],
+      "source": "SSA Catalog",
+      "when": {
+        "type": "eq",
+        "path": "$.inputs.target",
+        "value": "vegetables"
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.recommendations.spiceBlend.id",
+            "value": "shawarma.spice_blends.shawarma_vegetable_blend"
+          },
+          {
+            "type": "set",
+            "path": "$.recommendations.spiceBlend.dosePerKg",
+            "value": { "minG": 10, "idealG": 16, "maxG": 26 }
+          },
+          {
+            "type": "addTag",
+            "value": "spice.selected.vegetable_blend"
+          },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.guidance",
+              "payload": {
+                "rulesetId": "rulesets.shawarma.spice_selection",
+                "ruleId": "shawarma.spice.select.by_target_vegetables",
+                "message": "Vegetables: choose Vegetable Shawarma Blend. Dose ~10–26 g per kg veg (ideal ~16 g). Finish with lemon/sumac for brightness.",
+                "severity": "info"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "shawarma.spice.select.by_protein_chicken_default",
+      "enabled": true,
+      "priority": 20,
+      "title": "Chicken defaults to Chicken Shawarma Blend",
+      "description": "Chicken shawarma leans bright and aromatic; chicken blend is the default.",
+      "tags": ["shawarma", "spice", "selection", "chicken"],
+      "source": "SSA Catalog",
+      "when": {
+        "type": "eq",
+        "path": "$.inputs.protein",
+        "value": "chicken"
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.recommendations.spiceBlend.id",
+            "value": "shawarma.spice_blends.shawarma_chicken_blend"
+          },
+          {
+            "type": "set",
+            "path": "$.recommendations.spiceBlend.dosePerKg",
+            "value": { "minG": 12, "idealG": 18, "maxG": 28 }
+          },
+          { "type": "addTag", "value": "spice.selected.chicken_blend" },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.guidance",
+              "payload": {
+                "rulesetId": "rulesets.shawarma.spice_selection",
+                "ruleId": "shawarma.spice.select.by_protein_chicken_default",
+                "message": "Chicken: choose Chicken Shawarma Blend. Dose ~12–28 g per kg (ideal ~18 g).",
+                "severity": "info"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "shawarma.spice.select.by_protein_chicken_thigh",
+      "enabled": true,
+      "priority": 21,
+      "title": "Chicken thighs: Chicken Blend (can go heavier)",
+      "description": "Thighs tolerate a heavier spice dose and smoky finishing options.",
+      "tags": ["shawarma", "spice", "selection", "chicken"],
+      "source": "SSA Catalog",
+      "when": {
+        "type": "eq",
+        "path": "$.inputs.protein",
+        "value": "chicken_thigh"
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.recommendations.spiceBlend.id",
+            "value": "shawarma.spice_blends.shawarma_chicken_blend"
+          },
+          {
+            "type": "set",
+            "path": "$.recommendations.spiceBlend.dosePerKg",
+            "value": { "minG": 14, "idealG": 20, "maxG": 30 }
+          },
+          { "type": "addTag", "value": "spice.selected.chicken_blend" },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.guidance",
+              "payload": {
+                "rulesetId": "rulesets.shawarma.spice_selection",
+                "ruleId": "shawarma.spice.select.by_protein_chicken_thigh",
+                "message": "Chicken thighs: Chicken Blend works best and can be dosed a bit heavier (~14–30 g/kg, ideal ~20 g).",
+                "severity": "info"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "shawarma.spice.select.by_protein_chicken_breast",
+      "enabled": true,
+      "priority": 22,
+      "title": "Chicken breast: Chicken Blend (gentler dose)",
+      "description": "Breast is lean; keep dosing moderate to avoid a dry, powdery finish.",
+      "tags": ["shawarma", "spice", "selection", "chicken", "lean"],
+      "source": "SSA Catalog",
+      "when": {
+        "type": "eq",
+        "path": "$.inputs.protein",
+        "value": "chicken_breast"
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.recommendations.spiceBlend.id",
+            "value": "shawarma.spice_blends.shawarma_chicken_blend"
+          },
+          {
+            "type": "set",
+            "path": "$.recommendations.spiceBlend.dosePerKg",
+            "value": { "minG": 10, "idealG": 16, "maxG": 24 }
+          },
+          { "type": "addTag", "value": "spice.selected.chicken_blend" },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.guidance",
+              "payload": {
+                "rulesetId": "rulesets.shawarma.spice_selection",
+                "ruleId": "shawarma.spice.select.by_protein_chicken_breast",
+                "message": "Chicken breast: Chicken Blend, but keep dose moderate (~10–24 g/kg, ideal ~16 g). Ensure enough oil/yogurt in marinade for cling.",
+                "severity": "warning"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "shawarma.spice.select.by_protein_beef_default",
+      "enabled": true,
+      "priority": 30,
+      "title": "Beef defaults to Beef Shawarma Blend",
+      "description": "Beef benefits from warmer spice backbone and peppery depth.",
+      "tags": ["shawarma", "spice", "selection", "beef"],
+      "source": "SSA Catalog",
+      "when": {
+        "type": "eq",
+        "path": "$.inputs.protein",
+        "value": "beef"
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.recommendations.spiceBlend.id",
+            "value": "shawarma.spice_blends.shawarma_beef_blend"
+          },
+          {
+            "type": "set",
+            "path": "$.recommendations.spiceBlend.dosePerKg",
+            "value": { "minG": 12, "idealG": 18, "maxG": 28 }
+          },
+          { "type": "addTag", "value": "spice.selected.beef_blend" },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.guidance",
+              "payload": {
+                "rulesetId": "rulesets.shawarma.spice_selection",
+                "ruleId": "shawarma.spice.select.by_protein_beef_default",
+                "message": "Beef: choose Beef Shawarma Blend. Dose ~12–28 g/kg (ideal ~18 g).",
+                "severity": "info"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "shawarma.spice.select.by_protein_lamb_default",
+      "enabled": true,
+      "priority": 40,
+      "title": "Lamb defaults to Lamb Shawarma Blend",
+      "description": "Lamb pairs with deeper warm spices; lamb blend is richer and bolder.",
+      "tags": ["shawarma", "spice", "selection", "lamb"],
+      "source": "SSA Catalog",
+      "when": {
+        "type": "eq",
+        "path": "$.inputs.protein",
+        "value": "lamb"
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.recommendations.spiceBlend.id",
+            "value": "shawarma.spice_blends.shawarma_lamb_blend"
+          },
+          {
+            "type": "set",
+            "path": "$.recommendations.spiceBlend.dosePerKg",
+            "value": { "minG": 14, "idealG": 22, "maxG": 32 }
+          },
+          { "type": "addTag", "value": "spice.selected.lamb_blend" },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.guidance",
+              "payload": {
+                "rulesetId": "rulesets.shawarma.spice_selection",
+                "ruleId": "shawarma.spice.select.by_protein_lamb_default",
+                "message": "Lamb: choose Lamb Shawarma Blend. Dose ~14–32 g/kg (ideal ~22 g).",
+                "severity": "info"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "shawarma.spice.select.fallback_classic",
+      "enabled": true,
+      "priority": 200,
+      "title": "Fallback: Classic Shawarma Blend",
+      "description": "If protein/target unknown, default to Classic blend.",
+      "tags": ["shawarma", "spice", "selection", "fallback"],
+      "source": "SSA Catalog",
+      "when": {
+        "op": "not",
+        "conditions": [
+          {
+            "op": "any",
+            "conditions": [
+              { "type": "exists", "path": "$.inputs.target" },
+              { "type": "exists", "path": "$.inputs.protein" }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.recommendations.spiceBlend.id",
+            "value": "shawarma.spice_blends.shawarma_classic_blend"
+          },
+          {
+            "type": "set",
+            "path": "$.recommendations.spiceBlend.dosePerKg",
+            "value": { "minG": 10, "idealG": 16, "maxG": 26 }
+          },
+          { "type": "addTag", "value": "spice.selected.classic_blend" },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.guidance",
+              "payload": {
+                "rulesetId": "rulesets.shawarma.spice_selection",
+                "ruleId": "shawarma.spice.select.fallback_classic",
+                "message": "Fallback: Classic Shawarma Blend. Dose ~10–26 g/kg (ideal ~16 g).",
+                "severity": "info"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "shawarma.spice.adjust.heat_goal_add_heat",
+      "enabled": true,
+      "priority": 300,
+      "title": "Heat goal: add cayenne/pepper flakes guidance",
+      "description": "If user flavor goal includes heat/spicy, recommend heat additions.",
+      "tags": ["shawarma", "spice", "heat", "adjustment"],
+      "source": "SSA Catalog",
+      "when": {
+        "type": "intersects",
+        "path": "$.inputs.flavorGoals",
+        "values": ["heat", "spicy", "hot"]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.recommendations.spiceBlend.adjustments.heat",
+            "value": {
+              "cayenneTspPerKg": { "min": 0.25, "ideal": 0.5, "max": 1.0 },
+              "redPepperFlakesTspPerKg": {
+                "min": 0.5,
+                "ideal": 1.0,
+                "max": 2.0
+              },
+              "note": "Add heat gradually; taste a tiny pinch mixed with oil for perception."
+            }
+          },
+          { "type": "addTag", "value": "spice.adjust.heat" },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.guidance",
+              "payload": {
+                "rulesetId": "rulesets.shawarma.spice_selection",
+                "ruleId": "shawarma.spice.adjust.heat_goal_add_heat",
+                "message": "Heat goal: add cayenne (~1/4–1 tsp per kg) and/or red pepper flakes (~1/2–2 tsp per kg).",
+                "severity": "info"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "shawarma.spice.adjust.smoky_goal_add_smoked_paprika",
+      "enabled": true,
+      "priority": 310,
+      "title": "Smoky goal: add smoked paprika guidance",
+      "description": "If user flavor goal includes smoky, recommend smoked paprika or a touch of chipotle-style heat.",
+      "tags": ["shawarma", "spice", "smoky", "adjustment"],
+      "source": "SSA Catalog",
+      "when": {
+        "type": "intersects",
+        "path": "$.inputs.flavorGoals",
+        "values": ["smoky", "smoke", "bbq"]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.recommendations.spiceBlend.adjustments.smoky",
+            "value": {
+              "smokedPaprikaTspPerKg": { "min": 0.5, "ideal": 1.5, "max": 3.0 },
+              "note": "Smoked paprika boosts grilled notes for oven/air-fryer shawarma."
+            }
+          },
+          { "type": "addTag", "value": "spice.adjust.smoky" },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.guidance",
+              "payload": {
+                "rulesetId": "rulesets.shawarma.spice_selection",
+                "ruleId": "shawarma.spice.adjust.smoky_goal_add_smoked_paprika",
+                "message": "Smoky goal: add smoked paprika (~1/2–3 tsp per kg) for grilled notes, especially in oven/air fryer.",
+                "severity": "info"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "shawarma.spice.adjust.bright_goal_finish_sumac_lemon",
+      "enabled": true,
+      "priority": 320,
+      "title": "Bright goal: finish with sumac/lemon guidance",
+      "description": "If user wants bright/citrus, recommend finishers rather than loading extra acid into spice mix.",
+      "tags": ["shawarma", "spice", "bright", "adjustment", "finishing"],
+      "source": "SSA Catalog",
+      "when": {
+        "type": "intersects",
+        "path": "$.inputs.flavorGoals",
+        "values": ["bright", "citrus", "tangy", "fresh"]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.recommendations.finish.bright",
+            "value": {
+              "sumacTspPerKg": { "min": 0.5, "ideal": 1.0, "max": 2.0 },
+              "lemon": { "wedges": true, "finalSqueeze": true },
+              "note": "Prefer finishing acidity (lemon/sumac) for brightness rather than increasing harsh acid in the marinade."
+            }
+          },
+          { "type": "addTag", "value": "spice.adjust.bright_finish" },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.guidance",
+              "payload": {
+                "rulesetId": "rulesets.shawarma.spice_selection",
+                "ruleId": "shawarma.spice.adjust.bright_goal_finish_sumac_lemon",
+                "message": "Bright goal: finish with lemon and a pinch of sumac (about 1/2–2 tsp per kg) instead of over-acidifying the marinade.",
+                "severity": "info"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "shawarma.spice.method.high_heat_reduce_powdery_finish",
+      "enabled": true,
+      "priority": 400,
+      "title": "High-heat sear/grill: avoid a powdery spice crust",
+      "description": "At high heat, too much dry spice can scorch and taste bitter; encourage proper fat and patting excess.",
+      "tags": ["shawarma", "spice", "method", "sear", "grill", "adjustment"],
+      "source": "SSA Catalog",
+      "when": {
+        "type": "intersects",
+        "path": "$.inputs.method",
+        "values": ["method.sear", "method.grill", "method.broil"]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.recommendations.methodNotes.highHeatSpice",
+            "value": {
+              "note": "For sear/grill/broil, ensure enough oil/yogurt for spice cling; pat excess marinade before cooking; avoid over-dosing dry spice to prevent bitterness.",
+              "doseCapPerKgG": 28
+            }
+          },
+          { "type": "addTag", "value": "spice.method.high_heat_guidance" },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.guidance",
+              "payload": {
+                "rulesetId": "rulesets.shawarma.spice_selection",
+                "ruleId": "shawarma.spice.method.high_heat_reduce_powdery_finish",
+                "message": "High heat: don’t over-dose dry spice. Ensure enough fat for cling, pat excess marinade, and cap spice dose (~28 g/kg) to avoid bitter scorch.",
+                "severity": "info"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

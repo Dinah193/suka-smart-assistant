@@ -1,0 +1,364 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+  "meta": {
+    "id": "mexican.pozole.rojo",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Pozole Rojo",
+    "subtitle": "Hominy stew with pork (or chicken) and a red chile broth, served with fresh crunchy garnishes",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Mexican Cuisine"
+    }
+  },
+  "classification": {
+    "cuisine": "mexican",
+    "category": "main",
+    "mealArchetypes": ["archetype.soup", "archetype.stew", "archetype.braise"],
+    "servingStyles": ["bowl", "family_style"],
+    "plannerTags": [
+      "course.main",
+      "batch.friendly",
+      "leftovers.good",
+      "freezer.friendly",
+      "cold_weather"
+    ]
+  },
+  "summary": "Classic pozole rojo: a comforting hominy stew with tender pork (or chicken), a deeply flavored red chile broth, and a build-your-own garnish tray (cabbage, radish, lime, onion, oregano). Designed for SSA planning: big-batch friendly, reheats well, and garnishes can be prepped separately for speed.",
+  "yield": {
+    "servings": 8,
+    "servingSize": { "value": 2, "unit": "cups" },
+    "notes": "Makes about 12–14 cups total. Scale up easily for events."
+  },
+  "time": {
+    "activeMins": 35,
+    "handsOffMins": 120,
+    "totalMins": 155
+  },
+  "difficulty": "intermediate",
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": false,
+    "leftoversGood": true,
+    "freezerFriendly": true
+  },
+  "tasteProfile": {
+    "savory": 4,
+    "spicy": 2,
+    "acidic": 2,
+    "rich": 3
+  },
+  "equipment": {
+    "minimum": ["equipment.stock_pot", "equipment.blender"],
+    "recommended": ["equipment.fine_strainer", "equipment.dutch_oven"],
+    "optional": [
+      {
+        "id": "equipment.pressure_cooker",
+        "label": "Pressure Cooker / Instant Pot",
+        "notes": "Speeds up pork tenderizing; see variations"
+      }
+    ]
+  },
+  "dietFlags": ["diet.gluten_free"],
+  "allergens": [],
+  "ingredients": [
+    {
+      "id": "ingredient.pork_shoulder",
+      "label": "Pork shoulder (boneless)",
+      "role": "protein",
+      "amount": { "value": 900, "unit": "g" },
+      "notes": "Cut into 1.5-inch chunks; may substitute chicken thighs (see variations)"
+    },
+    {
+      "id": "ingredient.salt",
+      "label": "Salt",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Divide between broth + final seasoning"
+    },
+    {
+      "id": "ingredient.onion_white",
+      "label": "White onion",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "large" },
+      "notes": "Half for cooking; half for garnish"
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic cloves",
+      "role": "aromatic",
+      "amount": { "value": 6, "unit": "cloves" },
+      "notes": "Some for broth, some for chile blend"
+    },
+    {
+      "id": "ingredient.bay_leaf",
+      "label": "Bay leaves",
+      "role": "aromatic",
+      "amount": { "value": 2, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.oregano_mexican",
+      "label": "Mexican oregano",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Plus extra for serving"
+    },
+    {
+      "id": "ingredient.cumin_ground",
+      "label": "Ground cumin",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.hominy",
+      "label": "Hominy, canned (drained and rinsed)",
+      "role": "starch",
+      "amount": { "value": 2, "unit": "cans" },
+      "notes": "Use 25–30 oz cans; or ~6 cups cooked hominy"
+    },
+
+    {
+      "id": "ingredient.guajillo_chile",
+      "label": "Dried guajillo chiles",
+      "role": "chile.base",
+      "amount": { "value": 6, "unit": "each" },
+      "notes": "Stemmed and seeded"
+    },
+    {
+      "id": "ingredient.ancho_chile",
+      "label": "Dried ancho chiles",
+      "role": "chile.base",
+      "amount": { "value": 2, "unit": "each" },
+      "notes": "Stemmed and seeded"
+    },
+    {
+      "id": "ingredient.chipotle_in_adobo",
+      "label": "Chipotle in adobo",
+      "role": "chile.boost",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true,
+      "notes": "Use 1 chopped pepper + a little sauce for smoky heat"
+    },
+    {
+      "id": "ingredient.oil_neutral",
+      "label": "Neutral oil",
+      "role": "fat",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "notes": "For blooming the chile puree"
+    },
+
+    {
+      "id": "ingredient.vinegar_apple_cider",
+      "label": "Apple cider vinegar (or white vinegar)",
+      "role": "acid",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true,
+      "notes": "Brightens the chile puree"
+    },
+
+    {
+      "id": "ingredient.cabbage_green",
+      "label": "Green cabbage",
+      "role": "garnish.crunch",
+      "amount": { "value": 0.5, "unit": "small" },
+      "optional": true,
+      "notes": "Finely shredded for serving"
+    },
+    {
+      "id": "ingredient.radish",
+      "label": "Radishes",
+      "role": "garnish.crunch",
+      "amount": { "value": 6, "unit": "each" },
+      "optional": true,
+      "notes": "Thinly sliced"
+    },
+    {
+      "id": "ingredient.lime",
+      "label": "Limes",
+      "role": "garnish.acid",
+      "amount": { "value": 3, "unit": "each" },
+      "optional": true,
+      "notes": "Cut into wedges"
+    },
+    {
+      "id": "ingredient.cilantro",
+      "label": "Fresh cilantro",
+      "role": "garnish",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "optional": true,
+      "notes": "Roughly chopped"
+    }
+  ],
+  "ingredientGroups": [
+    {
+      "label": "Broth Base",
+      "items": [
+        "ingredient.pork_shoulder",
+        "ingredient.salt",
+        "ingredient.onion_white",
+        "ingredient.garlic",
+        "ingredient.bay_leaf",
+        "ingredient.oregano_mexican",
+        "ingredient.cumin_ground"
+      ]
+    },
+    {
+      "label": "Red Chile Blend",
+      "items": [
+        "ingredient.guajillo_chile",
+        "ingredient.ancho_chile",
+        "ingredient.garlic",
+        "ingredient.vinegar_apple_cider",
+        "ingredient.oil_neutral",
+        "ingredient.chipotle_in_adobo"
+      ]
+    },
+    {
+      "label": "Finish",
+      "items": ["ingredient.hominy"]
+    },
+    {
+      "label": "Garnish Tray (Recommended)",
+      "items": [
+        "ingredient.cabbage_green",
+        "ingredient.radish",
+        "ingredient.lime",
+        "ingredient.cilantro",
+        "ingredient.oregano_mexican",
+        "ingredient.onion_white"
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.prep_pork",
+      "title": "Prep and start the broth",
+      "activeMins": 10,
+      "body": "Cut pork into chunks and season with about 1 tsp salt. Add pork to a large pot with half the onion (quartered), 3 cloves garlic, bay leaves (optional), 1 tsp Mexican oregano, and enough water to cover by 2 inches (about 10–12 cups). Bring to a boil, then reduce to a gentle simmer."
+    },
+    {
+      "id": "step.simmer_until_tender",
+      "title": "Simmer until pork is tender",
+      "activeMins": 5,
+      "handsOffMins": 90,
+      "body": "Simmer partially covered until pork is fork-tender, about 75–100 minutes. Skim foam as needed. Remove onion/garlic/bay when done (optional).",
+      "timers": [{ "label": "Simmer pork", "minutes": 90 }],
+      "checks": ["Pork is tender and easily shreds with a fork"]
+    },
+    {
+      "id": "step.toast_and_soak_chiles",
+      "title": "Toast and soak dried chiles",
+      "activeMins": 12,
+      "body": "While the pork simmers, toast guajillo and ancho chiles briefly in a dry skillet (10–20 seconds per side) until fragrant—do not burn. Cover with hot water and soak 15 minutes until pliable.",
+      "timers": [
+        { "label": "Toast chiles", "minutes": 2 },
+        { "label": "Soak chiles", "minutes": 15 }
+      ],
+      "checks": ["Chiles are pliable and smell aromatic (not bitter/burnt)"]
+    },
+    {
+      "id": "step.blend_chile_puree",
+      "title": "Blend the red chile puree",
+      "activeMins": 8,
+      "body": "Drain soaked chiles (reserve a little soak water). Blend chiles with 3 cloves garlic, 1 tbsp vinegar (optional), and 1–2 cups of broth (or soak water) until very smooth. For an extra-smooth broth, strain through a fine mesh strainer."
+    },
+    {
+      "id": "step.bloom_chile_puree",
+      "title": "Bloom the chile puree for deeper flavor",
+      "activeMins": 6,
+      "body": "Heat 1 tbsp oil in a saucepan or skillet over medium heat. Pour in the chile puree carefully and cook 3–5 minutes, stirring, until darkened slightly and aromatic. Add chipotle in adobo if using.",
+      "timers": [{ "label": "Bloom chile puree", "minutes": 4 }],
+      "checks": ["Puree smells rich, not raw; color deepens slightly"]
+    },
+    {
+      "id": "step.combine_broth",
+      "title": "Combine broth, chile, and hominy",
+      "activeMins": 8,
+      "handsOffMins": 25,
+      "body": "Stir the bloomed chile puree into the pork pot. Add drained and rinsed hominy. Simmer 20–30 minutes to meld flavors. Season with remaining salt to taste; add extra oregano if desired.",
+      "timers": [{ "label": "Simmer with hominy", "minutes": 25 }],
+      "checks": [
+        "Broth tastes balanced: savory + chile depth + bright finish with lime at serving"
+      ]
+    },
+    {
+      "id": "step.garnish_tray",
+      "title": "Prepare garnish tray",
+      "activeMins": 12,
+      "body": "Shred cabbage, slice radishes, chop cilantro, and cut limes into wedges. Dice remaining onion finely. Set out Mexican oregano and any additional toppings you like."
+    },
+    {
+      "id": "step.serve",
+      "title": "Serve",
+      "activeMins": 3,
+      "body": "Ladle pozole into bowls. Let each person top with cabbage, radish, onion, oregano, cilantro, and lots of lime."
+    }
+  ],
+  "variations": [
+    {
+      "id": "variation.chicken",
+      "label": "Pozole Rojo de Pollo",
+      "notes": "Use 2–2.5 lb bone-in chicken thighs (or a whole chicken cut up). Simmer until cooked, shred, return to pot. Total time drops to ~60–75 minutes."
+    },
+    {
+      "id": "variation.pressure_cooker",
+      "label": "Pressure Cooker / Instant Pot",
+      "notes": "Cook pork with aromatics and water/broth for ~35 minutes high pressure + natural release. Then stir in chile puree and hominy; simmer on sauté 15–20 minutes."
+    },
+    {
+      "id": "variation.milder",
+      "label": "Milder Pozole",
+      "notes": "Use fewer chiles (e.g., 4 guajillo + 1 ancho), omit chipotle, and increase broth slightly."
+    },
+    {
+      "id": "variation.extra_spicy",
+      "label": "Spicier Pozole",
+      "notes": "Add 1–2 árbol chiles to the soak/blend or increase chipotle in adobo."
+    }
+  ],
+  "storage": {
+    "refrigeration": "Cool and refrigerate pozole (without garnishes) for up to 4 days.",
+    "freezing": "Freeze stew base (without fresh garnishes) for up to 3 months. Thaw overnight and reheat gently; add water/broth as needed.",
+    "reheat": "Reheat on the stove until steaming hot. Keep garnish tray separate."
+  },
+  "safety": {
+    "notes": [
+      "Cool stew within 2 hours before refrigerating.",
+      "Reheat leftovers to steaming hot throughout."
+    ]
+  },
+  "pairings": {
+    "sides": ["mexican.tostadas", "mexican.elote"],
+    "drinks": ["mexican.agua_fresca_jamaica", "mexican.horchata"],
+    "salsas": ["mexican.salsa_roja", "mexican.salsa_verde"]
+  },
+  "planner": {
+    "preferredFor": [
+      "cold_weather",
+      "batch_cooking",
+      "family_dinner",
+      "event_potluck"
+    ],
+    "scalesWell": true,
+    "prepNotes": [
+      "Make chile puree up to 2 days ahead and refrigerate.",
+      "Prep garnish tray same-day; store cabbage/radish separately for best crunch."
+    ],
+    "leftoversPlan": "Portion stew base into containers; pack garnish cups separately to keep crunch."
+  },
+  "methods": ["technique.simmer", "technique.toast_chiles", "technique.blend"],
+  "compat": {
+    "dishId": "mexican.pozole_rojo",
+    "aliases": ["pozole", "posole", "pozole rojo", "red pozole"]
+  },
+  "notes": [
+    "Canonical SSA pozole rojo baseline focuses on a dried-chile blend for depth, not chili powder.",
+    "If using canned hominy with varying can sizes, target ~6 cups drained hominy.",
+    "Flavor is finished at the bowl with lime and oregano—don’t skip the garnish tray."
+  ]
+}

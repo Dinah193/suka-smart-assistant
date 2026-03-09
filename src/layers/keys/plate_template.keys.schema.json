@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ssa://layers/keys/plate_template.keys.schema.json",
+  "title": "SSA Plate Template Keys Schema",
+  "description": "Schema for src/layers/keys/plate_template.keys.json. Defines canonical key identifiers and field metadata used across SSA for plate templates, roles, portions, and meal planning mappings.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["keysetId", "version", "generatedAt", "notes", "enums", "keys"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional pointer to this schema for IDE validation."
+    },
+    "keysetId": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-zA-Z0-9._-]+$"
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-[a-zA-Z0-9._-]+)?$"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "enums": {
+      "$ref": "#/$defs/enumsBlock"
+    },
+    "keys": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/keyDef" }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "enumStringList": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "keyId": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-zA-Z0-9_.-]+$"
+    },
+    "aliasesArray": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/nonEmptyString" },
+      "default": []
+    },
+    "examplesArray": {
+      "type": "array",
+      "items": {},
+      "default": []
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "minLength": { "type": "integer", "minimum": 0 },
+        "maxLength": { "type": "integer", "minimum": 0 },
+        "pattern": { "type": "string" },
+        "enumValues": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "itemType": {
+          "type": "string",
+          "enum": ["string", "number", "boolean", "object", "enum"]
+        },
+        "uniqueItems": { "type": "boolean" }
+      }
+    },
+    "enumsBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entities",
+        "domains",
+        "valueTypes",
+        "sensitivity",
+        "lifecycle"
+      ],
+      "properties": {
+        "entities": { "$ref": "#/$defs/enumStringList" },
+        "domains": { "$ref": "#/$defs/enumStringList" },
+        "valueTypes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": ["string", "number", "boolean", "array", "object", "enum"]
+          }
+        },
+        "sensitivity": { "$ref": "#/$defs/enumStringList" },
+        "lifecycle": { "$ref": "#/$defs/enumStringList" },
+        "plateKinds": { "$ref": "#/$defs/enumStringList" },
+        "roleKinds": { "$ref": "#/$defs/enumStringList" },
+        "roleFamilies": { "$ref": "#/$defs/enumStringList" },
+        "portionModels": { "$ref": "#/$defs/enumStringList" },
+        "portionUnits": { "$ref": "#/$defs/enumStringList" },
+        "mealTimes": { "$ref": "#/$defs/enumStringList" },
+        "ratioModes": { "$ref": "#/$defs/enumStringList" },
+        "applyModes": { "$ref": "#/$defs/enumStringList" },
+        "priority": { "$ref": "#/$defs/enumStringList" }
+      }
+    },
+    "keyDef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "label",
+        "entity",
+        "domain",
+        "valueType",
+        "description",
+        "required",
+        "aliases",
+        "examples",
+        "sensitivity",
+        "lifecycle",
+        "replacementId"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/keyId" },
+        "label": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "entity": { "$ref": "#/$defs/nonEmptyString" },
+        "domain": { "$ref": "#/$defs/nonEmptyString" },
+        "valueType": {
+          "type": "string",
+          "enum": ["string", "number", "boolean", "array", "object", "enum"]
+        },
+        "description": { "type": "string" },
+        "required": { "type": "boolean" },
+        "aliases": { "$ref": "#/$defs/aliasesArray" },
+        "examples": { "$ref": "#/$defs/examplesArray" },
+        "sensitivity": { "$ref": "#/$defs/nonEmptyString" },
+        "lifecycle": { "$ref": "#/$defs/nonEmptyString" },
+        "replacementId": {
+          "anyOf": [{ "$ref": "#/$defs/keyId" }, { "type": "null" }]
+        },
+        "sinceVersion": {
+          "type": ["string", "null"],
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-[a-zA-Z0-9._-]+)?$"
+        },
+        "deprecatedAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "constraints": { "$ref": "#/$defs/constraints" }
+      }
+    }
+  }
+}

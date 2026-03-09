@@ -9,6 +9,7 @@ import React, {
   useState,
 } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { emitCanonicalSignal } from "@/services/realtime/canonicalSignalEmitter";
 
 /**
  * Garden Play — Interactive Session Execution (NOT static)
@@ -68,8 +69,8 @@ try {
   try {
     // eslint-disable-next-line global-require
     featureFlags =
-      require("../../config/featureFlags.json")?.default ||
-      require("../../config/featureFlags.json");
+      require("@/config/featureFlags.json")?.default ||
+      require("@/config/featureFlags.json");
   } catch {}
 }
 
@@ -924,6 +925,21 @@ export default function GardenPlayPage() {
         totalSteps: normalized.steps.length,
       });
 
+      emitCanonicalSignal({
+        type: "taskStarted",
+        sourceModule: "executor.garden.play",
+        urgency: "normal",
+        completionPct: 0,
+        dependencies: ["sessions", "readiness"],
+        payload: {
+          taskId: normalized.id,
+          name: normalized.title,
+          domain: DOMAIN,
+          action: "session.started",
+          totalSteps: normalized.steps.length,
+        },
+      });
+
       // Start timer automatically only if step has timer and no required confirm
       const first = normalized.steps?.[0];
       if (first?.durationSec && !first?.validation?.requiredConfirm) {
@@ -1016,6 +1032,21 @@ export default function GardenPlayPage() {
       completedAt: nowISO(),
       totalSteps: session?.steps?.length || 0,
     });
+
+    emitCanonicalSignal({
+      type: "taskCompleted",
+      sourceModule: "executor.garden.play",
+      urgency: "normal",
+      completionPct: 100,
+      dependencies: ["sessions", "readiness"],
+      payload: {
+        taskId: session?.id,
+        name: session?.title || "garden session",
+        domain: DOMAIN,
+        action: "session.completed",
+        totalSteps: session?.steps?.length || 0,
+      },
+    });
     await writeCheckpoint("completed");
     try {
       await releaseWake?.();
@@ -1080,6 +1111,25 @@ export default function GardenPlayPage() {
 
     // Enforce requiredConfirm steps
     if (step?.validation?.requiredConfirm && !validationOk) return;
+
+    if (step?.id) {
+      emitCanonicalSignal({
+        type: "taskCompleted",
+        sourceModule: "executor.garden.play",
+        urgency: "normal",
+        completionPct: 100,
+        dependencies: ["sessions", "readiness"],
+        payload: {
+          taskId: `${session?.id || "session"}:${step.id}`,
+          sessionId: session?.id,
+          stepId: step.id,
+          stepIndex: currentStepIndex,
+          name: step.title || step.id,
+          domain: DOMAIN,
+          action: "step.completed",
+        },
+      });
+    }
 
     const lastIndex = (session.steps?.length || 1) - 1;
     if (currentStepIndex >= lastIndex) {

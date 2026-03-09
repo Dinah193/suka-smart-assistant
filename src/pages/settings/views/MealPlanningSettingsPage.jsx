@@ -6,9 +6,9 @@ import { classNames } from "@/utils/css";
 
 // Optional stores (graceful fallback if absent)
 import { useMealPlanningStore } from "@/store/MealPlanningStore"; // optional
-import { useFoodStore } from "@/store/FoodStore";                 // optional (dietary integration)
-import { useInventoryStore } from "@/store/InventoryStore";       // optional (pantry-first)
-import { useCalendarStore } from "@/store/CalendarStore";         // optional
+import { useFoodStore } from "@/store/FoodStore"; // optional (dietary integration)
+import { useInventoryStore } from "@/store/InventoryStore"; // optional (pantry-first)
+import { useCalendarStore } from "@/store/CalendarStore"; // optional
 
 /* -------------------------------------------------------------------------- */
 /* UI atoms                                                                   */
@@ -18,7 +18,9 @@ const SectionCard = ({ title, subtitle, right, children }) => (
     <div className="flex items-start justify-between p-5 border-b border-base-200">
       <div>
         <h3 className="text-lg font-semibold">{title}</h3>
-        {subtitle ? <p className="text-sm opacity-70 mt-1">{subtitle}</p> : null}
+        {subtitle ? (
+          <p className="text-sm opacity-70 mt-1">{subtitle}</p>
+        ) : null}
       </div>
       {right}
     </div>
@@ -46,7 +48,13 @@ const Toggle = ({ checked, onChange, disabled }) => (
   />
 );
 
-const Select = ({ value, onChange, options = [], disabled, className = "w-56" }) => (
+const Select = ({
+  value,
+  onChange,
+  options = [],
+  disabled,
+  className = "w-56",
+}) => (
   <select
     className={classNames("select select-bordered", className)}
     value={value ?? ""}
@@ -61,7 +69,14 @@ const Select = ({ value, onChange, options = [], disabled, className = "w-56" })
   </select>
 );
 
-const Input = ({ value, onChange, placeholder, disabled, className = "w-64", type = "text" }) => (
+const Input = ({
+  value,
+  onChange,
+  placeholder,
+  disabled,
+  className = "w-64",
+  type = "text",
+}) => (
   <input
     type={type}
     className={classNames("input input-bordered", className)}
@@ -72,7 +87,13 @@ const Input = ({ value, onChange, placeholder, disabled, className = "w-64", typ
   />
 );
 
-const Textarea = ({ value, onChange, placeholder, disabled, className = "w-full" }) => (
+const Textarea = ({
+  value,
+  onChange,
+  placeholder,
+  disabled,
+  className = "w-full",
+}) => (
   <textarea
     className={classNames("textarea textarea-bordered", className)}
     value={value ?? ""}
@@ -87,16 +108,28 @@ const Chip = ({ children }) => (
 );
 
 const GhostButton = (props) => (
-  <button {...props} className={classNames("btn btn-ghost btn-sm", props.className)} />
+  <button
+    {...props}
+    className={classNames("btn btn-ghost btn-sm", props.className)}
+  />
 );
 const PrimaryButton = (props) => (
-  <button {...props} className={classNames("btn btn-primary", props.className)} />
+  <button
+    {...props}
+    className={classNames("btn btn-primary", props.className)}
+  />
 );
 const SubtleButton = (props) => (
-  <button {...props} className={classNames("btn btn-outline btn-sm", props.className)} />
+  <button
+    {...props}
+    className={classNames("btn btn-outline btn-sm", props.className)}
+  />
 );
 const DangerButton = (props) => (
-  <button {...props} className={classNames("btn btn-error btn-sm", props.className)} />
+  <button
+    {...props}
+    className={classNames("btn btn-error btn-sm", props.className)}
+  />
 );
 
 const Divider = () => <div className="border-t border-base-200 my-4" />;
@@ -143,11 +176,11 @@ function useUndoStack() {
 /* Event-driven glue                                                          */
 /* -------------------------------------------------------------------------- */
 const EVENT_KEYS = [
-  "recipe.consolidated",  // improve plan quality (scores/tags changed)
-  "inventory.updated",    // pantry-first deltas -> replan or adjust shopping
-  "calendar.synced",      // surface success
-  "preferences.changed",  // cross-page updates
-  "torah.profile.updated" // dietary rules changed -> re-score/rebuild
+  "recipe.consolidated", // improve plan quality (scores/tags changed)
+  "inventory.updated", // pantry-first deltas -> replan or adjust shopping
+  "calendar.synced", // surface success
+  "preferences.changed", // cross-page updates
+  "torah.profile.updated", // dietary rules changed -> re-score/rebuild
 ];
 
 function useAutomationGlue(onEvent) {
@@ -179,39 +212,79 @@ export default function MealPlanningSettingsPage() {
   /* -------------------------------- State --------------------------------- */
   // Household / cadence
   const [servings, setServings] = useState(meal.servings ?? food.servings ?? 4);
-  const [mealsPerDay, setMealsPerDay] = useState(meal.mealsPerDay ?? food.mealsPerDay ?? 2);
-  const [planHorizonDays, setPlanHorizonDays] = useState(meal.planHorizonDays ?? 14);
-  const [batchDays, setBatchDays] = useState(meal.batchDays ?? food.batchDays ?? ["Sun"]);
-  const [leftoversPolicy, setLeftoversPolicy] = useState(meal.leftoversPolicy || "next-day"); // none|next-day|flex
-  const [rotationWindowWeeks, setRotationWindowWeeks] = useState(meal.rotationWindowWeeks ?? 6);
+  const [mealsPerDay, setMealsPerDay] = useState(
+    meal.mealsPerDay ?? food.mealsPerDay ?? 2
+  );
+  const [planHorizonDays, setPlanHorizonDays] = useState(
+    meal.planHorizonDays ?? 14
+  );
+  const [batchDays, setBatchDays] = useState(
+    meal.batchDays ?? food.batchDays ?? ["Sun"]
+  );
+  const [leftoversPolicy, setLeftoversPolicy] = useState(
+    meal.leftoversPolicy || "next-day"
+  ); // none|next-day|flex
+  const [rotationWindowWeeks, setRotationWindowWeeks] = useState(
+    meal.rotationWindowWeeks ?? 6
+  );
 
   // Preferences / cost / health
   const [pantryFirst, setPantryFirst] = useState(meal.pantryFirst ?? true);
-  const [seasonality, setSeasonality] = useState(meal.seasonality ?? "in-season"); // off|in-season|strict
-  const [budgetPerServing, setBudgetPerServing] = useState(meal.budgetPerServing ?? 3.5);
-  const [calorieTargetPerDay, setCalorieTargetPerDay] = useState(meal.calorieTargetPerDay ?? 2100);
-  const [proteinTargetPerDay, setProteinTargetPerDay] = useState(meal.proteinTargetPerDay ?? 90);
-  const [spiceCap, setSpiceCap] = useState(meal.spiceCap ?? food.spice ?? "medium"); // mild|medium|hot
-  const [cuisineDiversity, setCuisineDiversity] = useState(meal.cuisineDiversity ?? "balanced"); // homestyle|balanced|world-tour
+  const [seasonality, setSeasonality] = useState(
+    meal.seasonality ?? "in-season"
+  ); // off|in-season|strict
+  const [budgetPerServing, setBudgetPerServing] = useState(
+    meal.budgetPerServing ?? 3.5
+  );
+  const [calorieTargetPerDay, setCalorieTargetPerDay] = useState(
+    meal.calorieTargetPerDay ?? 2100
+  );
+  const [proteinTargetPerDay, setProteinTargetPerDay] = useState(
+    meal.proteinTargetPerDay ?? 90
+  );
+  const [spiceCap, setSpiceCap] = useState(
+    meal.spiceCap ?? food.spice ?? "medium"
+  ); // mild|medium|hot
+  const [cuisineDiversity, setCuisineDiversity] = useState(
+    meal.cuisineDiversity ?? "balanced"
+  ); // homestyle|balanced|world-tour
 
   // Dietary / rules (read from Food settings, editable overrides)
-  const [respectTorahMode, setRespectTorahMode] = useState(meal.respectTorahMode ?? true);
-  const [honorAllergens, setHonorAllergens] = useState(meal.honorAllergens ?? true);
-  const [honorAvoidList, setHonorAvoidList] = useState(meal.honorAvoidList ?? true);
+  const [respectTorahMode, setRespectTorahMode] = useState(
+    meal.respectTorahMode ?? true
+  );
+  const [honorAllergens, setHonorAllergens] = useState(
+    meal.honorAllergens ?? true
+  );
+  const [honorAvoidList, setHonorAvoidList] = useState(
+    meal.honorAvoidList ?? true
+  );
 
   // Labels & automation
-  const [autoLabeling, setAutoLabeling] = useState(meal.autoLabeling ?? food.autoLabeling ?? true);
-  const [autoGenerateOnInventory, setAutoGenerateOnInventory] = useState(meal.autoGenerateOnInventory ?? true);
+  const [autoLabeling, setAutoLabeling] = useState(
+    meal.autoLabeling ?? food.autoLabeling ?? true
+  );
+  const [autoGenerateOnInventory, setAutoGenerateOnInventory] = useState(
+    meal.autoGenerateOnInventory ?? true
+  );
 
   // Calendar & sharing
-  const [syncMealsToCalendar, setSyncMealsToCalendar] = useState(meal.syncMealsToCalendar ?? true);
-  const [sabbathBlock, setSabbathBlock] = useState(meal.sabbathBlock ?? food.sabbathBlock ?? true);
-  const [shareForecast, setShareForecast] = useState(meal.shareForecast ?? true);
+  const [syncMealsToCalendar, setSyncMealsToCalendar] = useState(
+    meal.syncMealsToCalendar ?? true
+  );
+  const [sabbathBlock, setSabbathBlock] = useState(
+    meal.sabbathBlock ?? food.sabbathBlock ?? true
+  );
+  const [shareForecast, setShareForecast] = useState(
+    meal.shareForecast ?? true
+  );
 
   // Plan quality diagnostics
   const [minVariety, setMinVariety] = useState(meal.minVariety ?? 5); // unique mains in window
-  const [maxRepeat, setMaxRepeat] = useState(meal.maxRepeat ?? 1);    // same dish repeat cap
-  const [prepTimeBudgetMins, setPrepTimeBudgetMins] = useState(meal.prepTimeBudgetMins ?? 45);
+  const [maxRepeat, setMaxRepeat] = useState(meal.maxRepeat ?? 1); // same dish repeat cap
+  const [prepTimeBudgetMins, setPrepTimeBudgetMins] = useState(
+    meal.prepTimeBudgetMins ?? 45
+  );
 
   /* -------------------------- Event-driven glue --------------------------- */
   useAutomationGlue((event, payload) => {
@@ -221,7 +294,10 @@ export default function MealPlanningSettingsPage() {
         tone: "info",
         text: "Recipes updated. Improve plan quality to reflect new scores & tags.",
         actions: [
-          { label: "Improve Plan Quality", fn: () => handleGenerate("quality") },
+          {
+            label: "Improve Plan Quality",
+            fn: () => handleGenerate("quality"),
+          },
           { label: "Rebuild Labels", fn: () => handleGenerate("labels") },
         ],
       });
@@ -233,28 +309,43 @@ export default function MealPlanningSettingsPage() {
         text: "Inventory changed. Refresh shopping list & nudge plan to pantry-first.",
         actions: [
           { label: "Refresh Shopping", fn: () => handleGenerate("shopping") },
-          { label: "Pantry-First Nudge", fn: () => handleGenerate("pantry-nudge") },
+          {
+            label: "Pantry-First Nudge",
+            fn: () => handleGenerate("pantry-nudge"),
+          },
         ],
       });
     }
     if (event === "calendar.synced") {
-      addBanner({ key: "cal-synced", tone: "success", text: "Meal events synced to calendar.", dismissible: true });
+      addBanner({
+        key: "cal-synced",
+        tone: "success",
+        text: "Meal events synced to calendar.",
+        dismissible: true,
+      });
     }
     if (event === "preferences.changed") {
-      setToast({ tone: "info", text: "Preferences updated. Meal planning will honor your new defaults." });
+      setToast({
+        tone: "info",
+        text: "Preferences updated. Meal planning will honor your new defaults.",
+      });
     }
     if (event === "torah.profile.updated") {
       addBanner({
         key: "dietary-alignment",
         tone: "info",
         text: "Dietary profile changed. Consider rebuilding meal suggestions & labels.",
-        actions: [{ label: "Rebuild Meal Plan", fn: () => handleGenerate("mealplan") }],
+        actions: [
+          { label: "Rebuild Meal Plan", fn: () => handleGenerate("mealplan") },
+        ],
       });
     }
   });
 
   function addBanner(b) {
-    setBanners((prev) => (prev.find((x) => x.key === b.key) ? prev : [...prev, b]));
+    setBanners((prev) =>
+      prev.find((x) => x.key === b.key) ? prev : [...prev, b]
+    );
   }
   function dismissBanner(key) {
     setBanners((prev) => prev.filter((b) => b.key !== key));
@@ -263,48 +354,115 @@ export default function MealPlanningSettingsPage() {
   /* ------------------------------ Persistence ----------------------------- */
   const optimisticSave = async (partial, descr = "Settings") => {
     const prev = {
-      servings, mealsPerDay, planHorizonDays, batchDays, leftoversPolicy, rotationWindowWeeks,
-      pantryFirst, seasonality, budgetPerServing, calorieTargetPerDay, proteinTargetPerDay, spiceCap, cuisineDiversity,
-      respectTorahMode, honorAllergens, honorAvoidList,
-      autoLabeling, autoGenerateOnInventory,
-      syncMealsToCalendar, sabbathBlock, shareForecast,
-      minVariety, maxRepeat, prepTimeBudgetMins,
+      servings,
+      mealsPerDay,
+      planHorizonDays,
+      batchDays,
+      leftoversPolicy,
+      rotationWindowWeeks,
+      pantryFirst,
+      seasonality,
+      budgetPerServing,
+      calorieTargetPerDay,
+      proteinTargetPerDay,
+      spiceCap,
+      cuisineDiversity,
+      respectTorahMode,
+      honorAllergens,
+      honorAvoidList,
+      autoLabeling,
+      autoGenerateOnInventory,
+      syncMealsToCalendar,
+      sabbathBlock,
+      shareForecast,
+      minVariety,
+      maxRepeat,
+      prepTimeBudgetMins,
     };
 
     // apply optimistic
     Object.entries(partial).forEach(([k, v]) => {
       switch (k) {
-        case "servings": setServings(v); break;
-        case "mealsPerDay": setMealsPerDay(v); break;
-        case "planHorizonDays": setPlanHorizonDays(v); break;
-        case "batchDays": setBatchDays(v); break;
-        case "leftoversPolicy": setLeftoversPolicy(v); break;
-        case "rotationWindowWeeks": setRotationWindowWeeks(v); break;
+        case "servings":
+          setServings(v);
+          break;
+        case "mealsPerDay":
+          setMealsPerDay(v);
+          break;
+        case "planHorizonDays":
+          setPlanHorizonDays(v);
+          break;
+        case "batchDays":
+          setBatchDays(v);
+          break;
+        case "leftoversPolicy":
+          setLeftoversPolicy(v);
+          break;
+        case "rotationWindowWeeks":
+          setRotationWindowWeeks(v);
+          break;
 
-        case "pantryFirst": setPantryFirst(v); break;
-        case "seasonality": setSeasonality(v); break;
-        case "budgetPerServing": setBudgetPerServing(v); break;
-        case "calorieTargetPerDay": setCalorieTargetPerDay(v); break;
-        case "proteinTargetPerDay": setProteinTargetPerDay(v); break;
-        case "spiceCap": setSpiceCap(v); break;
-        case "cuisineDiversity": setCuisineDiversity(v); break;
+        case "pantryFirst":
+          setPantryFirst(v);
+          break;
+        case "seasonality":
+          setSeasonality(v);
+          break;
+        case "budgetPerServing":
+          setBudgetPerServing(v);
+          break;
+        case "calorieTargetPerDay":
+          setCalorieTargetPerDay(v);
+          break;
+        case "proteinTargetPerDay":
+          setProteinTargetPerDay(v);
+          break;
+        case "spiceCap":
+          setSpiceCap(v);
+          break;
+        case "cuisineDiversity":
+          setCuisineDiversity(v);
+          break;
 
-        case "respectTorahMode": setRespectTorahMode(v); break;
-        case "honorAllergens": setHonorAllergens(v); break;
-        case "honorAvoidList": setHonorAvoidList(v); break;
+        case "respectTorahMode":
+          setRespectTorahMode(v);
+          break;
+        case "honorAllergens":
+          setHonorAllergens(v);
+          break;
+        case "honorAvoidList":
+          setHonorAvoidList(v);
+          break;
 
-        case "autoLabeling": setAutoLabeling(v); break;
-        case "autoGenerateOnInventory": setAutoGenerateOnInventory(v); break;
+        case "autoLabeling":
+          setAutoLabeling(v);
+          break;
+        case "autoGenerateOnInventory":
+          setAutoGenerateOnInventory(v);
+          break;
 
-        case "syncMealsToCalendar": setSyncMealsToCalendar(v); break;
-        case "sabbathBlock": setSabbathBlock(v); break;
-        case "shareForecast": setShareForecast(v); break;
+        case "syncMealsToCalendar":
+          setSyncMealsToCalendar(v);
+          break;
+        case "sabbathBlock":
+          setSabbathBlock(v);
+          break;
+        case "shareForecast":
+          setShareForecast(v);
+          break;
 
-        case "minVariety": setMinVariety(v); break;
-        case "maxRepeat": setMaxRepeat(v); break;
-        case "prepTimeBudgetMins": setPrepTimeBudgetMins(v); break;
+        case "minVariety":
+          setMinVariety(v);
+          break;
+        case "maxRepeat":
+          setMaxRepeat(v);
+          break;
+        case "prepTimeBudgetMins":
+          setPrepTimeBudgetMins(v);
+          break;
 
-        default: break;
+        default:
+          break;
       }
     });
 
@@ -315,14 +473,28 @@ export default function MealPlanningSettingsPage() {
       if (meal.saveSettings) {
         await meal.saveSettings({ ...prev, ...partial });
       } else {
-        await automation.request?.("mealplan.saveSettings", { ...prev, ...partial });
+        await automation.request?.("mealplan.saveSettings", {
+          ...prev,
+          ...partial,
+        });
       }
 
-      setToast({ tone: "success", text: `${descr} saved`, action: { label: "Undo", fn: () => revert() } });
-      emitProgress?.("settings.saved", { scope: "mealplanning", nextBestAction: suggestNBA(partial) });
+      setToast({
+        tone: "success",
+        text: `${descr} saved`,
+        action: { label: "Undo", fn: () => revert() },
+      });
+      emitProgress?.("settings.saved", {
+        scope: "mealplanning",
+        nextBestAction: suggestNBA(partial),
+      });
 
       // propagate dietary-impactful changes
-      if ("respectTorahMode" in partial || "honorAllergens" in partial || "honorAvoidList" in partial) {
+      if (
+        "respectTorahMode" in partial ||
+        "honorAllergens" in partial ||
+        "honorAvoidList" in partial
+      ) {
         automation.emit?.("torah.profile.updated", {
           effectiveDate: new Date().toISOString(),
         });
@@ -337,36 +509,82 @@ export default function MealPlanningSettingsPage() {
 
   function setStateFrom(prev) {
     return () => {
-      setServings(prev.servings); setMealsPerDay(prev.mealsPerDay); setPlanHorizonDays(prev.planHorizonDays);
-      setBatchDays(prev.batchDays); setLeftoversPolicy(prev.leftoversPolicy); setRotationWindowWeeks(prev.rotationWindowWeeks);
+      setServings(prev.servings);
+      setMealsPerDay(prev.mealsPerDay);
+      setPlanHorizonDays(prev.planHorizonDays);
+      setBatchDays(prev.batchDays);
+      setLeftoversPolicy(prev.leftoversPolicy);
+      setRotationWindowWeeks(prev.rotationWindowWeeks);
 
-      setPantryFirst(prev.pantryFirst); setSeasonality(prev.seasonality); setBudgetPerServing(prev.budgetPerServing);
-      setCalorieTargetPerDay(prev.calorieTargetPerDay); setProteinTargetPerDay(prev.proteinTargetPerDay);
-      setSpiceCap(prev.spiceCap); setCuisineDiversity(prev.cuisineDiversity);
+      setPantryFirst(prev.pantryFirst);
+      setSeasonality(prev.seasonality);
+      setBudgetPerServing(prev.budgetPerServing);
+      setCalorieTargetPerDay(prev.calorieTargetPerDay);
+      setProteinTargetPerDay(prev.proteinTargetPerDay);
+      setSpiceCap(prev.spiceCap);
+      setCuisineDiversity(prev.cuisineDiversity);
 
-      setRespectTorahMode(prev.respectTorahMode); setHonorAllergens(prev.honorAllergens); setHonorAvoidList(prev.honorAvoidList);
+      setRespectTorahMode(prev.respectTorahMode);
+      setHonorAllergens(prev.honorAllergens);
+      setHonorAvoidList(prev.honorAvoidList);
 
-      setAutoLabeling(prev.autoLabeling); setAutoGenerateOnInventory(prev.autoGenerateOnInventory);
+      setAutoLabeling(prev.autoLabeling);
+      setAutoGenerateOnInventory(prev.autoGenerateOnInventory);
 
-      setSyncMealsToCalendar(prev.syncMealsToCalendar); setSabbathBlock(prev.sabbathBlock); setShareForecast(prev.shareForecast);
+      setSyncMealsToCalendar(prev.syncMealsToCalendar);
+      setSabbathBlock(prev.sabbathBlock);
+      setShareForecast(prev.shareForecast);
 
-      setMinVariety(prev.minVariety); setMaxRepeat(prev.maxRepeat); setPrepTimeBudgetMins(prev.prepTimeBudgetMins);
+      setMinVariety(prev.minVariety);
+      setMaxRepeat(prev.maxRepeat);
+      setPrepTimeBudgetMins(prev.prepTimeBudgetMins);
     };
   }
 
   const suggestNBA = (partial) => {
-    if ("batchDays" in partial || "planHorizonDays" in partial || "rotationWindowWeeks" in partial)
-      return { label: "Rebuild Meal Plan", action: () => handleGenerate("mealplan") };
-    if ("pantryFirst" in partial || "seasonality" in partial || "budgetPerServing" in partial)
-      return { label: "Refresh Shopping List", action: () => handleGenerate("shopping") };
+    if (
+      "batchDays" in partial ||
+      "planHorizonDays" in partial ||
+      "rotationWindowWeeks" in partial
+    )
+      return {
+        label: "Rebuild Meal Plan",
+        action: () => handleGenerate("mealplan"),
+      };
+    if (
+      "pantryFirst" in partial ||
+      "seasonality" in partial ||
+      "budgetPerServing" in partial
+    )
+      return {
+        label: "Refresh Shopping List",
+        action: () => handleGenerate("shopping"),
+      };
     if ("autoLabeling" in partial)
-      return { label: "Rebuild Labels", action: () => handleGenerate("labels") };
+      return {
+        label: "Rebuild Labels",
+        action: () => handleGenerate("labels"),
+      };
     if ("syncMealsToCalendar" in partial)
       return { label: "Sync to Calendar", action: () => handleSync("meals") };
-    if ("minVariety" in partial || "maxRepeat" in partial || "prepTimeBudgetMins" in partial)
-      return { label: "Improve Plan Quality", action: () => handleGenerate("quality") };
-    if ("respectTorahMode" in partial || "honorAllergens" in partial || "honorAvoidList" in partial)
-      return { label: "Re-score Recipes", action: () => handleGenerate("recs") };
+    if (
+      "minVariety" in partial ||
+      "maxRepeat" in partial ||
+      "prepTimeBudgetMins" in partial
+    )
+      return {
+        label: "Improve Plan Quality",
+        action: () => handleGenerate("quality"),
+      };
+    if (
+      "respectTorahMode" in partial ||
+      "honorAllergens" in partial ||
+      "honorAvoidList" in partial
+    )
+      return {
+        label: "Re-score Recipes",
+        action: () => handleGenerate("recs"),
+      };
     return { label: "Open Meal Planner", action: () => openMealPlanner() };
   };
 
@@ -380,9 +598,15 @@ export default function MealPlanningSettingsPage() {
         } else {
           await automation.request?.("mealplan.generate", { scope });
         }
-        setToast({ tone: "success", text: `${labelForScope(scope)} generated.` });
+        setToast({
+          tone: "success",
+          text: `${labelForScope(scope)} generated.`,
+        });
       } catch {
-        setToast({ tone: "error", text: `Failed to generate ${labelForScope(scope)}.` });
+        setToast({
+          tone: "error",
+          text: `Failed to generate ${labelForScope(scope)}.`,
+        });
       } finally {
         setBusy(false);
       }
@@ -415,7 +639,10 @@ export default function MealPlanningSettingsPage() {
           includeShopping: true,
           includePreservation: true,
         });
-        setToast({ tone: "success", text: "Menu forecast sent to family planners." });
+        setToast({
+          tone: "success",
+          text: "Menu forecast sent to family planners.",
+        });
       } catch {
         setToast({ tone: "error", text: "Could not send menu forecast." });
       }
@@ -423,7 +650,8 @@ export default function MealPlanningSettingsPage() {
     await sabbathGuard(task, { allowReadOnly: true });
   };
 
-  const openMealPlanner = () => automation.emit?.("ui.navigate", { to: "/tier2/household/meals" });
+  const openMealPlanner = () =>
+    automation.emit?.("ui.navigate", { to: "/tier2/household/meals" });
 
   const labelForScope = (scope) =>
     ({
@@ -447,13 +675,18 @@ export default function MealPlanningSettingsPage() {
         <div>
           <h1 className="text-2xl font-bold">Meal Planning Settings</h1>
           <p className="opacity-70">
-            Tune plan horizon, rotation, pantry-first, cost/health goals, dietary alignment, and sync/sharing.
-            Changes save optimistically with Undo.
+            Tune plan horizon, rotation, pantry-first, cost/health goals,
+            dietary alignment, and sync/sharing. Changes save optimistically
+            with Undo.
           </p>
         </div>
         <div className="flex gap-2">
-          <GhostButton onClick={() => handleGenerate("mealplan")}>Rebuild Meal Plan</GhostButton>
-          <PrimaryButton onClick={() => openMealPlanner()}>Open Meal Planner</PrimaryButton>
+          <GhostButton onClick={() => handleGenerate("mealplan")}>
+            Rebuild Meal Plan
+          </GhostButton>
+          <PrimaryButton onClick={() => openMealPlanner()}>
+            Open Meal Planner
+          </PrimaryButton>
         </div>
       </div>
 
@@ -464,10 +697,14 @@ export default function MealPlanningSettingsPage() {
             <span>{b.text}</span>
             <div className="flex items-center gap-2">
               {b.actions?.map((a, i) => (
-                <SubtleButton key={i} onClick={a.fn}>{a.label}</SubtleButton>
+                <SubtleButton key={i} onClick={a.fn}>
+                  {a.label}
+                </SubtleButton>
               ))}
               {b.dismissible !== false && (
-                <GhostButton onClick={() => dismissBanner(b.key)}>Dismiss</GhostButton>
+                <GhostButton onClick={() => dismissBanner(b.key)}>
+                  Dismiss
+                </GhostButton>
               )}
             </div>
           </div>
@@ -488,7 +725,12 @@ export default function MealPlanningSettingsPage() {
                 type="number"
                 className="w-28"
                 value={String(servings)}
-                onChange={(v) => optimisticSave({ servings: Math.max(1, parseInt(v || "1", 10)) }, "Servings")}
+                onChange={(v) =>
+                  optimisticSave(
+                    { servings: Math.max(1, parseInt(v || "1", 10)) },
+                    "Servings"
+                  )
+                }
                 placeholder="4"
                 disabled={busy}
               />
@@ -498,8 +740,17 @@ export default function MealPlanningSettingsPage() {
             <Row label="Meals per Day">
               <Select
                 value={String(mealsPerDay)}
-                onChange={(v) => optimisticSave({ mealsPerDay: parseInt(v, 10) }, "Meals per day")}
-                options={[{value:"1",label:"1"}, {value:"2",label:"2"}, {value:"3",label:"3"}]}
+                onChange={(v) =>
+                  optimisticSave(
+                    { mealsPerDay: parseInt(v, 10) },
+                    "Meals per day"
+                  )
+                }
+                options={[
+                  { value: "1", label: "1" },
+                  { value: "2", label: "2" },
+                  { value: "3", label: "3" },
+                ]}
                 disabled={busy}
               />
             </Row>
@@ -507,8 +758,16 @@ export default function MealPlanningSettingsPage() {
             <Row label="Plan Horizon" hint="How many days to plan ahead">
               <Select
                 value={String(planHorizonDays)}
-                onChange={(v) => optimisticSave({ planHorizonDays: parseInt(v, 10) }, "Plan horizon")}
-                options={[7,10,14,21,28].map(n => ({ value:String(n), label:`${n} days` }))}
+                onChange={(v) =>
+                  optimisticSave(
+                    { planHorizonDays: parseInt(v, 10) },
+                    "Plan horizon"
+                  )
+                }
+                options={[7, 10, 14, 21, 28].map((n) => ({
+                  value: String(n),
+                  label: `${n} days`,
+                }))}
                 disabled={busy}
               />
             </Row>
@@ -517,29 +776,60 @@ export default function MealPlanningSettingsPage() {
               <Input
                 className="w-[28rem]"
                 value={batchDays.join(", ")}
-                onChange={(v) => optimisticSave({ batchDays: v.split(",").map(s => s.trim()).filter(Boolean) }, "Batch days")}
+                onChange={(v) =>
+                  optimisticSave(
+                    {
+                      batchDays: v
+                        .split(",")
+                        .map((s) => s.trim())
+                        .filter(Boolean),
+                    },
+                    "Batch days"
+                  )
+                }
                 placeholder="Sun, Wed"
                 disabled={busy}
               />
-              <SubtleButton onClick={() => handleGenerate("labels")} disabled={busy}>Rebuild Labels</SubtleButton>
+              <SubtleButton
+                onClick={() => handleGenerate("labels")}
+                disabled={busy}
+              >
+                Rebuild Labels
+              </SubtleButton>
             </Row>
 
-            <Row label="Leftovers Policy" hint="How the planner should schedule and reuse leftovers">
+            <Row
+              label="Leftovers Policy"
+              hint="How the planner should schedule and reuse leftovers"
+            >
               <Select
                 value={leftoversPolicy}
-                onChange={(v)=>optimisticSave({ leftoversPolicy: v }, "Leftovers policy")}
+                onChange={(v) =>
+                  optimisticSave({ leftoversPolicy: v }, "Leftovers policy")
+                }
                 options={[
-                  { value:"none", label:"Don’t schedule leftovers" },
-                  { value:"next-day", label:"Prefer next-day lunches/dinners" },
-                  { value:"flex", label:"Flexible reuse within 3 days" },
+                  { value: "none", label: "Don’t schedule leftovers" },
+                  {
+                    value: "next-day",
+                    label: "Prefer next-day lunches/dinners",
+                  },
+                  { value: "flex", label: "Flexible reuse within 3 days" },
                 ]}
                 disabled={busy}
               />
               <RowSpacer />
               <Select
                 value={String(rotationWindowWeeks)}
-                onChange={(v)=>optimisticSave({ rotationWindowWeeks: parseInt(v,10) }, "Rotation window")}
-                options={[4,6,8,10,12].map(n=>({ value:String(n), label:`${n} week rotation` }))}
+                onChange={(v) =>
+                  optimisticSave(
+                    { rotationWindowWeeks: parseInt(v, 10) },
+                    "Rotation window"
+                  )
+                }
+                options={[4, 6, 8, 10, 12].map((n) => ({
+                  value: String(n),
+                  label: `${n} week rotation`,
+                }))}
                 disabled={busy}
               />
             </Row>
@@ -556,42 +846,82 @@ export default function MealPlanningSettingsPage() {
           <Skeleton lines={5} />
         ) : (
           <>
-            <Row label="Pantry-First Planning" hint="Prefer ingredients already in your pantry/inventory">
-              <Toggle checked={pantryFirst} onChange={(v)=>optimisticSave({ pantryFirst: v }, "Pantry-first")} disabled={busy} />
-              <SubtleButton onClick={() => handleGenerate("pantry-nudge")} disabled={busy}>Nudge Current Plan</SubtleButton>
+            <Row
+              label="Pantry-First Planning"
+              hint="Prefer ingredients already in your pantry/inventory"
+            >
+              <Toggle
+                checked={pantryFirst}
+                onChange={(v) =>
+                  optimisticSave({ pantryFirst: v }, "Pantry-first")
+                }
+                disabled={busy}
+              />
+              <SubtleButton
+                onClick={() => handleGenerate("pantry-nudge")}
+                disabled={busy}
+              >
+                Nudge Current Plan
+              </SubtleButton>
             </Row>
 
-            <Row label="Seasonality" hint="Prefer in-season produce; strict avoids out-of-season except pantry items">
+            <Row
+              label="Seasonality"
+              hint="Prefer in-season produce; strict avoids out-of-season except pantry items"
+            >
               <Select
                 value={seasonality}
-                onChange={(v)=>optimisticSave({ seasonality: v }, "Seasonality")}
+                onChange={(v) =>
+                  optimisticSave({ seasonality: v }, "Seasonality")
+                }
                 options={[
-                  { value:"off", label:"Off" },
-                  { value:"in-season", label:"Prefer in-season" },
-                  { value:"strict", label:"Strict seasonal" },
+                  { value: "off", label: "Off" },
+                  { value: "in-season", label: "Prefer in-season" },
+                  { value: "strict", label: "Strict seasonal" },
                 ]}
                 disabled={busy}
               />
             </Row>
 
-            <Row label="Budget per Serving" hint="Used to cap plan & shopping substitutions">
+            <Row
+              label="Budget per Serving"
+              hint="Used to cap plan & shopping substitutions"
+            >
               <Input
                 type="number"
                 className="w-28"
                 value={String(budgetPerServing)}
-                onChange={(v)=>optimisticSave({ budgetPerServing: Math.max(0, parseFloat(v || "0")) }, "Budget per serving")}
+                onChange={(v) =>
+                  optimisticSave(
+                    { budgetPerServing: Math.max(0, parseFloat(v || "0")) },
+                    "Budget per serving"
+                  )
+                }
                 placeholder="3.50"
                 disabled={busy}
               />
               <span className="opacity-60">USD</span>
             </Row>
 
-            <Row label="Health Targets" hint="Daily targets used to balance plan (approximate)">
+            <Row
+              label="Health Targets"
+              hint="Daily targets used to balance plan (approximate)"
+            >
               <Input
                 type="number"
                 className="w-28"
                 value={String(calorieTargetPerDay)}
-                onChange={(v)=>optimisticSave({ calorieTargetPerDay: Math.max(1200, parseInt(v || "1200", 10)) }, "Calories/day")}
+                onChange={(v) =>
+                  optimisticSave(
+                    {
+                      calorieTargetPerDay: Math.max(
+                        1200,
+                        parseInt(v || "1200", 10)
+                      ),
+                    },
+                    "Calories/day"
+                  )
+                }
                 placeholder="2100"
                 disabled={busy}
               />
@@ -600,7 +930,17 @@ export default function MealPlanningSettingsPage() {
                 type="number"
                 className="w-28"
                 value={String(proteinTargetPerDay)}
-                onChange={(v)=>optimisticSave({ proteinTargetPerDay: Math.max(20, parseInt(v || "20", 10)) }, "Protein/day")}
+                onChange={(v) =>
+                  optimisticSave(
+                    {
+                      proteinTargetPerDay: Math.max(
+                        20,
+                        parseInt(v || "20", 10)
+                      ),
+                    },
+                    "Protein/day"
+                  )
+                }
                 placeholder="90"
                 disabled={busy}
               />
@@ -610,17 +950,23 @@ export default function MealPlanningSettingsPage() {
             <Row label="Spice Cap & Cuisine Diversity">
               <Select
                 value={String(spiceCap)}
-                onChange={(v)=>optimisticSave({ spiceCap: v }, "Spice cap")}
-                options={[{value:"mild",label:"Mild"}, {value:"medium",label:"Medium"}, {value:"hot",label:"Hot"}]}
+                onChange={(v) => optimisticSave({ spiceCap: v }, "Spice cap")}
+                options={[
+                  { value: "mild", label: "Mild" },
+                  { value: "medium", label: "Medium" },
+                  { value: "hot", label: "Hot" },
+                ]}
                 disabled={busy}
               />
               <Select
                 value={cuisineDiversity}
-                onChange={(v)=>optimisticSave({ cuisineDiversity: v }, "Cuisine diversity")}
+                onChange={(v) =>
+                  optimisticSave({ cuisineDiversity: v }, "Cuisine diversity")
+                }
                 options={[
-                  { value:"homestyle", label:"Homestyle" },
-                  { value:"balanced", label:"Balanced" },
-                  { value:"world-tour", label:"World tour" },
+                  { value: "homestyle", label: "Homestyle" },
+                  { value: "balanced", label: "Balanced" },
+                  { value: "world-tour", label: "World tour" },
                 ]}
                 disabled={busy}
               />
@@ -641,44 +987,93 @@ export default function MealPlanningSettingsPage() {
             <Row label="Respect Torah Mode">
               <Toggle
                 checked={respectTorahMode}
-                onChange={(v)=>optimisticSave({ respectTorahMode: v }, "Respect Torah mode")}
+                onChange={(v) =>
+                  optimisticSave({ respectTorahMode: v }, "Respect Torah mode")
+                }
                 disabled={busy}
               />
-              <SubtleButton onClick={() => handleGenerate("recs")} disabled={busy}>Re-score Recipes</SubtleButton>
+              <SubtleButton
+                onClick={() => handleGenerate("recs")}
+                disabled={busy}
+              >
+                Re-score Recipes
+              </SubtleButton>
             </Row>
             <Row label="Honor Allergens">
-              <Toggle checked={honorAllergens} onChange={(v)=>optimisticSave({ honorAllergens: v }, "Honor allergens")} disabled={busy} />
+              <Toggle
+                checked={honorAllergens}
+                onChange={(v) =>
+                  optimisticSave({ honorAllergens: v }, "Honor allergens")
+                }
+                disabled={busy}
+              />
             </Row>
             <Row label="Honor Avoid List">
-              <Toggle checked={honorAvoidList} onChange={(v)=>optimisticSave({ honorAvoidList: v }, "Honor avoids")} disabled={busy} />
+              <Toggle
+                checked={honorAvoidList}
+                onChange={(v) =>
+                  optimisticSave({ honorAvoidList: v }, "Honor avoids")
+                }
+                disabled={busy}
+              />
             </Row>
           </>
         )}
       </SectionCard>
 
       {/* Labels & Automation */}
-      <SectionCard title="Labels & Automation" subtitle="Auto-generate prep/cleanup/storage labels and react to inventory changes.">
+      <SectionCard
+        title="Labels & Automation"
+        subtitle="Auto-generate prep/cleanup/storage labels and react to inventory changes."
+      >
         {loading ? (
           <Skeleton lines={3} />
         ) : (
           <>
             <Row label="Auto-Generate Labels">
-              <Toggle checked={autoLabeling} onChange={(v)=>optimisticSave({ autoLabeling: v }, "Auto labeling")} disabled={busy} />
-              <SubtleButton onClick={() => handleGenerate("labels")} disabled={busy}>Rebuild Now</SubtleButton>
+              <Toggle
+                checked={autoLabeling}
+                onChange={(v) =>
+                  optimisticSave({ autoLabeling: v }, "Auto labeling")
+                }
+                disabled={busy}
+              />
+              <SubtleButton
+                onClick={() => handleGenerate("labels")}
+                disabled={busy}
+              >
+                Rebuild Now
+              </SubtleButton>
             </Row>
-            <Row label="Auto-Generate on Inventory Changes" hint="If pantry changes, nudge plan or rebuild shopping">
+            <Row
+              label="Auto-Generate on Inventory Changes"
+              hint="If pantry changes, nudge plan or rebuild shopping"
+            >
               <Toggle
                 checked={autoGenerateOnInventory}
-                onChange={(v)=>optimisticSave({ autoGenerateOnInventory: v }, "Auto-generate on inventory")}
+                onChange={(v) =>
+                  optimisticSave(
+                    { autoGenerateOnInventory: v },
+                    "Auto-generate on inventory"
+                  )
+                }
                 disabled={busy}
               />
             </Row>
-            <Row label="Plan Quality Guardrails" hint="Ensure variety and limit repeated dishes">
+            <Row
+              label="Plan Quality Guardrails"
+              hint="Ensure variety and limit repeated dishes"
+            >
               <Input
                 type="number"
                 className="w-28"
                 value={String(minVariety)}
-                onChange={(v)=>optimisticSave({ minVariety: Math.max(1, parseInt(v || "1", 10)) }, "Min variety")}
+                onChange={(v) =>
+                  optimisticSave(
+                    { minVariety: Math.max(1, parseInt(v || "1", 10)) },
+                    "Min variety"
+                  )
+                }
                 placeholder="5"
                 disabled={busy}
               />
@@ -687,7 +1082,12 @@ export default function MealPlanningSettingsPage() {
                 type="number"
                 className="w-28"
                 value={String(maxRepeat)}
-                onChange={(v)=>optimisticSave({ maxRepeat: Math.max(0, parseInt(v || "0", 10)) }, "Max repeat")}
+                onChange={(v) =>
+                  optimisticSave(
+                    { maxRepeat: Math.max(0, parseInt(v || "0", 10)) },
+                    "Max repeat"
+                  )
+                }
                 placeholder="1"
                 disabled={busy}
               />
@@ -696,51 +1096,120 @@ export default function MealPlanningSettingsPage() {
                 type="number"
                 className="w-28"
                 value={String(prepTimeBudgetMins)}
-                onChange={(v)=>optimisticSave({ prepTimeBudgetMins: Math.max(10, parseInt(v || "10", 10)) }, "Prep time budget")}
+                onChange={(v) =>
+                  optimisticSave(
+                    {
+                      prepTimeBudgetMins: Math.max(10, parseInt(v || "10", 10)),
+                    },
+                    "Prep time budget"
+                  )
+                }
                 placeholder="45"
                 disabled={busy}
               />
               <span className="opacity-60">mins avg prep</span>
-              <SubtleButton onClick={() => handleGenerate("quality")} disabled={busy}>Improve Plan Quality</SubtleButton>
+              <SubtleButton
+                onClick={() => handleGenerate("quality")}
+                disabled={busy}
+              >
+                Improve Plan Quality
+              </SubtleButton>
             </Row>
           </>
         )}
       </SectionCard>
 
       {/* Calendar & Sharing */}
-      <SectionCard title="Calendar & Sharing" subtitle="Sync the plan to your calendar and share a family-view forecast.">
+      <SectionCard
+        title="Calendar & Sharing"
+        subtitle="Sync the plan to your calendar and share a family-view forecast."
+      >
         {loading ? (
           <Skeleton lines={3} />
         ) : (
           <>
-            <Row label="Sync Meals to Calendar" hint="Create/refresh events for your plan (respects Sabbath guard)">
+            <Row
+              label="Sync Meals to Calendar"
+              hint="Create/refresh events for your plan (respects Sabbath guard)"
+            >
               <Toggle
                 checked={syncMealsToCalendar}
-                onChange={(v)=>optimisticSave({ syncMealsToCalendar: v }, "Calendar sync")}
+                onChange={(v) =>
+                  optimisticSave({ syncMealsToCalendar: v }, "Calendar sync")
+                }
                 disabled={busy}
               />
-              <SubtleButton onClick={() => handleSync("meals")} disabled={busy}>Sync now</SubtleButton>
+              <SubtleButton onClick={() => handleSync("meals")} disabled={busy}>
+                Sync now
+              </SubtleButton>
             </Row>
-            <Row label="Sabbath Guard" hint="Avoid creating/editing events during Sabbath; read-only allowed">
-              <Toggle checked={sabbathBlock} onChange={(v)=>optimisticSave({ sabbathBlock: v }, "Sabbath guard")} disabled={busy} />
+            <Row
+              label="Sabbath Guard"
+              hint="Avoid creating/editing events during Sabbath; read-only allowed"
+            >
+              <Toggle
+                checked={sabbathBlock}
+                onChange={(v) =>
+                  optimisticSave({ sabbathBlock: v }, "Sabbath guard")
+                }
+                disabled={busy}
+              />
             </Row>
-            <Row label="Share Menu Forecast" hint={`Send ${planHorizonDays}-day menus, shopping deltas, and preservation cues`}>
-              <Toggle checked={shareForecast} onChange={(v)=>optimisticSave({ shareForecast: v }, "Share forecast")} disabled={busy} />
-              <SubtleButton onClick={handleShareMenuForecast} disabled={busy}>Send now</SubtleButton>
+            <Row
+              label="Share Menu Forecast"
+              hint={`Send ${planHorizonDays}-day menus, shopping deltas, and preservation cues`}
+            >
+              <Toggle
+                checked={shareForecast}
+                onChange={(v) =>
+                  optimisticSave({ shareForecast: v }, "Share forecast")
+                }
+                disabled={busy}
+              />
+              <SubtleButton onClick={handleShareMenuForecast} disabled={busy}>
+                Send now
+              </SubtleButton>
             </Row>
           </>
         )}
       </SectionCard>
 
       {/* Recommended Next Steps */}
-      <SectionCard title="Recommended Next Steps" subtitle="Keep momentum with one clear action.">
+      <SectionCard
+        title="Recommended Next Steps"
+        subtitle="Keep momentum with one clear action."
+      >
         <div className="flex flex-wrap gap-2">
-          <PrimaryButton onClick={() => handleGenerate("mealplan")} disabled={busy}>Rebuild Meal Plan</PrimaryButton>
-          <SubtleButton onClick={() => handleGenerate("shopping")} disabled={busy}>Refresh Shopping List</SubtleButton>
-          <SubtleButton onClick={() => handleGenerate("labels")} disabled={busy}>Rebuild Labels</SubtleButton>
-          <SubtleButton onClick={() => handleGenerate("quality")} disabled={busy}>Improve Plan Quality</SubtleButton>
-          <SubtleButton onClick={() => handleGenerate("recs")} disabled={busy}>Re-score Recipes</SubtleButton>
-          <SubtleButton onClick={() => handleSync("meals")} disabled={busy}>Sync to Calendar</SubtleButton>
+          <PrimaryButton
+            onClick={() => handleGenerate("mealplan")}
+            disabled={busy}
+          >
+            Rebuild Meal Plan
+          </PrimaryButton>
+          <SubtleButton
+            onClick={() => handleGenerate("shopping")}
+            disabled={busy}
+          >
+            Refresh Shopping List
+          </SubtleButton>
+          <SubtleButton
+            onClick={() => handleGenerate("labels")}
+            disabled={busy}
+          >
+            Rebuild Labels
+          </SubtleButton>
+          <SubtleButton
+            onClick={() => handleGenerate("quality")}
+            disabled={busy}
+          >
+            Improve Plan Quality
+          </SubtleButton>
+          <SubtleButton onClick={() => handleGenerate("recs")} disabled={busy}>
+            Re-score Recipes
+          </SubtleButton>
+          <SubtleButton onClick={() => handleSync("meals")} disabled={busy}>
+            Sync to Calendar
+          </SubtleButton>
         </div>
       </SectionCard>
 
@@ -762,11 +1231,19 @@ export default function MealPlanningSettingsPage() {
             <div className="flex items-center gap-3">
               <span>{toast.text}</span>
               {toast.action ? (
-                <button className="btn btn-xs" onClick={() => toast.action.fn?.()}>
+                <button
+                  className="btn btn-xs"
+                  onClick={() => toast.action.fn?.()}
+                >
                   {toast.action.label}
                 </button>
               ) : null}
-              <button className="btn btn-ghost btn-xs" onClick={() => setToast(null)}>✕</button>
+              <button
+                className="btn btn-ghost btn-xs"
+                onClick={() => setToast(null)}
+              >
+                ✕
+              </button>
             </div>
           </div>
         </div>

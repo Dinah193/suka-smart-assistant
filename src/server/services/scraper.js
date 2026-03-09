@@ -31,13 +31,13 @@
  *   or { ok: false, error?: string }
  */
 
-import eventBus from 'src/services/eventBus.js';
-import * as cheerioPkg from 'cheerio';
+import eventBus from "src/services/events/eventBus.js";
+import * as cheerioPkg from "cheerio";
 
 const cheerio = cheerioPkg.default || cheerioPkg;
 
-const SOURCE = 'server.services.scraper';
-const PROVIDER = 'nutritionvalue.org';
+const SOURCE = "server.services.scraper";
+const PROVIDER = "nutritionvalue.org";
 const PROVIDER_TAG = `scraped:${PROVIDER}`;
 
 // -----------------------------------------------------------------------------
@@ -50,13 +50,16 @@ const PROVIDER_TAG = `scraped:${PROVIDER}`;
  * @returns {Promise<{ok:true, data:object} | {ok:false, error?:string}>}
  */
 export async function fetchNutrition(normalizedName, hint) {
-  const name = normalizeName(normalizedName || hint || '');
+  const name = normalizeName(normalizedName || hint || "");
   if (!name) {
-    emit('nutrition.scrape.error', { step: 'input', message: 'Invalid name' });
-    return { ok: false, error: 'Invalid name' };
+    emit("nutrition.scrape.error", { step: "input", message: "Invalid name" });
+    return { ok: false, error: "Invalid name" };
   }
 
-  emit('nutrition.scrape.started', { provider: PROVIDER, normalizedName: name });
+  emit("nutrition.scrape.started", {
+    provider: PROVIDER,
+    normalizedName: name,
+  });
 
   // Build a small list of candidate URLs for best-effort scraping.
   const urls = buildCandidateUrls(name, hint);
@@ -81,7 +84,7 @@ export async function fetchNutrition(normalizedName, hint) {
         lastUpdated: new Date().toISOString(),
       };
 
-      emit('nutrition.scrape.completed', {
+      emit("nutrition.scrape.completed", {
         provider: PROVIDER,
         normalizedName: name,
         url,
@@ -92,8 +95,12 @@ export async function fetchNutrition(normalizedName, hint) {
     }
   }
 
-  emit('nutrition.scrape.error', { provider: PROVIDER, normalizedName: name, message: 'No parseable page' });
-  return { ok: false, error: 'Unable to scrape nutrition data' };
+  emit("nutrition.scrape.error", {
+    provider: PROVIDER,
+    normalizedName: name,
+    message: "No parseable page",
+  });
+  return { ok: false, error: "Unable to scrape nutrition data" };
 }
 
 // -----------------------------------------------------------------------------
@@ -102,8 +109,8 @@ export async function fetchNutrition(normalizedName, hint) {
 function buildCandidateUrls(normalizedName, hint) {
   // nutritionvalue typically uses hyphenated slugs with .html suffix in product pages
   // and also has a search endpoint we can try.
-  const q = encodeURIComponent((hint || normalizedName).replace(/\s+/g, ' '));
-  const slug = normalizedName.replace(/\s+/g, '-');
+  const q = encodeURIComponent((hint || normalizedName).replace(/\s+/g, " "));
+  const slug = normalizedName.replace(/\s+/g, "-");
 
   const base = `https://${PROVIDER}`;
   const candidates = [
@@ -123,14 +130,15 @@ function buildCandidateUrls(normalizedName, hint) {
 async function fetchHtml(url, { timeoutMs = 12000, retries = 1 } = {}) {
   const f = await getFetch();
   for (let attempt = 0; attempt <= retries; attempt += 1) {
-    const ac = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const ac =
+      typeof AbortController !== "undefined" ? new AbortController() : null;
     const to = ac ? setTimeoutSafe(() => ac.abort(), timeoutMs) : null;
     try {
       const res = await f(url, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'User-Agent': 'SSA/1.0 (+household-automation; compatible)',
-          Accept: 'text/html,application/xhtml+xml',
+          "User-Agent": "SSA/1.0 (+household-automation; compatible)",
+          Accept: "text/html,application/xhtml+xml",
         },
         signal: ac?.signal,
       });
@@ -170,9 +178,13 @@ function parseNutrition(html, ctx) {
 
     // Try to find a heading/title for display.
     const title =
-      $('h1').first().text().trim() ||
-      $('title').first().text().trim().replace(/\s*\|\s*NutritionValue.*$/i, '') ||
-      '';
+      $("h1").first().text().trim() ||
+      $("title")
+        .first()
+        .text()
+        .trim()
+        .replace(/\s*\|\s*NutritionValue.*$/i, "") ||
+      "";
 
     // Strategy:
     // 1) Look for a table where first column is nutrient name and second is value (per 100g or per serving)
@@ -180,12 +192,19 @@ function parseNutrition(html, ctx) {
     const candidates = findLikelyTables($);
 
     let macros = { calories: null, protein: null, carbs: null, fat: null };
-    let micros = { vitaminC: null, calcium: null, iron: null, potassium: null, magnesium: null, zinc: null };
+    let micros = {
+      vitaminC: null,
+      calcium: null,
+      iron: null,
+      potassium: null,
+      magnesium: null,
+      zinc: null,
+    };
 
     for (const table of candidates) {
-      const rows = $(table).find('tr');
+      const rows = $(table).find("tr");
       rows.each((_, tr) => {
-        const cols = $(tr).find('th,td');
+        const cols = $(tr).find("th,td");
         if (cols.length < 2) return;
         const key = normalizeKey($(cols[0]).text());
         const val = normalizeValue($(cols[1]).text());
@@ -193,16 +212,26 @@ function parseNutrition(html, ctx) {
         if (!key || val == null) return;
 
         // Map keys to fields
-        if (keyMatch(key, ['calories', 'energy'])) macros.calories = preferNumber(macros.calories, val);
-        else if (keyMatch(key, ['protein'])) macros.protein = preferNumber(macros.protein, val);
-        else if (keyMatch(key, ['carbohydrate', 'carbohydrates', 'carbs'])) macros.carbs = preferNumber(macros.carbs, val);
-        else if (keyMatch(key, ['fat', 'total fat'])) macros.fat = preferNumber(macros.fat, val);
-        else if (keyMatch(key, ['vitamin c', 'ascorbic acid'])) micros.vitaminC = preferNumber(micros.vitaminC, val);
-        else if (keyMatch(key, ['calcium'])) micros.calcium = preferNumber(micros.calcium, val);
-        else if (keyMatch(key, ['iron'])) micros.iron = preferNumber(micros.iron, val);
-        else if (keyMatch(key, ['potassium'])) micros.potassium = preferNumber(micros.potassium, val);
-        else if (keyMatch(key, ['magnesium'])) micros.magnesium = preferNumber(micros.magnesium, val);
-        else if (keyMatch(key, ['zinc'])) micros.zinc = preferNumber(micros.zinc, val);
+        if (keyMatch(key, ["calories", "energy"]))
+          macros.calories = preferNumber(macros.calories, val);
+        else if (keyMatch(key, ["protein"]))
+          macros.protein = preferNumber(macros.protein, val);
+        else if (keyMatch(key, ["carbohydrate", "carbohydrates", "carbs"]))
+          macros.carbs = preferNumber(macros.carbs, val);
+        else if (keyMatch(key, ["fat", "total fat"]))
+          macros.fat = preferNumber(macros.fat, val);
+        else if (keyMatch(key, ["vitamin c", "ascorbic acid"]))
+          micros.vitaminC = preferNumber(micros.vitaminC, val);
+        else if (keyMatch(key, ["calcium"]))
+          micros.calcium = preferNumber(micros.calcium, val);
+        else if (keyMatch(key, ["iron"]))
+          micros.iron = preferNumber(micros.iron, val);
+        else if (keyMatch(key, ["potassium"]))
+          micros.potassium = preferNumber(micros.potassium, val);
+        else if (keyMatch(key, ["magnesium"]))
+          micros.magnesium = preferNumber(micros.magnesium, val);
+        else if (keyMatch(key, ["zinc"]))
+          micros.zinc = preferNumber(micros.zinc, val);
       });
     }
 
@@ -236,17 +265,17 @@ function parseNutrition(html, ctx) {
 
 // Find table candidates with many rows and nutrient-ish keys
 function findLikelyTables($) {
-  const tables = $('table').toArray();
+  const tables = $("table").toArray();
   // Rank by number of rows and presence of strings such as "Calories", "Protein" etc.
   const ranked = tables
     .map((t) => {
       const text = $(t).text().toLowerCase();
       const score =
-        (text.includes('calorie') ? 3 : 0) +
-        (text.includes('protein') ? 2 : 0) +
-        (text.includes('carbo') ? 2 : 0) +
-        (text.includes('fat') ? 1 : 0) +
-        $(t).find('tr').length / 10;
+        (text.includes("calorie") ? 3 : 0) +
+        (text.includes("protein") ? 2 : 0) +
+        (text.includes("carbo") ? 2 : 0) +
+        (text.includes("fat") ? 1 : 0) +
+        $(t).find("tr").length / 10;
       return { t, score };
     })
     .filter((x) => x.score > 1)
@@ -259,18 +288,21 @@ function findLikelyTables($) {
 // Normalizers & helpers
 
 function normalizeName(name) {
-  const s = String(name || '')
+  const s = String(name || "")
     .toLowerCase()
-    .normalize('NFKD')
-    .replace(/\p{Diacritic}/gu, '')
-    .replace(/[^a-z0-9\s\-]/g, ' ')
-    .replace(/\s+/g, ' ')
+    .normalize("NFKD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[^a-z0-9\s\-]/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
-  return s.replace(/s$/, ''); // light plural→singular
+  return s.replace(/s$/, ""); // light plural→singular
 }
 
 function normalizeKey(k) {
-  return String(k || '').toLowerCase().replace(/\s+/g, ' ').trim();
+  return String(k || "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function normalizeValue(v) {
@@ -279,15 +311,15 @@ function normalizeValue(v) {
 
   // Prefer numbers in g/mg/kcal cells; strip units
   // Examples: "12 g", "31.5g", "215 kcal", "0.8 mg", "2,345 mg"
-  const m = s.replace(/,/g, '').match(/-?\d+(\.\d+)?/);
+  const m = s.replace(/,/g, "").match(/-?\d+(\.\d+)?/);
   if (!m) return null;
   const n = parseFloat(m[0]);
   if (!Number.isFinite(n)) return null;
 
   // Heuristics for kcal vs grams vs milligrams:
-  if (s.includes('kcal')) return n; // calories
-  if (s.includes('cal') && !s.includes('kcal')) return n; // sometimes "calories"
-  if (s.includes('mg')) return n / 1000; // convert mg → g
+  if (s.includes("kcal")) return n; // calories
+  if (s.includes("cal") && !s.includes("kcal")) return n; // sometimes "calories"
+  if (s.includes("mg")) return n / 1000; // convert mg → g
   // else assume grams
   return n;
 }
@@ -301,7 +333,7 @@ function preferNumber(existing, nextVal) {
   return nextVal;
 }
 function hasNumber(x) {
-  return typeof x === 'number' && Number.isFinite(x);
+  return typeof x === "number" && Number.isFinite(x);
 }
 
 function roundMacros(m) {
@@ -327,28 +359,33 @@ function round2(n) {
 }
 
 function toTitleCase(s) {
-  return String(s || '')
-    .split(' ')
-    .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : ''))
-    .join(' ');
+  return String(s || "")
+    .split(" ")
+    .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : ""))
+    .join(" ");
 }
 
 // -----------------------------------------------------------------------------
 // fetch/polyfill & small utils
 
 async function getFetch() {
-  if (typeof fetch !== 'undefined') return fetch;
+  if (typeof fetch !== "undefined") return fetch;
   try {
-    const nf = await import(/* @vite-ignore */ 'node-fetch');
-    return (nf.default || nf);
+    const nf = await import(/* @vite-ignore */ "node-fetch");
+    return nf.default || nf;
   } catch {
-    throw new Error('No fetch() available in this runtime');
+    throw new Error("No fetch() available in this runtime");
   }
 }
 
 function isNetworkLike(err) {
-  const msg = (err?.message || '').toLowerCase();
-  return msg.includes('network') || msg.includes('timeout') || msg.includes('abort') || msg.includes('failed to fetch');
+  const msg = (err?.message || "").toLowerCase();
+  return (
+    msg.includes("network") ||
+    msg.includes("timeout") ||
+    msg.includes("abort") ||
+    msg.includes("failed to fetch")
+  );
 }
 
 function delay(ms) {
@@ -358,13 +395,13 @@ function delay(ms) {
 function setTimeoutSafe(fn, ms) {
   const id = setTimeout(fn, ms);
   // @ts-ignore
-  if (typeof id.unref === 'function') id.unref();
+  if (typeof id.unref === "function") id.unref();
   return id;
 }
 
 function emit(type, data) {
   try {
-    eventBus.emit('automation.event', {
+    eventBus.emit("automation.event", {
       type,
       ts: new Date().toISOString(),
       source: SOURCE,

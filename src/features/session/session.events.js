@@ -12,7 +12,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import eventBus from "@/services/eventBus";
+import eventBus from "@/services/events/eventBus";
 
 // Canonical event names used around SSA for session lifecycle & infra.
 export const SESSION_EVENTS = Object.freeze({
@@ -33,7 +33,7 @@ export const SESSION_EVENTS = Object.freeze({
   // Optional diagnostic / infra events
   CHECKPOINT_WRITTEN: "session.checkpoint.written",
   WARNING: "session.warning",
-  ERROR: "session.error"
+  ERROR: "session.error",
 });
 
 // Simple ISO timestamp helper.
@@ -85,7 +85,11 @@ export function emitOpenRequest(sessionId, source = "UI") {
 }
 
 // Runner signals the session has started.
-export function emitSessionStarted(sessionId, domain, source = "SessionRunner") {
+export function emitSessionStarted(
+  sessionId,
+  domain,
+  source = "SessionRunner"
+) {
   if (!isString(sessionId) || !isString(domain)) return;
   emit(SESSION_EVENTS.STARTED, source, { sessionId, domain });
 }
@@ -107,7 +111,7 @@ export function emitStepChanged(
         title: step.title,
         durationSec: step.durationSec,
         blockers: Array.isArray(step.blockers) ? step.blockers : [],
-        metadata: isObject(step.metadata) ? step.metadata : {}
+        metadata: isObject(step.metadata) ? step.metadata : {},
       }
     : null;
 
@@ -115,7 +119,7 @@ export function emitStepChanged(
     sessionId,
     domain,
     nextStepIndex,
-    step: stepPayload
+    step: stepPayload,
   });
 }
 
@@ -130,7 +134,7 @@ export function emitSessionPaused(
   emit(SESSION_EVENTS.PAUSED, source, {
     sessionId,
     domain,
-    reason: reason || "unknown"
+    reason: reason || "unknown",
   });
 }
 
@@ -153,7 +157,11 @@ export function emitSessionCompleted(
 ) {
   if (!isString(sessionId) || !isString(domain)) return;
   const payload = isObject(analytics) ? analytics : {};
-  emit(SESSION_EVENTS.COMPLETED, source, { sessionId, domain, analytics: payload });
+  emit(SESSION_EVENTS.COMPLETED, source, {
+    sessionId,
+    domain,
+    analytics: payload,
+  });
 }
 
 // Runner signals it has aborted.
@@ -169,11 +177,7 @@ export function emitSessionAborted(
 }
 
 // Runner signals Hub export succeeded.
-export function emitSessionExported(
-  sessionId,
-  info,
-  source = "SessionRunner"
-) {
+export function emitSessionExported(sessionId, info, source = "SessionRunner") {
   if (!isString(sessionId)) return;
   const extra = isObject(info) ? info : {};
   emit(SESSION_EVENTS.EXPORTED, source, { sessionId, ...extra });
@@ -190,21 +194,13 @@ export function emitCheckpointWritten(
 }
 
 // Non-fatal warning event for UI surfacing / logs.
-export function emitWarning(
-  sessionId,
-  warn,
-  source = "SessionRunner"
-) {
+export function emitWarning(sessionId, warn, source = "SessionRunner") {
   if (!isString(sessionId) || !isObject(warn) || !isString(warn.code)) return;
   emit(SESSION_EVENTS.WARNING, source, { sessionId, ...warn });
 }
 
 // Error event for telemetry/diagnostics.
-export function emitError(
-  sessionId,
-  err,
-  source = "SessionRunner"
-) {
+export function emitError(sessionId, err, source = "SessionRunner") {
   if (!isString(sessionId) || !isObject(err) || !isString(err.code)) return;
   emit(SESSION_EVENTS.ERROR, source, { sessionId, ...err });
 }
@@ -232,7 +228,11 @@ export function onMany(types, handler) {
   if (!Array.isArray(types) || typeof handler !== "function") {
     return () => {};
   }
-  if (!eventBus || typeof eventBus.on !== "function" || typeof eventBus.off !== "function") {
+  if (
+    !eventBus ||
+    typeof eventBus.on !== "function" ||
+    typeof eventBus.off !== "function"
+  ) {
     return () => {};
   }
   types.forEach((t) => eventBus.on(t, handler));
@@ -242,7 +242,11 @@ export function onMany(types, handler) {
 // Subscribe once to an event type then auto-unsubscribe.
 export function once(type, handler) {
   if (!type || typeof handler !== "function") return;
-  if (!eventBus || typeof eventBus.on !== "function" || typeof eventBus.off !== "function") {
+  if (
+    !eventBus ||
+    typeof eventBus.on !== "function" ||
+    typeof eventBus.off !== "function"
+  ) {
     return;
   }
   const wrapper = (evt) => {
@@ -275,7 +279,7 @@ const SessionEvents = {
   on,
   off,
   onMany,
-  once
+  once,
 };
 
 export default SessionEvents;

@@ -43,8 +43,8 @@
 //
 // -----------------------------------------------------------------------------
 
-import eventBus from "@/services/eventBus.js";
-import featureFlags from "@/config/featureFlags.js";
+import eventBus from "@/services/events/eventBus.js";
+import featureFlags from "@/config/featureFlags.json";
 
 // soft hub deps
 let HubPacketFormatter = null;
@@ -166,7 +166,8 @@ function detectItemName(evt = {}) {
   if (d.crop) return d.crop;
   if (d.ingredient) return d.ingredient;
   if (d.mealTitle) return d.mealTitle;
-  if (Array.isArray(d.items) && d.items.length) return d.items[0].name || d.items[0].item;
+  if (Array.isArray(d.items) && d.items.length)
+    return d.items[0].name || d.items[0].item;
   return "unknown";
 }
 
@@ -203,7 +204,8 @@ function upsertWaste(evt = {}) {
   const itemName = norm(detectItemName(evt));
   const reason = norm(detectReason(evt));
   const value = estimateLossValue(evt);
-  const srcId = evt.data?.id || evt.data?.sourceId || evt.data?.importId || null;
+  const srcId =
+    evt.data?.id || evt.data?.sourceId || evt.data?.importId || null;
 
   // update global totals
   wasteStats.totalWasteCount += 1;
@@ -397,9 +399,4 @@ const wasteAnalytics = {
 };
 
 export default wasteAnalytics;
-export {
-  initListener,
-  getWasteSnapshot,
-  getItemWasteReport,
-  prune,
-};
+export { initListener, getWasteSnapshot, getItemWasteReport, prune };

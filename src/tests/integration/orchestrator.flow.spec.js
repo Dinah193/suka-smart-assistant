@@ -16,11 +16,27 @@ const isVitest = !!globalThis.vi;
 
 const { describe, it, expect, beforeEach, afterEach } = (function () {
   const v = {
-    describe: globalThis.describe || (isVitest ? require("vitest").describe : require("@jest/globals").describe),
-    it: globalThis.it || (isVitest ? require("vitest").it : require("@jest/globals").it),
-    expect: globalThis.expect || (isVitest ? require("vitest").expect : require("@jest/globals").expect),
-    beforeEach: globalThis.beforeEach || (isVitest ? require("vitest").beforeEach : require("@jest/globals").beforeEach),
-    afterEach: globalThis.afterEach || (isVitest ? require("vitest").afterEach : require("@jest/globals").afterEach),
+    describe:
+      globalThis.describe ||
+      (isVitest
+        ? require("vitest").describe
+        : require("@jest/globals").describe),
+    it:
+      globalThis.it ||
+      (isVitest ? require("vitest").it : require("@jest/globals").it),
+    expect:
+      globalThis.expect ||
+      (isVitest ? require("vitest").expect : require("@jest/globals").expect),
+    beforeEach:
+      globalThis.beforeEach ||
+      (isVitest
+        ? require("vitest").beforeEach
+        : require("@jest/globals").beforeEach),
+    afterEach:
+      globalThis.afterEach ||
+      (isVitest
+        ? require("vitest").afterEach
+        : require("@jest/globals").afterEach),
   };
   return v;
 })();
@@ -33,7 +49,7 @@ const BASE = Date.UTC(2025, 9, 27, 14, 0, 0);
 const emissions = [];
 const notifications = [];
 
-T?.mock?.("@/services/eventBus", () => {
+T?.mock?.("@/services/events/eventBus", () => {
   const handlers = new Map();
   return {
     __esModule: true,
@@ -41,7 +57,11 @@ T?.mock?.("@/services/eventBus", () => {
       emit: (evt, payload) => {
         emissions.push({ evt, payload });
         const h = handlers.get(evt);
-        if (h) { try { h(payload); } catch (e) {} }
+        if (h) {
+          try {
+            h(payload);
+          } catch (e) {}
+        }
         return true;
       },
       on: (evt, fn) => handlers.set(evt, fn),
@@ -67,14 +87,26 @@ T?.mock?.("@/stores/scheduler/prefs", () => {
       user: { locale: "en-US", timeZone: "America/Chicago" },
       quietHours: { enabled: false, start: "22:00", end: "06:00" },
       sabbathGuard: { enabled: false },
-      safety: { softLeadMs: 120000, hardGraceMs: 60000, cooldownMs: 1, minTickMs: 5000 },
+      safety: {
+        softLeadMs: 120000,
+        hardGraceMs: 60000,
+        cooldownMs: 1,
+        minTickMs: 5000,
+      },
     }),
-    default: { getSchedulerPrefs: () => ({
-      user: { locale: "en-US", timeZone: "America/Chicago" },
-      quietHours: { enabled: false, start: "22:00", end: "06:00" },
-      sabbathGuard: { enabled: false },
-      safety: { softLeadMs: 120000, hardGraceMs: 60000, cooldownMs: 1, minTickMs: 5000 },
-    })},
+    default: {
+      getSchedulerPrefs: () => ({
+        user: { locale: "en-US", timeZone: "America/Chicago" },
+        quietHours: { enabled: false, start: "22:00", end: "06:00" },
+        sabbathGuard: { enabled: false },
+        safety: {
+          softLeadMs: 120000,
+          hardGraceMs: 60000,
+          cooldownMs: 1,
+          minTickMs: 5000,
+        },
+      }),
+    },
   };
 });
 
@@ -97,7 +129,10 @@ beforeEach(async () => {
   }
 
   const mod = await import("@/services/session/RelativeScheduler");
-  relativeScheduler = mod.relativeScheduler || (mod.default && mod.default.relativeScheduler) || mod;
+  relativeScheduler =
+    mod.relativeScheduler ||
+    (mod.default && mod.default.relativeScheduler) ||
+    mod;
   generateRepeats = mod.generateRepeats;
 
   // keep scheduler fast
@@ -126,8 +161,13 @@ async function advance(ms) {
   }
 }
 
-function find(evt) { return emissions.filter(e => e.evt === evt); }
-function last(evt) { const arr = find(evt); return arr[arr.length-1]; }
+function find(evt) {
+  return emissions.filter((e) => e.evt === evt);
+}
+function last(evt) {
+  const arr = find(evt);
+  return arr[arr.length - 1];
+}
 
 // -------------------------- Minimal Orchestrator -----------------------------
 
@@ -143,16 +183,24 @@ function createOrchestrator() {
   const uid = () => `t${Math.random().toString(36).slice(2, 7)}`;
 
   return {
-    startSession({ id = uid(), domain = "cooking", title = "Session", favoriteId, schedulePlan } = {}) {
+    startSession({
+      id = uid(),
+      domain = "cooking",
+      title = "Session",
+      favoriteId,
+      schedulePlan,
+    } = {}) {
       // 1) announce creation
       const created = {
-        id, domain, title,
+        id,
+        domain,
+        title,
         items: [],
         createdAt: Date.now(),
         source: { favoriteId },
       };
       // eventBus is mocked; require inline to avoid hoist mismatch in Node ESM
-      const bus = (require("@/services/eventBus").default);
+      const bus = require("@/services/events/eventBus").default;
       bus.emit("session:created", created);
 
       // 2) create anchor
@@ -168,7 +216,12 @@ function createOrchestrator() {
       // 3) schedule some items (inclusive 0ms then +30s)
       const plan = schedulePlan || [
         { title: "Warm pan", offsetMs: 0, suspendable: true, kind: "reminder" },
-        { title: "Add oil", offsetMs: 30_000, suspendable: true, kind: "reminder" },
+        {
+          title: "Add oil",
+          offsetMs: 30_000,
+          suspendable: true,
+          kind: "reminder",
+        },
       ];
       relativeScheduler.schedule(anchor.anchorId, plan);
 
@@ -182,23 +235,36 @@ function createOrchestrator() {
     pauseSession(id, reason = "user") {
       const sess = sessions.get(id);
       if (!sess) return;
-      const bus = (require("@/services/eventBus").default);
-      bus.emit("session:paused", { id, reason, pausedAt: Date.now(), anchorId: sess.anchorId });
+      const bus = require("@/services/events/eventBus").default;
+      bus.emit("session:paused", {
+        id,
+        reason,
+        pausedAt: Date.now(),
+        anchorId: sess.anchorId,
+      });
     },
 
     resumeSession(id) {
       const sess = sessions.get(id);
       if (!sess) return;
-      const bus = (require("@/services/eventBus").default);
-      bus.emit("session:resumed", { id, resumedAt: Date.now(), anchorId: sess.anchorId });
+      const bus = require("@/services/events/eventBus").default;
+      bus.emit("session:resumed", {
+        id,
+        resumedAt: Date.now(),
+        anchorId: sess.anchorId,
+      });
     },
 
     completeSession(id) {
       const sess = sessions.get(id);
       if (!sess) return;
-      const bus = (require("@/services/eventBus").default);
+      const bus = require("@/services/events/eventBus").default;
       // end anchor first
-      bus.emit("session:ended", { id, endedAt: Date.now(), anchorId: sess.anchorId });
+      bus.emit("session:ended", {
+        id,
+        endedAt: Date.now(),
+        anchorId: sess.anchorId,
+      });
       // then mark completed
       bus.emit("session:completed", { id, completedAt: Date.now() });
     },
@@ -225,12 +291,18 @@ describe("Integration • Orchestrator happy path", () => {
     expect(find("session:started").length).toBe(1);
     const anchorCreated = last("relative.schedule.anchor.created");
     expect(anchorCreated).toBeTruthy();
-    expect(anchorCreated.payload?.sessionId || anchorCreated.sessionId).toBe(sessionId);
+    expect(anchorCreated.payload?.sessionId || anchorCreated.sessionId).toBe(
+      sessionId
+    );
 
     // A due item at t=0 should trigger quickly
     await advance(60);
     const dueBeforePause = find("relative.reminder.due");
-    expect(dueBeforePause.some(e => /Warm pan/i.test(JSON.stringify(e.payload || e)))).toBe(true);
+    expect(
+      dueBeforePause.some((e) =>
+        /Warm pan/i.test(JSON.stringify(e.payload || e))
+      )
+    ).toBe(true);
 
     // PAUSE
     orch.pauseSession(sessionId, "user");
@@ -241,7 +313,9 @@ describe("Integration • Orchestrator happy path", () => {
 
     // While paused, the +30s item should NOT fire (advance >30s)
     await advance(35_000);
-    const dueDuringPause = find("relative.reminder.due").filter(e => /Add oil/i.test(JSON.stringify(e.payload || e)));
+    const dueDuringPause = find("relative.reminder.due").filter((e) =>
+      /Add oil/i.test(JSON.stringify(e.payload || e))
+    );
     expect(dueDuringPause.length).toBe(0);
 
     // RESUME
@@ -253,7 +327,9 @@ describe("Integration • Orchestrator happy path", () => {
 
     // After resume, the delayed item should fire
     await advance(60);
-    const dueAfterResume = find("relative.reminder.due").filter(e => /Add oil/i.test(JSON.stringify(e.payload || e)));
+    const dueAfterResume = find("relative.reminder.due").filter((e) =>
+      /Add oil/i.test(JSON.stringify(e.payload || e))
+    );
     expect(dueAfterResume.length).toBeGreaterThan(0);
 
     // END (and mark completed)
@@ -273,6 +349,8 @@ describe("Integration • Orchestrator happy path", () => {
     // Favorites-first assertion: session:created included favorite source
     const created = last("session:created");
     const payload = created.payload || created;
-    expect((payload.source && payload.source.favoriteId) || payload.favoriteId).toBe(favId);
+    expect(
+      (payload.source && payload.source.favoriteId) || payload.favoriteId
+    ).toBe(favId);
   });
 });

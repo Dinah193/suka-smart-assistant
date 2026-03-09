@@ -8,12 +8,44 @@ const CAL_GREG = "gregorian";
 const CAL_HEB = "hebrew";
 const CAL_CRE = "creation";
 
-const GREG_KEYS = ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"];
-const HEB_KEYS  = ["yom_rishon","yom_sheni","yom_shelishi","yom_revi_i","yom_chamishi","yom_shishi","shabbat"];
-const CRE_KEYS  = ["day_one","day_two","day_three","day_four","day_five","day_six","sabbath"];
+const GREG_KEYS = [
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+  "sunday",
+];
+const HEB_KEYS = [
+  "yom_rishon",
+  "yom_sheni",
+  "yom_shelishi",
+  "yom_revi_i",
+  "yom_chamishi",
+  "yom_shishi",
+  "shabbat",
+];
+const CRE_KEYS = [
+  "day_one",
+  "day_two",
+  "day_three",
+  "day_four",
+  "day_five",
+  "day_six",
+  "sabbath",
+];
 const POS = { [CAL_GREG]: GREG_KEYS, [CAL_HEB]: HEB_KEYS, [CAL_CRE]: CRE_KEYS };
 
-const SHORT = { monday:"Mon", tuesday:"Tue", wednesday:"Wed", thursday:"Thu", friday:"Fri", saturday:"Sat", sunday:"Sun" };
+const SHORT = {
+  monday: "Mon",
+  tuesday: "Tue",
+  wednesday: "Wed",
+  thursday: "Thu",
+  friday: "Fri",
+  saturday: "Sat",
+  sunday: "Sun",
+};
 
 /* ----------------------------- Rhythm utilities ---------------------------- */
 function detectCalendar(map = {}) {
@@ -24,7 +56,9 @@ function detectCalendar(map = {}) {
 }
 function normalizeTo(calendar, src = {}) {
   const out = {};
-  POS[calendar].forEach((k) => { out[k] = Array.isArray(src[k]) ? [...src[k]] : []; });
+  POS[calendar].forEach((k) => {
+    out[k] = Array.isArray(src[k]) ? [...src[k]] : [];
+  });
   return out;
 }
 function convertCalendar(srcMap = {}, srcCal, dstCal) {
@@ -39,49 +73,65 @@ function convertCalendar(srcMap = {}, srcCal, dstCal) {
   }
   return out;
 }
-function computeRhythmMaps(vision = {}) {
+export function computeRhythmMaps(vision = {}) {
   const r = vision?.weeklyFlavorRhythm || {};
   const srcCal = detectCalendar(r);
   const norm = normalizeTo(srcCal, r);
-  const greg = srcCal === CAL_GREG ? norm : convertCalendar(norm, srcCal, CAL_GREG);
+  const greg =
+    srcCal === CAL_GREG ? norm : convertCalendar(norm, srcCal, CAL_GREG);
   const weekSet = new Set();
-  Object.values(greg).forEach((arr) => (arr || []).forEach((f) => {
-    const t = String(f||"").trim();
-    if (t) weekSet.add(t.toLowerCase());
-  }));
+  Object.values(greg).forEach((arr) =>
+    (arr || []).forEach((f) => {
+      const t = String(f || "").trim();
+      if (t) weekSet.add(t.toLowerCase());
+    })
+  );
   return { gregMap: greg, weekSet };
 }
 
 /* ------------------------------- Flavor helpers ---------------------------- */
-function extractPackFlavors(entity) {
+export function extractPackFlavors(entity) {
   const out = new Set();
   const fp = entity?.flavor_profile;
   if (typeof fp === "string" && fp.trim()) out.add(fp.trim());
-  if (Array.isArray(fp)) fp.filter(Boolean).forEach((t) => out.add(String(t).trim()));
+  if (Array.isArray(fp))
+    fp.filter(Boolean).forEach((t) => out.add(String(t).trim()));
   const tags = Array.isArray(entity?.tags) ? entity.tags : [];
   tags.forEach((t) => {
     const m = String(t).match(/^flavor\s*:\s*(.+)$/i);
     if (m && m[1]) out.add(m[1].trim());
   });
   // pull nested item flavors (packs often define per-recipe flavors)
-  const items = Array.isArray(entity?.items) ? entity.items : Array.isArray(entity?.recipes) ? entity.recipes : [];
+  const items = Array.isArray(entity?.items)
+    ? entity.items
+    : Array.isArray(entity?.recipes)
+    ? entity.recipes
+    : [];
   items.forEach((it) => extractPackFlavors(it).forEach((f) => out.add(f)));
   return Array.from(out);
 }
-function matchingDaysForPack(pack, gregMap) {
-  const pf = new Set(extractPackFlavors(pack).map((s) => String(s).trim().toLowerCase()));
+
+export function matchingDaysForPack(pack, gregMap) {
+  const pf = new Set(
+    extractPackFlavors(pack).map((s) => String(s).trim().toLowerCase())
+  );
   const days = [];
   GREG_KEYS.forEach((dk) => {
-    const dayFlavors = (gregMap[dk] || []).map((s) => String(s).trim().toLowerCase());
+    const dayFlavors = (gregMap[dk] || []).map((s) =>
+      String(s).trim().toLowerCase()
+    );
     if (dayFlavors.some((f) => pf.has(f))) days.push(dk);
   });
   return days;
 }
-function formatMatchesHint(days) {
+
+export function formatMatchesHint(days) {
   if (!days?.length) return "";
   const parts = days.map((k) => SHORT[k] || k);
   const cap = 3;
-  return parts.length <= cap ? `Matches ${parts.join("/")}` : `Matches ${parts.slice(0, cap).join("/")} +${parts.length - cap}`;
+  return parts.length <= cap
+    ? `Matches ${parts.join("/")}`
+    : `Matches ${parts.slice(0, cap).join("/")} +${parts.length - cap}`;
 }
 
 /* ------------------------------ Vite pack glob ----------------------------- */
@@ -92,13 +142,16 @@ const PACK_MODULES_NESTED = import.meta.glob("./**/*.json");
 const ALL_MODULES = { ...PACK_MODULES, ...PACK_MODULES_NESTED };
 
 /* --------------------------------- Caching --------------------------------- */
-const _packCache = new Map();      // id -> normalized pack object (raw or enriched)
-const _manifestCache = new Map();  // file -> manifest (lightweight)
-const _fileById = new Map();       // id -> file path for quick lookup
+const _packCache = new Map(); // id -> normalized pack object (raw or enriched)
+const _manifestCache = new Map(); // file -> manifest (lightweight)
+const _fileById = new Map(); // id -> file path for quick lookup
 
 /* ------------------------------- Normalization ----------------------------- */
 function fileKeyToId(fileName, json) {
-  return json?.id || fileName.replace(/^\.\/|\.json$/g, "").replace(/^data\/recipe-packs\//, "");
+  return (
+    json?.id ||
+    fileName.replace(/^\.\/|\.json$/g, "").replace(/^data\/recipe-packs\//, "")
+  );
 }
 function toManifest(fileName, json) {
   const id = fileKeyToId(fileName, json);
@@ -106,7 +159,11 @@ function toManifest(fileName, json) {
   const description = json?.description || "";
   const tags = Array.isArray(json?.tags) ? json.tags : [];
   const flavors = extractPackFlavors(json);
-  const count = Array.isArray(json?.items) ? json.items.length : Array.isArray(json?.recipes) ? json.recipes.length : 0;
+  const count = Array.isArray(json?.items)
+    ? json.items.length
+    : Array.isArray(json?.recipes)
+    ? json.recipes.length
+    : 0;
   return { id, file: fileName, title, description, tags, flavors, count };
 }
 
@@ -141,10 +198,15 @@ export async function getPack(id, { vision = null, applyRhythm = false } = {}) {
   const entries = Object.entries(ALL_MODULES);
 
   // Resolve by file key (filename or nested path sans .json)
-  let modLoader = null, fileKey = null;
+  let modLoader = null,
+    fileKey = null;
   for (const [file, loader] of entries) {
     const keyId = file.replace(/^\.\/|\.json$/g, "");
-    if (keyId === id) { modLoader = loader; fileKey = file; break; }
+    if (keyId === id) {
+      modLoader = loader;
+      fileKey = file;
+      break;
+    }
   }
 
   let json;
@@ -155,7 +217,11 @@ export async function getPack(id, { vision = null, applyRhythm = false } = {}) {
     for (const [file, loader] of entries) {
       const data = await _loadJsonFromModule(loader);
       const jid = fileKeyToId(file, data);
-      if (jid === id) { json = data; fileKey = file; break; }
+      if (jid === id) {
+        json = data;
+        fileKey = file;
+        break;
+      }
     }
   }
   if (!json) throw new Error(`Recipe pack not found: ${id}`);
@@ -164,16 +230,29 @@ export async function getPack(id, { vision = null, applyRhythm = false } = {}) {
   let enriched = json;
   if (applyRhythm) {
     try {
-      const importerMod = await import("@/services/recipes/importers/packImporter.js");
-      const importer = importerMod?.default?.importRecipePack ? importerMod.default : importerMod;
-      const importRecipePack = importer?.importRecipePack || importerMod?.importRecipePack;
+      const importerMod = await import(
+        "@/services/recipes/importers/packImporter.js"
+      );
+      const importer = importerMod?.default?.importRecipePack
+        ? importerMod.default
+        : importerMod;
+      const importRecipePack =
+        importer?.importRecipePack || importerMod?.importRecipePack;
       if (typeof importRecipePack === "function") {
         const res = importRecipePack(json, { vision, applyRhythm: true });
         // Keep raw json (for manifests) but expose enriched recipes + a normalized pack
-        enriched = { ...json, items: res.recipes, _normalizedPack: res.pack, _raw: json };
+        enriched = {
+          ...json,
+          items: res.recipes,
+          _normalizedPack: res.pack,
+          _raw: json,
+        };
       }
     } catch (e) {
-      console.warn("[recipe-packs] applyRhythm failed; returning raw pack. Cause:", e);
+      console.warn(
+        "[recipe-packs] applyRhythm failed; returning raw pack. Cause:",
+        e
+      );
     }
   }
 
@@ -191,7 +270,9 @@ export async function getPack(id, { vision = null, applyRhythm = false } = {}) {
  */
 export async function listPacks({ vision = null } = {}) {
   const entries = Object.entries(ALL_MODULES);
-  const { gregMap, weekSet } = vision ? computeRhythmMaps(vision) : { gregMap: null, weekSet: null };
+  const { gregMap, weekSet } = vision
+    ? computeRhythmMaps(vision)
+    : { gregMap: null, weekSet: null };
 
   const out = [];
   for (const [file, loader] of entries) {
@@ -204,7 +285,11 @@ export async function listPacks({ vision = null } = {}) {
       matchesHint = formatMatchesHint(days);
     }
 
-    out.push({ ...manifest, matchesHint, rhythmActive: Boolean(weekSet && weekSet.size) });
+    out.push({
+      ...manifest,
+      matchesHint,
+      rhythmActive: Boolean(weekSet && weekSet.size),
+    });
   }
   // Title asc default
   return out.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
@@ -214,18 +299,26 @@ export async function listPacks({ vision = null } = {}) {
  * Recommend packs — rhythm-aware (boost packs whose flavors appear anywhere in weeklyFlavorRhythm),
  * with simple text matching and optional popularity/rating fields on packs.
  */
-export async function recommendPacks({ vision = null, query = "", limit = 12 } = {}) {
+export async function recommendPacks({
+  vision = null,
+  query = "",
+  limit = 12,
+} = {}) {
   const manifests = await listPacks({ vision });
   const lc = (s) => String(s || "").toLowerCase();
   const q = lc(query);
 
-  const { weekSet } = vision ? computeRhythmMaps(vision) : { weekSet: new Set() };
+  const { weekSet } = vision
+    ? computeRhythmMaps(vision)
+    : { weekSet: new Set() };
 
   const scored = manifests.map((m) => {
     // rhythm score: intersection between pack flavors and weekly set
     const flavors = (m.flavors || []).map((f) => lc(f));
     const rhythmHits = flavors.filter((f) => weekSet.has(f));
-    const rhythmScore = rhythmHits.length ? 3 + Math.min(2, rhythmHits.length - 1) : 0; // 3..5
+    const rhythmScore = rhythmHits.length
+      ? 3 + Math.min(2, rhythmHits.length - 1)
+      : 0; // 3..5
 
     // text relevance
     const hay = lc(`${m.title} ${m.description} ${(m.tags || []).join(" ")}`);
@@ -238,7 +331,10 @@ export async function recommendPacks({ vision = null, query = "", limit = 12 } =
     return { ...m, _score: rhythmScore + textScore + popScore };
   });
 
-  scored.sort((a, b) => b._score - a._score || (a.title || "").localeCompare(b.title || ""));
+  scored.sort(
+    (a, b) =>
+      b._score - a._score || (a.title || "").localeCompare(b.title || "")
+  );
   return scored.slice(0, limit).map(({ _score, ...m }) => m);
 }
 
@@ -249,7 +345,11 @@ export async function recommendPacks({ vision = null, query = "", limit = 12 } =
 export async function preloadAll({ vision = null, applyRhythm = false } = {}) {
   const manifests = await listPacks({ vision });
   for (const m of manifests) {
-    try { await getPack(m.id, { vision, applyRhythm }); } catch { /* ignore */ }
+    try {
+      await getPack(m.id, { vision, applyRhythm });
+    } catch {
+      /* ignore */
+    }
   }
 }
 

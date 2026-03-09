@@ -1,0 +1,361 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+  "meta": {
+    "id": "mexican.chilaquiles.rojos",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Chilaquiles Rojos",
+    "subtitle": "Crispy tortilla chips quickly tossed in warm salsa roja, topped with eggs and fresh garnishes",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Mexican Cuisine"
+    }
+  },
+  "classification": {
+    "cuisine": "mexican",
+    "category": "breakfast",
+    "mealArchetypes": [
+      "archetype.breakfast",
+      "archetype.chilaquiles",
+      "archetype.eggs"
+    ],
+    "servingStyles": ["plated", "bowl"],
+    "plannerTags": [
+      "course.breakfast",
+      "weeknight_or_weekend",
+      "leftovers.uses_tortillas"
+    ]
+  },
+  "summary": "Classic chilaquiles rojos built for SSA planning: a fast salsa roja (or use jarred), crisp tortilla chips, and flexible toppings (eggs, cheese, beans, chicken). The key is controlling softness: quick toss for crunchy, longer simmer for tender.",
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 1, "unit": "plate" },
+    "notes": "Serves 4 as a hearty breakfast/brunch; increase chips + sauce for larger crowds."
+  },
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 10,
+    "totalMins": 30
+  },
+  "difficulty": "beginner",
+  "signals": {
+    "batchFriendly": false,
+    "weeknightPossible": true,
+    "leftoversGood": "components_only",
+    "freezerFriendly": false
+  },
+  "tasteProfile": {
+    "savory": 4,
+    "spicy": 2,
+    "acidic": 2,
+    "rich": 2
+  },
+  "equipment": {
+    "minimum": ["equipment.skillet", "equipment.saucepan"],
+    "recommended": ["equipment.blender", "equipment.sheet_pan"],
+    "optional": [
+      {
+        "id": "equipment.deep_skillet",
+        "label": "Deep Skillet / Sauté Pan",
+        "notes": "Helps toss chips without breaking"
+      }
+    ]
+  },
+  "dietFlags": ["diet.gluten_free"],
+  "allergens": ["allergen.dairy", "allergen.eggs"],
+  "ingredients": [
+    {
+      "id": "ingredient.corn_tortilla",
+      "label": "Corn tortillas",
+      "role": "chips.base",
+      "amount": { "value": 10, "unit": "each" },
+      "notes": "Stale tortillas make the best chips"
+    },
+    {
+      "id": "ingredient.oil_neutral",
+      "label": "Neutral oil",
+      "role": "fat",
+      "amount": { "value": 3, "unit": "tbsp" },
+      "notes": "For frying or baking chips + sautéing"
+    },
+    {
+      "id": "ingredient.salt",
+      "label": "Salt",
+      "role": "seasoning",
+      "amount": { "value": 1.5, "unit": "tsp" },
+      "notes": "Divide across chips + sauce + final seasoning"
+    },
+
+    {
+      "id": "ingredient.tomato",
+      "label": "Roma tomatoes",
+      "role": "salsa.base",
+      "amount": { "value": 6, "unit": "medium" },
+      "notes": "Or substitute 2 cups canned crushed tomatoes"
+    },
+    {
+      "id": "ingredient.onion_white",
+      "label": "White onion",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "small" },
+      "notes": "Divide between salsa + garnish"
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic cloves",
+      "role": "aromatic",
+      "amount": { "value": 3, "unit": "cloves" }
+    },
+    {
+      "id": "ingredient.jalapeno",
+      "label": "Jalapeño",
+      "role": "heat",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": "Use half for mild; remove seeds for less heat"
+    },
+    {
+      "id": "ingredient.chipotle_in_adobo",
+      "label": "Chipotle in adobo",
+      "role": "heat.smoke",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": "Adds smoky heat; optional"
+    },
+    {
+      "id": "ingredient.chicken_broth",
+      "label": "Chicken broth (or water)",
+      "role": "liquid.salsa",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "notes": "Adjust thickness; vegetable broth works too"
+    },
+    {
+      "id": "ingredient.cumin_ground",
+      "label": "Ground cumin",
+      "role": "spice",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.oregano_mexican",
+      "label": "Mexican oregano (or oregano)",
+      "role": "spice",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.lime",
+      "label": "Lime",
+      "role": "finish.acid",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    },
+
+    {
+      "id": "ingredient.eggs",
+      "label": "Eggs",
+      "role": "protein",
+      "amount": { "value": 4, "unit": "each" },
+      "notes": "Fried or scrambled"
+    },
+    {
+      "id": "ingredient.cheese_crumbly",
+      "label": "Crumbly cheese (cotija/feta) or shredded cheese",
+      "role": "topping",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.sour_cream",
+      "label": "Sour cream or crema",
+      "role": "topping",
+      "amount": { "value": 0.25, "unit": "cup" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.cilantro",
+      "label": "Fresh cilantro",
+      "role": "garnish",
+      "amount": { "value": 0.25, "unit": "cup" },
+      "optional": true,
+      "notes": "Chopped"
+    },
+    {
+      "id": "ingredient.avocado",
+      "label": "Avocado",
+      "role": "topping",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": "Sliced"
+    },
+    {
+      "id": "ingredient.black_beans_cooked",
+      "label": "Cooked black beans (optional)",
+      "role": "topping.optional",
+      "amount": { "value": 1, "unit": "cup" },
+      "optional": true,
+      "notes": "Warm for serving"
+    },
+    {
+      "id": "ingredient.chicken_cooked_shredded",
+      "label": "Cooked shredded chicken (optional)",
+      "role": "topping.optional",
+      "amount": { "value": 1, "unit": "cup" },
+      "optional": true
+    }
+  ],
+  "ingredientGroups": [
+    {
+      "label": "Tortilla Chips",
+      "items": [
+        "ingredient.corn_tortilla",
+        "ingredient.oil_neutral",
+        "ingredient.salt"
+      ]
+    },
+    {
+      "label": "Salsa Roja (Quick)",
+      "items": [
+        "ingredient.tomato",
+        "ingredient.onion_white",
+        "ingredient.garlic",
+        "ingredient.jalapeno",
+        "ingredient.chipotle_in_adobo",
+        "ingredient.chicken_broth",
+        "ingredient.cumin_ground",
+        "ingredient.oregano_mexican",
+        "ingredient.salt",
+        "ingredient.lime"
+      ]
+    },
+    {
+      "label": "Toppings",
+      "items": [
+        "ingredient.eggs",
+        "ingredient.cheese_crumbly",
+        "ingredient.sour_cream",
+        "ingredient.cilantro",
+        "ingredient.avocado",
+        "ingredient.black_beans_cooked",
+        "ingredient.chicken_cooked_shredded",
+        "ingredient.onion_white"
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.make_chips",
+      "title": "Make tortilla chips (or use store-bought)",
+      "activeMins": 10,
+      "handsOffMins": 10,
+      "body": "Cut tortillas into wedges. Option A (quick fry): heat 2–3 tbsp oil in a skillet and fry chips in batches until crisp; drain and lightly salt. Option B (bake): toss wedges with a little oil and bake at 400°F (205°C) 10–12 minutes, flipping once. Set aside.",
+      "timers": [
+        { "label": "Bake chips (if baking)", "minutes": 11 },
+        { "label": "Per fry batch (if frying)", "minutes": 3 }
+      ],
+      "checks": ["Chips are crisp before saucing"]
+    },
+    {
+      "id": "step.salsa_roja",
+      "title": "Cook and blend salsa roja",
+      "activeMins": 10,
+      "handsOffMins": 8,
+      "body": "In a saucepan, simmer tomatoes with half the onion, garlic, and jalapeño (optional) with a splash of water until softened, 6–8 minutes. Blend until smooth with broth, cumin/oregano (optional), and chipotle (optional). Simmer 2–4 minutes to thicken; season with salt and a squeeze of lime if desired.",
+      "timers": [
+        { "label": "Simmer tomatoes", "minutes": 7 },
+        { "label": "Simmer blended salsa", "minutes": 3 }
+      ],
+      "checks": [
+        "Sauce is warm and slightly thick (coats chips without becoming soup)"
+      ]
+    },
+    {
+      "id": "step.eggs",
+      "title": "Cook eggs and prep toppings",
+      "activeMins": 8,
+      "body": "Cook eggs to preference (fried over-easy, scrambled, etc.). Prep toppings: crumble cheese, chop cilantro, slice avocado, warm beans/chicken if using, and dice remaining onion for garnish."
+    },
+    {
+      "id": "step.toss_chips",
+      "title": "Toss chips with salsa (control crunch)",
+      "activeMins": 4,
+      "body": "In a wide skillet, warm salsa over medium-low. Add chips and toss just 30–60 seconds for crunchy chilaquiles, or 2–3 minutes for softer chilaquiles. Remove from heat immediately when texture is right.",
+      "timers": [
+        { "label": "Crunchy toss time", "minutes": 1 },
+        { "label": "Softer toss time", "minutes": 3 }
+      ],
+      "checks": ["Chips are coated; texture matches preference"]
+    },
+    {
+      "id": "step.serve",
+      "title": "Serve",
+      "activeMins": 3,
+      "body": "Plate chilaquiles and top with eggs, cheese, crema, cilantro, onion, avocado, and optional beans/chicken. Serve immediately."
+    }
+  ],
+  "variations": [
+    {
+      "id": "variation.verdes",
+      "label": "Chilaquiles Verdes",
+      "notes": "Swap salsa roja for salsa verde (tomatillo-based). Great with crema and chicken."
+    },
+    {
+      "id": "variation.jarred_salsa_fast",
+      "label": "Fast Mode (Jarred Salsa)",
+      "notes": "Use 2–2.5 cups good jarred salsa. Warm and simmer 2–3 minutes to thicken; proceed with tossing."
+    },
+    {
+      "id": "variation.topping_chicken",
+      "label": "Chicken Chilaquiles",
+      "notes": "Add warm shredded chicken on top or toss into the chilaquiles right after chips for a heartier plate."
+    },
+    {
+      "id": "variation.dairy_free",
+      "label": "Dairy-Free",
+      "notes": "Skip cheese/crema; add extra avocado and a squeeze of lime for richness and balance."
+    }
+  ],
+  "storage": {
+    "refrigeration": "Store salsa separately for up to 4 days. Chips are best fresh; store-bought chips keep well.",
+    "freezing": "Freeze salsa only (up to 2 months). Do not freeze assembled chilaquiles.",
+    "reheat": "Reheat salsa on the stove; toss fresh chips just before serving."
+  },
+  "safety": {
+    "notes": [
+      "Serve immediately after tossing for best texture and food safety.",
+      "If using eggs, keep hot foods hot and refrigerate leftovers promptly."
+    ]
+  },
+  "pairings": {
+    "sides": ["mexican.frijoles_refritos", "mexican.rice_and_beans"],
+    "drinks": ["mexican.horchata", "mexican.agua_fresca_jamaica"],
+    "extras": ["mexican.guacamole", "mexican.pico_de_gallo"]
+  },
+  "planner": {
+    "preferredFor": ["breakfast", "brunch", "use_up_tortillas"],
+    "scalesWell": "components_only",
+    "prepNotes": [
+      "Make salsa ahead and reheat for fast assembly.",
+      "Keep chips separate until the last minute to control softness."
+    ],
+    "leftoversPlan": "Save extra salsa + toppings; make a fresh batch of chips next time."
+  },
+  "methods": [
+    "technique.simmer",
+    "technique.blend",
+    "technique.fry_or_bake",
+    "technique.toss"
+  ],
+  "compat": {
+    "dishId": "mexican.chilaquiles_rojos",
+    "aliases": ["chilaquiles", "chilaquiles rojos", "tortilla chip casserole"]
+  },
+  "notes": [
+    "Key control knob is texture: short toss = crunchy; longer toss = tender.",
+    "For a deeper red flavor, add a small toasted dried chile (guajillo) to the salsa blend.",
+    "If your tortillas are very fresh and soft, bake chips rather than fry for better crunch control."
+  ]
+}

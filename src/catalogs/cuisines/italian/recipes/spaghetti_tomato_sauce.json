@@ -1,0 +1,395 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T01:12:00.000Z",
+
+  "meta": {
+    "id": "cuisines.italian.recipes.spaghetti_tomato_sauce",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Spaghetti with Simple Tomato Sauce",
+    "subtitle": "Garlic, olive oil, crushed tomatoes, basil — weeknight classic",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa-core",
+      "notes": [
+        "Canonical baseline for Italian weeknight pasta in SSA catalogs.",
+        "Built to be adaptable by the RecipeAdapterService based on kitchen capabilities and doneness preferences."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.italian",
+    "category": "pasta",
+    "mealArchetypes": ["bowls", "plates"],
+    "servingStyles": ["family_style", "plates"],
+    "plannerTags": [
+      "cuisine.italian",
+      "category.pasta",
+      "method.simmer",
+      "weeknight.possible",
+      "batch.friendly",
+      "leftovers.good",
+      "flavor.tomato_forward",
+      "flavor.garlic_forward",
+      "pantry.core"
+    ]
+  },
+
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 340, "unit": "g" },
+    "notes": "About 1 heaping bowl per serving (includes sauce)."
+  },
+
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 10,
+    "totalMins": 30
+  },
+
+  "difficulty": "beginner",
+
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": "sauce_only",
+    "notes": [
+      "Sauce can be doubled and frozen; cook pasta fresh for best texture.",
+      "Best results with quality canned tomatoes and finishing cheese."
+    ]
+  },
+
+  "tasteProfile": {
+    "saltiness": 3,
+    "umami": 3,
+    "sweetness": 1,
+    "sourness": 2,
+    "heat": 0,
+    "oilUse": 2,
+    "notes": [
+      "If tomatoes are very acidic, add a small pinch of sugar or a knob of butter (optional).",
+      "Red pepper flakes optional for gentle heat."
+    ]
+  },
+
+  "equipment": {
+    "minimum": [
+      "tool.stockpot",
+      "tool.skillet",
+      "tool.knife",
+      "tool.cutting_board",
+      "tool.colander"
+    ],
+    "recommended": ["tool.microplane", "tool.tongs", "tool.ladle"],
+    "optional": [
+      {
+        "id": "tool.box_grater",
+        "label": "Box grater",
+        "required": false,
+        "notes": "If you don’t have a microplane."
+      },
+      {
+        "id": "tool.splatter_screen",
+        "label": "Splatter screen",
+        "required": false,
+        "notes": "Helps control sauce splatter."
+      }
+    ]
+  },
+
+  "dietFlags": ["diet.vegetarian_option"],
+  "allergens": ["allergen.gluten", "allergen.dairy_optional"],
+
+  "ingredients": [
+    {
+      "id": "starch.pasta.spaghetti",
+      "label": "Spaghetti",
+      "role": "starch",
+      "amount": { "value": 454, "unit": "g" },
+      "notes": "1 lb. Use linguine/penne as needed."
+    },
+    {
+      "id": "salt.kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 18, "unit": "g" },
+      "notes": [
+        "For pasta water: salt it until it tastes like the sea.",
+        "Reserve a pinch for sauce seasoning."
+      ]
+    },
+    {
+      "id": "fat.olive_oil.extra_virgin",
+      "label": "Extra-virgin olive oil",
+      "role": "fat",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "About 2 tablespoons."
+    },
+    {
+      "id": "aromatic.garlic",
+      "label": "Garlic, thinly sliced or minced",
+      "role": "aromatic",
+      "amount": { "value": 18, "unit": "g" },
+      "notes": "About 5–6 cloves."
+    },
+    {
+      "id": "spice.chili_flakes",
+      "label": "Crushed red pepper flakes (optional)",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "g" },
+      "optional": true,
+      "notes": "Use more for heat."
+    },
+    {
+      "id": "tomato.crushed",
+      "label": "Crushed tomatoes (canned)",
+      "role": "sauce_base",
+      "amount": { "value": 800, "unit": "g" },
+      "notes": "28 oz can. Substitute passata for a smoother sauce."
+    },
+    {
+      "id": "tomato.paste",
+      "label": "Tomato paste (optional)",
+      "role": "umami",
+      "amount": { "value": 15, "unit": "g" },
+      "optional": true,
+      "notes": "1 tablespoon. Adds depth; bloom briefly in oil."
+    },
+    {
+      "id": "herb.basil",
+      "label": "Fresh basil leaves",
+      "role": "herb",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": "Tear by hand; add at the end."
+    },
+    {
+      "id": "pepper.black",
+      "label": "Black pepper, freshly ground",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "Adjust to taste."
+    },
+    {
+      "id": "cheese.parmesan",
+      "label": "Parmesan (optional), grated",
+      "role": "garnish",
+      "amount": { "value": 40, "unit": "g" },
+      "optional": true,
+      "notes": "Serve at the table. Use Pecorino Romano for sharper bite."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_mise",
+      "title": "Mise en place",
+      "instructions": [
+        "Fill a large pot with water and bring to a boil.",
+        "Thinly slice or mince the garlic. Tear basil leaves. Measure tomatoes and olive oil.",
+        "Set a large skillet on the stove (off heat for now)."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 0,
+      "checks": [
+        "Garlic is prepped before the pasta goes in (prevents rushing).",
+        "Tomatoes opened and ready."
+      ]
+    },
+    {
+      "id": "step_02_salt_water",
+      "title": "Salt the pasta water",
+      "instructions": [
+        "Once the water boils, add kosher salt.",
+        "Keep at a steady boil while you start the sauce."
+      ],
+      "activeMins": 1,
+      "handsOffMins": 0,
+      "notes": "Salting the water is the main way pasta gets seasoned."
+    },
+    {
+      "id": "step_03_bloom_garlic",
+      "title": "Bloom garlic in olive oil",
+      "instructions": [
+        "Warm olive oil in a large skillet over medium-low heat.",
+        "Add garlic (and red pepper flakes if using). Cook gently until fragrant, 45–90 seconds.",
+        "Do not brown the garlic; reduce heat if needed."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Bloom garlic", "seconds": 75 }],
+      "checks": [
+        "Garlic is fragrant and pale golden at most (not browned).",
+        "Oil smells sweet and aromatic, not burnt."
+      ]
+    },
+    {
+      "id": "step_04_build_sauce",
+      "title": "Build and simmer the tomato sauce",
+      "instructions": [
+        "If using tomato paste, stir it into the garlic oil for 30–60 seconds to deepen flavor.",
+        "Add crushed tomatoes. Stir, then bring to a gentle simmer.",
+        "Simmer 8–12 minutes, stirring occasionally. Season with black pepper and a pinch of salt if needed."
+      ],
+      "activeMins": 4,
+      "handsOffMins": 8,
+      "timers": [{ "label": "Sauce simmer", "minutes": 10 }],
+      "checks": [
+        "Sauce thickens slightly and tastes less raw.",
+        "Balance: if too acidic, add a tiny pinch of sugar (optional)."
+      ]
+    },
+    {
+      "id": "step_05_cook_pasta",
+      "title": "Cook the spaghetti",
+      "instructions": [
+        "Add spaghetti to boiling salted water and stir for the first minute to prevent sticking.",
+        "Cook until al dente (start checking 2 minutes before the box time).",
+        "Reserve about 240 ml (1 cup) pasta water before draining."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 4,
+      "timers": [
+        { "label": "Check pasta doneness", "minutes": 8 },
+        { "label": "Reserve pasta water", "seconds": 10 }
+      ],
+      "checks": [
+        "Pasta has a slight bite (al dente).",
+        "Pasta water reserved before draining."
+      ]
+    },
+    {
+      "id": "step_06_emulsify_finish",
+      "title": "Toss pasta with sauce and emulsify",
+      "instructions": [
+        "Add drained pasta to the skillet with sauce.",
+        "Toss over medium heat for 1–2 minutes. Add splashes of reserved pasta water until the sauce clings and looks glossy.",
+        "Turn off heat. Stir in torn basil. Taste and adjust salt/pepper."
+      ],
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Toss + emulsify", "seconds": 90 }],
+      "checks": [
+        "Sauce coats noodles and looks slightly creamy from emulsification.",
+        "Basil stays bright (added off heat)."
+      ]
+    },
+    {
+      "id": "step_07_serve",
+      "title": "Serve",
+      "instructions": [
+        "Serve immediately in warm bowls/plates.",
+        "Top with grated Parmesan (optional). Add a drizzle of olive oil if desired."
+      ],
+      "activeMins": 2,
+      "handsOffMins": 0
+    }
+  ],
+
+  "notes": [
+    "For a smoother sauce: use passata instead of crushed tomatoes.",
+    "For richer sauce: finish with 1–2 tbsp butter (optional; not dairy-free).",
+    "For extra aromatics: add 1/4 tsp dried oregano while simmering (optional)."
+  ],
+
+  "variations": [
+    {
+      "id": "variation_arrabbiata",
+      "label": "Arrabbiata (spicy)",
+      "when": { "preference": "heat_high" },
+      "adapt": {
+        "addIngredients": [
+          {
+            "id": "spice.chili_flakes",
+            "label": "Crushed red pepper flakes",
+            "amount": { "value": 3, "unit": "g" }
+          }
+        ],
+        "notes": "Bloom chili flakes with garlic; keep sauce simmer gentle to avoid bitterness."
+      }
+    },
+    {
+      "id": "variation_vegan",
+      "label": "Vegan finish",
+      "when": { "diet": "vegan" },
+      "adapt": {
+        "removeIngredients": ["cheese.parmesan"],
+        "addIngredients": [
+          {
+            "id": "condiment.nutritional_yeast",
+            "label": "Nutritional yeast (optional)",
+            "amount": { "value": 8, "unit": "g" },
+            "optional": true
+          }
+        ],
+        "notes": "Use nutritional yeast for cheesy savoriness; finish with extra olive oil."
+      }
+    }
+  ],
+
+  "storage": {
+    "refrigerate": {
+      "notes": [
+        "Store leftovers up to 3–4 days.",
+        "Reheat with a splash of water to loosen sauce."
+      ]
+    },
+    "freeze": {
+      "notes": [
+        "Freeze sauce alone up to 3 months for best quality.",
+        "Pasta texture degrades when frozen; cook fresh pasta when possible."
+      ]
+    }
+  },
+
+  "planner": {
+    "roles": [
+      { "role": "starch", "ids": ["starch.pasta.spaghetti"] },
+      { "role": "sauce", "ids": ["tomato.crushed", "tomato.paste"] },
+      { "role": "aromatic", "ids": ["aromatic.garlic"] },
+      { "role": "herb", "ids": ["herb.basil"] },
+      { "role": "garnish", "ids": ["cheese.parmesan"] }
+    ],
+    "pairWith": {
+      "vegSides": [
+        "veg.green_salad",
+        "veg.roasted_broccoli",
+        "veg.sauteed_greens"
+      ],
+      "proteinsOptional": [
+        "protein.meatballs",
+        "protein.chicken_cutlet",
+        "protein.sausage"
+      ]
+    },
+    "leftovers": {
+      "bestUse": ["lunch", "quick_dinner"],
+      "notes": ["Refresh with olive oil + splash of water while reheating."]
+    }
+  },
+
+  "methods": ["technique.simmer", "technique.saute", "technique.boil"],
+
+  "compat": {
+    "aliases": [
+      "spaghetti marinara",
+      "spaghetti al pomodoro",
+      "spaghetti with tomato sauce",
+      "simple marinara pasta"
+    ],
+    "keywordBoost": [
+      "marinara",
+      "pomodoro",
+      "tomato sauce",
+      "weeknight pasta",
+      "garlic and basil"
+    ],
+    "normalization": {
+      "titleCaseFold": true,
+      "preferredIdCase": "lower"
+    }
+  }
+}

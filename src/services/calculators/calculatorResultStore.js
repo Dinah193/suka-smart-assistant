@@ -37,7 +37,7 @@
  *   }
  */
 
-import eventBus from "@/services/eventBus";
+import eventBus from "@/services/events/eventBus";
 
 // Defensive Dexie import – if your db is located elsewhere,
 // update this path once and keep the rest of this file intact.
@@ -92,21 +92,18 @@ export async function saveCalculatorResult(calculatorId, payload) {
   const record = {
     id,
     calculatorId,
-    input:
-      "input" in payload
-        ? payload.input
-        : null,
-    result:
-      "result" in payload
-        ? payload.result
-        : null,
+    input: "input" in payload ? payload.input : null,
+    result: "result" in payload ? payload.result : null,
     context: payload.context || undefined,
     tags: Array.isArray(payload.tags) ? payload.tags.slice(0) : undefined,
     label:
       typeof payload.label === "string" && payload.label.trim()
         ? payload.label.trim()
         : undefined,
-    meta: payload.meta && typeof payload.meta === "object" ? payload.meta : undefined,
+    meta:
+      payload.meta && typeof payload.meta === "object"
+        ? payload.meta
+        : undefined,
     createdAt: nowIso,
     updatedAt: nowIso,
   };
@@ -152,8 +149,7 @@ export async function getCalculatorResult(id) {
  */
 export async function listCalculatorResults(opts = {}) {
   const { calculatorId, tag, limit, sortDirection = "desc" } = opts;
-  const max =
-    typeof limit === "number" && limit > 0 ? limit : undefined;
+  const max = typeof limit === "number" && limit > 0 ? limit : undefined;
 
   /** @type {StoredCalculatorResult[]} */
   let records = [];
@@ -175,7 +171,9 @@ export async function listCalculatorResults(opts = {}) {
   }
 
   if (tag) {
-    records = records.filter((r) => Array.isArray(r.tags) && r.tags.includes(tag));
+    records = records.filter(
+      (r) => Array.isArray(r.tags) && r.tags.includes(tag)
+    );
   }
 
   records.sort((a, b) => {

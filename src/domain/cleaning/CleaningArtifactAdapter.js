@@ -44,8 +44,8 @@
 //     sessionMeta: { stepGraphReady: false, compliance: null },
 //   }
 
-import { emitEvent } from "../../services/eventBus";
-import { toStepGraph } from "../../services/sessions/StepGraphContract";
+import { emitEvent } from "../../services/events/eventBus";
+import { toStepGraph } from "../../services/session/StepGraphContract";
 
 const MODULE_SOURCE = "domain.cleaning.CleaningArtifactAdapter";
 

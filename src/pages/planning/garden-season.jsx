@@ -31,8 +31,8 @@
 // -----------------------------------------------------------------------------
 
 import React, { useCallback, useState } from "react";
-import { emitEvent } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emitEvent } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
 /**
  * Emit a “play the next runnable session now” request for Garden Season Setup.
@@ -64,7 +64,10 @@ function requestNextSession(domainHints, focusArea) {
     });
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.error("[GardenSeasonPlanning] Failed to emit session.requestNext", err);
+    console.error(
+      "[GardenSeasonPlanning] Failed to emit session.requestNext",
+      err
+    );
   }
 }
 
@@ -119,7 +122,9 @@ function GardenSeasonFlowModal({ open, onClose }) {
               cover crops fit.
             </li>
             <li>
-              <span className="font-semibold">Schedule seed starts & planting:</span>{" "}
+              <span className="font-semibold">
+                Schedule seed starts & planting:
+              </span>{" "}
               align indoor starts, direct sowing, and succession planting with
               frost dates and your calendar.
             </li>
@@ -129,7 +134,9 @@ function GardenSeasonFlowModal({ open, onClose }) {
               rush starts.
             </li>
             <li>
-              <span className="font-semibold">Harvest & preservation plan:</span>{" "}
+              <span className="font-semibold">
+                Harvest & preservation plan:
+              </span>{" "}
               connect expected harvest windows to preservation and meal flows so
               food doesn&apos;t go to waste.
             </li>
@@ -226,7 +233,10 @@ function GardenSeasonPlanningPage() {
   }, []);
 
   const handleNowSeedSchedule = useCallback(() => {
-    requestNextSession(["garden", "storehouse"], "seed-start-and-planting-calendar");
+    requestNextSession(
+      ["garden", "storehouse"],
+      "seed-start-and-planting-calendar"
+    );
   }, []);
 
   const handleNowWaterInfra = useCallback(() => {
@@ -492,7 +502,9 @@ function GardenSeasonPlanningPage() {
                 <li className="flex gap-2">
                   <span className="mt-[3px] inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />
                   <span>
-                    <span className="font-semibold">Seed Viability Calculator:</span>{" "}
+                    <span className="font-semibold">
+                      Seed Viability Calculator:
+                    </span>{" "}
                     check which seed lots are worth trusting before you commit
                     trays or rows.
                   </span>
@@ -500,7 +512,9 @@ function GardenSeasonPlanningPage() {
                 <li className="flex gap-2">
                   <span className="mt-[3px] inline-block h-1.5 w-1.5 rounded-full bg-sky-400" />
                   <span>
-                    <span className="font-semibold">Season Length & Calendar:</span>{" "}
+                    <span className="font-semibold">
+                      Season Length & Calendar:
+                    </span>{" "}
                     align frost dates and planting windows with your household
                     calendar and feast days.
                   </span>
@@ -508,7 +522,9 @@ function GardenSeasonPlanningPage() {
                 <li className="flex gap-2">
                   <span className="mt-[3px] inline-block h-1.5 w-1.5 rounded-full bg-fuchsia-400" />
                   <span>
-                    <span className="font-semibold">Storehouse & Meal tools:</span>{" "}
+                    <span className="font-semibold">
+                      Storehouse & Meal tools:
+                    </span>{" "}
                     link key crops to the meals and shelf items they support so
                     you plant with purpose.
                   </span>
@@ -551,7 +567,10 @@ function GardenSeasonPlanningPage() {
       </main>
 
       {/* Local informational modal */}
-      <GardenSeasonFlowModal open={flowOpen} onClose={() => setFlowOpen(false)} />
+      <GardenSeasonFlowModal
+        open={flowOpen}
+        onClose={() => setFlowOpen(false)}
+      />
     </div>
   );
 }

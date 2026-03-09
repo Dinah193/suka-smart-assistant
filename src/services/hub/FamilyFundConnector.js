@@ -28,7 +28,7 @@
 //     exportToHubIfEnabled,
 //     FamilyFundConnector,
 //   } from "@/services/hub/FamilyFundConnector";
-//   import featureFlags from "@/services/featureFlags"; // or similar
+//   import featureFlags from "@/config/featureFlags"; // or similar
 //
 //   configureHubConnector({
 //     familyFundMode: featureFlags.familyFundMode,
@@ -44,6 +44,16 @@
 //     exportToHubIfEnabled(packet, { mode: "auto" });
 //   }
 //
+// -----------------------------------------------------------------------------
+// UPDATE NOTE (Build fix)
+// -----------------------------------------------------------------------------
+// Some shim call sites import a named `sendToHub` helper.
+// This file previously did not export `sendToHub`.
+// To keep those call sites working without changing them, we now export:
+//   - named: sendToHub (alias facade around exportToHubIfEnabled)
+//   - named: configureHubConnector / exportToHubIfEnabled / flushHubQueue / etc.
+//   - named: FamilyFundConnector facade (existing)
+//   - default: FamilyFundConnector (existing)
 // -----------------------------------------------------------------------------
 
 /**
@@ -100,7 +110,10 @@ let _isFlushing = false;
 let _lastFlushAttempt = 0;
 
 // Attach network listeners lazily (browser only)
-if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
+if (
+  typeof window !== "undefined" &&
+  typeof window.addEventListener === "function"
+) {
   window.addEventListener("online", () => {
     // Soft schedule a flush after coming online
     tryFlushSoon("online");
@@ -176,6 +189,22 @@ export function exportToHubIfEnabled(packet, opts = {}) {
   sendNowOrQueue(packet, opts.reason || "auto");
 }
 
+/**
+ * Backward-compatible shim helper:
+ * Many shims expect `sendToHub(packet)` to exist as a named export.
+ *
+ * We route to exportToHubIfEnabled with sane defaults.
+ *
+ * @param {any} packet
+ * @param {{ mode?: "auto"|"immediate"|"queue", reason?: string }} [opts]
+ */
+export function sendToHub(packet, opts = {}) {
+  exportToHubIfEnabled(packet, {
+    mode: opts.mode || "auto",
+    reason: opts.reason || "sendToHub",
+  });
+}
+
 // -----------------------------------------------------------------------------
 // Core queue + flush logic
 // -----------------------------------------------------------------------------
@@ -199,7 +228,10 @@ function enqueuePacket(packet, reason = "unknown") {
 
   if (_config.environment === "development") {
     // eslint-disable-next-line no-console
-    console.debug("[FamilyFundConnector] queued packet", { reason, id: item.id });
+    console.debug("[FamilyFundConnector] queued packet", {
+      reason,
+      id: item.id,
+    });
   }
 
   // Optionally try a flush right away, in case we *are* online
@@ -265,10 +297,13 @@ async function tryFlushQueue(origin) {
           persistQueueToStorage();
           if (_config.environment === "development") {
             // eslint-disable-next-line no-console
-            console.warn("[FamilyFundConnector] dropping packet after max attempts", {
-              id: item.id,
-              lastError: item.lastError,
-            });
+            console.warn(
+              "[FamilyFundConnector] dropping packet after max attempts",
+              {
+                id: item.id,
+                lastError: item.lastError,
+              }
+            );
           }
         } else {
           // Break out to respect backoff; we'll retry on next flush.
@@ -343,7 +378,10 @@ async function sendPacketToHub(item) {
     item.lastError = String(err && err.message ? err.message : err);
     if (_config.environment === "development") {
       // eslint-disable-next-line no-console
-      console.warn("[FamilyFundConnector] send error", { id: item.id, error: item.lastError });
+      console.warn("[FamilyFundConnector] send error", {
+        id: item.id,
+        error: item.lastError,
+      });
     }
     return false;
   }
@@ -354,7 +392,10 @@ async function sendPacketToHub(item) {
 // -----------------------------------------------------------------------------
 
 function hydrateQueueFromStorage() {
-  if (typeof window === "undefined" || typeof window.localStorage === "undefined") {
+  if (
+    typeof window === "undefined" ||
+    typeof window.localStorage === "undefined"
+  ) {
     return;
   }
   if (_queue.length > 0) return; // already loaded
@@ -378,7 +419,10 @@ function hydrateQueueFromStorage() {
 }
 
 function persistQueueToStorage() {
-  if (typeof window === "undefined" || typeof window.localStorage === "undefined") {
+  if (
+    typeof window === "undefined" ||
+    typeof window.localStorage === "undefined"
+  ) {
     return;
   }
   try {
@@ -414,7 +458,10 @@ function isHubExportEnabled() {
  * @returns {boolean}
  */
 function isOnline() {
-  if (typeof navigator === "undefined" || typeof navigator.onLine !== "boolean") {
+  if (
+    typeof navigator === "undefined" ||
+    typeof navigator.onLine !== "boolean"
+  ) {
     // Assume online in non-browser contexts.
     return true;
   }
@@ -461,6 +508,8 @@ export const FamilyFundConnector = {
   enqueue: enqueuePacket,
   flush: flushHubQueue,
   getQueueSnapshot: getHubQueueSnapshot,
+  // alias for shim ergonomics:
+  sendToHub,
 };
 
 export default FamilyFundConnector;

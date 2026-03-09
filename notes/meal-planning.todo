@@ -14,11 +14,11 @@ B) UI (new/updated cards)
 - Labels: method/date/lot/pH/salt%/ppm/safe-handling; “medical-safe” icons honored.
 
 C) Agents
-- preservationAgent.js
+- preservationShim.js
   ☐ planBatch(method, recipe, inputs) → steps + consumables + InventoryDelta draft
   ☐ registerProcess(meta) → id; attach logs (temp, pH, salinity)
   ☐ finalizeBatch(measurements) → InventoryDelta + labels
-- sausageAgent.js
+- sausageShim.js
   ☐ scaleRecipe(form) → ingredient grams (salt %, cure ppm), ice/water %, yield
   ☐ casingNeeds(len_m, dia_mm, shrinkPct) → qty/size rolls
   ☐ grindPlan(cuts, plates) → ops list; bindCheck(mixTime/temp) → warning
@@ -27,11 +27,11 @@ C) Agents
   ☐ computePPM({batch_g, cure1_g, nitriteFraction}) → ppm
   ☐ cure1FromPPM({batch_g, targetPPM}) → grams
   ☐ equilibriumBrine({meat_g, water_g, saltPct, sugarPct, nitritePPM}) → grams
-- longLeadAgent.js (exists)
+- longLeadShim.js (exists)
   ☐ add: charcuterie phases (cure → equalize → smoke → rest → slice)
-- inventoryAgent.js (extend)
+- inventoryShim.js (extend)
   ☐ track materials (casings/spice/pink salt) consume[], finished goods produce[], location plans
-- labelAgent.js (extend)
+- labelShim.js (extend)
   ☐ buildPreservationLabels(meta) with method/pH/salt%/lot
   ☐ buildCharcuterieLabels(meta) with cure ppm, smoke date, safe-handling
 

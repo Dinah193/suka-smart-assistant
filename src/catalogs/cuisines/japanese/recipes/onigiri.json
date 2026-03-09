@@ -1,0 +1,421 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:20:00Z",
+  "meta": {
+    "id": "cuisines.japanese.recipes.onigiri",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Onigiri (Japanese Rice Balls) — Classic Base + Filling Options",
+    "subtitle": "Hand-formed seasoned rice triangles with nori and customizable fillings",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa-core",
+      "notes": [
+        "Canonical SSA catalog recipe.",
+        "Designed for deterministic planning: base recipe + optional filling modules.",
+        "Includes safe-handling notes for rice and fillings."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "japanese",
+    "category": "rice",
+    "mealArchetypes": ["snacks", "street_food", "breakfast", "bowls"],
+    "servingStyles": ["snacks", "street_food", "family_style"],
+    "plannerTags": [
+      "cuisine.japanese",
+      "dish.onigiri",
+      "course.snack",
+      "portable",
+      "batch.friendly",
+      "kid.friendly",
+      "customizable"
+    ]
+  },
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 1, "unit": "onigiri" },
+    "notes": "Makes 4 medium onigiri (about 100–120 g each), depending on shaping."
+  },
+  "time": {
+    "activeMins": 18,
+    "handsOffMins": 22,
+    "totalMins": 40
+  },
+  "difficulty": "beginner",
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": "some",
+    "notes": "Freeze plain/salted onigiri well; mayo-based fillings freeze poorly."
+  },
+  "tasteProfile": {
+    "sweet": 0,
+    "salty": 2,
+    "umami": 2,
+    "acid": 0,
+    "heat": 0,
+    "balanceNotes": "Salted rice + umami filling. Add furikake for extra savory depth."
+  },
+  "equipment": {
+    "minimum": [
+      "rice_cooker_or_pot",
+      "fine_mesh_strainer",
+      "mixing_bowl",
+      "measuring_cups",
+      "spoon"
+    ],
+    "recommended": [
+      "onigiri_mold",
+      "plastic_wrap",
+      "small_bowl",
+      "bamboo_rice_paddle",
+      "kitchen_scale"
+    ]
+  },
+  "dietFlags": [],
+  "allergens": {
+    "mayContain": ["fish", "soy", "sesame", "egg", "gluten"],
+    "commonTriggers": [
+      "soy_sauce_optional",
+      "furikake_optional",
+      "tuna_mayo_filling_optional",
+      "salmon_filling_optional"
+    ],
+    "notes": [
+      "Allergens depend on fillings and seasonings (furikake, tuna mayo, soy sauce).",
+      "For gluten-free, use GF tamari and verify furikake/seasonings are GF."
+    ]
+  },
+  "ingredients": [
+    {
+      "id": "short_grain_rice",
+      "label": "Japanese short-grain rice (or sushi rice)",
+      "role": "starch",
+      "amount": { "value": 300, "unit": "g" },
+      "notes": "About 1 1/2 cups dry. Short-grain gives best stickiness and shape."
+    },
+    {
+      "id": "water_for_rice",
+      "label": "Water (for cooking rice)",
+      "role": "base",
+      "amount": { "value": 420, "unit": "ml" },
+      "notes": "About 1 3/4 cups; adjust to your rice brand and cooker markings."
+    },
+    {
+      "id": "salt",
+      "label": "Fine salt",
+      "role": "seasoning",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "About 1 tsp. Used for seasoning rice and/or hands during shaping."
+    },
+    {
+      "id": "nori",
+      "label": "Nori sheets",
+      "role": "wrap",
+      "amount": { "value": 2, "unit": "sheet" },
+      "optional": true,
+      "notes": "Cut into strips to wrap each onigiri (prevents sticky hands while eating)."
+    },
+    {
+      "id": "furikake",
+      "label": "Furikake (Japanese rice seasoning)",
+      "role": "garnish",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true,
+      "notes": "Optional: mix into rice or sprinkle on outside."
+    },
+
+    {
+      "id": "umeboshi",
+      "label": "Umeboshi (pickled plum)",
+      "role": "filling",
+      "amount": { "value": 2, "unit": "each" },
+      "optional": true,
+      "notes": "Classic filling; salty-sour and helps with keeping quality."
+    },
+    {
+      "id": "canned_tuna",
+      "label": "Canned tuna, drained",
+      "role": "filling",
+      "amount": { "value": 120, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "mayonnaise",
+      "label": "Mayonnaise",
+      "role": "filling",
+      "amount": { "value": 30, "unit": "g" },
+      "optional": true,
+      "notes": "About 2 Tbsp; for tuna mayo filling."
+    },
+    {
+      "id": "soy_sauce",
+      "label": "Soy sauce",
+      "role": "seasoning",
+      "amount": { "value": 5, "unit": "ml" },
+      "optional": true,
+      "notes": "About 1 tsp; for tuna mayo seasoning or brushing."
+    },
+    {
+      "id": "cooked_salmon_flakes",
+      "label": "Cooked salmon flakes",
+      "role": "filling",
+      "amount": { "value": 120, "unit": "g" },
+      "optional": true,
+      "notes": "Use leftover cooked salmon or canned salmon; flake finely."
+    },
+    {
+      "id": "sesame_seeds",
+      "label": "Toasted sesame seeds",
+      "role": "garnish",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_rinse_rice",
+      "title": "Rinse the rice",
+      "activeMins": 5,
+      "handsOffMins": 0,
+      "instructions": [
+        "Place rice in a bowl and cover with water.",
+        "Swirl gently, then drain. Repeat 3–5 times until water is mostly clear.",
+        "Drain thoroughly in a fine mesh strainer for 2–3 minutes."
+      ],
+      "checks": ["Rice water runs mostly clear", "Rice drained well"]
+    },
+    {
+      "id": "step_02_cook_rice",
+      "title": "Cook the rice",
+      "activeMins": 3,
+      "handsOffMins": 20,
+      "instructions": [
+        "Cook the rinsed rice with measured water in a rice cooker, or in a pot with a tight lid.",
+        "If using a pot: bring to a boil, cover, reduce to low, cook 12 minutes; then rest off heat 10 minutes.",
+        "Fluff gently with a paddle/spoon to release steam without mashing grains."
+      ],
+      "timers": [
+        { "label": "Rice simmer (if stovetop)", "minutes": 12 },
+        { "label": "Rice rest (off heat)", "minutes": 10 }
+      ],
+      "checks": ["Rice is tender", "Grains cling lightly and hold shape"]
+    },
+    {
+      "id": "step_03_prepare_filling_options",
+      "title": "Prepare optional fillings",
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "instructions": [
+        "Umeboshi: pit if needed; keep whole or chop.",
+        "Tuna mayo: mix drained tuna + mayonnaise + a splash of soy sauce (optional).",
+        "Salmon: flake cooked salmon; optionally mix with a pinch of salt or sesame."
+      ],
+      "checks": ["Fillings are ready in small portions"]
+    },
+    {
+      "id": "step_04_season_rice_for_shaping",
+      "title": "Season rice for shaping",
+      "activeMins": 2,
+      "handsOffMins": 0,
+      "instructions": [
+        "While rice is warm (not piping hot), lightly salt it or salt your hands/water for shaping.",
+        "Optional: mix furikake into the rice for seasoned onigiri."
+      ],
+      "checks": [
+        "Rice is warm and workable",
+        "Salt/furikake evenly distributed (if used)"
+      ]
+    },
+    {
+      "id": "step_05_shape_onigiri",
+      "title": "Shape onigiri (triangle or round)",
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "instructions": [
+        "Prepare a small bowl of water with a pinch of salt. Wet hands lightly to prevent sticking.",
+        "Scoop about 1/2 cup warm rice into your palm, make a shallow well, and add 1–2 tsp filling (optional).",
+        "Cover filling with rice, then shape into a firm triangle (or round) by gently pressing with both hands.",
+        "Repeat for remaining rice. Avoid compressing too hard—aim for cohesive but tender."
+      ],
+      "checks": [
+        "Onigiri holds its shape",
+        "Filling is enclosed",
+        "Not overly dense"
+      ]
+    },
+    {
+      "id": "step_06_wrap_and_finish",
+      "title": "Wrap with nori and finish",
+      "activeMins": 2,
+      "handsOffMins": 0,
+      "instructions": [
+        "Cut nori into strips or rectangles and wrap around each onigiri just before eating.",
+        "Optional: sprinkle outside with furikake or sesame seeds.",
+        "Serve warm or room temperature."
+      ],
+      "checks": ["Nori applied (if using)", "Ready to serve"]
+    }
+  ],
+  "pairings": {
+    "serveWith": [
+      { "id": "miso_soup", "label": "Miso soup" },
+      { "id": "tsukemono", "label": "Japanese pickles (tsukemono)" },
+      { "id": "edamame", "label": "Edamame" },
+      { "id": "green_tea", "label": "Green tea" }
+    ],
+    "notes": "Onigiri is a portable starch; pair with soup, pickles, or a simple protein for balance."
+  },
+  "storage": {
+    "refrigerator": {
+      "duration": "24 hours",
+      "notes": [
+        "Best eaten same day. Rice hardens when chilled; wrap tightly to reduce drying.",
+        "Re-warm gently (microwave 20–40 seconds) and add nori after reheating."
+      ]
+    },
+    "freezer": {
+      "duration": "1 month",
+      "notes": [
+        "Freeze plain salted onigiri (no mayo-based fillings). Wrap tightly in plastic, then bag.",
+        "Thaw in fridge or microwave from frozen; add nori after reheating."
+      ]
+    }
+  },
+  "planner": {
+    "mealRole": "snack_or_side",
+    "weeknightNotes": "Use leftover rice or rice cooker batch. Make 6–8 onigiri for lunches.",
+    "shoppingSignals": [
+      "short_grain_rice",
+      "nori",
+      "furikake_optional",
+      "fillings_optional"
+    ]
+  },
+  "keywords": [
+    "onigiri",
+    "rice balls",
+    "japanese rice triangle",
+    "tuna mayo onigiri",
+    "umeboshi onigiri",
+    "salmon onigiri"
+  ],
+  "tags": [
+    "cuisine.japanese",
+    "dish.onigiri",
+    "course.snack",
+    "portable",
+    "batch.friendly",
+    "kid.friendly",
+    "customizable"
+  ],
+  "notes": [
+    "Food safety: plain salted onigiri is safer for room-temp carrying than mayo-based fillings. Keep cold fillings chilled and consume within safe time windows.",
+    "If rice is too hot to handle, let it cool 5–8 minutes; shaping works best while still warm.",
+    "For crisp nori, wrap right before eating; pre-wrapped nori can become chewy."
+  ],
+  "variations": [
+    {
+      "id": "var_plain_shio",
+      "label": "Shio Onigiri (Salt Only)",
+      "when": { "filling": "none" },
+      "adapt": {
+        "notes": [
+          "Skip fillings; season rice lightly with salt and shape.",
+          "Great for dipping into soup or serving with grilled fish."
+        ]
+      }
+    },
+    {
+      "id": "var_tuna_mayo",
+      "label": "Tuna Mayo",
+      "when": { "filling": "tuna_mayo" },
+      "adapt": {
+        "notes": [
+          "Mix tuna + mayo + soy sauce. Keep chilled and consume promptly.",
+          "Not ideal for freezing."
+        ]
+      }
+    },
+    {
+      "id": "var_umeboshi",
+      "label": "Umeboshi",
+      "when": { "filling": "umeboshi" },
+      "adapt": {
+        "notes": [
+          "Use 1/2 umeboshi per onigiri for stronger flavor.",
+          "Umeboshi helps keeping quality due to acidity and salt."
+        ]
+      }
+    },
+    {
+      "id": "var_salmon",
+      "label": "Salmon Flake",
+      "when": { "filling": "salmon" },
+      "adapt": {
+        "notes": [
+          "Use flaked cooked salmon. Optional sesame mixed in.",
+          "Freezes better than tuna mayo."
+        ]
+      }
+    }
+  ],
+  "summary": "Classic Japanese onigiri made with sticky short-grain rice, a touch of salt, optional nori wrap, and easy mix-and-match fillings like umeboshi, tuna mayo, or salmon flakes.",
+  "safety": {
+    "foodSafety": [
+      "Cool rice slightly before shaping to avoid burns; keep hands and tools clean.",
+      "If packing for later, cool quickly, wrap tightly, and refrigerate; avoid leaving mayo-based fillings at room temperature.",
+      "Reheat chilled onigiri briefly to soften rice; wrap nori after reheating."
+    ],
+    "allergenNotes": [
+      "Allergens depend on fillings (tuna, mayo/egg, soy sauce) and seasonings (furikake).",
+      "Verify gluten-free needs for soy sauce and seasonings."
+    ]
+  },
+  "ingredientGroups": [
+    {
+      "id": "grp_rice_base",
+      "label": "Rice Base",
+      "items": ["short_grain_rice", "water_for_rice", "salt"]
+    },
+    {
+      "id": "grp_wrapping_seasoning",
+      "label": "Wrap & Seasoning (optional)",
+      "items": ["nori", "furikake", "sesame_seeds"]
+    },
+    {
+      "id": "grp_fillings_optional",
+      "label": "Fillings (optional)",
+      "items": [
+        "umeboshi",
+        "canned_tuna",
+        "mayonnaise",
+        "soy_sauce",
+        "cooked_salmon_flakes"
+      ]
+    }
+  ],
+  "methods": ["cook_rice", "shape_handformed", "wrap_nori"],
+  "compat": {
+    "cuisineId": "cuisines.japanese",
+    "dishId": "cuisines.japanese.dishes.onigiri",
+    "aliases": [
+      "rice ball",
+      "japanese rice ball",
+      "onigiri triangles",
+      "tuna mayo onigiri"
+    ],
+    "searchBoost": [
+      "onigiri",
+      "rice ball",
+      "tuna mayo",
+      "umeboshi",
+      "salmon onigiri",
+      "nori wrap"
+    ]
+  }
+}

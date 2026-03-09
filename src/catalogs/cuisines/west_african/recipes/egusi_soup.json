@@ -1,0 +1,461 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-13",
+  "meta": {
+    "id": "recipe.west_african.egusi_soup",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "cuisineId": "cuisine.west_african",
+    "dishId": "dish.egusi_soup",
+    "label": "Egusi Soup",
+    "altLabels": ["Egusi Stew", "Melon Seed Soup"],
+    "source": "catalog",
+    "author": "SSA Canonical Catalog",
+    "regionHints": ["Nigeria", "Benin", "West Africa"],
+    "tags": [
+      "west_african",
+      "stew",
+      "soup",
+      "stew_and_starch",
+      "melon_seed",
+      "leafy_greens",
+      "batch_friendly"
+    ]
+  },
+  "summary": {
+    "oneLine": "A rich melon-seed thickened soup with pepper-tomato base and greens; served with rice, yam, or swallow.",
+    "notes": [
+      "Egusi varies widely by household: proteins, greens (spinach/ugwu/bitterleaf), and seasoning are flexible.",
+      "This SSA baseline emphasizes a cooked-down pepper-tomato base, then egusi thickening, then greens."
+    ]
+  },
+  "yields": {
+    "servings": 6,
+    "servingSizeNote": "Soup/stew servings (served with starch)."
+  },
+  "time": {
+    "totalMinutes": 95,
+    "activeMinutes": 30,
+    "restMinutes": 10
+  },
+  "difficulty": "intermediate",
+  "servingStyles": ["stew_and_starch", "family_style", "one_pot"],
+  "plannerHints": {
+    "batchFriendly": true,
+    "leftoversFriendly": true,
+    "weeknightBias": "medium",
+    "mealArchetypeId": "archetype_stew_with_starch"
+  },
+  "nutrition": {
+    "isEstimate": true,
+    "notes": [
+      "Egusi is calorie-dense due to seeds/oil; SSA nutrition pipeline should compute final values from ingredient quantities."
+    ]
+  },
+  "allergens": {
+    "mayContain": ["allergen_seed_optional"],
+    "commonTriggers": ["egusi_melon_seed_optional"],
+    "notes": [
+      "Egusi (melon seeds) may be considered a seed allergen for some households.",
+      "Optional dried fish/crayfish/shrimp are common in some variants—apply household allergen preferences."
+    ]
+  },
+  "equipment": {
+    "required": [
+      { "id": "pot_lidded", "label": "Lidded pot / Dutch oven", "qty": 1 },
+      { "id": "stove_burner", "label": "Stovetop burner", "qty": 1 },
+      { "id": "knife_chef", "label": "Chef’s knife", "qty": 1 },
+      { "id": "cutting_board", "label": "Cutting board", "qty": 1 },
+      { "id": "spoon_wooden", "label": "Wooden spoon", "qty": 1 },
+      { "id": "measuring_cups", "label": "Measuring cups", "qty": 1 }
+    ],
+    "optional": [
+      { "id": "blender", "label": "Blender", "qty": 1 },
+      { "id": "food_processor", "label": "Food processor", "qty": 1 }
+    ]
+  },
+  "ingredients": [
+    {
+      "id": "egusi_melon_seed_optional",
+      "label": "Ground egusi (melon seeds)",
+      "qty": 1.5,
+      "unit": "cup",
+      "role": "thickener",
+      "notes": [
+        "Use finely ground egusi; if coarse, blend briefly.",
+        "If your household treats egusi as non-optional, remove the '_optional' in your ingredient catalog or alias rules."
+      ]
+    },
+    {
+      "id": "oil_palm_red_optional",
+      "label": "Red palm oil",
+      "qty": 0.25,
+      "unit": "cup",
+      "role": "fat",
+      "optional": true,
+      "notes": [
+        "For lighter versions, use half red palm oil + half neutral oil."
+      ]
+    },
+    {
+      "id": "oil_neutral",
+      "label": "Neutral oil",
+      "qty": 0.25,
+      "unit": "cup",
+      "role": "fat",
+      "notes": [
+        "Adjust total oil based on desired richness and egusi fat release."
+      ]
+    },
+    {
+      "id": "onion_yellow",
+      "label": "Yellow onion",
+      "qty": 2,
+      "unit": "count",
+      "role": "aromatic",
+      "notes": ["One for base; one optional for broth/protein pot."]
+    },
+    {
+      "id": "tomato",
+      "label": "Tomatoes",
+      "qty": 4,
+      "unit": "count",
+      "role": "base",
+      "optional": true,
+      "notes": [
+        "Some egusi versions are less tomato-heavy; keep optional if you prefer."
+      ]
+    },
+    {
+      "id": "pepper_bell",
+      "label": "Red bell pepper",
+      "qty": 1,
+      "unit": "count",
+      "role": "base",
+      "optional": true
+    },
+    {
+      "id": "pepper_hot_scotch_bonnet_optional",
+      "label": "Scotch bonnet (or habanero)",
+      "qty": 1,
+      "unit": "count",
+      "role": "heat",
+      "optional": true,
+      "notes": ["Use half for medium heat; remove seeds for milder heat."]
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic",
+      "qty": 3,
+      "unit": "clove",
+      "role": "aromatic",
+      "optional": true
+    },
+    {
+      "id": "ginger",
+      "label": "Fresh ginger",
+      "qty": 1,
+      "unit": "tbsp",
+      "role": "aromatic",
+      "optional": true
+    },
+    {
+      "id": "stock_chicken_or_beef_optional",
+      "label": "Beef or chicken stock",
+      "qty": 4,
+      "unit": "cup",
+      "role": "liquid",
+      "optional": true,
+      "notes": ["Or use water plus seasoning; adjust salt carefully."]
+    },
+    {
+      "id": "water",
+      "label": "Water",
+      "qty": 2,
+      "unit": "cup",
+      "role": "liquid",
+      "notes": ["Total liquid varies with protein choice and greens moisture."]
+    },
+    {
+      "id": "seasoning_stock_cube_optional",
+      "label": "Stock cube / seasoning cube",
+      "qty": 1,
+      "unit": "count",
+      "role": "umami",
+      "optional": true
+    },
+    {
+      "id": "salt",
+      "label": "Salt",
+      "qty": 2,
+      "unit": "tsp",
+      "role": "seasoning",
+      "notes": ["Start lower if using salted stock/cubes; adjust at end."]
+    },
+    {
+      "id": "pepper_black",
+      "label": "Black pepper",
+      "qty": 0.5,
+      "unit": "tsp",
+      "role": "spice",
+      "optional": true
+    },
+    {
+      "id": "spice_thyme_dried",
+      "label": "Dried thyme",
+      "qty": 1,
+      "unit": "tsp",
+      "role": "spice",
+      "optional": true
+    },
+    {
+      "id": "spice_bay_leaf",
+      "label": "Bay leaf",
+      "qty": 2,
+      "unit": "count",
+      "role": "spice",
+      "optional": true
+    },
+    {
+      "id": "leafy_greens_spinach",
+      "label": "Spinach (or other leafy greens)",
+      "qty": 8,
+      "unit": "cup",
+      "role": "greens",
+      "notes": [
+        "Chopped. Alternative greens: bitterleaf (optional), pumpkin leaves, kale."
+      ]
+    },
+    {
+      "id": "bitterleaf_optional",
+      "label": "Bitterleaf (washed)",
+      "qty": 2,
+      "unit": "cup",
+      "role": "greens",
+      "optional": true,
+      "notes": ["Adds classic bitterness; rinse/washed as appropriate."]
+    },
+    {
+      "id": "fish_dried_smoked_optional",
+      "label": "Smoked dried fish",
+      "qty": 1,
+      "unit": "count",
+      "role": "umami",
+      "optional": true,
+      "notes": ["Optional; remove bones and apply fish allergen rules."]
+    },
+    {
+      "id": "dried_crayfish_optional",
+      "label": "Ground dried crayfish",
+      "qty": 2,
+      "unit": "tbsp",
+      "role": "umami",
+      "optional": true,
+      "notes": ["Optional; shellfish allergen."]
+    },
+    {
+      "id": "shrimp_dried_optional",
+      "label": "Dried shrimp",
+      "qty": 2,
+      "unit": "tbsp",
+      "role": "umami",
+      "optional": true,
+      "notes": ["Optional; shellfish allergen."]
+    },
+    {
+      "id": "beef_generic",
+      "label": "Beef (stew cuts)",
+      "qty": 1.5,
+      "unit": "lb",
+      "role": "protein",
+      "optional": true,
+      "notes": ["Choose one protein set below; mix-and-match is common."]
+    },
+    {
+      "id": "goat",
+      "label": "Goat meat",
+      "qty": 1.5,
+      "unit": "lb",
+      "role": "protein",
+      "optional": true
+    },
+    {
+      "id": "chicken_generic",
+      "label": "Chicken pieces",
+      "qty": 2,
+      "unit": "lb",
+      "role": "protein",
+      "optional": true
+    }
+  ],
+  "techniques": [
+    "prep_mise_en_place",
+    "blend_optional",
+    "saute",
+    "reduce",
+    "stew",
+    "season_to_taste",
+    "rest"
+  ],
+  "steps": [
+    {
+      "id": "step.prep_protein",
+      "title": "Prep protein and start broth",
+      "body": "Choose your protein (beef, goat, or chicken). Season lightly with salt and black pepper. Add to a pot with 1 chopped onion (optional), thyme/bay leaf (optional), stock cube (optional), and enough water/stock to cover. Simmer until protein is tender (beef/goat 35–55 min; chicken 20–30 min). Reserve the broth.",
+      "timeMinutes": 50,
+      "timers": [
+        { "label": "Simmer protein (beef/goat)", "seconds": 2700 },
+        { "label": "Simmer protein (chicken)", "seconds": 1500 }
+      ],
+      "hazards": []
+    },
+    {
+      "id": "step.make_base",
+      "title": "Make pepper-tomato base (optional but recommended)",
+      "body": "Blend (or finely chop) tomatoes (optional), bell pepper (optional), scotch bonnet (optional), garlic, ginger, and part of the onion. Set aside.",
+      "timeMinutes": 10,
+      "timers": [{ "label": "Blend base", "seconds": 600 }],
+      "hazards": [
+        {
+          "type": "pepper",
+          "message": "Use gloves when handling very hot peppers; avoid touching eyes/face and ventilate when blending."
+        }
+      ]
+    },
+    {
+      "id": "step.saute_and_reduce_base",
+      "title": "Sauté and cook down the base",
+      "body": "Heat oils (red palm oil optional + neutral oil) over medium heat. Add remaining chopped onion and sauté 3–5 minutes. Add blended base (if using) and simmer uncovered 10–15 minutes until thickened and the raw taste cooks off.",
+      "timeMinutes": 18,
+      "timers": [
+        { "label": "Sauté onion", "seconds": 240 },
+        { "label": "Reduce base", "seconds": 900 }
+      ],
+      "hazards": [
+        {
+          "type": "splatter",
+          "message": "Pepper-tomato base may splatter; reduce heat and stir carefully."
+        }
+      ]
+    },
+    {
+      "id": "step.bloom_egusi",
+      "title": "Bloom and thicken with egusi",
+      "body": "Reduce heat to medium-low. Sprinkle in ground egusi while stirring to prevent clumps. Stir 2–3 minutes so egusi absorbs oil and begins to ‘bloom.’ Add 1–2 cups reserved broth (or stock/water) gradually, stirring until a thick paste forms, then loosen to a stew consistency.",
+      "timeMinutes": 12,
+      "timers": [{ "label": "Bloom egusi", "seconds": 180 }],
+      "hazards": []
+    },
+    {
+      "id": "step.simmer_with_protein_umami",
+      "title": "Simmer with protein and optional umami builders",
+      "body": "Add cooked protein and 2–3 cups broth (as needed). Add smoked fish/crayfish/dried shrimp (optional) if allowed by household allergens. Simmer gently 15–20 minutes so flavors meld and egusi fully cooks.",
+      "timeMinutes": 20,
+      "timers": [{ "label": "Simmer soup", "seconds": 1200 }],
+      "hazards": []
+    },
+    {
+      "id": "step.add_greens_finish",
+      "title": "Add greens, finish, and rest",
+      "body": "Stir in spinach and bitterleaf (optional). Simmer 3–5 minutes until wilted. Taste and adjust salt/pepper. Turn off heat and rest 8–10 minutes before serving to allow body to set.",
+      "timeMinutes": 10,
+      "timers": [
+        { "label": "Wilt greens", "seconds": 240 },
+        { "label": "Rest", "seconds": 600 }
+      ],
+      "hazards": []
+    }
+  ],
+  "serving": {
+    "suggestions": [
+      "Serve with rice, yam, plantain, or swallow (fufu/eba) depending on household preference.",
+      "A small side of pepper sauce can be served for extra heat if desired."
+    ],
+    "garnishes": ["pepper_sauce_optional", "lime_optional"],
+    "storage": {
+      "refrigeratorDays": 4,
+      "freezerDays": 90,
+      "reheatNotes": [
+        "Reheat gently with a splash of water/stock; egusi thickens as it cools.",
+        "Avoid hard boiling after greens are added to preserve color and texture."
+      ]
+    }
+  },
+  "adaptation": {
+    "donenessTargets": {
+      "egusiTexture": "thick_spoon_coating",
+      "baseReduction": "cooked_down_no_raw_tomato",
+      "greens": "wilted_not_overcooked"
+    },
+    "substitutions": [
+      {
+        "whenMissing": ["oil_palm_red_optional"],
+        "useInstead": ["oil_neutral", "oil_olive_optional"],
+        "notes": "Red palm oil adds color and distinctive flavor; neutral oil yields a lighter profile."
+      },
+      {
+        "whenMissing": ["pepper_hot_scotch_bonnet_optional"],
+        "useInstead": ["pepper_hot_habanero", "pepper_red_flakes"],
+        "notes": "Habanero is closest in fruity heat; start small and adjust."
+      },
+      {
+        "whenMissing": ["leafy_greens_spinach"],
+        "useInstead": ["kale_optional", "collard_greens_optional"],
+        "notes": "Use hearty greens if needed; simmer a bit longer for tenderness."
+      }
+    ],
+    "equipmentFallbacks": [
+      {
+        "whenMissing": ["blender"],
+        "doInstead": "Finely chop tomatoes/peppers/onion/garlic/ginger; simmer longer to break down. A rustic texture is acceptable."
+      }
+    ],
+    "allergenConsiderations": [
+      {
+        "ifAllergenActive": "fish",
+        "avoid": [
+          "fish_dried_smoked_optional",
+          "dried_crayfish_optional",
+          "shrimp_dried_optional"
+        ],
+        "notes": "Use stock and careful seasoning for umami instead of seafood-based boosters."
+      },
+      {
+        "ifAllergenActive": "shellfish",
+        "avoid": ["dried_crayfish_optional", "shrimp_dried_optional"],
+        "notes": "Crayfish and dried shrimp are shellfish triggers; omit entirely if active."
+      }
+    ]
+  },
+  "qa": {
+    "validators": {
+      "requiresCatalogIngredientIds": true,
+      "requiresTechniqueIds": true,
+      "requiresEquipmentIds": true
+    },
+    "knownGood": [
+      "Egusi should be fully cooked (no raw seed taste) and thicken the broth to coat a spoon.",
+      "Base (if used) should be cooked down to avoid a raw pepper-tomato flavor.",
+      "Greens should be wilted but not cooked to mush."
+    ],
+    "commonIssues": [
+      {
+        "problem": "Egusi is clumpy",
+        "likelyCause": "Added too quickly or without enough stirring/oil contact",
+        "fix": "Sprinkle gradually while stirring; bloom in oil first, then add broth slowly."
+      },
+      {
+        "problem": "Soup tastes raw or bitter",
+        "likelyCause": "Base not cooked down or bitterleaf not washed enough",
+        "fix": "Reduce base longer; rinse bitterleaf thoroughly and add later in cooking."
+      },
+      {
+        "problem": "Too oily on top",
+        "likelyCause": "Excess oil relative to egusi and liquid",
+        "fix": "Reduce oil next time; skim excess oil or add more broth and simmer gently to emulsify."
+      }
+    ]
+  }
+}

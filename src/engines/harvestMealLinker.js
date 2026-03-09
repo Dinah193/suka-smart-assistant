@@ -19,7 +19,7 @@
  *   - hub export: if enabled, format + send anonymized/aggregated packet to the Hub
  */
 
- // --- Soft/defensive imports (local services are optional, engine still runs in degraded mode) ---
+// --- Soft/defensive imports (local services are optional, engine still runs in degraded mode) ---
 
 async function softImport(modulePath) {
   try {
@@ -95,7 +95,8 @@ function emit(type, source, data) {
 // --- Inventory helpers ---
 async function upsertHarvestIntoInventory(harvest) {
   // harvest: { id, items: [{ name, qty, unit }], harvestedAt, gardenZone?, notes? }
-  if (!harvest || !Array.isArray(harvest.items) || harvest.items.length === 0) return { updated: false };
+  if (!harvest || !Array.isArray(harvest.items) || harvest.items.length === 0)
+    return { updated: false };
 
   // If InventoryService exists, call it; otherwise just emit an event as a “virtual update”
   if (InventoryService?.addOrIncrementBatch) {
@@ -208,7 +209,9 @@ function rankAndFilterRecipes(candidates, harvest, prefs) {
     }
     if (prefs?.donenessHints && r?.techniques) {
       // If recipe techniques support doneness hints the user cares about, add a modest boost
-      const matches = r.techniques.filter((t) => prefs.donenessHints.includes(t)).length;
+      const matches = r.techniques.filter((t) =>
+        prefs.donenessHints.includes(t)
+      ).length;
       if (matches > 0) prefBonus += Math.min(0.1, matches * 0.03);
     }
 
@@ -243,7 +246,9 @@ function buildSuggestedCookingSession(candidate, harvest) {
       window: {
         from: nowISO(),
         // lightweight lookahead window; scheduler can adjust
-        to: new Date(Date.now() + state.config.lookaheadDays * 86400000).toISOString(),
+        to: new Date(
+          Date.now() + state.config.lookaheadDays * 86400000
+        ).toISOString(),
       },
     },
     meta: {
@@ -268,7 +273,8 @@ function buildSuggestedCookingSession(candidate, harvest) {
           id: generateId("task"),
           type: "cook",
           title: recipe?.title || "Cook",
-          notes: "Auto-suggested from recipe template; exact steps will be resolved by cooking engine.",
+          notes:
+            "Auto-suggested from recipe template; exact steps will be resolved by cooking engine.",
           estimatedMinutes: recipe?.estimatedMinutes || 30,
         },
       ],
@@ -325,7 +331,8 @@ async function processHarvestRecord(harvest) {
   await upsertHarvestIntoInventory(harvest);
 
   // 2) Fetch household prefs (degraded if unavailable)
-  const prefs = (HouseholdPrefs?.get?.() || HouseholdPrefs?.getCached?.()) ?? {};
+  const prefs =
+    (HouseholdPrefs?.get?.() || HouseholdPrefs?.getCached?.()) ?? {};
 
   // 3) Find candidate recipes
   const candidates = await findRecipeCandidates(harvest, prefs);
@@ -413,22 +420,14 @@ export async function start(config = {}) {
   state.config = { ...state.config, ...config };
 
   // Load dependencies
-  const [
-    evb,
-    ff,
-    inv,
-    tmpl,
-    prefs,
-    hubFmt,
-    hubConn,
-  ] = await Promise.all([
-    softImport("../services/eventBus.js"),
-    softImport("../config/featureFlags.js"),
+  const [evb, ff, inv, tmpl, prefs, hubFmt, hubConn] = await Promise.all([
+    softImport("../services/events/eventBus.js"),
+    softImport("@/config/featureFlags.json"),
     softImport("../domain/inventory/InventoryService.js"),
     softImport("../stores/TemplateStore.js"),
     softImport("../services/HouseholdPrefs.js"),
-    softImport("../hub/HubPacketFormatter.js"),
-    softImport("../hub/FamilyFundConnector.js"),
+    softImport("@/services/hub/HubPacketFormatter.js"),
+    softImport("@/services/hub/FamilyFundConnector.js"),
   ]);
 
   eventBus = evb?.default || evb || eventBus;
@@ -440,7 +439,9 @@ export async function start(config = {}) {
   FamilyFundConnector = hubConn?.default || hubConn || FamilyFundConnector;
 
   if (!eventBus?.on || !eventBus?.emit) {
-    throw new Error("harvestMealLinker requires a functional eventBus with on/emit.");
+    throw new Error(
+      "harvestMealLinker requires a functional eventBus with on/emit."
+    );
   }
 
   // Subscribe to garden harvest logs (canonical input)
@@ -453,7 +454,11 @@ export async function start(config = {}) {
   // Optional: support direct imports that carry garden payloads
   eventBus.on("import.parsed", (evt) => {
     const data = evt?.data;
-    if (data?.domain === "garden" && data?.type === "harvest" && Array.isArray(data?.items)) {
+    if (
+      data?.domain === "garden" &&
+      data?.type === "harvest" &&
+      Array.isArray(data?.items)
+    ) {
       enqueueHarvest({
         id: data.id || generateId("harvest"),
         items: data.items,

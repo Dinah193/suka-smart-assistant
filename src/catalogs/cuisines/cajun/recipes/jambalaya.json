@@ -1,0 +1,121 @@
+{
+  "id": "cajun_jambalaya",
+  "name": "Cajun Jambalaya",
+  "servings": 8,
+  "ingredients": [
+    { "item": "neutral oil", "amount": 2, "unit": "tbsp" },
+
+    {
+      "item": "andouille sausage",
+      "amount": 1,
+      "unit": "lb",
+      "prep": "sliced into rounds"
+    },
+    {
+      "item": "chicken thighs",
+      "amount": 2,
+      "unit": "lb",
+      "prep": "boneless/skinless, cut into bite-size pieces"
+    },
+
+    { "item": "yellow onion", "amount": 1, "unit": "large", "prep": "diced" },
+    {
+      "item": "green bell pepper",
+      "amount": 1,
+      "unit": "large",
+      "prep": "diced"
+    },
+    { "item": "celery", "amount": 3, "unit": "stalks", "prep": "diced" },
+    { "item": "garlic", "amount": 4, "unit": "cloves", "prep": "minced" },
+
+    { "item": "tomato paste", "amount": 2, "unit": "tbsp" },
+    {
+      "item": "crushed tomatoes",
+      "amount": 1,
+      "unit": "can",
+      "prep": "14-15 oz (optional for a slightly redder jambalaya)"
+    },
+
+    {
+      "item": "long-grain white rice",
+      "amount": 2.5,
+      "unit": "cups",
+      "prep": "rinsed and drained"
+    },
+    { "item": "chicken stock", "amount": 5, "unit": "cups" },
+
+    { "item": "bay leaves", "amount": 2, "unit": "each" },
+    { "item": "Cajun seasoning", "amount": 2, "unit": "tbsp" },
+    { "item": "dried thyme", "amount": 1, "unit": "tsp" },
+    { "item": "smoked paprika", "amount": 1, "unit": "tsp" },
+    { "item": "black pepper", "amount": 0.5, "unit": "tsp" },
+    { "item": "kosher salt", "amount": 1, "unit": "tsp" },
+
+    { "item": "Worcestershire sauce", "amount": 1, "unit": "tbsp" },
+    {
+      "item": "hot sauce",
+      "amount": 1,
+      "unit": "tsp",
+      "prep": "optional, or to taste"
+    },
+
+    {
+      "item": "green onions",
+      "amount": 4,
+      "unit": "stalks",
+      "prep": "sliced (for garnish)"
+    },
+    {
+      "item": "fresh parsley",
+      "amount": 0.25,
+      "unit": "cup",
+      "prep": "chopped (for garnish)"
+    }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "text": "Prep: Dice onion, bell pepper, and celery. Mince garlic. Slice sausage and cut chicken into bite-size pieces. Rinse rice until the water runs mostly clear; drain well."
+    },
+    {
+      "order": 2,
+      "text": "Brown the sausage: Heat oil in a heavy pot or Dutch oven over medium-high heat. Add sausage and cook until browned. Transfer sausage to a plate, leaving drippings in the pot."
+    },
+    {
+      "order": 3,
+      "text": "Brown the chicken: Add chicken to the pot. Cook until lightly browned on the outside (it does not need to be fully cooked). Transfer to the plate with sausage."
+    },
+    {
+      "order": 4,
+      "text": "Saute the trinity: Reduce heat to medium. Add onion, bell pepper, and celery. Cook until softened and fragrant, scraping up browned bits. Add garlic and cook 30–60 seconds."
+    },
+    {
+      "order": 5,
+      "text": "Build flavor base: Stir in tomato paste and cook 1 minute. If using crushed tomatoes, stir them in and cook 1–2 minutes to reduce slightly."
+    },
+    {
+      "order": 6,
+      "text": "Add rice and toast: Add drained rice to the pot and stir well to coat the grains in the seasoned base. Cook 1–2 minutes, stirring, to lightly toast."
+    },
+    {
+      "order": 7,
+      "text": "Simmer: Add chicken stock, bay leaves, Cajun seasoning, thyme, paprika, black pepper, salt, Worcestershire, and optional hot sauce. Stir to combine, then bring to a gentle boil."
+    },
+    {
+      "order": 8,
+      "text": "Cook covered: Reduce heat to low, cover, and simmer until the rice is tender and most liquid is absorbed. Avoid lifting the lid frequently. If needed, stir once halfway through to prevent sticking."
+    },
+    {
+      "order": 9,
+      "text": "Finish proteins: Stir sausage and chicken back into the pot. Cover and cook until the chicken is fully done and everything is hot throughout."
+    },
+    {
+      "order": 10,
+      "text": "Rest and fluff: Remove from heat and let rest covered 10 minutes. Remove bay leaves. Fluff gently with a fork."
+    },
+    {
+      "order": 11,
+      "text": "Serve: Garnish with green onions and parsley. Taste and adjust Cajun seasoning, salt, and hot sauce as desired."
+    }
+  ]
+}

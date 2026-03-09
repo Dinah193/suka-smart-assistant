@@ -33,7 +33,7 @@ import React, { useEffect, useMemo, useState } from "react";
 // ---- Defensive imports -----------------------------------------------------
 let eventBus;
 try {
-  eventBus = require("../../services/eventBus.js").default;
+  eventBus = require("../../services/events/eventBus.js").default;
 } catch {
   eventBus = { emit: () => {} };
 }
@@ -55,7 +55,12 @@ const styles = {
     display: "grid",
     gap: 8,
   },
-  row: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 },
+  row: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+  },
   title: { fontWeight: 800, fontSize: 13.5 },
   metaRow: { display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" },
   pill: {
@@ -98,7 +103,13 @@ const styles = {
     border: "1px solid rgba(0,0,0,0.2)",
   },
   note: { fontSize: 12, opacity: 0.9 },
-  subList: { margin: "6px 0 0 0", padding: 0, listStyle: "disc inside", opacity: 0.9, fontSize: 12.5 },
+  subList: {
+    margin: "6px 0 0 0",
+    padding: 0,
+    listStyle: "disc inside",
+    opacity: 0.9,
+    fontSize: 12.5,
+  },
   footer: {
     padding: "10px 12px",
     borderTop: "1px solid rgba(255,255,255,0.08)",
@@ -115,8 +126,15 @@ const styles = {
 const isoNow = () => new Date().toISOString();
 const emitUi = (action, data = {}) => {
   try {
-    eventBus.emit({ type: "session.ui.click", ts: isoNow(), source: "SessionUpcomingPanel", data: { action, ...data } });
-  } catch { /* noop */ }
+    eventBus.emit({
+      type: "session.ui.click",
+      ts: isoNow(),
+      source: "SessionUpcomingPanel",
+      data: { action, ...data },
+    });
+  } catch {
+    /* noop */
+  }
 };
 const mmss = (sec = 0) => {
   const s = Math.max(0, sec | 0);
@@ -145,11 +163,17 @@ export default function SessionUpcomingPanel({
   pillRenderer,
 }) {
   const steps = Array.isArray(session?.steps) ? session.steps : [];
-  const upcoming = useMemo(() => steps.slice(Math.max(0, currentIndex + 1)), [steps, currentIndex]);
+  const upcoming = useMemo(
+    () => steps.slice(Math.max(0, currentIndex + 1)),
+    [steps, currentIndex]
+  );
 
   // Precompute simple totals
   const remainingDur = useMemo(() => {
-    return upcoming.reduce((sum, s) => sum + (Number.isFinite(s?.durationSec) ? s.durationSec : 0), 0);
+    return upcoming.reduce(
+      (sum, s) => sum + (Number.isFinite(s?.durationSec) ? s.durationSec : 0),
+      0
+    );
   }, [upcoming]);
 
   const eta = useMemo(() => {
@@ -161,7 +185,9 @@ export default function SessionUpcomingPanel({
   }, [remainingDur]);
 
   // Guard states for visible upcoming (lazy-evaluated)
-  const [guardMap, setGuardMap] = useState(/** @type {Record<number,{ok:boolean,failed:string[]}|undefined>} */({}));
+  const [guardMap, setGuardMap] = useState(
+    /** @type {Record<number,{ok:boolean,failed:string[]}|undefined>} */ ({})
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -191,9 +217,11 @@ export default function SessionUpcomingPanel({
   const renderPill = (label, variant = "ok") => {
     if (pillRenderer) return pillRenderer(label, variant);
     const base =
-      variant === "bad" ? styles.badPill :
-      variant === "warn" ? styles.warnPill :
-      styles.pill;
+      variant === "bad"
+        ? styles.badPill
+        : variant === "warn"
+        ? styles.warnPill
+        : styles.pill;
     return <span style={base}>{label}</span>;
   };
 
@@ -219,7 +247,9 @@ export default function SessionUpcomingPanel({
           const cue = s?.metadata?.donenessCue || null;
           const temp = s?.metadata?.tempTargetF || null;
           const invNotes = s?.metadata?.inventoryNotes;
-          const subs = Array.isArray(s?.metadata?.substitutions) ? s.metadata.substitutions : null;
+          const subs = Array.isArray(s?.metadata?.substitutions)
+            ? s.metadata.substitutions
+            : null;
 
           const guardState = guardMap[i];
           const guardOk = guardState ? guardState.ok : undefined;
@@ -232,9 +262,13 @@ export default function SessionUpcomingPanel({
                   Step {absoluteIndex + 1}: {s?.title || "Untitled"}
                 </div>
                 <div style={styles.metaRow} aria-label="time and guard">
-                  {duration ? renderPill(mmss(duration), "ok") : renderPill("open", "warn")}
-                  {guardOk === true ? renderPill("guards ok", "ok")
-                    : guardOk === false ? renderPill(`blocked: ${failed.join(", ")}`, "bad")
+                  {duration
+                    ? renderPill(mmss(duration), "ok")
+                    : renderPill("open", "warn")}
+                  {guardOk === true
+                    ? renderPill("guards ok", "ok")
+                    : guardOk === false
+                    ? renderPill(`blocked: ${failed.join(", ")}`, "bad")
                     : renderPill("guards ?", "warn")}
                 </div>
               </div>
@@ -242,30 +276,58 @@ export default function SessionUpcomingPanel({
               {/* secondary meta */}
               <div className="meta" style={styles.metaRow}>
                 {cue ? renderPill(`doneness: ${cue}`, "ok") : null}
-                {Number.isFinite(temp) && temp ? renderPill(`target: ${temp} °F`, "ok") : null}
-                {blockers?.length ? blockers.map((b, bi) => <span key={`b-${bi}`} style={styles.pill}>{b}</span>) : null}
+                {Number.isFinite(temp) && temp
+                  ? renderPill(`target: ${temp} °F`, "ok")
+                  : null}
+                {blockers?.length
+                  ? blockers.map((b, bi) => (
+                      <span key={`b-${bi}`} style={styles.pill}>
+                        {b}
+                      </span>
+                    ))
+                  : null}
               </div>
 
               {/* Notes */}
               {s?.desc ? <div style={styles.note}>{s.desc}</div> : null}
-              {invNotes ? <div style={styles.note}><strong>Inventory:</strong> {String(invNotes)}</div> : null}
+              {invNotes ? (
+                <div style={styles.note}>
+                  <strong>Inventory:</strong> {String(invNotes)}
+                </div>
+              ) : null}
               {subs?.length ? (
                 <div>
-                  <div style={{ ...styles.note, marginBottom: 4 }}><strong>Substitutions:</strong></div>
+                  <div style={{ ...styles.note, marginBottom: 4 }}>
+                    <strong>Substitutions:</strong>
+                  </div>
                   <ul style={styles.subList}>
-                    {subs.map((x, xi) => <li key={xi}>{typeof x === "string" ? x : (x?.label || JSON.stringify(x))}</li>)}
+                    {subs.map((x, xi) => (
+                      <li key={xi}>
+                        {typeof x === "string"
+                          ? x
+                          : x?.label || JSON.stringify(x)}
+                      </li>
+                    ))}
                   </ul>
                 </div>
               ) : null}
 
               {/* Domain extras slot */}
-              {typeof renderStepExtras === "function" ? renderStepExtras(s, absoluteIndex) : null}
+              {typeof renderStepExtras === "function"
+                ? renderStepExtras(s, absoluteIndex)
+                : null}
 
               <div style={styles.btnRow}>
                 <button
                   type="button"
                   style={{ ...styles.btn, ...styles.btnPrimary }}
-                  onClick={() => { emitUi("upcoming.jump", { idx: absoluteIndex, id: session?.id }); onJumpTo?.(absoluteIndex); }}
+                  onClick={() => {
+                    emitUi("upcoming.jump", {
+                      idx: absoluteIndex,
+                      id: session?.id,
+                    });
+                    onJumpTo?.(absoluteIndex);
+                  }}
                   aria-label={`Jump to step ${absoluteIndex + 1}`}
                 >
                   Jump
@@ -273,7 +335,13 @@ export default function SessionUpcomingPanel({
                 <button
                   type="button"
                   style={styles.btn}
-                  onClick={() => { emitUi("upcoming.skip", { idx: absoluteIndex, id: session?.id }); onSkip?.(absoluteIndex); }}
+                  onClick={() => {
+                    emitUi("upcoming.skip", {
+                      idx: absoluteIndex,
+                      id: session?.id,
+                    });
+                    onSkip?.(absoluteIndex);
+                  }}
                   aria-label={`Skip step ${absoluteIndex + 1}`}
                 >
                   Skip
@@ -285,8 +353,12 @@ export default function SessionUpcomingPanel({
       </ul>
 
       <div style={styles.footer}>
-        <div><strong>Total remaining:</strong> {mmss(remainingDur)}</div>
-        <div><strong>ETA:</strong> {eta}</div>
+        <div>
+          <strong>Total remaining:</strong> {mmss(remainingDur)}
+        </div>
+        <div>
+          <strong>ETA:</strong> {eta}
+        </div>
       </div>
     </div>
   );

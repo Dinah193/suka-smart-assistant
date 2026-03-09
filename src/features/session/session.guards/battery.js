@@ -42,8 +42,8 @@
  * -----------------------------------------------------------------------------
  */
 
-import eventBus from "../../../services/eventBus";
-import { featureFlags } from "../../../services/featureFlags";
+import eventBus from "../../../services/events/eventBus";
+import { featureFlags } from "../../../config/featureFlags";
 
 /**
  * @typedef {Object} SessionStep
@@ -209,7 +209,10 @@ function isGuardEnabled(settings) {
   if (typeof fromSettings === "boolean") return fromSettings;
 
   try {
-    if (featureFlags && Object.prototype.hasOwnProperty.call(featureFlags, "batteryGuard")) {
+    if (
+      featureFlags &&
+      Object.prototype.hasOwnProperty.call(featureFlags, "batteryGuard")
+    ) {
       return !!featureFlags.batteryGuard;
     }
   } catch {
@@ -244,8 +247,13 @@ function withDefaults(s) {
  */
 function shouldApplyForStep(step) {
   if (!step) return true;
-  if (Array.isArray(step.blockers) && step.blockers.includes("equipment")) return true;
-  if (step.metadata && (step.metadata.requiresBatteryPower || isFinitePct(step.metadata.minBatteryPct))) {
+  if (Array.isArray(step.blockers) && step.blockers.includes("equipment"))
+    return true;
+  if (
+    step.metadata &&
+    (step.metadata.requiresBatteryPower ||
+      isFinitePct(step.metadata.minBatteryPct))
+  ) {
     return true;
   }
   return false;
@@ -259,7 +267,8 @@ function chooseMinPct(step, settings) {
   const explicit = step?.metadata?.minBatteryPct;
   if (isFinitePct(explicit)) return clampPct(explicit);
   // Heuristic: longer steps deserve a bit more buffer.
-  if (isLongStep(step, settings)) return Math.max(settings.minBatteryPctDefault, 20);
+  if (isLongStep(step, settings))
+    return Math.max(settings.minBatteryPctDefault, 20);
   return settings.minBatteryPctDefault;
 }
 
@@ -288,7 +297,12 @@ function clampPct(v) {
 function safeEmitDebug(type, data) {
   try {
     if (eventBus && typeof eventBus.emit === "function") {
-      eventBus.emit({ type, ts: new Date().toISOString(), source: "batteryGuard", data });
+      eventBus.emit({
+        type,
+        ts: new Date().toISOString(),
+        source: "batteryGuard",
+        data,
+      });
     }
   } catch {
     // no-op
@@ -331,7 +345,9 @@ async function readBatterySnapshot() {
     levelPct: Math.round((Number.isFinite(level) ? level : 0) * 100),
     level: Number.isFinite(level) ? level : 0,
     chargingTimeSec: Number.isFinite(chargingTime) ? chargingTime : null,
-    dischargingTimeSec: Number.isFinite(dischargingTime) ? dischargingTime : null,
+    dischargingTimeSec: Number.isFinite(dischargingTime)
+      ? dischargingTime
+      : null,
   };
 }
 
@@ -344,7 +360,8 @@ async function readBatterySnapshot() {
  */
 function estimateReachPct(snap, targetPct) {
   if (!snap.charging) return undefined;
-  if (!Number.isFinite(snap.chargingTimeSec) || snap.chargingTimeSec == null) return undefined;
+  if (!Number.isFinite(snap.chargingTimeSec) || snap.chargingTimeSec == null)
+    return undefined;
 
   const remainingPct = Math.max(0, targetPct - snap.levelPct);
   if (remainingPct <= 0) return new Date().toISOString();
@@ -380,7 +397,10 @@ export async function nextBatteryLiftTime(ctx = {}) {
   const snap = await readBatterySnapshot().catch(() => null);
   if (!snap) return null;
   if (!snap.charging) return null;
-  const iso = estimateReachPct(snap, withDefaults(ctx.settings).minBatteryPctDefault);
+  const iso = estimateReachPct(
+    snap,
+    withDefaults(ctx.settings).minBatteryPctDefault
+  );
   return iso || null;
 }
 

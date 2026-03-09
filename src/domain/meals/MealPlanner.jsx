@@ -30,15 +30,18 @@
 import React, { useEffect, useMemo, useState } from "react";
 
 // ASSUMED SERVICES (these should exist elsewhere in your SSA project)
-import eventBus from "../../services/eventBus"; // shared app-wide bus
-import featureFlags from "../../config/featureFlags.json"; // toggles incl. familyFundMode
+import eventBus from "../../services/events/eventBus"; // shared app-wide bus
+import featureFlags from "@/config/featureFlags.json"; // toggles incl. familyFundMode
 // Assume these exist and have reasonable interfaces:
-import { formatMealPlanForHub } from "../../services/HubPacketFormatter";
-import FamilyFundConnector from "../../services/FamilyFundConnector";
+import { formatMealPlanForHub } from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 // These are optional helpers — defensive import pattern:
-import { getRecentImports } from "../../services/import/ImportIntelligenceService";
+import { getRecentImports } from "../../services/imports/ImportIntelligenceService";
 import { suggestMealsFromIntelligence } from "../../services/meals/MealSuggestionService";
-import { saveMealPlan, loadLatestMealPlan } from "../../services/meals/MealPlanStore";
+import {
+  saveMealPlan,
+  loadLatestMealPlan,
+} from "../../services/meals/MealPlanStore";
 
 const SOURCE_ID = "domain.meals.MealPlanner";
 
@@ -141,7 +144,10 @@ function MealPlanner() {
         setSuggestions((prev) => [...refreshed, ...prev]);
       }
     } catch (e) {
-      console.warn("[MealPlanner] failed to refresh suggestions from import", e);
+      console.warn(
+        "[MealPlanner] failed to refresh suggestions from import",
+        e
+      );
     }
   }
 
@@ -259,7 +265,9 @@ function MealPlanner() {
             List
           </button>
           <button
-            className={viewMode === "sessions" ? "btn-primary" : "btn-secondary"}
+            className={
+              viewMode === "sessions" ? "btn-primary" : "btn-secondary"
+            }
             onClick={() => setViewMode("sessions")}
           >
             Sessions
@@ -334,7 +342,16 @@ function MealPlanner() {
   }
 
   function renderWeekView() {
-    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun", "Unassigned"];
+    const days = [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun",
+      "Unassigned",
+    ];
     return (
       <div className="grid grid-cols-4 md:grid-cols-8 gap-3">
         {days.map((day) => (
@@ -380,7 +397,10 @@ function MealPlanner() {
     return (
       <div className="flex flex-col gap-2">
         {plannedMeals.map((meal) => (
-          <div key={meal.id} className="border rounded p-2 flex items-center justify-between">
+          <div
+            key={meal.id}
+            className="border rounded p-2 flex items-center justify-between"
+          >
             <div>
               <div className="font-medium">{meal.title}</div>
               <div className="text-xs text-gray-500">
@@ -392,7 +412,16 @@ function MealPlanner() {
               value={meal.day || "Unassigned"}
               onChange={(e) => handleDayChange(meal.id, e.target.value)}
             >
-              {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun", "Unassigned"].map((d) => (
+              {[
+                "Mon",
+                "Tue",
+                "Wed",
+                "Thu",
+                "Fri",
+                "Sat",
+                "Sun",
+                "Unassigned",
+              ].map((d) => (
                 <option key={d} value={d}>
                   {d}
                 </option>
@@ -411,8 +440,9 @@ function MealPlanner() {
       <div className="border rounded p-3 bg-white/50">
         <h3 className="font-semibold mb-2">Session view</h3>
         <p className="text-xs text-gray-600 mb-2">
-          This view shows how your meal plan would be converted to cooking sessions. The actual
-          conversion is handled by your CookingSessionEngine / MealSessionGenerator.
+          This view shows how your meal plan would be converted to cooking
+          sessions. The actual conversion is handled by your
+          CookingSessionEngine / MealSessionGenerator.
         </p>
         <pre className="bg-gray-100 rounded p-2 text-xs overflow-x-auto">
           {JSON.stringify(
@@ -500,7 +530,14 @@ async function safeLoadLatestMealPlan() {
 async function safeGetRecentImports() {
   try {
     const imports = await getRecentImports({
-      domains: ["recipe", "cleaning", "garden", "animal", "storehouse", "video"],
+      domains: [
+        "recipe",
+        "cleaning",
+        "garden",
+        "animal",
+        "storehouse",
+        "video",
+      ],
       limit: 30,
     });
     return imports;

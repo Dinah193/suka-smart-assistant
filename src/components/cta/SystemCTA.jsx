@@ -7,14 +7,11 @@ const cx = (...c) => c.filter(Boolean).join(" ");
 const BTN =
   "inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-medium shadow-sm transition active:translate-y-px focus:outline-none focus:ring-2 focus:ring-offset-2";
 const VARIANTS = {
-  primary:
-    "bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-600",
+  primary: "bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-600",
   subtle:
     "bg-white text-gray-900 hover:bg-gray-50 border border-gray-200 focus:ring-indigo-600",
-  ghost:
-    "bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-indigo-600",
-  danger:
-    "bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-600",
+  ghost: "bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-indigo-600",
+  danger: "bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-600",
 };
 const WRAP =
   "w-full flex flex-wrap items-center gap-2 sm:gap-3 rounded-3xl bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60 p-3 sm:p-4 border border-gray-200";
@@ -22,7 +19,7 @@ const WRAP =
 /* ----------------------------- Defensive imports ----------------------------- */
 let eventBus = { emit: () => {}, on: () => {}, off: () => {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch (_) {}
 
@@ -103,7 +100,10 @@ const domainToDraftEvent = (domain) => {
 };
 
 const defaultPlanId = (plan) =>
-  plan?.id || plan?._id || plan?.slug || `plan:${Math.random().toString(36).slice(2, 9)}`;
+  plan?.id ||
+  plan?._id ||
+  plan?.slug ||
+  `plan:${Math.random().toString(36).slice(2, 9)}`;
 
 /* -------------------------------- Component --------------------------------- */
 /**
@@ -242,7 +242,12 @@ export default function SystemCTA({
       // Fallback: emit an event so a handler can persist
       const next = !favLocal;
       setFavLocal(next);
-      emit("plan.favorite.toggled", { domain, planId, next, source: "SystemCTA" });
+      emit("plan.favorite.toggled", {
+        domain,
+        planId,
+        next,
+        source: "SystemCTA",
+      });
       toastSafe(next ? "Added to favorites." : "Removed from favorites.");
       return;
     }
@@ -284,7 +289,10 @@ export default function SystemCTA({
         default: {
           // Device: download JSON right here if router provides helper
           if (storage?.downloadJson) {
-            await storage.downloadJson(`${safeFileName(title)}.json`, plan || { id: planId, domain, title });
+            await storage.downloadJson(
+              `${safeFileName(title)}.json`,
+              plan || { id: planId, domain, title }
+            );
           } else {
             // Fallback: fire an event for a listener to handle
             emit("plan.export.requested", { ...payload, target: "device" });
@@ -299,10 +307,19 @@ export default function SystemCTA({
   };
 
   const handleShare = () => {
-    emit("plan.share.requested", { domain, planId, title, source: "SystemCTA" });
+    emit("plan.share.requested", {
+      domain,
+      planId,
+      title,
+      source: "SystemCTA",
+    });
     if (navigator?.share) {
       try {
-        navigator.share({ title, text: `${title} — ${domain}`, url: window?.location?.href });
+        navigator.share({
+          title,
+          text: `${title} — ${domain}`,
+          url: window?.location?.href,
+        });
       } catch (_) {}
     }
     toastSafe("Share initiated.");
@@ -315,9 +332,11 @@ export default function SystemCTA({
     (async () => {
       // Pull a hint from your automation runtime if it exists
       try {
-        const hint =
-          (await automation?.nba?.suggest?.({ domain, planId, plan })) ||
-          { label: null };
+        const hint = (await automation?.nba?.suggest?.({
+          domain,
+          planId,
+          plan,
+        })) || { label: null };
         if (!cancelled && hint?.label) setNbaLabel(hint.label);
       } catch (_) {}
     })();
@@ -332,7 +351,11 @@ export default function SystemCTA({
 
   /* --------------------------------- Render --------------------------------- */
   return (
-    <div className={cx(WRAP, compact && "p-2 gap-2", className)} role="group" aria-label={`${title} actions`}>
+    <div
+      className={cx(WRAP, compact && "p-2 gap-2", className)}
+      role="group"
+      aria-label={`${title} actions`}
+    >
       {/* Primary actions */}
       <button
         type="button"
@@ -389,8 +412,14 @@ export default function SystemCTA({
         aria-pressed={favLocal}
         aria-label={favLocal ? "Remove from favorites" : "Add to favorites"}
       >
-        {favLocal ? <Icons.Star className="h-4 w-4" /> : <Icons.StarOff className="h-4 w-4" />}
-        <span className="hidden sm:inline">{favLocal ? "Favorited" : "Favorite"}</span>
+        {favLocal ? (
+          <Icons.Star className="h-4 w-4" />
+        ) : (
+          <Icons.StarOff className="h-4 w-4" />
+        )}
+        <span className="hidden sm:inline">
+          {favLocal ? "Favorited" : "Favorite"}
+        </span>
       </button>
 
       <button
@@ -406,25 +435,47 @@ export default function SystemCTA({
       {/* Secondary (more) */}
       <div className="relative ml-auto">
         <details className="group">
-          <summary className={cx(BTN, VARIANTS.ghost, "cursor-pointer list-none [&::-webkit-details-marker]:hidden")}>
+          <summary
+            className={cx(
+              BTN,
+              VARIANTS.ghost,
+              "cursor-pointer list-none [&::-webkit-details-marker]:hidden"
+            )}
+          >
             <Icons.MoreHorizontal className="h-4 w-4" />
             <span className="hidden sm:inline">More</span>
           </summary>
           <div className="absolute right-0 z-20 mt-2 min-w-[14rem] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
             <MenuItem onClick={handleNBA} label={nbaLabel} />
             <div className="h-px bg-gray-100" />
-            <MenuItem onClick={() => handleExport("device")} icon={<Icons.Download className="h-4 w-4" />} label="Export to device (.json)" />
-            <MenuItem onClick={() => handleExport("drive")} icon={<Icons.Download className="h-4 w-4" />} label="Export to Google Drive" />
-            <MenuItem onClick={() => handleExport("cloud")} icon={<Icons.Download className="h-4 w-4" />} label="Export to Cloud" />
+            <MenuItem
+              onClick={() => handleExport("device")}
+              icon={<Icons.Download className="h-4 w-4" />}
+              label="Export to device (.json)"
+            />
+            <MenuItem
+              onClick={() => handleExport("drive")}
+              icon={<Icons.Download className="h-4 w-4" />}
+              label="Export to Google Drive"
+            />
+            <MenuItem
+              onClick={() => handleExport("cloud")}
+              icon={<Icons.Download className="h-4 w-4" />}
+              label="Export to Cloud"
+            />
             <div className="h-px bg-gray-100" />
-            <MenuItem onClick={handleShare} icon={<Icons.Share className="h-4 w-4" />} label="Share…" />
+            <MenuItem
+              onClick={handleShare}
+              icon={<Icons.Share className="h-4 w-4" />}
+              label="Share…"
+            />
           </div>
         </details>
       </div>
 
       {/* Save Modal (lazy preferred, else inline) */}
-      {saveOpen && (
-        SavePlanModalLazy ? (
+      {saveOpen &&
+        (SavePlanModalLazy ? (
           <Suspense fallback={<InlineSaveModalFallback onCancel={closeSave} />}>
             <SavePlanModalLazy
               isOpen={saveOpen}
@@ -434,7 +485,12 @@ export default function SystemCTA({
               plan={plan || { id: planId, title, domain }}
               onSaved={(saved) => {
                 toastSafe("Plan saved.");
-                emit("plan.saved", { domain, planId: saved?.id || planId, saved, source: "SystemCTA" });
+                emit("plan.saved", {
+                  domain,
+                  planId: saved?.id || planId,
+                  saved,
+                  source: "SystemCTA",
+                });
                 closeSave();
               }}
             />
@@ -447,12 +503,16 @@ export default function SystemCTA({
             onCancel={closeSave}
             onSaved={(saved) => {
               toastSafe("Plan saved.");
-              emit("plan.saved", { domain, planId: saved?.id || planId, saved, source: "SystemCTA" });
+              emit("plan.saved", {
+                domain,
+                planId: saved?.id || planId,
+                saved,
+                source: "SystemCTA",
+              });
               closeSave();
             }}
           />
-        )
-      )}
+        ))}
     </div>
   );
 }
@@ -473,7 +533,11 @@ function MenuItem({ onClick, label, icon = null }) {
 
 function InlineSaveModalFallback({ onCancel }) {
   return (
-    <div role="dialog" aria-modal="true" className="fixed inset-0 z-30 flex items-center justify-center bg-black/30">
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-30 flex items-center justify-center bg-black/30"
+    >
       <div className="w-[95vw] max-w-md rounded-2xl bg-white p-6 shadow-xl">
         <div className="animate-pulse h-6 w-40 bg-gray-200 rounded mb-4" />
         <div className="space-y-2">
@@ -481,7 +545,9 @@ function InlineSaveModalFallback({ onCancel }) {
           <div className="h-10 bg-gray-100 rounded" />
         </div>
         <div className="mt-6 flex justify-end gap-2">
-          <button className={cx(BTN, VARIANTS.ghost)} onClick={onCancel}>Close</button>
+          <button className={cx(BTN, VARIANTS.ghost)} onClick={onCancel}>
+            Close
+          </button>
         </div>
       </div>
     </div>
@@ -509,17 +575,25 @@ function InlineSaveModal({ title, domain, plan, onCancel, onSaved }) {
   };
 
   return (
-    <div role="dialog" aria-modal="true" className="fixed inset-0 z-30 flex items-center justify-center bg-black/30">
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-30 flex items-center justify-center bg-black/30"
+    >
       <div className="w-[95vw] max-w-md rounded-2xl bg-white p-6 shadow-xl">
         <h3 className="text-lg font-semibold mb-4">Save Plan</h3>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Title
+        </label>
         <input
           className="w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Name your plan"
         />
-        <label className="block text-sm font-medium text-gray-700 mt-4 mb-1">Description (optional)</label>
+        <label className="block text-sm font-medium text-gray-700 mt-4 mb-1">
+          Description (optional)
+        </label>
         <textarea
           className="w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
           value={desc}
@@ -528,8 +602,14 @@ function InlineSaveModal({ title, domain, plan, onCancel, onSaved }) {
           placeholder="What makes this plan special?"
         />
         <div className="mt-6 flex justify-end gap-2">
-          <button className={cx(BTN, VARIANTS.ghost)} onClick={onCancel}>Cancel</button>
-          <button className={cx(BTN, VARIANTS.primary)} onClick={saveLocal} disabled={busy}>
+          <button className={cx(BTN, VARIANTS.ghost)} onClick={onCancel}>
+            Cancel
+          </button>
+          <button
+            className={cx(BTN, VARIANTS.primary)}
+            onClick={saveLocal}
+            disabled={busy}
+          >
             <Icons.Check className="h-4 w-4" />
             Save
           </button>
@@ -543,7 +623,10 @@ function InlineSaveModal({ title, domain, plan, onCancel, onSaved }) {
 function toastSafe(msg, isError = false) {
   // If you have a toast system, emit an event it listens to:
   try {
-    eventBus.emit("ui.toast", { message: msg, variant: isError ? "error" : "success" });
+    eventBus.emit("ui.toast", {
+      message: msg,
+      variant: isError ? "error" : "success",
+    });
   } catch (_) {
     // Fallback
     if (isError) console.warn(msg);
@@ -560,5 +643,8 @@ function humanizeDomain(d) {
 }
 
 function safeFileName(name = "plan") {
-  return String(name).toLowerCase().replace(/[^a-z0-9-_]+/gi, "-").replace(/-+/g, "-");
+  return String(name)
+    .toLowerCase()
+    .replace(/[^a-z0-9-_]+/gi, "-")
+    .replace(/-+/g, "-");
 }

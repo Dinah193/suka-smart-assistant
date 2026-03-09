@@ -18,10 +18,10 @@
  */
 
 import { db } from "../../../services/db";
-import { emitEvent } from "../../../services/eventBus";
-import { familyFundMode } from "../../../services/featureFlags";
-import { HubPacketFormatter } from "../../../services/hub/HubPacketFormatter";
-import { FamilyFundConnector } from "../../../services/hub/FamilyFundConnector";
+import { emitEvent } from "../../../services/events/eventBus";
+import { familyFundMode } from "../../../config/featureFlags";
+import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
+import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
 
 /**
  * @typedef {"cool"|"warm"} CropSeason
@@ -605,8 +605,7 @@ export async function planGardenSchedule(crops, options = {}) {
 
         const resumeId = chosenSwapByWindowId[w.id];
         const chosen =
-          (resumeId &&
-            optionsForWindow.find((opt) => opt.id === resumeId)) ||
+          (resumeId && optionsForWindow.find((opt) => opt.id === resumeId)) ||
           optionsForWindow.find((opt) => opt.autoSelected) ||
           optionsForWindow[0] ||
           null;
@@ -628,7 +627,11 @@ export async function planGardenSchedule(crops, options = {}) {
       });
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error("[garden/schedule] Failed to plan crop schedule:", crop, err);
+      console.error(
+        "[garden/schedule] Failed to plan crop schedule:",
+        crop,
+        err
+      );
       result.error = err?.message || String(err);
       errorCount += 1;
     }

@@ -30,7 +30,7 @@
 // -----------------------------------------------------------------------------
 
 import React from "react";
-import eventBus from "../services/eventBus";
+import eventBus from "../services/events/eventBus";
 import config from "../config";
 
 // -----------------------------------------------------------------------------
@@ -39,20 +39,30 @@ import config from "../config";
 async function exportToHubIfEnabled(payload) {
   try {
     const flags =
-      (config && (config.featureFlags || (typeof config === "function" ? config().featureFlags : {}))) ||
+      (config &&
+        (config.featureFlags ||
+          (typeof config === "function" ? config().featureFlags : {}))) ||
       config.featureFlags ||
       {};
-    const familyFundMode = flags.familyFundMode === true || flags.familyFundMode === "true";
+    const familyFundMode =
+      flags.familyFundMode === true || flags.familyFundMode === "true";
     if (!familyFundMode) return;
 
-    const { default: HubPacketFormatter } = await import("../services/HubPacketFormatter.js");
-    const { default: FamilyFundConnector } = await import("../services/FamilyFundConnector.js");
+    const { default: HubPacketFormatter } = await import(
+      "@/services/hub/HubPacketFormatter.js"
+    );
+    const { default: FamilyFundConnector } = await import(
+      "@/services/hub/FamilyFundConnector.js"
+    );
 
     const packet = HubPacketFormatter.format(payload);
     await FamilyFundConnector.send(packet);
   } catch (err) {
     // SSA owns the data — Hub is best-effort
-    console.warn("[ImportPreviewModal] Hub export failed (silent):", err?.message || err);
+    console.warn(
+      "[ImportPreviewModal] Hub export failed (silent):",
+      err?.message || err
+    );
   }
 }
 
@@ -93,15 +103,25 @@ export default function ImportPreviewModal({
   const domain = parsedImport?.domain || "unknown";
   const normalized = parsedImport?.normalized || {};
   const context = parsedImport?.context || {};
-  const sessions = Array.isArray(parsedImport?.sessions) ? parsedImport.sessions : [];
-  const inventoryChanges = Array.isArray(parsedImport?.inventoryChanges) ? parsedImport.inventoryChanges : [];
-  const storehouseChanges = Array.isArray(parsedImport?.storehouseChanges) ? parsedImport.storehouseChanges : [];
-  const warnings = Array.isArray(parsedImport?.warnings) ? parsedImport.warnings : [];
+  const sessions = Array.isArray(parsedImport?.sessions)
+    ? parsedImport.sessions
+    : [];
+  const inventoryChanges = Array.isArray(parsedImport?.inventoryChanges)
+    ? parsedImport.inventoryChanges
+    : [];
+  const storehouseChanges = Array.isArray(parsedImport?.storehouseChanges)
+    ? parsedImport.storehouseChanges
+    : [];
+  const warnings = Array.isArray(parsedImport?.warnings)
+    ? parsedImport.warnings
+    : [];
 
   const title =
     normalized?.title ||
     normalized?.name ||
-    (parsedImport?.domain ? `Imported ${parsedImport.domain}` : "Imported item");
+    (parsedImport?.domain
+      ? `Imported ${parsedImport.domain}`
+      : "Imported item");
 
   // ---------------------------------------------------------------------------
   // ACTION HANDLERS
@@ -198,7 +218,9 @@ export default function ImportPreviewModal({
     if (Array.isArray(context.ingredients) && context.ingredients.length > 0) {
       chips.push(
         <div key="ingredients" className="flex flex-wrap gap-1">
-          <span className="text-[10px] uppercase tracking-wide text-slate-500">Ingredients:</span>
+          <span className="text-[10px] uppercase tracking-wide text-slate-500">
+            Ingredients:
+          </span>
           {context.ingredients.map((ing) => (
             <Badge key={ing}>{ing}</Badge>
           ))}
@@ -208,7 +230,9 @@ export default function ImportPreviewModal({
     if (Array.isArray(context.methods) && context.methods.length > 0) {
       chips.push(
         <div key="methods" className="flex flex-wrap gap-1">
-          <span className="text-[10px] uppercase tracking-wide text-slate-500">Methods:</span>
+          <span className="text-[10px] uppercase tracking-wide text-slate-500">
+            Methods:
+          </span>
           {context.methods.map((m) => (
             <Badge key={m}>{m}</Badge>
           ))}
@@ -218,7 +242,9 @@ export default function ImportPreviewModal({
     if (Array.isArray(context.equipment) && context.equipment.length > 0) {
       chips.push(
         <div key="equipment" className="flex flex-wrap gap-1">
-          <span className="text-[10px] uppercase tracking-wide text-slate-500">Equipment:</span>
+          <span className="text-[10px] uppercase tracking-wide text-slate-500">
+            Equipment:
+          </span>
           {context.equipment.map((e) => (
             <Badge key={e}>{e}</Badge>
           ))}
@@ -228,7 +254,9 @@ export default function ImportPreviewModal({
     if (Array.isArray(context.seasonality) && context.seasonality.length > 0) {
       chips.push(
         <div key="seasonality" className="flex flex-wrap gap-1">
-          <span className="text-[10px] uppercase tracking-wide text-slate-500">Seasonality:</span>
+          <span className="text-[10px] uppercase tracking-wide text-slate-500">
+            Seasonality:
+          </span>
           {context.seasonality.map((s) => (
             <Badge key={s}>{s}</Badge>
           ))}
@@ -238,7 +266,9 @@ export default function ImportPreviewModal({
     if (Array.isArray(context.tags) && context.tags.length > 0) {
       chips.push(
         <div key="tags" className="flex flex-wrap gap-1">
-          <span className="text-[10px] uppercase tracking-wide text-slate-500">Tags:</span>
+          <span className="text-[10px] uppercase tracking-wide text-slate-500">
+            Tags:
+          </span>
           {context.tags.map((t) => (
             <Badge key={t}>{t}</Badge>
           ))}
@@ -247,7 +277,11 @@ export default function ImportPreviewModal({
     }
 
     if (chips.length === 0) {
-      return <p className="text-xs text-slate-400">No context intelligence extracted.</p>;
+      return (
+        <p className="text-xs text-slate-400">
+          No context intelligence extracted.
+        </p>
+      );
     }
 
     return <div className="flex flex-col gap-2">{chips}</div>;
@@ -259,10 +293,13 @@ export default function ImportPreviewModal({
         {/* Header */}
         <div className="flex items-start justify-between gap-3 px-5 py-4 border-b">
           <div>
-            <p className="text-[10px] uppercase tracking-wide text-slate-400">Import preview</p>
+            <p className="text-[10px] uppercase tracking-wide text-slate-400">
+              Import preview
+            </p>
             <h2 className="text-lg font-semibold leading-tight">{title}</h2>
             <p className="text-xs text-slate-400">
-              Domain: <span className="font-medium text-slate-600">{domain}</span>
+              Domain:{" "}
+              <span className="font-medium text-slate-600">{domain}</span>
             </p>
           </div>
           <button
@@ -284,22 +321,33 @@ export default function ImportPreviewModal({
 
           {/* sessions */}
           <section>
-            <h3 className="text-sm font-semibold mb-2">Sessions SSA can create</h3>
+            <h3 className="text-sm font-semibold mb-2">
+              Sessions SSA can create
+            </h3>
             {sessions.length === 0 ? (
               <p className="text-xs text-slate-400">
-                This import didn&apos;t produce any sessions. You can still send it to inventory/storehouse.
+                This import didn&apos;t produce any sessions. You can still send
+                it to inventory/storehouse.
               </p>
             ) : (
               <ul className="flex flex-col gap-2">
                 {sessions.map((s, idx) => (
-                  <li key={idx} className="border rounded-lg p-3 bg-slate-50/70">
+                  <li
+                    key={idx}
+                    className="border rounded-lg p-3 bg-slate-50/70"
+                  >
                     <p className="text-sm font-medium">
                       {s.label || s.title || `Session ${idx + 1}`}{" "}
                       <Badge>{s.type || "session"}</Badge>
                     </p>
                     {Array.isArray(s.steps) && s.steps.length > 0 ? (
                       <p className="text-xs text-slate-500 mt-1 line-clamp-2">
-                        {s.steps.slice(0, 3).map((st, i) => (typeof st === "string" ? st : st.text || "")).join(" • ")}
+                        {s.steps
+                          .slice(0, 3)
+                          .map((st, i) =>
+                            typeof st === "string" ? st : st.text || ""
+                          )
+                          .join(" • ")}
                         {s.steps.length > 3 ? " …" : ""}
                       </p>
                     ) : null}
@@ -314,14 +362,22 @@ export default function ImportPreviewModal({
             <div>
               <h3 className="text-sm font-semibold mb-2">Inventory changes</h3>
               {inventoryChanges.length === 0 ? (
-                <p className="text-xs text-slate-400">No inventory changes in this import.</p>
+                <p className="text-xs text-slate-400">
+                  No inventory changes in this import.
+                </p>
               ) : (
                 <ul className="flex flex-col gap-1">
                   {inventoryChanges.map((ic, idx) => (
-                    <li key={idx} className="flex items-center justify-between text-xs bg-slate-50 rounded px-2 py-1">
-                      <span>{ic.item || ic.name || ic.sku || "Unknown item"}</span>
+                    <li
+                      key={idx}
+                      className="flex items-center justify-between text-xs bg-slate-50 rounded px-2 py-1"
+                    >
+                      <span>
+                        {ic.item || ic.name || ic.sku || "Unknown item"}
+                      </span>
                       <span className="text-slate-500">
-                        {ic.qty || ic.quantity || ic.amount || 1} {ic.unit || ic.units || ""}
+                        {ic.qty || ic.quantity || ic.amount || 1}{" "}
+                        {ic.unit || ic.units || ""}
                       </span>
                     </li>
                   ))}
@@ -331,14 +387,20 @@ export default function ImportPreviewModal({
             <div>
               <h3 className="text-sm font-semibold mb-2">Storehouse changes</h3>
               {storehouseChanges.length === 0 ? (
-                <p className="text-xs text-slate-400">No storehouse changes in this import.</p>
+                <p className="text-xs text-slate-400">
+                  No storehouse changes in this import.
+                </p>
               ) : (
                 <ul className="flex flex-col gap-1">
                   {storehouseChanges.map((sc, idx) => (
-                    <li key={idx} className="flex items-center justify-between text-xs bg-slate-50 rounded px-2 py-1">
+                    <li
+                      key={idx}
+                      className="flex items-center justify-between text-xs bg-slate-50 rounded px-2 py-1"
+                    >
                       <span>{sc.item || sc.name || "Unknown item"}</span>
                       <span className="text-slate-500">
-                        {sc.targetQty || sc.qty || sc.quantity || 0} {sc.unit || "ea"}
+                        {sc.targetQty || sc.qty || sc.quantity || 0}{" "}
+                        {sc.unit || "ea"}
                       </span>
                     </li>
                   ))}
@@ -350,7 +412,9 @@ export default function ImportPreviewModal({
           {/* warnings */}
           {warnings.length > 0 && (
             <section>
-              <h3 className="text-sm font-semibold mb-2 text-amber-700">Warnings</h3>
+              <h3 className="text-sm font-semibold mb-2 text-amber-700">
+                Warnings
+              </h3>
               <ul className="list-disc pl-5 text-xs text-amber-700 space-y-1">
                 {warnings.map((w, idx) => (
                   <li key={idx}>{w}</li>

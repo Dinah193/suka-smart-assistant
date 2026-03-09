@@ -1,7 +1,7 @@
 // C:\Users\larho\suka-smart-assistant\src\features\calculators\gardenAnimal\SeedViabilityCalculator\SeedViabilityCalculator.view.jsx
 
 import React, { useState } from "react";
-import { emit } from "@/services/eventBus";
+import { emit } from "@/services/events/eventBus";
 import { runSeedViabilityCalculatorShim } from "./SeedViabilityCalculator.shim";
 
 /**
@@ -466,9 +466,7 @@ export default function SeedViabilityCalculatorView() {
                 <input
                   type="number"
                   className="sv-input"
-                  value={
-                    environment.expectedSoilTempStartC ?? ""
-                  }
+                  value={environment.expectedSoilTempStartC ?? ""}
                   onChange={(e) =>
                     setEnvironment((prev) => ({
                       ...prev,
@@ -521,8 +519,8 @@ export default function SeedViabilityCalculatorView() {
                   step="0.1"
                   className="sv-input"
                   value={
-                    planningHints.storehouseGoalProfile
-                      .staplePriorityFactor ?? ""
+                    planningHints.storehouseGoalProfile.staplePriorityFactor ??
+                    ""
                   }
                   onChange={(e) =>
                     setPlanningHints((prev) => ({
@@ -530,9 +528,7 @@ export default function SeedViabilityCalculatorView() {
                       storehouseGoalProfile: {
                         ...prev.storehouseGoalProfile,
                         staplePriorityFactor:
-                          e.target.value === ""
-                            ? null
-                            : Number(e.target.value),
+                          e.target.value === "" ? null : Number(e.target.value),
                       },
                     }))
                   }
@@ -555,9 +551,7 @@ export default function SeedViabilityCalculatorView() {
                       storehouseGoalProfile: {
                         ...prev.storehouseGoalProfile,
                         minimumViabilityForStaples:
-                          e.target.value === ""
-                            ? null
-                            : Number(e.target.value),
+                          e.target.value === "" ? null : Number(e.target.value),
                       },
                     }))
                   }
@@ -577,8 +571,8 @@ export default function SeedViabilityCalculatorView() {
                 />
               </div>
               <p className="sv-hint">
-                These hints help the calculator treat staple crops more
-                strictly and decide when to recommend replacement.
+                These hints help the calculator treat staple crops more strictly
+                and decide when to recommend replacement.
               </p>
             </div>
           </div>
@@ -641,12 +635,11 @@ export default function SeedViabilityCalculatorView() {
                           {lot.variety ? ` – ${lot.variety}` : ""}
                         </td>
                         <td>{Math.round(lot.viabilityScore)} / 100</td>
-                        <td>
-                          {Math.round(lot.estimatedGerminationRate)}
-                          %
-                        </td>
+                        <td>{Math.round(lot.estimatedGerminationRate)}%</td>
                         <td>{lot.sowRateMultiplier.toFixed(2)}</td>
-                        <td className={`sv-status sv-status-${lot.recommendedStatus}`}>
+                        <td
+                          className={`sv-status sv-status-${lot.recommendedStatus}`}
+                        >
                           {statusLabel(lot.recommendedStatus)}
                         </td>
                         <td>
@@ -719,8 +712,7 @@ function SeedLotDetailsModal({ lot, onClose }) {
       <div className="sv-modal">
         <header className="sv-modal-header">
           <h3>
-            Seed Lot Details: {lot.id}{" "}
-            {lot.crop ? `– ${lot.crop}` : ""}
+            Seed Lot Details: {lot.id} {lot.crop ? `– ${lot.crop}` : ""}
           </h3>
           <button
             type="button"
@@ -748,8 +740,7 @@ function SeedLotDetailsModal({ lot, onClose }) {
                 {lot.sowRateMultiplier.toFixed(2)}
               </p>
               <p>
-                <strong>Status:</strong>{" "}
-                {statusLabel(lot.recommendedStatus)}
+                <strong>Status:</strong> {statusLabel(lot.recommendedStatus)}
               </p>
               <p>
                 <strong>Risk Flags:</strong>{" "}
@@ -771,8 +762,7 @@ function SeedLotDetailsModal({ lot, onClose }) {
               )}
 
               <h4 className="sv-modal-subtitle">Next Actions</h4>
-              {Array.isArray(lot.nextActions) &&
-              lot.nextActions.length > 0 ? (
+              {Array.isArray(lot.nextActions) && lot.nextActions.length > 0 ? (
                 <ul className="sv-list">
                   {lot.nextActions.map((action, idx) => (
                     <li key={idx}>{action}</li>

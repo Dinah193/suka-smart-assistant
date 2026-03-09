@@ -62,7 +62,7 @@
       "label": "eventBus",
       "type": "orchestration",
       "cluster": "orch",
-      "path": "@/services/eventBus",
+      "path": "@/services/events/eventBus",
       "tags": ["events", "pubsub"]
     },
     {

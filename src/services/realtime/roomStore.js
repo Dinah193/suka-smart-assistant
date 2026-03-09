@@ -32,15 +32,19 @@ let eventBus = {
   on: () => () => {},
 };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
-} catch { /* optional */ }
+} catch {
+  /* optional */
+}
 
 // Feature flags
 let featureFlags = { familyFundMode: false };
 try {
   featureFlags = require("@/config/featureFlags.json");
-} catch { /* optional */ }
+} catch {
+  /* optional */
+}
 
 // Optional Hub export
 let HubPacketFormatter = null;
@@ -48,18 +52,29 @@ let FamilyFundConnector = null;
 try {
   HubPacketFormatter = require("@/integrations/HubPacketFormatter");
   FamilyFundConnector = require("@/integrations/FamilyFundConnector");
-} catch { /* optional */ }
+} catch {
+  /* optional */
+}
 
 const SRC = "services.realtime.roomStore";
 
 /* -------------------------------- Helpers -------------------------------- */
-function nowIso() { return new Date().toISOString(); }
-function emit(type, data = {}) {
-  try { eventBus.emit({ type, ts: nowIso(), source: SRC, data }); }
-  catch (err) { console.warn("[roomStore] eventBus.emit failed", err); }
+function nowIso() {
+  return new Date().toISOString();
 }
-function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
-function deepClone(x) { return x == null ? x : JSON.parse(JSON.stringify(x)); }
+function emit(type, data = {}) {
+  try {
+    eventBus.emit({ type, ts: nowIso(), source: SRC, data });
+  } catch (err) {
+    console.warn("[roomStore] eventBus.emit failed", err);
+  }
+}
+function clamp(n, min, max) {
+  return Math.max(min, Math.min(max, n));
+}
+function deepClone(x) {
+  return x == null ? x : JSON.parse(JSON.stringify(x));
+}
 function isMutatingType(t = "") {
   return /^session\.|^inventory\.|^garden\.|^preservation\./.test(t || "");
 }
@@ -71,7 +86,10 @@ async function exportToHubIfEnabled(payload) {
     await FamilyFundConnector.send(packet);
   } catch (err) {
     // Silent by design; Hub is auxiliary.
-    console.warn("[roomStore] Hub export failed silently:", err?.message || err);
+    console.warn(
+      "[roomStore] Hub export failed silently:",
+      err?.message || err
+    );
   }
 }
 
@@ -86,10 +104,18 @@ function appendBounded(arr, item, max) {
 // Local storage helpers (best-effort)
 const LS_KEY = "ssa.roomStore.v1";
 function lsGet() {
-  try { return JSON.parse(localStorage.getItem(LS_KEY) || "null"); } catch { return null; }
+  try {
+    return JSON.parse(localStorage.getItem(LS_KEY) || "null");
+  } catch {
+    return null;
+  }
 }
 function lsSet(obj) {
-  try { localStorage.setItem(LS_KEY, JSON.stringify(obj)); } catch { /* ignore quota */ }
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify(obj));
+  } catch {
+    /* ignore quota */
+  }
 }
 
 /* --------------------------------- Store --------------------------------- */
@@ -102,7 +128,15 @@ class RoomStore {
       maxMessagesPerRoom: 200,
       ttlMs: 6 * 60 * 60 * 1000, // 6h
       persist: false,
-      persistFields: ["id", "createdAt", "updatedAt", "metadata", "session", "transport", "participants"],
+      persistFields: [
+        "id",
+        "createdAt",
+        "updatedAt",
+        "metadata",
+        "session",
+        "transport",
+        "participants",
+      ],
       debug: false,
     };
 
@@ -118,17 +152,23 @@ class RoomStore {
       this._opts.maxMessagesPerRoom = clamp(opts.maxMessagesPerRoom, 20, 5000);
     }
     if (typeof opts.ttlMs === "number") {
-      this._opts.ttlMs = clamp(opts.ttlMs, 5 * 60 * 1000, 7 * 24 * 60 * 60 * 1000); // 5m..7d
+      this._opts.ttlMs = clamp(
+        opts.ttlMs,
+        5 * 60 * 1000,
+        7 * 24 * 60 * 60 * 1000
+      ); // 5m..7d
     }
     if (typeof opts.persist === "boolean") this._opts.persist = opts.persist;
-    if (Array.isArray(opts.persistFields)) this._opts.persistFields = opts.persistFields.slice(0);
+    if (Array.isArray(opts.persistFields))
+      this._opts.persistFields = opts.persistFields.slice(0);
     if (typeof opts.debug === "boolean") this._opts.debug = opts.debug;
   }
 
   /* -------------------------------- Observe ------------------------------- */
   onRoom(roomId, fn) {
     if (!roomId || typeof fn !== "function") return () => {};
-    if (!this._roomObservers.has(roomId)) this._roomObservers.set(roomId, new Set());
+    if (!this._roomObservers.has(roomId))
+      this._roomObservers.set(roomId, new Set());
     const set = this._roomObservers.get(roomId);
     set.add(fn);
     return () => set.delete(fn);
@@ -141,13 +181,23 @@ class RoomStore {
   _notify(roomId, event, roomSnapshot) {
     const snap = deepClone(roomSnapshot);
     const set = this._roomObservers.get(roomId);
-    set && set.forEach(fn => { try { fn(event, snap); } catch {} });
-    this._wildcards.forEach(fn => { try { fn(roomId, event, snap); } catch {} });
+    set &&
+      set.forEach((fn) => {
+        try {
+          fn(event, snap);
+        } catch {}
+      });
+    this._wildcards.forEach((fn) => {
+      try {
+        fn(roomId, event, snap);
+      } catch {}
+    });
   }
 
   /* --------------------------------- CRUD -------------------------------- */
   createRoom(roomId, initial = {}) {
-    if (!roomId || typeof roomId !== "string") throw new Error("createRoom requires roomId:string");
+    if (!roomId || typeof roomId !== "string")
+      throw new Error("createRoom requires roomId:string");
     if (this._rooms.has(roomId)) {
       // Update metadata if provided
       const r = this._rooms.get(roomId);
@@ -156,7 +206,10 @@ class RoomStore {
         r.updatedAt = nowIso();
         this._persist();
         this._notify(roomId, "metadata.updated", r);
-        emit("room.metadata.updated", { roomId, metadata: deepClone(r.metadata) });
+        emit("room.metadata.updated", {
+          roomId,
+          metadata: deepClone(r.metadata),
+        });
       }
       return { roomId, existed: true };
     }
@@ -213,7 +266,7 @@ class RoomStore {
     const p = sanitizeParticipant(participant);
     if (!p) return false;
 
-    const idx = r.participants.findIndex(x => x.id === p.id);
+    const idx = r.participants.findIndex((x) => x.id === p.id);
     if (idx >= 0) {
       r.participants[idx] = { ...r.participants[idx], ...p };
     } else {
@@ -232,7 +285,7 @@ class RoomStore {
     const r = this._rooms.get(roomId);
     if (!r) return false;
     const sizeBefore = r.participants.length;
-    r.participants = r.participants.filter(x => x.id !== participantId);
+    r.participants = r.participants.filter((x) => x.id !== participantId);
     if (r.participants.length !== sizeBefore) {
       r.updatedAt = nowIso();
       r.lastActiveAt = r.updatedAt;
@@ -265,7 +318,12 @@ class RoomStore {
       exportToHubIfEnabled({
         via: "roomStore",
         roomId,
-        message: { type: "session.state.updated", ts: nowIso(), source: SRC, data: deepClone(merged) },
+        message: {
+          type: "session.state.updated",
+          ts: nowIso(),
+          source: SRC,
+          data: deepClone(merged),
+        },
       });
     }
     return deepClone(merged);
@@ -288,7 +346,12 @@ class RoomStore {
 
     // Hub export only for mutating domain messages
     if (isMutatingType(msg.type)) {
-      exportToHubIfEnabled({ via: "roomStore", roomId, message: msg, inbound: true });
+      exportToHubIfEnabled({
+        via: "roomStore",
+        roomId,
+        message: msg,
+        inbound: true,
+      });
     }
     return msg;
   }
@@ -318,7 +381,11 @@ class RoomStore {
     const ttl = this._opts.ttlMs;
     const removed = [];
     this._rooms.forEach((room, id) => {
-      const age = now - new Date(room.lastActiveAt || room.updatedAt || room.createdAt).getTime();
+      const age =
+        now -
+        new Date(
+          room.lastActiveAt || room.updatedAt || room.createdAt
+        ).getTime();
       if (age > ttl) {
         this._rooms.delete(id);
         removed.push(id);
@@ -333,7 +400,7 @@ class RoomStore {
     const ids = Array.from(this._rooms.keys());
     this._rooms.clear();
     this._persist();
-    ids.forEach(id => this._notify(id, "room.cleared", { id, reason }));
+    ids.forEach((id) => this._notify(id, "room.cleared", { id, reason }));
     emit("room.cleared.all", { count: ids.length, reason });
     return ids.length;
   }
@@ -342,7 +409,7 @@ class RoomStore {
   _hydrateFromStorage() {
     const snap = lsGet();
     if (!snap || !Array.isArray(snap.rooms)) return;
-    snap.rooms.forEach(s => {
+    snap.rooms.forEach((s) => {
       // messages are not persisted to keep storage light
       const room = {
         ...s,
@@ -355,9 +422,11 @@ class RoomStore {
 
   _persist() {
     if (!this._opts.persist) return;
-    const rooms = Array.from(this._rooms.values()).map(r => {
+    const rooms = Array.from(this._rooms.values()).map((r) => {
       const slim = {};
-      this._opts.persistFields.forEach(f => { if (f in r) slim[f] = r[f]; });
+      this._opts.persistFields.forEach((f) => {
+        if (f in r) slim[f] = r[f];
+      });
       return slim;
     });
     lsSet({ savedAt: nowIso(), rooms });
@@ -378,11 +447,11 @@ function sanitizeParticipant(p) {
 function sanitizeSession(s) {
   if (!s || typeof s !== "object") {
     return {
-      type: null,          // cooking|cleaning|garden|animal|preservation
-      status: "idle",      // idle|planned|started|paused|completed|canceled|failed
+      type: null, // cooking|cleaning|garden|animal|preservation
+      status: "idle", // idle|planned|started|paused|completed|canceled|failed
       stepId: null,
-      deadlineTs: null,    // absolute
-      plan: null,          // optional plan snapshot { plannedStartTs, p50, p80, p95, ... }
+      deadlineTs: null, // absolute
+      plan: null, // optional plan snapshot { plannedStartTs, p50, p80, p95, ... }
       notes: null,
     };
   }
@@ -419,7 +488,7 @@ function normalizeEnvelope(obj) {
       type: obj.type,
       ts: obj.ts || nowIso(),
       source: obj.source || SRC,
-      data: ("data" in obj) ? obj.data : null,
+      data: "data" in obj ? obj.data : null,
     };
   }
   // Wrap raw payload
@@ -438,11 +507,16 @@ function shouldExportSessionMutation(beforeJson, afterObj) {
       const t = (after.type || "").toLowerCase();
       const s = (after.status || "").toLowerCase();
       // Only export for domain sessions, not idle/no-type
-      if (["cooking", "cleaning", "garden", "animal", "preservation"].includes(t)) {
-        if (["started", "completed", "canceled", "failed"].includes(s)) return true;
+      if (
+        ["cooking", "cleaning", "garden", "animal", "preservation"].includes(t)
+      ) {
+        if (["started", "completed", "canceled", "failed"].includes(s))
+          return true;
       }
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return false;
 }
 

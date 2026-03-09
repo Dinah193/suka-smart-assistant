@@ -1,0 +1,294 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00.000Z",
+  "meta": {
+    "id": "cuisines.bbq.recipes.smoked_fish",
+    "type": "recipe",
+    "name": "BBQ Smoked Fish (Dry-Brined, Low & Slow)",
+    "locale": "en-US",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalog",
+      "notes": [
+        "BBQ-friendly smoked fish using a dry brine + pellicle for better smoke adhesion.",
+        "Designed for salmon, trout, or firm white fish (sablefish/black cod, mackerel, etc.).",
+        "Includes both hot-smoke (ready-to-eat) and warm-smoke guidance, plus sauce pairing ideas."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "cuisines.bbq",
+    "category": "main",
+    "mealArchetypes": ["smoke_day", "cookout", "meal_prep"],
+    "servingStyles": ["bbq_plate", "sandwich", "taco", "salad_topper"],
+    "plannerTags": [
+      "cuisine.bbq",
+      "smoked",
+      "seafood",
+      "low_and_slow",
+      "meal_prep",
+      "make_ahead"
+    ]
+  },
+  "yield": {
+    "servings": 6,
+    "notes": "6 servings (about 4–6 oz cooked fish per person), depending on cut and appetites."
+  },
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 220,
+    "totalMins": 240
+  },
+  "difficulty": "intermediate",
+  "equipment": {
+    "minimum": [
+      "equipment.smoker",
+      "equipment.instant_read_thermometer",
+      "equipment.baking_sheet"
+    ],
+    "recommended": [
+      "equipment.wire_rack",
+      "equipment.tongs",
+      "equipment.small_bowl",
+      "equipment.measuring_spoons",
+      "equipment.spray_bottle_optional"
+    ],
+    "optional": ["equipment.fish_spatula", "equipment.probe_thermometer"]
+  },
+  "allergens": ["fish"],
+  "ingredients": [
+    {
+      "id": "ingredients.fish",
+      "label": "Fish fillets (salmon, trout, or firm white fish)",
+      "qty": 2.5,
+      "unit": "lb",
+      "notes": "Skin-on preferred for salmon/trout. For white fish, choose thicker fillets for easier smoking.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.kosher_salt",
+      "label": "Kosher salt",
+      "qty": 1.5,
+      "unit": "tbsp",
+      "notes": "Dry brine. If using fine/table salt, reduce to ~2 tsp.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.brown_sugar",
+      "label": "Brown sugar",
+      "qty": 2,
+      "unit": "tbsp",
+      "notes": "Balances salt and helps browning; optional but recommended.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.black_pepper",
+      "label": "Black pepper, freshly ground",
+      "qty": 1,
+      "unit": "tsp",
+      "optional": true
+    },
+    {
+      "id": "ingredients.paprika",
+      "label": "Paprika (sweet or smoked)",
+      "qty": 1,
+      "unit": "tsp",
+      "notes": "Adds color and gentle warmth.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.garlic_powder",
+      "label": "Garlic powder",
+      "qty": 0.5,
+      "unit": "tsp",
+      "optional": true
+    },
+    {
+      "id": "ingredients.onion_powder",
+      "label": "Onion powder",
+      "qty": 0.5,
+      "unit": "tsp",
+      "optional": true
+    },
+    {
+      "id": "ingredients.cayenne",
+      "label": "Cayenne (optional)",
+      "qty": 0.125,
+      "unit": "tsp",
+      "notes": "A pinch for heat; skip for mild.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.lemon",
+      "label": "Lemon, cut into wedges",
+      "qty": 1,
+      "unit": "each",
+      "notes": "For serving.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.neutral_oil",
+      "label": "Neutral oil (for brushing rack or fish)",
+      "qty": 1,
+      "unit": "tsp",
+      "notes": "Helps prevent sticking.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.wood_chunks",
+      "label": "Smoking wood (chunks or chips)",
+      "qty": 2,
+      "unit": "cup",
+      "notes": "Alder is classic for salmon; apple/cherry are mild-sweet; pecan is richer. Avoid heavy mesquite for fish unless used lightly.",
+      "optional": false
+    },
+    {
+      "id": "ingredients.bbq_sauce",
+      "label": "BBQ sauce (optional, for glazing)",
+      "qty": 0.25,
+      "unit": "cup",
+      "notes": "Use a thinner, tangy sauce; optional glaze late in cook.",
+      "optional": true
+    },
+    {
+      "id": "ingredients.apple_cider_vinegar",
+      "label": "Apple cider vinegar (optional spritz)",
+      "qty": 0.25,
+      "unit": "cup",
+      "notes": "For a light spritz during smoking to keep surface tacky; optional.",
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.prep_fish",
+      "title": "Prep the fish",
+      "body": "Pat fish dry with paper towels. Remove pin bones (for salmon/trout) if needed. Keep skin on if present. Place fish on a wire rack set over a baking sheet.",
+      "timers": []
+    },
+    {
+      "id": "step.dry_brine",
+      "title": "Dry brine",
+      "body": "Mix kosher salt, brown sugar (if using), black pepper, paprika, garlic powder, onion powder, and cayenne (if using). Sprinkle evenly over fish (top and sides). Refrigerate uncovered 45–60 minutes.",
+      "timers": [{ "label": "Dry brine", "mins": 60 }]
+    },
+    {
+      "id": "step.rinse_dry",
+      "title": "Rinse lightly and dry (optional but recommended)",
+      "body": "For a cleaner smoke flavor, quickly rinse the surface of the fish under cool water to remove excess cure, then pat very dry. Return fish to the rack.",
+      "timers": []
+    },
+    {
+      "id": "step.pellicle",
+      "title": "Form the pellicle (tacky surface for better smoke)",
+      "body": "Refrigerate the fish uncovered 30–60 minutes until the surface feels slightly tacky. This helps smoke adhere and improves texture.",
+      "timers": [{ "label": "Pellicle rest", "mins": 45 }]
+    },
+    {
+      "id": "step.preheat_smoker",
+      "title": "Preheat smoker",
+      "body": "Preheat smoker to 200–225°F. Oil the grates lightly. Use a mild wood (alder, apple, cherry). Keep smoke thin and steady—fish takes smoke fast.",
+      "timers": [{ "label": "Preheat smoker", "mins": 15 }]
+    },
+    {
+      "id": "step.smoke",
+      "title": "Smoke the fish",
+      "body": "Place fish on the smoker, skin-side down if applicable. Smoke at 200–225°F until the thickest part reaches an internal temp of 135°F for salmon (juicy) or 145°F for firm white fish / USDA doneness. Expect ~60–120 minutes depending on thickness. Optional: spritz lightly with apple cider vinegar every 30 minutes if the surface looks dry (not mandatory).",
+      "timers": [
+        { "label": "Check temp (first check)", "mins": 60 },
+        { "label": "Optional spritz interval", "mins": 30 }
+      ]
+    },
+    {
+      "id": "step.glaze_optional",
+      "title": "Optional BBQ glaze (last 10–15 minutes)",
+      "body": "If glazing, brush a thin layer of BBQ sauce on the fish during the final 10–15 minutes of smoking so it sets without burning. Keep it light—fish can get overpowered.",
+      "timers": [{ "label": "Glaze set time", "mins": 15 }]
+    },
+    {
+      "id": "step.rest",
+      "title": "Rest and serve",
+      "body": "Remove fish and rest 5–10 minutes. Serve with lemon wedges. Great as a BBQ plate protein or flaked into sandwiches, tacos, salads, or rice bowls.",
+      "timers": [{ "label": "Rest", "mins": 10 }]
+    }
+  ],
+  "pairings": {
+    "sides": [
+      { "id": "cuisines.bbq.recipes.coleslaw", "label": "BBQ Cole Slaw" },
+      { "id": "cuisines.bbq.recipes.baked_beans", "label": "BBQ Baked Beans" },
+      { "id": "dishes.bbq.cornbread", "label": "Cornbread" },
+      { "id": "dishes.bbq.grilled_vegetables", "label": "Grilled Vegetables" }
+    ],
+    "sauces": [
+      {
+        "id": "dishes.bbq.vinegar_sauce",
+        "label": "Vinegar Pepper Sauce",
+        "notes": "Especially good with smoked white fish."
+      },
+      {
+        "id": "dishes.bbq.lemon_herb_aioli",
+        "label": "Lemon-Herb Aioli",
+        "notes": "Great for sandwiches."
+      }
+    ]
+  },
+  "storage": {
+    "refrigerate": {
+      "instructions": "Cool completely, then refrigerate in an airtight container.",
+      "maxDays": 3
+    },
+    "freeze": {
+      "instructions": "Wrap tightly and freeze up to 2 months. Thaw overnight in fridge for best texture.",
+      "maxDays": 60
+    },
+    "notes": "Smoked fish is excellent cold the next day. For reheating, warm gently (avoid drying)."
+  },
+  "planner": {
+    "batchable": true,
+    "makeAhead": true,
+    "leftoversFriendly": true,
+    "serveModes": [
+      {
+        "id": "serveMode.bbq_plate",
+        "label": "BBQ Plate",
+        "notes": "Serve with slaw + beans or grilled veg."
+      },
+      {
+        "id": "serveMode.tacos",
+        "label": "Tacos",
+        "notes": "Flake smoked fish into tortillas with slaw + vinegar sauce."
+      },
+      {
+        "id": "serveMode.sandwich",
+        "label": "Sandwich",
+        "notes": "Use a soft bun, add slaw, and a light aioli or tangy sauce."
+      }
+    ]
+  },
+  "adaptations": [
+    {
+      "kind": "temperature_targets",
+      "notes": [
+        "Salmon/trout: 130–135°F for juicy (carryover can take it slightly higher).",
+        "Firm white fish (cod/halibut style): aim 140–145°F.",
+        "If you prefer firmer, smoke to 145°F for salmon as well."
+      ]
+    },
+    {
+      "kind": "wood",
+      "notes": [
+        "Best woods for fish: alder (classic), apple, cherry, maple.",
+        "Use pecan lightly for richer smoke. Avoid heavy mesquite unless very small amounts."
+      ]
+    },
+    {
+      "kind": "sauce_style",
+      "notes": [
+        "Carolina-style: skip sweet glaze; finish with vinegar-pepper sauce + lemon.",
+        "KC-style: very light glaze late in cook, then serve extra sauce on the side.",
+        "Spicy: add cayenne to rub and a dash of hot sauce to serving sauce."
+      ]
+    }
+  ]
+}

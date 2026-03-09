@@ -26,9 +26,9 @@
  *   Rules are pure functions or declarative objects; see RuleSpec below.
  */
 
-import eventBus from 'src/services/eventBus.js';
+import { emit as emitEventBus } from "@/services/events/eventBus";
 
-const SOURCE = 'SynthesisEngine';
+const SOURCE = "SynthesisEngine";
 
 // ───────────────────────────────────────────────────────────────────────────────
 // Public API
@@ -50,8 +50,18 @@ export async function synthesize({ imports, context }, options = {}) {
   const tsStart = nowISO();
 
   if (!Array.isArray(imports) || imports.length === 0) {
-    emit('synthesis.completed', { ok: true, empty: true, steps: 0, sessions: 0 });
-    return { ok: true, readinessSteps: [], sessionSuggestions: [], meta: { tsStart, tsEnd: nowISO() } };
+    emit("synthesis.completed", {
+      ok: true,
+      empty: true,
+      steps: 0,
+      sessions: 0,
+    });
+    return {
+      ok: true,
+      readinessSteps: [],
+      sessionSuggestions: [],
+      meta: { tsStart, tsEnd: nowISO() },
+    };
   }
 
   const ctx = buildContext(context);
@@ -62,7 +72,7 @@ export async function synthesize({ imports, context }, options = {}) {
     source: options.source || SOURCE,
   };
 
-  emit('synthesis.started', {
+  emit("synthesis.started", {
     imports: imports.length,
     domains: unique(imports.map((i) => i.domain)),
     planId: opts.planId || null,
@@ -73,22 +83,35 @@ export async function synthesize({ imports, context }, options = {}) {
   const diagnostics = [];
 
   for (const item of imports) {
-    const domain = (item?.domain || '').toLowerCase();
+    const domain = (item?.domain || "").toLowerCase();
     const rules = getRulesForDomain(domain);
 
     if (!rules || rules.length === 0) {
-      diagnostics.push({ level: 'warn', domain, reason: 'NO_RULES' });
+      diagnostics.push({ level: "warn", domain, reason: "NO_RULES" });
       continue;
     }
 
     try {
-      const { steps, sessions, diag } = await runRuleset({ item, rules, ctx, opts });
+      const { steps, sessions, diag } = await runRuleset({
+        item,
+        rules,
+        ctx,
+        opts,
+      });
       if (Array.isArray(steps)) readinessSteps.push(...steps);
       if (Array.isArray(sessions)) sessionSuggestions.push(...sessions);
       if (diag?.length) diagnostics.push(...diag);
     } catch (err) {
-      emit('synthesis.error', { domain, message: err?.message || 'rule execution failed' });
-      diagnostics.push({ level: 'error', domain, reason: 'RULE_THROW', message: err?.message });
+      emit("synthesis.error", {
+        domain,
+        message: err?.message || "rule execution failed",
+      });
+      diagnostics.push({
+        level: "error",
+        domain,
+        reason: "RULE_THROW",
+        message: err?.message,
+      });
     }
   }
 
@@ -96,7 +119,7 @@ export async function synthesize({ imports, context }, options = {}) {
   const stepsOut = dedupeSteps(readinessSteps);
   const sessionsOut = dedupeSessions(sessionSuggestions);
 
-  emit('synthesis.suggestion.generated', {
+  emit("synthesis.suggestion.generated", {
     steps: stepsOut.length,
     sessions: sessionsOut.length,
     planId: opts.planId || null,
@@ -104,18 +127,24 @@ export async function synthesize({ imports, context }, options = {}) {
 
   // Optionally commit session suggestions to SessionsStore
   if (opts.commit && sessionsOut.length > 0) {
-    const commitRes = await commitSessions(sessionsOut, { ctx, planId: opts.planId });
+    const commitRes = await commitSessions(sessionsOut, {
+      ctx,
+      planId: opts.planId,
+    });
     if (commitRes.ok) {
-      emit('synthesis.sessions.committed', { count: sessionsOut.length, planId: opts.planId || null });
+      emit("synthesis.sessions.committed", {
+        count: sessionsOut.length,
+        planId: opts.planId || null,
+      });
       // Try optional hub export (fire and forget)
       await exportToHubIfEnabled({
-        type: 'sessions.committed',
+        type: "sessions.committed",
         ts: nowISO(),
         source: SOURCE,
         data: { planId: opts.planId || null, sessions: sessionsOut },
       });
     } else {
-      emit('synthesis.error', { message: commitRes.error || 'commit failed' });
+      emit("synthesis.error", { message: commitRes.error || "commit failed" });
     }
   }
 
@@ -130,7 +159,7 @@ export async function synthesize({ imports, context }, options = {}) {
     },
   };
 
-  emit('synthesis.completed', {
+  emit("synthesis.completed", {
     ok: true,
     steps: stepsOut.length,
     sessions: sessionsOut.length,
@@ -146,10 +175,10 @@ export async function synthesize({ imports, context }, options = {}) {
  * @param {Array<RuleSpec|RuleFn>} ruleset
  */
 export function registerDomainRules(domain, ruleset = []) {
-  const d = (domain || '').toLowerCase().trim();
+  const d = (domain || "").toLowerCase().trim();
   if (!d || !Array.isArray(ruleset)) return;
   RULES_REGISTRY.set(d, ruleset.slice());
-  emit('synthesis.rules.registered', { domain: d, count: ruleset.length });
+  emit("synthesis.rules.registered", { domain: d, count: ruleset.length });
 }
 
 // Provide a snapshot of domains/rules for observability/UIs.
@@ -181,26 +210,38 @@ async function runRuleset({ item, rules, ctx, opts }) {
   const sessions = [];
 
   // Sort by priority desc; fallback to 0
-  const ordered = rules.slice().sort((a, b) => (b.priority || 0) - (a.priority || 0));
+  const ordered = rules
+    .slice()
+    .sort((a, b) => (b.priority || 0) - (a.priority || 0));
 
   for (const rule of ordered) {
     try {
       // Support both declarative and functional rules
-      if (typeof rule === 'function') {
+      if (typeof rule === "function") {
         const out = await rule({ item, ctx, options: opts });
         if (out?.steps) steps.push(...out.steps);
         if (out?.sessions) sessions.push(...out.sessions);
         if (out?.diag) diag.push(...out.diag);
-      } else if (rule && typeof rule === 'object') {
-        const shouldRun = typeof rule.when === 'function' ? !!rule.when({ item, ctx, options: opts }) : true;
+      } else if (rule && typeof rule === "object") {
+        const shouldRun =
+          typeof rule.when === "function"
+            ? !!rule.when({ item, ctx, options: opts })
+            : true;
         if (!shouldRun) continue;
-        const out = typeof rule.produce === 'function' ? await rule.produce({ item, ctx, options: opts }) : null;
+        const out =
+          typeof rule.produce === "function"
+            ? await rule.produce({ item, ctx, options: opts })
+            : null;
         if (out?.steps) steps.push(...out.steps);
         if (out?.sessions) sessions.push(...out.sessions);
         if (out?.diag) diag.push(...out.diag);
       }
     } catch (err) {
-      diag.push({ level: 'error', rule: rule?.id || '<fn>', message: err?.message || 'rule error' });
+      diag.push({
+        level: "error",
+        rule: rule?.id || "<fn>",
+        message: err?.message || "rule error",
+      });
     }
   }
 
@@ -221,9 +262,9 @@ bootstrapDefaultRules();
 async function commitSessions(sessions, { ctx, planId }) {
   try {
     const store =
-      (await softImport('src/domain/sessions/SessionsStore.js')) ||
-      (await softImport('src/services/sessions/SessionsStore.js')); // alt path
-    if (!store) return { ok: false, error: 'SessionsStore unavailable' };
+      (await softImport("src/domain/sessions/SessionsStore.js")) ||
+      (await softImport("src/services/session/SessionsStore.js")); // alt path
+    if (!store) return { ok: false, error: "SessionsStore unavailable" };
 
     // Allow either bulkUpsert or saveMany
     const fn =
@@ -231,13 +272,17 @@ async function commitSessions(sessions, { ctx, planId }) {
       store.saveMany ||
       (store.default && (store.default.bulkUpsert || store.default.saveMany));
 
-    if (typeof fn !== 'function') {
-      return { ok: false, error: 'No bulkUpsert/saveMany in SessionsStore' };
+    if (typeof fn !== "function") {
+      return { ok: false, error: "No bulkUpsert/saveMany in SessionsStore" };
     }
 
     // Normalize shape
     const docs = sessions.map((s) => ({
-      id: s.id || `sess:${hash(`${s.domain}:${s.title}:${s.start || ''}:${s.meta?.refId || ''}`)}`,
+      id:
+        s.id ||
+        `sess:${hash(
+          `${s.domain}:${s.title}:${s.start || ""}:${s.meta?.refId || ""}`
+        )}`,
       domain: s.domain,
       title: s.title,
       start: s.start || null,
@@ -245,13 +290,15 @@ async function commitSessions(sessions, { ctx, planId }) {
       needs: s.needs || {},
       meta: { ...(s.meta || {}), planId: planId || null },
       createdAt: nowISO(),
-      status: 'suggested',
+      status: "suggested",
     }));
 
     const res = await fn.call(store, docs);
-    return res?.ok !== false ? { ok: true, count: docs.length } : { ok: false, error: res?.error || 'store error' };
+    return res?.ok !== false
+      ? { ok: true, count: docs.length }
+      : { ok: false, error: res?.error || "store error" };
   } catch (err) {
-    return { ok: false, error: err?.message || 'commit exception' };
+    return { ok: false, error: err?.message || "commit exception" };
   }
 }
 
@@ -275,7 +322,7 @@ function dedupeSteps(steps) {
     });
   }
   // Sort: higher priority first, then sooner due
-  out.sort((a, b) => (b.priority - a.priority) || cmpISO(a.dueBy, b.dueBy));
+  out.sort((a, b) => b.priority - a.priority || cmpISO(a.dueBy, b.dueBy));
   return out;
 }
 
@@ -294,10 +341,14 @@ function dedupeSessions(sessions) {
 }
 
 function sKey(s) {
-  return `${s.domain}|${s.title}|${s.dueBy || ''}|${JSON.stringify(s.meta || {})}`;
+  return `${s.domain}|${s.title}|${s.dueBy || ""}|${JSON.stringify(
+    s.meta || {}
+  )}`;
 }
 function sessKey(s) {
-  return `${s.domain}|${s.title}|${s.start || ''}|${JSON.stringify(s.needs || {})}`;
+  return `${s.domain}|${s.title}|${s.start || ""}|${JSON.stringify(
+    s.needs || {}
+  )}`;
 }
 
 // ───────────────────────────────────────────────────────────────────────────────
@@ -305,58 +356,74 @@ function sessKey(s) {
 
 function bootstrapDefaultRules() {
   // RECIPE domain — mise en place, thawing, preheat, marinate, soak beans
-  RULES_REGISTRY.set('recipe', [
+  RULES_REGISTRY.set("recipe", [
     // thaw if frozen proteins detected
     {
-      id: 'recipe-thaw-protein',
+      id: "recipe-thaw-protein",
       priority: 50,
-      when: ({ item }) => hasAny(item?.items, (x) => /(chicken|beef|pork|fish|lamb)/i.test(x.name) && x.state === 'frozen'),
+      when: ({ item }) =>
+        hasAny(
+          item?.items,
+          (x) =>
+            /(chicken|beef|pork|fish|lamb)/i.test(x.name) &&
+            x.state === "frozen"
+        ),
       produce: ({ item, ctx }) => {
         const hrs = 12;
         const due = isoMinusHours(ctx.now, hrs);
         return {
-          steps: [{
-            domain: 'recipe',
-            title: `Thaw ${item.title} protein in fridge (${hrs}h)`,
-            dueBy: due,
-            priority: 9,
-            meta: { refId: item.id, reason: 'frozen-protein' },
-          }],
+          steps: [
+            {
+              domain: "recipe",
+              title: `Thaw ${item.title} protein in fridge (${hrs}h)`,
+              dueBy: due,
+              priority: 9,
+              meta: { refId: item.id, reason: "frozen-protein" },
+            },
+          ],
         };
       },
     },
     // Soak dried beans if present
     {
-      id: 'recipe-soak-beans',
+      id: "recipe-soak-beans",
       priority: 40,
-      when: ({ item }) => hasAny(item?.items, (x) => /(chickpea|garbanzo|bean)/i.test(x.name) && x.state === 'dried'),
+      when: ({ item }) =>
+        hasAny(
+          item?.items,
+          (x) => /(chickpea|garbanzo|bean)/i.test(x.name) && x.state === "dried"
+        ),
       produce: ({ item, ctx }) => {
         const hrs = 8;
         const due = isoMinusHours(ctx.now, 2); // start 2h before to have time
         return {
-          steps: [{
-            domain: 'recipe',
-            title: `Soak beans for ${hrs}h for ${item.title}`,
-            dueBy: due,
-            priority: 8,
-            meta: { refId: item.id, reason: 'dried-legume' },
-          }],
+          steps: [
+            {
+              domain: "recipe",
+              title: `Soak beans for ${hrs}h for ${item.title}`,
+              dueBy: due,
+              priority: 8,
+              meta: { refId: item.id, reason: "dried-legume" },
+            },
+          ],
         };
       },
     },
     // Preheat step as a readiness action close to mealtime
     {
-      id: 'recipe-preheat-oven',
+      id: "recipe-preheat-oven",
       priority: 10,
       when: ({ item }) => hasAny(item?.methods, (m) => /bake|roast/i.test(m)),
       produce: ({ item }) => ({
-        steps: [{
-          domain: 'recipe',
-          title: `Preheat oven for ${item.title}`,
-          dueBy: null,
-          priority: 5,
-          meta: { refId: item.id, reason: 'oven-method' },
-        }],
+        steps: [
+          {
+            domain: "recipe",
+            title: `Preheat oven for ${item.title}`,
+            dueBy: null,
+            priority: 5,
+            meta: { refId: item.id, reason: "oven-method" },
+          },
+        ],
       }),
     },
     // Produce a session suggestion
@@ -364,126 +431,143 @@ function bootstrapDefaultRules() {
       // If import contains desired time (e.g., dinner slot) use it; else leave null
       const start = item.meta?.desiredStart || null;
       return {
-        sessions: [{
-          domain: 'cooking',
-          title: `Cook: ${item.title}`,
-          start,
-          needs: {
-            devices: item.equipment?.includes('oven') ? ['oven-1'] : [],
-            people: [], // automation can assign later
-            capacity: [],
+        sessions: [
+          {
+            domain: "cooking",
+            title: `Cook: ${item.title}`,
+            start,
+            needs: {
+              devices: item.equipment?.includes("oven") ? ["oven-1"] : [],
+              people: [], // automation can assign later
+              capacity: [],
+            },
+            meta: { refId: item.id, origin: "synthesis" },
           },
-          meta: { refId: item.id, origin: 'synthesis' },
-        }],
+        ],
       };
     },
   ]);
 
   // CLEANING domain — supplies check & vacuum scheduling off quiet hours
-  RULES_REGISTRY.set('cleaning', [
+  RULES_REGISTRY.set("cleaning", [
     {
-      id: 'cleaning-supply-check',
+      id: "cleaning-supply-check",
       priority: 20,
       produce: ({ item, ctx }) => {
-        const shortages = (item.items || []).filter((it) => qty(ctx.inventory, it.sku) < (it.qty || 1));
+        const shortages = (item.items || []).filter(
+          (it) => qty(ctx.inventory, it.sku) < (it.qty || 1)
+        );
         if (shortages.length === 0) return {};
         return {
           steps: shortages.map((s) => ({
-            domain: 'cleaning',
+            domain: "cleaning",
             title: `Stock up: ${s.name}`,
             dueBy: null,
             priority: 6,
-            meta: { refId: item.id, sku: s.sku, reason: 'inventory-shortage' },
+            meta: { refId: item.id, sku: s.sku, reason: "inventory-shortage" },
           })),
         };
       },
     },
     {
-      id: 'cleaning-schedule',
+      id: "cleaning-schedule",
       priority: 10,
-      when: ({ item }) => /vacuum|mop|disinfect/i.test(item.title || ''),
+      when: ({ item }) => /vacuum|mop|disinfect/i.test(item.title || ""),
       produce: ({ item, ctx }) => {
         // Suggest a session outside quiet hours if we know them
         const start = nextOutsideQuietHours(ctx);
         return {
-          sessions: [{
-            domain: 'cleaning',
-            title: item.title,
-            start,
-            needs: { devices: [], people: [], capacity: [] },
-            meta: { refId: item.id },
-          }],
+          sessions: [
+            {
+              domain: "cleaning",
+              title: item.title,
+              start,
+              needs: { devices: [], people: [], capacity: [] },
+              meta: { refId: item.id },
+            },
+          ],
         };
       },
     },
   ]);
 
   // GARDEN domain — watering windows, harvest readiness
-  RULES_REGISTRY.set('garden', [
+  RULES_REGISTRY.set("garden", [
     {
-      id: 'garden-water',
+      id: "garden-water",
       priority: 15,
-      when: ({ item }) => /watering/i.test(item.title || '') || hasAny(item?.methods, (m) => /water/i.test(m)),
+      when: ({ item }) =>
+        /watering/i.test(item.title || "") ||
+        hasAny(item?.methods, (m) => /water/i.test(m)),
       produce: ({ item, ctx }) => {
-        const start = withinTimeWindow(ctx.prefs?.garden?.wateringWindow) || null;
+        const start =
+          withinTimeWindow(ctx.prefs?.garden?.wateringWindow) || null;
         return {
-          sessions: [{
-            domain: 'garden',
-            title: item.title || 'Water plants',
-            start,
-            needs: { devices: [], people: [], capacity: [] },
-            meta: { refId: item.id },
-          }],
+          sessions: [
+            {
+              domain: "garden",
+              title: item.title || "Water plants",
+              start,
+              needs: { devices: [], people: [], capacity: [] },
+              meta: { refId: item.id },
+            },
+          ],
         };
       },
     },
     {
-      id: 'garden-harvest-readiness',
+      id: "garden-harvest-readiness",
       priority: 10,
-      when: ({ item }) => /harvest/i.test(item.title || ''),
+      when: ({ item }) => /harvest/i.test(item.title || ""),
       produce: ({ item }) => ({
-        steps: [{
-          domain: 'garden',
-          title: `Clean tools & baskets for ${item.title}`,
-          dueBy: null,
-          priority: 5,
-          meta: { refId: item.id },
-        }],
+        steps: [
+          {
+            domain: "garden",
+            title: `Clean tools & baskets for ${item.title}`,
+            dueBy: null,
+            priority: 5,
+            meta: { refId: item.id },
+          },
+        ],
       }),
     },
   ]);
 
   // ANIMAL domain — feed schedule
-  RULES_REGISTRY.set('animal', [
+  RULES_REGISTRY.set("animal", [
     {
-      id: 'animal-feed',
+      id: "animal-feed",
       priority: 10,
-      when: ({ item }) => /feed|feeding/i.test(item.title || ''),
+      when: ({ item }) => /feed|feeding/i.test(item.title || ""),
       produce: ({ item }) => ({
-        sessions: [{
-          domain: 'animal',
-          title: item.title || 'Feed animals',
-          start: null,
-          needs: { devices: [], people: [], capacity: [] },
-          meta: { refId: item.id },
-        }],
+        sessions: [
+          {
+            domain: "animal",
+            title: item.title || "Feed animals",
+            start: null,
+            needs: { devices: [], people: [], capacity: [] },
+            meta: { refId: item.id },
+          },
+        ],
       }),
     },
   ]);
 
   // PRESERVATION domain — jar sterilization
-  RULES_REGISTRY.set('preservation', [
+  RULES_REGISTRY.set("preservation", [
     {
-      id: 'preservation-sterilize-jars',
+      id: "preservation-sterilize-jars",
       priority: 20,
       produce: ({ item }) => ({
-        steps: [{
-          domain: 'preservation',
-          title: `Sterilize jars for ${item.title || 'preservation'}`,
-          dueBy: null,
-          priority: 8,
-          meta: { refId: item.id },
-        }],
+        steps: [
+          {
+            domain: "preservation",
+            title: `Sterilize jars for ${item.title || "preservation"}`,
+            dueBy: null,
+            priority: 8,
+            meta: { refId: item.id },
+          },
+        ],
       }),
     },
   ]);
@@ -496,7 +580,7 @@ function buildContext(context = {}) {
   const now = context.now ? new Date(context.now) : new Date();
   return {
     now,
-    tz: context.tz || 'UTC',
+    tz: context.tz || "UTC",
     inventory: context.inventory || {},
     prefs: context.prefs || {},
     weather: context.weather || {},
@@ -515,10 +599,16 @@ function nextOutsideQuietHours(ctx) {
   if (!q?.enabled) return null;
   try {
     const now = new Date(ctx.now);
-    const [qsH, qsM] = (q.start || '21:00').split(':').map((x) => parseInt(x, 10));
-    const [qeH, qeM] = (q.end || '07:00').split(':').map((x) => parseInt(x, 10));
-    const startQ = new Date(now); startQ.setHours(qsH, qsM, 0, 0);
-    const endQ = new Date(now); endQ.setHours(qeH, qeM, 0, 0);
+    const [qsH, qsM] = (q.start || "21:00")
+      .split(":")
+      .map((x) => parseInt(x, 10));
+    const [qeH, qeM] = (q.end || "07:00")
+      .split(":")
+      .map((x) => parseInt(x, 10));
+    const startQ = new Date(now);
+    startQ.setHours(qsH, qsM, 0, 0);
+    const endQ = new Date(now);
+    endQ.setHours(qeH, qeM, 0, 0);
 
     // If quiet spans midnight, ensure endQ > startQ
     if (endQ <= startQ) endQ.setDate(endQ.getDate() + 1);
@@ -533,10 +623,12 @@ function nextOutsideQuietHours(ctx) {
 function withinTimeWindow([start, end] = []) {
   if (!start || !end) return null;
   const now = new Date();
-  const [sH, sM] = start.split(':').map((x) => parseInt(x, 10));
-  const [eH, eM] = end.split(':').map((x) => parseInt(x, 10));
-  const s = new Date(now); s.setHours(sH, sM, 0, 0);
-  const e = new Date(now); e.setHours(eH, eM, 0, 0);
+  const [sH, sM] = start.split(":").map((x) => parseInt(x, 10));
+  const [eH, eM] = end.split(":").map((x) => parseInt(x, 10));
+  const s = new Date(now);
+  s.setHours(sH, sM, 0, 0);
+  const e = new Date(now);
+  e.setHours(eH, eM, 0, 0);
   if (now < s) return s.toISOString();
   if (now > e) return null;
   return now.toISOString();
@@ -560,7 +652,7 @@ function cmpISO(a, b) {
 
 function emit(type, data) {
   try {
-    eventBus.emit('automation.event', {
+    eventBus.emit("automation.event", {
       type,
       ts: nowISO(),
       source: SOURCE,
@@ -592,7 +684,7 @@ function unique(arr) {
 }
 
 function stringOrNull(v) {
-  return typeof v === 'string' && v.trim() ? v.trim() : null;
+  return typeof v === "string" && v.trim() ? v.trim() : null;
 }
 
 function hash(str) {
@@ -613,24 +705,29 @@ function hasAny(list, pred) {
 
 async function exportToHubIfEnabled(payload) {
   try {
-    const flagsMod = await softImport('src/config/featureFlags.js');
+    const flagsMod = await softImport("src/config/featureFlags.json");
     const featureFlags = flagsMod?.default || flagsMod || {};
     if (!featureFlags.familyFundMode) return;
 
-    const Formatter = await softImport('src/services/hub/HubPacketFormatter.js');
-    const Connector = await softImport('src/services/hub/FamilyFundConnector.js');
+    const Formatter = await softImport(
+      "src/services/hub/HubPacketFormatter.js"
+    );
+    const Connector = await softImport(
+      "src/services/hub/FamilyFundConnector.js"
+    );
     if (!Formatter || !Connector) return;
 
     const packet =
       (Formatter.format && Formatter.format(payload)) ||
-      (Formatter.default && Formatter.default.format && Formatter.default.format(payload)) ||
+      (Formatter.default &&
+        Formatter.default.format &&
+        Formatter.default.format(payload)) ||
       null;
     if (!packet) return;
 
     const send =
-      Connector.send ||
-      (Connector.default && Connector.default.send);
-    if (typeof send !== 'function') return;
+      Connector.send || (Connector.default && Connector.default.send);
+    if (typeof send !== "function") return;
 
     await send(packet);
   } catch {

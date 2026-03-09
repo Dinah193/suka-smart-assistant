@@ -37,16 +37,26 @@ function readJSON(p, { optional = false } = {}) {
 }
 
 const cfg = readJSON(CONFIG_PATH);
-const depgraph = readJSON(DEPGRAPH_PATH, { optional: true }) || { nodes: [], edges: [] };
+const depgraph = readJSON(DEPGRAPH_PATH, { optional: true }) || {
+  nodes: [],
+  edges: [],
+};
 const routes = readJSON(ROUTES_PATH, { optional: true }) || { routes: [] };
 const events = readJSON(EVENTS_PATH, { optional: true }) || { events: [] };
-const aliases = readJSON(ALIASES_PATH, { optional: true }) || { aliases: {}, tooling: {} };
-const boundaries = readJSON(BOUNDARIES_PATH, { optional: true }) || { rules: [] };
+const aliases = readJSON(ALIASES_PATH, { optional: true }) || {
+  aliases: {},
+  tooling: {},
+};
+const boundaries = readJSON(BOUNDARIES_PATH, { optional: true }) || {
+  rules: [],
+};
 
 const mm = (pattern) => new Minimatch(pattern, { dot: true, nocase: false });
 const IGNS = (cfg.ignoreGlobs || []).map(mm);
 const SRC_GLOBS =
-  cfg.sourceGlobs && cfg.sourceGlobs.length ? cfg.sourceGlobs : ["src/**/*.{js,jsx,ts,tsx}"];
+  cfg.sourceGlobs && cfg.sourceGlobs.length
+    ? cfg.sourceGlobs
+    : ["src/**/*.{js,jsx,ts,tsx}"];
 
 function passIgnore(file) {
   return !IGNS.some((m) => m.match(file));
@@ -67,7 +77,8 @@ function aliasResolve(importPath) {
       return rel(abs(path.posix.join(replacement, tail)));
     }
   }
-  if (importPath.startsWith(".") || importPath.startsWith("/")) return importPath;
+  if (importPath.startsWith(".") || importPath.startsWith("/"))
+    return importPath;
   return null; // package import
 }
 
@@ -80,7 +91,11 @@ function tryResolveFile(fromFile, spec) {
     if (aliased) p = aliased;
   }
   if (!p) return null;
-  if (p.startsWith("src/") || p.startsWith("schemas/") || p.startsWith("public/")) {
+  if (
+    p.startsWith("src/") ||
+    p.startsWith("schemas/") ||
+    p.startsWith("public/")
+  ) {
     const candidates = [
       p,
       `${p}.js`,
@@ -92,8 +107,8 @@ function tryResolveFile(fromFile, spec) {
       `${p}.json`,
       path.posix.join(p, "index.js"),
       path.posix.join(p, "index.jsx"),
-      path.posix.join(p, "index.ts"),
-      path.posix.join(p, "index.tsx"),
+      path.posix.join(p, "index.js"),
+      path.posix.join(p, "index.jsx"),
     ];
     for (const c of candidates) {
       const full = abs(c);
@@ -137,11 +152,17 @@ function collectGraph(allFiles) {
   for (const f of allFiles) {
     const code = fs.readFileSync(abs(f), "utf8");
     const { imports, dynamicHints } = parseImports(code, f);
-    const entry = { imports: new Set(), pkgs: new Set(), workers: new Set(), dynamicHints };
+    const entry = {
+      imports: new Set(),
+      pkgs: new Set(),
+      workers: new Set(),
+      dynamicHints,
+    };
     for (const spec of imports) {
       const resolved = tryResolveFile(f, spec);
       if (resolved) {
-        if (resolved.endsWith(".worker.js") || resolved.endsWith(".worker.ts")) entry.workers.add(resolved);
+        if (resolved.endsWith(".worker.js") || resolved.endsWith(".worker.ts"))
+          entry.workers.add(resolved);
         entry.imports.add(resolved);
       } else {
         const pkg = spec.split("/")[0];
@@ -171,7 +192,8 @@ function seedsFromRoutes(rm) {
   for (const r of rm.routes || []) {
     if (r.page) seeds.add(rel(r.page.replace(/^@\//, "src/")));
     for (const feat of r.features || []) {
-      if (feat.component) seeds.add(rel(feat.component.replace(/^@\//, "src/")));
+      if (feat.component)
+        seeds.add(rel(feat.component.replace(/^@\//, "src/")));
     }
   }
   return seeds;
@@ -180,7 +202,8 @@ function seedsFromPipelines(rm) {
   const s = new Set();
   for (const r of rm.routes || []) {
     for (const p of r.pipeline || []) {
-      if (/worker/i.test(p)) s.add("src/features/scan-compare-trust/services/workers/ocr.worker.js");
+      if (/worker/i.test(p))
+        s.add("src/features/scan-compare-trust/services/workers/ocr.worker.js");
     }
   }
   return s;
@@ -238,7 +261,9 @@ function writeMarkdown(out) {
   }
   if (cats.unusedExports.length) {
     lines.push(`## Unused exports (top 25)`);
-    topN(cats.unusedExports, 25).forEach((u) => lines.push(`- \`${u.file}\` → **${u.export}**`));
+    topN(cats.unusedExports, 25).forEach((u) =>
+      lines.push(`- \`${u.file}\` → **${u.export}**`)
+    );
     lines.push("");
   }
   if (cats.strayDependencies.length) {
@@ -293,7 +318,11 @@ function printSummaryToConsole(out, allFilesCount) {
   };
 
   showTop("Unreferenced files", out.unreferencedFiles, (x) => x);
-  showTop("Unused exports", out.unusedExports, (x) => `${x.file} → ${x.export}`);
+  showTop(
+    "Unused exports",
+    out.unusedExports,
+    (x) => `${x.file} → ${x.export}`
+  );
   showTop("Stray dependencies", out.strayDependencies?.unused, (x) => x, 20);
 }
 
@@ -301,12 +330,14 @@ function mainOnce() {
   const allFiles = loadFiles();
   const { graph, pkgImports } = collectGraph(allFiles);
 
-  const seeds = new Set([
-    ...setFromDepgraphNodes(depgraph),
-    ...seedsFromRoutes(routes),
-    ...seedsFromPipelines(routes),
-    ...(cfg.allowlist?.files || []),
-  ].map((x) => x.replaceAll("\\", "/")));
+  const seeds = new Set(
+    [
+      ...setFromDepgraphNodes(depgraph),
+      ...seedsFromRoutes(routes),
+      ...seedsFromPipelines(routes),
+      ...(cfg.allowlist?.files || []),
+    ].map((x) => x.replaceAll("\\", "/"))
+  );
   const dynamicKeep = dynamicKeepRules(cfg);
   dynamicKeep.forEach((x) => seeds.add(x));
 
@@ -349,7 +380,10 @@ function mainOnce() {
       } else if (m[2]) {
         m[2]
           .split(",")
-          .map((s) => s.trim().split(/\s+as\s+/)[1] || s.trim().split(/\s+as\s+/)[0])
+          .map(
+            (s) =>
+              s.trim().split(/\s+as\s+/)[1] || s.trim().split(/\s+as\s+/)[0]
+          )
           .forEach((name) => {
             const set = symbolDefs.get(name) || new Set();
             set.add(f);
@@ -381,31 +415,44 @@ function mainOnce() {
     ...Object.keys(pkgJson.devDependencies || {}),
   ]);
   const usedPkgs = new Set([...pkgImports.keys()]);
-  const strayDeps = [...declared].filter((d) => !usedPkgs.has(d) && !d.startsWith("@types/"));
+  const strayDeps = [...declared].filter(
+    (d) => !usedPkgs.has(d) && !d.startsWith("@types/")
+  );
 
   const schemaFiles = fg
     .sync(["schemas/**/*.json"], { cwd: projectRoot, dot: true })
     .map((f) => f.replaceAll("\\", "/"));
   const boundarySchemaRefs = new Set();
   (boundaries.rules || []).forEach((r) => {
-    if (typeof r.validateWithSchema === "string") boundarySchemaRefs.add(rel(r.validateWithSchema));
+    if (typeof r.validateWithSchema === "string")
+      boundarySchemaRefs.add(rel(r.validateWithSchema));
   });
   if (cfg.crossChecks?.schemaSchedule)
-    boundarySchemaRefs.add(cfg.crossChecks.schemaSchedule.replaceAll("\\", "/"));
+    boundarySchemaRefs.add(
+      cfg.crossChecks.schemaSchedule.replaceAll("\\", "/")
+    );
   const danglingSchemas = schemaFiles.filter((f) => !boundarySchemaRefs.has(f));
 
   const staleFixtures = fg
     .sync(["src/**/data/fixtures/**"], { cwd: projectRoot, dot: true })
     .map((f) => f.replaceAll("\\", "/"))
     .filter(passIgnore)
-    .filter((f) => daysSinceModified(abs(f)) > (cfg.thresholds?.maxDaysSinceModifiedForFixture || 365));
+    .filter(
+      (f) =>
+        daysSinceModified(abs(f)) >
+        (cfg.thresholds?.maxDaysSinceModifiedForFixture || 365)
+    );
 
   const orphanWorkers = allWorkers.filter((f) => !referencedWorkers.has(f));
 
   const out = { ...cfg };
   out.candidates = [
     ...unref.map((f) => ({ type: "unreferencedFile", file: f })),
-    ...unusedExports.map((u) => ({ type: "unusedExport", file: u.file, export: u.export })),
+    ...unusedExports.map((u) => ({
+      type: "unusedExport",
+      file: u.file,
+      export: u.export,
+    })),
     ...strayDeps.map((d) => ({ type: "strayDependency", dependency: d })),
     ...danglingSchemas.map((s) => ({ type: "danglingSchema", file: s })),
     ...staleFixtures.map((s) => ({ type: "staleFixture", file: s })),
@@ -429,18 +476,30 @@ function mainOnce() {
     if (cond) errs.push(msg);
   };
 
-  pushIf((cap.maxUnreferencedFiles ?? 0) < unref.length, `Unreferenced files ${unref.length} > cap`);
+  pushIf(
+    (cap.maxUnreferencedFiles ?? 0) < unref.length,
+    `Unreferenced files ${unref.length} > cap`
+  );
   pushIf(
     (cap.maxUnusedExports ?? 0) < unusedExports.length,
     `Unused exports ${unusedExports.length} > cap`
   );
-  pushIf((cap.maxStrayDependencies ?? 0) < strayDeps.length, `Stray deps ${strayDeps.length} > cap`);
-  pushIf((cap.maxOrphanWorkers ?? 0) < orphanWorkers.length, `Orphan workers ${orphanWorkers.length} > cap`);
+  pushIf(
+    (cap.maxStrayDependencies ?? 0) < strayDeps.length,
+    `Stray deps ${strayDeps.length} > cap`
+  );
+  pushIf(
+    (cap.maxOrphanWorkers ?? 0) < orphanWorkers.length,
+    `Orphan workers ${orphanWorkers.length} > cap`
+  );
   pushIf(
     (cap.maxDanglingSchemas ?? 0) < danglingSchemas.length,
     `Dangling schemas ${danglingSchemas.length} > cap`
   );
-  pushIf((cap.maxStaleFixtures ?? 0) < staleFixtures.length, `Stale fixtures ${staleFixtures.length} > cap`);
+  pushIf(
+    (cap.maxStaleFixtures ?? 0) < staleFixtures.length,
+    `Stale fixtures ${staleFixtures.length} > cap`
+  );
 
   // Write JSON + Markdown, and print console summary
   fs.writeFileSync(CONFIG_PATH, JSON.stringify(out, null, 2));
@@ -449,8 +508,11 @@ function mainOnce() {
 
   const ok = errs.length === 0;
   const kind = ok ? pc.green("OK") : pc.red("FAIL");
-  console.log(`${kind} • Wrote findings to ${rel(CONFIG_PATH)} and ${rel(MD_PATH)}`);
-  if (!ok && (cap.onError || out.enforcement?.onError) !== "log") process.exit(1);
+  console.log(
+    `${kind} • Wrote findings to ${rel(CONFIG_PATH)} and ${rel(MD_PATH)}`
+  );
+  if (!ok && (cap.onError || out.enforcement?.onError) !== "log")
+    process.exit(1);
 }
 
 if (WATCH) {

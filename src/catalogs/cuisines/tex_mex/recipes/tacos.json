@@ -1,0 +1,618 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "meta": {
+    "id": "recipes.tex_mex.tacos",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Tex-Mex Tacos (Seasoned Beef + Quick Pico + Taco Sauce)",
+    "subtitle": "Weeknight-friendly tacos with a classic Tex-Mex seasoning profile; scalable for family meals.",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Tex-Mex",
+      "notes": [
+        "Designed for deterministic planning: clear equipment minimums, scalable yield, and optional add-ons.",
+        "Ingredient IDs use SSA-friendly canonical-style tokens; update to match your ingredient catalog IDs as needed."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "tex_mex",
+    "category": "main",
+    "mealArchetypes": ["archetype.tacos", "archetype.protein_plus_starch"],
+    "servingStyles": ["street_food", "family_style"],
+    "plannerTags": [
+      "cuisine.tex_mex",
+      "dish.tacos",
+      "weeknight.friendly",
+      "batch.friendly",
+      "leftovers.friendly"
+    ],
+    "subprofiles": ["texmex.classic"]
+  },
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 3, "unit": "tacos" },
+    "notes": "Makes ~12 tacos (3 per person). Scale as needed."
+  },
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 10,
+    "totalMins": 30
+  },
+  "difficulty": "beginner",
+  "summary": "Classic Tex-Mex tacos: browned, well-seasoned beef in warm tortillas with crisp lettuce, quick pico, cheese, and a simple taco sauce. Built to be fast, scalable, and planner-friendly.",
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": "filling_only",
+    "heatTypical": 2,
+    "messLevel": "medium",
+    "kidFriendly": true
+  },
+  "tasteProfile": {
+    "salt": 3,
+    "acid": 2,
+    "sweet": 1,
+    "heat": 2,
+    "umami": 3,
+    "notes": ["cumin_forward", "chile_forward", "lime_bright"]
+  },
+  "equipment": {
+    "minimum": [
+      "equipment.stovetop",
+      "equipment.skillet",
+      "equipment.knife",
+      "equipment.cutting_board",
+      "equipment.measuring_spoons",
+      "equipment.bowl"
+    ],
+    "recommended": [
+      "equipment.cast_iron_skillet",
+      "equipment.microplane",
+      "equipment.citrus_juicer",
+      "equipment.tongs",
+      "equipment.sheet_pan"
+    ],
+    "optional": [
+      {
+        "id": "equipment.food_processor",
+        "label": "Food processor",
+        "required": false,
+        "notes": "Speeds up pico chopping if pulsed carefully."
+      },
+      {
+        "id": "equipment.air_fryer",
+        "label": "Air fryer",
+        "required": false,
+        "notes": "Useful for quick-warming tortillas (foil packet) or making crispy shells."
+      }
+    ]
+  },
+  "dietFlags": ["diet.omnivore"],
+  "allergens": [
+    "allergen.dairy_optional",
+    "allergen.gluten_optional",
+    "allergen.nightshades"
+  ],
+  "ingredientGroups": [
+    {
+      "id": "group.filling",
+      "label": "Taco filling (seasoned beef)",
+      "items": [
+        "ingredient.beef.ground_80_20",
+        "ingredient.onion.white",
+        "ingredient.garlic",
+        "ingredient.chili_powder",
+        "ingredient.cumin",
+        "ingredient.paprika",
+        "ingredient.oregano_dried",
+        "ingredient.salt_kosher",
+        "ingredient.black_pepper",
+        "ingredient.tomato.paste",
+        "ingredient.lime",
+        "ingredient.water"
+      ]
+    },
+    {
+      "id": "group.quick_pico",
+      "label": "Quick pico de gallo",
+      "items": [
+        "ingredient.tomato",
+        "ingredient.onion.white",
+        "ingredient.jalapeno",
+        "ingredient.cilantro",
+        "ingredient.lime",
+        "ingredient.salt_kosher"
+      ]
+    },
+    {
+      "id": "group.taco_sauce",
+      "label": "Quick taco sauce",
+      "items": [
+        "ingredient.sour_cream",
+        "ingredient.mayo",
+        "ingredient.lime",
+        "ingredient.hot_sauce",
+        "ingredient.garlic_powder",
+        "ingredient.salt_kosher"
+      ]
+    },
+    {
+      "id": "group.assembly",
+      "label": "Assembly",
+      "items": [
+        "ingredient.tortilla.corn_or_flour",
+        "ingredient.lettuce_shredded",
+        "ingredient.cheese.cheddar_or_jack",
+        "ingredient.guacamole_optional"
+      ]
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "ingredient.beef.ground_80_20",
+      "label": "Ground beef (80/20)",
+      "role": "protein",
+      "amount": { "value": 1, "unit": "lb" },
+      "notes": "Use 85/15 for leaner. Turkey works but benefits from extra fat."
+    },
+    {
+      "id": "ingredient.onion.white",
+      "label": "White onion, finely diced",
+      "role": "aromatic",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "notes": "About 1/2 medium onion."
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 3, "unit": "cloves" }
+    },
+    {
+      "id": "ingredient.chili_powder",
+      "label": "Chili powder",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Use mild for kid-friendly; add cayenne later for more heat."
+    },
+    {
+      "id": "ingredient.cumin",
+      "label": "Ground cumin",
+      "role": "spice",
+      "amount": { "value": 1.5, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.paprika",
+      "label": "Paprika (smoked or sweet)",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.oregano_dried",
+      "label": "Dried oregano",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": "Mexican oregano if available; standard oregano is fine."
+    },
+    {
+      "id": "ingredient.salt_kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": "Adjust to taste, especially if using salty taco seasoning blends."
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.tomato.paste",
+      "label": "Tomato paste",
+      "role": "umami",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "notes": "Adds body and depth; swap with 2 tbsp tomato sauce if needed."
+    },
+    {
+      "id": "ingredient.water",
+      "label": "Water",
+      "role": "binder",
+      "amount": { "value": 0.33, "unit": "cup" },
+      "notes": "Helps bloom spices and makes a saucy filling."
+    },
+    {
+      "id": "ingredient.lime",
+      "label": "Lime juice (plus wedges for serving)",
+      "role": "acid",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "notes": "1/2 lime for the filling; reserve wedges for assembly."
+    },
+
+    {
+      "id": "ingredient.tomato",
+      "label": "Tomatoes, diced (for quick pico)",
+      "role": "veg",
+      "amount": { "value": 1.5, "unit": "cup" },
+      "notes": "About 2 Roma tomatoes; drain excess juice if watery."
+    },
+    {
+      "id": "ingredient.onion.white_pico",
+      "label": "White onion, finely diced (for quick pico)",
+      "role": "aromatic",
+      "amount": { "value": 0.25, "unit": "cup" }
+    },
+    {
+      "id": "ingredient.jalapeno",
+      "label": "Jalapeño, minced",
+      "role": "heat",
+      "amount": { "value": 1, "unit": "each" },
+      "notes": "Optional; remove seeds for milder heat.",
+      "optional": true
+    },
+    {
+      "id": "ingredient.cilantro",
+      "label": "Cilantro, chopped",
+      "role": "herb",
+      "amount": { "value": 0.25, "unit": "cup" },
+      "notes": "Optional; skip for cilantro-averse eaters.",
+      "optional": true
+    },
+    {
+      "id": "ingredient.lime_pico",
+      "label": "Lime juice (for quick pico)",
+      "role": "acid",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.salt_pico",
+      "label": "Kosher salt (for quick pico)",
+      "role": "seasoning",
+      "amount": { "value": 0.25, "unit": "tsp" }
+    },
+
+    {
+      "id": "ingredient.sour_cream",
+      "label": "Sour cream",
+      "role": "sauce_base",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "optional": true,
+      "notes": "Swap with plain Greek yogurt."
+    },
+    {
+      "id": "ingredient.mayo",
+      "label": "Mayonnaise",
+      "role": "sauce_base",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true,
+      "notes": "Adds richness; omit and add a little extra sour cream if preferred."
+    },
+    {
+      "id": "ingredient.hot_sauce",
+      "label": "Hot sauce",
+      "role": "heat",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": "Use your preferred heat level."
+    },
+    {
+      "id": "ingredient.garlic_powder",
+      "label": "Garlic powder",
+      "role": "spice",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.salt_sauce",
+      "label": "Kosher salt (for sauce)",
+      "role": "seasoning",
+      "amount": { "value": 0.25, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.lime_sauce",
+      "label": "Lime juice (for sauce)",
+      "role": "acid",
+      "amount": { "value": 2, "unit": "tsp" },
+      "optional": true
+    },
+
+    {
+      "id": "ingredient.tortilla.corn_or_flour",
+      "label": "Tortillas (corn or flour)",
+      "role": "starch",
+      "amount": { "value": 12, "unit": "each" },
+      "notes": "Corn = classic; flour = softer. Warm before serving."
+    },
+    {
+      "id": "ingredient.lettuce_shredded",
+      "label": "Lettuce, shredded",
+      "role": "veg",
+      "amount": { "value": 2, "unit": "cups" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.cheese.cheddar_or_jack",
+      "label": "Shredded cheddar or Monterey Jack",
+      "role": "garnish",
+      "amount": { "value": 1, "unit": "cup" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.guacamole_optional",
+      "label": "Guacamole (optional)",
+      "role": "garnish",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.mise_en_place",
+      "title": "Prep + mise en place",
+      "activeMins": 8,
+      "instructions": [
+        "Dice onion and tomatoes; mince garlic (and jalapeño if using).",
+        "Chop cilantro if using.",
+        "Set out taco toppings (lettuce, cheese, guacamole) and tortillas."
+      ],
+      "checks": ["Knife + board ready", "Toppings staged for fast assembly"]
+    },
+    {
+      "id": "step.quick_pico",
+      "title": "Make quick pico de gallo",
+      "activeMins": 4,
+      "instructions": [
+        "In a bowl, combine diced tomatoes, diced onion, jalapeño (optional), cilantro (optional), lime juice, and salt.",
+        "Taste and adjust: add more lime for brightness or a pinch more salt if flat.",
+        "Let sit while you cook the filling."
+      ],
+      "timers": [{ "label": "Rest pico briefly", "minutes": 10 }],
+      "checks": [
+        "Pico tastes bright and lightly salty",
+        "Drain excess tomato juice if watery"
+      ]
+    },
+    {
+      "id": "step.cook_beef",
+      "title": "Brown beef + build Tex-Mex seasoning base",
+      "activeMins": 10,
+      "handsOffMins": 5,
+      "instructions": [
+        "Heat a skillet over medium-high heat. Add ground beef and cook, breaking it up, until browned.",
+        "If there is a lot of rendered fat, spoon off excess (leave ~1 tbsp for flavor).",
+        "Add diced onion and cook until softened (2–3 minutes). Add garlic and cook 30 seconds.",
+        "Stir in chili powder, cumin, paprika, oregano, salt, and pepper. Toast spices for 20–30 seconds to bloom."
+      ],
+      "timers": [
+        { "label": "Brown beef", "minutes": 6 },
+        { "label": "Soften onions", "minutes": 3 }
+      ],
+      "checks": [
+        "Beef is browned with no raw pink",
+        "Spices smell fragrant (not burnt)"
+      ]
+    },
+    {
+      "id": "step.sauce_fill",
+      "title": "Sauce the filling",
+      "activeMins": 3,
+      "handsOffMins": 5,
+      "instructions": [
+        "Stir in tomato paste and cook 30–60 seconds to deepen flavor.",
+        "Add water and simmer until slightly saucy and cohesive (3–5 minutes).",
+        "Finish with lime juice; taste and adjust salt/heat."
+      ],
+      "timers": [{ "label": "Simmer filling", "minutes": 4 }],
+      "checks": [
+        "Filling is saucy (not watery) and coats the meat",
+        "Seasoning is balanced: salty, cumin/chile forward, lightly tangy"
+      ]
+    },
+    {
+      "id": "step.quick_sauce",
+      "title": "Optional quick taco sauce",
+      "activeMins": 2,
+      "instructions": [
+        "In a small bowl, mix sour cream, mayo (optional), lime juice, hot sauce, garlic powder, and a pinch of salt.",
+        "Taste: add more hot sauce for heat or lime for brightness."
+      ],
+      "checks": ["Sauce is creamy and tangy", "Heat level matches preference"]
+    },
+    {
+      "id": "step.warm_tortillas",
+      "title": "Warm tortillas",
+      "activeMins": 3,
+      "instructions": [
+        "Warm tortillas in a dry skillet (20–30 seconds per side) OR wrap in foil and warm in a 300°F oven for 8–10 minutes.",
+        "Keep warm under a clean towel or in a covered dish."
+      ],
+      "temperature": {
+        "type": "oven_optional",
+        "value": 300,
+        "unit": "F",
+        "notes": "Oven method is convenient for many tortillas."
+      },
+      "timers": [{ "label": "Warm tortillas (oven option)", "minutes": 9 }]
+    },
+    {
+      "id": "step.assemble",
+      "title": "Assemble + serve",
+      "activeMins": 5,
+      "instructions": [
+        "Fill each warm tortilla with seasoned beef.",
+        "Top with lettuce, cheese, quick pico, and optional sauce/guacamole.",
+        "Serve with lime wedges and any extra pico on the side."
+      ],
+      "checks": [
+        "Tortillas are warm and pliable",
+        "Toppings distributed for texture + freshness"
+      ]
+    }
+  ],
+  "methods": [
+    "method.brown",
+    "method.saute",
+    "method.simmer",
+    "method.assemble"
+  ],
+  "pairings": {
+    "suggestedSides": [
+      "texmex.rice.spanish_rice",
+      "texmex.beans.refried",
+      "texmex.elote.corn"
+    ],
+    "suggestedDrinks": [
+      "drink.agua_fresca",
+      "drink.iced_tea",
+      "drink.citrus_sparkling_water"
+    ],
+    "condiments": [
+      "condiment.salsa",
+      "condiment.pickled_jalapenos",
+      "condiment.hot_sauce"
+    ]
+  },
+  "storage": {
+    "fridge": {
+      "filling": {
+        "duration": "3-4 days",
+        "notes": "Cool quickly, store airtight. Reheat in skillet with a splash of water."
+      },
+      "pico": {
+        "duration": "1-2 days",
+        "notes": "Best fresh; drain excess juices before serving leftovers."
+      }
+    },
+    "freezer": {
+      "filling": {
+        "duration": "2-3 months",
+        "notes": "Freeze filling only. Thaw overnight and reheat gently."
+      }
+    },
+    "reheat": [
+      "Skillet over medium heat with 1–2 tbsp water, stirring until hot.",
+      "Microwave covered, 60–90 seconds, stirring halfway."
+    ]
+  },
+  "safety": {
+    "notes": [
+      "Cook ground beef to a safe internal temperature (160°F / 71°C).",
+      "Keep hot foods hot and refrigerate leftovers within 2 hours.",
+      "If serving buffet-style, keep filling above 140°F (60°C)."
+    ]
+  },
+  "planner": {
+    "leftovers": {
+      "remixIdeas": [
+        "Taco salad bowls (greens + rice + beans + leftover filling)",
+        "Breakfast tacos (scrambled eggs + leftover filling)",
+        "Quesadillas with leftover filling + cheese"
+      ]
+    },
+    "batchPrep": [
+      "Double the filling and freeze half.",
+      "Prep pico ingredients ahead; mix with lime/salt right before serving."
+    ]
+  },
+  "variations": [
+    {
+      "id": "variation.chicken",
+      "label": "Chicken tacos (quick skillet)",
+      "when": { "protein": "chicken" },
+      "adapt": {
+        "swap": [
+          {
+            "from": "ingredient.beef.ground_80_20",
+            "to": "ingredient.chicken.thighs_diced",
+            "notes": "Use diced thighs or ground chicken; add 1 tbsp oil if very lean."
+          }
+        ],
+        "notes": [
+          "Cook chicken through (165°F / 74°C).",
+          "Chicken benefits from an extra squeeze of lime."
+        ]
+      }
+    },
+    {
+      "id": "variation.beans_only",
+      "label": "Bean-forward vegetarian tacos",
+      "when": { "diet": "vegetarian" },
+      "adapt": {
+        "swap": [
+          {
+            "from": "ingredient.beef.ground_80_20",
+            "to": "ingredient.beans.black",
+            "notes": "Use 2 cups cooked black beans; mash ~1/3 for binding."
+          }
+        ],
+        "notes": [
+          "Add 1 tbsp oil when blooming spices.",
+          "Optional: add roasted corn for sweetness and texture."
+        ]
+      }
+    },
+    {
+      "id": "variation.crispy_shells",
+      "label": "Crispy taco shells (oven method)",
+      "when": { "preference": "crispy" },
+      "adapt": {
+        "notes": [
+          "Drape corn tortillas over oven racks and bake at 375°F for 7–10 minutes until crisp.",
+          "Cool 2 minutes before filling to reduce breakage."
+        ]
+      }
+    }
+  ],
+  "compat": {
+    "cuisineId": "cuisines.tex_mex",
+    "recipeTagDefaults": ["cuisine.tex_mex", "dish.tacos"],
+    "ingredientIds": [
+      "ingredient.beef.ground_80_20",
+      "ingredient.onion.white",
+      "ingredient.garlic",
+      "ingredient.chili_powder",
+      "ingredient.cumin",
+      "ingredient.paprika",
+      "ingredient.oregano_dried",
+      "ingredient.tomato.paste",
+      "ingredient.tomato",
+      "ingredient.jalapeno",
+      "ingredient.cilantro",
+      "ingredient.lime",
+      "ingredient.tortilla.corn_or_flour",
+      "ingredient.cheese.cheddar_or_jack",
+      "ingredient.lettuce_shredded",
+      "ingredient.sour_cream"
+    ],
+    "methodIds": [
+      "method.brown",
+      "method.saute",
+      "method.simmer",
+      "method.assemble"
+    ],
+    "equipmentIds": [
+      "equipment.stovetop",
+      "equipment.skillet",
+      "equipment.knife",
+      "equipment.cutting_board",
+      "equipment.measuring_spoons",
+      "equipment.bowl"
+    ],
+    "search": {
+      "keywords": [
+        "tacos",
+        "tex-mex",
+        "ground beef tacos",
+        "weeknight tacos",
+        "taco night"
+      ],
+      "aliases": ["taco night tacos", "classic tacos", "seasoned beef tacos"]
+    }
+  }
+}

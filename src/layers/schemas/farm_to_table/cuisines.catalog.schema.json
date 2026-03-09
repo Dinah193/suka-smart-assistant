@@ -1,0 +1,452 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.suka.local/ssa/catalogs/farm_to_table/cuisines.catalog.schema.json",
+  "title": "SSA Farm-to-Table • Cuisines Catalog Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "catalogId",
+    "version",
+    "generatedAt",
+    "cuisines"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Path to the schema (relative) or canonical schema URL.",
+      "minLength": 1
+    },
+    "catalogId": {
+      "type": "string",
+      "const": "farm_to_table.cuisines",
+      "description": "Stable catalog identifier."
+    },
+    "version": {
+      "type": "string",
+      "description": "SemVer string for the catalog content.",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[0-9A-Za-z.-]+)?$"
+    },
+    "generatedAt": {
+      "type": "string",
+      "description": "ISO-8601 timestamp (UTC recommended).",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Optional human-readable notes."
+    },
+    "enums": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "regions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "mealTimes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "difficulty": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "heatLevels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "indexes": {
+      "type": "object",
+      "description": "Optional flags for UI indexing.",
+      "additionalProperties": true
+    },
+    "cuisines": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/cuisine"
+      },
+      "uniqueItems": false
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "description": "Stable id (namespace.segment[.segment]).",
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)+$",
+      "minLength": 3,
+      "maxLength": 120
+    },
+    "tag": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_\\-\\.]{1,80}$"
+    },
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stringArray": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "tagArray": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/tag"
+      },
+      "uniqueItems": true,
+      "default": []
+    },
+    "ratio01": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "intNonNeg": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "flavorProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "High-level flavor bias and signature elements.",
+      "properties": {
+        "signatureSpices": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "signatureHerbs": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "signatureAromatics": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "signatureAcids": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "signatureFats": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "signatureSweeteners": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "heatLevel": {
+          "type": "string"
+        },
+        "saltiness": {
+          "$ref": "#/$defs/ratio01"
+        },
+        "sourness": {
+          "$ref": "#/$defs/ratio01"
+        },
+        "sweetness": {
+          "$ref": "#/$defs/ratio01"
+        },
+        "bitterness": {
+          "$ref": "#/$defs/ratio01"
+        },
+        "umami": {
+          "$ref": "#/$defs/ratio01"
+        },
+        "smokiness": {
+          "$ref": "#/$defs/ratio01"
+        },
+        "aromaIntensity": {
+          "$ref": "#/$defs/ratio01"
+        },
+        "notes": {
+          "$ref": "#/$defs/stringArray"
+        }
+      }
+    },
+    "techniqueProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Preferred cooking techniques and method constraints.",
+      "properties": {
+        "preferredMethods": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "avoidMethods": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "commonDishes": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "prepDifficulty": {
+          "type": "string"
+        },
+        "maxActiveStepsDefault": {
+          "$ref": "#/$defs/intNonNeg"
+        },
+        "maxConcurrentTimersDefault": {
+          "$ref": "#/$defs/intNonNeg"
+        },
+        "notes": {
+          "$ref": "#/$defs/stringArray"
+        }
+      }
+    },
+    "plateBias": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Default plate role ratio hints. Engines may override per template.",
+      "properties": {
+        "protein": {
+          "$ref": "#/$defs/ratio01"
+        },
+        "starch": {
+          "$ref": "#/$defs/ratio01"
+        },
+        "vegetable": {
+          "$ref": "#/$defs/ratio01"
+        },
+        "legume": {
+          "$ref": "#/$defs/ratio01"
+        },
+        "bread": {
+          "$ref": "#/$defs/ratio01"
+        },
+        "sauce": {
+          "$ref": "#/$defs/ratio01"
+        },
+        "fruit": {
+          "$ref": "#/$defs/ratio01"
+        },
+        "notes": {
+          "$ref": "#/$defs/stringArray"
+        }
+      }
+    },
+    "pairings": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "proteinPairs": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "starchPairs": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "vegPairs": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "breadPairs": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "saucePairs": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "doNotPair": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "notes": {
+          "$ref": "#/$defs/stringArray"
+        }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "dietTagsAllowed": {
+          "$ref": "#/$defs/tagArray"
+        },
+        "dietTagsAvoid": {
+          "$ref": "#/$defs/tagArray"
+        },
+        "allergensAvoid": {
+          "$ref": "#/$defs/tagArray"
+        },
+        "noPork": {
+          "type": "boolean"
+        },
+        "noShellfish": {
+          "type": "boolean"
+        },
+        "notes": {
+          "$ref": "#/$defs/stringArray"
+        }
+      }
+    },
+    "ingredientBias": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Ingredient selection bias by tags/categories/substitution groups.",
+      "properties": {
+        "preferTags": {
+          "$ref": "#/$defs/tagArray"
+        },
+        "avoidTags": {
+          "$ref": "#/$defs/tagArray"
+        },
+        "preferCategoryIds": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "avoidCategoryIds": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "preferSubstitutionGroups": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "avoidSubstitutionGroups": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "preferComponentIds": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "avoidComponentIds": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "notes": {
+          "$ref": "#/$defs/stringArray"
+        }
+      }
+    },
+    "seasonality": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "seasonTags": {
+          "$ref": "#/$defs/tagArray"
+        },
+        "priorityInSeason": {
+          "type": "boolean"
+        },
+        "notes": {
+          "$ref": "#/$defs/stringArray"
+        }
+      }
+    },
+    "ui": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "colorHint": {
+          "type": "string"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "sortOrder": {
+          "type": "integer"
+        },
+        "emoji": {
+          "type": "string"
+        }
+      }
+    },
+    "cuisine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "label"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "description": {
+          "type": "string"
+        },
+        "family": {
+          "type": "string",
+          "description": "Optional cuisine family/cluster label."
+        },
+        "region": {
+          "type": "string"
+        },
+        "tags": {
+          "$ref": "#/$defs/tagArray"
+        },
+        "defaultMealTimes": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "flavorProfile": {
+          "$ref": "#/$defs/flavorProfile"
+        },
+        "techniqueProfile": {
+          "$ref": "#/$defs/techniqueProfile"
+        },
+        "plateBias": {
+          "$ref": "#/$defs/plateBias"
+        },
+        "pairings": {
+          "$ref": "#/$defs/pairings"
+        },
+        "ingredientBias": {
+          "$ref": "#/$defs/ingredientBias"
+        },
+        "constraints": {
+          "$ref": "#/$defs/constraints"
+        },
+        "seasonality": {
+          "$ref": "#/$defs/seasonality"
+        },
+        "compatibility": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "compatibleCuisineIds": {
+              "$ref": "#/$defs/stringArray"
+            },
+            "incompatibleCuisineIds": {
+              "$ref": "#/$defs/stringArray"
+            },
+            "notes": {
+              "$ref": "#/$defs/stringArray"
+            }
+          }
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "label",
+              "url"
+            ],
+            "properties": {
+              "label": {
+                "$ref": "#/$defs/nonEmptyString"
+              },
+              "url": {
+                "type": "string",
+                "format": "uri"
+              }
+            }
+          },
+          "default": []
+        },
+        "ui": {
+          "$ref": "#/$defs/ui"
+        }
+      }
+    }
+  }
+}

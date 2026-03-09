@@ -1,0 +1,108 @@
+{
+  "id": "soul_food_hearty_potato_soup",
+  "name": "Hearty Soul Food Potato Soup",
+  "servings": 8,
+  "ingredients": [
+    { "item": "neutral oil", "amount": 1, "unit": "tbsp" },
+    { "item": "unsalted butter", "amount": 4, "unit": "tbsp" },
+
+    { "item": "yellow onion", "amount": 1, "unit": "large", "prep": "diced" },
+    { "item": "celery", "amount": 3, "unit": "stalks", "prep": "diced" },
+    {
+      "item": "carrots",
+      "amount": 2,
+      "unit": "each",
+      "prep": "peeled and diced"
+    },
+    { "item": "garlic", "amount": 4, "unit": "cloves", "prep": "minced" },
+
+    { "item": "all-purpose flour", "amount": 3, "unit": "tbsp" },
+
+    {
+      "item": "russet potatoes",
+      "amount": 3,
+      "unit": "lb",
+      "prep": "peeled and diced (about 6–7 medium)"
+    },
+    { "item": "chicken stock", "amount": 6, "unit": "cups" },
+
+    { "item": "whole milk", "amount": 2, "unit": "cups" },
+    {
+      "item": "heavy cream",
+      "amount": 0.5,
+      "unit": "cup",
+      "prep": "optional for extra richness"
+    },
+
+    {
+      "item": "smoked turkey",
+      "amount": 1,
+      "unit": "lb",
+      "prep": "chopped (or smoked sausage/bacon substitute)"
+    },
+
+    { "item": "bay leaves", "amount": 2, "unit": "each" },
+    { "item": "dried thyme", "amount": 1, "unit": "tsp" },
+    { "item": "smoked paprika", "amount": 1, "unit": "tsp" },
+    { "item": "black pepper", "amount": 1, "unit": "tsp" },
+    {
+      "item": "kosher salt",
+      "amount": 1.5,
+      "unit": "tsp",
+      "prep": "adjust to taste"
+    },
+
+    {
+      "item": "sharp cheddar cheese",
+      "amount": 2,
+      "unit": "cups",
+      "prep": "shredded (optional)"
+    },
+    {
+      "item": "green onions",
+      "amount": 4,
+      "unit": "stalks",
+      "prep": "sliced (garnish)"
+    },
+    {
+      "item": "fresh parsley",
+      "amount": 0.25,
+      "unit": "cup",
+      "prep": "chopped (garnish)"
+    }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "text": "Saute aromatics: In a large pot over medium heat, warm oil and melt butter. Add onion, celery, and carrots. Cook until softened. Add garlic and cook 30–60 seconds."
+    },
+    {
+      "order": 2,
+      "text": "Make a light roux: Sprinkle flour over the vegetables and stir well. Cook 1–2 minutes to remove raw flour taste."
+    },
+    {
+      "order": 3,
+      "text": "Add potatoes and stock: Stir in diced potatoes, then slowly add chicken stock while stirring. Add bay leaves, thyme, paprika, black pepper, and salt. Bring to a gentle boil."
+    },
+    {
+      "order": 4,
+      "text": "Simmer until tender: Reduce heat and simmer until potatoes are very tender. Stir occasionally to prevent sticking."
+    },
+    {
+      "order": 5,
+      "text": "Mash for texture: Remove bay leaves. Mash some of the potatoes in the pot with a spoon/potato masher to thicken, leaving some chunks."
+    },
+    {
+      "order": 6,
+      "text": "Add dairy and smoked meat: Stir in milk and optional cream. Add chopped smoked turkey. Warm gently (avoid a hard boil)."
+    },
+    {
+      "order": 7,
+      "text": "Optional cheese finish: If using cheddar, stir in gradually until melted and smooth. Taste and adjust seasoning."
+    },
+    {
+      "order": 8,
+      "text": "Serve: Ladle into bowls and garnish with green onions and parsley."
+    }
+  ]
+}

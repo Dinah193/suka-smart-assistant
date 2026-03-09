@@ -31,10 +31,10 @@
  */
 
 import { db } from "../../../services/db";
-import { emitEvent } from "../../../services/eventBus";
-import { familyFundMode } from "../../../services/featureFlags";
-import { HubPacketFormatter } from "../../../services/hub/HubPacketFormatter";
-import { FamilyFundConnector } from "../../../services/hub/FamilyFundConnector";
+import { emitEvent } from "../../../services/events/eventBus";
+import { familyFundMode } from "../../../config/featureFlags";
+import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
+import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
 
 /* -------------------------------------------------------------------------- */
 /* Typedefs                                                                   */
@@ -157,7 +157,11 @@ function emit(type, source, data) {
     });
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.error("[animals/butcheryCutSheet] Failed to emit event:", type, err);
+    console.error(
+      "[animals/butcheryCutSheet] Failed to emit event:",
+      type,
+      err
+    );
   }
 }
 
@@ -178,8 +182,7 @@ function resolveWeights(animal) {
   const carcassKg =
     typeof animal.carcassWeightKg === "number" && animal.carcassWeightKg > 0
       ? animal.carcassWeightKg
-      : typeof animal.carcassWeightLb === "number" &&
-        animal.carcassWeightLb > 0
+      : typeof animal.carcassWeightLb === "number" && animal.carcassWeightLb > 0
       ? animal.carcassWeightLb * 0.453592
       : liveKg > 0
       ? liveKg * 0.55 // generic dressing %.
@@ -189,7 +192,8 @@ function resolveWeights(animal) {
 
   // Generic packaged yield ~ 70% of carcass.
   const packagedYieldKg = carcassKg * 0.7;
-  const packagedYieldPct = carcassKg > 0 ? (packagedYieldKg / carcassKg) * 100 : 0;
+  const packagedYieldPct =
+    carcassKg > 0 ? (packagedYieldKg / carcassKg) * 100 : 0;
 
   return {
     liveWeightKg: Math.round(liveKg * 10) / 10,
@@ -217,15 +221,19 @@ const SPECIES_BREAKDOWN = {
       { key: "rib", label: "Rib", fraction: 0.09 },
       { key: "loin", label: "Short loin / Sirloin", fraction: 0.18 },
       { key: "round", label: "Round", fraction: 0.22 },
-      { key: "brisketPlateFlank", label: "Brisket / Plate / Flank", fraction: 0.15 },
-      { key: "misc", label: "Trim / Stew / Bones / Offal", fraction: 0.10 },
+      {
+        key: "brisketPlateFlank",
+        label: "Brisket / Plate / Flank",
+        fraction: 0.15,
+      },
+      { key: "misc", label: "Trim / Stew / Bones / Offal", fraction: 0.1 },
     ],
   },
   goat: {
     primals: [
       { key: "shoulder", label: "Shoulder", fraction: 0.25 },
       { key: "rack", label: "Rack / Rib", fraction: 0.15 },
-      { key: "loin", label: "Loin", fraction: 0.20 },
+      { key: "loin", label: "Loin", fraction: 0.2 },
       { key: "leg", label: "Leg", fraction: 0.25 },
       { key: "misc", label: "Trim / Stew / Bones / Offal", fraction: 0.15 },
     ],
@@ -234,7 +242,7 @@ const SPECIES_BREAKDOWN = {
     primals: [
       { key: "shoulder", label: "Shoulder", fraction: 0.24 },
       { key: "rack", label: "Rack / Rib", fraction: 0.16 },
-      { key: "loin", label: "Loin", fraction: 0.20 },
+      { key: "loin", label: "Loin", fraction: 0.2 },
       { key: "leg", label: "Leg", fraction: 0.25 },
       { key: "misc", label: "Trim / Stew / Bones / Offal", fraction: 0.15 },
     ],
@@ -243,7 +251,7 @@ const SPECIES_BREAKDOWN = {
     primals: [
       { key: "shoulder", label: "Shoulder", fraction: 0.24 },
       { key: "rack", label: "Rack / Rib", fraction: 0.16 },
-      { key: "loin", label: "Loin", fraction: 0.20 },
+      { key: "loin", label: "Loin", fraction: 0.2 },
       { key: "leg", label: "Leg", fraction: 0.25 },
       { key: "misc", label: "Trim / Stew / Bones / Offal", fraction: 0.15 },
     ],
@@ -252,7 +260,7 @@ const SPECIES_BREAKDOWN = {
     primals: [
       { key: "shoulder", label: "Shoulder / Boston butt", fraction: 0.28 },
       { key: "loin", label: "Loin", fraction: 0.22 },
-      { key: "belly", label: "Belly / Bacon", fraction: 0.20 },
+      { key: "belly", label: "Belly / Bacon", fraction: 0.2 },
       { key: "ham", label: "Ham / Leg", fraction: 0.22 },
       { key: "misc", label: "Trim / Bones / Offal", fraction: 0.08 },
     ],
@@ -615,7 +623,11 @@ function buildLinesForPrimal(
   } else if (species === "goat" || species === "sheep" || species === "lamb") {
     if (primal.key === "shoulder") {
       const stewShare =
-        baseStyle === "stew-heavy" ? 0.6 : baseStyle === "ground-heavy" ? 0.2 : 0.4;
+        baseStyle === "stew-heavy"
+          ? 0.6
+          : baseStyle === "ground-heavy"
+          ? 0.2
+          : 0.4;
       const roastShare = 1 - stewShare;
 
       lines.push({
@@ -681,7 +693,11 @@ function buildLinesForPrimal(
       });
     } else if (primal.key === "leg") {
       const roastShare =
-        baseStyle === "roasts-heavy" ? 0.8 : baseStyle === "stew-heavy" ? 0.5 : 0.6;
+        baseStyle === "roasts-heavy"
+          ? 0.8
+          : baseStyle === "stew-heavy"
+          ? 0.5
+          : 0.6;
       const stewShare = 1 - roastShare;
 
       lines.push({
@@ -752,7 +768,11 @@ function buildLinesForPrimal(
   } else if (species === "swine") {
     if (primal.key === "shoulder") {
       const sausageShare =
-        baseStyle === "ground-heavy" ? 0.6 : baseStyle === "balanced" ? 0.4 : 0.3;
+        baseStyle === "ground-heavy"
+          ? 0.6
+          : baseStyle === "balanced"
+          ? 0.4
+          : 0.3;
       const roastShare = 1 - sausageShare;
 
       lines.push({
@@ -835,7 +855,11 @@ function buildLinesForPrimal(
       });
     } else if (primal.key === "ham") {
       const hamShare =
-        baseStyle === "roasts-heavy" ? 0.8 : baseStyle === "ground-heavy" ? 0.5 : 0.7;
+        baseStyle === "roasts-heavy"
+          ? 0.8
+          : baseStyle === "ground-heavy"
+          ? 0.5
+          : 0.7;
       const groundShare = 1 - hamShare;
 
       lines.push({
@@ -1051,7 +1075,9 @@ function buildSwapOptionsForLine(line, baseStyle) {
       label: variant.replace("-", " "),
       summary,
       variant,
-      autoSelected: variant === baseStyle || (variant === "balanced" && baseStyle === "balanced"),
+      autoSelected:
+        variant === baseStyle ||
+        (variant === "balanced" && baseStyle === "balanced"),
       isNeutral: variant === "balanced",
       badges,
       overrides,
@@ -1138,8 +1164,8 @@ export async function buildButcheryCutSheet(animal, options = {}) {
 
   const weights = resolveWeights(animal);
   const speciesKey = resolveSpeciesKey(animal);
-  const breakdown =
-    SPECIES_BREAKDOWN[speciesKey] || SPECIES_BREAKDOWN.other || {
+  const breakdown = SPECIES_BREAKDOWN[speciesKey] ||
+    SPECIES_BREAKDOWN.other || {
       primals: [],
     };
 
@@ -1265,10 +1291,14 @@ export async function buildAndStoreButcheryCutSheet(animal, options = {}) {
   if (db && db.butcheryCutSheets && db.butcheryCutSheets.put) {
     try {
       await db.butcheryCutSheets.put(sheet);
-      emit("animals.butchery.cutsheet.stored", options.eventSource || "animals", {
-        animalId: animal.id,
-        sheetId: sheet.id,
-      });
+      emit(
+        "animals.butchery.cutsheet.stored",
+        options.eventSource || "animals",
+        {
+          animalId: animal.id,
+          sheetId: sheet.id,
+        }
+      );
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(

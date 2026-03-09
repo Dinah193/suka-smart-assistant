@@ -1,7 +1,9 @@
 # Unused / Architecture Report
+
 _Generated: 2025-10-29T18:57:31.198Z_
 
 **Counts**:
+
 - Unreferenced files: 640
 - Unused exports: 1023
 - Stray deps: 34
@@ -10,60 +12,63 @@ _Generated: 2025-10-29T18:57:31.198Z_
 - Stale fixtures: 0
 
 ## Unreferenced files (top 25)
-- `src/agents/animalAgent.js`
-- `src/agents/animalHealthAgent.js`
-- `src/agents/animalPlannerAgent.js`
-- `src/agents/batchCookingAgent.js`
-- `src/agents/breedingAndButcheringAgent.js`
-- `src/agents/butcheryAgent.js`
-- `src/agents/cleaningAgent.js`
-- `src/agents/cleaningRoutineAgent.js`
-- `src/agents/companionPlantingAgent.js`
-- `src/agents/cookingAgent.js`
-- `src/agents/cookingStylesAgent.js`
+
+- `src/agents/animalShim.js`
+- `src/agents/animalHealthShim.js`
+- `src/agents/animalPlannerShim.js`
+- `src/agents/batchCookingShim.js`
+- `src/agents/breedingAndButcheringShim.js`
+- `src/agents/butcheryShim.js`
+- `src/agents/cleaningShim.js`
+- `src/agents/cleaningRoutineShim.js`
+- `src/agents/companionPlantingShim.js`
+- `src/agents/cookingShim.js`
+- `src/agents/cookingStylesShim.js`
 - `src/agents/cureCalc.js`
-- `src/agents/feedOptimizerAgent.js`
-- `src/agents/gardenEstimateAgent.js`
-- `src/agents/gardenHarvestAgent.js`
-- `src/agents/gardenHealthAgent.js`
-- `src/agents/gardeningAgent.js`
-- `src/agents/gardenPlanAgent.js`
-- `src/agents/inventoryAgent.js`
-- `src/agents/preservationAgent.js`
-- `src/agents/procurementAgent.js`
-- `src/agents/recipeConsolidatorAgent.js`
-- `src/agents/sababAgent.js`
-- `src/agents/sausageAgent.js`
-- `src/agents/shoppingAgent.js`
+- `src/agents/feedOptimizerShim.js`
+- `src/agents/gardenEstimateShim.js`
+- `src/agents/gardenHarvestShim.js`
+- `src/agents/gardenHealthShim.js`
+- `src/agents/gardeningShim.js`
+- `src/agents/gardenPlanShim.js`
+- `src/agents/inventoryShim.js`
+- `src/agents/preservationShim.js`
+- `src/agents/procurementShim.js`
+- `src/agents/shims/recipeConsolidatorShim.js`
+- `src/agents/sababShim.js`
+- `src/agents/sausageShim.js`
+- `src/agents/shoppingShim.js`
 
 ## Unused exports (top 25)
-- `src/agents/animalAgent.js` → **AnimalAgent**
-- `src/agents/animalAgent.js` → **createAgent**
-- `src/agents/animalHealthAgent.js` → **createAgent**
-- `src/agents/batchCookingAgent.js` → **createAgent**
-- `src/agents/cleaningAgent.js` → **createAgent**
-- `src/agents/companionPlantingAgent.js` → **createAgent**
-- `src/agents/cookingAgent.js` → **createAgent**
-- `src/agents/feedOptimizerAgent.js` → **createAgent**
-- `src/agents/storehouseAgent.js` → **createAgent**
-- `src/agents/animalHealthAgent.js` → **AnimalHealthAgent**
-- `src/agents/batchCookingAgent.js` → **subscribe**
-- `src/agents/inventoryAgent.js` → **subscribe**
-- `src/agents/procurementAgent.js` → **subscribe**
-- `src/agents/sababAgent.js` → **subscribe**
-- `src/agents/spiceAgent.js` → **subscribe**
+
+- `src/agents/animalShim.js` → **AnimalAgent**
+- `src/agents/animalShim.js` → **createAgent**
+- `src/agents/animalHealthShim.js` → **createAgent**
+- `src/agents/batchCookingShim.js` → **createAgent**
+- `src/agents/cleaningShim.js` → **createAgent**
+- `src/agents/companionPlantingShim.js` → **createAgent**
+- `src/agents/cookingShim.js` → **createAgent**
+- `src/agents/feedOptimizerShim.js` → **createAgent**
+- `src/agents/storehouseShim.js` → **createAgent**
+- `src/agents/animalHealthShim.js` → **AnimalHealthAgent**
+- `src/agents/batchCookingShim.js` → **subscribe**
+- `src/agents/inventoryShim.js` → **subscribe**
+- `src/agents/procurementShim.js` → **subscribe**
+- `src/agents/sababShim.js` → **subscribe**
+- `src/agents/spiceShim.js` → **subscribe**
 - `src/store/SettingsStore.js` → **subscribe**
 - `src/services/profile/householdProfileService.js` → **subscribe**
-- `src/agents/batchCookingAgent.js` → **BatchCookingAgent**
-- `src/agents/cleaningAgent.js` → **CleaningAgent**
-- `src/agents/cleaningRoutineAgent.js` → **suggestMakeBuyActions**
-- `src/agents/companionPlantingAgent.js` → **CompanionPlantingAgent**
-- `src/agents/cookingAgent.js` → **CookingAgent**
-- `src/agents/cookingStylesAgent.js` → **markStepComplete**
-- `src/agents/cookingStylesAgent.js` → **buildStyleCards**
-- `src/agents/feedOptimizerAgent.js` → **FeedOptimizerAgent**
+- `src/agents/batchCookingShim.js` → **BatchCookingAgent**
+- `src/agents/cleaningShim.js` → **CleaningAgent**
+- `src/agents/cleaningRoutineShim.js` → **suggestMakeBuyActions**
+- `src/agents/companionPlantingShim.js` → **CompanionPlantingAgent**
+- `src/agents/cookingShim.js` → **CookingAgent**
+- `src/agents/cookingStylesShim.js` → **markStepComplete**
+- `src/agents/cookingStylesShim.js` → **buildStyleCards**
+- `src/agents/feedOptimizerShim.js` → **FeedOptimizerAgent**
 
 ## Stray dependencies
+
 - `@fullcalendar/core`
 - `@fullcalendar/daygrid`
 - `@fullcalendar/interaction`
@@ -100,6 +105,7 @@ _Generated: 2025-10-29T18:57:31.198Z_
 - `vite`
 
 ## Orphan workers
+
 - `src/workers/automation.worker.js`
 - `src/app/features/scan-compare-trust/services/workers/cycle.worker.js`
 - `src/app/features/scan-compare-trust/services/workers/ocr.worker.js`

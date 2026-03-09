@@ -1,0 +1,377 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://suka-smart-assistant.local/schemas/estimators/cost_delta_defaults.schema.json",
+  "title": "SSA • Estimators • Cost Delta Defaults Schema",
+  "description": "Schema for SSA baseline cost assumptions used by estimators (grocery savings, eating-out replacement, batch cooking & preservation value factors) before the user provides spending data. Ensures assumptions are transparent, versioned, and overrideable per region/culture later.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "$id",
+    "schemaVersion",
+    "updatedAt",
+    "meta",
+    "defaults",
+    "profiles"
+  ],
+
+  "properties": {
+    "$schema": { "type": "string", "minLength": 1 },
+    "$id": { "type": "string", "minLength": 1 },
+
+    "schemaVersion": {
+      "type": "string",
+      "description": "Schema document version (not the data file version).",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+    },
+
+    "updatedAt": { "type": "string", "format": "date-time" },
+
+    "meta": { "$ref": "#/$defs/Meta" },
+
+    "notes": {
+      "description": "Optional human-facing notes for maintainers and auditors.",
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+
+    "defaults": { "$ref": "#/$defs/GlobalDefaults" },
+
+    "profiles": {
+      "description": "One or more named profiles. A UI/engine selects a profile (e.g., default / conservative / generous / regional variants).",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/Profile" }
+    },
+
+    "index": {
+      "description": "Optional precomputed lookup index for faster runtime selection.",
+      "type": "object",
+      "additionalProperties": true,
+      "default": {}
+    }
+  },
+
+  "$defs": {
+    "Id": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 160,
+      "pattern": "^[a-z0-9_\\.\\-]+$"
+    },
+
+    "Tag": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 80,
+      "pattern": "^[a-z0-9_\\.\\-]+$"
+    },
+
+    "Locale": { "type": "string", "minLength": 2, "maxLength": 35 },
+
+    "MoneyAmount": {
+      "description": "Currency amount expressed in a single currency for baseline assumptions.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["currency", "value"],
+      "properties": {
+        "currency": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 3,
+          "default": "USD",
+          "description": "ISO 4217 code (e.g., USD)."
+        },
+        "value": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Non-negative currency value."
+        }
+      }
+    },
+
+    "Meta": {
+      "description": "Catalog/document metadata for transparency and provenance.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "domain", "label", "status", "source"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "type": { "type": "string", "const": "schema" },
+        "domain": { "type": "string", "const": "estimators" },
+        "label": { "type": "string", "minLength": 1 },
+        "status": {
+          "type": "string",
+          "enum": ["canonical", "draft", "experimental", "deprecated"]
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "name"],
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": ["catalog", "user", "import", "generated"]
+            },
+            "name": { "type": "string", "minLength": 1 },
+            "notes": {
+              "type": "array",
+              "items": { "type": "string" },
+              "default": []
+            }
+          }
+        }
+      }
+    },
+
+    "GlobalDefaults": {
+      "description": "Global defaults that apply unless overridden inside a profile.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["currency", "regionNeutral", "transparency"],
+      "properties": {
+        "currency": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 3,
+          "default": "USD"
+        },
+
+        "regionNeutral": {
+          "description": "If true, the baseline assumes a nationally-averaged neutral region (no metro/rural or coastal premium baked in).",
+          "type": "boolean",
+          "default": true
+        },
+
+        "transparency": {
+          "description": "Transparency/audit rules the UI can render to avoid hidden assumptions.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["requireRationale", "showToUserByDefault"],
+          "properties": {
+            "requireRationale": {
+              "description": "If true, each profile should provide a rationale/explanation string.",
+              "type": "boolean",
+              "default": true
+            },
+            "showToUserByDefault": {
+              "description": "If true, onboarding and previews should show the active assumptions.",
+              "type": "boolean",
+              "default": true
+            },
+            "allowUserOverride": {
+              "description": "If true, UI should allow users to override baseline costs without editing files.",
+              "type": "boolean",
+              "default": true
+            }
+          }
+        }
+      }
+    },
+
+    "ProfileSelector": {
+      "description": "Hints for selecting this profile in runtime.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "locales": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Locale" },
+          "default": []
+        },
+        "regions": {
+          "description": "Optional region tags (e.g., us.south, us.midwest). Keep tags deterministic.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/Tag" },
+          "default": []
+        },
+        "cultures": {
+          "description": "Optional culture tags (e.g., culture.aai, cuisine.west_african_forward).",
+          "type": "array",
+          "items": { "$ref": "#/$defs/Tag" },
+          "default": []
+        },
+        "segments": {
+          "description": "Optional household segment tags (e.g., household.large_family, budget.tight).",
+          "type": "array",
+          "items": { "$ref": "#/$defs/Tag" },
+          "default": []
+        }
+      }
+    },
+
+    "MealCostDefaults": {
+      "description": "Baseline costs per meal and per-person assumptions used before the user enters spending data.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["groceryCostPerMeal", "eatingOutCostPerMeal", "assumptions"],
+      "properties": {
+        "groceryCostPerMeal": {
+          "description": "Baseline cash cost per meal (household-aggregate) for home-cooked grocery meals.",
+          "$ref": "#/$defs/MoneyAmount"
+        },
+
+        "eatingOutCostPerMeal": {
+          "description": "Baseline cash cost per meal (household-aggregate) for eating out / takeout.",
+          "$ref": "#/$defs/MoneyAmount"
+        },
+
+        "assumptions": {
+          "description": "Assumption block that clarifies what the 'per meal' means.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["basis", "persons", "mealsPerDay"],
+          "properties": {
+            "basis": {
+              "description": "Defines what a 'meal' means for comparisons.",
+              "type": "string",
+              "enum": ["household_meal", "per_person_meal"]
+            },
+            "persons": {
+              "description": "If basis=household_meal, how many people is assumed per household meal; if per_person_meal, may be omitted.",
+              "type": "integer",
+              "minimum": 1,
+              "default": 4
+            },
+            "mealsPerDay": {
+              "description": "Used by weekly/monthly projections (defaults are conservative).",
+              "type": "number",
+              "minimum": 0.5,
+              "maximum": 6,
+              "default": 2.5
+            },
+            "includesSnacks": {
+              "type": "boolean",
+              "default": false
+            },
+            "notes": {
+              "type": "array",
+              "items": { "type": "string" },
+              "default": []
+            }
+          }
+        }
+      }
+    },
+
+    "FactorDefaults": {
+      "description": "Multipliers/factors that adjust estimated savings/value for batch cooking and preservation.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["batchCookingSavingsFactor", "preservationValueFactor"],
+      "properties": {
+        "batchCookingSavingsFactor": {
+          "description": "Multiplier applied to groceryCostPerMeal (or delta between eating-out and grocery) to estimate savings attributable to batch cooking efficiencies. Example: 0.12 means 12% improvement.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1.5
+        },
+
+        "preservationValueFactor": {
+          "description": "Multiplier representing preserved-food value uplift (reduced spoilage, seasonal cost avoidance). Example: 0.08 means +8% value impact.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2
+        },
+
+        "inflationBuffer": {
+          "description": "Optional multiplier to conservatively inflate costs (e.g., 0.03 for 3% buffer).",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0
+        },
+
+        "regionalNeutrality": {
+          "description": "If true, indicates the factors are not regionally tuned; if false, factors may assume the profile's region tags.",
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+
+    "Profile": {
+      "description": "A named, selectable cost-assumption profile.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "label",
+        "status",
+        "selector",
+        "mealDefaults",
+        "factors",
+        "rationale",
+        "tags"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+
+        "label": { "type": "string", "minLength": 1 },
+
+        "status": {
+          "type": "string",
+          "enum": ["canonical", "draft", "experimental", "deprecated"]
+        },
+
+        "selector": { "$ref": "#/$defs/ProfileSelector" },
+
+        "tags": {
+          "description": "Search/filter tags for UI and auditing.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/Tag" },
+          "default": []
+        },
+
+        "mealDefaults": { "$ref": "#/$defs/MealCostDefaults" },
+
+        "factors": { "$ref": "#/$defs/FactorDefaults" },
+
+        "rationale": {
+          "description": "Human-readable explanation of how these defaults were chosen. Displayable in UI for transparency.",
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 2400
+        },
+
+        "limits": {
+          "description": "Optional constraints for sanity checks in UI/engine.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "minGroceryCostPerMeal": { "$ref": "#/$defs/MoneyAmount" },
+            "maxGroceryCostPerMeal": { "$ref": "#/$defs/MoneyAmount" },
+            "minEatingOutCostPerMeal": { "$ref": "#/$defs/MoneyAmount" },
+            "maxEatingOutCostPerMeal": { "$ref": "#/$defs/MoneyAmount" }
+          },
+          "default": {}
+        },
+
+        "audit": {
+          "description": "Optional audit metadata for defensibility and later variants.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "assumptionFamily": {
+              "description": "Stable identifier to group variants (e.g., 'us_baseline_v1').",
+              "type": "string",
+              "minLength": 1
+            },
+            "createdBy": { "type": "string", "minLength": 1 },
+            "createdAt": { "type": "string", "format": "date-time" },
+            "updatedBy": { "type": "string", "minLength": 1 },
+            "updatedAt": { "type": "string", "format": "date-time" },
+            "references": {
+              "description": "Optional citations/notes without forcing web links (store a plain string list).",
+              "type": "array",
+              "items": { "type": "string" },
+              "default": []
+            }
+          },
+          "default": {}
+        }
+      }
+    }
+  }
+}

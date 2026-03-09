@@ -1,0 +1,168 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+  "meta": {
+    "id": "shawarma.sauces.creamy_roasted_pepper_sauce",
+    "type": "recipe",
+    "domain": "shawarma",
+    "locale": "en-US",
+    "label": "Creamy Roasted Pepper Sauce",
+    "tags": [
+      "sauce",
+      "shawarma",
+      "condiment",
+      "roasted_pepper",
+      "creamy",
+      "smoky",
+      "garlic_forward",
+      "citrus",
+      "blend",
+      "batch_friendly"
+    ],
+    "source": {
+      "curation": "ssa",
+      "author": "SSA Catalog",
+      "notes": "Creamy roasted red pepper sauce for shawarma wraps/bowls; smoky, tangy, and garlicky."
+    }
+  },
+  "ingredients": [
+    {
+      "id": "ing.red_bell_pepper_roasted",
+      "label": "Roasted red bell peppers (jarred, drained)",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": [
+        "If using jarred: drain well and pat dry to prevent a watery sauce.",
+        "If roasting fresh: roast 2–3 large red bell peppers, peel, and remove seeds."
+      ]
+    },
+    {
+      "id": "ing.greek_yogurt.plain",
+      "label": "Plain Greek yogurt",
+      "amount": { "value": 180, "unit": "g" },
+      "notes": ["Whole-milk preferred for a thicker, richer sauce."]
+    },
+    {
+      "id": "ing.mayonnaise",
+      "label": "Mayonnaise",
+      "amount": { "value": 45, "unit": "g" },
+      "notes": [
+        "Optional, but adds richness and helps the sauce cling to meat/veg."
+      ]
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic, grated or pressed",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": ["About 2–3 medium cloves; adjust to taste."]
+    },
+    {
+      "id": "ing.lemon_juice",
+      "label": "Fresh lemon juice",
+      "amount": { "value": 20, "unit": "ml" }
+    },
+    {
+      "id": "ing.vinegar.red_wine",
+      "label": "Red wine vinegar",
+      "amount": { "value": 10, "unit": "ml" },
+      "notes": ["Sub: apple cider vinegar or white vinegar."]
+    },
+    {
+      "id": "ing.olive_oil",
+      "label": "Olive oil",
+      "amount": { "value": 15, "unit": "ml" }
+    },
+    {
+      "id": "ing.paprika_smoked",
+      "label": "Smoked paprika",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": ["About 1 teaspoon; boosts roasted/smoky character."]
+    },
+    {
+      "id": "ing.cumin_ground",
+      "label": "Ground cumin",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": ["About 1/3 teaspoon; shawarma-friendly warmth."]
+    },
+    {
+      "id": "ing.chili_flakes",
+      "label": "Crushed red pepper flakes",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": ["Optional; adjust heat."]
+    },
+    {
+      "id": "ing.tomato_paste",
+      "label": "Tomato paste",
+      "amount": { "value": 15, "unit": "g" },
+      "notes": [
+        "Optional for deeper color and savory body (about 1 tablespoon)."
+      ]
+    },
+    {
+      "id": "ing.salt.kosher",
+      "label": "Kosher salt",
+      "amount": { "value": 3, "unit": "g" },
+      "notes": ["Start with 1/2 teaspoon; adjust after resting."]
+    },
+    {
+      "id": "ing.black_pepper",
+      "label": "Black pepper, freshly ground",
+      "amount": { "value": 0.6, "unit": "g" },
+      "notes": ["About 1/4 teaspoon."]
+    },
+    {
+      "id": "ing.honey",
+      "label": "Honey",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": ["Optional; balances acidity and bitterness (about 1 teaspoon)."]
+    },
+    {
+      "id": "ing.water",
+      "label": "Water (as needed)",
+      "amount": { "value": 15, "unit": "ml" },
+      "notes": ["Use only if you need to thin to a drizzleable consistency."]
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.01",
+      "title": "Drain and prep peppers",
+      "instructions": [
+        "Drain roasted red peppers thoroughly and pat dry with paper towels to avoid a watery sauce.",
+        "If using homemade roasted peppers, peel and remove seeds, then cool completely."
+      ]
+    },
+    {
+      "id": "step.02",
+      "title": "Blend until smooth",
+      "instructions": [
+        "Add roasted peppers, yogurt, mayonnaise, garlic, lemon juice, vinegar, olive oil, smoked paprika, cumin, optional chili flakes, optional tomato paste, salt, black pepper, and optional honey to a blender or food processor.",
+        "Blend until very smooth, scraping down the sides as needed."
+      ]
+    },
+    {
+      "id": "step.03",
+      "title": "Adjust texture and balance",
+      "instructions": [
+        "Taste and adjust: add more lemon/vinegar for brightness, more salt for savor, more honey for balance, or more chili for heat.",
+        "If the sauce is thicker than you want, blend in water 1 teaspoon (5 ml) at a time until drizzleable."
+      ]
+    },
+    {
+      "id": "step.04",
+      "title": "Rest for best flavor",
+      "instructions": [
+        "Cover and refrigerate for at least 30 minutes so flavors meld and garlic mellows.",
+        "Stir before serving."
+      ]
+    },
+    {
+      "id": "step.05",
+      "title": "Store",
+      "instructions": [
+        "Store refrigerated in a sealed container.",
+        "Best within 3–5 days for freshest flavor; use within 7 days if kept cold."
+      ]
+    }
+  ]
+}

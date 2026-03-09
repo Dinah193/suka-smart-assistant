@@ -54,7 +54,7 @@ TABLE OF CONTENTS
 • Quick dev loop
   1) Add/extend a contract (schema) under src/contracts/
   2) Parse/normalize inputs to match the contract
-  3) Emit events using the standard envelope via src/services/eventBus.js
+  3) Emit events using the standard envelope via src/services/events/eventBus.js
   4) If state changes occur, attempt exportToHubIfEnabled(...)
   5) Add tests with EventProbe to assert event emissions and shapes
 
@@ -73,7 +73,7 @@ TABLE OF CONTENTS
   -> src/docs/EventCatalog.md
 
 • Bus:
-  -> src/services/eventBus.js
+  -> src/services/events/eventBus.js
 
 • Envelope (minimum):
   type: "domain.topic.action"
@@ -338,7 +338,7 @@ QUICK LINKS (Paths)
 • Guards .................... src/services/guards/*
 • Inventory/Storehouse ...... src/domain/inventory/*, src/domain/storehouse/*
 • Hub Export ................ src/services/hub/*
-• Event Bus ................. src/services/eventBus.js
+• Event Bus ................. src/services/events/eventBus.js
 • Analytics ................. src/analytics/*
 • Tests/Probe ............... src/test/utils/EventProbe.ts
 

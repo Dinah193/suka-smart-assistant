@@ -25,9 +25,11 @@ import Dexie from "dexie";
 
 let eventBus = { emit: () => {}, on: () => () => {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
-} catch { /* non-fatal for early bootstrap */ }
+} catch {
+  /* non-fatal for early bootstrap */
+}
 
 const SOURCE = "db/dexie";
 const isoNow = () => new Date().toISOString();
@@ -112,18 +114,14 @@ db.version(5).stores({
     "id, [sessionId+position], sessionId, domain, status, position, createdAt, updatedAt",
   resources:
     "id, type, status, updatedAt, location.roomId, assignedTo.personId",
-  calendars:
-    "id, status, updatedAt, householdId, resourceId, name",
+  calendars: "id, status, updatedAt, householdId, resourceId, name",
   calendarEvents:
     "id, [calendarId+start], calendarId, start, end, status, sessionId, stepId, domain",
-  telemetry:
-    "id, ts, kind, stepId, sessionId, domain, resourceId, deviceId",
-  metrics:
-    "id, ts, key, stepId, sessionId, domain, resourceId, deviceId",
+  telemetry: "id, ts, kind, stepId, sessionId, domain, resourceId, deviceId",
+  metrics: "id, ts, key, stepId, sessionId, domain, resourceId, deviceId",
   calibrationFactors:
     "id, key, updatedAt, scope.deviceId, scope.resourceId, scope.roomId, scope.recipeId, scope.ingredient, scope.method, scope.domain, scope.model, scope.householdId",
-  calibrationHistory:
-    "id, factorId, key, ts",
+  calibrationHistory: "id, factorId, key, ts",
 });
 
 /**
@@ -154,7 +152,9 @@ db.on("populate", async () => {
 });
 
 db.on("blocked", () => {
-  console.warn("[dexie] schema upgrade blocked — close other tabs to continue.");
+  console.warn(
+    "[dexie] schema upgrade blocked — close other tabs to continue."
+  );
   emit("db.blocked", {});
 });
 
@@ -177,9 +177,16 @@ db.open()
 
 function cryptoRandomId(prefix) {
   try {
-    return globalThis?.crypto?.randomUUID?.() || `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    return (
+      globalThis?.crypto?.randomUUID?.() ||
+      `${prefix}_${Date.now().toString(36)}_${Math.random()
+        .toString(36)
+        .slice(2, 8)}`
+    );
   } catch {
-    return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    return `${prefix}_${Date.now().toString(36)}_${Math.random()
+      .toString(36)
+      .slice(2, 8)}`;
   }
 }
 
@@ -198,7 +205,9 @@ export async function sanityCheck() {
     "metrics",
     "calibrationFactors",
   ];
-  const missing = expected.filter((t) => !(t in db.tables.reduce((m, tbl) => (m[tbl.name] = true, m), {})));
+  const missing = expected.filter(
+    (t) => !(t in db.tables.reduce((m, tbl) => ((m[tbl.name] = true), m), {}))
+  );
   const ok = missing.length === 0;
   if (!ok) console.warn("[dexie] missing tables:", missing);
   return { ok, missing };
@@ -208,10 +217,7 @@ export async function sanityCheck() {
  * Convenience: get a default active calendar (used by CalendarsRepo fallback)
  */
 export async function getDefaultCalendar() {
-  const first = await db.calendars
-    .where("status")
-    .equals("active")
-    .first();
+  const first = await db.calendars.where("status").equals("active").first();
   return first || (await db.calendars.toCollection().first());
 }
 

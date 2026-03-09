@@ -23,10 +23,10 @@
  */
 
 import { db } from "../../../services/db";
-import { emitEvent } from "../../../services/eventBus";
-import { familyFundMode } from "../../../services/featureFlags";
-import { HubPacketFormatter } from "../../../services/hub/HubPacketFormatter";
-import { FamilyFundConnector } from "../../../services/hub/FamilyFundConnector";
+import { emitEvent } from "../../../services/events/eventBus";
+import { familyFundMode } from "../../../config/featureFlags";
+import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
+import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
 
 /**
  * @typedef {Object} ShoppingLineItem
@@ -168,14 +168,31 @@ function isStoreAllowed(coupon, storeId) {
 function isCouponTargetingItem(coupon, item) {
   const target = coupon.target || {};
   const hasTarget =
-    target.upc || target.sku || target.category || target.tag || target.minSpend || target.minQty;
+    target.upc ||
+    target.sku ||
+    target.category ||
+    target.tag ||
+    target.minSpend ||
+    target.minQty;
 
   if (!hasTarget) return true;
 
-  if (target.upc && item.upc && String(item.upc).trim() === String(target.upc).trim()) return true;
-  if (target.sku && item.sku && String(item.sku).trim() === String(target.sku).trim()) return true;
-  if (target.category && item.category && item.category === target.category) return true;
-  if (target.tag && Array.isArray(item.tags) && item.tags.includes(target.tag)) return true;
+  if (
+    target.upc &&
+    item.upc &&
+    String(item.upc).trim() === String(target.upc).trim()
+  )
+    return true;
+  if (
+    target.sku &&
+    item.sku &&
+    String(item.sku).trim() === String(target.sku).trim()
+  )
+    return true;
+  if (target.category && item.category && item.category === target.category)
+    return true;
+  if (target.tag && Array.isArray(item.tags) && item.tags.includes(target.tag))
+    return true;
 
   // For order-scope coupons (minSpend / minQty) we still treat as eligible here;
   // full order-check will be done in a higher-level skill if needed.
@@ -304,7 +321,12 @@ function buildSingleCouponOptions(item, baseUnitPrice, baseLineTotal, coupons) {
  * @param {CouponRecord[]} coupons
  * @returns {DealSwapOption[]}
  */
-function buildStackedCouponOptions(item, baseUnitPrice, baseLineTotal, coupons) {
+function buildStackedCouponOptions(
+  item,
+  baseUnitPrice,
+  baseLineTotal,
+  coupons
+) {
   const combinable = coupons.filter((c) => c.combinable !== false);
   if (combinable.length < 2) return [];
 
@@ -324,7 +346,8 @@ function buildStackedCouponOptions(item, baseUnitPrice, baseLineTotal, coupons) 
       // For simplicity, apply savings in sequence but cap at baseLineTotal.
       const savingsA = computeCouponSavings(a, baseUnitPrice, qty);
       const remainingAfterA = Math.max(baseLineTotal - savingsA, 0);
-      const effectiveUnitAfterA = qty > 0 ? remainingAfterA / qty : baseUnitPrice;
+      const effectiveUnitAfterA =
+        qty > 0 ? remainingAfterA / qty : baseUnitPrice;
       const savingsB = computeCouponSavings(b, effectiveUnitAfterA, qty);
       let totalSavings = savingsA + savingsB;
       if (totalSavings > baseLineTotal) totalSavings = baseLineTotal;
@@ -338,7 +361,9 @@ function buildStackedCouponOptions(item, baseUnitPrice, baseLineTotal, coupons) 
 
       const label =
         (a.description || "Coupon A") + " + " + (b.description || "Coupon B");
-      const summary = `${label} → Stack to save $${totalSavings.toFixed(2)} on this line.`;
+      const summary = `${label} → Stack to save $${totalSavings.toFixed(
+        2
+      )} on this line.`;
 
       options.push({
         id: `${a.id}+${b.id}`,
@@ -591,7 +616,11 @@ export async function applyCouponsAndAds(lineItems, options = {}) {
       });
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error("[couponApply] Error computing coupons for item:", item, err);
+      console.error(
+        "[couponApply] Error computing coupons for item:",
+        item,
+        err
+      );
       result.error = err?.message || String(err);
       errorCount += 1;
       // fallback: no-deal baseline already set.

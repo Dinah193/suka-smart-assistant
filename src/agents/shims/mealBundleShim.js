@@ -41,32 +41,32 @@
  * @property {Array<Object>} [debug]
  */
 
-import dayjs from 'dayjs';
-import { emit } from '@/services/eventBus';
-import { familyFundMode } from '@/services/featureFlags';
+import dayjs from "dayjs";
+import { emit } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
 // Reasoner runtime support
-import { enforceBudget } from '@/services/reasoner/budget';
-import { isGated } from '@/services/reasoner/gating';
-import { checkConfidence } from '@/services/reasoner/confidence';
-import { applyFreshnessRules } from '@/services/reasoner/freshness';
-import { getCachedResponse, setCachedResponse } from '@/services/reasoner/cache/memo';
-import { mealBundleShimKey } from '@/services/reasoner/cache/keys';
-import { selectModeForIntent } from '@/services/reasoner/modes/map';
-import { validateResponse } from '@/services/reasoner/validate';
-import { buildSystemPrompt } from '@/services/reasoner/prompts/system';
-import { buildTemplatePrompt } from '@/services/reasoner/prompts/templates';
-import { callReasoner } from '@/services/reasoner/core';
+import { enforceBudget } from "@/reasoner/budget";
+import { isGated } from "@/reasoner/gating";
+import { checkConfidence } from "@/reasoner/confidence";
+import { applyFreshnessRules } from "@/reasoner/freshness";
+import { getCachedResponse, setCachedResponse } from "@/reasoner/cache/memo";
+import { mealBundleShimKey } from "@/reasoner/cache/keys";
+import { selectModeForIntent } from "@/reasoner/modes/map";
+import { validateResponse } from "@/reasoner/modes/validate";
+import { buildSystemPrompt } from "@/reasoner/prompts/system";
+import { buildTemplatePrompt } from "@/reasoner/prompts/templates";
+import { callReasoner } from "@/reasoner/core";
 
 // Context selectors
-import { selectCookingContext } from '@/services/selectors/cookingSelectors';
+import { selectCookingContext } from "@/services/selectors/cookingSelectors";
 
 // Hub export (optional)
-import { HubPacketFormatter } from '@/services/hub/HubPacketFormatter';
-import { FamilyFundConnector } from '@/services/hub/FamilyFundConnector';
+import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
+import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
 
 const isoNow = () => dayjs().toISOString();
-const lower = (s) => (s == null ? '' : String(s).toLowerCase().trim());
+const lower = (s) => (s == null ? "" : String(s).toLowerCase().trim());
 const uid = () => Math.random().toString(36).slice(2);
 
 /* ---------------------------------------------------------------------------
@@ -75,123 +75,130 @@ const uid = () => Math.random().toString(36).slice(2);
 
 const ARCHETYPES = [
   {
-    key: 'torah',
-    label: 'Torah-compliant (Israelite home)',
+    key: "torah",
+    label: "Torah-compliant (Israelite home)",
     description:
-      'Fresh bread weekly; lamb/goat/organ meats present; legumes & leafy greens frequent; one leftovers day.',
+      "Fresh bread weekly; lamb/goat/organ meats present; legumes & leafy greens frequent; one leftovers day.",
     leftoversDay: 6, // 0=Mon … 6=Sun
     rules: {
       breakfast: {
-        includeTags: ['bread', 'grain', 'porridge', 'egg'],
-        avoidTags: ['pork'],
+        includeTags: ["bread", "grain", "porridge", "egg"],
+        avoidTags: ["pork"],
       },
       lunch: {
-        includeTags: ['legume', 'lentil', 'pea', 'bean', 'salad', 'greens'],
-        avoidTags: ['pork', 'shellfish'],
+        includeTags: ["legume", "lentil", "pea", "bean", "salad", "greens"],
+        avoidTags: ["pork", "shellfish"],
       },
       dinner: {
-        includeTags: ['lamb', 'goat', 'fish', 'chicken', 'greens', 'organ-meat'],
-        avoidTags: ['pork', 'shellfish'],
+        includeTags: [
+          "lamb",
+          "goat",
+          "fish",
+          "chicken",
+          "greens",
+          "organ-meat",
+        ],
+        avoidTags: ["pork", "shellfish"],
       },
       snacks: {
-        includeTags: ['fruit', 'nut', 'olive', 'seed'],
+        includeTags: ["fruit", "nut", "olive", "seed"],
         avoidTags: [],
       },
     },
   },
   {
-    key: 'dairyfree',
-    label: 'Dairy-Free',
-    description: 'No dairy in any slot; weekly leftovers.',
+    key: "dairyfree",
+    label: "Dairy-Free",
+    description: "No dairy in any slot; weekly leftovers.",
     leftoversDay: 6,
     rules: {
       breakfast: {
-        includeTags: ['breakfast', 'oats', 'egg', 'smoothie'],
-        avoidTags: ['dairy'],
+        includeTags: ["breakfast", "oats", "egg", "smoothie"],
+        avoidTags: ["dairy"],
       },
       lunch: {
-        includeTags: ['soup', 'salad', 'wrap', 'bowl'],
-        avoidTags: ['dairy'],
+        includeTags: ["soup", "salad", "wrap", "bowl"],
+        avoidTags: ["dairy"],
       },
       dinner: {
-        includeTags: ['chicken', 'turkey', 'beef', 'fish', 'stew'],
-        avoidTags: ['dairy'],
+        includeTags: ["chicken", "turkey", "beef", "fish", "stew"],
+        avoidTags: ["dairy"],
       },
       snacks: {
-        includeTags: ['fruit', 'nut', 'seed'],
-        avoidTags: ['dairy'],
+        includeTags: ["fruit", "nut", "seed"],
+        avoidTags: ["dairy"],
       },
     },
   },
   {
-    key: 'vegetarian',
-    label: 'Vegetarian',
-    description: 'Meatless meals; weekly leftovers.',
+    key: "vegetarian",
+    label: "Vegetarian",
+    description: "Meatless meals; weekly leftovers.",
     leftoversDay: 6,
     rules: {
       breakfast: {
-        includeTags: ['breakfast', 'oats', 'egg', 'pancake'],
-        avoidTags: ['meat', 'fish'],
+        includeTags: ["breakfast", "oats", "egg", "pancake"],
+        avoidTags: ["meat", "fish"],
       },
       lunch: {
-        includeTags: ['salad', 'soup', 'grain', 'pasta', 'wrap'],
-        avoidTags: ['meat', 'fish'],
+        includeTags: ["salad", "soup", "grain", "pasta", "wrap"],
+        avoidTags: ["meat", "fish"],
       },
       dinner: {
-        includeTags: ['curry', 'stir-fry', 'pasta', 'legume'],
-        avoidTags: ['meat', 'fish'],
+        includeTags: ["curry", "stir-fry", "pasta", "legume"],
+        avoidTags: ["meat", "fish"],
       },
       snacks: {
-        includeTags: ['fruit', 'nut', 'yogurt', 'veg'],
+        includeTags: ["fruit", "nut", "yogurt", "veg"],
         avoidTags: [],
       },
     },
   },
   {
-    key: 'lowcarb',
-    label: 'Low-Carb / Low Sugar',
-    description: 'Lower carbs and sugar across all slots; weekly leftovers.',
+    key: "lowcarb",
+    label: "Low-Carb / Low Sugar",
+    description: "Lower carbs and sugar across all slots; weekly leftovers.",
     leftoversDay: 6,
     rules: {
       breakfast: {
-        includeTags: ['egg', 'greens', 'protein'],
-        avoidTags: ['sugar', 'grain'],
+        includeTags: ["egg", "greens", "protein"],
+        avoidTags: ["sugar", "grain"],
       },
       lunch: {
-        includeTags: ['salad', 'bowl', 'protein'],
-        avoidTags: ['sugar', 'grain'],
+        includeTags: ["salad", "bowl", "protein"],
+        avoidTags: ["sugar", "grain"],
       },
       dinner: {
-        includeTags: ['protein', 'steak', 'chicken', 'fish'],
-        avoidTags: ['sugar', 'grain'],
+        includeTags: ["protein", "steak", "chicken", "fish"],
+        avoidTags: ["sugar", "grain"],
       },
       snacks: {
-        includeTags: ['nut', 'cheese', 'olive'],
-        avoidTags: ['sugar'],
+        includeTags: ["nut", "cheese", "olive"],
+        avoidTags: ["sugar"],
       },
     },
   },
   {
-    key: 'keto',
-    label: 'Keto',
-    description: 'Very low carb/high fat; weekly leftovers.',
+    key: "keto",
+    label: "Keto",
+    description: "Very low carb/high fat; weekly leftovers.",
     leftoversDay: 6,
     rules: {
       breakfast: {
-        includeTags: ['egg', 'bacon', 'avocado', 'keto'],
-        avoidTags: ['sugar', 'grain'],
+        includeTags: ["egg", "bacon", "avocado", "keto"],
+        avoidTags: ["sugar", "grain"],
       },
       lunch: {
-        includeTags: ['bowl', 'salad', 'burger-bowl', 'keto'],
-        avoidTags: ['sugar', 'grain'],
+        includeTags: ["bowl", "salad", "burger-bowl", "keto"],
+        avoidTags: ["sugar", "grain"],
       },
       dinner: {
-        includeTags: ['keto', 'fatty-fish', 'lamb', 'butter-sauce'],
-        avoidTags: ['sugar', 'grain'],
+        includeTags: ["keto", "fatty-fish", "lamb", "butter-sauce"],
+        avoidTags: ["sugar", "grain"],
       },
       snacks: {
-        includeTags: ['nut', 'cheese', 'olive', 'pork-rind'],
-        avoidTags: ['sugar'],
+        includeTags: ["nut", "cheese", "olive", "pork-rind"],
+        avoidTags: ["sugar"],
       },
     },
   },
@@ -201,7 +208,11 @@ const ARCHETYPES = [
  * Public helper (legacy-compatible): list archetypes.
  */
 export function listArchetypes() {
-  return ARCHETYPES.map(({ key, label, description }) => ({ key, label, description }));
+  return ARCHETYPES.map(({ key, label, description }) => ({
+    key,
+    label,
+    description,
+  }));
 }
 
 /* ---------------------------------------------------------------------------
@@ -217,22 +228,22 @@ export function listArchetypes() {
  * @returns {string}
  */
 function normalizeIntent(rawIntentOrCommand) {
-  const s = lower(rawIntentOrCommand || '');
+  const s = lower(rawIntentOrCommand || "");
 
   const map = {
-    list: 'mealBundle.listArchetypes',
-    archetypes: 'mealBundle.listArchetypes',
-    'mealbundle.listarchetypes': 'mealBundle.listArchetypes',
+    list: "mealBundle.listArchetypes",
+    archetypes: "mealBundle.listArchetypes",
+    "mealbundle.listarchetypes": "mealBundle.listArchetypes",
 
-    generate: 'mealBundle.generate',
-    bundle: 'mealBundle.generate',
-    generatebundle: 'mealBundle.generate',
-    'mealbundle.generate': 'mealBundle.generate',
+    generate: "mealBundle.generate",
+    bundle: "mealBundle.generate",
+    generatebundle: "mealBundle.generate",
+    "mealbundle.generate": "mealBundle.generate",
   };
 
   if (map[s]) return map[s];
 
-  if (s.startsWith('mealbundle.')) return s;
+  if (s.startsWith("mealbundle.")) return s;
   return `mealBundle.${s}`;
 }
 
@@ -250,7 +261,7 @@ function normalizeIntent(rawIntentOrCommand) {
 function buildMealBundleHints() {
   return {
     archetypes: ARCHETYPES,
-    defaultSlots: ['breakfast', 'lunch', 'dinner', 'snacks'],
+    defaultSlots: ["breakfast", "lunch", "dinner", "snacks"],
   };
 }
 
@@ -325,10 +336,10 @@ function normalizeMealBundleOutput(intent, raw) {
   const warnings = [];
   const debug = [];
 
-  if (!raw || typeof raw !== 'object') {
+  if (!raw || typeof raw !== "object") {
     return {
       data: {
-        summary: 'Reasoner returned empty result.',
+        summary: "Reasoner returned empty result.",
         archetypes: [],
         seed: null,
         events: [],
@@ -336,8 +347,9 @@ function normalizeMealBundleOutput(intent, raw) {
       },
       warnings: [
         {
-          type: 'emptyResult',
-          message: 'Reasoner returned no structured payload for meal bundle intent.',
+          type: "emptyResult",
+          message:
+            "Reasoner returned no structured payload for meal bundle intent.",
         },
       ],
       debug,
@@ -346,18 +358,21 @@ function normalizeMealBundleOutput(intent, raw) {
 
   const baseSummary =
     raw.summary ||
-    (intent === 'mealBundle.listArchetypes'
-      ? 'Meal bundle archetypes listed.'
-      : intent === 'mealBundle.generate'
-      ? 'Meal bundle generated.'
-      : 'Meal bundle output ready.');
+    (intent === "mealBundle.listArchetypes"
+      ? "Meal bundle archetypes listed."
+      : intent === "mealBundle.generate"
+      ? "Meal bundle generated."
+      : "Meal bundle output ready.");
 
   // LIST ARCHETYPES
-  if (intent === 'mealBundle.listArchetypes') {
-    const archetypesFromModel = Array.isArray(raw.archetypes) ? raw.archetypes : null;
-    const archList = archetypesFromModel && archetypesFromModel.length
-      ? archetypesFromModel
-      : listArchetypes();
+  if (intent === "mealBundle.listArchetypes") {
+    const archetypesFromModel = Array.isArray(raw.archetypes)
+      ? raw.archetypes
+      : null;
+    const archList =
+      archetypesFromModel && archetypesFromModel.length
+        ? archetypesFromModel
+        : listArchetypes();
 
     const data = {
       summary: baseSummary,
@@ -365,7 +380,7 @@ function normalizeMealBundleOutput(intent, raw) {
     };
 
     debug.push({
-      type: 'mealBundleShim.normalize.list',
+      type: "mealBundleShim.normalize.list",
       ts: isoNow(),
       rawKeys: Object.keys(raw || {}),
       archetypeCount: archList.length,
@@ -375,18 +390,18 @@ function normalizeMealBundleOutput(intent, raw) {
   }
 
   // GENERATE BUNDLE
-  if (intent === 'mealBundle.generate') {
+  if (intent === "mealBundle.generate") {
     const archetype =
-      raw.archetype && typeof raw.archetype === 'object'
+      raw.archetype && typeof raw.archetype === "object"
         ? raw.archetype
-        : raw.data?.archetype && typeof raw.data.archetype === 'object'
+        : raw.data?.archetype && typeof raw.data.archetype === "object"
         ? raw.data.archetype
         : null;
 
     const seed =
-      raw.seed && typeof raw.seed === 'object'
+      raw.seed && typeof raw.seed === "object"
         ? raw.seed
-        : raw.data?.seed && typeof raw.data.seed === 'object'
+        : raw.data?.seed && typeof raw.data.seed === "object"
         ? raw.data.seed
         : null;
 
@@ -412,15 +427,15 @@ function normalizeMealBundleOutput(intent, raw) {
     }
 
     const nextBestAction =
-      raw.nextBestAction && typeof raw.nextBestAction === 'object'
+      raw.nextBestAction && typeof raw.nextBestAction === "object"
         ? raw.nextBestAction
         : null;
 
-    if (raw.nextBestAction && typeof raw.nextBestAction !== 'object') {
+    if (raw.nextBestAction && typeof raw.nextBestAction !== "object") {
       warnings.push({
-        type: 'invalidNextBestAction',
+        type: "invalidNextBestAction",
         message:
-          'nextBestAction must be an object or null; Reasoner returned a non-object, dropping it.',
+          "nextBestAction must be an object or null; Reasoner returned a non-object, dropping it.",
       });
     }
 
@@ -434,7 +449,7 @@ function normalizeMealBundleOutput(intent, raw) {
     };
 
     debug.push({
-      type: 'mealBundleShim.normalize.generate',
+      type: "mealBundleShim.normalize.generate",
       ts: isoNow(),
       rawKeys: Object.keys(raw || {}),
       hasSeed: !!seed,
@@ -452,7 +467,7 @@ function normalizeMealBundleOutput(intent, raw) {
   };
 
   debug.push({
-    type: 'mealBundleShim.normalize.fallback',
+    type: "mealBundleShim.normalize.fallback",
     ts: isoNow(),
     intent,
     rawKeys: Object.keys(raw || {}),
@@ -477,31 +492,34 @@ export async function invokeShim(req) {
   const debug = [];
 
   try {
-    if (!req || typeof req !== 'object') {
+    if (!req || typeof req !== "object") {
       return {
         ok: false,
-        mode: 'none',
+        mode: "none",
         data: {},
         warnings: [
-          { type: 'badRequest', message: 'ShimRequest is required and must be an object.' },
+          {
+            type: "badRequest",
+            message: "ShimRequest is required and must be an object.",
+          },
         ],
         debug,
       };
     }
 
-    const domain = req.domain || 'cooking';
-    const intent = normalizeIntent(req.intent || '');
+    const domain = req.domain || "cooking";
+    const intent = normalizeIntent(req.intent || "");
     const input = req.input || {};
     const runtime = req.runtime || {};
 
-    if (domain !== 'cooking') {
+    if (domain !== "cooking") {
       return {
         ok: false,
-        mode: 'none',
+        mode: "none",
         data: {},
         warnings: [
           {
-            type: 'badDomain',
+            type: "badDomain",
             message: `Meal bundle shim only supports domain="cooking", received "${domain}".`,
           },
         ],
@@ -511,29 +529,29 @@ export async function invokeShim(req) {
 
     // Emit early invocation event
     emit({
-      type: 'reasoner.invoked',
+      type: "reasoner.invoked",
       ts: startedAt,
-      source: 'agents/shims/mealBundle',
+      source: "agents/shims/mealBundle",
       data: { intent, domain, runtime },
     });
 
     // Gating
     if (isGated({ domain, intent, runtime })) {
       warnings.push({
-        type: 'gated',
+        type: "gated",
         message: `Reasoner calls gated for intent "${intent}".`,
       });
 
       emit({
-        type: 'reasoner.gated',
+        type: "reasoner.gated",
         ts: isoNow(),
-        source: 'agents/shims/mealBundle',
+        source: "agents/shims/mealBundle",
         data: { intent, domain },
       });
 
       return {
         ok: false,
-        mode: 'none',
+        mode: "none",
         data: {},
         warnings,
         debug,
@@ -546,20 +564,20 @@ export async function invokeShim(req) {
         domain,
         intent,
         input,
-      }) || 'mealBundle.generate.v1';
+      }) || "mealBundle.generate.v1";
 
     // Budget enforcement
     const budgetInfo = enforceBudget({ domain, intent, mode, runtime });
     if (!budgetInfo.ok) {
       warnings.push({
-        type: 'budgetExceeded',
-        message: budgetInfo.message || 'Budget exceeded for meal bundle shim.',
+        type: "budgetExceeded",
+        message: budgetInfo.message || "Budget exceeded for meal bundle shim.",
       });
 
       emit({
-        type: 'reasoner.budgetExceeded',
+        type: "reasoner.budgetExceeded",
         ts: isoNow(),
-        source: 'agents/shims/mealBundle',
+        source: "agents/shims/mealBundle",
         data: { intent, domain, mode, budgetInfo },
       });
 
@@ -576,7 +594,7 @@ export async function invokeShim(req) {
     const context = await selectCookingContext({ input, runtime, intent });
 
     debug.push({
-      type: 'context.loaded',
+      type: "context.loaded",
       ts: isoNow(),
       keys: Object.keys(context || {}),
     });
@@ -610,17 +628,25 @@ export async function invokeShim(req) {
     };
 
     // Cache key + lookup
-    const cacheKey = mealBundleShimKey({ intent, mode, payload: reasonerPayload });
+    const cacheKey = mealBundleShimKey({
+      intent,
+      mode,
+      payload: reasonerPayload,
+    });
     const cached = await getCachedResponse(cacheKey);
     if (cached) {
       emit({
-        type: 'reasoner.cachedHit',
+        type: "reasoner.cachedHit",
         ts: isoNow(),
-        source: 'agents/shims/mealBundle',
+        source: "agents/shims/mealBundle",
         data: { intent, mode, cacheKey },
       });
 
-      const { data, warnings: w2, debug: d2 } = normalizeMealBundleOutput(intent, cached);
+      const {
+        data,
+        warnings: w2,
+        debug: d2,
+      } = normalizeMealBundleOutput(intent, cached);
       if (w2?.length) warnings.push(...w2);
       if (d2?.length) debug.push(...d2);
 
@@ -634,27 +660,27 @@ export async function invokeShim(req) {
     }
 
     emit({
-      type: 'reasoner.cachedMiss',
+      type: "reasoner.cachedMiss",
       ts: isoNow(),
-      source: 'agents/shims/mealBundle',
+      source: "agents/shims/mealBundle",
       data: { intent, mode, cacheKey },
     });
 
     // Build prompts
     const systemPrompt = buildSystemPrompt({
-      domain: 'cooking',
+      domain: "cooking",
       mode,
       extra: {
         mealBundleInstruction:
-          'You are a household meal planner. Use the archetype hints (dietary rules, leftoversDay, slot rules) ' +
-          'and cooking context (recipes, tags, inventory, preferences) to generate a structured meal bundle. ' +
-          'Keep dates and slots stable, respect user avoidTags, and prefer recipe IDs when available. ' +
-          'If you only output a seed (bundleKey/start/days), ensure days include {date,leftovers,meals[{time,title,recipeId?}]}.',
+          "You are a household meal planner. Use the archetype hints (dietary rules, leftoversDay, slot rules) " +
+          "and cooking context (recipes, tags, inventory, preferences) to generate a structured meal bundle. " +
+          "Keep dates and slots stable, respect user avoidTags, and prefer recipe IDs when available. " +
+          "If you only output a seed (bundleKey/start/days), ensure days include {date,leftovers,meals[{time,title,recipeId?}]}.",
       },
     });
 
     const userPrompt = buildTemplatePrompt({
-      domain: 'cooking',
+      domain: "cooking",
       mode,
       intent,
       payload: reasonerPayload,
@@ -679,31 +705,39 @@ export async function invokeShim(req) {
 
     if (!confidence.ok) {
       warnings.push({
-        type: 'lowConfidence',
-        message: confidence.message || 'Reasoner confidence below threshold for meal bundle intent.',
+        type: "lowConfidence",
+        message:
+          confidence.message ||
+          "Reasoner confidence below threshold for meal bundle intent.",
       });
 
       emit({
-        type: 'reasoner.lowConfidence',
+        type: "reasoner.lowConfidence",
         ts: isoNow(),
-        source: 'agents/shims/mealBundle',
+        source: "agents/shims/mealBundle",
         data: { intent, mode, confidence },
       });
     }
 
     // Schema validation
-    const validation = validateResponse({ domain, intent, mode, raw: rawResult });
+    const validation = validateResponse({
+      domain,
+      intent,
+      mode,
+      raw: rawResult,
+    });
     if (!validation.ok) {
       warnings.push({
-        type: 'invalidSchema',
-        message: validation.message || 'Reasoner output failed schema validation.',
+        type: "invalidSchema",
+        message:
+          validation.message || "Reasoner output failed schema validation.",
         details: validation.errors || [],
       });
 
       emit({
-        type: 'reasoner.invalidSchema',
+        type: "reasoner.invalidSchema",
         ts: isoNow(),
-        source: 'agents/shims/mealBundle',
+        source: "agents/shims/mealBundle",
         data: { intent, mode, errors: validation.errors || [] },
       });
 
@@ -717,14 +751,18 @@ export async function invokeShim(req) {
     }
 
     emit({
-      type: 'reasoner.validated',
+      type: "reasoner.validated",
       ts: isoNow(),
-      source: 'agents/shims/mealBundle',
+      source: "agents/shims/mealBundle",
       data: { intent, mode },
     });
 
     // Normalize into SSA meal-bundle payload
-    const { data, warnings: w3, debug: d3 } = normalizeMealBundleOutput(intent, rawResult);
+    const {
+      data,
+      warnings: w3,
+      debug: d3,
+    } = normalizeMealBundleOutput(intent, rawResult);
     if (w3?.length) warnings.push(...w3);
     if (d3?.length) debug.push(...d3);
 
@@ -733,16 +771,16 @@ export async function invokeShim(req) {
 
     // Emit domain-level event
     const domainEventType =
-      intent === 'mealBundle.listArchetypes'
-        ? 'mealBundle.archetypes.listed'
-        : intent === 'mealBundle.generate'
-        ? 'mealBundle.generated'
-        : 'mealBundle.output.ready';
+      intent === "mealBundle.listArchetypes"
+        ? "mealBundle.archetypes.listed"
+        : intent === "mealBundle.generate"
+        ? "mealBundle.generated"
+        : "mealBundle.output.ready";
 
     emit({
       type: domainEventType,
       ts: isoNow(),
-      source: 'agents/shims/mealBundle',
+      source: "agents/shims/mealBundle",
       data: {
         intent,
         mode,
@@ -751,7 +789,11 @@ export async function invokeShim(req) {
     });
 
     // Optional Hub export (primarily for bundles)
-    if (familyFundMode && runtime?.exportToHub && intent === 'mealBundle.generate') {
+    if (
+      familyFundMode &&
+      runtime?.exportToHub &&
+      intent === "mealBundle.generate"
+    ) {
       try {
         const packet = HubPacketFormatter.formatMealBundle({
           intent,
@@ -763,15 +805,16 @@ export async function invokeShim(req) {
         await FamilyFundConnector.export(packet);
 
         emit({
-          type: 'session.exported',
+          type: "session.exported",
           ts: isoNow(),
-          source: 'agents/shims/mealBundle',
-          data: { intent, mode, packetType: 'mealBundle' },
+          source: "agents/shims/mealBundle",
+          data: { intent, mode, packetType: "mealBundle" },
         });
       } catch (e) {
         warnings.push({
-          type: 'hubExportFailed',
-          message: e?.message || 'Failed to export meal bundle to Family Fund Hub.',
+          type: "hubExportFailed",
+          message:
+            e?.message || "Failed to export meal bundle to Family Fund Hub.",
         });
       }
     }
@@ -788,26 +831,26 @@ export async function invokeShim(req) {
     const stack = err?.stack || null;
 
     emit({
-      type: 'reasoner.error',
+      type: "reasoner.error",
       ts: isoNow(),
-      source: 'agents/shims/mealBundle',
+      source: "agents/shims/mealBundle",
       data: { message, stack },
     });
 
     return {
       ok: false,
-      mode: 'none',
+      mode: "none",
       data: {},
       warnings: [
         {
-          type: 'shimError',
+          type: "shimError",
           message,
         },
       ],
       debug: [
         ...debug,
         {
-          type: 'exception',
+          type: "exception",
           ts: isoNow(),
           message,
           stack,
@@ -836,17 +879,17 @@ export async function handleCommand(command, payload = {}) {
   let cmd = command;
 
   // Backwards-compatible: allow object form { command, payload }
-  if (typeof command === 'object' && command) {
+  if (typeof command === "object" && command) {
     if (command.payload && !Object.keys(payload || {}).length) {
       // eslint-disable-next-line no-param-reassign
       payload = command.payload;
     }
-    cmd = command.command || command.type || 'list';
+    cmd = command.command || command.type || "list";
   }
 
-  const normalized = normalizeIntent(cmd || '');
+  const normalized = normalizeIntent(cmd || "");
   return invokeShim({
-    domain: 'cooking',
+    domain: "cooking",
     intent: normalized,
     input: payload,
     runtime: payload?.runtime || {},
@@ -860,8 +903,8 @@ export async function handleCommand(command, payload = {}) {
 
 export async function generateBundle(input = {}) {
   return invokeShim({
-    domain: 'cooking',
-    intent: 'mealBundle.generate',
+    domain: "cooking",
+    intent: "mealBundle.generate",
     input,
     runtime: input.runtime || {},
   });
@@ -870,8 +913,8 @@ export async function generateBundle(input = {}) {
 export async function list(input = {}) {
   // Keep a "list" wrapper for older call sites
   return invokeShim({
-    domain: 'cooking',
-    intent: 'mealBundle.listArchetypes',
+    domain: "cooking",
+    intent: "mealBundle.listArchetypes",
     input,
     runtime: input.runtime || {},
   });
@@ -880,8 +923,8 @@ export async function list(input = {}) {
 // Preserve familiar name for callers that used listArchetypes()
 export async function listArchetypesShim(input = {}) {
   return invokeShim({
-    domain: 'cooking',
-    intent: 'mealBundle.listArchetypes',
+    domain: "cooking",
+    intent: "mealBundle.listArchetypes",
     input,
     runtime: input.runtime || {},
   });

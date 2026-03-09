@@ -24,8 +24,12 @@ const Card = ({ title, subtitle, right, children }) => (
 );
 
 const Button = (p) => <button {...p} className={cx("btn", p.className)} />;
-const Primary = (p) => <Button {...p} className={cx("btn-primary", p.className)} />;
-const Subtle = (p) => <Button {...p} className={cx("btn-outline btn-sm", p.className)} />;
+const Primary = (p) => (
+  <Button {...p} className={cx("btn-primary", p.className)} />
+);
+const Subtle = (p) => (
+  <Button {...p} className={cx("btn-outline btn-sm", p.className)} />
+);
 
 const Skeleton = ({ lines = 3 }) => (
   <div className="animate-pulse space-y-3">
@@ -58,7 +62,9 @@ function deriveMacros(n) {
 
 function multiply(obj, n = 1) {
   const out = {};
-  Object.entries(obj || {}).forEach(([k, v]) => (out[k] = typeof v === "number" ? v * n : v));
+  Object.entries(obj || {}).forEach(
+    ([k, v]) => (out[k] = typeof v === "number" ? v * n : v)
+  );
   return out;
 }
 
@@ -98,9 +104,12 @@ function useAutomationGlue(onEvent) {
       const off = automation?.on?.(k, (payload) => onEvent?.(k, payload));
       if (typeof off === "function") offs.push(off);
     });
-    return () => offs.forEach((f) => {
-      try { f?.(); } catch {}
-    });
+    return () =>
+      offs.forEach((f) => {
+        try {
+          f?.();
+        } catch {}
+      });
   }, [onEvent]);
 }
 
@@ -125,24 +134,29 @@ export default function NutritionPanel({
   showActions = true,
 }) {
   // Stores are optional – guard them so the panel never throws if they’re not wired.
-  const useFoodStore = typeof _useFoodStore === "function" ? _useFoodStore : null;
-  const usePreferencesStore = typeof _usePreferencesStore === "function" ? _usePreferencesStore : null;
+  const useFoodStore =
+    typeof _useFoodStore === "function" ? _useFoodStore : null;
+  const usePreferencesStore =
+    typeof _usePreferencesStore === "function" ? _usePreferencesStore : null;
 
-  const food = useFoodStore ? (useFoodStore() ?? {}) : {};
-  const prefs = usePreferencesStore ? (usePreferencesStore() ?? {}) : {};
+  const food = useFoodStore ? useFoodStore() ?? {} : {};
+  const prefs = usePreferencesStore ? usePreferencesStore() ?? {} : {};
 
   const [loading, setLoading] = useState(false);
   const [nutr, setNutr] = useState(null); // { perServing, total }
   const [toast, setToast] = useState(null);
   const [expanded, setExpanded] = useState(false);
-  const [localServings, setLocalServings] = useState(typeof servings === "number" ? servings : 1);
+  const [localServings, setLocalServings] = useState(
+    typeof servings === "number" ? servings : 1
+  );
 
   // keep local in sync with controlled prop
   useEffect(() => {
     if (typeof servings === "number") setLocalServings(servings);
   }, [servings]);
 
-  const effectiveServings = typeof servings === "number" ? servings : localServings;
+  const effectiveServings =
+    typeof servings === "number" ? servings : localServings;
 
   // Normalize recipes: accept string ids or {id, servings}
   const normalizedRecipes = useMemo(() => {
@@ -151,7 +165,8 @@ export default function NutritionPanel({
       .map((r) => {
         if (!r) return null;
         if (typeof r === "string") return { id: r, servings: 1 };
-        if (typeof r === "object" && r.id) return { id: r.id, servings: Number(r.servings ?? 1) || 1 };
+        if (typeof r === "object" && r.id)
+          return { id: r.id, servings: Number(r.servings ?? 1) || 1 };
         return null;
       })
       .filter(Boolean);
@@ -166,7 +181,7 @@ export default function NutritionPanel({
 
   const undo = useUndoStack();
 
-  const canFetchBySession = !!(sessionId);
+  const canFetchBySession = !!sessionId;
   const canFetchByRecipes = normalizedRecipes.length > 0;
 
   const refetch = async () => {
@@ -183,7 +198,9 @@ export default function NutritionPanel({
       // Prefer store methods if present (fast local cache), then automation bridge.
       if (canFetchBySession) {
         if (typeof food.getNutritionForSession === "function") {
-          data = await food.getNutritionForSession(sessionId, { servings: effectiveServings });
+          data = await food.getNutritionForSession(sessionId, {
+            servings: effectiveServings,
+          });
         } else if (automation?.request) {
           data = await automation.request("food.nutrition.session", {
             sessionId,
@@ -192,7 +209,9 @@ export default function NutritionPanel({
         }
       } else if (canFetchByRecipes) {
         if (typeof food.getNutritionForRecipes === "function") {
-          data = await food.getNutritionForRecipes(normalizedRecipes, { servings: effectiveServings });
+          data = await food.getNutritionForRecipes(normalizedRecipes, {
+            servings: effectiveServings,
+          });
         } else if (automation?.request) {
           data = await automation.request("food.nutrition.recipes", {
             recipes: normalizedRecipes,
@@ -255,10 +274,12 @@ export default function NutritionPanel({
   };
 
   const handleCopy = async () => {
-    const text = `Per serving: ${fmt(macro.calories, " kcal")} • P ${fmt(macro.p, "g")} • C ${fmt(
-      macro.c,
+    const text = `Per serving: ${fmt(macro.calories, " kcal")} • P ${fmt(
+      macro.p,
       "g"
-    )} • F ${fmt(macro.f, "g")} (${macro.pp}/${macro.cp}/${macro.fp}%)`;
+    )} • C ${fmt(macro.c, "g")} • F ${fmt(macro.f, "g")} (${macro.pp}/${
+      macro.cp
+    }/${macro.fp}%)`;
     try {
       await navigator.clipboard?.writeText(text);
       setToast({ tone: "success", text: "Copied macros to clipboard." });
@@ -286,7 +307,10 @@ export default function NutritionPanel({
         action: { label: "Undo", fn: revert },
       });
       emitProgress?.("nutrition.logged", {
-        nextBestAction: { label: "Create leftover labels", action: "leftovers.labels" },
+        nextBestAction: {
+          label: "Create leftover labels",
+          action: "leftovers.labels",
+        },
       });
     } catch {
       setToast({ tone: "error", text: "Couldn’t log meal." });
@@ -376,10 +400,27 @@ export default function NutritionPanel({
       </div>
 
       {/* Macro stacked bar */}
-      <div className={cx("mt-3 w-full h-3 rounded-full bg-base-200 overflow-hidden", dense && "h-2")}>
-        <div className="h-full bg-primary" style={{ width: `${macro.pp}%` }} title={`Protein ${macro.pp}%`} />
-        <div className="h-full bg-secondary" style={{ width: `${macro.cp}%` }} title={`Carbs ${macro.cp}%`} />
-        <div className="h-full bg-accent" style={{ width: `${macro.fp}%` }} title={`Fat ${macro.fp}%`} />
+      <div
+        className={cx(
+          "mt-3 w-full h-3 rounded-full bg-base-200 overflow-hidden",
+          dense && "h-2"
+        )}
+      >
+        <div
+          className="h-full bg-primary"
+          style={{ width: `${macro.pp}%` }}
+          title={`Protein ${macro.pp}%`}
+        />
+        <div
+          className="h-full bg-secondary"
+          style={{ width: `${macro.cp}%` }}
+          title={`Carbs ${macro.cp}%`}
+        />
+        <div
+          className="h-full bg-accent"
+          style={{ width: `${macro.fp}%` }}
+          title={`Fat ${macro.fp}%`}
+        />
       </div>
       <div className="mt-2 text-xs opacity-70 flex gap-4">
         <span>
@@ -403,24 +444,48 @@ export default function NutritionPanel({
             <Field label="Fat" value={`${ps.fat ?? 0} g`} />
             {"fiber" in ps && <Field label="Fiber" value={`${ps.fiber} g`} />}
             {"sugar" in ps && <Field label="Sugar" value={`${ps.sugar} g`} />}
-            {"sodium" in ps && <Field label="Sodium" value={`${ps.sodium} mg`} />}
+            {"sodium" in ps && (
+              <Field label="Sodium" value={`${ps.sodium} mg`} />
+            )}
           </div>
           <div className="mt-3 text-xs opacity-70">
-            Meal totals ({effectiveServings} serv): ~{fmt(total.calories)} kcal • P {fmt(total.protein, "g")} • C{" "}
-            {fmt(total.carbs, "g")} • F {fmt(total.fat, "g")}
+            Meal totals ({effectiveServings} serv): ~{fmt(total.calories)} kcal
+            • P {fmt(total.protein, "g")} • C {fmt(total.carbs, "g")} • F{" "}
+            {fmt(total.fat, "g")}
           </div>
         </div>
 
         {/* Goals progress */}
         <div className="rounded-xl border border-base-200 p-3">
           <p className="font-medium mb-2 text-sm">Daily goals impact</p>
-          <GoalRow label="Calories" value={`${fmt(total.calories)} / ${fmt(goalCal)} kcal`} pct={pctOfGoal.cal} />
-          <GoalRow label="Protein" value={`${fmt(total.protein, "g")} / ${fmt(goalP, "g")}`} pct={pctOfGoal.p} />
-          <GoalRow label="Carbs" value={`${fmt(total.carbs, "g")} / ${fmt(goalC, "g")}`} pct={pctOfGoal.c} />
-          <GoalRow label="Fat" value={`${fmt(total.fat, "g")} / ${fmt(goalF, "g")}`} pct={pctOfGoal.f} />
+          <GoalRow
+            label="Calories"
+            value={`${fmt(total.calories)} / ${fmt(goalCal)} kcal`}
+            pct={pctOfGoal.cal}
+          />
+          <GoalRow
+            label="Protein"
+            value={`${fmt(total.protein, "g")} / ${fmt(goalP, "g")}`}
+            pct={pctOfGoal.p}
+          />
+          <GoalRow
+            label="Carbs"
+            value={`${fmt(total.carbs, "g")} / ${fmt(goalC, "g")}`}
+            pct={pctOfGoal.c}
+          />
+          <GoalRow
+            label="Fat"
+            value={`${fmt(total.fat, "g")} / ${fmt(goalF, "g")}`}
+            pct={pctOfGoal.f}
+          />
           <div className="mt-2 text-xs opacity-70">
             Goals from Preferences; adjust in{" "}
-            <a className="link" onClick={() => automation.emit?.("ui.navigate", { to: "/settings/profile" })}>
+            <a
+              className="link"
+              onClick={() =>
+                automation.emit?.("ui.navigate", { to: "/settings/profile" })
+              }
+            >
               Settings
             </a>
             .
@@ -430,16 +495,29 @@ export default function NutritionPanel({
 
       {/* Expandable micronutrients (if present) */}
       <div className="mt-4">
-        <button className="btn btn-ghost btn-sm" onClick={() => setExpanded((x) => !x)}>
+        <button
+          className="btn btn-ghost btn-sm"
+          onClick={() => setExpanded((x) => !x)}
+        >
           {expanded ? "Hide details" : "Show more details"}
         </button>
         {expanded && (
           <div className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-y-2 text-sm">
-            {"cholesterol" in ps && <Field label="Cholesterol" value={`${ps.cholesterol} mg`} />}
-            {"saturatedFat" in ps && <Field label="Saturated fat" value={`${ps.saturatedFat} g`} />}
-            {"potassium" in ps && <Field label="Potassium" value={`${ps.potassium} mg`} />}
-            {"vitaminD" in ps && <Field label="Vitamin D" value={`${ps.vitaminD} IU`} />}
-            {"calcium" in ps && <Field label="Calcium" value={`${ps.calcium} mg`} />}
+            {"cholesterol" in ps && (
+              <Field label="Cholesterol" value={`${ps.cholesterol} mg`} />
+            )}
+            {"saturatedFat" in ps && (
+              <Field label="Saturated fat" value={`${ps.saturatedFat} g`} />
+            )}
+            {"potassium" in ps && (
+              <Field label="Potassium" value={`${ps.potassium} mg`} />
+            )}
+            {"vitaminD" in ps && (
+              <Field label="Vitamin D" value={`${ps.vitaminD} IU`} />
+            )}
+            {"calcium" in ps && (
+              <Field label="Calcium" value={`${ps.calcium} mg`} />
+            )}
             {"iron" in ps && <Field label="Iron" value={`${ps.iron} mg`} />}
           </div>
         )}
@@ -463,11 +541,17 @@ export default function NutritionPanel({
             <div className="flex items-center gap-3">
               <span>{toast.text}</span>
               {toast.action && (
-                <button className="btn btn-xs" onClick={() => toast.action.fn?.()}>
+                <button
+                  className="btn btn-xs"
+                  onClick={() => toast.action.fn?.()}
+                >
                   {toast.action.label}
                 </button>
               )}
-              <button className="btn btn-ghost btn-xs" onClick={() => setToast(null)}>
+              <button
+                className="btn btn-ghost btn-xs"
+                onClick={() => setToast(null)}
+              >
                 ✕
               </button>
             </div>

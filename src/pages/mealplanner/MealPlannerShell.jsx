@@ -1,5 +1,12 @@
 // C:\Users\larho\suka-smart-assistant\src\pages\MealPlanning\MealPlannerShell.jsx
-import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { addDays, startOfWeek, format, isSameDay } from "date-fns";
 
 /**
@@ -23,22 +30,39 @@ import { addDays, startOfWeek, format, isSameDay } from "date-fns";
 
 /* ---------- Tiny UI (no external alias) ---------- */
 const cx = (...a) => a.filter(Boolean).join(" ");
-const Button = ({ variant = "solid", size = "md", className, children, ...props }) => {
-  const v = {
-    solid: "bg-black text-white hover:opacity-90 disabled:opacity-50",
-    outline: "border hover:bg-zinc-50",
-    ghost: "hover:bg-zinc-100",
-    subtle: "bg-zinc-100 text-zinc-900 hover:bg-zinc-200",
-  }[variant] || "";
-  const s = { sm: "h-8 px-2 text-sm", md: "h-10 px-3 text-sm", icon: "h-9 w-9 p-0" }[size] || "";
+const Button = ({
+  variant = "solid",
+  size = "md",
+  className,
+  children,
+  ...props
+}) => {
+  const v =
+    {
+      solid: "bg-black text-white hover:opacity-90 disabled:opacity-50",
+      outline: "border hover:bg-zinc-50",
+      ghost: "hover:bg-zinc-100",
+      subtle: "bg-zinc-100 text-zinc-900 hover:bg-zinc-200",
+    }[variant] || "";
+  const s =
+    { sm: "h-8 px-2 text-sm", md: "h-10 px-3 text-sm", icon: "h-9 w-9 p-0" }[
+      size
+    ] || "";
   return (
-    <button className={cx("rounded-xl transition-colors", v, s, className)} {...props}>
+    <button
+      className={cx("rounded-xl transition-colors", v, s, className)}
+      {...props}
+    >
       {children}
     </button>
   );
 };
-const Card = ({ className, children }) => <div className={cx("rounded-2xl border bg-white", className)}>{children}</div>;
-const Input = (props) => <input className="h-9 rounded-xl border px-3 text-sm" {...props} />;
+const Card = ({ className, children }) => (
+  <div className={cx("rounded-2xl border bg-white", className)}>{children}</div>
+);
+const Input = (props) => (
+  <input className="h-9 rounded-xl border px-3 text-sm" {...props} />
+);
 const Badge = ({ children, className, tone = "zinc" }) => (
   <span
     className={cx(
@@ -58,43 +82,93 @@ try {
   // Prefer new events path, fall back to older one if present
   eventBus = require("@/services/events/eventBus");
 } catch {
-  try { eventBus = require("@/services/eventBus").eventBus || eventBus; } catch {}
+  try {
+    eventBus = require("@/services/events/eventBus").eventBus || eventBus;
+  } catch {}
 }
 
 let PreferencesStore = {};
-try { PreferencesStore = require("@/store/PreferencesStore"); } catch {}
+try {
+  PreferencesStore = require("@/store/PreferencesStore");
+} catch {}
 
 /* ---------- Lazy panels (alias-safe, with fallbacks) ---------- */
 function lazyEither(localPath, aliasPath, fallback) {
   return React.lazy(async () => {
-    try { return { default: (await import(/* @vite-ignore */ localPath)).default }; } catch {}
-    try { return { default: (await import(/* @vite-ignore */ aliasPath)).default }; } catch {}
-    return { default: fallback || (() => <div className="p-4 text-sm text-zinc-600">Panel not available.</div>) };
+    try {
+      return { default: (await import(/* @vite-ignore */ localPath)).default };
+    } catch {}
+    try {
+      return { default: (await import(/* @vite-ignore */ aliasPath)).default };
+    } catch {}
+    return {
+      default:
+        fallback ||
+        (() => (
+          <div className="p-4 text-sm text-zinc-600">Panel not available.</div>
+        )),
+    };
   });
 }
 
-const CalendarPreview       = lazyEither("./CalendarPreview.jsx", "@/pages/MealPlanning/CalendarPreview.jsx");
-const MealCyclePlanner      = lazyEither("./MealCyclePlannerCalendar.jsx", "@/pages/MealPlanning/MealCyclePlannerCalendar.jsx");
-const GroceryListPanel      = lazyEither("./GroceryListPanel.jsx", "@/pages/MealPlanning/GroceryListPanel.jsx");
-const CalendarSyncPanel     = lazyEither("./CalendarSyncPanel.jsx", "@/pages/MealPlanning/CalendarSyncPanel.jsx");
-const MealPlanEditorModal   = lazyEither("./MealPlanEditorModal.jsx", "@/pages/MealPlanning/MealPlanEditorModal.jsx", () => null);
-const MealPlanNutritionPeek = lazyEither("./MealPlanNutritionPeek.jsx", "@/pages/MealPlanning/MealPlanNutritionPeek.jsx");
-const MealPlanView          = lazyEither("./MealPlanView.jsx", "@/pages/MealPlanning/MealPlanView.jsx");
-const PrepChecklistGen      = lazyEither("./PrepChecklistGenerator.jsx", "@/pages/MealPlanning/PrepChecklistGenerator.jsx");
-const BatchSessionLinker    = lazyEither("./BatchSessionLinker.jsx", "@/pages/MealPlanning/BatchSessionLinker.jsx");
-const BatchInventoryMap     = lazyEither("./BatchInventoryMap.jsx", "@/pages/MealPlanning/BatchInventoryMap.jsx");
+const CalendarPreview = lazyEither(
+  "./CalendarPreview.jsx",
+  "@/pages/MealPlanning/CalendarPreview.jsx"
+);
+const MealCyclePlanner = lazyEither(
+  "./MealCyclePlannerCalendar.jsx",
+  "@/pages/MealPlanning/MealCyclePlannerCalendar.jsx"
+);
+const GroceryListPanel = lazyEither(
+  "./GroceryListPanel.jsx",
+  "@/pages/MealPlanning/GroceryListPanel.jsx"
+);
+const CalendarSyncPanel = lazyEither(
+  "./CalendarSyncPanel.jsx",
+  "@/pages/MealPlanning/CalendarSyncPanel.jsx"
+);
+const MealPlanEditorModal = lazyEither(
+  "./MealPlanEditorModal.jsx",
+  "@/pages/MealPlanning/MealPlanEditorModal.jsx",
+  () => null
+);
+const MealPlanNutritionPeek = lazyEither(
+  "./MealPlanNutritionPeek.jsx",
+  "@/pages/MealPlanning/MealPlanNutritionPeek.jsx"
+);
+const MealPlanView = lazyEither(
+  "./MealPlanView.jsx",
+  "@/pages/MealPlanning/MealPlanView.jsx"
+);
+const PrepChecklistGen = lazyEither(
+  "./PrepChecklistGenerator.jsx",
+  "@/pages/MealPlanning/PrepChecklistGenerator.jsx"
+);
+const BatchSessionLinker = lazyEither(
+  "./BatchSessionLinker.jsx",
+  "@/pages/MealPlanning/BatchSessionLinker.jsx"
+);
+const BatchInventoryMap = lazyEither(
+  "./BatchInventoryMap.jsx",
+  "@/pages/MealPlanning/BatchInventoryMap.jsx"
+);
 
 /* ---------- Period semantics (suite parity) ---------- */
 const PERIODS = [
-  { key: "week",    label: "Week",                     spec: 7 },
-  { key: "2w",      label: "2 Weeks",                  spec: 14 },
-  { key: "month",   label: "Month (Full Calendar)",    spec: "month-full" },
-  { key: "quarter", label: "Quarter (True Calendar)",  spec: "quarter" },
-  { key: "custom",  label: "Custom",                   spec: "custom" },
+  { key: "week", label: "Week", spec: 7 },
+  { key: "2w", label: "2 Weeks", spec: 14 },
+  { key: "month", label: "Month (Full Calendar)", spec: "month-full" },
+  { key: "quarter", label: "Quarter (True Calendar)", spec: "quarter" },
+  { key: "custom", label: "Custom", spec: "custom" },
 ];
 
-function lastDayOfMonth(y, m) { return new Date(y, m + 1, 0); }
-function quarterStart(d) { const m = d.getMonth(); return new Date(d.getFullYear(), Math.floor(m / 3) * 3, 1); }
+function lastDayOfMonth(y, m) {
+  return new Date(y, m + 1, 0);
+}
+function quarterStart(d) {
+  const m = d.getMonth();
+  return new Date(d.getFullYear(), Math.floor(m / 3) * 3, 1);
+}
 function enumerate(anchor, spec, custom) {
   if (spec === "custom") return (custom || []).slice().sort((a, b) => a - b);
 
@@ -105,14 +179,16 @@ function enumerate(anchor, spec, custom) {
     const start = startOfWeek(first, { weekStartsOn: 0 }); // Sun
     const endPad = addDays(last, (6 - last.getDay() + 7) % 7); // to Sat
     const out = [];
-    for (let d = new Date(start); d <= endPad; d = addDays(d, 1)) out.push(new Date(d));
+    for (let d = new Date(start); d <= endPad; d = addDays(d, 1))
+      out.push(new Date(d));
     return out; // 35 or 42 days
   }
 
   if (spec === "quarter") {
     const s = quarterStart(anchor);
     const e = new Date(s.getFullYear(), s.getMonth() + 3, 0);
-    const out = []; for (let d = new Date(s); d <= e; d = addDays(d, 1)) out.push(new Date(d));
+    const out = [];
+    for (let d = new Date(s); d <= e; d = addDays(d, 1)) out.push(new Date(d));
     return out;
   }
 
@@ -129,26 +205,35 @@ const sabbathStatus = () => {
     const p = PreferencesStore?.getPreferences?.() || {};
     const active = p?.torahProfile?.sabbath?.isActive;
     const handsOff = p?.torahProfile?.sabbath?.handsOffCooking === true;
-    return { active: !!active, handsOff: !!handsOff, blocked: !!(active && handsOff) };
-  } catch { return { active: false, handsOff: false, blocked: false }; }
+    return {
+      active: !!active,
+      handsOff: !!handsOff,
+      blocked: !!(active && handsOff),
+    };
+  } catch {
+    return { active: false, handsOff: false, blocked: false };
+  }
 };
 
 /* ---------- Built-in tabs ---------- */
 const CORE_TABS = [
-  { key: "preview",   label: "Calendar Preview" },
-  { key: "cycle",     label: "Meal Cycle (Calendar)" },
+  { key: "preview", label: "Calendar Preview" },
+  { key: "cycle", label: "Meal Cycle (Calendar)" },
   { key: "groceries", label: "Groceries" },
-  { key: "sync",      label: "Calendar Sync" },
+  { key: "sync", label: "Calendar Sync" },
   { key: "nutrition", label: "Nutrition Peek" },
-  { key: "planview",  label: "Plan View" },
-  { key: "prep",      label: "Prep Checklist" },
-  { key: "linker",    label: "Batch Session Linker" },
+  { key: "planview", label: "Plan View" },
+  { key: "prep", label: "Prep Checklist" },
+  { key: "linker", label: "Batch Session Linker" },
   { key: "inventory", label: "Batch Inventory Map" },
 ];
 
 /* ---------- URL helpers & storage ---------- */
 const toIso = (d) => format(d, "yyyy-MM-dd");
-const fromIso = (s) => { const d = new Date(s); return isNaN(d) ? null : d; };
+const fromIso = (s) => {
+  const d = new Date(s);
+  return isNaN(d) ? null : d;
+};
 
 function readUrlState() {
   if (typeof window === "undefined") return {};
@@ -174,8 +259,18 @@ function writeUrlState({ tab, period, anchor, cs, ce }) {
   window.history.replaceState({}, "", `${u.pathname}?${q.toString()}${u.hash}`);
 }
 const safeLS = {
-  get(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } },
-  set(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} },
+  get(key, fallback) {
+    try {
+      return JSON.parse(localStorage.getItem(key)) ?? fallback;
+    } catch {
+      return fallback;
+    }
+  },
+  set(key, val) {
+    try {
+      localStorage.setItem(key, JSON.stringify(val));
+    } catch {}
+  },
 };
 
 /* ---------- Shell ---------- */
@@ -183,17 +278,23 @@ export default function MealPlannerShell() {
   const urlSeed = readUrlState();
 
   const today = new Date();
-  const [activeTab, setActiveTab] = useState(() =>
-    urlSeed.tab || safeLS.get("mp.tab", "preview")
+  const [activeTab, setActiveTab] = useState(
+    () => urlSeed.tab || safeLS.get("mp.tab", "preview")
   );
-  const [anchor, setAnchor] = useState(() =>
-    urlSeed.anchor || fromIso(safeLS.get("mp.anchor", "")) || startOfWeek(today, { weekStartsOn: 0 })
+  const [anchor, setAnchor] = useState(
+    () =>
+      urlSeed.anchor ||
+      fromIso(safeLS.get("mp.anchor", "")) ||
+      startOfWeek(today, { weekStartsOn: 0 })
   );
-  const [periodKey, setPeriodKey] = useState(() =>
-    urlSeed.period || safeLS.get("mp.period", "week")
+  const [periodKey, setPeriodKey] = useState(
+    () => urlSeed.period || safeLS.get("mp.period", "week")
   );
 
-  const spec = useMemo(() => PERIODS.find((p) => p.key === periodKey)?.spec, [periodKey]);
+  const spec = useMemo(
+    () => PERIODS.find((p) => p.key === periodKey)?.spec,
+    [periodKey]
+  );
 
   const [customStart, setCustomStart] = useState(() =>
     urlSeed.cs ? toIso(urlSeed.cs) : safeLS.get("mp.cs", "")
@@ -225,13 +326,18 @@ export default function MealPlannerShell() {
   // Build custom dates
   const customDates = useMemo(() => {
     if (spec !== "custom" || !customStart || !customEnd) return [];
-    const s = new Date(customStart), e = new Date(customEnd);
+    const s = new Date(customStart),
+      e = new Date(customEnd);
     if (isNaN(s) || isNaN(e) || s > e) return [];
-    const out = []; for (let d = new Date(s); d <= e; d = addDays(d, 1)) out.push(new Date(d));
+    const out = [];
+    for (let d = new Date(s); d <= e; d = addDays(d, 1)) out.push(new Date(d));
     return out;
   }, [spec, customStart, customEnd]);
 
-  const days = useMemo(() => enumerate(anchor, spec, customDates), [anchor, spec, customDates]);
+  const days = useMemo(
+    () => enumerate(anchor, spec, customDates),
+    [anchor, spec, customDates]
+  );
   const range = useMemo(() => {
     const start = days[0] || anchor;
     const end = days[days.length - 1] || addDays(anchor, 6);
@@ -281,7 +387,8 @@ export default function MealPlannerShell() {
       setLazyCache((prev) => {
         const next = { ...prev };
         for (const i of items) {
-          if (i?.key && !next[i.key]) next[i.key] = lazyEither(i.localPath, i.aliasPath);
+          if (i?.key && !next[i.key])
+            next[i.key] = lazyEither(i.localPath, i.aliasPath);
         }
         return next;
       });
@@ -296,15 +403,19 @@ export default function MealPlannerShell() {
 
   // Period navigation
   const jumpPrev = useCallback(() => {
-    if (spec === "month-full") setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() - 1, 1));
-    else if (spec === "quarter") setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() - 3, 1));
+    if (spec === "month-full")
+      setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() - 1, 1));
+    else if (spec === "quarter")
+      setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() - 3, 1));
     else if (typeof spec === "number") setAnchor(addDays(anchor, -spec));
     else setAnchor(addDays(anchor, -7));
   }, [anchor, spec]);
 
   const jumpNext = useCallback(() => {
-    if (spec === "month-full") setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() + 1, 1));
-    else if (spec === "quarter") setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() + 3, 1));
+    if (spec === "month-full")
+      setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() + 1, 1));
+    else if (spec === "quarter")
+      setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() + 3, 1));
     else if (typeof spec === "number") setAnchor(addDays(anchor, spec));
     else setAnchor(addDays(anchor, 7));
   }, [anchor, spec]);
@@ -316,12 +427,22 @@ export default function MealPlannerShell() {
 
   /* ---------- Quick actions (emit only; panels handle work) ---------- */
   const handleGenerate = useCallback(
-    () => eventBus.emit?.("mealplan.generate.requested", { at: new Date().toISOString(), range, periodKey }),
+    () =>
+      eventBus.emit?.("mealplan.generate.requested", {
+        at: new Date().toISOString(),
+        range,
+        periodKey,
+      }),
     [range, periodKey]
   );
 
   const handleSync = useCallback(
-    () => eventBus.emit?.("calendar.sync.requested", { at: new Date().toISOString(), range, mode: "manual" }),
+    () =>
+      eventBus.emit?.("calendar.sync.requested", {
+        at: new Date().toISOString(),
+        range,
+        mode: "manual",
+      }),
     [range]
   );
 
@@ -332,7 +453,7 @@ export default function MealPlannerShell() {
     const slot = inferSlotByNow();
     eventBus.emit?.("ui.open", {
       panel: "RecipeDecider",
-      date: new Date(),      // or range.start if you prefer anchoring to current period
+      date: new Date(), // or range.start if you prefer anchoring to current period
       slot,
       intent: "single",
       autoPick: true,
@@ -385,8 +506,22 @@ export default function MealPlannerShell() {
 
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1">
-              <Button variant="ghost" size="icon" onClick={jumpPrev} aria-label="Previous">←</Button>
-              <Button variant="ghost" size="icon" onClick={jumpNext} aria-label="Next">→</Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={jumpPrev}
+                aria-label="Previous"
+              >
+                ←
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={jumpNext}
+                aria-label="Next"
+              >
+                →
+              </Button>
             </div>
 
             <select
@@ -395,14 +530,26 @@ export default function MealPlannerShell() {
               onChange={(e) => setPeriodKey(e.target.value)}
               aria-label="Planning period"
             >
-              {PERIODS.map((p) => (<option key={p.key} value={p.key}>{p.label}</option>))}
+              {PERIODS.map((p) => (
+                <option key={p.key} value={p.key}>
+                  {p.label}
+                </option>
+              ))}
             </select>
 
             {periodKey === "custom" && (
               <div className="flex items-center gap-2">
-                <Input type="date" value={customStart} onChange={(e) => setCustomStart(e.target.value)} />
+                <Input
+                  type="date"
+                  value={customStart}
+                  onChange={(e) => setCustomStart(e.target.value)}
+                />
                 <span className="text-sm text-zinc-500">to</span>
-                <Input type="date" value={customEnd} onChange={(e) => setCustomEnd(e.target.value)} />
+                <Input
+                  type="date"
+                  value={customEnd}
+                  onChange={(e) => setCustomEnd(e.target.value)}
+                />
               </div>
             )}
           </div>
@@ -416,7 +563,9 @@ export default function MealPlannerShell() {
                 key={t.key}
                 className={cx(
                   "rounded-xl px-3 py-2 text-sm",
-                  activeTab === t.key ? "bg-zinc-900 text-white" : "border hover:bg-zinc-50"
+                  activeTab === t.key
+                    ? "bg-zinc-900 text-white"
+                    : "border hover:bg-zinc-50"
                 )}
                 onClick={() => setActiveTab(t.key)}
               >
@@ -425,32 +574,106 @@ export default function MealPlannerShell() {
             ))}
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="subtle" onClick={openVault}>Open Recipe Vault</Button>
-            <Button variant="outline" onClick={handleGenerate} disabled={sabbath.blocked}>Generate Draft</Button>
-            <Button variant="outline" onClick={handleDecideForMe} disabled={sabbath.blocked}>Decide For Me</Button>
-            <Button onClick={handleSync} disabled={sabbath.blocked}>Sync Calendar</Button>
+            <Button variant="subtle" onClick={openVault}>
+              Open Recipe Vault
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleGenerate}
+              disabled={sabbath.blocked}
+            >
+              Generate Draft
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleDecideForMe}
+              disabled={sabbath.blocked}
+            >
+              Decide For Me
+            </Button>
+            <Button onClick={handleSync} disabled={sabbath.blocked}>
+              Sync Calendar
+            </Button>
           </div>
         </div>
       </Card>
 
       {/* Active panel */}
       <Card className="p-3">
-        <Suspense fallback={<div className="p-4 text-sm text-zinc-600">Loading…</div>}>
-          {activeTab === "preview"   && <CalendarPreview       initialRange={{ start: range.start, end: range.end }} periodKey={periodKey} context={ctx} />}
-          {activeTab === "cycle"     && <MealCyclePlanner      initialRange={{ start: range.start, end: range.end }} context={ctx} />}
-          {activeTab === "groceries" && <GroceryListPanel      initialRange={{ start: range.start, end: range.end }} include={{ meals: true, batches: true, household: true }} defaultStoreId="any" context={ctx} />}
-          {activeTab === "sync"      && <CalendarSyncPanel     mode="manual" defaultCalendarId="primary" initialRange={{ start: range.start, end: range.end }} context={ctx} />}
-          {activeTab === "nutrition" && <MealPlanNutritionPeek initialRange={{ start: range.start, end: range.end }} periodKey={periodKey} context={ctx} />}
-          {activeTab === "planview"  && <MealPlanView          initialRange={{ start: range.start, end: range.end }} periodKey={periodKey} context={ctx} />}
-          {activeTab === "prep"      && <PrepChecklistGen      initialRange={{ start: range.start, end: range.end }} context={ctx} />}
-          {activeTab === "linker"    && <BatchSessionLinker    initialRange={{ start: range.start, end: range.end }} context={ctx} />}
-          {activeTab === "inventory" && <BatchInventoryMap     initialRange={{ start: range.start, end: range.end }} context={ctx} />}
+        <Suspense
+          fallback={<div className="p-4 text-sm text-zinc-600">Loading…</div>}
+        >
+          {activeTab === "preview" && (
+            <CalendarPreview
+              initialRange={{ start: range.start, end: range.end }}
+              periodKey={periodKey}
+              context={ctx}
+            />
+          )}
+          {activeTab === "cycle" && (
+            <MealCyclePlanner
+              initialRange={{ start: range.start, end: range.end }}
+              context={ctx}
+            />
+          )}
+          {activeTab === "groceries" && (
+            <GroceryListPanel
+              initialRange={{ start: range.start, end: range.end }}
+              include={{ meals: true, batches: true, household: true }}
+              defaultStoreId="any"
+              context={ctx}
+            />
+          )}
+          {activeTab === "sync" && (
+            <CalendarSyncPanel
+              mode="manual"
+              defaultCalendarId="primary"
+              initialRange={{ start: range.start, end: range.end }}
+              context={ctx}
+            />
+          )}
+          {activeTab === "nutrition" && (
+            <MealPlanNutritionPeek
+              initialRange={{ start: range.start, end: range.end }}
+              periodKey={periodKey}
+              context={ctx}
+            />
+          )}
+          {activeTab === "planview" && (
+            <MealPlanView
+              initialRange={{ start: range.start, end: range.end }}
+              periodKey={periodKey}
+              context={ctx}
+            />
+          )}
+          {activeTab === "prep" && (
+            <PrepChecklistGen
+              initialRange={{ start: range.start, end: range.end }}
+              context={ctx}
+            />
+          )}
+          {activeTab === "linker" && (
+            <BatchSessionLinker
+              initialRange={{ start: range.start, end: range.end }}
+              context={ctx}
+            />
+          )}
+          {activeTab === "inventory" && (
+            <BatchInventoryMap
+              initialRange={{ start: range.start, end: range.end }}
+              context={ctx}
+            />
+          )}
 
           {/* Plugin tab mounts */}
           {extraTabs.map((t) => {
             const Cmp = lazyCache[t.key];
             return activeTab === t.key && Cmp ? (
-              <Cmp key={t.key} initialRange={{ start: range.start, end: range.end }} context={ctx} />
+              <Cmp
+                key={t.key}
+                initialRange={{ start: range.start, end: range.end }}
+                context={ctx}
+              />
             ) : null;
           })}
         </Suspense>
@@ -468,13 +691,20 @@ export default function MealPlannerShell() {
 function EditorPortal({ periodKey }) {
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState(new Date());
-  const [initialDay, setInitialDay] = useState({ breakfast: [], lunch: [], dinner: [], snack: [] });
+  const [initialDay, setInitialDay] = useState({
+    breakfast: [],
+    lunch: [],
+    dinner: [],
+    snack: [],
+  });
 
   useEffect(() => {
     const handler = (p) => {
       if (p?.panel !== "MealPlanEditor") return;
       setDate(p?.date ? new Date(p.date) : new Date());
-      setInitialDay(p?.day || { breakfast: [], lunch: [], dinner: [], snack: [] });
+      setInitialDay(
+        p?.day || { breakfast: [], lunch: [], dinner: [], snack: [] }
+      );
       setOpen(true);
     };
     eventBus.on?.("ui.open", handler);
@@ -501,7 +731,10 @@ function EditorPortal({ periodKey }) {
   if (window.__MEAL_PLANNER_SHELL_REFS__) return;
   window.__MEAL_PLANNER_SHELL_REFS__ = true;
 
-  const ok = (c, m) => (c ? console.log("[MealPlannerShell TEST PASS]", m) : console.error("[MealPlannerShell TEST FAIL]", m));
+  const ok = (c, m) =>
+    c
+      ? console.log("[MealPlannerShell TEST PASS]", m)
+      : console.error("[MealPlannerShell TEST FAIL]", m);
 
   // Period enumerate sanity
   const w = enumerate(new Date(2025, 0, 14), 7).length;
@@ -513,7 +746,10 @@ function EditorPortal({ periodKey }) {
   ok(mFull === 35 || mFull === 42, "Month full calendar pads to 35/42 days");
 
   const qs = quarterStart(new Date(2025, 6, 5));
-  ok(qs.getMonth() % 3 === 0 && qs.getDate() === 1, "Quarter start aligns to Q*-01");
+  ok(
+    qs.getMonth() % 3 === 0 && qs.getDate() === 1,
+    "Quarter start aligns to Q*-01"
+  );
 
   // URL read/write smoke
   const seed = readUrlState();

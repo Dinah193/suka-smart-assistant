@@ -37,21 +37,22 @@ try {
 
 let eventBus = { emit: () => {}, on: () => {}, off: () => {} };
 try {
-  eventBus = require("@/services/eventBus").eventBus || eventBus;
+  eventBus = require("@/services/events/eventBus").eventBus || eventBus;
 } catch {}
 
 let useMealPlanStore = () => ({
   hydrateFromTemplates: null, // (template, options) => void
 });
 try {
-  useMealPlanStore = require("@/store/MealPlanStore").useMealPlanStore || useMealPlanStore;
+  useMealPlanStore =
+    require("@/store/MealPlanStore").useMealPlanStore || useMealPlanStore;
 } catch {}
 
 let usePersonalFoodStandards = () => ({ standards: {} });
 try {
   usePersonalFoodStandards =
-    require("@/app/context/HouseholdSettingsContext").usePersonalFoodStandards ||
-    usePersonalFoodStandards;
+    require("@/app/context/HouseholdSettingsContext")
+      .usePersonalFoodStandards || usePersonalFoodStandards;
 } catch {}
 
 let InventoryMonitor = {
@@ -74,9 +75,15 @@ const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, Number(n) || 0));
 /** lightweight match on standards for a quick badge */
 function standardsOK(template = {}, standards = {}) {
   // If template carries tags like ["pork","seafood"], flag quickly
-  const tags = new Set(safeArr(template.tags).map((t) => (typeof t === "string" ? t : t?.id)));
-  if (standards?.noPork && tags.has("pork")) return { ok: false, reason: "Pork" };
-  if (standards?.lambBeefOnly && (tags.has("chicken") || tags.has("fish") || tags.has("seafood")))
+  const tags = new Set(
+    safeArr(template.tags).map((t) => (typeof t === "string" ? t : t?.id))
+  );
+  if (standards?.noPork && tags.has("pork"))
+    return { ok: false, reason: "Pork" };
+  if (
+    standards?.lambBeefOnly &&
+    (tags.has("chicken") || tags.has("fish") || tags.has("seafood"))
+  )
     return { ok: false, reason: "Lamb/Beef only" };
   return { ok: true };
 }
@@ -94,18 +101,38 @@ export default function PlanTemplateChooser({
    */
   templates = [],
   initialQuery = "",
-  categories = [],          // optional e.g. ["Balanced","High Protein","Quick","Family","Budget"]
+  categories = [], // optional e.g. ["Balanced","High Protein","Quick","Family","Budget"]
   defaultDuration = "week", // day|week|month
   /** Optional destinations */
-  onApply,                  // (template, options) => void
-  onPreview,                // (template) => void
+  onApply, // (template, options) => void
+  onPreview, // (template) => void
   className,
 }) {
   const {
-    LayoutGrid, CalendarDays, Search, Filter, Sparkles, Eye, EyeOff, Check, X,
-    Clock, Tag, UtensilsCrossed, Download, Upload, ChevronRight, ChevronLeft,
-    ChevronDown, ChevronUp, ListChecks, SlidersHorizontal, Bot, CopyPlus,
-    Star, StarOff
+    LayoutGrid,
+    CalendarDays,
+    Search,
+    Filter,
+    Sparkles,
+    Eye,
+    EyeOff,
+    Check,
+    X,
+    Clock,
+    Tag,
+    UtensilsCrossed,
+    Download,
+    Upload,
+    ChevronRight,
+    ChevronLeft,
+    ChevronDown,
+    ChevronUp,
+    ListChecks,
+    SlidersHorizontal,
+    Bot,
+    CopyPlus,
+    Star,
+    StarOff,
   } = Icons;
 
   const ChevronRightIcon = ChevronRight || (() => null);
@@ -130,7 +157,8 @@ export default function PlanTemplateChooser({
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
       if (saved.sortKey) setSortKey(saved.sortKey);
       if (saved.sortDir) setSortDir(saved.sortDir);
-      if (typeof saved.showPreviewPane === "boolean") setShowPreviewPane(saved.showPreviewPane);
+      if (typeof saved.showPreviewPane === "boolean")
+        setShowPreviewPane(saved.showPreviewPane);
     } catch {}
   }, []);
   useEffect(() => {
@@ -158,7 +186,9 @@ export default function PlanTemplateChooser({
         const hay = [
           t.title,
           t.description,
-          ...(safeArr(t.tags).map((x) => (typeof x === "string" ? x : x?.label || x?.id))),
+          ...safeArr(t.tags).map((x) =>
+            typeof x === "string" ? x : x?.label || x?.id
+          ),
           t.category,
           t.duration,
         ]
@@ -171,18 +201,25 @@ export default function PlanTemplateChooser({
 
     const keyFn = (t) => {
       switch (sortKey) {
-        case "rating": return Number(t.rating || 0);
-        case "recent": return Number(new Date(t.updatedAt || t.createdAt || 0).getTime());
-        case "slots": return Number(t.slots || 0);
-        case "title": return (t.title || "").toLowerCase();
+        case "rating":
+          return Number(t.rating || 0);
+        case "recent":
+          return Number(new Date(t.updatedAt || t.createdAt || 0).getTime());
+        case "slots":
+          return Number(t.slots || 0);
+        case "title":
+          return (t.title || "").toLowerCase();
         case "relevance":
         default: {
           // quick heuristic: rating + slots + contains search needle near title
           const base = Number(t.rating || 0) * 10 + Number(t.slots || 0);
           if (!needle) return base;
-          const score =
-            (t.title || "").toLowerCase().includes(needle) ? 25 : 0 +
-            (safeArr(t.tags).join(" ").toLowerCase().includes(needle) ? 10 : 0);
+          const score = (t.title || "").toLowerCase().includes(needle)
+            ? 25
+            : 0 +
+              (safeArr(t.tags).join(" ").toLowerCase().includes(needle)
+                ? 10
+                : 0);
           return base + score;
         }
       }
@@ -252,7 +289,10 @@ export default function PlanTemplateChooser({
     try {
       const text = await file.text();
       const parsed = JSON.parse(text);
-      eventBus.emit("meals.plan.template.imported", { id: parsed.id, title: parsed.title });
+      eventBus.emit("meals.plan.template.imported", {
+        id: parsed.id,
+        title: parsed.title,
+      });
       // We don’t mutate props.templates here; parent should handle adding.
       alert("Template imported. Add it to your template store/list to use.");
     } catch (e) {
@@ -302,7 +342,9 @@ export default function PlanTemplateChooser({
         >
           <option value="all">All</option>
           {safeArr(categories).map((c) => (
-            <option key={c} value={c}>{c}</option>
+            <option key={c} value={c}>
+              {c}
+            </option>
           ))}
         </select>
       </div>
@@ -340,14 +382,23 @@ export default function PlanTemplateChooser({
           className="inline-flex items-center gap-1 px-3 py-2 rounded-lg border bg-white border-gray-300 text-sm"
           title={showPreviewPane ? "Hide preview" : "Show preview"}
         >
-          {showPreviewPane ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          {showPreviewPane ? (
+            <EyeOff className="w-4 h-4" />
+          ) : (
+            <Eye className="w-4 h-4" />
+          )}
           {showPreviewPane ? "Preview off" : "Preview on"}
         </button>
 
         <label className="inline-flex items-center gap-1 px-3 py-2 rounded-lg border bg-white border-gray-300 text-sm cursor-pointer">
           <Upload className="w-4 h-4" />
           Import
-          <input type="file" accept="application/json" onChange={importTemplate} className="sr-only" />
+          <input
+            type="file"
+            accept="application/json"
+            onChange={importTemplate}
+            className="sr-only"
+          />
         </label>
       </div>
     </div>
@@ -357,7 +408,12 @@ export default function PlanTemplateChooser({
     const ok = standardsOK(tpl, standards);
     const inv = (() => {
       try {
-        return InventoryMonitor.estimateCoverageForTemplate?.(tpl) || { status: "unknown", missingCount: 0 };
+        return (
+          InventoryMonitor.estimateCoverageForTemplate?.(tpl) || {
+            status: "unknown",
+            missingCount: 0,
+          }
+        );
       } catch {
         return { status: "unknown", missingCount: 0 };
       }
@@ -370,21 +426,31 @@ export default function PlanTemplateChooser({
         role="button"
         tabIndex={0}
         onClick={() => previewTemplate(tpl)}
-        onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && previewTemplate(tpl)}
+        onKeyDown={(e) =>
+          (e.key === "Enter" || e.key === " ") && previewTemplate(tpl)
+        }
         aria-label={`Preview template ${tpl.title}`}
       >
         {/* Media */}
         <div className="h-32 bg-gray-100 overflow-hidden">
           {tpl.image ? (
-            <img src={tpl.image} alt="" className="w-full h-full object-cover transition group-hover:scale-[1.02]" />
+            <img
+              src={tpl.image}
+              alt=""
+              className="w-full h-full object-cover transition group-hover:scale-[1.02]"
+            />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-xs text-gray-500">No image</div>
+            <div className="w-full h-full flex items-center justify-center text-xs text-gray-500">
+              No image
+            </div>
           )}
         </div>
 
         {/* Body */}
         <div className="p-3">
-          <div className="line-clamp-2 font-semibold text-gray-900 text-sm">{tpl.title || "Untitled template"}</div>
+          <div className="line-clamp-2 font-semibold text-gray-900 text-sm">
+            {tpl.title || "Untitled template"}
+          </div>
           <div className="mt-1 text-[11px] text-gray-600 flex items-center gap-2">
             <CalendarDays className="w-3 h-3" />
             <span className="capitalize">{tpl.duration || "week"}</span>
@@ -398,7 +464,11 @@ export default function PlanTemplateChooser({
             {/* rating */}
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[11px] bg-gray-50 border-gray-200">
               {Array.from({ length: 5 }).map((_, i) =>
-                i < rating ? <Star key={i} className="w-3 h-3 text-amber-500" /> : <StarOff key={i} className="w-3 h-3 text-gray-300" />
+                i < rating ? (
+                  <Star key={i} className="w-3 h-3 text-amber-500" />
+                ) : (
+                  <StarOff key={i} className="w-3 h-3 text-gray-300" />
+                )
               )}
             </span>
             {/* inventory */}
@@ -408,7 +478,8 @@ export default function PlanTemplateChooser({
               </span>
             ) : inv.status === "missing" ? (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[11px] bg-amber-50 border-amber-200 text-amber-700">
-                <ListChecks className="w-3 h-3" /> {inv.missingCount || 1} missing
+                <ListChecks className="w-3 h-3" /> {inv.missingCount || 1}{" "}
+                missing
               </span>
             ) : (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[11px] bg-gray-50 border-gray-200 text-gray-600">
@@ -434,7 +505,10 @@ export default function PlanTemplateChooser({
               {safeArr(tpl.tags)
                 .slice(0, 5)
                 .map((t, i) => (
-                  <span key={`${tpl.id}-tag-${i}`} className="text-[11px] px-2 py-0.5 rounded-full border border-gray-200 bg-gray-50 text-gray-700">
+                  <span
+                    key={`${tpl.id}-tag-${i}`}
+                    className="text-[11px] px-2 py-0.5 rounded-full border border-gray-200 bg-gray-50 text-gray-700"
+                  >
                     {typeof t === "string" ? t : t?.label || t?.id}
                   </span>
                 ))}
@@ -502,12 +576,20 @@ export default function PlanTemplateChooser({
             </div>
           ) : (
             <>
-              <div className="font-medium text-sm text-gray-900">{selected.title}</div>
-              <div className="mt-1 text-[11px] text-gray-600 capitalize">{selected.duration || "week"}</div>
+              <div className="font-medium text-sm text-gray-900">
+                {selected.title}
+              </div>
+              <div className="mt-1 text-[11px] text-gray-600 capitalize">
+                {selected.duration || "week"}
+              </div>
 
               {selected.image ? (
                 <div className="mt-2 h-32 rounded-lg overflow-hidden bg-gray-100">
-                  <img src={selected.image} alt="" className="w-full h-full object-cover" />
+                  <img
+                    src={selected.image}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               ) : null}
 
@@ -516,21 +598,31 @@ export default function PlanTemplateChooser({
                 <div className="text-xs text-gray-700 mb-1">Sample layout</div>
                 <ul className="space-y-1 max-h-56 overflow-auto pr-1">
                   {safeArr(selected.sample).length ? (
-                    safeArr(selected.sample).slice(0, 25).map((row, i) => (
-                      <li key={`s-${i}`} className="flex items-center justify-between text-[11px] rounded border bg-gray-50 border-gray-200 px-2 py-1">
-                        <span className="text-gray-700 truncate">
-                          <span className="font-medium">{row.day || row.date || "Day"}</span> • {row.slot || "Meal"}:
-                          &nbsp;{row.recipeTitle || row.title || "Recipe"}
-                        </span>
-                        {row.time ? (
-                          <span className="text-gray-500 ml-2 flex items-center gap-1">
-                            <Clock className="w-3 h-3" /> {row.time}
+                    safeArr(selected.sample)
+                      .slice(0, 25)
+                      .map((row, i) => (
+                        <li
+                          key={`s-${i}`}
+                          className="flex items-center justify-between text-[11px] rounded border bg-gray-50 border-gray-200 px-2 py-1"
+                        >
+                          <span className="text-gray-700 truncate">
+                            <span className="font-medium">
+                              {row.day || row.date || "Day"}
+                            </span>{" "}
+                            • {row.slot || "Meal"}: &nbsp;
+                            {row.recipeTitle || row.title || "Recipe"}
                           </span>
-                        ) : null}
-                      </li>
-                    ))
+                          {row.time ? (
+                            <span className="text-gray-500 ml-2 flex items-center gap-1">
+                              <Clock className="w-3 h-3" /> {row.time}
+                            </span>
+                          ) : null}
+                        </li>
+                      ))
                   ) : (
-                    <li className="text-[11px] text-gray-500">No sample data.</li>
+                    <li className="text-[11px] text-gray-500">
+                      No sample data.
+                    </li>
                   )}
                 </ul>
               </div>
@@ -557,7 +649,8 @@ export default function PlanTemplateChooser({
             </>
           )}
           <div className="mt-3 text-[11px] text-gray-500">
-            Tip: Templates can pre-pin meals, set servings, and add batch sessions.
+            Tip: Templates can pre-pin meals, set servings, and add batch
+            sessions.
           </div>
         </div>
       </aside>
@@ -566,7 +659,10 @@ export default function PlanTemplateChooser({
 
   /* ----------------------------------- JSX ----------------------------------- */
   return (
-    <section className={cx("w-full", className)} aria-label="Plan template chooser">
+    <section
+      className={cx("w-full", className)}
+      aria-label="Plan template chooser"
+    >
       <Toolbar />
 
       <div className="flex items-start gap-3">
@@ -575,8 +671,10 @@ export default function PlanTemplateChooser({
           {/* Header row: count + pager */}
           <div className="flex items-center justify-between mb-2">
             <div className="text-xs text-gray-600">
-              Showing <strong>{filtered.length ? ((page - 1) * perPage + 1) : 0}</strong>–
-              <strong>{Math.min(page * perPage, filtered.length)}</strong> of <strong>{filtered.length}</strong>
+              Showing{" "}
+              <strong>{filtered.length ? (page - 1) * perPage + 1 : 0}</strong>–
+              <strong>{Math.min(page * perPage, filtered.length)}</strong> of{" "}
+              <strong>{filtered.length}</strong>
             </div>
             {totalPages > 1 ? (
               <div className="flex items-center gap-2">
@@ -602,7 +700,9 @@ export default function PlanTemplateChooser({
                   <ChevronRightIcon className="w-4 h-4" />
                 </button>
               </div>
-            ) : <div />}
+            ) : (
+              <div />
+            )}
           </div>
 
           {/* Grid */}
@@ -612,7 +712,8 @@ export default function PlanTemplateChooser({
             ))}
             {pageItems.length === 0 ? (
               <div className="col-span-full rounded-xl border border-dashed p-6 text-center text-sm text-gray-600 bg-white">
-                No templates match your search. Try a different category, duration, or keywords.
+                No templates match your search. Try a different category,
+                duration, or keywords.
               </div>
             ) : null}
           </div>
@@ -621,11 +722,13 @@ export default function PlanTemplateChooser({
           <div className="mt-3 text-[11px] text-gray-500 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <Filter className="w-3 h-3" />
-              Tip: use categories to quickly find themed plans (e.g., “High Protein” or “Budget”).
+              Tip: use categories to quickly find themed plans (e.g., “High
+              Protein” or “Budget”).
             </div>
             <div className="hidden sm:flex items-center gap-2">
               <Bot className="w-3 h-3" />
-              Want a custom plan? Use the AI Meal Builder and save as a template.
+              Want a custom plan? Use the AI Meal Builder and save as a
+              template.
             </div>
           </div>
         </div>

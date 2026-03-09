@@ -20,7 +20,7 @@
 // - Be defensive: bad imports don’t break the whole runtime.
 //
 // ASSUMPTIONS
-// - src/services/eventBus.js exists
+// - src/services/events/eventBus.js exists
 // - src/import/ImportRouter.js exists
 // - src/import/ImportNormalizer.js exists
 // - src/config/index.js (or ../config) exposes featureFlags + env
@@ -31,7 +31,7 @@
 // - UI can listen to: "ui.import.preview.show" to pop the ImportPreviewModal.
 // -----------------------------------------------------------------------------
 
-import eventBus from "../services/eventBus";
+import eventBus from "../services/events/eventBus";
 import ImportRouter from "./ImportRouter";
 import ImportNormalizer from "./ImportNormalizer";
 import config from "../config";
@@ -61,7 +61,10 @@ function loadImportSettings() {
     const parsed = JSON.parse(raw);
     return { ...DEFAULT_SETTINGS, ...parsed };
   } catch (err) {
-    console.warn("[ImportService] failed to load settings; using defaults:", err);
+    console.warn(
+      "[ImportService] failed to load settings; using defaults:",
+      err
+    );
     return { ...DEFAULT_SETTINGS };
   }
 }
@@ -84,21 +87,31 @@ function emitImportEvent(type, data = {}) {
 async function exportToHubIfEnabled(payload, force = false) {
   try {
     const flags =
-      (config && (config.featureFlags || (typeof config === "function" ? config().featureFlags : {}))) ||
+      (config &&
+        (config.featureFlags ||
+          (typeof config === "function" ? config().featureFlags : {}))) ||
       config.featureFlags ||
       {};
-    const familyFundMode = flags.familyFundMode === true || flags.familyFundMode === "true";
+    const familyFundMode =
+      flags.familyFundMode === true || flags.familyFundMode === "true";
 
     if (!familyFundMode && !force) return;
 
-    const { default: HubPacketFormatter } = await import("../services/HubPacketFormatter.js");
-    const { default: FamilyFundConnector } = await import("../services/FamilyFundConnector.js");
+    const { default: HubPacketFormatter } = await import(
+      "@/services/hub/HubPacketFormatter.js"
+    );
+    const { default: FamilyFundConnector } = await import(
+      "@/services/hub/FamilyFundConnector.js"
+    );
 
     const packet = HubPacketFormatter.format(payload);
     await FamilyFundConnector.send(packet);
   } catch (err) {
     // keep silent — SSA owns data
-    console.warn("[ImportService] Hub export failed (silent):", err?.message || err);
+    console.warn(
+      "[ImportService] Hub export failed (silent):",
+      err?.message || err
+    );
   }
 }
 
@@ -173,7 +186,10 @@ async function importPayload({ domain, raw, meta = {} } = {}) {
 
   emitImportEvent("import.parsed", {
     domain: resolvedDomain,
-    parsedPreview: typeof parsed === "object" ? Object.keys(parsed).slice(0, 12) : "[non-object]",
+    parsedPreview:
+      typeof parsed === "object"
+        ? Object.keys(parsed).slice(0, 12)
+        : "[non-object]",
     meta,
   });
 
@@ -229,7 +245,11 @@ async function importPayload({ domain, raw, meta = {} } = {}) {
   }
 
   // 5b. auto-schedule sessions
-  if (settings.autoScheduleSessions && Array.isArray(sessions) && sessions.length > 0) {
+  if (
+    settings.autoScheduleSessions &&
+    Array.isArray(sessions) &&
+    sessions.length > 0
+  ) {
     emitImportEvent("automation.schedule.request", {
       domain: resolvedDomain,
       sessions,
@@ -264,8 +284,10 @@ async function importPayload({ domain, raw, meta = {} } = {}) {
   }
 
   // 5d. if the import ITSELF carries data changes → emit the change events
-  const hasInventoryChanges = Array.isArray(inventoryChanges) && inventoryChanges.length > 0;
-  const hasStorehouseChanges = Array.isArray(storehouseChanges) && storehouseChanges.length > 0;
+  const hasInventoryChanges =
+    Array.isArray(inventoryChanges) && inventoryChanges.length > 0;
+  const hasStorehouseChanges =
+    Array.isArray(storehouseChanges) && storehouseChanges.length > 0;
   const hasSessions = Array.isArray(sessions) && sessions.length > 0;
 
   if (hasInventoryChanges) {
@@ -306,7 +328,9 @@ async function importPayload({ domain, raw, meta = {} } = {}) {
   }
 
   // step 6: (optional) HUB EXPORT
-  const needsHubExport = settings.autoExportToHub && (hasInventoryChanges || hasStorehouseChanges || hasSessions);
+  const needsHubExport =
+    settings.autoExportToHub &&
+    (hasInventoryChanges || hasStorehouseChanges || hasSessions);
   if (needsHubExport) {
     await exportToHubIfEnabled(
       {

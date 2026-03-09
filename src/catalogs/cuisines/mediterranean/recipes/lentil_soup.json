@@ -1,0 +1,318 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.mediterranean.recipes.lentil_soup",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Mediterranean Lentil Soup (Lemony Herb)",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalog",
+      "notes": [
+        "Deterministic Mediterranean-style lentil soup baseline: olive oil + aromatics + herbs + lemon finish.",
+        "Designed to be pantry-friendly and weeknight reliable; supports optional tomato and greens."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.mediterranean",
+    "category": "soup",
+    "mealArchetypes": ["soup", "stew_light", "weeknight", "make_ahead"],
+    "servingStyles": ["bowl", "family_style"],
+    "plannerTags": [
+      "cuisine.mediterranean",
+      "soup",
+      "lentils",
+      "plant_protein",
+      "olive_oil_forward",
+      "lemon_finish",
+      "herb_forward",
+      "make_ahead",
+      "budget_friendly"
+    ]
+  },
+
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 360, "unit": "ml" },
+    "notes": "Makes ~2.2 liters (about 9 cups)."
+  },
+
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 40,
+    "totalMins": 60
+  },
+
+  "difficulty": "beginner",
+
+  "equipment": {
+    "minimum": ["large_pot_with_lid", "cutting_board", "knife", "wooden_spoon"],
+    "recommended": [
+      "citrus_juicer",
+      "fine_mesh_strainer",
+      "immersion_blender_optional"
+    ],
+    "optional": ["blender"]
+  },
+
+  "dietFlags": ["vegan", "vegetarian", "dairy_free", "gluten_free"],
+  "allergens": [],
+
+  "keywords": [
+    "lentil soup",
+    "Mediterranean",
+    "lemon",
+    "olive oil",
+    "parsley",
+    "cumin",
+    "weeknight soup",
+    "plant protein"
+  ],
+
+  "tags": [
+    "cuisine.mediterranean",
+    "soup",
+    "method.simmer",
+    "flavor.lemon",
+    "flavor.herb_forward",
+    "pantry",
+    "make_ahead"
+  ],
+
+  "signals": {
+    "profile": "olive_oil_lentil_lemon_herb",
+    "primaryFat": "olive_oil",
+    "acid": "lemon",
+    "protein": "lentils",
+    "techniqueCore": ["saute_aromatics", "simmer", "finish_with_lemon_herbs"],
+    "pairingCore": ["pita", "salad", "roasted_vegetables", "hummus"]
+  },
+
+  "ingredients": [
+    {
+      "id": "ingredients.lentils",
+      "label": "Brown or green lentils, rinsed and picked over",
+      "amount": { "value": 320, "unit": "g" },
+      "notes": "About 1 1/2 cups dry lentils."
+    },
+    {
+      "id": "ingredients.olive_oil",
+      "label": "Extra-virgin olive oil",
+      "amount": { "value": 45, "unit": "ml" },
+      "notes": "Plus more for serving (optional)."
+    },
+    {
+      "id": "ingredients.onion",
+      "label": "Onion, diced",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "About 1 medium."
+    },
+    {
+      "id": "ingredients.carrot",
+      "label": "Carrot, diced",
+      "amount": { "value": 150, "unit": "g" },
+      "notes": "About 2 medium."
+    },
+    {
+      "id": "ingredients.celery",
+      "label": "Celery, diced",
+      "amount": { "value": 120, "unit": "g" },
+      "optional": true,
+      "notes": "About 2 stalks. Optional but adds classic aromatic depth."
+    },
+    {
+      "id": "ingredients.garlic",
+      "label": "Garlic, minced",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": "About 3 cloves."
+    },
+    {
+      "id": "ingredients.tomato_paste",
+      "label": "Tomato paste",
+      "amount": { "value": 20, "unit": "g" },
+      "optional": true,
+      "notes": "Optional for deeper color and mild sweetness."
+    },
+    {
+      "id": "ingredients.cumin",
+      "label": "Ground cumin",
+      "amount": { "value": 3, "unit": "g" },
+      "notes": "About 1 tsp."
+    },
+    {
+      "id": "ingredients.coriander",
+      "label": "Ground coriander",
+      "amount": { "value": 2, "unit": "g" },
+      "optional": true,
+      "notes": "About 3/4 tsp. Optional."
+    },
+    {
+      "id": "ingredients.paprika",
+      "label": "Sweet paprika",
+      "amount": { "value": 2, "unit": "g" },
+      "optional": true,
+      "notes": "About 3/4 tsp. Optional."
+    },
+    {
+      "id": "ingredients.bay_leaf",
+      "label": "Bay leaf",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "ingredients.vegetable_broth",
+      "label": "Vegetable broth (or water + bouillon)",
+      "amount": { "value": 1650, "unit": "ml" },
+      "notes": "About 7 cups."
+    },
+    {
+      "id": "ingredients.salt",
+      "label": "Fine salt",
+      "amount": { "value": 7, "unit": "g" },
+      "notes": "Start here; adjust after simmering. (Broth saltiness varies.)"
+    },
+    {
+      "id": "ingredients.black_pepper",
+      "label": "Black pepper",
+      "amount": { "value": 1, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredients.lemon",
+      "label": "Lemon juice",
+      "amount": { "value": 60, "unit": "ml" },
+      "notes": "About 1–2 lemons; add to taste at the end."
+    },
+    {
+      "id": "ingredients.lemon_zest",
+      "label": "Lemon zest",
+      "amount": { "value": 2, "unit": "g" },
+      "optional": true,
+      "notes": "Optional but highly recommended for aroma."
+    },
+    {
+      "id": "ingredients.parsley",
+      "label": "Flat-leaf parsley, chopped",
+      "amount": { "value": 20, "unit": "g" },
+      "notes": "About 1/2 cup loosely packed."
+    },
+    {
+      "id": "ingredients.mint",
+      "label": "Fresh mint, chopped (optional)",
+      "amount": { "value": 4, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredients.spinach",
+      "label": "Spinach or chopped kale (optional)",
+      "amount": { "value": 80, "unit": "g" },
+      "optional": true,
+      "notes": "Stir in at the end until wilted."
+    },
+    {
+      "id": "ingredients.red_wine_vinegar",
+      "label": "Red wine vinegar (optional, for extra brightness)",
+      "amount": { "value": 10, "unit": "ml" },
+      "optional": true,
+      "notes": "Use if lemons are mild."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_prep_and_rinse",
+      "title": "Prep and rinse lentils",
+      "body": "Rinse lentils in a fine-mesh strainer and pick out any stones or debris. Dice onion, carrot (and celery if using). Mince garlic. Juice lemon and chop herbs.",
+      "notes": "Keeping the dice fairly small helps the soup feel cohesive."
+    },
+    {
+      "id": "step_02_saute_aromatics",
+      "title": "Sauté aromatics in olive oil",
+      "body": "Heat olive oil in a large pot over medium heat. Add onion, carrot, and celery (optional). Cook 6–8 minutes until softened and lightly glossy. Add garlic and cook 30 seconds until fragrant.",
+      "timers": [
+        { "label": "Sauté aromatics", "seconds": 480 },
+        { "label": "Garlic bloom", "seconds": 30 }
+      ]
+    },
+    {
+      "id": "step_03_bloom_spices",
+      "title": "Bloom spices (and tomato paste if using)",
+      "body": "Add cumin, coriander (optional), paprika (optional), and tomato paste (optional). Stir 30–45 seconds to bloom spices and coat vegetables.",
+      "timers": [{ "label": "Bloom spices", "seconds": 45 }]
+    },
+    {
+      "id": "step_04_simmer_lentils",
+      "title": "Simmer until lentils are tender",
+      "body": "Add lentils, broth, salt, pepper (optional), and bay leaf (optional). Bring to a gentle boil, then reduce to a steady simmer. Cover partially and cook 30–40 minutes, stirring occasionally, until lentils are tender but not mushy.",
+      "timers": [{ "label": "Simmer", "seconds": 2400 }]
+    },
+    {
+      "id": "step_05_adjust_texture_optional_blend",
+      "title": "Adjust texture (optional blending)",
+      "body": "For a creamier soup: remove bay leaf, then blend 1–2 cups of soup and return to the pot (or use an immersion blender for a few quick pulses). For a brothy soup: skip blending. If soup is too thick, add a splash of hot water/broth.",
+      "notes": "Blending a portion increases body without dairy."
+    },
+    {
+      "id": "step_06_finish_with_lemon_and_herbs",
+      "title": "Finish with lemon + herbs",
+      "body": "Turn off heat. Stir in lemon juice (start with half, then add more to taste), lemon zest (optional), parsley, and mint (optional). Add greens (optional) and stir until wilted. Taste and adjust salt/pepper. Add a small splash of red wine vinegar (optional) if you want extra brightness.",
+      "notes": "Add lemon off heat to keep the flavor fresh and fragrant."
+    },
+    {
+      "id": "step_07_serve",
+      "title": "Serve",
+      "body": "Ladle into bowls. Drizzle with extra olive oil if desired. Serve with pita/flatbread, a crisp salad, or roasted vegetables."
+    }
+  ],
+
+  "storage": {
+    "refrigerate": {
+      "maxDays": 5,
+      "container": "airtight",
+      "notes": "Soup thickens as it sits; add water/broth when reheating."
+    },
+    "freeze": {
+      "maxMonths": 3,
+      "notes": "Cool completely before freezing. Thaw overnight in fridge; reheat gently."
+    }
+  },
+
+  "variations": [
+    {
+      "id": "variation_tomato_lemon",
+      "title": "Tomato + lemon lentil soup",
+      "changes": [
+        "Use tomato paste and add 200 g diced tomatoes during simmer.",
+        "Increase cumin slightly and add a pinch of oregano."
+      ]
+    },
+    {
+      "id": "variation_greekish_oregano",
+      "title": "Oregano-forward finish",
+      "changes": [
+        "Add 1–2 g dried oregano during simmer.",
+        "Finish with lemon + parsley; skip cumin if you prefer a cleaner herb profile."
+      ]
+    },
+    {
+      "id": "variation_spicy",
+      "title": "Spicy version",
+      "changes": [
+        "Add 0.5–1 g red pepper flakes with garlic.",
+        "Finish with lemon and a drizzle of olive oil."
+      ]
+    }
+  ],
+
+  "notes": [
+    "Lemon is the signature finish: add it off-heat and adjust gradually.",
+    "If using red lentils, reduce simmer time to ~18–25 minutes (they break down more and will be thicker).",
+    "Pairs well with: tabbouleh, hummus, roasted_vegetables_olive_oil, or baked fish for a full Mediterranean meal."
+  ]
+}

@@ -1,0 +1,321 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "meta": {
+    "id": "cuisines.nigerian.egusi_soup",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Egusi Soup",
+    "description": "Classic Nigerian egusi soup: rich, nutty melon-seed base with palm oil, aromatics, and leafy greens. Built for swallow (fufu/pounded yam/eba) or rice.",
+    "tags": [
+      "cuisine.nigerian",
+      "course.main",
+      "soup.stew",
+      "stew.thick",
+      "protein.flexible",
+      "palm_oil",
+      "weekend.cook",
+      "freezer.friendly"
+    ],
+    "source": {
+      "curation": "ssa",
+      "author": "Suka Smart Assistant",
+      "reference": "Traditional method; standardized for SSA catalog.",
+      "url": ""
+    }
+  },
+  "summary": "Classic Nigerian egusi soup with a rich, nutty melon-seed base thickened in palm oil and stock, finished with greens and optional smoked/dried fish for deep umami.",
+  "yields": {
+    "servings": 6,
+    "makes": "About 2.5–3 quarts (10–12 cups)"
+  },
+  "difficulty": "intermediate",
+  "time": {
+    "prepMinutes": 25,
+    "cookMinutes": 65,
+    "totalMinutes": 90
+  },
+  "diet": {
+    "suitableFor": ["gluten_free"],
+    "notes": [
+      "To keep gluten-free, serve with gluten-free swallow options and confirm bouillon is GF."
+    ]
+  },
+  "allergens": ["fish", "shellfish"],
+  "safety": {
+    "notes": [
+      "If using dried fish/stockfish, rinse thoroughly and pick out bones before serving.",
+      "Bring soup to a simmer long enough to heat through and keep hot foods above 140°F (60°C) for holding."
+    ]
+  },
+  "ingredientGroups": [
+    {
+      "id": "group.proteins",
+      "label": "Proteins (choose your mix)",
+      "ingredients": [
+        {
+          "id": "ingredient.beef_stew_meat",
+          "label": "Beef stew meat, cut into bite-size pieces",
+          "amount": {
+            "value": 680,
+            "unit": "g"
+          },
+          "notes": ["Sub: goat meat or a mix of beef + goat."]
+        },
+        {
+          "id": "ingredient.stockfish",
+          "label": "Stockfish, pre-soaked and rinsed",
+          "amount": {
+            "value": 115,
+            "unit": "g"
+          },
+          "notes": ["Optional but classic; soak until pliable."]
+        },
+        {
+          "id": "ingredient.dried_fish",
+          "label": "Smoked or dried fish, rinsed",
+          "amount": {
+            "value": 85,
+            "unit": "g"
+          },
+          "notes": ["Optional; adds smoky depth. Pick bones carefully."]
+        }
+      ]
+    },
+    {
+      "id": "group.egusi_base",
+      "label": "Egusi base",
+      "ingredients": [
+        {
+          "id": "ingredient.egusi_ground",
+          "label": "Egusi (ground melon seeds)",
+          "amount": {
+            "value": 300,
+            "unit": "g"
+          },
+          "notes": [
+            "If whole seeds, grind fine (not oily paste) for best thickening."
+          ]
+        },
+        {
+          "id": "ingredient.onion_yellow",
+          "label": "Yellow onion, finely chopped",
+          "amount": {
+            "value": 200,
+            "unit": "g"
+          }
+        },
+        {
+          "id": "ingredient.pepper_blend",
+          "label": "Pepper blend (scotch bonnet/habanero + red bell pepper), blended",
+          "amount": {
+            "value": 240,
+            "unit": "g"
+          },
+          "notes": ["Adjust heat to preference."]
+        },
+        {
+          "id": "ingredient.palm_oil",
+          "label": "Red palm oil",
+          "amount": {
+            "value": 180,
+            "unit": "ml"
+          },
+          "notes": ["Add up to 240 ml for a richer, more traditional finish."]
+        },
+        {
+          "id": "ingredient.crayfish_ground",
+          "label": "Ground crayfish",
+          "amount": {
+            "value": 20,
+            "unit": "g"
+          },
+          "notes": ["Optional but adds deep savoriness."]
+        },
+        {
+          "id": "ingredient.iru_locust_beans",
+          "label": "Iru (locust beans)",
+          "amount": {
+            "value": 15,
+            "unit": "g"
+          },
+          "notes": ["Optional; rinse briefly to mellow intensity."]
+        }
+      ]
+    },
+    {
+      "id": "group.stock_seasoning_greens",
+      "label": "Stock, seasoning, and greens",
+      "ingredients": [
+        {
+          "id": "ingredient.beef_stock",
+          "label": "Beef stock (or water + meat stock)",
+          "amount": {
+            "value": 1200,
+            "unit": "ml"
+          },
+          "notes": ["Start with 900 ml and add as needed to control thickness."]
+        },
+        {
+          "id": "ingredient.salt",
+          "label": "Salt",
+          "amount": {
+            "value": 6,
+            "unit": "g"
+          },
+          "notes": ["Add gradually; stocks and bouillon vary."]
+        },
+        {
+          "id": "ingredient.bouillon_powder",
+          "label": "Bouillon powder or cubes (crumbled)",
+          "amount": {
+            "value": 6,
+            "unit": "g"
+          },
+          "notes": ["Optional; use to taste."]
+        },
+        {
+          "id": "ingredient.ogiri_optional",
+          "label": "Ogiri (fermented seasoning), optional",
+          "amount": {
+            "value": 5,
+            "unit": "g"
+          },
+          "notes": ["Very pungent; optional."]
+        },
+        {
+          "id": "ingredient.spinach",
+          "label": "Spinach (or ugu/fluted pumpkin leaves), chopped",
+          "amount": {
+            "value": 200,
+            "unit": "g"
+          },
+          "notes": [
+            "If using tougher greens, blanch briefly and squeeze dry before adding."
+          ]
+        }
+      ]
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "ingredient.water_optional",
+      "label": "Water (as needed to adjust consistency)",
+      "amount": {
+        "value": 500,
+        "unit": "ml"
+      },
+      "notes": ["Use only if needed; prefer stock for flavor."]
+    }
+  ],
+  "methods": ["simmer", "stew", "bloom_in_oil"],
+  "compat": {
+    "equipmentRequired": [
+      "pot.dutch_oven",
+      "knife.chef",
+      "cutting_board",
+      "spoon.wooden",
+      "blender"
+    ],
+    "appliancesOptional": ["pressure_cooker"],
+    "utensilsOptional": ["strainer", "ladle"],
+    "notes": ["Pressure cooker can reduce meat tenderizing time significantly."]
+  },
+  "steps": [
+    {
+      "id": "step.prep_fish",
+      "title": "Prep stockfish and dried fish",
+      "body": "If using stockfish, soak in warm water until pliable, then rinse well. Rinse smoked/dried fish and pick out obvious bones. Set aside."
+    },
+    {
+      "id": "step.cook_meat",
+      "title": "Cook meat until tender and flavorful",
+      "body": "In a heavy pot, add beef (or goat), onion (half), salt (a pinch), and enough stock/water to barely cover. Simmer covered until tender, 35–55 minutes depending on cut. Add stockfish during the last 20 minutes so it softens and flavors the broth.",
+      "timers": [
+        {
+          "id": "timer.meat_simmer",
+          "label": "Simmer meat until tender",
+          "minutes": 45
+        }
+      ]
+    },
+    {
+      "id": "step.make_egusi_mix",
+      "title": "Make egusi mixture",
+      "body": "In a bowl, combine ground egusi with a portion of the pepper blend (about 1/3) and enough warm stock to form a thick, scoopable paste. This helps reduce lumps and speeds thickening."
+    },
+    {
+      "id": "step.bloom_oil",
+      "title": "Bloom aromatics in palm oil",
+      "body": "Push cooked meat to the side (or briefly remove to a bowl). Add palm oil to the pot and warm over medium heat until it shimmers. Add remaining onion and cook 3–5 minutes. Stir in the remaining pepper blend and cook until the raw smell softens and the oil begins to separate slightly, 6–10 minutes.",
+      "timers": [
+        {
+          "id": "timer.pepper_bloom",
+          "label": "Cook pepper in palm oil",
+          "minutes": 8
+        }
+      ]
+    },
+    {
+      "id": "step.add_egusi",
+      "title": "Add egusi and build the stew body",
+      "body": "Reduce heat to medium-low. Add the egusi paste in small spoonfuls across the surface (don’t dump in one lump). Let it set 2–3 minutes, then gently stir to break up and distribute. Add more stock as needed for a thick stew consistency. Simmer uncovered 10–15 minutes, stirring occasionally so it doesn’t stick.",
+      "timers": [
+        {
+          "id": "timer.egusi_thicken",
+          "label": "Simmer to thicken",
+          "minutes": 12
+        }
+      ]
+    },
+    {
+      "id": "step.season_umami",
+      "title": "Season and add umami ingredients",
+      "body": "Stir in ground crayfish and iru (if using). Add bouillon to taste. Add smoked/dried fish now (if using). Simmer 8–10 minutes to marry flavors and gently heat fish through."
+    },
+    {
+      "id": "step.finish_greens",
+      "title": "Finish with greens",
+      "body": "Stir in chopped spinach (or ugu). Cook just until wilted and bright, 2–4 minutes. Taste and adjust salt, pepper heat, and thickness (add stock/water a splash at a time)."
+    },
+    {
+      "id": "step.serve",
+      "title": "Serve",
+      "body": "Serve hot with pounded yam, eba, fufu, amala, or rice. For meal prep, cool quickly and refrigerate up to 4 days or freeze up to 3 months."
+    }
+  ],
+  "notes": [
+    "Why this works: Egusi emulsifies with stock and palm oil to create a naturally thick, luxurious stew.",
+    "Flavor tips: Bloom pepper in palm oil to deepen aroma and reduce raw heat edge.",
+    "Greens tip: Add greens at the end to keep color and freshness.",
+    "Pairings: pounded yam, eba (garri), amala, fufu, white rice.",
+    "Texture control: For a looser soup, add extra stock; for thicker, simmer uncovered longer and stir gently.",
+    "Egusi lumps: Adding egusi in spoonfuls and letting it set briefly before stirring minimizes clumping.",
+    "If using dried fish/stockfish: rinse well and pick bones carefully before serving."
+  ],
+  "variations": [
+    {
+      "id": "variation.goat_forward",
+      "label": "Goat-forward egusi",
+      "notes": [
+        "Use 900 g goat meat; simmer longer until tender and increase stock to maintain stew consistency."
+      ]
+    },
+    {
+      "id": "variation.vegetarian",
+      "label": "Vegetarian egusi",
+      "notes": [
+        "Omit meat and fish; use mushroom stock, add sautéed mushrooms, and replace smoky depth with smoked paprika plus iru/ogiri (optional)."
+      ]
+    },
+    {
+      "id": "variation.party_rich",
+      "label": "Party-rich egusi",
+      "notes": [
+        "Increase palm oil to 240 ml, add assorted meats (shaki/tripe, cow foot), and simmer longer for a deeper, more luxurious stew."
+      ]
+    }
+  ]
+}

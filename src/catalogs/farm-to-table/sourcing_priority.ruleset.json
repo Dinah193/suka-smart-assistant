@@ -1,0 +1,502 @@
+{
+  "$schema": "../../schemas/ruleset.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-24T00:00:00.000Z",
+  "kind": "ruleset",
+  "meta": {
+    "id": "farm_to_table.sourcing_priority",
+    "type": "ruleset",
+    "label": "Farm-to-Table • Sourcing Priority Rules",
+    "status": "canonical",
+    "source": {
+      "kind": "catalog",
+      "name": "src/catalogs/farm-to-table/sourcing_priority.ruleset.json",
+      "notes": [
+        "Deterministic scoring rules to prefer ingredients/components sourced from household production, preserved stores, local farms, then retail.",
+        "Intended for planners/resolvers that choose between candidate components/items with equivalent role fit."
+      ]
+    }
+  },
+  "scope": {
+    "kind": "module",
+    "locales": ["en-US"]
+  },
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true,
+    "tokens": {
+      "stopWords": [
+        "a",
+        "an",
+        "the",
+        "and",
+        "or",
+        "of",
+        "to",
+        "for",
+        "with",
+        "in",
+        "on"
+      ]
+    },
+    "ingredientAliases": {},
+    "dishAliases": {},
+    "equipmentAliases": {},
+    "methodAliases": {}
+  },
+  "globals": {
+    "module": "farm_to_table.sourcing_priority",
+    "engineHints": {
+      "purpose": [
+        "Used as a scoring layer. Actions adjust $.score (number) and attach planner tags/hints.",
+        "Expected evaluation context includes: $.candidate (component/item), $.inventory (optional), $.planner (optional), $.ui (optional)."
+      ],
+      "contextPaths": {
+        "candidate": "$.candidate",
+        "candidateTags": "$.candidate.tags",
+        "candidateSourceKind": "$.candidate.source.kind",
+        "candidateReadiness": "$.candidate.readiness",
+        "candidateOrigin": "$.candidate.origin",
+        "candidateStorage": "$.candidate.storage",
+        "candidateSeasonality": "$.candidate.seasonality",
+        "plannerMode": "$.planner.mode",
+        "plannerGoal": "$.planner.goal",
+        "plannerTimeBudgetMins": "$.planner.timeBudgetMins"
+      },
+      "candidateConventions": [
+        "candidate.tags: string[] should include signals like source.homegrown, source.preserved, source.local, source.retail.",
+        "candidate.source.kind may be one of: homegrown|garden|animals|butchery|preserved|local_farm|co_op|retail|restaurant|unknown.",
+        "candidate.readiness may be: readiness.raw|readiness.cleaned|readiness.prepped|readiness.cooked|readiness.parcooked|readiness.preserved_shelf_stable|readiness.preserved_frozen."
+      ],
+      "scoring": {
+        "base": 0,
+        "clamp": { "min": -500, "max": 500 }
+      }
+    },
+    "defaults": {
+      "score": 0,
+      "notes": [],
+      "selected": false
+    }
+  },
+  "rules": [
+    {
+      "id": "sourcing.base_init_score",
+      "enabled": true,
+      "priority": 0,
+      "title": "Initialize score if missing",
+      "description": "Ensures $.score is present before applying priority adjustments.",
+      "tags": ["sourcing", "baseline"],
+      "source": "farm_to_table.sourcing_priority",
+      "stopOnMatch": false,
+      "when": {
+        "op": "not",
+        "conditions": [{ "type": "exists", "path": "$.score" }]
+      },
+      "then": {
+        "actions": [
+          { "type": "set", "path": "$.score", "value": 0 },
+          { "type": "addTag", "value": "sourcing.score.init" }
+        ]
+      }
+    },
+
+    {
+      "id": "sourcing.prefer_homegrown_tag",
+      "enabled": true,
+      "priority": 10,
+      "title": "Prefer homegrown items",
+      "description": "Strongly prefer items tagged source.homegrown (garden/animals/butchery).",
+      "tags": ["sourcing", "homegrown"],
+      "source": "farm_to_table.sourcing_priority",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "$.candidate.tags",
+        "values": ["source.homegrown"]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 160 },
+          { "type": "addTag", "value": "sourcing.prefer.homegrown" }
+        ]
+      }
+    },
+
+    {
+      "id": "sourcing.prefer_preserved_tag",
+      "enabled": true,
+      "priority": 20,
+      "title": "Prefer household preserved stores",
+      "description": "Prefer items tagged source.preserved (canned, frozen, dehydrated, fermented) from household stores.",
+      "tags": ["sourcing", "preserved"],
+      "source": "farm_to_table.sourcing_priority",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "$.candidate.tags",
+        "values": ["source.preserved"]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 120 },
+          { "type": "addTag", "value": "sourcing.prefer.preserved" }
+        ]
+      }
+    },
+
+    {
+      "id": "sourcing.prefer_local_farm_tag",
+      "enabled": true,
+      "priority": 30,
+      "title": "Prefer local farm / co-op",
+      "description": "Prefer local_farm/co_op sources when homegrown or preserved is not available.",
+      "tags": ["sourcing", "local"],
+      "source": "farm_to_table.sourcing_priority",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "$.candidate.tags",
+        "values": ["source.local", "source.co_op"]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 70 },
+          { "type": "addTag", "value": "sourcing.prefer.local" }
+        ]
+      }
+    },
+
+    {
+      "id": "sourcing.penalize_retail_tag",
+      "enabled": true,
+      "priority": 40,
+      "title": "De-prioritize retail",
+      "description": "Slightly penalize retail when other sources exist.",
+      "tags": ["sourcing", "retail"],
+      "source": "farm_to_table.sourcing_priority",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "$.candidate.tags",
+        "values": ["source.retail"]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": -20 },
+          { "type": "addTag", "value": "sourcing.penalty.retail" }
+        ]
+      }
+    },
+
+    {
+      "id": "sourcing.penalize_restaurant_or_takeout",
+      "enabled": true,
+      "priority": 45,
+      "title": "De-prioritize restaurant/takeout",
+      "description": "Strongly penalize restaurant/takeout sources for farm-to-table planning unless explicitly requested.",
+      "tags": ["sourcing", "restaurant"],
+      "source": "farm_to_table.sourcing_priority",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "$.candidate.tags",
+        "values": ["source.restaurant", "source.takeout"]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": -120 },
+          { "type": "addTag", "value": "sourcing.penalty.restaurant" }
+        ]
+      }
+    },
+
+    {
+      "id": "sourcing.boost_in_season",
+      "enabled": true,
+      "priority": 60,
+      "title": "Boost in-season produce",
+      "description": "If candidate has seasonality.in_season, boost score.",
+      "tags": ["sourcing", "seasonality"],
+      "source": "farm_to_table.sourcing_priority",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "$.candidate.tags",
+        "values": ["seasonality.in_season"]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 35 },
+          { "type": "addTag", "value": "sourcing.boost.in_season" }
+        ]
+      }
+    },
+
+    {
+      "id": "sourcing.penalize_out_of_season",
+      "enabled": true,
+      "priority": 61,
+      "title": "Penalize out-of-season",
+      "description": "If candidate has seasonality.out_of_season, penalize score (unless preserved).",
+      "tags": ["sourcing", "seasonality"],
+      "source": "farm_to_table.sourcing_priority",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.candidate.tags",
+            "values": ["seasonality.out_of_season"]
+          },
+          {
+            "op": "not",
+            "conditions": [
+              {
+                "type": "intersects",
+                "path": "$.candidate.tags",
+                "values": ["source.preserved"]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": -35 },
+          { "type": "addTag", "value": "sourcing.penalty.out_of_season" }
+        ]
+      }
+    },
+
+    {
+      "id": "sourcing.boost_low_waste_storage",
+      "enabled": true,
+      "priority": 70,
+      "title": "Boost shelf-stable or freezer-stable items",
+      "description": "Boost items that reduce spoilage risk (shelf-stable/frozen preserved).",
+      "tags": ["sourcing", "storage", "waste_reduction"],
+      "source": "farm_to_table.sourcing_priority",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "$.candidate.tags",
+        "values": [
+          "storage.shelf_stable",
+          "storage.frozen",
+          "storage.root_cellar"
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 18 },
+          { "type": "addTag", "value": "sourcing.boost.storage" }
+        ]
+      }
+    },
+
+    {
+      "id": "sourcing.weeknight_bias_prepped_or_cooked",
+      "enabled": true,
+      "priority": 90,
+      "title": "Weeknight bias: prefer prepped/cooked",
+      "description": "When planner.mode=weeknight, boost candidates that are prepped/cooked/preserved.",
+      "tags": ["sourcing", "weeknight", "readiness"],
+      "source": "farm_to_table.sourcing_priority",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "eq", "path": "$.planner.mode", "value": "weeknight" },
+          {
+            "type": "intersects",
+            "path": "$.candidate.tags",
+            "values": [
+              "readiness.prepped",
+              "readiness.cooked",
+              "readiness.parcooked",
+              "readiness.preserved_shelf_stable",
+              "readiness.preserved_frozen"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 35 },
+          { "type": "addTag", "value": "sourcing.boost.weeknight.readiness" }
+        ]
+      }
+    },
+
+    {
+      "id": "sourcing.weeknight_penalty_raw_only",
+      "enabled": true,
+      "priority": 95,
+      "title": "Weeknight bias: penalize raw-only items",
+      "description": "When planner.mode=weeknight, penalize candidates that are only raw (no prep), unless marked quick_prep.",
+      "tags": ["sourcing", "weeknight", "readiness"],
+      "source": "farm_to_table.sourcing_priority",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "eq", "path": "$.planner.mode", "value": "weeknight" },
+          {
+            "type": "intersects",
+            "path": "$.candidate.tags",
+            "values": ["readiness.raw"]
+          },
+          {
+            "op": "not",
+            "conditions": [
+              {
+                "type": "intersects",
+                "path": "$.candidate.tags",
+                "values": ["prep.quick", "prep.low_effort"]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": -25 },
+          { "type": "addTag", "value": "sourcing.penalty.weeknight.raw" }
+        ]
+      }
+    },
+
+    {
+      "id": "sourcing.batch_day_bias_raw_or_bulk",
+      "enabled": true,
+      "priority": 110,
+      "title": "Batch day bias: boost raw/bulk candidates",
+      "description": "When planner.mode=batch_day, boost raw/cleaned/chopped candidates suitable for large prep.",
+      "tags": ["sourcing", "batch", "readiness"],
+      "source": "farm_to_table.sourcing_priority",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "eq", "path": "$.planner.mode", "value": "batch_day" },
+          {
+            "type": "intersects",
+            "path": "$.candidate.tags",
+            "values": [
+              "readiness.raw",
+              "readiness.cleaned",
+              "readiness.trimmed",
+              "readiness.chopped"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 20 },
+          { "type": "addTag", "value": "sourcing.boost.batch.raw" }
+        ]
+      }
+    },
+
+    {
+      "id": "sourcing.goal_reduce_spend_penalize_retail_more",
+      "enabled": true,
+      "priority": 140,
+      "title": "Goal: reduce spending → penalize retail more",
+      "description": "If planner.goal=reduce_spend, increase retail penalty.",
+      "tags": ["sourcing", "goal", "budget"],
+      "source": "farm_to_table.sourcing_priority",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "eq", "path": "$.planner.goal", "value": "reduce_spend" },
+          {
+            "type": "intersects",
+            "path": "$.candidate.tags",
+            "values": ["source.retail"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": -35 },
+          {
+            "type": "addTag",
+            "value": "sourcing.goal.reduce_spend.retail_penalty"
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "sourcing.goal_farm_to_table_boost_homegrown_preserved_local",
+      "enabled": true,
+      "priority": 150,
+      "title": "Goal: farm_to_table → boost homegrown/preserved/local",
+      "description": "If planner.goal=farm_to_table, further boost preferred sources.",
+      "tags": ["sourcing", "goal", "ftt"],
+      "source": "farm_to_table.sourcing_priority",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "eq", "path": "$.planner.goal", "value": "farm_to_table" },
+          {
+            "type": "intersects",
+            "path": "$.candidate.tags",
+            "values": [
+              "source.homegrown",
+              "source.preserved",
+              "source.local",
+              "source.co_op"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 25 },
+          { "type": "addTag", "value": "sourcing.goal.ftt.boost" }
+        ]
+      }
+    },
+
+    {
+      "id": "sourcing.final_clamp_low",
+      "enabled": true,
+      "priority": 900,
+      "title": "Clamp score low bound",
+      "description": "Optional clamp to keep score in a sane range.",
+      "tags": ["sourcing", "clamp"],
+      "source": "farm_to_table.sourcing_priority",
+      "stopOnMatch": false,
+      "when": { "type": "lt", "path": "$.score", "value": -500 },
+      "then": {
+        "actions": [{ "type": "set", "path": "$.score", "value": -500 }]
+      }
+    },
+
+    {
+      "id": "sourcing.final_clamp_high",
+      "enabled": true,
+      "priority": 901,
+      "title": "Clamp score high bound",
+      "description": "Optional clamp to keep score in a sane range.",
+      "tags": ["sourcing", "clamp"],
+      "source": "farm_to_table.sourcing_priority",
+      "stopOnMatch": false,
+      "when": { "type": "gt", "path": "$.score", "value": 500 },
+      "then": {
+        "actions": [{ "type": "set", "path": "$.score", "value": 500 }]
+      }
+    }
+  ]
+}

@@ -1,0 +1,433 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-16T00:00:00.000Z",
+  "meta": {
+    "id": "caribbean.curry_chicken",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Caribbean Curry Chicken",
+    "subtitle": "Trini/Jamaican-style curry chicken with potatoes + optional chickpeas",
+    "source": {
+      "kind": "curated",
+      "author": "SSA Canonical Catalog",
+      "origin": "caribbean",
+      "attribution": "Modeled from common Caribbean home-cooking patterns (Trinidad/Jamaica variants).",
+      "url": null
+    }
+  },
+
+  "classification": {
+    "cuisine": "caribbean",
+    "subprofiles": ["trini_tobago", "jamaican", "guyanese"],
+    "category": "main",
+    "mealArchetypes": ["stew_plus_starch_plus_acid"],
+    "servingStyles": ["family_style", "plated_meals", "holiday_feasts"],
+    "plannerTags": ["caribbean", "curry", "chicken", "stew", "batch"]
+  },
+
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 1, "unit": "bowl" },
+    "notes": "Designed to scale well for batch cooking."
+  },
+
+  "time": {
+    "activeMins": 30,
+    "totalMins": 90,
+    "handsOffMins": 55
+  },
+
+  "difficulty": 2,
+
+  "nutritionHints": {
+    "proteinForward": true,
+    "fiberForward": true,
+    "glutenFreeByDefault": true,
+    "dairyFreeByDefault": true
+  },
+
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": false,
+    "leftoversGood": true,
+    "freezerFriendly": true
+  },
+
+  "tasteProfile": {
+    "heatTypical": 3,
+    "heatScale": { "min": 0, "max": 5 },
+    "sweetness": 0,
+    "sourness": 1,
+    "saltiness": 2,
+    "umami": 2,
+    "signature": [
+      "toasted_curry_powder",
+      "garlic_ginger",
+      "thyme",
+      "scallion",
+      "scotch_bonnet_aroma"
+    ]
+  },
+
+  "equipment": {
+    "recommended": [
+      "heavy_pot_or_dutch_oven",
+      "tongs",
+      "cutting_board",
+      "chef_knife"
+    ],
+    "minimum": ["pot_with_lid", "stovetop"],
+    "optional": ["pressure_cooker", "thermometer"]
+  },
+
+  "dietFlags": ["dairy_free", "gluten_free"],
+  "allergens": [],
+
+  "ingredients": [
+    {
+      "id": "chicken_thighs_bone_in_skin_on",
+      "label": "Chicken thighs (bone-in, skin-on)",
+      "amount": { "value": 3.0, "unit": "lb" },
+      "role": "protein",
+      "notes": "Leg quarters also work. Boneless thighs shorten cook time."
+    },
+    {
+      "id": "lime_juice",
+      "label": "Lime juice",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "role": "acid",
+      "notes": "For washing/seasoning chicken (Caribbean practice)."
+    },
+    {
+      "id": "salt",
+      "label": "Salt",
+      "amount": { "value": 2, "unit": "tsp" },
+      "role": "seasoning",
+      "notes": "Adjust to taste; start lower if using salted stock."
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper",
+      "amount": { "value": 1, "unit": "tsp" },
+      "role": "seasoning"
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic (minced)",
+      "amount": { "value": 5, "unit": "clove" },
+      "role": "aromatic"
+    },
+    {
+      "id": "ginger",
+      "label": "Ginger (grated)",
+      "amount": { "value": 1.5, "unit": "tbsp" },
+      "role": "aromatic"
+    },
+    {
+      "id": "onion",
+      "label": "Onion (sliced)",
+      "amount": { "value": 1, "unit": "medium" },
+      "role": "aromatic"
+    },
+    {
+      "id": "scallion",
+      "label": "Scallions (chopped)",
+      "amount": { "value": 4, "unit": "stalk" },
+      "role": "aromatic"
+    },
+    {
+      "id": "thyme",
+      "label": "Thyme (fresh sprigs) or dried",
+      "amount": { "value": 6, "unit": "sprig" },
+      "role": "herb",
+      "notes": "If dried: 2 tsp."
+    },
+    {
+      "id": "curry_powder_caribbean",
+      "label": "Caribbean curry powder",
+      "amount": { "value": 3, "unit": "tbsp" },
+      "role": "spice",
+      "notes": "Trini curry powder is ideal; Madras can work with tweaks."
+    },
+    {
+      "id": "ground_cumin",
+      "label": "Ground cumin",
+      "amount": { "value": 1, "unit": "tsp" },
+      "role": "spice",
+      "optional": true
+    },
+    {
+      "id": "ground_coriander",
+      "label": "Ground coriander",
+      "amount": { "value": 1, "unit": "tsp" },
+      "role": "spice",
+      "optional": true
+    },
+    {
+      "id": "turmeric",
+      "label": "Turmeric",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "role": "spice",
+      "optional": true,
+      "notes": "Optional if your curry powder already has plenty."
+    },
+    {
+      "id": "scotch_bonnet",
+      "label": "Scotch bonnet (whole)",
+      "amount": { "value": 1, "unit": "each" },
+      "role": "heat",
+      "notes": "Keep whole for aroma; do NOT burst unless you want it hotter."
+    },
+    {
+      "id": "neutral_oil",
+      "label": "Neutral oil",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "role": "fat"
+    },
+    {
+      "id": "potatoes",
+      "label": "Potatoes (diced 1-inch)",
+      "amount": { "value": 1.5, "unit": "lb" },
+      "role": "starch",
+      "notes": "Yukon gold or red potatoes hold their shape best."
+    },
+    {
+      "id": "carrot",
+      "label": "Carrot (sliced)",
+      "amount": { "value": 2, "unit": "medium" },
+      "role": "veg",
+      "optional": true
+    },
+    {
+      "id": "bell_pepper",
+      "label": "Bell pepper (sliced)",
+      "amount": { "value": 1, "unit": "medium" },
+      "role": "veg",
+      "optional": true
+    },
+    {
+      "id": "tomato_paste",
+      "label": "Tomato paste",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "role": "base",
+      "optional": true,
+      "notes": "More common in some Jamaican-style versions."
+    },
+    {
+      "id": "stock_chicken_or_water",
+      "label": "Chicken stock or water",
+      "amount": { "value": 3.0, "unit": "cup" },
+      "role": "liquid",
+      "notes": "Start with 2.5 cups; add more if needed."
+    },
+    {
+      "id": "chickpeas",
+      "label": "Chickpeas (cooked/drained)",
+      "amount": { "value": 1.0, "unit": "cup" },
+      "role": "legume",
+      "optional": true,
+      "notes": "Optional but common in some households."
+    },
+    {
+      "id": "lime_wedges",
+      "label": "Lime wedges",
+      "amount": { "value": 1, "unit": "each" },
+      "role": "garnish",
+      "optional": true
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "prep_chicken",
+      "title": "Season the chicken",
+      "domain": "cooking",
+      "activeMins": 10,
+      "instructions": [
+        "Rinse or wipe chicken as preferred; pat dry.",
+        "Toss chicken with lime juice, salt, black pepper, half the garlic, and half the ginger.",
+        "Add scallions and thyme (reserve a little scallion for finishing if you want).",
+        "Rest 15–30 minutes (or refrigerate up to overnight for deeper flavor)."
+      ],
+      "timers": [{ "label": "Rest/Marinate", "mins": 20 }],
+      "inputs": {
+        "ingredients": [
+          "chicken_thighs_bone_in_skin_on",
+          "lime_juice",
+          "salt",
+          "black_pepper",
+          "garlic",
+          "ginger",
+          "scallion",
+          "thyme"
+        ],
+        "equipment": ["mixing_bowl"]
+      }
+    },
+    {
+      "id": "toast_curry",
+      "title": "Toast the curry",
+      "domain": "cooking",
+      "activeMins": 5,
+      "instructions": [
+        "Heat pot over medium heat; add oil.",
+        "Add curry powder (and optional cumin/coriander/turmeric).",
+        "Stir constantly 30–60 seconds until fragrant—do not burn.",
+        "Add remaining garlic/ginger; stir 15 seconds."
+      ],
+      "inputs": {
+        "ingredients": [
+          "neutral_oil",
+          "curry_powder_caribbean",
+          "ground_cumin",
+          "ground_coriander",
+          "turmeric",
+          "garlic",
+          "ginger"
+        ],
+        "equipment": ["pot_with_lid", "stovetop", "spoon"]
+      }
+    },
+    {
+      "id": "brown_chicken",
+      "title": "Brown the chicken",
+      "domain": "cooking",
+      "activeMins": 10,
+      "instructions": [
+        "Add chicken pieces to the pot in a single layer (work in batches if needed).",
+        "Brown 3–4 minutes per side to build flavor; you are not cooking through yet.",
+        "Add onion (and optional bell pepper). Stir 2 minutes."
+      ],
+      "inputs": {
+        "ingredients": [
+          "chicken_thighs_bone_in_skin_on",
+          "onion",
+          "bell_pepper"
+        ],
+        "equipment": ["tongs", "pot_with_lid", "stovetop"]
+      }
+    },
+    {
+      "id": "simmer",
+      "title": "Simmer until tender",
+      "domain": "cooking",
+      "activeMins": 5,
+      "handsOffMins": 45,
+      "instructions": [
+        "Stir in optional tomato paste (if using) for 30 seconds.",
+        "Add stock/water, potatoes, optional carrot, and whole scotch bonnet.",
+        "Bring to a gentle simmer, cover, and cook 35–50 minutes, stirring occasionally.",
+        "If using chickpeas, add during the last 15 minutes.",
+        "Uncover and simmer 5–10 minutes to thicken to a glossy curry sauce."
+      ],
+      "timers": [
+        { "label": "Covered simmer", "mins": 40 },
+        { "label": "Uncovered reduce", "mins": 8 }
+      ],
+      "inputs": {
+        "ingredients": [
+          "tomato_paste",
+          "stock_chicken_or_water",
+          "potatoes",
+          "carrot",
+          "scotch_bonnet",
+          "chickpeas"
+        ],
+        "equipment": ["pot_with_lid", "stovetop"]
+      }
+    },
+    {
+      "id": "finish",
+      "title": "Finish and serve",
+      "domain": "cooking",
+      "activeMins": 3,
+      "instructions": [
+        "Taste and adjust salt/pepper.",
+        "Remove scotch bonnet whole (unless you intentionally burst it for heat).",
+        "Serve with rice, roti, dumplings, or boiled provisions; add lime wedges if desired."
+      ],
+      "inputs": {
+        "ingredients": ["lime_wedges"],
+        "equipment": ["ladle"]
+      }
+    }
+  ],
+
+  "pairings": {
+    "starches": [
+      "caribbean.rice_and_peas",
+      "caribbean.black_beans_and_rice",
+      "rice",
+      "roti",
+      "dumplings"
+    ],
+    "vegSides": ["caribbean.callaloo", "cabbage_slaw", "greens", "salad"],
+    "condiments": ["caribbean.pikliz", "pepper_sauce", "lime_juice"],
+    "drinks": ["caribbean.ginger_beer", "caribbean.sorrel_drink"]
+  },
+
+  "adaptations": [
+    {
+      "id": "caribbean.curry_chicken.pressure",
+      "label": "Pressure Cooker Curry Chicken",
+      "when": { "hasEquipmentAll": ["pressure_cooker"] },
+      "adapt": {
+        "method": "pressure_cook_then_reduce",
+        "notes": "Toast curry + brown chicken first. Pressure cook 10–12 min (bone-in), quick release, then reduce sauce uncovered."
+      }
+    },
+    {
+      "id": "caribbean.curry_chicken.weeknight_shortcut",
+      "label": "Weeknight Shortcut (boneless)",
+      "when": { "timeMaxTotalMins": 45 },
+      "adapt": {
+        "swapProtein": "chicken_thighs_boneless",
+        "notes": "Use boneless thighs and smaller potato dice; simmer 18–25 min."
+      }
+    },
+    {
+      "id": "caribbean.curry_chicken.low_heat",
+      "label": "Lower Heat Version",
+      "when": { "tasteMaxHeat": 2 },
+      "adapt": {
+        "reduceHeat": true,
+        "notes": "Use 1/2 scotch bonnet (or remove seeds) and keep it whole; add mild sweet pepper instead."
+      }
+    }
+  ],
+
+  "storage": {
+    "fridge": {
+      "safeDays": 4,
+      "notes": "Cool quickly; reheat to steaming hot."
+    },
+    "freezer": {
+      "safeMonths": 3,
+      "notes": "Freeze in flat bags or portion containers. Thaw overnight."
+    },
+    "reheat": {
+      "methods": ["stovetop_simmer", "microwave"],
+      "notes": "Add a splash of water/stock when reheating to loosen sauce."
+    }
+  },
+
+  "planner": {
+    "defaultSlot": "dinner",
+    "batchPlanHints": {
+      "goodForBatch": true,
+      "prepTasks": [
+        "Chop onion/pepper/carrot",
+        "Measure curry spices",
+        "Dice potatoes",
+        "Portion chicken"
+      ],
+      "makeAhead": [
+        "Season chicken (up to overnight)",
+        "Pre-chop aromatics",
+        "Pre-mix curry spice blend"
+      ]
+    }
+  }
+}

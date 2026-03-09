@@ -39,7 +39,7 @@ const ISO = () => new Date().toISOString();
 let eventBus;
 try {
   // expected default export: { emit({type, ts, source, data}) }
-  eventBus = require("../../services/eventBus.js").default;
+  eventBus = require("../../services/events/eventBus.js").default;
 } catch {
   eventBus = { emit: () => {} };
 }
@@ -54,14 +54,18 @@ try {
 
 let featureFlags = { familyFundMode: false };
 try {
-  featureFlags = require("../../services/featureFlags.js");
-} catch { /* noop */ }
+  featureFlags = require("@/config/featureFlags.json");
+} catch {
+  /* noop */
+}
 
 // -------------------- Utilities ---------------------------------------------
 function emitStore(type, data) {
   try {
     eventBus.emit({ type, ts: ISO(), source: "SessionStore", data });
-  } catch { /* noop */ }
+  } catch {
+    /* noop */
+  }
 }
 
 function normalizeSession(s = {}) {
@@ -73,7 +77,12 @@ function normalizeSession(s = {}) {
     steps: [],
     prefs: { voiceGuidance: true, haptic: true, autoAdvance: false },
     status: "pending",
-    progress: { currentStepIndex: 0, elapsedSec: 0, startedAt: null, pausedAt: null },
+    progress: {
+      currentStepIndex: 0,
+      elapsedSec: 0,
+      startedAt: null,
+      pausedAt: null,
+    },
     analytics: { skippedSteps: [], adjustments: [] },
     createdAt: ISO(),
     updatedAt: ISO(),
@@ -82,11 +91,16 @@ function normalizeSession(s = {}) {
   out.prefs = { ...base.prefs, ...(s.prefs || {}) };
   out.progress = { ...base.progress, ...(s.progress || {}) };
   out.analytics = {
-    skippedSteps: Array.isArray(s?.analytics?.skippedSteps) ? s.analytics.skippedSteps : [],
-    adjustments: Array.isArray(s?.analytics?.adjustments) ? s.analytics.adjustments : [],
+    skippedSteps: Array.isArray(s?.analytics?.skippedSteps)
+      ? s.analytics.skippedSteps
+      : [],
+    adjustments: Array.isArray(s?.analytics?.adjustments)
+      ? s.analytics.adjustments
+      : [],
   };
   out.steps = Array.isArray(s.steps) ? s.steps : [];
-  if (!out.id || typeof out.id !== "string") throw new Error("Session must have a string id");
+  if (!out.id || typeof out.id !== "string")
+    throw new Error("Session must have a string id");
   return out;
 }
 
@@ -97,13 +111,22 @@ function sortByUpdatedDesc(a, b) {
 // -------------------- In-memory fallback ------------------------------------
 const memory = new Map(); // id -> session
 const memApi = {
-  async put(s) { memory.set(s.id, s); return s.id; },
-  async get(id) { return memory.get(id) || null; },
-  async delete(id) { memory.delete(id); },
+  async put(s) {
+    memory.set(s.id, s);
+    return s.id;
+  },
+  async get(id) {
+    return memory.get(id) || null;
+  },
+  async delete(id) {
+    memory.delete(id);
+  },
   async whereDomain(domain) {
     return Array.from(memory.values()).filter((x) => x.domain === domain);
   },
-  async all() { return Array.from(memory.values()); },
+  async all() {
+    return Array.from(memory.values());
+  },
 };
 
 // -------------------- Dexie helpers -----------------------------------------
@@ -118,7 +141,9 @@ async function ensureSchema() {
   try {
     // Dexie allows versioned upgrades; bumping dynamically is supported.
     // We only add the store if it doesn't exist.
-    const tables = Object.keys(db?.tables?.reduce?.((acc, t) => ((acc[t.name] = 1), acc), {}) || {});
+    const tables = Object.keys(
+      db?.tables?.reduce?.((acc, t) => ((acc[t.name] = 1), acc), {}) || {}
+    );
     const hasSessions = tables.includes("sessions") || !!db.sessions;
 
     if (!hasSessions) {
@@ -142,7 +167,9 @@ async function table() {
   if (ok && db?.sessions) return db.sessions;
   // Fallback to memory
   if (!SessionStore._warnedFallback) {
-    console.warn("[SessionStore] Dexie unavailable — using in-memory fallback (non-persistent).");
+    console.warn(
+      "[SessionStore] Dexie unavailable — using in-memory fallback (non-persistent)."
+    );
     SessionStore._warnedFallback = true;
   }
   return null;
@@ -160,7 +187,11 @@ class SessionStore {
    */
   async upsert(raw) {
     if (!raw) throw new Error("upsert() requires a session object");
-    const s = normalizeSession({ ...raw, updatedAt: ISO(), createdAt: raw?.createdAt || ISO() });
+    const s = normalizeSession({
+      ...raw,
+      updatedAt: ISO(),
+      createdAt: raw?.createdAt || ISO(),
+    });
 
     const t = await table();
     if (t) {
@@ -244,8 +275,12 @@ class SessionStore {
    */
   async listRunnableByDomain(domain) {
     const list = await this.listByDomain(domain);
-    const running = list.filter((s) => s.status === "running").sort(sortByUpdatedDesc);
-    const paused = list.filter((s) => s.status === "paused").sort(sortByUpdatedDesc);
+    const running = list
+      .filter((s) => s.status === "running")
+      .sort(sortByUpdatedDesc);
+    const paused = list
+      .filter((s) => s.status === "paused")
+      .sort(sortByUpdatedDesc);
     const pending = list
       .filter((s) => s.status === "pending")
       .sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || "")); // oldest first
@@ -296,8 +331,14 @@ class SessionStore {
       updatedAt: now,
       progress: {
         ...current.progress,
-        pausedAt: status === "paused" ? now : status === "running" ? null : current.progress?.pausedAt || null,
-        startedAt: current.progress?.startedAt || (status === "running" ? now : null),
+        pausedAt:
+          status === "paused"
+            ? now
+            : status === "running"
+            ? null
+            : current.progress?.pausedAt || null,
+        startedAt:
+          current.progress?.startedAt || (status === "running" ? now : null),
       },
     };
 
@@ -319,8 +360,12 @@ class SessionStore {
     const current = await this.get(id);
     if (!current) return null;
 
-    const skippedSteps = Array.isArray(patch.skippedSteps) ? patch.skippedSteps : [];
-    const adjustments = Array.isArray(patch.adjustments) ? patch.adjustments : [];
+    const skippedSteps = Array.isArray(patch.skippedSteps)
+      ? patch.skippedSteps
+      : [];
+    const adjustments = Array.isArray(patch.adjustments)
+      ? patch.adjustments
+      : [];
 
     const mergeUnique = (arr, add, keyFn = (x) => JSON.stringify(x)) => {
       const seen = new Set(arr.map(keyFn));
@@ -338,8 +383,15 @@ class SessionStore {
     const next = {
       ...current,
       analytics: {
-        skippedSteps: mergeUnique(current.analytics?.skippedSteps || [], skippedSteps, (x) => String(x)),
-        adjustments: mergeUnique(current.analytics?.adjustments || [], adjustments),
+        skippedSteps: mergeUnique(
+          current.analytics?.skippedSteps || [],
+          skippedSteps,
+          (x) => String(x)
+        ),
+        adjustments: mergeUnique(
+          current.analytics?.adjustments || [],
+          adjustments
+        ),
       },
       updatedAt: ISO(),
     };
@@ -415,7 +467,10 @@ class SessionStore {
     if (!s) return null;
     const next = {
       ...s,
-      progress: { ...s.progress, elapsedSec: (s.progress?.elapsedSec || 0) + (deltaSec | 0) },
+      progress: {
+        ...s.progress,
+        elapsedSec: (s.progress?.elapsedSec || 0) + (deltaSec | 0),
+      },
       updatedAt: ISO(),
     };
     const t = await table();
@@ -443,7 +498,11 @@ class SessionStore {
     const t = await table();
     if (t) await t.put(next);
     else await memApi.put(next);
-    emitStore("session.store.updated", { id, op: "setCurrentStep", stepIndex: nextIdx });
+    emitStore("session.store.updated", {
+      id,
+      op: "setCurrentStep",
+      stepIndex: nextIdx,
+    });
     return next;
   }
 

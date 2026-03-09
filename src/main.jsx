@@ -26,6 +26,54 @@ async function safeImportMany(paths = []) {
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
+   0.5) ✅ CRITICAL: purge stale SW + caches on localhost at module-load
+   - Prevents "MIME type text/html" module load failures due to stale SW shell
+   - Runs BEFORE React mounts, so it works even when App crashes early
+   ────────────────────────────────────────────────────────────────────────── */
+(function purgeStaleSWOnLocalhostEarly() {
+  if (!isBrowser) return;
+  const host = window.location.hostname;
+  const isLocal =
+    host === "localhost" || host === "127.0.0.1" || host === "0.0.0.0";
+  if (!isLocal) return;
+  if (!("serviceWorker" in navigator)) return;
+
+  const key = "__ssa_sw_purged_once__";
+  const alreadyPurged = (() => {
+    try {
+      return sessionStorage.getItem(key) === "1";
+    } catch {
+      return false;
+    }
+  })();
+
+  (async () => {
+    try {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map((r) => r.unregister()));
+    } catch {}
+
+    try {
+      if (window.caches && typeof window.caches.keys === "function") {
+        const keys = await window.caches.keys();
+        await Promise.all(keys.map((k) => window.caches.delete(k)));
+      }
+    } catch {}
+
+    try {
+      sessionStorage.setItem(key, "1");
+    } catch {}
+
+    // Reload once to ensure we re-fetch fresh modules (avoid loops).
+    if (!alreadyPurged) {
+      try {
+        window.location.reload();
+      } catch {}
+    }
+  })();
+})();
+
+/* ────────────────────────────────────────────────────────────────────────────
    1) Legacy hash-routing redirect (for old #/links)
    ────────────────────────────────────────────────────────────────────────── */
 (function hashToPathShim() {
@@ -224,12 +272,12 @@ async function bootDI() {
   const dbMod = await safeImportMany([
     // ✅ Prefer alias-based canonical module first
     "@/db/index.js",
-    "@/db/index.ts",
+    "@/db/index.js",
     "@/db",
 
     // Fallbacks (dev / older layouts)
     "./db/index.js",
-    "./db/index.ts",
+    "./db/index.js",
   ]);
 
   const importedDb = dbMod?.default || dbMod?.db || null;
@@ -385,14 +433,14 @@ async function bootDI() {
         if (!enabled) return;
         const HubPacketFormatter = (
           await safeImportMany([
-            "@/services/HubPacketFormatter.js",
-            "@/services/HubPacketFormatter",
+            "@/services/hub/HubPacketFormatter.js",
+            "@/services/hub/HubPacketFormatter",
           ])
         )?.default;
         const FamilyFundConnector = (
           await safeImportMany([
-            "@/services/FamilyFundConnector.js",
-            "@/services/FamilyFundConnector",
+            "@/services/hub/FamilyFundConnector.js",
+            "@/services/hub/FamilyFundConnector",
           ])
         )?.default;
 
@@ -562,33 +610,62 @@ root.render(
 
 /* ────────────────────────────────────────────────────────────────────────────
    8) PWA Service Worker
+   ✅ UPDATED:
+   - Never register SW on localhost (prevents stale app-shell / MIME failures)
+   - In dev: unregister SWs but DO NOT force reload loops
+   - In prod: register only when NOT localhost
    ────────────────────────────────────────────────────────────────────────── */
 if (isBrowser && "serviceWorker" in navigator) {
-  if (import.meta.env.PROD) {
+  const host = window.location.hostname;
+  const isLocal =
+    host === "localhost" || host === "127.0.0.1" || host === "0.0.0.0";
+
+  if (isLocal) {
+    // Always unregister on localhost (dev OR preview) to prevent cache poisoning.
+    navigator.serviceWorker.getRegistrations?.().then((regs) => {
+      regs.forEach((r) =>
+        r
+          .unregister()
+          .then(() => console.log("🧹 SW unregistered (localhost):", r.scope))
+          .catch(() => {})
+      );
+    });
+
+    // Optional: clear Cache Storage once (no forced reload loop).
+    (async () => {
+      try {
+        const key = "__ssa_sw_cache_cleared__";
+        const already = sessionStorage.getItem(key) === "1";
+        if (already) return;
+        if (window.caches && typeof window.caches.keys === "function") {
+          const keys = await window.caches.keys();
+          await Promise.all(keys.map((k) => window.caches.delete(k)));
+        }
+        sessionStorage.setItem(key, "1");
+        console.log("🧹 Cache Storage cleared (localhost).");
+      } catch {}
+    })();
+  } else if (import.meta.env.PROD) {
+    // Real prod only (non-localhost)
     window.addEventListener("load", () => {
+      // Prefer common candidate names; your App.jsx also tries its own candidates.
+      const url = `${import.meta.env.BASE_URL}service-worker.js`;
       navigator.serviceWorker
-        .register(`${import.meta.env.BASE_URL}service-worker.js`)
+        .register(url)
         .then((reg) => console.log("✅ Service Worker registered:", reg.scope))
         .catch((err) =>
           console.error("❌ Service Worker registration failed:", err)
         );
     });
   } else {
-    // in dev → unregister so Vite HMR works properly
+    // Non-local dev (rare) → unregister to keep HMR stable; no reload loops.
     navigator.serviceWorker.getRegistrations?.().then((regs) => {
       regs.forEach((r) =>
         r
           .unregister()
           .then(() => console.log("🧹 SW unregistered (dev):", r.scope))
+          .catch(() => {})
       );
     });
-    if (navigator.serviceWorker.controller) {
-      try {
-        navigator.serviceWorker.controller.postMessage({
-          type: "SKIP_WAITING",
-        });
-      } catch {}
-      setTimeout(() => location.reload(), 50);
-    }
   }
 }

@@ -1,0 +1,470 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "meta": {
+    "id": "cuisines.citrus_chili.recipes.orange_chili_pork",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Orange-Chili Pork",
+    "subtitle": "Sticky-savory citrus glaze with gentle heat (stovetop or oven finish)"
+  },
+  "classification": {
+    "cuisine": "citrus_chili",
+    "category": "main",
+    "mealArchetypes": [
+      "protein_main",
+      "weeknight_main",
+      "stew_and_starch",
+      "plates"
+    ],
+    "servingStyles": ["plates", "bowls", "family_style"],
+    "plannerTags": [
+      "cuisine.citrus_chili",
+      "protein.pork",
+      "flavor.citrus_bright",
+      "flavor.sweet_heat",
+      "weeknight.friendly",
+      "one_pan",
+      "glaze"
+    ]
+  },
+  "summary": "Tender pork cooked quickly and finished in a glossy orange-chili glaze. Great over rice, with roasted vegetables, or tucked into tacos/bowls.",
+  "yield": {
+    "servings": 4,
+    "notes": "Scale easily; keep glaze ratio the same."
+  },
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 10,
+    "totalMins": 35
+  },
+  "difficulty": "beginner",
+  "signals": {
+    "weeknightPossible": true,
+    "batchFriendly": "medium",
+    "leftoversGood": true,
+    "freezerFriendly": "medium",
+    "spiceAdjustable": true,
+    "kidFriendlyIfMild": true
+  },
+  "tasteProfile": {
+    "heatLevel": 2,
+    "acidity": "orange-forward",
+    "salt": "medium-high",
+    "sweetness": "medium",
+    "notes": [
+      "sticky glaze",
+      "garlic + ginger",
+      "bright citrus finish",
+      "warm chili"
+    ]
+  },
+  "equipment": {
+    "minimum": [
+      "cutting_board",
+      "knife",
+      "mixing_bowl",
+      "measuring_spoons",
+      "measuring_cups",
+      "large_skillet_or_saute_pan",
+      "tongs_or_spatula"
+    ],
+    "recommended": [
+      "microplane_or_grater",
+      "citrus_juicer",
+      "instant_read_thermometer"
+    ],
+    "optional": [
+      {
+        "id": "cast_iron_skillet",
+        "label": "Cast iron skillet",
+        "notes": "Excellent browning for pork."
+      },
+      {
+        "id": "wire_rack",
+        "label": "Wire rack",
+        "notes": "Useful if you choose an oven finish for crisp edges."
+      }
+    ]
+  },
+  "allergens": ["citrus", "soy"],
+  "dietFlags": [],
+  "keywords": [
+    "orange chili pork",
+    "orange glazed pork",
+    "sweet spicy pork",
+    "one pan pork",
+    "citrus chili glaze"
+  ],
+  "tags": [
+    "cuisine.citrus_chili",
+    "protein.pork",
+    "weeknight.friendly",
+    "one_pan",
+    "glaze",
+    "leftovers.good"
+  ],
+  "methods": ["pan_sear", "glaze_reduce", "optional_oven_finish"],
+  "ingredientGroups": [
+    {
+      "id": "pork",
+      "label": "Pork",
+      "items": ["pork_tenderloin_or_chops"]
+    },
+    {
+      "id": "glaze",
+      "label": "Orange-Chili Glaze",
+      "items": [
+        "orange_juice",
+        "orange_zest",
+        "soy_sauce",
+        "rice_vinegar_or_lime",
+        "honey_or_brown_sugar",
+        "garlic",
+        "ginger",
+        "chili_paste_or_flakes",
+        "cornstarch_optional",
+        "water_for_slurry_optional"
+      ]
+    },
+    {
+      "id": "finish",
+      "label": "Finish & Serve",
+      "items": [
+        "green_onions_optional",
+        "sesame_seeds_optional",
+        "lime_wedges_optional"
+      ]
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "pork_tenderloin_or_chops",
+      "label": "Pork tenderloin (sliced into medallions) or boneless pork chops (cut into bite-size)",
+      "role": "protein",
+      "amount": { "value": 680, "unit": "g" },
+      "notes": [
+        "Tenderloin cooks fastest and stays tender.",
+        "If using thicker chops, pound lightly for even cooking."
+      ]
+    },
+    {
+      "id": "salt",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 0.75, "unit": "tsp" },
+      "notes": "Go lighter if your soy sauce is very salty."
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 0.25, "unit": "tsp" }
+    },
+    {
+      "id": "neutral_oil",
+      "label": "Neutral oil (avocado/canola) for searing",
+      "role": "fat",
+      "amount": { "value": 1, "unit": "tbsp" }
+    },
+
+    {
+      "id": "orange_juice",
+      "label": "Fresh orange juice",
+      "role": "acid",
+      "amount": { "value": 120, "unit": "ml" },
+      "notes": "About 1–2 oranges depending on size."
+    },
+    {
+      "id": "orange_zest",
+      "label": "Orange zest",
+      "role": "aroma",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "soy_sauce",
+      "label": "Soy sauce",
+      "role": "umami",
+      "amount": { "value": 45, "unit": "ml" },
+      "notes": "Use tamari for gluten-free."
+    },
+    {
+      "id": "rice_vinegar_or_lime",
+      "label": "Rice vinegar (or lime juice)",
+      "role": "acid",
+      "amount": { "value": 15, "unit": "ml" }
+    },
+    {
+      "id": "honey_or_brown_sugar",
+      "label": "Honey (or brown sugar)",
+      "role": "sweetener",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "notes": "Honey gives a glossy finish; brown sugar gives deeper caramel notes."
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic, finely minced",
+      "role": "aromatic",
+      "amount": { "value": 3, "unit": "cloves" }
+    },
+    {
+      "id": "ginger",
+      "label": "Fresh ginger, grated",
+      "role": "aromatic",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Or 1 tsp ground ginger in a pinch."
+    },
+    {
+      "id": "chili_paste_or_flakes",
+      "label": "Chili paste (or red pepper flakes)",
+      "role": "heat",
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": "Start with 1 tsp for mild-medium; increase to 2 tsp for hotter."
+    },
+    {
+      "id": "cornstarch_optional",
+      "label": "Cornstarch (optional, for thicker glaze)",
+      "role": "thickener",
+      "optional": true,
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "water_for_slurry_optional",
+      "label": "Water (for cornstarch slurry, optional)",
+      "role": "thickener",
+      "optional": true,
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+
+    {
+      "id": "green_onions_optional",
+      "label": "Green onions, sliced (optional)",
+      "role": "finish",
+      "optional": true,
+      "amount": { "value": 2, "unit": "each" }
+    },
+    {
+      "id": "sesame_seeds_optional",
+      "label": "Sesame seeds (optional)",
+      "role": "finish",
+      "optional": true,
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "lime_wedges_optional",
+      "label": "Lime wedges (optional)",
+      "role": "finish",
+      "optional": true,
+      "amount": { "value": 1, "unit": "each" }
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Mix the orange-chili glaze",
+      "instructions": [
+        "In a bowl, whisk together orange juice, orange zest, soy sauce, rice vinegar (or lime juice), honey (or brown sugar), garlic, ginger, and chili paste/flakes.",
+        "If using cornstarch: whisk cornstarch with water to make a smooth slurry; set aside separately."
+      ],
+      "activeMins": 6,
+      "checks": [
+        "Glaze tastes balanced: salty-sweet with orange brightness",
+        "Cornstarch slurry is smooth (no lumps) if using"
+      ]
+    },
+    {
+      "id": "step_02",
+      "title": "Season the pork",
+      "instructions": [
+        "Pat pork dry and cut into medallions (tenderloin) or bite-size pieces (chops).",
+        "Season with salt and black pepper."
+      ],
+      "activeMins": 4
+    },
+    {
+      "id": "step_03",
+      "title": "Sear the pork",
+      "instructions": [
+        "Heat a large skillet over medium-high heat. Add neutral oil.",
+        "Add pork in a single layer and sear until browned, 2–3 minutes per side (work in batches if needed).",
+        "Transfer browned pork to a plate (it will finish cooking in the glaze)."
+      ],
+      "activeMins": 10,
+      "checks": [
+        "Pork has browned edges (don’t worry if not fully cooked through yet)",
+        "Pan has browned bits (fond) but nothing burnt"
+      ],
+      "timers": [
+        { "label": "Sear first side", "minutes": 3 },
+        { "label": "Sear second side", "minutes": 2 }
+      ]
+    },
+    {
+      "id": "step_04",
+      "title": "Reduce the glaze and finish cooking",
+      "instructions": [
+        "Lower heat to medium. Pour glaze into the skillet and scrape up browned bits.",
+        "Simmer 2–4 minutes until slightly reduced.",
+        "Return pork (and any juices) to the pan and cook 2–4 minutes, stirring/turning to coat, until pork is cooked through.",
+        "If using the cornstarch slurry: whisk it again, then drizzle into simmering glaze and stir 30–60 seconds until thickened and glossy."
+      ],
+      "activeMins": 10,
+      "temperature": {
+        "type": "internal",
+        "value": 63,
+        "unit": "C",
+        "notes": "145°F / 63°C is a commonly referenced safe finished temp for whole cuts of pork."
+      },
+      "checks": [
+        "Glaze coats the back of a spoon (or thickens quickly if slurry used)",
+        "Pork is just cooked through and still juicy"
+      ],
+      "timers": [
+        { "label": "Glaze reduce", "minutes": 3 },
+        { "label": "Finish pork in glaze", "minutes": 3 }
+      ]
+    },
+    {
+      "id": "step_05",
+      "title": "Finish and serve",
+      "instructions": [
+        "Taste the glaze. Add a squeeze of lime for extra brightness or a tiny pinch of salt if needed.",
+        "Top with green onions and sesame seeds (optional).",
+        "Serve over rice, quinoa, or roasted vegetables; also great in bowls or tacos."
+      ],
+      "activeMins": 3
+    }
+  ],
+  "pairings": {
+    "sides": [
+      "steamed_rice",
+      "coconut_rice_optional",
+      "herb_roasted_vegetables",
+      "simple_cabbage_slaw",
+      "black_beans",
+      "roasted_sweet_potatoes"
+    ],
+    "fresh_finishes": [
+      "lime_wedges_optional",
+      "cilantro_optional",
+      "quick_pickled_onions_optional"
+    ]
+  },
+  "storage": {
+    "refrigerator": {
+      "maxDays": 4,
+      "notes": "Glaze keeps pork moist; store tightly covered."
+    },
+    "freezer": {
+      "ok": true,
+      "notes": "Freeze up to 2 months. Thaw overnight in fridge; reheat gently."
+    },
+    "reheat": {
+      "methods": [
+        "gentle skillet with splash of water",
+        "microwave on medium power"
+      ],
+      "notes": "Avoid high heat to prevent pork from drying out."
+    }
+  },
+  "safety": {
+    "handling": [
+      "Keep raw pork refrigerated until cooking.",
+      "Wash hands, board, and knife after handling raw pork."
+    ],
+    "internalTemp": {
+      "target": 63,
+      "unit": "C",
+      "notes": "Rest briefly after cooking if needed; carryover heat will finish."
+    }
+  },
+  "variations": [
+    {
+      "id": "variation_extra_spicy",
+      "label": "Extra spicy orange-chili pork",
+      "notes": [
+        "Increase chili paste/flakes to 2 tsp.",
+        "Add 1 minced jalapeño when simmering the glaze."
+      ]
+    },
+    {
+      "id": "variation_ginger_forward",
+      "label": "Ginger-forward version",
+      "notes": ["Use 1 tbsp grated ginger and finish with extra orange zest."]
+    },
+    {
+      "id": "variation_oven_finish",
+      "label": "Oven-finished for sticky edges",
+      "notes": [
+        "After searing pork, pour glaze over pork in an oven-safe skillet or baking dish.",
+        "Bake at 425°F / 218°C for 8–10 minutes, basting once, until glossy and cooked through."
+      ]
+    }
+  ],
+  "planner": {
+    "cuisineId": "cuisines.citrus_chili",
+    "defaultCourse": "main",
+    "weeknightNotes": [
+      "Prep glaze while pan heats, then sear and finish in under 20 minutes.",
+      "Serve with microwave rice or pre-roasted veggies for speed."
+    ],
+    "shopping": {
+      "corePantry": [
+        "soy_sauce",
+        "honey_or_brown_sugar",
+        "chili_paste_or_flakes",
+        "salt",
+        "black_pepper",
+        "neutral_oil"
+      ],
+      "fresh": [
+        "oranges",
+        "ginger",
+        "garlic",
+        "pork_tenderloin_or_chops",
+        "green_onions_optional",
+        "limes_optional"
+      ]
+    }
+  },
+  "compat": {
+    "cuisine": "citrus_chili",
+    "dishId": "orange_chili_pork",
+    "ingredientIds": [
+      "pork_tenderloin_or_chops",
+      "orange_juice",
+      "orange_zest",
+      "soy_sauce",
+      "rice_vinegar_or_lime",
+      "honey_or_brown_sugar",
+      "garlic",
+      "ginger",
+      "chili_paste_or_flakes",
+      "cornstarch_optional",
+      "water_for_slurry_optional",
+      "salt",
+      "black_pepper",
+      "neutral_oil",
+      "green_onions_optional",
+      "sesame_seeds_optional",
+      "lime_wedges_optional"
+    ],
+    "equipmentIds": [
+      "cutting_board",
+      "knife",
+      "mixing_bowl",
+      "measuring_spoons",
+      "measuring_cups",
+      "large_skillet_or_saute_pan",
+      "tongs_or_spatula",
+      "microplane_or_grater",
+      "citrus_juicer",
+      "instant_read_thermometer",
+      "cast_iron_skillet",
+      "wire_rack"
+    ],
+    "methodIds": ["pan_sear", "glaze_reduce", "optional_oven_finish"]
+  }
+}

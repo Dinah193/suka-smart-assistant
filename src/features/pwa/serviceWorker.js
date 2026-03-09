@@ -42,7 +42,6 @@ const APP_SHELL_ASSETS = [
   "/icons/suka-192.png",
   "/icons/suka-512.png",
   // add your main js/css here if needed
-  // "/assets/index.js",
   // "/assets/index.css"
 ];
 
@@ -59,7 +58,10 @@ function idbOpen() {
     req.onupgradeneeded = (event) => {
       const db = event.target.result;
       if (!db.objectStoreNames.contains(OFFLINE_IMPORTS_STORE)) {
-        db.createObjectStore(OFFLINE_IMPORTS_STORE, { keyPath: "id", autoIncrement: true });
+        db.createObjectStore(OFFLINE_IMPORTS_STORE, {
+          keyPath: "id",
+          autoIncrement: true,
+        });
       }
     };
     req.onsuccess = () => resolve(req.result);
@@ -73,7 +75,9 @@ async function idbAddImport(payload) {
     // fallback localStorage (best-effort)
     const key = "suka.pwa.offlineImports.v1";
     try {
-      const existing = JSON.parse((self.localStorage && self.localStorage.getItem(key)) || "[]");
+      const existing = JSON.parse(
+        (self.localStorage && self.localStorage.getItem(key)) || "[]"
+      );
       existing.unshift(payload);
       if (self.localStorage) {
         self.localStorage.setItem(key, JSON.stringify(existing.slice(0, 100)));
@@ -119,11 +123,13 @@ async function idbClearImports() {
 // -----------------------------------------------------------------------------
 function broadcastToClients(msg) {
   if (!self.clients || !self.clients.matchAll) return;
-  self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
-    clients.forEach((client) => {
-      client.postMessage(msg);
+  self.clients
+    .matchAll({ type: "window", includeUncontrolled: true })
+    .then((clients) => {
+      clients.forEach((client) => {
+        client.postMessage(msg);
+      });
     });
-  });
 }
 
 // -----------------------------------------------------------------------------
@@ -133,7 +139,7 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(APP_SHELL_CACHE).then((cache) => {
       return cache.addAll(APP_SHELL_ASSETS);
-    }),
+    })
   );
   self.skipWaiting();
 });
@@ -150,9 +156,9 @@ self.addEventListener("activate", (event) => {
             return caches.delete(key);
           }
           return null;
-        }),
-      ),
-    ),
+        })
+      )
+    )
   );
   self.clients.claim();
 });
@@ -183,7 +189,7 @@ self.addEventListener("fetch", (event) => {
             });
           })
         );
-      }),
+      })
     );
     return;
   }
@@ -197,7 +203,7 @@ self.addEventListener("fetch", (event) => {
           caches.open(RUNTIME_CACHE).then((cache) => cache.put(req, clone));
           return netRes;
         })
-        .catch(() => caches.match(req)),
+        .catch(() => caches.match(req))
     );
     return;
   }
@@ -223,12 +229,12 @@ async function handleShareTargetPost(event) {
       source: {
         kind: "pwa-share",
         url,
-        title
+        title,
       },
       meta: {
         text,
         files: files.map((f) => f.name),
-        sharedAt: Date.now()
+        sharedAt: Date.now(),
       },
       // user-first flags (they can toggle in UI later)
       saveAsFavorite: false,
@@ -236,8 +242,8 @@ async function handleShareTargetPost(event) {
         shareTarget: "family-fund-hub",
         includeShare: true,
         format: "json",
-        reverseFromId: null
-      }
+        reverseFromId: null,
+      },
     };
 
     // shape per domain
@@ -249,7 +255,7 @@ async function handleShareTargetPost(event) {
     // notify any open pages
     broadcastToClients({
       type: "pwa-share-received",
-      payload
+      payload,
     });
 
     // redirect back to app capture
@@ -269,30 +275,48 @@ function inferImportTypeFromShare({ title, text, url, files }) {
   if (lower.includes("pinterest.com")) return "mealPlan";
 
   // cleaning / chore blogs
-  if (/clean|declutter|organize|bathroom|kitchen|laundry|mop|dust|chore/i.test(lower)) {
+  if (
+    /clean|declutter|organize|bathroom|kitchen|laundry|mop|dust|chore/i.test(
+      lower
+    )
+  ) {
     return "cleaningPlan";
   }
 
   // garden planning / care / harvest
   if (/seed|garden|nursery|burpee|johnnyseeds|grow|raised bed/i.test(lower)) {
     // care vs harvest?
-    if (/water|fertiliz|pest control|prune|trellis|mulch/i.test(lower)) return "gardenCare";
-    if (/harvest|curing|canning|preserving|fermenting|root cellar/i.test(lower)) return "harvestPlan";
+    if (/water|fertiliz|pest control|prune|trellis|mulch/i.test(lower))
+      return "gardenCare";
+    if (/harvest|curing|canning|preserving|fermenting|root cellar/i.test(lower))
+      return "harvestPlan";
     return "gardenPlan";
   }
 
   // grocery circulars / store ads → storehouse stock
-  if (/weekly ad|circular|grocery|kroger|walmart|aldi|heb|publix|food lion|costco|sams/i.test(lower)) {
+  if (
+    /weekly ad|circular|grocery|kroger|walmart|aldi|heb|publix|food lion|costco|sams/i.test(
+      lower
+    )
+  ) {
     return "storehouseStock";
   }
 
   // animal / livestock pages → acquisition
-  if (/livestock|goats?|sheep|lambs?|calves?|heifer|poultry|chickens?|ducks?|rabbits?/i.test(lower)) {
+  if (
+    /livestock|goats?|sheep|lambs?|calves?|heifer|poultry|chickens?|ducks?|rabbits?/i.test(
+      lower
+    )
+  ) {
     return "animalAcquisition";
   }
 
   // butchery / processing
-  if (/butcher|butchery|slaughter|meat cutting|cut sheet|processing|usda inspected|halal/i.test(lower)) {
+  if (
+    /butcher|butchery|slaughter|meat cutting|cut sheet|processing|usda inspected|halal/i.test(
+      lower
+    )
+  ) {
     return "butcherySession";
   }
 
@@ -302,7 +326,8 @@ function inferImportTypeFromShare({ title, text, url, files }) {
   }
 
   // recipe-like
-  if (lower.includes("recipe") || lower.includes("ingredients")) return "recipe";
+  if (lower.includes("recipe") || lower.includes("ingredients"))
+    return "recipe";
 
   // default
   return "recipe";
@@ -329,8 +354,8 @@ function shapePayloadByType(payload, ctx) {
     payload.days = [
       {
         date: null,
-        meals: [title || "Shared Meal"]
-      }
+        meals: [title || "Shared Meal"],
+      },
     ];
     payload.collaborative = true;
   }
@@ -341,9 +366,11 @@ function shapePayloadByType(payload, ctx) {
     payload.rooms = [
       {
         name: "Home",
-        tasks: lines.length ? lines : ["Clear surfaces", "Vacuum", "Mop", "Bathrooms"],
-        supplies: ["All-purpose cleaner", "Microfiber cloths"]
-      }
+        tasks: lines.length
+          ? lines
+          : ["Clear surfaces", "Vacuum", "Mop", "Bathrooms"],
+        supplies: ["All-purpose cleaner", "Microfiber cloths"],
+      },
     ];
     payload.cadence = /weekly|every week/i.test(lowerText) ? "weekly" : "daily";
     payload.batchable = true;
@@ -351,7 +378,7 @@ function shapePayloadByType(payload, ctx) {
       kind: "cleaning",
       date: null,
       recurring: payload.cadence,
-      tasks: payload.rooms[0].tasks.slice(0, 30)
+      tasks: payload.rooms[0].tasks.slice(0, 30),
     };
   }
 
@@ -371,15 +398,17 @@ function shapePayloadByType(payload, ctx) {
       {
         id: "default",
         name: "Garden Zone",
-        tasks: lines.length ? lines : ["Water", "Fertilize", "Inspect for pests"]
-      }
+        tasks: lines.length
+          ? lines
+          : ["Water", "Fertilize", "Inspect for pests"],
+      },
     ];
     payload.cadence = "2x/week";
     payload.session = {
       kind: "garden-care",
       date: null,
       recurring: "2x/week",
-      tasks: payload.zones[0].tasks.slice(0, 20)
+      tasks: payload.zones[0].tasks.slice(0, 20),
     };
   }
 
@@ -392,13 +421,15 @@ function shapePayloadByType(payload, ctx) {
       quantity: null,
       unit: null,
       toStorehouse: true,
-      preserveMethod: /can|ferment|dry|freeze/i.test(lowerText) ? "preserve" : null
+      preserveMethod: /can|ferment|dry|freeze/i.test(lowerText)
+        ? "preserve"
+        : null,
     }));
     payload.session = {
       kind: "garden-harvest",
       date: null,
       recurring: null,
-      tasks: lines.slice(0, 20)
+      tasks: lines.slice(0, 20),
     };
   }
 
@@ -411,45 +442,49 @@ function shapePayloadByType(payload, ctx) {
       kind: "storehouse-restock",
       date: null,
       recurring: "weekly",
-      tasks: lines.slice(0, 30)
+      tasks: lines.slice(0, 30),
     };
   }
 
   // ANIMAL ACQUISITION
   if (t === "animalAcquisition") {
     const lines = text ? text.split(/\n|\r/).filter(Boolean) : [];
-    payload.needs =
-      lines.length
-        ? lines.map((line) => {
-            const low = line.toLowerCase();
-            const species =
-              /goat/.test(low) ? "goat" :
-              /sheep|lamb/.test(low) ? "sheep" :
-              /chicken|poultry|hen/.test(low) ? "chicken" :
-              /duck/.test(low) ? "duck" :
-              /rabbit/.test(low) ? "rabbit" : "livestock";
-            return {
-              species,
-              breed: null,
-              qty: null,
-              reason: "Imported from PWA share",
-              targetDate: null
-            };
-          })
-        : [
-            {
-              species: "livestock",
-              breed: null,
-              qty: null,
-              reason: "Imported from PWA share",
-              targetDate: null
-            }
-          ];
+    payload.needs = lines.length
+      ? lines.map((line) => {
+          const low = line.toLowerCase();
+          const species = /goat/.test(low)
+            ? "goat"
+            : /sheep|lamb/.test(low)
+            ? "sheep"
+            : /chicken|poultry|hen/.test(low)
+            ? "chicken"
+            : /duck/.test(low)
+            ? "duck"
+            : /rabbit/.test(low)
+            ? "rabbit"
+            : "livestock";
+          return {
+            species,
+            breed: null,
+            qty: null,
+            reason: "Imported from PWA share",
+            targetDate: null,
+          };
+        })
+      : [
+          {
+            species: "livestock",
+            breed: null,
+            qty: null,
+            reason: "Imported from PWA share",
+            targetDate: null,
+          },
+        ];
     payload.session = {
       kind: "inventory-sync",
       date: null,
       recurring: null,
-      tasks: []
+      tasks: [],
     };
   }
 
@@ -460,8 +495,8 @@ function shapePayloadByType(payload, ctx) {
       {
         species: "livestock",
         qty: null,
-        cuts: []
-      }
+        cuts: [],
+      },
     ];
     payload.processingTasks = lines.length
       ? lines
@@ -470,13 +505,13 @@ function shapePayloadByType(payload, ctx) {
       recipes: [],
       mealPlans: [],
       storehouseGoals: [],
-      inventoryUpdates: []
+      inventoryUpdates: [],
     };
     payload.session = {
       kind: "butchery",
       date: null,
       recurring: null,
-      tasks: payload.processingTasks.slice(0, 30)
+      tasks: payload.processingTasks.slice(0, 30),
     };
   }
 
@@ -489,10 +524,17 @@ function shapePayloadByType(payload, ctx) {
 // helper: bucket grocery-like lines to sections
 function bucketToGrocerySections(lines) {
   const sections = [];
-  const produce = [], dairy = [], meat = [], dry = [], freezer = [];
+  const produce = [],
+    dairy = [],
+    meat = [],
+    dry = [],
+    freezer = [];
   lines.forEach((it) => {
     const low = it.toLowerCase();
-    if (/lettuce|onion|pepper|apple|banana|greens?|tomato|potato|carrot/.test(low)) produce.push(it);
+    if (
+      /lettuce|onion|pepper|apple|banana|greens?|tomato|potato|carrot/.test(low)
+    )
+      produce.push(it);
     else if (/milk|cheese|butter|yogurt|cream/.test(low)) dairy.push(it);
     else if (/beef|chicken|lamb|goat|turkey|fish|pork/.test(low)) meat.push(it);
     else if (/rice|beans|flour|cornmeal|pasta|oats?/.test(low)) dry.push(it);
@@ -501,32 +543,62 @@ function bucketToGrocerySections(lines) {
   if (produce.length)
     sections.push({
       section: "produce",
-      items: produce.map((item) => ({ item, targetQty: null, unit: null, preserveMethod: null }))
+      items: produce.map((item) => ({
+        item,
+        targetQty: null,
+        unit: null,
+        preserveMethod: null,
+      })),
     });
   if (dairy.length)
     sections.push({
       section: "dairy",
-      items: dairy.map((item) => ({ item, targetQty: null, unit: null, preserveMethod: null }))
+      items: dairy.map((item) => ({
+        item,
+        targetQty: null,
+        unit: null,
+        preserveMethod: null,
+      })),
     });
   if (meat.length)
     sections.push({
       section: "meat",
-      items: meat.map((item) => ({ item, targetQty: null, unit: null, preserveMethod: "freeze" }))
+      items: meat.map((item) => ({
+        item,
+        targetQty: null,
+        unit: null,
+        preserveMethod: "freeze",
+      })),
     });
   if (dry.length)
     sections.push({
       section: "pantry",
-      items: dry.map((item) => ({ item, targetQty: null, unit: null, preserveMethod: null }))
+      items: dry.map((item) => ({
+        item,
+        targetQty: null,
+        unit: null,
+        preserveMethod: null,
+      })),
     });
   if (freezer.length)
     sections.push({
       section: "frozen-or-other",
-      items: freezer.map((item) => ({ item, targetQty: null, unit: null, preserveMethod: "freeze" }))
+      items: freezer.map((item) => ({
+        item,
+        targetQty: null,
+        unit: null,
+        preserveMethod: "freeze",
+      })),
     });
   if (!sections.length) {
     sections.push({
       section: "general",
-      items: lines.map((item) => ({ item, targetQty: null, unit: null, preserveMethod: null }))
+      items: lines.map((item) => ({
+        item,
+        targetQty: null,
+        unit: null,
+        preserveMethod: null,
+      })),
     });
   }
   return sections;
@@ -546,7 +618,7 @@ async function flushOfflineImports() {
   if (!items.length) return;
   broadcastToClients({
     type: "pwa-offline-imports",
-    items
+    items,
   });
   await idbClearImports();
 }
@@ -560,7 +632,7 @@ self.addEventListener("message", (event) => {
     idbGetAllImports().then((items) => {
       event.source?.postMessage({
         type: "suka:offline-imports",
-        items
+        items,
       });
     });
   }

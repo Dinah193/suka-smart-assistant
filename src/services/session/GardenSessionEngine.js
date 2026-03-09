@@ -30,10 +30,10 @@
 //     to the Family Fund Hub when `familyFundMode` is true.
 //
 
-import eventBus from "../eventBus";
-import featureFlags from "../featureFlags";
-import HubPacketFormatter from "../hub/HubPacketFormatter";
-import FamilyFundConnector from "../hub/FamilyFundConnector";
+import eventBus from "../events/eventBus";
+import featureFlags from "@/config/featureFlags";
+import HubPacketFormatter from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 
 // Dexie instance (adjust path if your db helper lives elsewhere)
 import db from "../db";

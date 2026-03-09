@@ -17,31 +17,31 @@
  *   (e.g., sessions committed / status changed).
  */
 
-import eventBus from 'src/services/eventBus.js';
+import { emit as emitEventBus } from "@/services/events/eventBus";
 
-const SOURCE = 'engines.synthesis.EventEmitter';
+const SOURCE = "engines.synthesis.EventEmitter";
 
 // ───────────────────────────────────────────────────────────────────────────────
 // Event catalogue (add new ones here as the engine grows)
 
 export const EventTypes = Object.freeze({
   // Synthesis lifecycle
-  PREP_SYNTHESIZED:            'prep.synthesized',
-  SYNTHESIS_COMPLETED:         'synthesis.completed',
-  SYNTHESIS_ERROR:             'synthesis.error',
+  PREP_SYNTHESIZED: "prep.synthesized",
+  SYNTHESIS_COMPLETED: "synthesis.completed",
+  SYNTHESIS_ERROR: "synthesis.error",
 
   // Rule / lead-time / dedup / preference signals
-  RULES_LOADED:                'synthesis.rules.loaded',
-  LEADTIME_COMPLETED:          'synthesis.leadtime.completed',
-  DEDUP_COMPLETED:             'synthesis.dedup.completed',
-  PREFS_RESOLVED:              'prefs.resolved',
+  RULES_LOADED: "synthesis.rules.loaded",
+  LEADTIME_COMPLETED: "synthesis.leadtime.completed",
+  DEDUP_COMPLETED: "synthesis.dedup.completed",
+  PREFS_RESOLVED: "prefs.resolved",
 
   // Validation & sessions
-  VALIDATION_COVERAGE:         'synthesis.validation.coverage',
-  SESSION_VALIDATION_FAILED:   'session.validation.failed',
-  SESSION_VALIDATION_PASSED:   'session.validation.passed',
-  SESSION_BUILD_COMPLETE:      'session.build.complete',    // status change → hub export candidate
-  SESSIONS_COMMITTED:          'sessions.committed',        // status change → hub export candidate
+  VALIDATION_COVERAGE: "synthesis.validation.coverage",
+  SESSION_VALIDATION_FAILED: "session.validation.failed",
+  SESSION_VALIDATION_PASSED: "session.validation.passed",
+  SESSION_BUILD_COMPLETE: "session.build.complete", // status change → hub export candidate
+  SESSIONS_COMMITTED: "sessions.committed", // status change → hub export candidate
 });
 
 // Household-mutation events (trigger optional hub export).
@@ -136,7 +136,7 @@ export async function emitDedupCompleted(data) {
  * @param {object} data
  */
 export async function emitEvent(type, data) {
-  const payload = await emit(String(type || '').trim(), sanitize(data));
+  const payload = await emit(String(type || "").trim(), sanitize(data));
   if (MUTATION_TYPES.has(type)) await exportToHubIfEnabled(payload);
   return payload;
 }
@@ -155,7 +155,7 @@ async function emit(type, data) {
   if (!evt) return null;
 
   try {
-    eventBus.emit('automation.event', evt);
+    eventBus.emit("automation.event", evt);
   } catch {
     // Never throw from telemetry
   }
@@ -163,7 +163,7 @@ async function emit(type, data) {
 }
 
 function makeEnvelope(type, data) {
-  if (!type || typeof type !== 'string') return null;
+  if (!type || typeof type !== "string") return null;
   const clean = capKeys(capSize(safeClone(data), 100_000), 128); // ~100KB cap, 128 keys per level
   return {
     type,
@@ -180,22 +180,24 @@ async function exportToHubIfEnabled(payload) {
   try {
     if (!payload || !MUTATION_TYPES.has(payload.type)) return;
 
-    const flagsMod = await softImport('src/config/featureFlags.js');
+    const flagsMod = await softImport("src/config/featureFlags.json");
     const featureFlags = flagsMod?.default || flagsMod || {};
     if (!featureFlags.familyFundMode) return;
 
-    const Formatter = await softImport('src/services/hub/HubPacketFormatter.js');
-    const Connector = await softImport('src/services/hub/FamilyFundConnector.js');
+    const Formatter = await softImport(
+      "src/services/hub/HubPacketFormatter.js"
+    );
+    const Connector = await softImport(
+      "src/services/hub/FamilyFundConnector.js"
+    );
     if (!Formatter || !Connector) return;
 
     const format =
-      Formatter.format ||
-      (Formatter.default && Formatter.default.format);
+      Formatter.format || (Formatter.default && Formatter.default.format);
     const send =
-      Connector.send ||
-      (Connector.default && Connector.default.send);
+      Connector.send || (Connector.default && Connector.default.send);
 
-    if (typeof format !== 'function' || typeof send !== 'function') return;
+    if (typeof format !== "function" || typeof send !== "function") return;
 
     const packet = await format(payload);
     if (!packet) return;
@@ -211,7 +213,7 @@ async function exportToHubIfEnabled(payload) {
 
 function sanitize(obj) {
   // remove undefined, keep nulls; shallow by default
-  if (!obj || typeof obj !== 'object') return obj;
+  if (!obj || typeof obj !== "object") return obj;
   const out = Array.isArray(obj) ? [] : {};
   for (const [k, v] of Object.entries(obj)) {
     if (v === undefined) continue;
@@ -222,10 +224,10 @@ function sanitize(obj) {
 
 function safeClone(v) {
   try {
-    if (!v || typeof v !== 'object') return v;
+    if (!v || typeof v !== "object") return v;
     return JSON.parse(JSON.stringify(v));
   } catch {
-    return { note: 'non-serializable payload' };
+    return { note: "non-serializable payload" };
   }
 }
 
@@ -233,14 +235,18 @@ function capSize(v, maxBytes) {
   try {
     const s = JSON.stringify(v);
     if (s.length <= maxBytes) return v;
-    return { truncated: true, approxBytes: s.length, note: 'payload too large' };
+    return {
+      truncated: true,
+      approxBytes: s.length,
+      note: "payload too large",
+    };
   } catch {
     return v;
   }
 }
 
 function capKeys(v, maxKeys) {
-  if (!v || typeof v !== 'object') return v;
+  if (!v || typeof v !== "object") return v;
   const keys = Object.keys(v);
   if (keys.length <= maxKeys) return v;
   const out = {};

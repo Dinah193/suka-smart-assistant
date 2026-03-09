@@ -33,7 +33,7 @@ try {
 
 let eventBus = { emit: () => {}, on: () => {}, off: () => {} };
 try {
-  eventBus = require("@/services/eventBus").eventBus || eventBus;
+  eventBus = require("@/services/events/eventBus").eventBus || eventBus;
 } catch {}
 
 let useBatchQueue = () => ({
@@ -42,7 +42,9 @@ let useBatchQueue = () => ({
   contains: () => false,
 });
 try {
-  useBatchQueue = require("@/features/meals/BatchQueueProvider").useBatchQueue || useBatchQueue;
+  useBatchQueue =
+    require("@/features/meals/BatchQueueProvider").useBatchQueue ||
+    useBatchQueue;
 } catch {}
 
 let InventoryMonitor = {
@@ -58,8 +60,8 @@ try {
 let usePersonalFoodStandards = () => ({ standards: {} });
 try {
   usePersonalFoodStandards =
-    require("@/app/context/HouseholdSettingsContext").usePersonalFoodStandards ||
-    usePersonalFoodStandards;
+    require("@/app/context/HouseholdSettingsContext")
+      .usePersonalFoodStandards || usePersonalFoodStandards;
 } catch {}
 
 /* ---------------------------------- Helpers --------------------------------- */
@@ -76,8 +78,13 @@ const fallbackImg =
 /** Standards check (very lightweight, expand as needed) */
 function checkStandards(recipe = {}, standards = {}) {
   // Ex: noPork + lamb/beef only + goat allowed flags
-  const tags = new Set((recipe.tags || []).map((t) => (typeof t === "string" ? t : t.id)));
-  if (standards?.noPork && (tags.has("pork") || /pork/i.test(recipe.title || ""))) {
+  const tags = new Set(
+    (recipe.tags || []).map((t) => (typeof t === "string" ? t : t.id))
+  );
+  if (
+    standards?.noPork &&
+    (tags.has("pork") || /pork/i.test(recipe.title || ""))
+  ) {
     return { ok: false, reason: "Pork" };
   }
   if (standards?.lambBeefOnly) {
@@ -89,7 +96,9 @@ function checkStandards(recipe = {}, standards = {}) {
       tags.has("seafood") ||
       /chicken|fish|turkey|seafood/i.test(recipe.title || "");
     if (hasForbidden) return { ok: false, reason: "Lamb/Beef only" };
-    const hasAllowed = allowed.some((x) => tags.has(x) || new RegExp(x, "i").test(recipe.title || ""));
+    const hasAllowed = allowed.some(
+      (x) => tags.has(x) || new RegExp(x, "i").test(recipe.title || "")
+    );
     return { ok: !!hasAllowed, reason: hasAllowed ? null : "No allowed meat" };
   }
   // If no strict rules triggered:
@@ -171,8 +180,14 @@ export default function RecipeCard({
   const { add, contains } = useBatchQueue();
   const { standards } = usePersonalFoodStandards();
 
-  const [invStatus, setInvStatus] = useState({ status: "unknown", missingCount: 0 });
-  const standardsCheck = useMemo(() => checkStandards(recipe, standards), [recipe, standards]);
+  const [invStatus, setInvStatus] = useState({
+    status: "unknown",
+    missingCount: 0,
+  });
+  const standardsCheck = useMemo(
+    () => checkStandards(recipe, standards),
+    [recipe, standards]
+  );
   const inBatch = contains?.(id);
 
   useEffect(() => {
@@ -269,7 +284,8 @@ export default function RecipeCard({
 
   const timePill = timeBadge ? (
     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] bg-gray-50 text-gray-700 border border-gray-200">
-      <Clock className="w-3 h-3" /> {fmtMin(totalMinutes || prepMinutes || cookMinutes)}
+      <Clock className="w-3 h-3" />{" "}
+      {fmtMin(totalMinutes || prepMinutes || cookMinutes)}
     </span>
   ) : null;
 
@@ -303,7 +319,11 @@ export default function RecipeCard({
               : "bg-white/90 backdrop-blur border-gray-200 text-gray-700 hover:bg-gray-50"
           )}
         >
-          {pinned ? <Pin className="w-4 h-4" /> : <PinOff className="w-4 h-4" />}
+          {pinned ? (
+            <Pin className="w-4 h-4" />
+          ) : (
+            <PinOff className="w-4 h-4" />
+          )}
         </button>
 
         <button
@@ -320,12 +340,21 @@ export default function RecipeCard({
               : "bg-white/90 backdrop-blur border-gray-200 text-gray-700 hover:bg-gray-50"
           )}
         >
-          {favorite ? <Heart className="w-4 h-4" /> : <HeartOff className="w-4 h-4" />}
+          {favorite ? (
+            <Heart className="w-4 h-4" />
+          ) : (
+            <HeartOff className="w-4 h-4" />
+          )}
         </button>
       </div>
 
       {/* Media */}
-      <div className={cx("mb-3 rounded-xl overflow-hidden bg-gray-100", dense ? "h-36" : "h-44")}>
+      <div
+        className={cx(
+          "mb-3 rounded-xl overflow-hidden bg-gray-100",
+          dense ? "h-36" : "h-44"
+        )}
+      >
         {image ? (
           <img
             src={image}
@@ -335,14 +364,23 @@ export default function RecipeCard({
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <img src={fallbackImg} alt="" className="w-full h-full object-cover" />
+            <img
+              src={fallbackImg}
+              alt=""
+              className="w-full h-full object-cover"
+            />
             <ImageIcon className="absolute w-6 h-6 text-gray-400" />
           </div>
         )}
       </div>
 
       {/* Title */}
-      <h3 className={cx("line-clamp-2 font-semibold text-gray-900", dense ? "text-sm" : "text-base")}>
+      <h3
+        className={cx(
+          "line-clamp-2 font-semibold text-gray-900",
+          dense ? "text-sm" : "text-base"
+        )}
+      >
         {title}
       </h3>
 
@@ -393,7 +431,8 @@ export default function RecipeCard({
           {safeArr(tags)
             .slice(0, 5)
             .map((t, i) => {
-              const label = typeof t === "string" ? t : t?.label || t?.id || "tag";
+              const label =
+                typeof t === "string" ? t : t?.label || t?.id || "tag";
               return (
                 <span
                   key={`${id}-tag-${i}`}
@@ -488,7 +527,11 @@ export default function RecipeCard({
           <Tags className="w-3 h-3" />
           {(source?.type || "vault").toUpperCase()}
         </div>
-        {updatedAt ? <div>Updated {new Date(updatedAt).toLocaleDateString()}</div> : <span>&nbsp;</span>}
+        {updatedAt ? (
+          <div>Updated {new Date(updatedAt).toLocaleDateString()}</div>
+        ) : (
+          <span>&nbsp;</span>
+        )}
       </div>
     </article>
   );

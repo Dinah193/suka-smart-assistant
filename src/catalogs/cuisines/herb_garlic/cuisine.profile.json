@@ -1,0 +1,405 @@
+{
+  "$schema": "../../../schemas/cuisine.profile.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.herb_garlic",
+    "type": "cuisine_profile",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Herb & Garlic",
+    "description": "Aromatic, savory cooking built around garlic, fresh herbs, citrus, and olive oil. Works as a flexible overlay cuisine for poultry, fish, vegetables, legumes, and simple grains.",
+    "tags": [
+      "cuisine.herb_garlic",
+      "flavor.herb_forward",
+      "flavor.garlic_forward",
+      "profile.overlay",
+      "weeknight.friendly",
+      "batch.friendly"
+    ],
+    "source": {
+      "curation": "SSA Canonical",
+      "maintainer": "SSA",
+      "license": "internal",
+      "attribution": "Canonical composite profile (no single source).",
+      "kind": "catalog",
+      "notes": "Designed as a cross-cuisine flavor overlay. Keep ingredient ids aligned to ingredients.aliases.json when available."
+    }
+  },
+
+  "plannerDefaults": {
+    "servingStyles": ["plates", "bowls", "family_style", "one_pot"],
+    "weeknightBias": "Fast aromatics, simple proteins, sheet-pan vegetables, and quick sauces (lemon/garlic/herb).",
+    "leftoversStrategy": "batch_and_remix",
+
+    "batchCookingBias": {
+      "level": "medium",
+      "bestBatches": [
+        "dish.archetype.sheet_pan_veg",
+        "dish.archetype.herb_garlic_chicken",
+        "dish.archetype.lentil_base"
+      ],
+      "notes": "Batch roast vegetables and a simple herb-garlic sauce; reuse across bowls, wraps, salads, and plates."
+    },
+
+    "spiceHeatDefault": "low",
+    "saltinessDefault": "medium",
+    "sournessDefault": "medium",
+    "sweetnessDefault": "none",
+    "umamiDefault": "medium",
+    "oilUseDefault": "medium",
+
+    "preferredCookingFats": [
+      "ingredients.olive_oil",
+      "ingredients.butter_optional"
+    ],
+
+    "primaryStarches": [
+      "ingredients.rice_optional",
+      "ingredients.potatoes",
+      "ingredients.pasta_optional",
+      "ingredients.bread_optional",
+      "ingredients.couscous_optional"
+    ],
+
+    "primaryProteins": [
+      "ingredients.chicken",
+      "ingredients.fish",
+      "ingredients.eggs_optional",
+      "ingredients.chickpeas",
+      "ingredients.lentils",
+      "ingredients.lamb_optional"
+    ],
+
+    "defaultMealArchetypes": [
+      "dish.archetype.herb_garlic_protein",
+      "dish.archetype.sheet_pan_veg",
+      "dish.archetype.lemon_garlic_sauce",
+      "dish.archetype.legume_salad"
+    ],
+
+    "defaultPlateTemplateIds": [
+      "plate.template.protein_veg_starch",
+      "plate.template.bowl_grain_veg_protein",
+      "plate.template.salad_protein"
+    ]
+  },
+
+  "flavorSystem": {
+    "signatureNotes": [
+      "Garlic + herbs + olive oil is the core triangle.",
+      "Brighten with lemon/vinegar at the end.",
+      "Use salt + pepper as the base seasoning; add gentle heat optionally.",
+      "Pair with roasted vegetables, grilled proteins, legumes, and simple grains."
+    ],
+
+    "aromaticsCore": [
+      "ingredients.garlic",
+      "ingredients.onion_optional",
+      "ingredients.shallot_optional"
+    ],
+
+    "spiceCore": [
+      "ingredients.black_pepper",
+      "ingredients.dried_oregano_optional",
+      "ingredients.dried_thyme_optional",
+      "ingredients.paprika_optional"
+    ],
+
+    "umamiBuilders": [
+      "ingredients.salt",
+      "ingredients.parmesan_optional",
+      "ingredients.anchovy_optional",
+      "ingredients.olives_optional"
+    ],
+
+    "acidOptions": [
+      "ingredients.lemon",
+      "ingredients.red_wine_vinegar_optional",
+      "ingredients.white_wine_vinegar_optional"
+    ],
+
+    "sweetBalanceOptions": ["ingredients.honey_optional"],
+
+    "heatOptions": [
+      "ingredients.red_pepper_flakes_optional",
+      "ingredients.cayenne_optional"
+    ]
+  },
+
+  "dishArchetypes": [
+    {
+      "id": "dish.archetype.herb_garlic_protein",
+      "label": "Herb-Garlic Protein",
+      "description": "A simple grilled/roasted/sautéed protein seasoned with garlic, herbs, oil, and citrus.",
+      "commonExamples": [
+        "Lemon-herb grilled chicken",
+        "Garlic-herb baked fish",
+        "Pan-seared chicken with herb butter"
+      ],
+      "defaults": {
+        "proteinOptions": [
+          "ingredients.chicken",
+          "ingredients.fish",
+          "ingredients.lamb_optional",
+          "ingredients.eggs_optional"
+        ],
+        "sauceOptions": ["dish.archetype.lemon_garlic_sauce"],
+        "pairings": [
+          "dish.archetype.sheet_pan_veg",
+          "dish.archetype.legume_salad"
+        ]
+      }
+    },
+    {
+      "id": "dish.archetype.sheet_pan_veg",
+      "label": "Sheet-Pan Vegetables",
+      "description": "Roasted vegetables with olive oil, garlic, herbs, salt, and pepper.",
+      "commonExamples": [
+        "Roasted zucchini and bell peppers",
+        "Roasted carrots and onions",
+        "Roasted broccoli and cauliflower"
+      ],
+      "defaults": {
+        "vegOptions": [
+          "ingredients.zucchini_optional",
+          "ingredients.bell_pepper_optional",
+          "ingredients.onion_optional",
+          "ingredients.carrots_optional",
+          "ingredients.broccoli_optional",
+          "ingredients.cauliflower_optional"
+        ],
+        "pairings": [
+          "dish.archetype.herb_garlic_protein",
+          "dish.archetype.lemon_garlic_sauce"
+        ]
+      }
+    },
+    {
+      "id": "dish.archetype.lemon_garlic_sauce",
+      "label": "Lemon-Garlic Herb Sauce",
+      "description": "Quick finishing sauce (or marinade) built from garlic, herbs, lemon, oil, salt, and pepper.",
+      "commonExamples": [
+        "Lemon-garlic vinaigrette",
+        "Garlic-herb pan sauce",
+        "Herb-garlic marinade"
+      ],
+      "defaults": {
+        "sauceOptions": [
+          "ingredients.olive_oil",
+          "ingredients.lemon",
+          "ingredients.garlic"
+        ],
+        "pairings": [
+          "dish.archetype.herb_garlic_protein",
+          "dish.archetype.sheet_pan_veg",
+          "dish.archetype.legume_salad"
+        ]
+      }
+    },
+    {
+      "id": "dish.archetype.legume_salad",
+      "label": "Herb-Forward Legume Salad",
+      "description": "Chickpeas/lentils tossed with herbs, garlic, olive oil, and lemon; served as side or main bowl component.",
+      "commonExamples": [
+        "Chickpea herb salad",
+        "Lentil salad with lemon and parsley"
+      ],
+      "defaults": {
+        "proteinOptions": ["ingredients.chickpeas", "ingredients.lentils"],
+        "pairings": [
+          "dish.archetype.herb_garlic_protein",
+          "dish.archetype.sheet_pan_veg"
+        ]
+      }
+    }
+  ],
+
+  "substitutionGuidance": {
+    "proteinSubstitutions": [
+      {
+        "for": "ingredients.fish",
+        "options": ["ingredients.chicken", "ingredients.lamb_optional"],
+        "notes": "If replacing fish with chicken, increase cook time and keep lemon/herb finishing."
+      },
+      {
+        "for": "ingredients.chicken",
+        "options": [
+          "ingredients.fish",
+          "ingredients.chickpeas",
+          "ingredients.lentils"
+        ],
+        "notes": "For plant-based swaps, emphasize herbs, acid, and a savory salt/umami component (olives/cheese optional)."
+      }
+    ],
+    "sideSubstitutions": [
+      {
+        "for": "ingredients.rice_optional",
+        "options": [
+          "ingredients.potatoes",
+          "ingredients.couscous_optional",
+          "ingredients.pasta_optional"
+        ],
+        "notes": "Any neutral starch works; keep the herb/garlic sauce as the connector."
+      }
+    ],
+    "notes": [
+      "If you don't have fresh herbs, use dried oregano/thyme and finish with lemon.",
+      "If you don't have lemon, use vinegar; keep acid as a finishing step.",
+      "If avoiding dairy, skip cheese/anchovy and keep umami via olives or salt-forward seasoning."
+    ]
+  },
+
+  "mealTemplates": [
+    {
+      "id": "meal.template.herb_garlic_chicken_plate",
+      "label": "Herb-Garlic Chicken Plate",
+      "archetypeId": "dish.archetype.herb_garlic_protein",
+      "components": [
+        {
+          "role": "protein",
+          "ingredientIds": ["ingredients.chicken"],
+          "chooseOne": false,
+          "notes": "Grill/roast/saute with garlic + herbs + lemon."
+        },
+        {
+          "role": "veg",
+          "ingredientIds": [
+            "ingredients.zucchini_optional",
+            "ingredients.bell_pepper_optional",
+            "ingredients.broccoli_optional",
+            "ingredients.cauliflower_optional",
+            "ingredients.carrots_optional"
+          ],
+          "chooseOne": true,
+          "notes": "Sheet-pan roast with olive oil, garlic, herbs."
+        },
+        {
+          "role": "starch",
+          "ingredientIds": [
+            "ingredients.potatoes",
+            "ingredients.rice_optional",
+            "ingredients.couscous_optional"
+          ],
+          "chooseOne": true,
+          "notes": "Neutral base; sauce ties it together."
+        },
+        {
+          "role": "sauce",
+          "ingredientIds": [
+            "ingredients.lemon",
+            "ingredients.olive_oil",
+            "ingredients.garlic"
+          ],
+          "chooseOne": false,
+          "notes": "Quick lemon-garlic herb sauce or vinaigrette."
+        }
+      ],
+      "prepNotes": [
+        "Batch: roast extra vegetables and make a jar of lemon-garlic herb dressing for 3–4 meals."
+      ]
+    },
+    {
+      "id": "meal.template.legume_herb_bowl",
+      "label": "Herb-Garlic Legume Bowl",
+      "archetypeId": "dish.archetype.legume_salad",
+      "components": [
+        {
+          "role": "legume",
+          "ingredientIds": ["ingredients.chickpeas", "ingredients.lentils"],
+          "chooseOne": true,
+          "notes": "Use cooked/canned legumes; toss with herbs, garlic, lemon, oil."
+        },
+        {
+          "role": "veg",
+          "ingredientIds": [
+            "ingredients.cucumber_optional",
+            "ingredients.tomatoes_optional",
+            "ingredients.onion_optional"
+          ],
+          "chooseOne": true,
+          "notes": "Fresh chopped vegetables for crunch; or swap with roasted veg."
+        },
+        {
+          "role": "fat",
+          "ingredientIds": ["ingredients.olive_oil"],
+          "chooseOne": false,
+          "notes": "Olive oil carries herbs and garlic."
+        },
+        {
+          "role": "sauce",
+          "ingredientIds": [
+            "ingredients.lemon",
+            "ingredients.red_wine_vinegar_optional"
+          ],
+          "chooseOne": true,
+          "notes": "Always include acid; it makes the profile pop."
+        }
+      ],
+      "prepNotes": [
+        "Make ahead: legume salad holds 3–4 days refrigerated; refresh with lemon before serving."
+      ]
+    }
+  ],
+
+  "safetyNotes": [
+    {
+      "id": "safety.raw_garlic",
+      "label": "Raw garlic intensity",
+      "notes": [
+        "Raw garlic can be harsh; mellow by grating finely and letting it sit in lemon/vinegar for 5 minutes before adding oil.",
+        "For sensitive stomachs, use lightly sautéed garlic instead of raw."
+      ]
+    }
+  ],
+
+  "searchHints": {
+    "keywords": [
+      "garlic herb",
+      "lemon garlic",
+      "herb vinaigrette",
+      "sheet pan vegetables",
+      "herb chicken",
+      "garlic fish"
+    ],
+    "commonAlternateNames": ["lemon herb", "garlic and herbs", "herb-forward"]
+  },
+
+  "ui": {
+    "heroSuggestions": [
+      {
+        "title": "Fast Herb & Garlic Staples",
+        "items": [
+          "dish.archetype.lemon_garlic_sauce",
+          "dish.archetype.sheet_pan_veg",
+          "dish.archetype.herb_garlic_protein"
+        ]
+      }
+    ],
+    "searchBoostTerms": [
+      "lemon",
+      "garlic",
+      "parsley",
+      "oregano",
+      "thyme",
+      "olive oil"
+    ],
+    "iconHints": ["cuisine.herb_garlic"]
+  },
+
+  "compat": {
+    "recipeTagDefaults": [
+      "cuisine.herb_garlic",
+      "flavor.herb_forward",
+      "flavor.garlic_forward"
+    ],
+    "defaultPlateTemplateIds": [
+      "plate.template.protein_veg_starch",
+      "plate.template.bowl_grain_veg_protein"
+    ],
+    "notes": [
+      "This profile is designed to be used alone or layered on top of other cuisines as an overlay tag."
+    ]
+  }
+}

@@ -29,25 +29,25 @@
  * - Touch UI, DOM, timers, or global mutable state
  */
 
-import { emit as emitEvent } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit as emitEvent } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
 import { getModeForIntent } from "@/reasoner/modes/map"; // (domain, intent) -> mode string
-import { runReasoner } from "@/reasoner/runtime/reasoner";
-import { checkBudget } from "@/reasoner/runtime/budget";
-import { canInvokeReasoner } from "@/reasoner/runtime/gating";
-import { applyConfidenceRules } from "@/reasoner/runtime/confidence";
-import { applyFreshnessRules } from "@/reasoner/runtime/freshness";
+import { runReasoner } from "@/reasoner/index";
+import { checkBudget } from "@/reasoner/budget";
+import { canInvokeReasoner } from "@/reasoner/gating";
+import { applyConfidenceRules } from "@/reasoner/confidence";
+import { applyFreshnessRules } from "@/reasoner/freshness";
 
 import { getDomainContext } from "@/db/selectors";
 import { getCached, setCached } from "@/reasoner/cache/memo";
 import { buildCacheKey } from "@/reasoner/cache/keys";
 
-import { validateModeOutput } from "@/reasoner/modes/validator";
+import { validateModeOutput } from "@/reasoner/modes/validate";
 import { buildPromptForMode } from "@/reasoner/prompts/builder";
 
-import { HubPacketFormatter } from "@/hub/HubPacketFormatter";
-import { FamilyFundConnector } from "@/hub/FamilyFundConnector";
+import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
+import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
 
 /**
  * Canonical garden health intents corresponding to the old agent commands.
@@ -116,7 +116,10 @@ export async function invokeShim(req) {
     }
 
     if (!intent || typeof intent !== "string") {
-      return buildShimError("Missing intent in ShimRequest", null, { ts, domain });
+      return buildShimError("Missing intent in ShimRequest", null, {
+        ts,
+        domain,
+      });
     }
 
     const normalizedIntent = normalizeIntent(intent);
@@ -209,11 +212,14 @@ export async function invokeShim(req) {
       contextKeys: Object.keys(context || {}),
     });
 
-    const { input: freshInput, freshnessWarnings } =
-      (await applyFreshnessRules(mode, input, context)) || {
-        input,
-        freshnessWarnings: [],
-      };
+    const { input: freshInput, freshnessWarnings } = (await applyFreshnessRules(
+      mode,
+      input,
+      context
+    )) || {
+      input,
+      freshnessWarnings: [],
+    };
 
     if (freshnessWarnings?.length) {
       warnings.push(...freshnessWarnings);
@@ -468,7 +474,9 @@ export async function handleGardenHealthCommand(command, payload = {}) {
  * @returns {string}
  */
 function normalizeIntent(intent) {
-  const c = String(intent || "").toLowerCase().trim();
+  const c = String(intent || "")
+    .toLowerCase()
+    .trim();
 
   const map = {
     seasonal: "generateSeasonalAlerts",
@@ -547,9 +555,7 @@ function normalizeGardenHealthEnvelope(raw, normalizedIntent) {
       calendarEvents: Array.isArray(raw.calendarEvents)
         ? raw.calendarEvents
         : [],
-      gardenUpdates: Array.isArray(raw.gardenUpdates)
-        ? raw.gardenUpdates
-        : [],
+      gardenUpdates: Array.isArray(raw.gardenUpdates) ? raw.gardenUpdates : [],
       logs: Array.isArray(raw.logs) ? raw.logs : [],
     };
   }

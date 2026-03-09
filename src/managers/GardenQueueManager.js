@@ -34,7 +34,8 @@
 
 const DOMAIN = "garden";
 const NOW = () => new Date();
-const iso = (d) => (d instanceof Date ? d.toISOString() : new Date(d || Date.now()).toISOString());
+const iso = (d) =>
+  d instanceof Date ? d.toISOString() : new Date(d || Date.now()).toISOString();
 const addDays = (d, n) => new Date(d.getTime() + n * 86400000);
 const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 const safeNumber = (v, fb = 0) => (Number.isFinite(Number(v)) ? Number(v) : fb);
@@ -58,8 +59,12 @@ async function lazy(path) {
 import DexieDB from "../db";
 
 // Event bus (fallback noop, then hydrate)
-let eventBus = (typeof window !== "undefined" && window.__suka_eventBus__) || { emit() {}, on() {}, off() {} };
-lazy("@/services/eventBus").then((eb) => {
+let eventBus = (typeof window !== "undefined" && window.__suka_eventBus__) || {
+  emit() {},
+  on() {},
+  off() {},
+};
+lazy("@/services/events/eventBus").then((eb) => {
   const bus = eb?.eventBus || eb || eventBus;
   if (typeof window !== "undefined") window.__suka_eventBus__ = bus;
   eventBus = bus;
@@ -73,11 +78,21 @@ let PlanStorageRouter = null;
 let SettingsStore = null;
 
 Promise.all([
-  lazy("@/services/sync/tierSync").then((m) => (tierSync = m?.default || m || tierSync)),
-  lazy("@/services/automation/runtime").then((m) => (automation = m?.automation || m?.default || null)),
-  lazy("@/services/calendar/calendarSync").then((m) => (calendarSync = m?.default || m || null)),
-  lazy("@/services/plans/PlanStorageRouter").then((m) => (PlanStorageRouter = m?.default || m || null)),
-  lazy("@/store/SettingsStore").then((m) => (SettingsStore = m?.default || m || null)),
+  lazy("@/services/sync/tierSync").then(
+    (m) => (tierSync = m?.default || m || tierSync)
+  ),
+  lazy("@/services/automation/runtime").then(
+    (m) => (automation = m?.automation || m?.default || null)
+  ),
+  lazy("@/services/calendar/calendarSync").then(
+    (m) => (calendarSync = m?.default || m || null)
+  ),
+  lazy("@/services/plans/PlanStorageRouter").then(
+    (m) => (PlanStorageRouter = m?.default || m || null)
+  ),
+  lazy("@/store/SettingsStore").then(
+    (m) => (SettingsStore = m?.default || m || null)
+  ),
 ]);
 
 // ---------- Settings ----------
@@ -90,7 +105,9 @@ function getSettingsSnapshot() {
       sabbathDayRule: get("observance.sabbathDayRule", "hebrew_day7"),
       quietRespect: !!get("notifications.quietHours.respectObservance", true),
       defaultDestination: get("favorites.defaultDestination", "local"),
-      plantSessionWindowStart: get("sessions.itemRuntimePanel.compact", false) ? "18:30" : "17:30",
+      plantSessionWindowStart: get("sessions.itemRuntimePanel.compact", false)
+        ? "18:30"
+        : "17:30",
       defaultScheduleName: get("scheduler.defaultScheduleName", "Household"),
     };
   } catch {
@@ -126,7 +143,10 @@ async function loadGardenSettings() {
 async function loadFavoriteHints() {
   try {
     const all =
-      (await DexieDB.favoritePlans?.where?.("domain")?.equals?.(DOMAIN)?.toArray?.()) ??
+      (await DexieDB.favoritePlans
+        ?.where?.("domain")
+        ?.equals?.(DOMAIN)
+        ?.toArray?.()) ??
       (await DexieDB.favoritePlans?.toArray?.()) ??
       [];
     const hints = {};
@@ -134,7 +154,10 @@ async function loadFavoriteHints() {
       if (fav?.domain !== DOMAIN) continue;
       const map = fav?.meta?.hints || {};
       for (const k of Object.keys(map)) {
-        hints[k.toLowerCase()] = { ...(hints[k.toLowerCase()] || {}), ...map[k] };
+        hints[k.toLowerCase()] = {
+          ...(hints[k.toLowerCase()] || {}),
+          ...map[k],
+        };
       }
     }
     return hints;
@@ -172,12 +195,20 @@ function daysUntil(date) {
 }
 
 // ---------- Priority ----------
-function priorityScore({ belowRatio, timePressureDays, viabilityRisk, categoryBump = 0 }) {
+function priorityScore({
+  belowRatio,
+  timePressureDays,
+  viabilityRisk,
+  categoryBump = 0,
+}) {
   let base =
-    belowRatio <= 0.1 ? 80 :
-    belowRatio <= 0.25 ? 60 :
-    belowRatio <= 0.5 ? 35 :
-    15;
+    belowRatio <= 0.1
+      ? 80
+      : belowRatio <= 0.25
+      ? 60
+      : belowRatio <= 0.5
+      ? 35
+      : 15;
 
   if (Number.isFinite(timePressureDays)) {
     if (timePressureDays <= 0) base += 25;
@@ -229,17 +260,23 @@ function buildPlantingTask(item, ctx, favoriteHints = {}) {
   const fav = favoriteHints[key] || {};
 
   const windowPrefUser = fav.plantingWindow || null;
-  const windowPrefTags = item.meta?.plantingWindow || defaultWindowForTags(item);
+  const windowPrefTags =
+    item.meta?.plantingWindow || defaultWindowForTags(item);
   const windowPref = windowPrefUser || windowPrefTags;
 
   const inWindow = monthInWindow(mIdx, windowPref);
   const frostSoon = lastFrostISO ? daysUntil(lastFrostISO) : null;
   const beforeLastFrost = frostSoon != null && frostSoon > 0;
 
-  const sowing = item.meta?.sowing || (hasTag(item, "root") ? "direct" : "transplant");
+  const sowing =
+    item.meta?.sowing || (hasTag(item, "root") ? "direct" : "transplant");
   let task = inWindow
-    ? (sowing === "transplant" ? "Transplant seedlings" : "Direct sow")
-    : (sowing === "transplant" ? "Up-pot & harden off" : "Start indoors");
+    ? sowing === "transplant"
+      ? "Transplant seedlings"
+      : "Direct sow"
+    : sowing === "transplant"
+    ? "Up-pot & harden off"
+    : "Start indoors";
 
   if (hasTag(item, "warm") && beforeLastFrost && sowing !== "transplant") {
     task = "Start indoors (warm crop)";
@@ -252,7 +289,7 @@ function buildPlantingTask(item, ctx, favoriteHints = {}) {
 
   let timePressureDays = null;
   if (windowPref) {
-    const endMonthIdx = clamp((windowPref.endMonth || (mIdx + 1)) - 1, 0, 11);
+    const endMonthIdx = clamp((windowPref.endMonth || mIdx + 1) - 1, 0, 11);
     const endDate = new Date(now.getFullYear(), endMonthIdx, 28, 18, 0, 0);
     timePressureDays = daysUntil(endDate);
   } else if (hasTag(item, "warm") && firstFrostISO) {
@@ -266,18 +303,30 @@ function buildPlantingTask(item, ctx, favoriteHints = {}) {
     else if (d <= 30) viabilityRisk = "soon";
   }
 
-  const categoryBump =
-    hasTag(item, "root") ? 10 :
-    hasTag(item, "leafy") ? 5 :
-    hasTag(item, "herb") ? 3 :
-    hasTag(item, "fruiting") ? 12 : 0;
+  const categoryBump = hasTag(item, "root")
+    ? 10
+    : hasTag(item, "leafy")
+    ? 5
+    : hasTag(item, "herb")
+    ? 3
+    : hasTag(item, "fruiting")
+    ? 12
+    : 0;
 
-  const { label, score } = priorityScore({ belowRatio, timePressureDays, viabilityRisk, categoryBump });
+  const { label, score } = priorityScore({
+    belowRatio,
+    timePressureDays,
+    viabilityRisk,
+    categoryBump,
+  });
 
-  const estMinutes =
-    /Transplant/i.test(task) ? 25 :
-    /Direct sow|Start indoors/i.test(task) ? 15 :
-    /Up-pot|harden/i.test(task) ? 20 : 12;
+  const estMinutes = /Transplant/i.test(task)
+    ? 25
+    : /Direct sow|Start indoors/i.test(task)
+    ? 15
+    : /Up-pot|harden/i.test(task)
+    ? 20
+    : 12;
 
   const due = (() => {
     if (timePressureDays != null) {
@@ -289,7 +338,9 @@ function buildPlantingTask(item, ctx, favoriteHints = {}) {
     return addDays(now, 7);
   })();
 
-  const companions = Array.isArray(item.meta?.companions) ? item.meta.companions : [];
+  const companions = Array.isArray(item.meta?.companions)
+    ? item.meta.companions
+    : [];
 
   return {
     id: item.id,
@@ -311,13 +362,20 @@ function buildPlantingTask(item, ctx, favoriteHints = {}) {
       window: windowPref || null,
       viabilityExpiresISO: item.meta?.viabilityExpiresISO || null,
       variety: item.meta?.variety || null,
-      successionsPerSeason: fav.successionsPerSeason ?? item.meta?.successionsPerSeason ?? null,
+      successionsPerSeason:
+        fav.successionsPerSeason ?? item.meta?.successionsPerSeason ?? null,
     },
     ui: {
       intent: "garden-plant",
       deepLink: { panel: "Garden", tab: "Planner", id: item.id },
       followups: [
-        companions.length ? { action: "openGuide", target: "CompanionPlanting", data: companions } : null,
+        companions.length
+          ? {
+              action: "openGuide",
+              target: "CompanionPlanting",
+              data: companions,
+            }
+          : null,
       ].filter(Boolean),
     },
     speak: `Garden reminder: ${task} ${item.name} in the ${recommendedPlot}.`,
@@ -381,12 +439,17 @@ function buildPlantSessionPlan(queue, { title, startTimeLocal }) {
       recurrence: null,
       startTimeLocal: startTimeLocal || "17:30",
       calendar: { write: true, title: "Garden — Plant Session" },
-      favoriteableSchedule: { suggestedName: "My Evening Planting", suggestedDomain: DOMAIN },
+      favoriteableSchedule: {
+        suggestedName: "My Evening Planting",
+        suggestedDomain: DOMAIN,
+      },
     },
     steps: queue.map((e) => ({
       id: `plant-${e.id}`,
       title: `${e.task} — ${e.name}`,
-      description: `Plot: ${e.recommendedPlot || "Garden"} · Est ${e.estMinutes || 12} min`,
+      description: `Plot: ${e.recommendedPlot || "Garden"} · Est ${
+        e.estMinutes || 12
+      } min`,
       kind: "garden",
       plot: e.recommendedPlot || null,
       durationMs: (e.estMinutes || 12) * 60000,
@@ -465,9 +528,15 @@ async function adjustSupplyQty(id, delta) {
     if (!get || !put) return false;
     const item = await get(id);
     if (!item) return false;
-    const next = { ...item, quantity: safeNumber(item.quantity, 0) + safeNumber(delta, 0) };
+    const next = {
+      ...item,
+      quantity: safeNumber(item.quantity, 0) + safeNumber(delta, 0),
+    };
     await put(next);
-    eventBus?.emit?.("inventory:changed", { reason: "garden-consume", itemId: id });
+    eventBus?.emit?.("inventory:changed", {
+      reason: "garden-consume",
+      itemId: id,
+    });
     tierSync?.publish?.("garden.supplies.adjusted", { id, delta });
     return true;
   } catch (e) {
@@ -497,9 +566,21 @@ const GardenQueueManager = {
     const supplies = (await DexieDB.supplies?.toArray?.()) ?? [];
 
     const candidates = supplies.filter((item) => {
-      const gardenish = hasAnyTag(item, ["garden", "growable", "seed", "seedling", "root", "leafy", "herb", "fruiting"]);
+      const gardenish = hasAnyTag(item, [
+        "garden",
+        "growable",
+        "seed",
+        "seedling",
+        "root",
+        "leafy",
+        "herb",
+        "fruiting",
+      ]);
       const isBelowThreshold = (item.quantity ?? 0) <= (item.threshold ?? 0);
-      return gardenish && (isBelowThreshold || hasAnyTag(item, ["fruiting", "trellis"]));
+      return (
+        gardenish &&
+        (isBelowThreshold || hasAnyTag(item, ["fruiting", "trellis"]))
+      );
     });
 
     const queue = [];
@@ -507,7 +588,8 @@ const GardenQueueManager = {
       const planting = buildPlantingTask(item, settings, favoriteHints);
       if (planting) {
         queue.push(planting);
-        const belowRatio = (item.quantity ?? 0) / Math.max(1, item.threshold ?? 1);
+        const belowRatio =
+          (item.quantity ?? 0) / Math.max(1, item.threshold ?? 1);
         if (emitEvents && belowRatio <= 1) {
           eventBus.emit("inventory.shortage.detected", {
             domain: DOMAIN,
@@ -532,7 +614,8 @@ const GardenQueueManager = {
     }
 
     queue.sort((a, b) => {
-      if ((b.priorityScore || 0) !== (a.priorityScore || 0)) return (b.priorityScore || 0) - (a.priorityScore || 0);
+      if ((b.priorityScore || 0) !== (a.priorityScore || 0))
+        return (b.priorityScore || 0) - (a.priorityScore || 0);
       return new Date(a.dueISO || 0) - new Date(b.dueISO || 0);
     });
 
@@ -552,7 +635,10 @@ const GardenQueueManager = {
       });
     }
 
-    tierSync?.publish?.("garden.queue.generated", { count: queue.length, top: queue[0]?.name || null });
+    tierSync?.publish?.("garden.queue.generated", {
+      count: queue.length,
+      top: queue[0]?.name || null,
+    });
 
     return queue.map((entry) => ({
       id: entry.id,
@@ -611,7 +697,12 @@ const GardenQueueManager = {
       id: `${e.id}:${e.dueISO || "soon"}`,
       title: `${iconFor(e)} ${e.task || "Plant"} — ${e.name}`,
       start: e.dueISO || iso(NOW()),
-      end: iso(new Date(new Date(e.dueISO || Date.now()).getTime() + (e.estMinutes || 12) * 60000)),
+      end: iso(
+        new Date(
+          new Date(e.dueISO || Date.now()).getTime() +
+            (e.estMinutes || 12) * 60000
+        )
+      ),
       metadata: {
         source: "garden-queue",
         priority: e.priority,
@@ -624,7 +715,12 @@ const GardenQueueManager = {
 
   async writeCalendar(opts = {}) {
     const events = await this.getCalendarEvents(opts);
-    if (!calendarSync?.writeEvents) return { ok: false, reason: "calendarSync not present", eventsCount: events.length };
+    if (!calendarSync?.writeEvents)
+      return {
+        ok: false,
+        reason: "calendarSync not present",
+        eventsCount: events.length,
+      };
     try {
       await calendarSync.writeEvents(events, { domain: DOMAIN });
       return { ok: true, eventsCount: events.length };
@@ -679,7 +775,10 @@ const GardenQueueManager = {
           successionsPerSeason: e.details?.successionsPerSeason || null,
         },
       })),
-      meta: { generatedBy: "GardenQueueManager", settings: await loadGardenSettings() },
+      meta: {
+        generatedBy: "GardenQueueManager",
+        settings: await loadGardenSettings(),
+      },
     };
 
     // Prefer PlanStorageRouter
@@ -689,7 +788,10 @@ const GardenQueueManager = {
         await PlanStorageRouter.save(rawPlan, { favorite, ...exportOpts });
         return true;
       } catch (err) {
-        console.warn("[GardenQueueManager] PlanStorageRouter.save failed:", err);
+        console.warn(
+          "[GardenQueueManager] PlanStorageRouter.save failed:",
+          err
+        );
         return false;
       }
     };
@@ -707,7 +809,8 @@ const GardenQueueManager = {
                 acc[k] = acc[k] || {};
                 if (it.plot) acc[k].preferredPlot = it.plot;
                 if (it.meta?.window) acc[k].plantingWindow = it.meta.window;
-                if (it.meta?.successionsPerSeason) acc[k].successionsPerSeason = it.meta.successionsPerSeason;
+                if (it.meta?.successionsPerSeason)
+                  acc[k].successionsPerSeason = it.meta.successionsPerSeason;
                 return acc;
               }, {}),
             },
@@ -733,9 +836,18 @@ const GardenQueueManager = {
     eventBus?.emit?.("prep.tasks.requested", {
       domain: DOMAIN,
       tasks: rawPlan.items.map((it) => ({
-        id: it.id, name: it.name, task: it.task, dueISO: it.dueISO, estMinutes: it.estMinutes, priority: it.priority,
+        id: it.id,
+        name: it.name,
+        task: it.task,
+        dueISO: it.dueISO,
+        estMinutes: it.estMinutes,
+        priority: it.priority,
       })),
-      meta: { planId: rawPlan.id, title: rawPlan.title, source: "GardenQueueManager.saveQueueAsPlan" },
+      meta: {
+        planId: rawPlan.id,
+        title: rawPlan.title,
+        source: "GardenQueueManager.saveQueueAsPlan",
+      },
     });
 
     // Emit favorite-able plan save for user-owned flows (save modal/export)
@@ -743,7 +855,10 @@ const GardenQueueManager = {
       eventBus?.emit?.("general.plan.favorite.requested", {
         domain: DOMAIN,
         plan,
-        options: { source: "GardenQueueManager", destination: settingsSnap.defaultDestination || "local" },
+        options: {
+          source: "GardenQueueManager",
+          destination: settingsSnap.defaultDestination || "local",
+        },
         favoriteKey: plan.meta.defaultFavoriteKey || "garden:plant-session",
       });
     }
@@ -752,7 +867,12 @@ const GardenQueueManager = {
     automation?.nudge?.({
       scope: DOMAIN,
       kind: "plan_saved",
-      payload: { planId: rawPlan.id, favorite, items: rawPlan.items.length, title: rawPlan.title },
+      payload: {
+        planId: rawPlan.id,
+        favorite,
+        items: rawPlan.items.length,
+        title: rawPlan.title,
+      },
     });
 
     return { ok: saved, plan, rawPlan };
@@ -819,13 +939,18 @@ const GardenQueueManager = {
         threshold: safeNumber(p.threshold, 1),
         unit: p.unit || "packet",
         location: p.location || "Seed Box",
-        tags: Array.isArray(p.tags) ? p.tags : ["garden", "seed", ...(p.tags ? [p.tags] : [])],
+        tags: Array.isArray(p.tags)
+          ? p.tags
+          : ["garden", "seed", ...(p.tags ? [p.tags] : [])],
         meta: { ...(p.meta || {}) },
       };
       await upsertSupply(row);
 
       // Generate a quick queue and auto-build a plan (no favorite unless UI asks)
-      const queue = await this.generateQueue({ emitEvents: true, useFavorites: true });
+      const queue = await this.generateQueue({
+        emitEvents: true,
+        useFavorites: true,
+      });
       const settingsSnap = getSettingsSnapshot();
       const plan = buildPlantSessionPlan(queue.slice(0, 12), {
         title: `Plant It — ${p.name || "Seeds"}`,
@@ -836,14 +961,21 @@ const GardenQueueManager = {
       eventBus?.emit?.("general.plan.favorite.requested", {
         domain: DOMAIN,
         plan,
-        options: { source: "GardenQueueManager.onSeedAccepted", destination: settingsSnap.defaultDestination || "local" },
+        options: {
+          source: "GardenQueueManager.onSeedAccepted",
+          destination: settingsSnap.defaultDestination || "local",
+        },
         favoriteKey: plan.meta.defaultFavoriteKey || "garden:plant-session",
       });
     };
 
     // garden.queue.generate.requested
     const onQueueGenerateRequested = async () => {
-      await this.generateQueue({ emitEvents: true, useFavorites: true, includeSupportHarvest: true });
+      await this.generateQueue({
+        emitEvents: true,
+        useFavorites: true,
+        includeSupportHarvest: true,
+      });
     };
 
     // garden.plan.save.requested: { title?, favorite?, destination? }
@@ -860,24 +992,40 @@ const GardenQueueManager = {
     // garden.task.completed: { sourceId, consumeQty?, idempotencyKey? }
     const onTaskCompleted = async (evt) => {
       const p = evt?.payload || evt || {};
-      const key = p.idempotencyKey || `taskdone:${p.sourceId}:${p.consumeQty || 1}`;
+      const key =
+        p.idempotencyKey || `taskdone:${p.sourceId}:${p.consumeQty || 1}`;
       if (seenOrRemember(key)) return;
       if (p.sourceId) {
-        await adjustSupplyQty(p.sourceId, -Math.abs(safeNumber(p.consumeQty, 1)));
+        await adjustSupplyQty(
+          p.sourceId,
+          -Math.abs(safeNumber(p.consumeQty, 1))
+        );
       }
     };
 
     try {
-      eventBus.on?.("scanner.seed.accepted", onSeedAccepted);                 handlers.push(["scanner.seed.accepted", onSeedAccepted]);
-      eventBus.on?.("garden.queue.generate.requested", onQueueGenerateRequested); handlers.push(["garden.queue.generate.requested", onQueueGenerateRequested]);
-      eventBus.on?.("garden.plan.save.requested", onPlanSaveRequested);       handlers.push(["garden.plan.save.requested", onPlanSaveRequested]);
-      eventBus.on?.("garden.task.completed", onTaskCompleted);               handlers.push(["garden.task.completed", onTaskCompleted]);
+      eventBus.on?.("scanner.seed.accepted", onSeedAccepted);
+      handlers.push(["scanner.seed.accepted", onSeedAccepted]);
+      eventBus.on?.(
+        "garden.queue.generate.requested",
+        onQueueGenerateRequested
+      );
+      handlers.push([
+        "garden.queue.generate.requested",
+        onQueueGenerateRequested,
+      ]);
+      eventBus.on?.("garden.plan.save.requested", onPlanSaveRequested);
+      handlers.push(["garden.plan.save.requested", onPlanSaveRequested]);
+      eventBus.on?.("garden.task.completed", onTaskCompleted);
+      handlers.push(["garden.task.completed", onTaskCompleted]);
     } catch (e) {
       console.warn("[GardenQueueManager] registerActionConsumers failed:", e);
     }
 
     return () => {
-      try { for (const [evt, fn] of handlers) eventBus.off?.(evt, fn); } catch {}
+      try {
+        for (const [evt, fn] of handlers) eventBus.off?.(evt, fn);
+      } catch {}
     };
   },
 };

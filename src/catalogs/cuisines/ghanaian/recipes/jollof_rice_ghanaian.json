@@ -1,0 +1,443 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "meta": {
+    "id": "recipe.ghanaian.jollof_rice_ghanaian",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Ghanaian Jollof Rice",
+    "subtitle": "Smoky tomato-pepper rice with aromatics and optional protein",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa",
+      "notes": [
+        "Canonical Ghanaian-style jollof profile: tomato-forward, aromatic, lightly smoky, and well-seasoned.",
+        "Designed for SSA planners: supports weeknight + batch cooking + leftovers + freezer (sauce base)."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "cuisines.ghanaian",
+    "category": "category.rice",
+    "mealArchetypes": [
+      "archetype.rice_one_pot",
+      "archetype.weeknight_core",
+      "archetype.party_tray"
+    ],
+    "servingStyles": ["one_pot", "family_style", "plated_meals"],
+    "plannerTags": [
+      "cuisine.ghanaian",
+      "dish.jollof_rice",
+      "one_pot",
+      "tomato_forward",
+      "pepper_forward",
+      "batch_friendly",
+      "leftovers_good",
+      "weeknight_possible"
+    ]
+  },
+  "yield": {
+    "servings": 6,
+    "notes": "Serves ~6 as a main with sides, or ~8–10 as a party side."
+  },
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 35,
+    "totalMins": 60
+  },
+  "difficulty": "intermediate",
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": "base_only",
+    "onePot": true,
+    "spiceLevelDefault": 3,
+    "proteinOptional": true
+  },
+  "tasteProfile": {
+    "signatureNotes": ["tomato", "pepper", "aromatic onion", "smoky", "savory"],
+    "heat": 3,
+    "salt": 3,
+    "acid": 2,
+    "sweet": 1,
+    "umami": 3
+  },
+  "equipment": {
+    "minimum": [
+      "tool.pot_heavy_lid",
+      "tool.spoon_wood",
+      "tool.knife",
+      "tool.board"
+    ],
+    "recommended": [
+      "tool.blender",
+      "tool.fine_mesh_sieve",
+      "tool.rice_washer",
+      "tool.thermometer_instant"
+    ],
+    "optional": [
+      {
+        "id": "tool.dutch_oven",
+        "label": "Dutch oven / heavy pot",
+        "required": false,
+        "notes": "Best heat retention and even simmer for jollof."
+      },
+      {
+        "id": "tool.oven",
+        "label": "Oven (optional finish)",
+        "required": false,
+        "notes": "Optional low-oven finish for even cooking if stovetop heat is uneven."
+      }
+    ]
+  },
+  "dietFlags": ["diet.dairy_free", "diet.gluten_free"],
+  "allergens": ["allergen.fish_optional", "allergen.shellfish_optional"],
+  "ingredients": [
+    {
+      "id": "ingredient.rice_long_grain_parboiled",
+      "label": "Long-grain parboiled rice",
+      "role": "base",
+      "amount": { "value": 3, "unit": "cup" },
+      "notes": "Parboiled long grain is classic; rinse quickly to reduce surface starch but keep structure."
+    },
+    {
+      "id": "ingredient.oil_neutral",
+      "label": "Neutral oil (or a mix of neutral oil + a little palm oil)",
+      "role": "fat",
+      "amount": { "value": 0.333, "unit": "cup" },
+      "notes": "Optional: replace 1–2 Tbsp of neutral oil with palm oil for a deeper Ghanaian profile."
+    },
+    {
+      "id": "ingredient.onion_yellow",
+      "label": "Onion, sliced thin",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "large" }
+    },
+    {
+      "id": "ingredient.tomato_paste",
+      "label": "Tomato paste",
+      "role": "umami",
+      "amount": { "value": 4, "unit": "tbsp" },
+      "notes": "Fry the paste to reduce raw acidity and deepen color."
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 4, "unit": "clove" }
+    },
+    {
+      "id": "ingredient.ginger",
+      "label": "Ginger, grated",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.jollof_base_blended",
+      "label": "Blended tomato-pepper base (see note)",
+      "role": "sauce",
+      "amount": { "value": 4, "unit": "cup" },
+      "notes": [
+        "Blend: 4 Roma tomatoes + 1 red bell pepper + 1–2 hot peppers (scotch bonnet) + 1 small onion + splash of water.",
+        "You can substitute ~1 quart tomato puree + blended peppers/onion, but the fresh blend gives the best flavor."
+      ]
+    },
+    {
+      "id": "ingredient.stock_chicken_or_veg",
+      "label": "Chicken stock (or vegetable stock)",
+      "role": "liquid",
+      "amount": { "value": 3.5, "unit": "cup" },
+      "notes": "Total liquid depends on rice brand; start with 3.5 cups and adjust if needed."
+    },
+    {
+      "id": "ingredient.bay_leaf",
+      "label": "Bay leaves",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "each" }
+    },
+    {
+      "id": "ingredient.thyme_dried",
+      "label": "Dried thyme",
+      "role": "spice",
+      "amount": { "value": 1.5, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.curry_powder",
+      "label": "Curry powder",
+      "role": "spice",
+      "amount": { "value": 1.5, "unit": "tsp" },
+      "notes": "Common in many Ghanaian home styles; keep it balanced (not dominating)."
+    },
+    {
+      "id": "ingredient.paprika_smoked",
+      "label": "Smoked paprika",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": "Optional but helpful if you’re not getting a smoky note from the pot."
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.salt",
+      "label": "Salt",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Adjust to taste depending on stock saltiness."
+    },
+    {
+      "id": "ingredient.maggee_or_seasoning_cube",
+      "label": "Seasoning cube (optional)",
+      "role": "umami",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": "Optional, but common. If using, reduce salt slightly."
+    },
+    {
+      "id": "ingredient.frozen_mixed_vegetables",
+      "label": "Mixed vegetables (carrot/peas/green beans)",
+      "role": "veg",
+      "amount": { "value": 1.5, "unit": "cup" },
+      "optional": true,
+      "notes": "Optional Ghana-party style add-in; stir in near the end."
+    },
+    {
+      "id": "ingredient.protein_optional",
+      "label": "Protein (optional): chicken, turkey, beef, or goat (pre-cooked/grilled/fried)",
+      "role": "protein",
+      "amount": { "value": 1.5, "unit": "lb" },
+      "optional": true,
+      "notes": "Jollof can be cooked without protein; serve protein on the side for cleaner rice texture."
+    },
+    {
+      "id": "ingredient.lemon_or_lime",
+      "label": "Lime wedges (optional for serving)",
+      "role": "acid",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.jollof_01_prep_rice",
+      "title": "Rinse rice and prep aromatics",
+      "instructions": [
+        "Rinse the rice briefly (2–3 quick rinses) until the water is less cloudy; drain well.",
+        "Slice onion thin. Mince garlic and grate ginger.",
+        "If making the blended base: blend tomatoes, bell pepper, hot pepper(s), and onion with a splash of water until smooth."
+      ],
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Rinse/drain rice", "minutes": 3 }],
+      "checks": [
+        "Rice is drained well (excess water throws off liquid ratio).",
+        "Blended base is smooth (no large chunks)."
+      ]
+    },
+    {
+      "id": "step.jollof_02_fry_onions",
+      "title": "Soften onions and bloom aromatics",
+      "instructions": [
+        "Heat oil in a heavy pot over medium heat.",
+        "Add sliced onions and cook until softened and lightly golden at the edges.",
+        "Stir in garlic and ginger; cook 30–60 seconds until fragrant (do not burn)."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 2,
+      "timers": [
+        { "label": "Onions soften", "minutes": 6 },
+        { "label": "Garlic/ginger bloom", "seconds": 45 }
+      ],
+      "checks": [
+        "Onions are softened (not fully browned).",
+        "Aromatics smell fragrant, not burnt."
+      ]
+    },
+    {
+      "id": "step.jollof_03_fry_tomato_paste",
+      "title": "Fry tomato paste to deepen flavor",
+      "instructions": [
+        "Add tomato paste to the pot.",
+        "Fry, stirring constantly, until the paste darkens slightly and smells sweet/savory (not raw)."
+      ],
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Fry tomato paste", "minutes": 4 }],
+      "checks": [
+        "Paste color deepens and oil starts to separate slightly.",
+        "Raw tomato paste smell is gone."
+      ]
+    },
+    {
+      "id": "step.jollof_04_reduce_base",
+      "title": "Add blended base and reduce",
+      "instructions": [
+        "Pour in the blended tomato-pepper base carefully (it may sputter).",
+        "Add thyme, curry powder, smoked paprika (if using), black pepper, bay leaves, and seasoning cube (if using).",
+        "Cook uncovered, stirring occasionally, until the sauce reduces, thickens, and the oil begins to separate on top."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 14,
+      "timers": [{ "label": "Reduce sauce base", "minutes": 20 }],
+      "checks": [
+        "Sauce looks thicker and darker.",
+        "Oil is visible on the surface (separation is a good sign)."
+      ]
+    },
+    {
+      "id": "step.jollof_05_add_stock_and_season",
+      "title": "Add stock and balance seasoning",
+      "instructions": [
+        "Stir in stock and salt (start with about 1.5 tsp if your stock is salty).",
+        "Bring to a gentle simmer and taste the liquid: it should be slightly stronger than you want the finished rice.",
+        "Adjust salt and heat (optional extra hot pepper) now—flavors mute once rice is added."
+      ],
+      "activeMins": 4,
+      "handsOffMins": 3,
+      "timers": [{ "label": "Simmer and taste", "minutes": 3 }],
+      "checks": [
+        "Liquid tastes properly seasoned (a bit bold).",
+        "Simmer is gentle, not violently boiling."
+      ]
+    },
+    {
+      "id": "step.jollof_06_cook_rice",
+      "title": "Add rice and cook covered",
+      "instructions": [
+        "Add drained rice and stir thoroughly to coat every grain with the sauce.",
+        "Reduce heat to low. Cover tightly (use foil under the lid if your lid vents).",
+        "Cook on low heat until rice is tender and liquid is absorbed."
+      ],
+      "activeMins": 4,
+      "handsOffMins": 25,
+      "timers": [{ "label": "Cook covered", "minutes": 25 }],
+      "checks": [
+        "After 15 minutes, quickly check: surface should be steaming; if dry but rice is still hard, add 1/4 cup stock/water and re-cover.",
+        "Rice grains should be separate, not mushy."
+      ]
+    },
+    {
+      "id": "step.jollof_07_steam_finish_and_fluff",
+      "title": "Steam-finish, add optional vegetables, and fluff",
+      "instructions": [
+        "When rice is nearly done, optionally fold in mixed vegetables for the last 5 minutes.",
+        "Turn off heat and let rice steam (covered) 10 minutes.",
+        "Remove bay leaves, then fluff gently with a fork."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 10,
+      "timers": [{ "label": "Final steam", "minutes": 10 }],
+      "checks": [
+        "Rice is tender; no wet puddles at the bottom.",
+        "Fluffing separates grains without smashing them."
+      ]
+    },
+    {
+      "id": "step.jollof_08_serve",
+      "title": "Serve",
+      "instructions": [
+        "Serve hot as a one-pot meal or alongside grilled/fried chicken, turkey, beef, or goat.",
+        "Optional: serve with shito or fresh pepper sauce, and lime wedges."
+      ],
+      "activeMins": 2,
+      "handsOffMins": 0
+    }
+  ],
+  "pairings": {
+    "typicalSides": [
+      "dish.ghanaian.fried_plantain",
+      "dish.ghanaian.shito",
+      "dish.ghanaian.fresh_pepper_sauce"
+    ],
+    "proteinIdeas": [
+      "protein.chicken_grilled",
+      "protein.chicken_fried",
+      "protein.goat_stewed",
+      "protein.beef_grilled"
+    ]
+  },
+  "storage": {
+    "fridge": {
+      "durationDays": 4,
+      "notes": "Cool quickly; refrigerate within 2 hours. Reheat until steaming hot."
+    },
+    "freezer": {
+      "durationDays": 60,
+      "notes": "Freeze in flat portions. For best texture, freeze sauce base separately and cook rice fresh."
+    },
+    "reheat": {
+      "notes": "Add a splash of water/stock and steam on low, or microwave covered with a damp paper towel."
+    }
+  },
+  "planner": {
+    "batch": {
+      "recommended": true,
+      "bestBatchSizeServings": 10,
+      "notes": "Make a double batch for gatherings; jollof holds well for buffet service."
+    },
+    "leftovers": {
+      "goodFor": ["lunch_boxes", "quick_dinners", "fried_rice_remix"],
+      "remixNotes": [
+        "Turn leftovers into quick fried rice with eggs and mixed veg.",
+        "Serve with a fresh salad or sliced cucumbers to brighten."
+      ]
+    }
+  },
+  "notes": [
+    "Liquid ratio varies by rice brand and pot seal. Start with the listed stock, then adjust only if needed during the first check.",
+    "For a smoky party jollof vibe, keep heat low and let the bottom lightly toast (do not burn).",
+    "If your pot runs hot, consider finishing in a low oven (300F / 150C) for 25–35 minutes after bringing to a simmer."
+  ],
+  "variations": [
+    {
+      "id": "variation.oven_finish",
+      "label": "Oven-finish for even cooking",
+      "when": { "hasEquipment": ["tool.oven"] },
+      "adapt": {
+        "notes": "After Step 6 begins and the pot is covered, place in a 300F / 150C oven for ~30 minutes, then steam 10 minutes and fluff."
+      }
+    },
+    {
+      "id": "variation.party_tray",
+      "label": "Party tray jollof (more vegetables)",
+      "when": { "servingsGte": 8 },
+      "adapt": {
+        "ingredients": [
+          {
+            "add": "ingredient.frozen_mixed_vegetables",
+            "amount": { "value": 2.5, "unit": "cup" }
+          }
+        ],
+        "notes": "Add vegetables at the end so the rice stays structured and not watery."
+      }
+    }
+  ],
+  "methods": ["method.stew", "method.simmer", "method.steam_finish"],
+  "compat": {
+    "cuisineId": "cuisines.ghanaian",
+    "dishId": "dish.ghanaian.jollof_rice",
+    "search": {
+      "aliases": [
+        "ghana jollof",
+        "ghanaian jollof",
+        "jollof rice ghana",
+        "jollof"
+      ],
+      "keywords": [
+        "rice",
+        "tomato",
+        "pepper",
+        "one pot",
+        "party",
+        "west african",
+        "ghanaian"
+      ]
+    }
+  }
+}

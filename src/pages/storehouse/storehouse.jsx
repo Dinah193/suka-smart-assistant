@@ -11,6 +11,8 @@ import React, {
 
 import { automation } from "@/services/automation/runtime";
 import { useVision } from "@/context/VisionContext";
+import RealtimeCoordinationPanel from "@/components/home/RealtimeCoordinationPanel";
+import { emitCanonicalSignal } from "@/services/realtime/canonicalSignalEmitter";
 
 /* ────────────────────────────────────────────────────────────────────────────
   Safe imports & helpers (avoid hard crashes if a module isn't present)
@@ -187,6 +189,19 @@ function CustomLocationsInline() {
       const setter = api?.setAll || api?.setLocations || api?.save || null;
       if (setter) await setter(list);
       else automation.emit("locations/update", { locations: list });
+
+      emitCanonicalSignal({
+        type: "inventoryAdded",
+        sourceModule: "planner.storehouse",
+        urgency: "low",
+        completionPct: 100,
+        dependencies: ["storehouse"],
+        payload: {
+          action: "locationsUpdated",
+          count: Array.isArray(list) ? list.length : 0,
+        },
+      });
+
       setOk(true);
       setTimeout(() => setOk(false), 900);
     } finally {
@@ -337,6 +352,45 @@ export default function StorehousePage() {
   const runningRef = useRef(false);
   const [lastRun, setLastRun] = useState(null);
 
+  const emitForecastSignals = useCallback((forecast) => {
+    const weekly = forecast?.weekly || {};
+    const eggs = Number(weekly?.eggs || 0);
+    const milkLiters = Number(weekly?.milkLiters || 0);
+    const produceKg = Number(weekly?.produceKg || 0);
+    const meatKg = Number(weekly?.meatKg || 0);
+    const total = eggs + milkLiters + produceKg + meatKg;
+
+    if (total > 0) {
+      emitCanonicalSignal({
+        type: "inventoryAdded",
+        sourceModule: "planner.storehouse",
+        urgency: "normal",
+        completionPct: 100,
+        dependencies: ["meal", "sessions", "storehouse"],
+        payload: {
+          name: "Projected weekly inputs",
+          eggs,
+          milkLiters,
+          produceKg,
+          meatKg,
+        },
+      });
+      return;
+    }
+
+    emitCanonicalSignal({
+      type: "inventoryShortage",
+      sourceModule: "planner.storehouse",
+      urgency: "high",
+      completionPct: 100,
+      dependencies: ["meal", "sessions", "storehouse"],
+      payload: {
+        name: "Projected weekly inputs",
+        message: "No projected inputs available for this cycle.",
+      },
+    });
+  }, []);
+
   // Tools (optional)
   const [activeTool, setActiveTool] = useState("");
   const ToolComp = useMemo(
@@ -376,6 +430,7 @@ export default function StorehousePage() {
         if (res && typeof res === "object" && res.weekly) {
           setProject(res);
           setDebug({ via: "template" });
+          emitForecastSignals(res);
         } else {
           const fb = simpleProjections({
             animals: payload.animals,
@@ -383,13 +438,14 @@ export default function StorehousePage() {
           });
           setProject(fb);
           setDebug({ via: "fallback" });
+          emitForecastSignals(fb);
         }
         setLastRun(new Date().toISOString());
       } finally {
         setBusy(false);
       }
     },
-    [vision, animalQueue, gardenQueue]
+    [vision, animalQueue, gardenQueue, emitForecastSignals]
   );
 
   // Background: run when Home profile changes
@@ -436,6 +492,10 @@ export default function StorehousePage() {
         See upcoming inputs from animals and gardens, and forecast what flows
         into your storehouse. Automations run quietly based on your Home setup.
       </p>
+
+      <div style={{ marginBottom: 12 }}>
+        <RealtimeCoordinationPanel scopeOverrides={{ scope: "household" }} />
+      </div>
 
       {/* Background controls */}
       <div className="card" style={{ marginBottom: 12 }}>

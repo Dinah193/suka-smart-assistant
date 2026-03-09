@@ -1,0 +1,227 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://suka-smart-assistant.local/schemas/farm_to_table/readiness_levels.catalog.schema.json",
+  "title": "SSA • Farm-to-Table Readiness Levels Catalog Schema",
+  "description": "Schema for SSA farm-to-table readiness levels catalogs. Readiness levels are deterministic states used by planners/resolvers to reason about time/effort (e.g., readiness.raw, readiness.prepped, readiness.cooked). Compatible with SSA's generic catalog schema (id + tags) while adding structured readiness semantics (order, effort, storage, shelf-life hints).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "meta", "items"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "$id": { "type": "string" },
+
+    "schemaVersion": { "type": "string", "minLength": 1 },
+    "updatedAt": { "type": "string", "format": "date-time" },
+
+    "meta": { "$ref": "#/$defs/Meta" },
+
+    "scope": {
+      "description": "Optional scoping for planners/resolvers (e.g., module, locale).",
+      "type": ["string", "object"],
+      "additionalProperties": true
+    },
+
+    "defaults": {
+      "description": "Optional defaults used by planners (e.g., default readiness, ranking weights).",
+      "type": "object",
+      "additionalProperties": true
+    },
+
+    "items": {
+      "description": "Readiness level entries (minimal or rich).",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/ReadinessItem" }
+    }
+  },
+
+  "$defs": {
+    "Id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160,
+      "pattern": "^[a-z0-9_\\.\\-]+$"
+    },
+
+    "Tag": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80,
+      "pattern": "^[a-z0-9_\\.\\-]+$"
+    },
+
+    "ShortText": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 240,
+      "pattern": "^[^\\u0000-\\u001F]+$"
+    },
+
+    "Text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000,
+      "pattern": "^[^\\u0000-\\u001F]+$"
+    },
+
+    "Meta": {
+      "type": "object",
+      "required": ["id", "type", "name"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "type": { "type": "string", "const": "catalog" },
+        "domain": { "type": "string", "minLength": 1 },
+        "locale": { "type": "string", "minLength": 2 },
+        "name": { "$ref": "#/$defs/ShortText" },
+        "label": { "$ref": "#/$defs/ShortText" },
+        "subtitle": { "$ref": "#/$defs/ShortText" },
+        "source": {
+          "type": ["object", "null"],
+          "additionalProperties": true
+        }
+      }
+    },
+
+    "StorageHint": {
+      "description": "Preferred storage type for a readiness state (generic).",
+      "type": "string",
+      "enum": [
+        "storage.pantry",
+        "storage.fridge",
+        "storage.freezer",
+        "storage.root_cellar",
+        "storage.cellar",
+        "storage.shelf_stable",
+        "storage.frozen",
+        "storage.ferment",
+        "storage.dry",
+        "storage.unknown"
+      ]
+    },
+
+    "EffortModel": {
+      "description": "Optional structured effort/time hints used by planners.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "activeMinsTypical": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1440
+        },
+        "handsOffMinsTypical": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10080
+        },
+        "totalMinsTypical": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10080
+        },
+        "effortTier": {
+          "description": "Coarse tier used for quick filters.",
+          "type": "string",
+          "enum": ["low", "medium", "high", "unknown"]
+        },
+        "batchFriendly": { "type": "boolean", "default": false }
+      },
+      "default": {}
+    },
+
+    "ShelfLifeHint": {
+      "description": "Optional shelf-life guidance for a readiness state (generic, not safety-critical).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "roomTempDays": { "type": "number", "minimum": 0, "maximum": 3650 },
+        "fridgeDays": { "type": "number", "minimum": 0, "maximum": 3650 },
+        "freezerDays": { "type": "number", "minimum": 0, "maximum": 3650 },
+        "notes": { "$ref": "#/$defs/ShortText" }
+      },
+      "default": {}
+    },
+
+    "UiHints": {
+      "description": "Optional UI hints for readiness chips and sorting.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "icon": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "colorToken": {
+          "description": "Design token reference (do not hardcode colors here).",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "sortOrder": { "type": "integer", "minimum": 0, "maximum": 999 },
+        "chipLabel": { "$ref": "#/$defs/ShortText" }
+      },
+      "default": {}
+    },
+
+    "ReadinessItem": {
+      "description": "A single readiness level definition. Minimum required is id + tags (SSA catalog compatibility).",
+      "type": "object",
+      "required": ["id", "tags"],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "description": "Canonical readiness ID (recommend prefix 'readiness.'), e.g., readiness.raw.",
+          "allOf": [{ "$ref": "#/$defs/Id" }]
+        },
+
+        "tags": {
+          "description": "Search/filter tags.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/Tag" },
+          "default": []
+        },
+
+        "label": { "$ref": "#/$defs/ShortText" },
+        "group": { "$ref": "#/$defs/ShortText" },
+        "rank": { "type": "number" },
+        "status": {
+          "type": "string",
+          "enum": ["active", "draft", "deprecated"]
+        },
+        "notes": { "$ref": "#/$defs/Text" },
+
+        "path": {
+          "description": "Optional relative path to a richer readiness definition.",
+          "type": "string"
+        },
+
+        "order": {
+          "description": "Deterministic ordering of readiness progression. Lower = earlier (raw).",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 999
+        },
+
+        "storageHint": {
+          "description": "Generic preferred storage associated with this readiness level.",
+          "anyOf": [{ "$ref": "#/$defs/StorageHint" }, { "type": "null" }]
+        },
+
+        "effort": { "$ref": "#/$defs/EffortModel" },
+        "shelfLife": { "$ref": "#/$defs/ShelfLifeHint" },
+        "ui": { "$ref": "#/$defs/UiHints" },
+
+        "refs": {
+          "description": "Optional cross references: aliases, related readiness IDs, etc.",
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+
+      "allOf": [
+        {
+          "if": { "required": ["order"] },
+          "then": { "properties": { "order": { "type": "integer" } } }
+        }
+      ]
+    }
+  }
+}

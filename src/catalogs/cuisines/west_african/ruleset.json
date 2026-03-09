@@ -1,0 +1,714 @@
+{
+  "$schema": "../../../schemas/ruleset.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-13",
+  "meta": {
+    "id": "ruleset.cuisine.west_african",
+    "type": "ruleset",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "scope": {
+      "kind": "cuisine",
+      "cuisineId": "cuisine.west_african"
+    },
+    "normalization": {
+      "case": "lower",
+      "trim": true,
+      "collapseWhitespace": true,
+      "stripPunctuation": true
+    }
+  },
+  "notes": [
+    "West African cuisine ruleset: used by SSA Meal Planner, Recipe Adapter, and Knowledge Helper.",
+    "Rules here are deterministic and should remain browser-safe (no heavy regex).",
+    "Higher priority runs first. Some rules stop evaluation when matched."
+  ],
+  "globals": {
+    "cuisineId": "cuisine.west_african",
+    "defaultHeat": "medium",
+    "defaultSaltiness": "medium",
+    "defaultSourness": "low",
+    "defaultSweetness": "low",
+    "defaultUmami": "medium",
+    "defaultOilUse": "medium",
+    "preferredFats": [
+      "oil_neutral",
+      "oil_palm_red_optional",
+      "oil_groundnut_peanut_optional"
+    ],
+    "coreAromatics": [
+      "onion_yellow",
+      "garlic",
+      "ginger",
+      "pepper_bell",
+      "pepper_hot_scotch_bonnet_optional"
+    ],
+    "tomatoBaseCore": ["tomato", "tomato_paste", "onion_yellow", "pepper_bell"],
+    "umamiBuilders": [
+      "fish_dried_smoked_optional",
+      "shrimp_dried_optional",
+      "fermented_locust_beans_iru_optional",
+      "seasoning_stock_cube_optional",
+      "seasoning_msg_optional"
+    ],
+    "primaryStarches": [
+      "rice_white_longgrain",
+      "yam",
+      "cassava",
+      "plantain",
+      "millet",
+      "sorghum",
+      "cornmeal"
+    ],
+    "primaryProteins": [
+      "chicken_generic",
+      "goat",
+      "beef_generic",
+      "fish_generic",
+      "egg_chicken",
+      "beans_black_eyed_pea",
+      "beans_cowpea"
+    ],
+    "preferredServingStyles": [
+      "family_style",
+      "one_pot",
+      "stew_and_starch",
+      "grill_and_sides"
+    ],
+    "safePepperHandlingMessage": "Use gloves when handling very hot peppers; avoid touching eyes/face and ventilate when blending/cooking."
+  },
+  "rules": [
+    {
+      "id": "wa.scope_guard",
+      "enabled": true,
+      "priority": 1000,
+      "title": "Apply only to West African cuisine context",
+      "description": "Ensures downstream engines can short-circuit if cuisine does not match.",
+      "tags": ["scope", "guard"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.context.cuisineId",
+            "value": "cuisine.west_african"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.state.flags.rulesetApplied",
+            "value": true
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "wa.default_flavor_system",
+      "enabled": true,
+      "priority": 950,
+      "title": "Default West African flavor targets",
+      "description": "Sets baseline flavor targets when user has not explicitly overridden them.",
+      "tags": ["defaults", "flavor"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.context.cuisineId",
+            "value": "cuisine.west_african"
+          },
+          { "type": "neq", "path": "$.prefs.flavor.overridden", "value": true }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "set", "path": "$.prefs.flavor.heat", "value": "medium" },
+          {
+            "type": "set",
+            "path": "$.prefs.flavor.saltiness",
+            "value": "medium"
+          },
+          { "type": "set", "path": "$.prefs.flavor.sourness", "value": "low" },
+          { "type": "set", "path": "$.prefs.flavor.sweetness", "value": "low" },
+          { "type": "set", "path": "$.prefs.flavor.umami", "value": "medium" },
+          { "type": "set", "path": "$.prefs.flavor.oilUse", "value": "medium" }
+        ]
+      }
+    },
+
+    {
+      "id": "wa.prefer_serving_styles",
+      "enabled": true,
+      "priority": 920,
+      "title": "Prefer West African serving styles for planning",
+      "description": "Biases the planner towards one-pot, stew+starch, and grill+sides patterns.",
+      "tags": ["planner", "bias"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.context.cuisineId",
+            "value": "cuisine.west_african"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.planner.bias.servingStyles",
+            "value": [
+              "one_pot",
+              "stew_and_starch",
+              "family_style",
+              "grill_and_sides"
+            ]
+          },
+          {
+            "type": "set",
+            "path": "$.planner.bias.weeknightStyle",
+            "value": "one_pot"
+          },
+          {
+            "type": "set",
+            "path": "$.planner.bias.batchCooking",
+            "value": "high"
+          },
+          {
+            "type": "set",
+            "path": "$.planner.bias.leftoversStrategy",
+            "value": "planned"
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "wa.core_aromatics_suggest",
+      "enabled": true,
+      "priority": 900,
+      "title": "Suggest core aromatics when missing",
+      "description": "If dish/recipe lacks core aromatics, add planner suggestions rather than forcing changes.",
+      "tags": ["suggestions", "aromatics"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.context.cuisineId",
+            "value": "cuisine.west_african"
+          },
+          { "type": "exists", "path": "$.candidate.ingredients" }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.state.suggestions.aromaticsCore",
+            "value": [
+              "onion_yellow",
+              "garlic",
+              "ginger",
+              "pepper_bell",
+              "pepper_hot_scotch_bonnet_optional"
+            ]
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "wa.tomato_base_for_stews",
+      "enabled": true,
+      "priority": 880,
+      "title": "Tomato-pepper-onion base guidance for stews and rice pots",
+      "description": "Adds a planning hint to use a cooked-down base for signature depth when archetype indicates stew/rice pot.",
+      "tags": ["guidance", "tomato_base"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.candidate.archetypeId",
+            "value": "archetype_rice_pot"
+          },
+          {
+            "type": "eq",
+            "path": "$.candidate.archetypeId",
+            "value": "archetype_stew_with_starch"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "push",
+            "path": "$.state.hints.cooking",
+            "value": "Build flavor by cooking down a tomato–pepper–onion base until it deepens in color and aroma; in some methods, oil may begin to separate."
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "wa.sub_scotch_bonnet_to_habanero",
+      "enabled": true,
+      "priority": 860,
+      "title": "Substitute scotch bonnet with habanero when missing",
+      "description": "If scotch bonnet is missing and a hot pepper is required, prefer habanero as the closest profile.",
+      "tags": ["substitution", "pepper"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "in",
+            "path": "$.candidate.ingredients.required",
+            "values": ["pepper_hot_scotch_bonnet"]
+          },
+          {
+            "type": "neq",
+            "path": "$.availability.ingredients.pepper_hot_scotch_bonnet",
+            "value": true
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.state.substitutions.pepper_hot_scotch_bonnet",
+            "value": {
+              "useInstead": ["pepper_hot_habanero", "pepper_red_flakes"],
+              "notes": "Habanero is closest in heat/fruity profile; adjust quantity carefully."
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "wa.sub_red_palm_oil",
+      "enabled": true,
+      "priority": 840,
+      "title": "Red palm oil substitution guidance",
+      "description": "If red palm oil is preferred but unavailable, fall back to neutral oil and optionally olive oil for lighter profile.",
+      "tags": ["substitution", "fat"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.context.cuisineId",
+            "value": "cuisine.west_african"
+          },
+          {
+            "type": "neq",
+            "path": "$.availability.ingredients.oil_palm_red",
+            "value": true
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.state.substitutions.oil_palm_red",
+            "value": {
+              "useInstead": ["oil_neutral", "oil_olive_optional"],
+              "notes": "Red palm oil adds distinctive flavor and color; neutral oil yields a lighter profile."
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "wa.avoid_excess_sugar",
+      "enabled": true,
+      "priority": 820,
+      "title": "Avoid excess sweetness in savory dishes",
+      "description": "Discourage adding refined sugar to savory stews/rice unless explicitly requested by user.",
+      "tags": ["flavor", "guardrail"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.context.cuisineId",
+            "value": "cuisine.west_african"
+          },
+          {
+            "type": "neq",
+            "path": "$.prefs.allowAddedSugarInSavory",
+            "value": true
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "push",
+            "path": "$.state.hints.flavor",
+            "value": "Most savory dishes should not taste sweet; aim for natural sweetness from onions, tomatoes, and bell peppers."
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "wa.allergen_peanut_block_groundnut",
+      "enabled": true,
+      "priority": 800,
+      "title": "Block peanut dishes when peanut allergy is active",
+      "description": "If peanut allergy is set, block dishes/recipes that require peanuts (e.g., groundnut soup).",
+      "tags": ["allergen", "block"],
+      "source": "catalog",
+      "stopOnMatch": true,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "eq", "path": "$.prefs.allergens.peanut", "value": true },
+          {
+            "op": "any",
+            "conditions": [
+              {
+                "type": "in",
+                "path": "$.candidate.ingredients.required",
+                "values": ["peanut"]
+              },
+              {
+                "type": "in",
+                "path": "$.candidate.allergens.mayContain",
+                "values": ["allergen_peanut"]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "block",
+            "message": "Peanut allergy active: block peanut-based dishes (e.g., groundnut/peanut soup). Choose a non-peanut stew instead."
+          },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ssa.rules.blocked",
+              "payload": {
+                "reason": "allergen_peanut",
+                "cuisineId": "cuisine.west_african"
+              }
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "wa.allergen_fish_shellfish_warn_umami_builders",
+      "enabled": true,
+      "priority": 780,
+      "title": "Warn on dried fish/crayfish/shrimp if fish or shellfish allergy is active",
+      "description": "West African cooking sometimes uses dried fish/crayfish/shrimp. Provide warning and suggest safe alternatives.",
+      "tags": ["allergen", "warning"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          { "type": "eq", "path": "$.prefs.allergens.fish", "value": true },
+          { "type": "eq", "path": "$.prefs.allergens.shellfish", "value": true }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "warn",
+            "severity": "warning",
+            "message": "Fish/shellfish allergy active: avoid dried fish, crayfish, dried shrimp, and similar umami builders. Use stock and careful seasoning instead."
+          },
+          {
+            "type": "set",
+            "path": "$.state.substitutions.umamiBuildersSafe",
+            "value": {
+              "avoid": [
+                "fish_dried_smoked_optional",
+                "shrimp_dried_optional",
+                "dried_crayfish_optional"
+              ],
+              "useInstead": [
+                "stock_chicken_or_beef_optional",
+                "seasoning_stock_cube_optional",
+                "seasoning_msg_optional"
+              ]
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "wa.pepper_handling_safety_note",
+      "enabled": true,
+      "priority": 760,
+      "title": "Pepper handling safety note",
+      "description": "Always add a safety note when hot pepper techniques are present.",
+      "tags": ["safety", "pepper"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "contains",
+            "path": "$.candidate.ingredients.required",
+            "value": "pepper_hot_scotch_bonnet_optional"
+          },
+          {
+            "type": "contains",
+            "path": "$.candidate.ingredients.optional",
+            "value": "pepper_hot_scotch_bonnet_optional"
+          },
+          {
+            "type": "contains",
+            "path": "$.candidate.ingredients.required",
+            "value": "pepper_hot_habanero"
+          },
+          {
+            "type": "contains",
+            "path": "$.candidate.ingredients.optional",
+            "value": "pepper_hot_habanero"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "push",
+            "path": "$.state.hints.safety",
+            "value": "Use gloves when handling very hot peppers; avoid touching eyes/face and ventilate when blending/cooking."
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "wa.prefer_starches_rotation",
+      "enabled": true,
+      "priority": 740,
+      "title": "Prefer primary starches when planner needs starch selection",
+      "description": "When a meal template/archetype requires a starch, bias selection toward West African primary starches.",
+      "tags": ["planner", "starch"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.context.cuisineId",
+            "value": "cuisine.west_african"
+          },
+          { "type": "exists", "path": "$.planner.needs.starch" }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.planner.preferences.starchOrder",
+            "value": [
+              "rice_white_longgrain",
+              "yam",
+              "plantain",
+              "cassava",
+              "millet",
+              "sorghum",
+              "cornmeal"
+            ]
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "wa.prefer_proteins_rotation",
+      "enabled": true,
+      "priority": 720,
+      "title": "Prefer primary proteins when planner needs protein selection",
+      "description": "When a meal template/archetype requires a protein, bias selection toward West African primary proteins.",
+      "tags": ["planner", "protein"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.context.cuisineId",
+            "value": "cuisine.west_african"
+          },
+          { "type": "exists", "path": "$.planner.needs.protein" }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.planner.preferences.proteinOrder",
+            "value": [
+              "chicken_generic",
+              "goat",
+              "beef_generic",
+              "fish_generic",
+              "beans_black_eyed_pea",
+              "beans_cowpea",
+              "egg_chicken"
+            ]
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "wa.batch_cooking_promote_stews_rice",
+      "enabled": true,
+      "priority": 700,
+      "title": "Promote stews and rice pots for batch cooking sessions",
+      "description": "If user is in batch cooking mode, prefer dishes marked batchFriendly or matching one-pot/stew archetypes.",
+      "tags": ["planner", "batch_cooking"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.context.cuisineId",
+            "value": "cuisine.west_african"
+          },
+          { "type": "eq", "path": "$.planner.mode", "value": "batch" }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.planner.bias.preferBatchFriendly",
+            "value": true
+          },
+          {
+            "type": "set",
+            "path": "$.planner.bias.preferArchetypes",
+            "value": ["archetype_rice_pot", "archetype_stew_with_starch"]
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "wa.weeknight_quick_path",
+      "enabled": true,
+      "priority": 680,
+      "title": "Weeknight quick path: one-pot dishes and fast porridge",
+      "description": "If planner is generating weeknight meals, bias toward one-pot and quick breakfast porridge.",
+      "tags": ["planner", "weeknight"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.context.cuisineId",
+            "value": "cuisine.west_african"
+          },
+          { "type": "eq", "path": "$.planner.intent", "value": "weeknight" }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.planner.bias.maxTimeMinutes",
+            "value": 90
+          },
+          {
+            "type": "set",
+            "path": "$.planner.bias.preferServingStyles",
+            "value": ["one_pot", "stew_and_starch", "breakfast"]
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "wa.knowledge_helper_skills",
+      "enabled": true,
+      "priority": 650,
+      "title": "Knowledge Helper skill prompts for West African cooking",
+      "description": "Adds skill prompts to the Knowledge Helper panel based on archetype and techniques.",
+      "tags": ["knowledge_helper", "skills"],
+      "source": "catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.context.cuisineId",
+            "value": "cuisine.west_african"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.state.knowledge.skillsSuggested",
+            "value": [
+              {
+                "id": "skill.tomato_base_reduction",
+                "label": "Tomato base reduction",
+                "why": "Signature depth often comes from cooking down the pepper-tomato base."
+              },
+              {
+                "id": "skill.rice_pot_control",
+                "label": "One-pot rice control",
+                "why": "Managing liquid ratios and heat yields fluffy rice without burning."
+              },
+              {
+                "id": "skill.heat_management",
+                "label": "Heat management",
+                "why": "Hot peppers vary; learn safe handling and balanced heat."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

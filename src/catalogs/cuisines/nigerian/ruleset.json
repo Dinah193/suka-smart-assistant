@@ -1,0 +1,645 @@
+{
+  "$schema": "../../../schemas/ruleset.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "kind": "cuisine_ruleset",
+  "meta": {
+    "id": "cuisines.nigerian.ruleset",
+    "type": "cuisine_ruleset",
+    "label": "Nigerian Cuisine • Deterministic Ruleset",
+    "cuisineId": "cuisines.nigerian",
+    "status": "canonical",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa.canonical",
+      "notes": [
+        "Deterministic cuisine rules used by planners and recipe adapters.",
+        "Focus: ingredient normalization, heat control, swallow pairing, and common Nigerian technique expectations.",
+        "All rule IDs and tags use ^[a-z0-9_.-]+$ tokens."
+      ]
+    }
+  },
+  "scope": {
+    "kind": "cuisine",
+    "cuisineId": "cuisines.nigerian",
+    "locales": ["en-US"]
+  },
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true,
+    "tokens": {
+      "stopWords": [
+        "and",
+        "or",
+        "with",
+        "of",
+        "the",
+        "a",
+        "an",
+        "to",
+        "for",
+        "in",
+        "on"
+      ]
+    },
+    "ingredientAliases": {
+      "ingredient.scotch_bonnet": [
+        "scotch bonnet",
+        "scotch bonnets",
+        "ata rodo",
+        "atarodo",
+        "habanero",
+        "habaneros"
+      ],
+      "ingredient.red_bell_pepper": [
+        "red bell pepper",
+        "red bell peppers",
+        "tatashe",
+        "tatase",
+        "tatase pepper",
+        "sweet red pepper"
+      ],
+      "ingredient.green_bell_pepper": [
+        "green bell pepper",
+        "green bell peppers",
+        "green pepper"
+      ],
+      "ingredient.onion": ["onion", "onions", "yellow onion", "red onion"],
+      "ingredient.spring_onion": [
+        "spring onion",
+        "scallion",
+        "scallions",
+        "green onion",
+        "green onions"
+      ],
+      "ingredient.iru": [
+        "iru",
+        "locust bean",
+        "locust beans",
+        "dawadawa",
+        "dawadawa paste",
+        "ogiri okpei"
+      ],
+      "ingredient.ogbono": [
+        "ogbono",
+        "ogbono seed",
+        "ogbono seeds",
+        "wild mango seed",
+        "draw soup seed"
+      ],
+      "ingredient.egusi": [
+        "egusi",
+        "egusi seeds",
+        "melon seed",
+        "melon seeds",
+        "ground egusi"
+      ],
+      "ingredient.ugu": [
+        "ugu",
+        "fluted pumpkin leaf",
+        "pumpkin leaves",
+        "ugu leaves"
+      ],
+      "ingredient.bitterleaf": [
+        "bitter leaf",
+        "bitterleaf",
+        "onugbu",
+        "ndole leaf"
+      ],
+      "ingredient.stockfish": [
+        "stockfish",
+        "stock fish",
+        "okporoko",
+        "panla",
+        "dry stockfish"
+      ],
+      "ingredient.dried_fish": [
+        "dried fish",
+        "dry fish",
+        "smoked dried fish",
+        "smoked fish"
+      ],
+      "ingredient.shrimp_dried": [
+        "dried shrimp",
+        "dry shrimp",
+        "crayfish",
+        "ground crayfish",
+        "cray fish"
+      ],
+      "ingredient.palm_oil": ["palm oil", "red palm oil", "epo pupa"],
+      "ingredient.garri": ["garri", "gari", "cassava granules"],
+      "ingredient.cassava_fufu": [
+        "fufu",
+        "cassava fufu",
+        "akpu",
+        "foofoo",
+        "foufou"
+      ],
+      "ingredient.elubo_yam_flour": ["elubo", "yam flour", "amala flour"],
+      "ingredient.yam": ["yam", "white yam", "punyam"],
+      "ingredient.plantain_ripe": [
+        "ripe plantain",
+        "ripe plantains",
+        "plantain (ripe)"
+      ],
+      "ingredient.plantain_unripe": [
+        "unripe plantain",
+        "green plantain",
+        "plantain (green)"
+      ],
+      "ingredient.rice_parboiled": ["parboiled rice", "converted rice"],
+      "ingredient.rice_long_grain": ["long grain rice", "long-grain rice"],
+      "ingredient.maggi": [
+        "maggi",
+        "maggi cube",
+        "maggi cubes",
+        "seasoning cube",
+        "bouillon cube"
+      ],
+      "ingredient.knorr": [
+        "knorr",
+        "knorr cube",
+        "knorr cubes",
+        "bouillon cube"
+      ],
+      "ingredient.peanut_powder": [
+        "ground peanuts",
+        "peanut powder",
+        "kuli kuli",
+        "kulikuli",
+        "peanut meal"
+      ]
+    },
+    "dishAliases": {
+      "dish.nigerian.jollof_rice": [
+        "jollof",
+        "jollof rice",
+        "party jollof",
+        "smoky jollof"
+      ],
+      "dish.nigerian.fried_rice": ["nigerian fried rice", "fried rice"],
+      "dish.nigerian.egusi_soup": ["egusi", "egusi soup", "egusi stew"],
+      "dish.nigerian.ogbono_soup": [
+        "ogbono",
+        "ogbono soup",
+        "draw soup (ogbono)"
+      ],
+      "dish.nigerian.okra_soup": ["okra soup", "okro soup", "draw soup (okra)"],
+      "dish.nigerian.pepper_soup": [
+        "pepper soup",
+        "goat pepper soup",
+        "catfish pepper soup"
+      ],
+      "dish.nigerian.moi_moi": ["moi moi", "moimoi", "steamed bean pudding"],
+      "dish.nigerian.akara": ["akara", "bean fritters", "bean cake"],
+      "dish.nigerian.suya": ["suya", "beef suya", "chicken suya"],
+      "dish.nigerian.fried_plantains": ["dodo", "fried plantains"],
+      "dish.nigerian.eba": ["eba", "garri swallow", "garri"],
+      "dish.nigerian.fufu": ["fufu", "cassava fufu", "akpu"],
+      "dish.nigerian.pounded_yam": ["pounded yam", "iyan"],
+      "dish.nigerian.amala": ["amala", "elubo"],
+      "dish.nigerian.ewa_agoyin": ["ewa agoyin", "ewa aganyin"],
+      "dish.nigerian.ayamase_ofada_sauce": [
+        "ayamase",
+        "ofada sauce",
+        "designer stew"
+      ]
+    },
+    "equipmentAliases": {
+      "equipment.pot_heavy": [
+        "heavy pot",
+        "dutch oven",
+        "caldero",
+        "stock pot",
+        "stockpot"
+      ],
+      "equipment.pot": ["pot", "saucepot", "sauce pot"],
+      "equipment.pan": ["pan", "skillet", "frying pan"],
+      "equipment.pan_large": ["large pan", "large skillet", "wide pan"],
+      "equipment.blender": ["blender", "power blender", "liquidizer"],
+      "equipment.mortar_and_pestle": ["mortar and pestle", "mortar", "pestle"],
+      "equipment.oven": ["oven"],
+      "equipment.sheet_pan": ["sheet pan", "baking tray", "baking sheet"],
+      "equipment.knife": ["knife", "chef knife"],
+      "equipment.board": ["cutting board", "chopping board"],
+      "equipment.spoon_wooden": ["wooden spoon", "spoon"],
+      "equipment.whisk": ["whisk"],
+      "equipment.steamer": ["steamer", "steam basket", "steaming rack"]
+    },
+    "methodAliases": {
+      "technique.blend": ["blend", "puree", "liquefy"],
+      "technique.simmer": ["simmer", "low simmer", "cook gently"],
+      "technique.fry_low_and_slow": [
+        "fry low and slow",
+        "slow fry",
+        "reduce by frying"
+      ],
+      "technique.thicken": ["thicken", "reduce", "tighten"],
+      "technique.rice_absorption": [
+        "absorption method",
+        "cook rice by absorption"
+      ],
+      "technique.deep_fry": ["deep fry", "deep-fry"],
+      "technique.pan_fry": ["pan fry", "shallow fry"],
+      "technique.grill": ["grill", "broil", "roast on grill"],
+      "technique.steam": ["steam", "steaming"],
+      "technique.knead": ["knead", "work dough", "stir until smooth"]
+    }
+  },
+  "globals": {
+    "heatScale": {
+      "min": 0,
+      "max": 5,
+      "notes": [
+        "0 = no heat, 1 = mild, 2 = medium, 3 = hot, 4 = very hot, 5 = extreme"
+      ]
+    },
+    "typicalAromatics": [
+      "ingredient.onion",
+      "ingredient.ginger",
+      "ingredient.garlic"
+    ],
+    "typicalFats": ["ingredient.palm_oil", "ingredient.oil"],
+    "typicalUmami": ["ingredient.iru", "ingredient.maggi", "ingredient.knorr"],
+    "plannerDefaults": {
+      "preferOnePot": true,
+      "preferSwallowPairingForSoups": true
+    }
+  },
+  "rules": [
+    {
+      "id": "nigerian.normalize.pepper_family_to_scotch_bonnet",
+      "enabled": true,
+      "priority": 100,
+      "title": "Normalize hot pepper family to scotch bonnet id",
+      "description": "When ingredients mention ata rodo/habanero/scotch bonnet, normalize to canonical scotch bonnet id.",
+      "tags": ["normalize", "ingredient", "heat"],
+      "source": "ssa.canonical",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "$.ingredients[*].id",
+        "values": ["ingredient.scotch_bonnet"]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "flavor.heat_scotch_bonnet" },
+          {
+            "type": "set",
+            "path": "$.tasteProfile.heatSource",
+            "value": "scotch_bonnet"
+          }
+        ]
+      }
+    },
+    {
+      "id": "nigerian.jollof.require_blended_tomato_pepper_base",
+      "enabled": true,
+      "priority": 90,
+      "title": "Jollof should use blended tomato-pepper base",
+      "description": "If dish or tags indicate jollof, set technique expectations and scoring for tomato/pepper base and reduction step.",
+      "tags": ["dish", "jollof", "technique"],
+      "source": "ssa.canonical",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          { "type": "hasTag", "value": "dish.jollof" },
+          {
+            "type": "eq",
+            "path": "$.classification.cuisine",
+            "value": "nigerian"
+          },
+          {
+            "type": "contains",
+            "path": "$.classification.plannerTags",
+            "values": ["rice", "tomato_base"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "technique.blend_base" },
+          { "type": "addTag", "value": "technique.reduce_pepper_mix" },
+          { "type": "scoreAdjust", "scoreDelta": 2.0 }
+        ]
+      }
+    },
+    {
+      "id": "nigerian.soups_and_swallows.add_swallow_pairing_hint",
+      "enabled": true,
+      "priority": 85,
+      "title": "Nigerian soups prefer swallow pairings",
+      "description": "For soup/swallow archetypes, add pairing hints and planner tags.",
+      "tags": ["planner", "pairing", "swallow"],
+      "source": "ssa.canonical",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          { "type": "hasTag", "value": "dish.egusi" },
+          { "type": "hasTag", "value": "dish.ogbono" },
+          { "type": "hasTag", "value": "dish.okra_soup" },
+          {
+            "type": "contains",
+            "path": "$.classification.mealArchetypes",
+            "values": ["archetype.soup_and_swallow"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "planner.swallow_pairing" },
+          {
+            "type": "set",
+            "path": "$.pairings.swallowSuggestions",
+            "value": [
+              "dish.nigerian.fufu",
+              "dish.nigerian.eba",
+              "dish.nigerian.pounded_yam",
+              "dish.nigerian.amala"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "nigerian.okra_draw_soup.require_fine_chop_and_stir",
+      "enabled": true,
+      "priority": 80,
+      "title": "Okra draw soup expects fine chop and active stirring",
+      "description": "If okra soup is detected, enforce technique tags for draw texture and reduce overcooking risk.",
+      "tags": ["okra", "technique", "texture"],
+      "source": "ssa.canonical",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          { "type": "hasTag", "value": "dish.okra_soup" },
+          {
+            "type": "intersects",
+            "path": "$.ingredients[*].id",
+            "values": ["ingredient.okra"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "technique.chop_fine" },
+          { "type": "addTag", "value": "technique.stir_for_draw" },
+          {
+            "type": "set",
+            "path": "$.tasteProfile.textureGoal",
+            "value": "draw"
+          }
+        ]
+      }
+    },
+    {
+      "id": "nigerian.egusi.require_thickener_and_palm_oil",
+      "enabled": true,
+      "priority": 78,
+      "title": "Egusi expects melon-seed thickener and palm oil base",
+      "description": "If egusi is present, add technique tags and dish signals to favor thick, rich stew texture.",
+      "tags": ["egusi", "thickener", "palm_oil"],
+      "source": "ssa.canonical",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          { "type": "hasTag", "value": "dish.egusi" },
+          {
+            "type": "intersects",
+            "path": "$.ingredients[*].id",
+            "values": ["ingredient.egusi"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "technique.thicken" },
+          { "type": "addTag", "value": "fat.palm_oil_preferred" },
+          {
+            "type": "set",
+            "path": "$.tasteProfile.textureGoal",
+            "value": "thick_stew"
+          }
+        ]
+      }
+    },
+    {
+      "id": "nigerian.ogbono.require_draw_texture",
+      "enabled": true,
+      "priority": 77,
+      "title": "Ogbono expects draw texture",
+      "description": "If ogbono is present, bias toward draw texture technique and avoid too vigorous boiling.",
+      "tags": ["ogbono", "draw_soup", "texture"],
+      "source": "ssa.canonical",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          { "type": "hasTag", "value": "dish.ogbono" },
+          {
+            "type": "intersects",
+            "path": "$.ingredients[*].id",
+            "values": ["ingredient.ogbono"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "technique.low_simmer" },
+          { "type": "addTag", "value": "technique.stir_for_draw" },
+          {
+            "type": "set",
+            "path": "$.tasteProfile.textureGoal",
+            "value": "draw"
+          }
+        ]
+      }
+    },
+    {
+      "id": "nigerian.suya.add_peanut_allergen_tag_and_grill_bias",
+      "enabled": true,
+      "priority": 72,
+      "title": "Suya: peanut-forward spice + grill bias",
+      "description": "If suya spice mix or peanut powder is used, add allergen signal and grill technique tags.",
+      "tags": ["suya", "allergen", "grill"],
+      "source": "ssa.canonical",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          { "type": "hasTag", "value": "dish.suya" },
+          {
+            "type": "intersects",
+            "path": "$.ingredients[*].id",
+            "values": ["spice.suya_mix", "ingredient.peanut_powder"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "allergen.peanut" },
+          { "type": "addTag", "value": "technique.grill" },
+          { "type": "scoreAdjust", "scoreDelta": 1.5 }
+        ]
+      }
+    },
+    {
+      "id": "nigerian.moi_moi.require_steam_and_blend",
+      "enabled": true,
+      "priority": 70,
+      "title": "Moi moi expects blended legumes and steaming",
+      "description": "If black-eyed peas or moi moi tags appear, add steaming and blending requirements and equipment hints.",
+      "tags": ["moi_moi", "steam", "legume"],
+      "source": "ssa.canonical",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          { "type": "hasTag", "value": "dish.moi_moi" },
+          {
+            "type": "intersects",
+            "path": "$.ingredients[*].id",
+            "values": ["ingredient.black_eyed_peas", "ingredient.brown_beans"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "technique.blend" },
+          { "type": "addTag", "value": "technique.steam" },
+          {
+            "type": "set",
+            "path": "$.equipment.recommended",
+            "value": ["equipment.blender", "equipment.steamer"]
+          }
+        ]
+      }
+    },
+    {
+      "id": "nigerian.pepper_soup.add_brothy_profile_and_heat_bias",
+      "enabled": true,
+      "priority": 68,
+      "title": "Pepper soup: brothy + high heat bias",
+      "description": "If pepper soup is detected, tag for brothy style and increase heat score preference.",
+      "tags": ["pepper_soup", "brothy", "heat"],
+      "source": "ssa.canonical",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          { "type": "hasTag", "value": "dish.pepper_soup" },
+          {
+            "type": "contains",
+            "path": "$.classification.plannerTags",
+            "values": ["brothy", "pepper_soup"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "style.brothy" },
+
+          { "type": "set", "path": "$.tasteProfile.heatTypical", "value": 4.5 },
+
+          { "type": "scoreAdjust", "scoreDelta": 1.0 }
+        ]
+      }
+    },
+    {
+      "id": "nigerian.palm_oil.if_present_tag_and_color_profile",
+      "enabled": true,
+      "priority": 60,
+      "title": "Palm oil: tag red-oil profile",
+      "description": "If palm oil is used, set color/flavor profile tags for red-oil stews and soups.",
+      "tags": ["palm_oil", "profile"],
+      "source": "ssa.canonical",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "$.ingredients[*].id",
+        "values": ["ingredient.palm_oil"]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "fat.palm_oil" },
+          { "type": "addTag", "value": "profile.red_oil" },
+          {
+            "type": "set",
+            "path": "$.tasteProfile.colorCue",
+            "value": "red_orange"
+          }
+        ]
+      }
+    },
+    {
+      "id": "nigerian.iru.if_present_tag_fermented_umami",
+      "enabled": true,
+      "priority": 58,
+      "title": "Iru/locust bean: fermented umami tag",
+      "description": "If iru (locust bean) appears, tag fermented umami profile to guide substitutions and notes.",
+      "tags": ["iru", "umami", "fermented"],
+      "source": "ssa.canonical",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "$.ingredients[*].id",
+        "values": ["ingredient.iru"]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "umami.fermented_locust_bean" },
+          {
+            "type": "set",
+            "path": "$.tasteProfile.umamiSource",
+            "value": "iru"
+          }
+        ]
+      }
+    },
+    {
+      "id": "nigerian.emit_event_on_strong_match",
+      "enabled": true,
+      "priority": 10,
+      "title": "Emit event when Nigerian ruleset strongly matches context",
+      "description": "Optional event for SSA eventBus consumers when Nigerian cuisine tags/archetypes are detected.",
+      "tags": ["event", "ssa"],
+      "source": "ssa.canonical",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.classification.cuisine",
+            "value": "nigerian"
+          },
+          { "type": "exists", "path": "$.ingredients" }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ssa.ruleset.matched",
+              "payload": {
+                "rulesetId": "cuisines.nigerian.ruleset",
+                "scope": "cuisine",
+                "cuisineId": "cuisines.nigerian",
+                "confidence": "contextual"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

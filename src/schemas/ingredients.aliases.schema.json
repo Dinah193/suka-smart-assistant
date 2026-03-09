@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://suka-smart-assistant.local/schemas/ingredients.aliases.schema.json",
+  "title": "SSA • Ingredients Aliases Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schemaVersion", "updatedAt", "meta", "aliases"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Schema reference used by JSON tooling (may be a relative path in catalogs).",
+      "minLength": 1
+    },
+    "schemaVersion": {
+      "type": "string",
+      "description": "Semantic version of the data contract for this catalog file.",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+    },
+    "updatedAt": {
+      "type": "string",
+      "description": "Last updated date for the file (ISO-8601 date or datetime).",
+      "anyOf": [{ "format": "date" }, { "format": "date-time" }]
+    },
+    "notes": {
+      "type": "array",
+      "description": "Human-readable notes about usage and maintenance.",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "domain", "locale", "normalization"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Stable catalog ID.",
+          "pattern": "^[a-z0-9_\\.\\-]+$",
+          "minLength": 3
+        },
+        "type": {
+          "type": "string",
+          "const": "aliases",
+          "description": "Catalog type discriminator."
+        },
+        "domain": {
+          "type": "string",
+          "const": "ingredients",
+          "description": "Domain discriminator."
+        },
+        "locale": {
+          "type": "string",
+          "description": "BCP-47-ish locale tag (SSA defaults to en-US).",
+          "minLength": 2
+        },
+        "normalization": {
+          "type": "object",
+          "description": "Normalization rules the app should apply before matching keys.",
+          "additionalProperties": false,
+          "required": [
+            "case",
+            "trim",
+            "collapseWhitespace",
+            "stripPunctuation"
+          ],
+          "properties": {
+            "case": {
+              "type": "string",
+              "enum": ["lower", "none"],
+              "default": "lower"
+            },
+            "trim": { "type": "boolean", "default": true },
+            "collapseWhitespace": { "type": "boolean", "default": true },
+            "stripPunctuation": { "type": "boolean", "default": true }
+          }
+        }
+      }
+    },
+    "aliases": {
+      "type": "object",
+      "description": "Map of normalized human ingredient strings -> canonical ingredient IDs.",
+      "propertyNames": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 120,
+        "pattern": "^[^\\u0000-\\u001F]+$",
+        "description": "Alias key (should be a typical ingredient phrase)."
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 128,
+        "pattern": "^[a-z0-9_\\.\\-]+$",
+        "description": "Canonical ingredient ID (SSA-safe identifier)."
+      },
+      "minProperties": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "meta": {
+            "properties": {
+              "type": { "const": "aliases" },
+              "domain": { "const": "ingredients" }
+            },
+            "required": ["type", "domain"]
+          }
+        },
+        "required": ["meta"]
+      },
+      "then": true
+    }
+  ]
+}

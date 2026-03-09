@@ -8,15 +8,19 @@
 
 let eventBus = { on() {}, off() {}, emit() {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
-} catch (_e) { /* no-op */ }
+} catch (_e) {
+  /* no-op */
+}
 
 let timeMath = null;
 try {
   timeMath = require("@/services/session/utils/timeMath.js");
   timeMath = (timeMath && (timeMath.default || timeMath)) || null;
-} catch (_e) { /* no-op */ }
+} catch (_e) {
+  /* no-op */
+}
 
 /* --------------------------------- Env-safe --------------------------------- */
 const isBrowser = typeof window !== "undefined";
@@ -43,11 +47,14 @@ const LEVELS = /** @type {const} */ ({
 });
 
 const COLOR_BY_LEVEL = {
-  error: "background:#fee2e2;color:#991b1b;border:1px solid #fecaca;border-radius:6px;padding:2px 6px",
+  error:
+    "background:#fee2e2;color:#991b1b;border:1px solid #fecaca;border-radius:6px;padding:2px 6px",
   warn: "background:#fef3c7;color:#92400e;border:1px solid #fde68a;border-radius:6px;padding:2px 6px",
   info: "background:#e0f2fe;color:#075985;border:1px solid #bae6fd;border-radius:6px;padding:2px 6px",
-  debug: "background:#ecfeff;color:#164e63;border:1px solid #cffafe;border-radius:6px;padding:2px 6px",
-  trace: "background:#f1f5f9;color:#0f172a;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px",
+  debug:
+    "background:#ecfeff;color:#164e63;border:1px solid #cffafe;border-radius:6px;padding:2px 6px",
+  trace:
+    "background:#f1f5f9;color:#0f172a;border:1px solid #e2e8f0;border-radius:6px;padding:2px 6px",
 };
 
 const COLOR_BY_DOMAIN = {
@@ -76,10 +83,18 @@ function pushBuffer(entry) {
   buffer.push(entry);
   if (buffer.length > MAX_BUFFER) buffer.shift();
 }
-export function getBuffer() { return buffer.slice(); }
-export function clearBuffer() { buffer.length = 0; }
+export function getBuffer() {
+  return buffer.slice();
+}
+export function clearBuffer() {
+  buffer.length = 0;
+}
 export function exportBuffer() {
-  return JSON.stringify({ exportedAt: new Date().toISOString(), entries: buffer }, null, 2);
+  return JSON.stringify(
+    { exportedAt: new Date().toISOString(), entries: buffer },
+    null,
+    2
+  );
 }
 
 /* ----------------------------- Enablement State ----------------------------- */
@@ -111,12 +126,16 @@ function readLocalStorage() {
   try {
     const s = window.localStorage.getItem(LS_KEY);
     return s ? JSON.parse(s) : null;
-  } catch (_e) { return null; }
+  } catch (_e) {
+    return null;
+  }
 }
 
 function writeLocalStorage(state) {
   if (!isBrowser) return;
-  try { window.localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch (_e) {}
+  try {
+    window.localStorage.setItem(LS_KEY, JSON.stringify(state));
+  } catch (_e) {}
 }
 
 function readQueryStrings() {
@@ -127,7 +146,9 @@ function readQueryStrings() {
     const v = u.searchParams.get(QS_KEY);
     if (!v) return null;
     return { debug: v };
-  } catch (_e) { return null; }
+  } catch (_e) {
+    return null;
+  }
 }
 
 function applyDomains(domainsCsv) {
@@ -137,24 +158,51 @@ function applyDomains(domainsCsv) {
 }
 
 /* --------------------------------- Controls --------------------------------- */
-export function setEnabled(v) { _enabled = !!v; syncAutoSubscriptions(); persistState(); }
-export function isEnabled() { return !!_enabled; }
+export function setEnabled(v) {
+  _enabled = !!v;
+  syncAutoSubscriptions();
+  persistState();
+}
+export function isEnabled() {
+  return !!_enabled;
+}
 
 export function setLevel(level) {
   if (typeof level === "number") _level = level;
   else _level = LEVELS[level] ?? _level;
   persistState();
 }
-export function getLevel() { return _level; }
+export function getLevel() {
+  return _level;
+}
 
-export function setDomains(domainsCsv) { applyDomains(domainsCsv); persistState(); }
-export function getDomains() { return Array.from(_domains); }
+export function setDomains(domainsCsv) {
+  applyDomains(domainsCsv);
+  persistState();
+}
+export function getDomains() {
+  return Array.from(_domains);
+}
 
-export function setSample(prob01) { _sample = Math.max(0, Math.min(1, Number(prob01) || 0)); persistState(); }
-export function getSample() { return _sample; }
+export function setSample(prob01) {
+  _sample = Math.max(0, Math.min(1, Number(prob01) || 0));
+  persistState();
+}
+export function getSample() {
+  return _sample;
+}
 
-export function enableAll() { _enabled = true; _domains.clear(); persistState(); syncAutoSubscriptions(); }
-export function disableAll() { _enabled = false; persistState(); syncAutoSubscriptions(); }
+export function enableAll() {
+  _enabled = true;
+  _domains.clear();
+  persistState();
+  syncAutoSubscriptions();
+}
+export function disableAll() {
+  _enabled = false;
+  persistState();
+  syncAutoSubscriptions();
+}
 
 function persistState() {
   writeLocalStorage({
@@ -178,8 +226,11 @@ function hydrateInitialState() {
   if (envFlag) parseDebugFlag(envFlag);
 
   const qs = readQueryStrings();
-  if (qs?.off) { _enabled = false; }
-  else if (qs?.debug) { parseDebugFlag(qs.debug); }
+  if (qs?.off) {
+    _enabled = false;
+  } else if (qs?.debug) {
+    parseDebugFlag(qs.debug);
+  }
 
   if (_domains.has("all")) _domains.clear();
 
@@ -187,10 +238,15 @@ function hydrateInitialState() {
 }
 
 function parseDebugFlag(flag) {
-  const f = String(flag || "").trim().toLowerCase();
+  const f = String(flag || "")
+    .trim()
+    .toLowerCase();
   if (!f) return;
 
-  if (["off", "false", "0", "no"].includes(f)) { _enabled = false; return; }
+  if (["off", "false", "0", "no"].includes(f)) {
+    _enabled = false;
+    return;
+  }
 
   _enabled = true;
   if (["on", "true", "1", "yes", "all", "*"].includes(f)) {
@@ -241,20 +297,26 @@ function styleFor(level, domain) {
 function writeLine(kind, domain, label, payload, meta) {
   const [sLevel, sDomain] = styleFor(kind, domain);
   const ts = new Date().toISOString();
-  const title = `%c${kind.toUpperCase()}%c ${domain ? `[${domain}] ` : ""}${label}`;
+  const title = `%c${kind.toUpperCase()}%c ${
+    domain ? `[${domain}] ` : ""
+  }${label}`;
   const record = { ts, kind, domain, label, payload, meta };
 
   pushBuffer(record);
 
-  if (kind === "error") console.error(title, sLevel, sDomain, payload || "", meta || "");
-  else if (kind === "warn") console.warn(title, sLevel, sDomain, payload || "", meta || "");
+  if (kind === "error")
+    console.error(title, sLevel, sDomain, payload || "", meta || "");
+  else if (kind === "warn")
+    console.warn(title, sLevel, sDomain, payload || "", meta || "");
   else console.log(title, sLevel, sDomain, payload || "", meta || "");
 }
 
 function grouped(kind, domain, label, payload, meta, collapsed = true) {
   const [sLevel, sDomain] = styleFor(kind, domain);
   const ts = new Date().toISOString();
-  const title = `%c${kind.toUpperCase()}%c ${domain ? `[${domain}] ` : ""}${label}  ${meta?.note ? `— ${meta.note}` : ""}`;
+  const title = `%c${kind.toUpperCase()}%c ${
+    domain ? `[${domain}] ` : ""
+  }${label}  ${meta?.note ? `— ${meta.note}` : ""}`;
 
   const record = { ts, kind, domain, label, payload, meta };
   pushBuffer(record);
@@ -272,30 +334,59 @@ function grouped(kind, domain, label, payload, meta, collapsed = true) {
 }
 
 /* --------------------------------- Public API -------------------------------- */
-function log(kind, domain, label, payload = null, meta = null, collapsed = false) {
+function log(
+  kind,
+  domain,
+  label,
+  payload = null,
+  meta = null,
+  collapsed = false
+) {
   if (!domainOk(domain) || !levelOk(kind) || !shouldSample()) return;
   grouped(kind, domain, label, payload, meta, collapsed);
 }
 
 export const dbg = {
-  error: (domain, label, payload, meta) => log("error", domain, label, payload, meta),
-  warn:  (domain, label, payload, meta) => log("warn", domain, label, payload, meta, true),
-  info:  (domain, label, payload, meta) => log("info", domain, label, payload, meta, true),
-  debug: (domain, label, payload, meta) => log("debug", domain, label, payload, meta, true),
-  trace: (domain, label, payload, meta) => log("trace", domain, label, payload, meta, true),
+  error: (domain, label, payload, meta) =>
+    log("error", domain, label, payload, meta),
+  warn: (domain, label, payload, meta) =>
+    log("warn", domain, label, payload, meta, true),
+  info: (domain, label, payload, meta) =>
+    log("info", domain, label, payload, meta, true),
+  debug: (domain, label, payload, meta) =>
+    log("debug", domain, label, payload, meta, true),
+  trace: (domain, label, payload, meta) =>
+    log("trace", domain, label, payload, meta, true),
 
   group: (domain, title, fn, meta) => {
     if (!domainOk(domain) || !levelOk("debug") || !shouldSample()) return;
     const [sLevel, sDomain] = styleFor("debug", domain);
     console.groupCollapsed(`%cDEBUG%c [${domain}] ${title}`, sLevel, sDomain);
-    try { fn?.(); } finally { console.groupEnd(); }
-    pushBuffer({ ts: new Date().toISOString(), kind: "group", domain, label: title, meta });
+    try {
+      fn?.();
+    } finally {
+      console.groupEnd();
+    }
+    pushBuffer({
+      ts: new Date().toISOString(),
+      kind: "group",
+      domain,
+      label: title,
+      meta,
+    });
   },
 };
 
 /* -------------------------- Domain-specific helpers ------------------------- */
 export function logEvent(evtName, payload = {}, domain = inferDomain(evtName)) {
-  log("info", domain, `event: ${evtName}`, sanitizeEvent(payload), { evt: evtName }, true);
+  log(
+    "info",
+    domain,
+    `event: ${evtName}`,
+    sanitizeEvent(payload),
+    { evt: evtName },
+    true
+  );
 }
 
 export function logDecision(kind, reason, context = {}, domain = "scheduler") {
@@ -303,18 +394,46 @@ export function logDecision(kind, reason, context = {}, domain = "scheduler") {
 }
 
 export function logTimerSet(what, dueTs, options = {}, domain = "scheduler") {
-  const human = timeMath?.humanize ? timeMath.humanize(dueTs - now()) : `${dueTs - now()}ms`;
-  log("debug", domain, `timer:set → ${what}`, options, { dueTs, eta: human }, true);
+  const human = timeMath?.humanize
+    ? timeMath.humanize(dueTs - now())
+    : `${dueTs - now()}ms`;
+  log(
+    "debug",
+    domain,
+    `timer:set → ${what}`,
+    options,
+    { dueTs, eta: human },
+    true
+  );
 }
 
 export function logTimerFire(what, scheduledTs, domain = "scheduler") {
   const late = now() - scheduledTs;
   const humanLate = timeMath?.humanize ? timeMath.humanize(late) : `${late}ms`;
-  log("info", domain, `timer:fire → ${what}`, null, { scheduledTs, late: humanLate }, false);
+  log(
+    "info",
+    domain,
+    `timer:fire → ${what}`,
+    null,
+    { scheduledTs, late: humanLate },
+    false
+  );
 }
 
-export function logPause(sessionId, atTs = now(), reason = "unspecified", domain = "sessions") {
-  log("info", domain, `session:pause #${sessionId}`, null, { atTs, reason }, true);
+export function logPause(
+  sessionId,
+  atTs = now(),
+  reason = "unspecified",
+  domain = "sessions"
+) {
+  log(
+    "info",
+    domain,
+    `session:pause #${sessionId}`,
+    null,
+    { atTs, reason },
+    true
+  );
 }
 
 export function logResume(sessionId, atTs = now(), domain = "sessions") {
@@ -329,7 +448,9 @@ export function traceStep(sessionId, step, state = {}, domain = "sessions") {
 function syncAutoSubscriptions() {
   if (!_enabled) {
     if (_autoSubscribed) {
-      try { eventBus.off && eventBus.off("*", onAnyEvent); } catch (_e) {}
+      try {
+        eventBus.off && eventBus.off("*", onAnyEvent);
+      } catch (_e) {}
       _autoSubscribed = false;
     }
     return;
@@ -341,7 +462,9 @@ function syncAutoSubscriptions() {
       eventBus.on("*", onAnyEvent);
       _autoSubscribed = true;
     }
-  } catch (_e) { /* no-op */ }
+  } catch (_e) {
+    /* no-op */
+  }
 }
 
 function onAnyEvent(evtName, payload) {
@@ -361,25 +484,43 @@ function inferDomain(evtName, payload) {
   const hint = (payload && (payload.domain || payload?.params?.domain)) || "";
   if (hint) return String(hint).toLowerCase();
   switch (p) {
-    case "mealplan": return "meals";
-    case "grocerylist": return "meals";
-    case "prep": return "meals";
-    case "inventory": return "inventory";
-    case "planner": return "scheduler";
+    case "mealplan":
+      return "meals";
+    case "grocerylist":
+      return "meals";
+    case "prep":
+      return "meals";
+    case "inventory":
+      return "inventory";
+    case "planner":
+      return "scheduler";
     case "session":
-    case "sessions": return "sessions";
-    case "garden": return "garden";
+    case "sessions":
+      return "sessions";
+    case "garden":
+      return "garden";
     case "animal":
-    case "animals": return "animals";
-    case "cleaning": return "cleaning";
-    case "automation": return "automation";
-    default: return p || "scheduler";
+    case "animals":
+      return "animals";
+    case "cleaning":
+      return "cleaning";
+    case "automation":
+      return "automation";
+    default:
+      return p || "scheduler";
   }
 }
 
 function sanitizeEvent(payload) {
   if (!payload || typeof payload !== "object") return payload ?? null;
-  const omitKeys = new Set(["_bigData", "rawHtml", "imageBlob", "stack", "stackTrace", "sourceMap"]);
+  const omitKeys = new Set([
+    "_bigData",
+    "rawHtml",
+    "imageBlob",
+    "stack",
+    "stackTrace",
+    "sourceMap",
+  ]);
   const out = {};
   for (const k of Object.keys(payload)) {
     if (omitKeys.has(k)) continue;
@@ -397,15 +538,16 @@ export function toggle(domainOrAll = "all") {
     if (_domains.size === 0 || domainOrAll === "all") _enabled = false;
     else setDomains("");
   }
-  persistState(); syncAutoSubscriptions();
+  persistState();
+  syncAutoSubscriptions();
 }
 
 export function withDomain(domain) {
   const d = String(domain || "scheduler").toLowerCase();
   return {
     error: (label, payload, meta) => dbg.error(d, label, payload, meta),
-    warn:  (label, payload, meta) => dbg.warn(d, label, payload, meta),
-    info:  (label, payload, meta) => dbg.info(d, label, payload, meta),
+    warn: (label, payload, meta) => dbg.warn(d, label, payload, meta),
+    info: (label, payload, meta) => dbg.info(d, label, payload, meta),
     debug: (label, payload, meta) => dbg.debug(d, label, payload, meta),
     trace: (label, payload, meta) => dbg.trace(d, label, payload, meta),
   };
@@ -414,7 +556,8 @@ export function withDomain(domain) {
 /* ------------------------------ Pretty Banners ------------------------------- */
 export function banner(msg = "Suka Debug ON") {
   if (!_enabled) return;
-  const s = "background:#111827;color:#f9fafb;padding:6px 10px;border-radius:8px";
+  const s =
+    "background:#111827;color:#f9fafb;padding:6px 10px;border-radius:8px";
   console.log(`%c${msg}`, s);
 }
 
@@ -423,19 +566,28 @@ hydrateInitialState();
 syncAutoSubscriptions();
 
 if (_enabled && isBrowser) {
-  const levelName = Object.keys(LEVELS).find(k => LEVELS[k] === _level) || "info";
+  const levelName =
+    Object.keys(LEVELS).find((k) => LEVELS[k] === _level) || "info";
   banner(
     `Suka Debug: ON — level=${levelName} ` +
-    `domains=${_domains.size ? Array.from(_domains).join(",") : "ALL"} sample=${_sample}`
+      `domains=${
+        _domains.size ? Array.from(_domains).join(",") : "ALL"
+      } sample=${_sample}`
   );
 }
 
 /* ----------------------------------- Exports -------------------------------- */
 const scheduleDebug = {
-  isEnabled, setEnabled, enableAll, disableAll,
-  getLevel, setLevel,
-  getDomains, setDomains,
-  getSample, setSample,
+  isEnabled,
+  setEnabled,
+  enableAll,
+  disableAll,
+  getLevel,
+  setLevel,
+  getDomains,
+  setDomains,
+  getSample,
+  setSample,
   toggle,
 
   dbg,

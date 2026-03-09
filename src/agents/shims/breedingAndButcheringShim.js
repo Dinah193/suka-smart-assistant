@@ -1,4 +1,4 @@
-// src/agents/shims/breedingAndButcheringAgent.js
+// src/agents/shims/breedingAndButcheringShim.js
 // -----------------------------------------------------------------------------
 // SSA Breeding & Butchering Shim
 // - Replaces the old "breedingAndButcheringAgent" logic-heavy agent
@@ -12,10 +12,10 @@
 //   plus a BreedingAndButcheringAgent class.
 // -----------------------------------------------------------------------------
 
-import { emit } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
-import budget from "@/reasoner/budget.json";
+import budget from "@/reasoner/budget.js";
 import { canInvokeReasoner } from "@/reasoner/gating";
 import { evaluateConfidence } from "@/reasoner/confidence";
 import { selectAnimalsContext } from "@/reasoner/selectors";
@@ -28,8 +28,8 @@ import { getSystemPrompt } from "@/reasoner/prompts/system";
 import { buildAnimalsPrompt } from "@/reasoner/prompts/templates";
 import { invokeReasoner } from "@/reasoner/core";
 
-import { evaluateGuards } from "@/guards/guardsEvaluate";
-import { composeSessionsFromPlan } from "@/skills/sessions/compose";
+import { evaluateGuards } from "@/agents/skills/sessions/guardsEvaluate";
+import { composeSessionsFromPlan } from "@agents/skills/sessions/compose";
 
 import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
 import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
@@ -93,7 +93,13 @@ function buildErrorResponse(reason, mode = "none", err, debug = []) {
       }
     : base;
 
-  return buildShimResponse(false, mode, data, [{ type: "error", reason }], debug);
+  return buildShimResponse(
+    false,
+    mode,
+    data,
+    [{ type: "error", reason }],
+    debug
+  );
 }
 
 /**
@@ -106,9 +112,7 @@ function buildErrorResponse(reason, mode = "none", err, debug = []) {
 function enforceBudget(req, debug) {
   const domainBudget =
     (budget &&
-      (budget.animals ||
-        budget.breeding ||
-        budget["animals.breeding"])) ||
+      (budget.animals || budget.breeding || budget["animals.breeding"])) ||
     {};
   const maxChars = domainBudget.maxChars || 20000;
 
@@ -305,7 +309,10 @@ export async function invokeShim(req) {
     // -------------------------------------------------
     // 2. Budget + gating
     // -------------------------------------------------
-    const budgetCheck = enforceBudget({ domain, intent, input, runtime }, debug);
+    const budgetCheck = enforceBudget(
+      { domain, intent, input, runtime },
+      debug
+    );
     if (!budgetCheck.ok) {
       warnings.push({
         type: "budget.blocked",
@@ -746,7 +753,10 @@ export class BreedingAndButcheringAgent {
     if (c === "generatebreedingplan" || c === "generate-breeding-plan") {
       return generateBreedingPlan(normalized, rt);
     }
-    if (c === "optimizecyclesagainstfeed" || c === "optimize-cycles-against-feed") {
+    if (
+      c === "optimizecyclesagainstfeed" ||
+      c === "optimize-cycles-against-feed"
+    ) {
       return optimizeCyclesAgainstFeed(normalized, rt);
     }
     if (c === "planbutchering" || c === "plan-butchering") {

@@ -1,0 +1,434 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-20T00:00:00.000Z",
+
+  "meta": {
+    "id": "recipes.cuisines.indian.aloo_gobi",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Aloo Gobi",
+    "subtitle": "Potato & cauliflower sabzi with turmeric, cumin, and a tomato-ginger masala",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA canonical cuisines/indian/recipes/aloo_gobi.json",
+      "notes": [
+        "Deterministic weeknight-friendly aloo gobi using stovetop pan-roast + steam finish.",
+        "Optimized for consistent texture: browned potatoes, tender cauliflower, not mushy."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.indian",
+    "category": "sabzi",
+    "mealArchetypes": ["meal.main.vegetable", "meal.side.vegetable"],
+    "servingStyles": ["family_style", "dry_curry"],
+    "plannerTags": [
+      "cuisine.indian",
+      "dish.aloo_gobi",
+      "diet.vegan",
+      "diet.vegetarian",
+      "weeknight.friendly",
+      "batch.friendly",
+      "leftovers.good"
+    ]
+  },
+
+  "summary": "A classic Indian dry curry: golden potatoes and tender cauliflower tossed in a fragrant turmeric-cumin masala with ginger, optional tomato, and a bright lemon finish.",
+
+  "keywords": [
+    "aloo gobi",
+    "potato cauliflower",
+    "sabzi",
+    "dry curry",
+    "vegan",
+    "weeknight"
+  ],
+
+  "tags": [
+    "cuisine.indian",
+    "dish.aloo_gobi",
+    "diet.vegan",
+    "weeknight.friendly",
+    "batch.friendly"
+  ],
+
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 1.25, "unit": "cups" },
+    "notes": "Serves 4 as a side; 2–3 as a main with roti/rice and a protein."
+  },
+
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 18,
+    "totalMins": 38
+  },
+
+  "difficulty": 2,
+
+  "signals": {
+    "weeknightPossible": true,
+    "batchFriendly": true,
+    "leftoversGood": true,
+    "freezerFriendly": false
+  },
+
+  "dietFlags": ["diet.vegan", "diet.vegetarian"],
+
+  "allergens": {
+    "contains": [],
+    "mayContain": [],
+    "notes": ["Naturally gluten-free and dairy-free as written."]
+  },
+
+  "equipment": {
+    "minimum": [
+      "equip.chef_knife",
+      "equip.cut_board",
+      "equip.large_skillet",
+      "equip.lid",
+      "equip.spatula",
+      "equip.measuring_spoons"
+    ],
+    "recommended": ["equip.microplane", "equip.kitchen_scale"],
+    "optional": [
+      {
+        "id": "equip.nonstick_skillet",
+        "label": "Nonstick skillet",
+        "required": false,
+        "notes": "Helps prevent potatoes from sticking during the browning stage."
+      }
+    ]
+  },
+
+  "ingredientGroups": [
+    {
+      "title": "Vegetables",
+      "items": ["ing.potato_yukon_gold", "ing.cauliflower", "ing.onion"]
+    },
+    {
+      "title": "Masala + Spices",
+      "items": [
+        "ing.oil_neutral",
+        "ing.ginger",
+        "ing.garlic",
+        "spice.cumin",
+        "spice.turmeric",
+        "spice.coriander",
+        "spice.kashmiri_chili",
+        "spice.garam_masala"
+      ]
+    },
+    {
+      "title": "Finish",
+      "items": ["ing.lemon", "ing.cilantro", "ing.salt_kosher"]
+    }
+  ],
+
+  "ingredients": [
+    {
+      "id": "ing.potato_yukon_gold",
+      "label": "Potatoes, diced 3/4-inch",
+      "role": "role.vegetable",
+      "amount": { "value": 1.25, "unit": "lb" },
+      "notes": [
+        "Yukon gold preferred for creamy interior; russet also works (crisper edges)."
+      ]
+    },
+    {
+      "id": "ing.cauliflower",
+      "label": "Cauliflower florets",
+      "role": "role.vegetable",
+      "amount": { "value": 1, "unit": "medium" },
+      "notes": [
+        "Cut into bite-size florets (about 5–6 cups). Keep pieces similar for even cooking."
+      ]
+    },
+    {
+      "id": "ing.onion",
+      "label": "Yellow onion, thinly sliced",
+      "role": "role.aromatic",
+      "amount": { "value": 1, "unit": "medium" }
+    },
+    {
+      "id": "ing.oil_neutral",
+      "label": "Neutral oil",
+      "role": "role.fat",
+      "amount": { "value": 3, "unit": "tbsp" },
+      "notes": ["Can replace 1 tbsp with ghee for richer flavor (not vegan)."]
+    },
+    {
+      "id": "ing.ginger",
+      "label": "Fresh ginger, grated",
+      "role": "role.aromatic",
+      "amount": { "value": 1.5, "unit": "tsp" }
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic, minced",
+      "role": "role.aromatic",
+      "amount": { "value": 3, "unit": "cloves" }
+    },
+    {
+      "id": "spice.cumin",
+      "label": "Ground cumin",
+      "role": "role.spice",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "spice.coriander",
+      "label": "Ground coriander",
+      "role": "role.spice",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "spice.turmeric",
+      "label": "Ground turmeric",
+      "role": "role.spice",
+      "amount": { "value": 0.75, "unit": "tsp" }
+    },
+    {
+      "id": "spice.kashmiri_chili",
+      "label": "Kashmiri chili powder (or mild chili powder)",
+      "role": "role.spice",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": ["Add more for heat; Kashmiri gives color with mild warmth."]
+    },
+    {
+      "id": "ing.tomatoes_diced",
+      "label": "Diced tomatoes",
+      "role": "role.base",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "optional": true,
+      "notes": [
+        "Optional but recommended: helps create a light masala coating and balances starch."
+      ]
+    },
+    {
+      "id": "ing.water",
+      "label": "Water",
+      "role": "role.steam",
+      "amount": { "value": 0.25, "unit": "cup" },
+      "notes": ["Used to steam-finish the potatoes/cauliflower."]
+    },
+    {
+      "id": "ing.salt_kosher",
+      "label": "Kosher salt",
+      "role": "role.seasoning",
+      "amount": { "value": 1.75, "unit": "tsp" },
+      "notes": ["Start with 1 tsp early; finish with the rest to taste."]
+    },
+    {
+      "id": "spice.garam_masala",
+      "label": "Garam masala",
+      "role": "role.spice_finish",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ing.lemon",
+      "label": "Lemon juice",
+      "role": "role.finish",
+      "amount": { "value": 1.5, "unit": "tbsp" }
+    },
+    {
+      "id": "ing.cilantro",
+      "label": "Fresh cilantro, chopped",
+      "role": "role.finish",
+      "amount": { "value": 0.25, "unit": "cup" },
+      "optional": true
+    }
+  ],
+
+  "methods": ["method.bloom_spices", "method.pan_roast", "method.steam_finish"],
+
+  "steps": [
+    {
+      "id": "step_01_prep",
+      "title": "Prep vegetables",
+      "instructions": [
+        "Dice potatoes into 3/4-inch pieces and keep in a bowl of water to prevent browning; drain and pat dry before cooking.",
+        "Cut cauliflower into bite-size florets.",
+        "Slice onion; mince garlic; grate ginger."
+      ],
+      "activeMins": 8,
+      "handsOffMins": 0,
+      "checks": [
+        "Dry potatoes = better browning (less sticking).",
+        "Keep cauliflower florets similar size for even tenderness."
+      ]
+    },
+    {
+      "id": "step_02_brown_potatoes",
+      "title": "Brown the potatoes",
+      "instructions": [
+        "Heat 2 tbsp oil in a large skillet over medium-high heat.",
+        "Add drained, well-dried potatoes and spread into an even layer.",
+        "Cook 8–10 minutes, turning occasionally, until golden in spots."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 4,
+      "timers": [{ "label": "Brown potatoes", "minutes": 9 }],
+      "checks": [
+        "Don’t stir constantly; give potatoes contact time to brown.",
+        "If sticking, reduce heat slightly and add a small splash of oil."
+      ]
+    },
+    {
+      "id": "step_03_onion_and_spices",
+      "title": "Cook onion and bloom spices",
+      "instructions": [
+        "Push potatoes to the side of the skillet (or remove temporarily to a bowl).",
+        "Add remaining 1 tbsp oil. Add onions and cook 3–4 minutes until softened.",
+        "Add garlic and ginger; cook 30 seconds until fragrant.",
+        "Sprinkle in cumin, coriander, turmeric, and Kashmiri chili (if using). Stir 15–20 seconds to bloom.",
+        "If using diced tomatoes, add them now and cook 2 minutes to soften."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 1,
+      "timers": [
+        { "label": "Cook onions", "minutes": 4 },
+        { "label": "Bloom spices", "seconds": 20 }
+      ],
+      "checks": [
+        "Spices should smell toasted, not burnt—lower heat if needed.",
+        "Tomatoes are optional; they help prevent dryness and add tang."
+      ]
+    },
+    {
+      "id": "step_04_add_cauliflower_and_steam_finish",
+      "title": "Add cauliflower and steam until tender",
+      "instructions": [
+        "Return potatoes to the center (if removed). Add cauliflower and toss everything to coat in the masala.",
+        "Add water and salt (start with 1 tsp). Stir, then cover with a lid.",
+        "Reduce heat to medium and steam 10–12 minutes, stirring once halfway, until potatoes are tender and cauliflower is cooked but not mushy."
+      ],
+      "activeMins": 4,
+      "handsOffMins": 12,
+      "timers": [{ "label": "Steam-finish vegetables", "minutes": 11 }],
+      "checks": [
+        "If pan dries out, add 1–2 tbsp water and re-cover.",
+        "For a drier sabzi, remove lid for the last 2–3 minutes to evaporate moisture."
+      ]
+    },
+    {
+      "id": "step_05_finish",
+      "title": "Finish and season",
+      "instructions": [
+        "Turn heat to low. Taste and adjust salt.",
+        "Stir in garam masala (optional) for aroma.",
+        "Add lemon juice and toss.",
+        "Top with cilantro before serving."
+      ],
+      "activeMins": 2,
+      "handsOffMins": 0,
+      "checks": [
+        "Acid at the end brightens the dish.",
+        "Garam masala is best added at the end to preserve fragrance."
+      ]
+    }
+  ],
+
+  "pairings": {
+    "sides": [
+      "recipes.cuisines.indian.roti",
+      "recipes.cuisines.indian.naan",
+      "recipes.cuisines.indian.basmati_rice"
+    ],
+    "proteins": [
+      "dish.indian.dal",
+      "dish.indian.chana_masala",
+      "dish.grilled.chicken_tikka"
+    ],
+    "notes": [
+      "Serve with roti/naan or rice. Great alongside dal or a simple lentil soup.",
+      "Add a cooling side like cucumber salad or raita (if not vegan)."
+    ]
+  },
+
+  "storage": {
+    "refrigerator": {
+      "durationDays": 4,
+      "notes": [
+        "Reheat in a skillet with a splash of water; finish with fresh lemon."
+      ]
+    },
+    "freezer": {
+      "durationMonths": 0,
+      "notes": [
+        "Not ideal to freeze: potatoes can turn grainy and cauliflower can soften."
+      ]
+    }
+  },
+
+  "safety": {
+    "notes": [
+      "Cool quickly before refrigerating.",
+      "Reheat to steaming hot throughout."
+    ]
+  },
+
+  "variations": [
+    {
+      "id": "var_restaurant_style_crispier",
+      "label": "Crispier restaurant-style sabzi",
+      "adapt": {
+        "notes": [
+          "Parboil potatoes 6 minutes, drain, then pan-fry to crisp edges faster.",
+          "After steaming, uncover and cook 3–5 minutes to dry and lightly toast the masala onto the vegetables."
+        ]
+      }
+    },
+    {
+      "id": "var_add_peas",
+      "label": "Aloo gobi matar (add peas)",
+      "adapt": {
+        "notes": [
+          "Add 1 cup frozen peas during the last 3 minutes of steaming.",
+          "Increase salt slightly and finish with extra lemon."
+        ]
+      }
+    },
+    {
+      "id": "var_add_whole_spice_temper",
+      "label": "Whole-spice tempering (tadka-style start)",
+      "adapt": {
+        "notes": [
+          "At the very beginning, heat oil and sizzle 1 tsp cumin seeds and 1/2 tsp mustard seeds until fragrant, then proceed with onions.",
+          "Optional: add 6–8 curry leaves for a South-Indian-leaning aroma."
+        ]
+      }
+    }
+  ],
+
+  "planner": {
+    "roles": [
+      { "role": "role.veg.side", "primary": true },
+      { "role": "role.veg.main", "primary": false }
+    ],
+    "notes": [
+      "Weeknight-friendly if paired with quick dal, eggs, or leftover protein.",
+      "Scales well for batch meal prep (best refrigerated, not frozen)."
+    ]
+  },
+
+  "compat": {
+    "cuisineId": "cuisines.indian",
+    "dishId": "dish.indian.aloo_gobi",
+    "aliases": ["aloo gobi", "aloo gobhi", "potato cauliflower sabzi"],
+    "index": {
+      "primaryTokens": ["aloo", "gobi", "potato", "cauliflower"],
+      "secondaryTokens": ["sabzi", "dry curry", "turmeric", "cumin"]
+    }
+  },
+
+  "audit": {
+    "curatedBy": "SSA",
+    "curationTier": "canonical",
+    "lastReviewedAt": "2026-01-20T00:00:00.000Z"
+  }
+}

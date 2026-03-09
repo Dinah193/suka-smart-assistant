@@ -45,6 +45,7 @@ let preferences = null;
 })();
 
 let io = null;
+let realtimeCoordinator = null;
 
 // ---- Config -----------------------------------------------------------------
 const SOCKET_PATH = process.env.SOCKET_PATH || "/socket.io";
@@ -153,6 +154,11 @@ const ALLOW_EVENTS_FROM_CLIENT = new Map([
       "notify",
       "client:ready",
       "presence:hello",
+      "signal:emit",
+      "suggestion:list",
+      "suggestion:consume",
+      "suggestion:assign",
+      "report:request",
     ]),
   ],
   [
@@ -167,6 +173,44 @@ const ALLOW_EVENTS_FROM_CLIENT = new Map([
 
 function buildNamespace(ns) {
   const n = io.of(ns);
+
+  function resolveAuthorizedScopeFromSocket(socket, requestedScope) {
+    const scope = requestedScope === "family" ? "family" : "household";
+    const scopeId = scope === "family" ? socket.user?.familyId : socket.user?.homeId;
+    if (!scopeId) {
+      const code = scope === "family" ? "family_scope_forbidden" : "household_scope_missing";
+      throw new Error(code);
+    }
+    return { scope, scopeId };
+  }
+
+  function canJoinRoom(socket, room) {
+    const user = socket?.user || {};
+    if (typeof room !== "string" || !room) return false;
+
+    if (room.startsWith("user:")) return room === `user:${user.id}`;
+    if (room.startsWith("home:")) return room === `home:${user.homeId}`;
+    if (room.startsWith("family:")) {
+      return !!user.familyId && room === `family:${user.familyId}`;
+    }
+
+    // Scoped realtime channels (queue + report)
+    if (room.startsWith("suggestions:household:")) {
+      return room === `suggestions:household:${user.homeId}`;
+    }
+    if (room.startsWith("suggestions:family:")) {
+      return !!user.familyId && room === `suggestions:family:${user.familyId}`;
+    }
+    if (room.startsWith("reports:household:")) {
+      return room === `reports:household:${user.homeId}`;
+    }
+    if (room.startsWith("reports:family:")) {
+      return !!user.familyId && room === `reports:family:${user.familyId}`;
+    }
+
+    // Keep backward compatibility for existing ad-hoc rooms.
+    return true;
+  }
 
   // Auth handshake
   n.use(async (socket, next) => {
@@ -243,6 +287,7 @@ function buildNamespace(ns) {
     socket.on("join", (room, cb) => {
       try {
         if (typeof room !== "string" || !room) throw new Error("invalid_room");
+        if (!canJoinRoom(socket, room)) throw new Error("forbidden_room");
         socket.join(room);
         cb && cb({ ok: true, room });
       } catch (e) {
@@ -289,6 +334,90 @@ function buildNamespace(ns) {
         if (socket.user?.id) n.to(`user:${socket.user.id}`).emit("notify", safe);
         pushReplay(ns, "notify", safe);
         cb && cb({ ok: true, id: safe.id });
+      } catch (e) {
+        cb && cb({ ok: false, error: String(e.message || e) });
+      }
+    });
+
+    // Realtime signal aggregator APIs
+    socket.on("signal:emit", (payload, cb) => {
+      try {
+        EventBus.emit("realtime:signal:ingest", {
+          payload,
+          context: {
+            ns,
+            user: socket.user,
+            socketId: socket.id,
+            sourceModule: ns,
+          },
+        });
+        cb && cb({ ok: true });
+      } catch (e) {
+        cb && cb({ ok: false, error: String(e.message || e) });
+      }
+    });
+
+    socket.on("suggestion:list", (query = {}, cb) => {
+      try {
+        if (!realtimeCoordinator) throw new Error("realtime_not_ready");
+        const { scope, scopeId } = resolveAuthorizedScopeFromSocket(socket, query?.scope);
+        const items = realtimeCoordinator.listSuggestions({
+          scope,
+          scopeId,
+          includeConsumed: !!query?.includeConsumed,
+          target: query?.target,
+          domain: query?.domain,
+          assignedToUserId: query?.assignedToUserId,
+        });
+        cb && cb({ ok: true, scope, scopeId, items, suggestions: items });
+      } catch (e) {
+        cb && cb({ ok: false, error: String(e.message || e) });
+      }
+    });
+
+    socket.on("suggestion:consume", (payload = {}, cb) => {
+      try {
+        if (!realtimeCoordinator) throw new Error("realtime_not_ready");
+        const { scope, scopeId } = resolveAuthorizedScopeFromSocket(socket, payload?.scope);
+        const item = realtimeCoordinator.consumeSuggestion({
+          scope,
+          scopeId,
+          suggestionId: payload?.suggestionId,
+          userId: socket.user?.id,
+        });
+        cb && cb({ ok: !!item, item, suggestion: item });
+      } catch (e) {
+        cb && cb({ ok: false, error: String(e.message || e) });
+      }
+    });
+
+    socket.on("suggestion:assign", (payload = {}, cb) => {
+      try {
+        if (!realtimeCoordinator) throw new Error("realtime_not_ready");
+        const { scope, scopeId } = resolveAuthorizedScopeFromSocket(socket, payload?.scope);
+        const item = realtimeCoordinator.assignSuggestion({
+          scope,
+          scopeId,
+          suggestionId: payload?.suggestionId,
+          assignedToUserId: payload?.assignedToUserId,
+          assignedRole: payload?.assignedRole,
+          assignedBy: socket.user?.id,
+        });
+        cb && cb({ ok: !!item, item, suggestion: item });
+      } catch (e) {
+        cb && cb({ ok: false, error: String(e.message || e) });
+      }
+    });
+
+    socket.on("report:request", (payload = {}, cb) => {
+      try {
+        if (!realtimeCoordinator) throw new Error("realtime_not_ready");
+        const { scope, scopeId } = resolveAuthorizedScopeFromSocket(socket, payload?.scope);
+        if (payload?.forceGenerate) {
+          realtimeCoordinator.generateReports();
+        }
+        const report = realtimeCoordinator.getLatestReport({ scope, scopeId });
+        cb && cb({ ok: true, report, scope, scopeId });
       } catch (e) {
         cb && cb({ ok: false, error: String(e.message || e) });
       }
@@ -372,6 +501,10 @@ function namespaceEmit(ns, event, payload, room = null) {
   pushReplay(ns, event, payload);
 }
 
+function getRealtimeCoordinator() {
+  return realtimeCoordinator;
+}
+
 // ---- Create server -----------------------------------------------------------
 function createSocketServer(httpServer) {
   if (io) return io; // singleton
@@ -406,6 +539,16 @@ function createSocketServer(httpServer) {
   // Bridges
   wirePreferencesBridge();
 
+  try {
+    const { createCoordinator } = require("./services/realtimeCoordinator.js");
+    realtimeCoordinator = createCoordinator({ eventBus: EventBus, namespaceEmit });
+    realtimeCoordinator.start();
+  } catch (e) {
+    // Keep socket server alive even if realtime coordinator fails to boot.
+    // eslint-disable-next-line no-console
+    console.warn("[socket] realtime coordinator skipped:", e?.message || e);
+  }
+
   return io;
 }
 
@@ -418,6 +561,7 @@ module.exports = {
   emitToRoom,
   emitGlobal,
   namespaceEmit,
+  getRealtimeCoordinator,
 
   // optional direct bridges for services
   bridgeInventory,

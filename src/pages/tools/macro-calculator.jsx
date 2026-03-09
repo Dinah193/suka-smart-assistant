@@ -53,9 +53,9 @@ function emitToolEvent(type, data = {}) {
 
 // Placeholder for future Hub export when this tool starts writing household data
 // (inventory, storehouse, or generated sessions).
-// import featureFlags from "../../services/featureFlags";
-// import HubPacketFormatter from "../../services/hub/HubPacketFormatter";
-// import FamilyFundConnector from "../../services/hub/FamilyFundConnector";
+// import featureFlags from "../../config/featureFlags";
+// import HubPacketFormatter from "@/services/hub/HubPacketFormatter";
+// import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 // function exportToHubIfEnabled(payload) {
 //   try {
 //     if (!featureFlags?.familyFundMode) return;

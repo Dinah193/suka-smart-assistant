@@ -39,8 +39,8 @@
  * -----------------------------------------------------------------------------
  */
 
-import eventBus from "@/services/eventBus";
-import { featureFlags } from "@/services/featureFlags";
+import eventBus from "@/services/events/eventBus";
+import { featureFlags } from "@/config/featureFlags";
 
 let HubPacketFormatter = null;
 let FamilyFundConnector = null;
@@ -50,7 +50,9 @@ let FamilyFundConnector = null;
     const m2 = await import("@/services/hub/FamilyFundConnector");
     HubPacketFormatter = m1?.default || null;
     FamilyFundConnector = m2?.default || null;
-  } catch { /* no-op */ }
+  } catch {
+    /* no-op */
+  }
 })();
 
 const SOURCE = "services.tts";
@@ -58,7 +60,11 @@ const isoNow = () => new Date().toISOString();
 
 function emit(type, data = {}) {
   const payload = { type, ts: isoNow(), source: SOURCE, data };
-  try { eventBus?.emit?.(payload); } catch { /* no-op */ }
+  try {
+    eventBus?.emit?.(payload);
+  } catch {
+    /* no-op */
+  }
   if (featureFlags?.familyFundMode) exportToHubIfEnabled(payload);
   return payload;
 }
@@ -69,12 +75,17 @@ async function exportToHubIfEnabled(payload) {
     if (!HubPacketFormatter || !FamilyFundConnector) return;
     const packet = HubPacketFormatter.format(payload);
     await FamilyFundConnector.send(packet);
-  } catch { /* silent */ }
+  } catch {
+    /* silent */
+  }
 }
 
 function supported() {
-  try { return typeof window !== "undefined" && "speechSynthesis" in window; }
-  catch { return false; }
+  try {
+    return typeof window !== "undefined" && "speechSynthesis" in window;
+  } catch {
+    return false;
+  }
 }
 
 // Basic sanitizer: strip tags/ssml-ish, collapse whitespace, limit length.
@@ -97,7 +108,10 @@ function chunkText(text, max = 180) {
   // Post-process to ensure none exceed max
   const final = [];
   for (const p of parts) {
-    if (p.length <= max) { if (p.trim()) final.push(p.trim()); continue; }
+    if (p.length <= max) {
+      if (p.trim()) final.push(p.trim());
+      continue;
+    }
     // Hard wrap
     for (let i = 0; i < p.length; i += max) {
       final.push(p.slice(i, i + max).trim());
@@ -115,7 +129,7 @@ class TtsService {
       rate: 1.0,
       pitch: 1.0,
       volume: 1.0,
-      voiceHint: /** { name?: string, lang?: string } */ ({ lang: "en-US" }),
+      voiceHint: /** { name?: string, lang?: string } */ { lang: "en-US" },
     };
     this._queue = [];
     this._speaking = false;
@@ -144,7 +158,9 @@ class TtsService {
         await this._loadVoices();
         emit("device.tts.voices.changed", { count: this._voices.length });
       };
-    } catch { /* no-op */ }
+    } catch {
+      /* no-op */
+    }
   }
 
   async _loadVoices() {
@@ -153,7 +169,7 @@ class TtsService {
     let voices = window.speechSynthesis.getVoices() || [];
     // Some browsers populate asynchronously; retry briefly.
     while ((!voices || voices.length === 0) && tries < 5) {
-      await new Promise(r => setTimeout(r, 100));
+      await new Promise((r) => setTimeout(r, 100));
       voices = window.speechSynthesis.getVoices() || [];
       tries++;
     }
@@ -164,8 +180,14 @@ class TtsService {
   listVoices(filter = {}) {
     if (!this._voices?.length) return [];
     const { lang, name } = filter;
-    return this._voices.filter(v => {
-      if (lang && !String(v.lang || "").toLowerCase().startsWith(String(lang).toLowerCase())) return false;
+    return this._voices.filter((v) => {
+      if (
+        lang &&
+        !String(v.lang || "")
+          .toLowerCase()
+          .startsWith(String(lang).toLowerCase())
+      )
+        return false;
       if (name && String(v.name) !== String(name)) return false;
       return true;
     });
@@ -173,18 +195,30 @@ class TtsService {
 
   setProfile(profile = {}) {
     // rate: 0.1..10 (spec), pitch: 0..2, volume: 0..1
-    const clamp = (v, min, max, d) => Number.isFinite(+v) ? Math.min(max, Math.max(min, +v)) : d;
-    if (profile.rate !== undefined)  this._profile.rate = clamp(profile.rate, 0.5, 2.0, 1.0);
-    if (profile.pitch !== undefined) this._profile.pitch = clamp(profile.pitch, 0.5, 2.0, 1.0);
-    if (profile.volume !== undefined) this._profile.volume = clamp(profile.volume, 0.0, 1.0, 1.0);
+    const clamp = (v, min, max, d) =>
+      Number.isFinite(+v) ? Math.min(max, Math.max(min, +v)) : d;
+    if (profile.rate !== undefined)
+      this._profile.rate = clamp(profile.rate, 0.5, 2.0, 1.0);
+    if (profile.pitch !== undefined)
+      this._profile.pitch = clamp(profile.pitch, 0.5, 2.0, 1.0);
+    if (profile.volume !== undefined)
+      this._profile.volume = clamp(profile.volume, 0.0, 1.0, 1.0);
     if (profile.voiceHint && typeof profile.voiceHint === "object") {
-      this._profile.voiceHint = { ...this._profile.voiceHint, ...profile.voiceHint };
+      this._profile.voiceHint = {
+        ...this._profile.voiceHint,
+        ...profile.voiceHint,
+      };
     }
   }
 
   setPreferredVoiceByName(name) {
-    const v = this._voices.find(x => x.name === name);
-    if (v) this._profile.voiceHint = { ...this._profile.voiceHint, name: v.name, lang: v.lang };
+    const v = this._voices.find((x) => x.name === name);
+    if (v)
+      this._profile.voiceHint = {
+        ...this._profile.voiceHint,
+        name: v.name,
+        lang: v.lang,
+      };
     return !!v;
   }
 
@@ -204,7 +238,8 @@ class TtsService {
     await this.init(); // ensure voices loaded at least once
 
     const profile = { ...this._profile, ...opts };
-    if (opts.voiceHint) profile.voiceHint = { ...this._profile.voiceHint, ...opts.voiceHint };
+    if (opts.voiceHint)
+      profile.voiceHint = { ...this._profile.voiceHint, ...opts.voiceHint };
 
     if (opts.interrupt) {
       this.cancelAll(); // cancel currently speaking; onend will be skipped by cancel
@@ -229,8 +264,8 @@ class TtsService {
    */
   async speakStep(session, step, opts = {}) {
     if (!step) return false;
-    const prefix = (opts.prepend ?? "");
-    const suffix = (opts.append ?? "");
+    const prefix = opts.prepend ?? "";
+    const suffix = opts.append ?? "";
     const parts = [
       prefix,
       step.title || "",
@@ -250,7 +285,10 @@ class TtsService {
       emit("device.tts.paused", {});
       return true;
     } catch (e) {
-      emit("device.tts.error", { phase: "pause", message: String(e?.message || e) });
+      emit("device.tts.error", {
+        phase: "pause",
+        message: String(e?.message || e),
+      });
       return false;
     }
   }
@@ -265,7 +303,10 @@ class TtsService {
       if (!this._speaking && this._queue.length) this._dequeueAndSpeak();
       return true;
     } catch (e) {
-      emit("device.tts.error", { phase: "resume", message: String(e?.message || e) });
+      emit("device.tts.error", {
+        phase: "resume",
+        message: String(e?.message || e),
+      });
       return false;
     }
   }
@@ -280,15 +321,21 @@ class TtsService {
       emit("device.tts.cancelled", {});
       return true;
     } catch (e) {
-      emit("device.tts.error", { phase: "cancel", message: String(e?.message || e) });
+      emit("device.tts.error", {
+        phase: "cancel",
+        message: String(e?.message || e),
+      });
       return false;
     }
   }
 
   isSpeaking() {
     if (!supported()) return false;
-    try { return window.speechSynthesis.speaking || this._speaking; }
-    catch { return this._speaking; }
+    try {
+      return window.speechSynthesis.speaking || this._speaking;
+    } catch {
+      return this._speaking;
+    }
   }
 
   /* ------------------------------ Internals ------------------------------- */
@@ -297,13 +344,17 @@ class TtsService {
     if (!this._voices?.length) return null;
     const { name, lang } = hint;
     if (name) {
-      const byName = this._voices.find(v => v.name === name);
+      const byName = this._voices.find((v) => v.name === name);
       if (byName) return byName;
     }
     if (lang) {
       // Prefer enhanced/localService voices in requested language
       const langLower = String(lang).toLowerCase();
-      const matches = this._voices.filter(v => String(v.lang || "").toLowerCase().startsWith(langLower));
+      const matches = this._voices.filter((v) =>
+        String(v.lang || "")
+          .toLowerCase()
+          .startsWith(langLower)
+      );
       if (matches.length) {
         // Prefer non-default to avoid duplicates; then localService
         matches.sort((a, b) => {
@@ -317,7 +368,7 @@ class TtsService {
       }
     }
     // Fallback: default voice
-    return this._voices.find(v => v.default) || this._voices[0] || null;
+    return this._voices.find((v) => v.default) || this._voices[0] || null;
   }
 
   _dequeueAndSpeak() {
@@ -339,7 +390,9 @@ class TtsService {
         textLen: next.text.length,
         voice: u.voice?.name || null,
         lang: u.voice?.lang || null,
-        rate: u.rate, pitch: u.pitch, volume: u.volume,
+        rate: u.rate,
+        pitch: u.pitch,
+        volume: u.volume,
       });
     };
     u.onend = () => {
@@ -349,7 +402,10 @@ class TtsService {
       if (!this._paused) this._dequeueAndSpeak();
     };
     u.onerror = (e) => {
-      emit("device.tts.error", { phase: "speak", message: String(e?.error || e?.message || "unknown") });
+      emit("device.tts.error", {
+        phase: "speak",
+        message: String(e?.error || e?.message || "unknown"),
+      });
       this._speaking = false;
       if (!this._paused) this._dequeueAndSpeak();
     };
@@ -357,7 +413,10 @@ class TtsService {
     try {
       window.speechSynthesis.speak(u);
     } catch (e) {
-      emit("device.tts.error", { phase: "speak", message: String(e?.message || e) });
+      emit("device.tts.error", {
+        phase: "speak",
+        message: String(e?.message || e),
+      });
       this._speaking = false;
     }
   }

@@ -16,6 +16,36 @@ export function extractIngredients(recipe) {
 }
 
 /**
+ * getRecipeIngredients
+ * - Backward-compatible export expected by some components (e.g., InventoryAwarePlanner).
+ * - Returns a normalized ingredient list.
+ * - Supports both "amount" and "quantity" style fields safely.
+ *
+ * @param {Object} recipe
+ * @returns {Array<{ name: string, amount: number, unit: string }>}
+ */
+export function getRecipeIngredients(recipe) {
+  if (!recipe || !Array.isArray(recipe.ingredients)) return [];
+
+  return recipe.ingredients
+    .map((item) => {
+      const name = String(item?.name || item?.label || "")
+        .trim()
+        .toLowerCase();
+      const unit = String(item?.unit || item?.uom || "").trim();
+      const amount =
+        Number(item?.amount ?? item?.quantity ?? item?.qty ?? item?.value) || 0;
+
+      return {
+        name: name || "unknown",
+        amount,
+        unit,
+      };
+    })
+    .filter((x) => x.name && x.amount >= 0);
+}
+
+/**
  * Consolidate and total ingredients from multiple recipes.
  * @param {Array<Object>} recipes
  * @returns {Array<{ name: string, totalAmount: number, unit: string }>}

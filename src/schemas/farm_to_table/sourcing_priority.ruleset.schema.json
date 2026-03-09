@@ -1,0 +1,409 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://suka-smart-assistant.local/schemas/farm_to_table/sourcing_priority.ruleset.schema.json",
+  "title": "SSA • Farm-to-Table Sourcing Priority Ruleset Schema",
+  "description": "Schema for SSA deterministic sourcing priority rulesets. These rulesets rank or constrain candidate components/sources by preference (e.g., garden > pantry > store) and can emit planner tags or adjust scores. This schema is intentionally compatible with the core SSA ruleset.schema.json shape (kind/meta/scope/rules) while providing optional structured globals and action constraints used by farm-to-table planners.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "updatedAt", "kind", "meta", "scope", "rules"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional self-declared schema reference used by editors like VS Code.",
+      "minLength": 1
+    },
+
+    "$id": {
+      "type": "string",
+      "description": "Optional canonical schema id.",
+      "minLength": 1
+    },
+
+    "schemaVersion": {
+      "type": "string",
+      "description": "Ruleset file version (SSA ruleset format version).",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last update timestamp (ISO 8601)."
+    },
+
+    "kind": {
+      "type": "string",
+      "description": "Kind of ruleset document.",
+      "enum": ["ruleset", "cuisine_ruleset", "farm_to_table_ruleset"]
+    },
+
+    "meta": { "$ref": "#/$defs/Meta" },
+
+    "scope": { "$ref": "#/$defs/Scope" },
+
+    "normalization": { "$ref": "#/$defs/Normalization" },
+
+    "globals": {
+      "description": "Optional global signals and defaults used by sourcing priority engines.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "module": { "type": "string", "minLength": 1 },
+
+        "engineHints": {
+          "description": "Optional hints about evaluation context and engine behavior.",
+          "type": "object",
+          "additionalProperties": true
+        },
+
+        "priorityOrder": {
+          "description": "Optional explicit ordering of sourcing tiers (best -> worst).",
+          "type": "array",
+          "items": { "$ref": "#/$defs/Id" },
+          "default": []
+        },
+
+        "tierWeights": {
+          "description": "Optional scoring weights per sourcing tier (tierId -> scoreDelta).",
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/Id" },
+          "additionalProperties": {
+            "type": "number",
+            "minimum": -1000,
+            "maximum": 1000
+          },
+          "default": {}
+        },
+
+        "defaults": {
+          "description": "Optional default output fields used by engines.",
+          "type": "object",
+          "additionalProperties": true,
+          "default": {}
+        }
+      },
+      "default": {}
+    },
+
+    "rules": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/Rule" }
+    }
+  },
+
+  "$defs": {
+    "Id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_\\.\\-]+$",
+      "minLength": 2,
+      "maxLength": 160
+    },
+
+    "Tag": {
+      "type": "string",
+      "pattern": "^[a-z0-9_\\.\\-]+$",
+      "minLength": 2,
+      "maxLength": 80
+    },
+
+    "ShortText": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 240,
+      "pattern": "^[^\\u0000-\\u001F]+$"
+    },
+
+    "Meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "label", "status", "source"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "type": {
+          "type": "string",
+          "enum": ["ruleset", "cuisine_ruleset", "farm_to_table_ruleset"]
+        },
+        "label": { "$ref": "#/$defs/ShortText" },
+        "cuisineId": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["canonical", "draft", "experimental", "deprecated"]
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "name"],
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": ["catalog", "user", "import", "generated"]
+            },
+            "name": { "$ref": "#/$defs/ShortText" },
+            "notes": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+
+    "Scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": { "type": "string", "enum": ["cuisine", "global", "module"] },
+        "cuisineId": { "type": "string" },
+        "locales": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 2 }
+        }
+      }
+    },
+
+    "AliasMap": {
+      "type": "object",
+      "description": "Map of canonical IDs -> list of alias strings.",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "type": "string", "minLength": 1 }
+      }
+    },
+
+    "Normalization": {
+      "type": "object",
+      "description": "Optional normalization and alias maps to support deterministic matching.",
+      "additionalProperties": false,
+      "properties": {
+        "idPattern": { "type": "string" },
+        "idCase": { "type": "string", "enum": ["lower", "upper", "preserve"] },
+        "aliasCaseFold": { "type": "boolean" },
+        "keywordCaseFold": { "type": "boolean" },
+        "trimWhitespace": { "type": "boolean" },
+        "collapseSpaces": { "type": "boolean" },
+        "tokens": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "stopWords": {
+              "type": "array",
+              "items": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "ingredientAliases": { "$ref": "#/$defs/AliasMap" },
+        "dishAliases": { "$ref": "#/$defs/AliasMap" },
+        "equipmentAliases": { "$ref": "#/$defs/AliasMap" },
+        "methodAliases": { "$ref": "#/$defs/AliasMap" }
+      }
+    },
+
+    "Rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "enabled", "priority", "title", "when", "then"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "enabled": { "type": "boolean" },
+        "priority": { "type": "integer", "minimum": 0 },
+        "title": { "$ref": "#/$defs/ShortText" },
+        "description": { "type": "string" },
+        "tags": { "type": "array", "items": { "$ref": "#/$defs/Tag" } },
+        "source": { "type": "string", "minLength": 1 },
+        "stopOnMatch": { "type": "boolean" },
+
+        "when": { "$ref": "#/$defs/LogicNode" },
+        "then": { "$ref": "#/$defs/ThenBlock" }
+      }
+    },
+
+    "ThenBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actions"],
+      "properties": {
+        "actions": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/Action" }
+        }
+      }
+    },
+
+    "LogicNode": {
+      "description": "Boolean logic tree used by rule 'when'. Supports op: all|any|not and leaf conditions.",
+      "oneOf": [
+        { "$ref": "#/$defs/LogicGroup" },
+        { "$ref": "#/$defs/Condition" }
+      ]
+    },
+
+    "LogicGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["op", "conditions"],
+      "properties": {
+        "op": { "type": "string", "enum": ["all", "any", "not"] },
+        "conditions": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/LogicNode" }
+        }
+      }
+    },
+
+    "Condition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "eq",
+            "exists",
+            "hasTag",
+            "intersects",
+            "matches",
+            "contains",
+            "lt",
+            "lte",
+            "gt",
+            "gte"
+          ]
+        },
+        "path": { "type": "string", "minLength": 1 },
+        "value": {
+          "anyOf": [
+            { "type": "string" },
+            { "type": "number" },
+            { "type": "integer" },
+            { "type": "boolean" },
+            { "type": "null" },
+            { "type": "object" },
+            { "type": "array" }
+          ]
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              { "type": "string" },
+              { "type": "number" },
+              { "type": "integer" },
+              { "type": "boolean" }
+            ]
+          }
+        },
+        "regex": { "type": "string" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "type": { "const": "exists" } },
+            "required": ["type"]
+          },
+          "then": { "required": ["path"] }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "eq" } },
+            "required": ["type"]
+          },
+          "then": { "required": ["path", "value"] }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "hasTag" } },
+            "required": ["type"]
+          },
+          "then": { "required": ["value"] }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "intersects" } },
+            "required": ["type"]
+          },
+          "then": { "required": ["path", "values"] }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "matches" } },
+            "required": ["type"]
+          },
+          "then": { "required": ["path", "regex"] }
+        }
+      ]
+    },
+
+    "Action": {
+      "oneOf": [
+        { "$ref": "#/$defs/ActionAddTag" },
+        { "$ref": "#/$defs/ActionScoreAdjust" },
+        { "$ref": "#/$defs/ActionSet" },
+        { "$ref": "#/$defs/ActionEmitEvent" }
+      ]
+    },
+
+    "ActionAddTag": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "value"],
+      "properties": {
+        "type": { "type": "string", "const": "addTag" },
+        "value": { "type": "string", "minLength": 1 }
+      }
+    },
+
+    "ActionScoreAdjust": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "scoreDelta"],
+      "properties": {
+        "type": { "type": "string", "const": "scoreAdjust" },
+        "scoreDelta": { "type": "number" }
+      }
+    },
+
+    "ActionSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "path", "value"],
+      "properties": {
+        "type": { "type": "string", "const": "set" },
+        "path": { "type": "string", "minLength": 1 },
+        "value": {
+          "anyOf": [
+            { "type": "string" },
+            { "type": "number" },
+            { "type": "integer" },
+            { "type": "boolean" },
+            { "type": "null" },
+            { "type": "object" },
+            { "type": "array" }
+          ]
+        }
+      }
+    },
+
+    "ActionEmitEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "event"],
+      "properties": {
+        "type": { "type": "string", "const": "emitEvent" },
+        "event": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "payload"],
+          "properties": {
+            "name": { "type": "string", "minLength": 1 },
+            "payload": { "type": "object", "additionalProperties": true }
+          }
+        }
+      }
+    }
+  }
+}

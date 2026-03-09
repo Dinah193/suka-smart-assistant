@@ -34,7 +34,7 @@
 /* ------------------------------- Optional deps ------------------------------- */
 let eventBus = { emit: () => {}, on: () => {} };
 try {
-  const mod = require("@/services/eventBus");
+  const mod = require("@/services/events/eventBus");
   eventBus = mod?.default || mod || eventBus;
 } catch (_) {}
 
@@ -59,7 +59,7 @@ try {
 let INGREDIENT_SOURCES = null;
 try {
   const mod = require("@/app/utils/ingredientSourceMap");
-  INGREDIENT_SOURCES = (mod?.INGREDIENT_SOURCES || null);
+  INGREDIENT_SOURCES = mod?.INGREDIENT_SOURCES || null;
 } catch (_) {}
 
 let inventoryApi = null;
@@ -137,12 +137,13 @@ function normalizeIngredient(raw) {
 
 /** Simple similarity (Jaro-Winkler-like light) */
 function similarity(a = "", b = "") {
-  a = a.toLowerCase(); b = b.toLowerCase();
+  a = a.toLowerCase();
+  b = b.toLowerCase();
   if (a === b) return 1;
   if (!a || !b) return 0;
   const setA = new Set(a.split(" "));
   const setB = new Set(b.split(" "));
-  const inter = [...setA].filter(t => setB.has(t));
+  const inter = [...setA].filter((t) => setB.has(t));
   return inter.length / Math.max(setA.size, setB.size);
 }
 
@@ -161,7 +162,9 @@ const Weights = {
   inventoryLow: -0.1,
 };
 
-function clamp01(n) { return Math.max(0, Math.min(1, n)); }
+function clamp01(n) {
+  return Math.max(0, Math.min(1, n));
+}
 
 /* ------------------------------- Core logic --------------------------------- */
 
@@ -172,46 +175,52 @@ function inventoryCandidates(normName, neededQty, ctx) {
   if (!inventoryApi?.findItems) return [];
   try {
     const found = inventoryApi.findItems({ query: normName });
-    return (found || []).map(item => {
-      const sim = similarity(normName, singularize(item?.name || ""));
-      let score = 0;
-      const rationale = [];
-      if (item?.sku) {
-        score += Weights.inventorySku;
-        rationale.push("inventory-sku");
-      }
-      if (item?.qty > 0) {
-        score += Weights.inventoryAvail;
-        rationale.push("qty-available");
-      } else {
-        score += Weights.inventoryLow;
-        rationale.push("inventory-low");
-      }
-      if (sim >= 0.66) {
-        score += Weights.nameSimStrong;
-        rationale.push("name-sim-strong");
-      } else if (sim >= 0.4) {
-        score += Weights.nameSimWeak;
-        rationale.push("name-sim-weak");
-      }
-      // pantry awareness: if user wants to preserve pantry, slightly penalize
-      if (ctx?.pantryGuard === true) {
-        score += Weights.pantryLow;
-        rationale.push("pantry-guard");
-      }
-      return {
-        sourceType: "inventory",
-        sourceId: item?.id || item?.sku || null,
-        confidence: clamp01(score),
-        rationale,
-        item,
-        fulfill: () => ({
-          type: "inventory:reserve",
-          disabled: ctx?.sabbathGuard === true,
-          data: { itemId: item?.id || item?.sku, qty: neededQty ?? null, unit: ctx?.unit || null },
-        }),
-      };
-    }).sort((a, b) => b.confidence - a.confidence);
+    return (found || [])
+      .map((item) => {
+        const sim = similarity(normName, singularize(item?.name || ""));
+        let score = 0;
+        const rationale = [];
+        if (item?.sku) {
+          score += Weights.inventorySku;
+          rationale.push("inventory-sku");
+        }
+        if (item?.qty > 0) {
+          score += Weights.inventoryAvail;
+          rationale.push("qty-available");
+        } else {
+          score += Weights.inventoryLow;
+          rationale.push("inventory-low");
+        }
+        if (sim >= 0.66) {
+          score += Weights.nameSimStrong;
+          rationale.push("name-sim-strong");
+        } else if (sim >= 0.4) {
+          score += Weights.nameSimWeak;
+          rationale.push("name-sim-weak");
+        }
+        // pantry awareness: if user wants to preserve pantry, slightly penalize
+        if (ctx?.pantryGuard === true) {
+          score += Weights.pantryLow;
+          rationale.push("pantry-guard");
+        }
+        return {
+          sourceType: "inventory",
+          sourceId: item?.id || item?.sku || null,
+          confidence: clamp01(score),
+          rationale,
+          item,
+          fulfill: () => ({
+            type: "inventory:reserve",
+            disabled: ctx?.sabbathGuard === true,
+            data: {
+              itemId: item?.id || item?.sku,
+              qty: neededQty ?? null,
+              unit: ctx?.unit || null,
+            },
+          }),
+        };
+      })
+      .sort((a, b) => b.confidence - a.confidence);
   } catch (e) {
     console.warn("[IngredientLinker] inventoryCandidates error:", e);
     return [];
@@ -225,40 +234,47 @@ function gardenCandidates(normName, ctx) {
   if (!gardenApi?.searchCrops) return [];
   try {
     const crops = gardenApi.searchCrops({ query: normName });
-    return (crops || []).map(crop => {
-      const sim = similarity(normName, singularize(crop?.name || crop?.crop || ""));
-      const inSeason = crop?.inSeason === true || crop?.harvestWindow?.includes(ctx?.targetDateRange?.label);
-      const planned = crop?.planned === true || crop?.beds?.length > 0;
-      let score = 0;
-      const rationale = [];
-      if (sim >= 0.66) {
-        score += Weights.nameSimStrong;
-        rationale.push("name-sim-strong");
-      } else if (sim >= 0.4) {
-        score += Weights.nameSimWeak;
-        rationale.push("name-sim-weak");
-      }
-      if (inSeason) {
-        score += Weights.gardenInSeason;
-        rationale.push("garden-in-season");
-      }
-      if (planned) {
-        score += Weights.gardenPlanned;
-        rationale.push("garden-planned");
-      }
-      return {
-        sourceType: "garden",
-        sourceId: crop?.id || crop?.slug || crop?.crop || null,
-        confidence: clamp01(score),
-        rationale,
-        crop,
-        fulfill: () => ({
-          type: "garden:allocateHarvest",
-          disabled: ctx?.sabbathGuard === true,
-          data: { cropId: crop?.id, estimateQty: ctx?.estimateQty ?? null },
-        }),
-      };
-    }).sort((a, b) => b.confidence - a.confidence);
+    return (crops || [])
+      .map((crop) => {
+        const sim = similarity(
+          normName,
+          singularize(crop?.name || crop?.crop || "")
+        );
+        const inSeason =
+          crop?.inSeason === true ||
+          crop?.harvestWindow?.includes(ctx?.targetDateRange?.label);
+        const planned = crop?.planned === true || crop?.beds?.length > 0;
+        let score = 0;
+        const rationale = [];
+        if (sim >= 0.66) {
+          score += Weights.nameSimStrong;
+          rationale.push("name-sim-strong");
+        } else if (sim >= 0.4) {
+          score += Weights.nameSimWeak;
+          rationale.push("name-sim-weak");
+        }
+        if (inSeason) {
+          score += Weights.gardenInSeason;
+          rationale.push("garden-in-season");
+        }
+        if (planned) {
+          score += Weights.gardenPlanned;
+          rationale.push("garden-planned");
+        }
+        return {
+          sourceType: "garden",
+          sourceId: crop?.id || crop?.slug || crop?.crop || null,
+          confidence: clamp01(score),
+          rationale,
+          crop,
+          fulfill: () => ({
+            type: "garden:allocateHarvest",
+            disabled: ctx?.sabbathGuard === true,
+            data: { cropId: crop?.id, estimateQty: ctx?.estimateQty ?? null },
+          }),
+        };
+      })
+      .sort((a, b) => b.confidence - a.confidence);
   } catch (e) {
     console.warn("[IngredientLinker] gardenCandidates error:", e);
     return [];
@@ -272,33 +288,41 @@ function animalCandidates(normName, ctx) {
   if (!animalApi?.search) return [];
   try {
     const results = animalApi.search({ query: normName });
-    return (results || []).map(an => {
-      const labels = [an?.animal, an?.breed, ...(an?.tags || [])].filter(Boolean).join(" ");
-      const sim = similarity(normName, singularize(labels));
-      let score = 0;
-      const rationale = [];
-      if (sim >= 0.5) {
-        score += Weights.animalMatch;
-        rationale.push("animal-match");
-      }
-      // (Optional) penalize if zero projected yield
-      if (an?.projectedYield && an?.projectedYield <= 0) {
-        score += Weights.inventoryLow;
-        rationale.push("yield-low");
-      }
-      return {
-        sourceType: "animal",
-        sourceId: an?.id || an?.animal || null,
-        confidence: clamp01(score),
-        rationale,
-        animal: an,
-        fulfill: () => ({
-          type: "animal:reserveCut",
-          disabled: ctx?.sabbathGuard === true,
-          data: { animalId: an?.id, cutHint: normName, qty: ctx?.neededQty ?? null },
-        }),
-      };
-    }).sort((a, b) => b.confidence - a.confidence);
+    return (results || [])
+      .map((an) => {
+        const labels = [an?.animal, an?.breed, ...(an?.tags || [])]
+          .filter(Boolean)
+          .join(" ");
+        const sim = similarity(normName, singularize(labels));
+        let score = 0;
+        const rationale = [];
+        if (sim >= 0.5) {
+          score += Weights.animalMatch;
+          rationale.push("animal-match");
+        }
+        // (Optional) penalize if zero projected yield
+        if (an?.projectedYield && an?.projectedYield <= 0) {
+          score += Weights.inventoryLow;
+          rationale.push("yield-low");
+        }
+        return {
+          sourceType: "animal",
+          sourceId: an?.id || an?.animal || null,
+          confidence: clamp01(score),
+          rationale,
+          animal: an,
+          fulfill: () => ({
+            type: "animal:reserveCut",
+            disabled: ctx?.sabbathGuard === true,
+            data: {
+              animalId: an?.id,
+              cutHint: normName,
+              qty: ctx?.neededQty ?? null,
+            },
+          }),
+        };
+      })
+      .sort((a, b) => b.confidence - a.confidence);
   } catch (e) {
     console.warn("[IngredientLinker] animalCandidates error:", e);
     return [];
@@ -311,22 +335,8 @@ function animalCandidates(normName, ctx) {
 function bulkCandidates(normName, ctx) {
   if (!suppliersApi?.search) {
     // default fallback if suppliers API not present
-    return [{
-      sourceType: "bulk",
-      supplier: "Default Supplier",
-      confidence: clamp01(Weights.bulkDefault),
-      rationale: ["bulk-default"],
-      fulfill: () => ({
-        type: "bulk:order",
-        disabled: ctx?.sabbathGuard === true,
-        data: { item: normName, qty: ctx?.neededQty ?? null },
-      }),
-    }];
-  }
-  try {
-    const items = suppliersApi.search({ query: normName, category: "food" });
-    if (!items?.length) {
-      return [{
+    return [
+      {
         sourceType: "bulk",
         supplier: "Default Supplier",
         confidence: clamp01(Weights.bulkDefault),
@@ -336,39 +346,74 @@ function bulkCandidates(normName, ctx) {
           disabled: ctx?.sabbathGuard === true,
           data: { item: normName, qty: ctx?.neededQty ?? null },
         }),
-      }];
+      },
+    ];
+  }
+  try {
+    const items = suppliersApi.search({ query: normName, category: "food" });
+    if (!items?.length) {
+      return [
+        {
+          sourceType: "bulk",
+          supplier: "Default Supplier",
+          confidence: clamp01(Weights.bulkDefault),
+          rationale: ["bulk-default"],
+          fulfill: () => ({
+            type: "bulk:order",
+            disabled: ctx?.sabbathGuard === true,
+            data: { item: normName, qty: ctx?.neededQty ?? null },
+          }),
+        },
+      ];
     }
-    return items.map(s => {
-      const sim = similarity(normName, singularize(s?.name || ""));
-      const score = clamp01((sim >= 0.66 ? Weights.nameSimStrong : sim >= 0.4 ? Weights.nameSimWeak : 0) + Weights.bulkDefault);
-      const rationale = ["bulk-default", sim >= 0.66 ? "name-sim-strong" : sim >= 0.4 ? "name-sim-weak" : "name-sim-low"];
-      return {
+    return items
+      .map((s) => {
+        const sim = similarity(normName, singularize(s?.name || ""));
+        const score = clamp01(
+          (sim >= 0.66
+            ? Weights.nameSimStrong
+            : sim >= 0.4
+            ? Weights.nameSimWeak
+            : 0) + Weights.bulkDefault
+        );
+        const rationale = [
+          "bulk-default",
+          sim >= 0.66
+            ? "name-sim-strong"
+            : sim >= 0.4
+            ? "name-sim-weak"
+            : "name-sim-low",
+        ];
+        return {
+          sourceType: "bulk",
+          sourceId: s?.id || null,
+          supplier: s?.supplier || s?.vendor || "Supplier",
+          confidence: score,
+          rationale,
+          supplierItem: s,
+          fulfill: () => ({
+            type: "bulk:order",
+            disabled: ctx?.sabbathGuard === true,
+            data: { supplierItemId: s?.id, qty: ctx?.neededQty ?? null },
+          }),
+        };
+      })
+      .sort((a, b) => b.confidence - a.confidence);
+  } catch (e) {
+    console.warn("[IngredientLinker] bulkCandidates error:", e);
+    return [
+      {
         sourceType: "bulk",
-        sourceId: s?.id || null,
-        supplier: s?.supplier || s?.vendor || "Supplier",
-        confidence: score,
-        rationale,
-        supplierItem: s,
+        supplier: "Default Supplier",
+        confidence: clamp01(Weights.bulkDefault),
+        rationale: ["bulk-default"],
         fulfill: () => ({
           type: "bulk:order",
           disabled: ctx?.sabbathGuard === true,
-          data: { supplierItemId: s?.id, qty: ctx?.neededQty ?? null },
+          data: { item: normName, qty: ctx?.neededQty ?? null },
         }),
-      };
-    }).sort((a, b) => b.confidence - a.confidence);
-  } catch (e) {
-    console.warn("[IngredientLinker] bulkCandidates error:", e);
-    return [{
-      sourceType: "bulk",
-      supplier: "Default Supplier",
-      confidence: clamp01(Weights.bulkDefault),
-      rationale: ["bulk-default"],
-      fulfill: () => ({
-        type: "bulk:order",
-        disabled: ctx?.sabbathGuard === true,
-        data: { item: normName, qty: ctx?.neededQty ?? null },
-      }),
-    }];
+      },
+    ];
   }
 }
 
@@ -377,11 +422,16 @@ function bulkCandidates(normName, ctx) {
  */
 function explicitMapCandidate(normName, ctx) {
   if (!INGREDIENT_SOURCES) return null;
-  const entry = INGREDIENT_SOURCES[normName] || INGREDIENT_SOURCES[singularize(normName)];
+  const entry =
+    INGREDIENT_SOURCES[normName] || INGREDIENT_SOURCES[singularize(normName)];
   if (!entry) return null;
 
   const rationale = ["explicit-map"];
-  let base = { sourceType: entry.source, confidence: Weights.explicitMap, rationale };
+  let base = {
+    sourceType: entry.source,
+    confidence: Weights.explicitMap,
+    rationale,
+  };
 
   if (entry.source === "garden") {
     base = {
@@ -400,7 +450,11 @@ function explicitMapCandidate(normName, ctx) {
       fulfill: () => ({
         type: "animal:reserveCut",
         disabled: ctx?.sabbathGuard === true,
-        data: { animalId: entry.animal, cutHint: normName, qty: ctx?.neededQty ?? null },
+        data: {
+          animalId: entry.animal,
+          cutHint: normName,
+          qty: ctx?.neededQty ?? null,
+        },
       }),
     };
   } else if (entry.source === "bulk") {
@@ -410,7 +464,11 @@ function explicitMapCandidate(normName, ctx) {
       fulfill: () => ({
         type: "bulk:order",
         disabled: ctx?.sabbathGuard === true,
-        data: { supplier: entry.supplier, item: normName, qty: ctx?.neededQty ?? null },
+        data: {
+          supplier: entry.supplier,
+          item: normName,
+          qty: ctx?.neededQty ?? null,
+        },
       }),
     };
   } else if (entry.source === "inventory") {
@@ -462,13 +520,7 @@ async function linkIngredient(ingredient, context = {}) {
   const blk = bulkCandidates(normName, context);
 
   // Assemble all candidates
-  const combined = [
-    ...(exp ? [exp] : []),
-    ...inv,
-    ...grd,
-    ...anl,
-    ...blk,
-  ];
+  const combined = [...(exp ? [exp] : []), ...inv, ...grd, ...anl, ...blk];
 
   // Deduplicate by (sourceType + sourceId + supplier)
   const unique = [];
@@ -494,7 +546,10 @@ async function linkIngredient(ingredient, context = {}) {
   const tags = inferTags(normName);
 
   const result = {
-    name: typeof ingredient === "string" ? ingredient : (ingredient?.name || ingredient),
+    name:
+      typeof ingredient === "string"
+        ? ingredient
+        : ingredient?.name || ingredient,
     normalized,
     primary,
     candidates,
@@ -509,7 +564,9 @@ async function linkIngredient(ingredient, context = {}) {
   safeEmit("ingredient:linked", {
     ingredient: result.name,
     normalized,
-    chosen: primary ? { type: primary.sourceType, id: primary.sourceId || primary.supplier } : null,
+    chosen: primary
+      ? { type: primary.sourceType, id: primary.sourceId || primary.supplier }
+      : null,
     confidence: primary?.confidence ?? 0,
     hasFallbacks: candidates.length > 0,
   });
@@ -562,11 +619,36 @@ function safeTierSync(type, payload) {
 
 function mapAisleHint(tags = [], name = "") {
   const key = `${tags.join(",")} ${name}`.toLowerCase();
-  if (key.includes("meat") || key.includes("lamb") || key.includes("beef") || key.includes("poultry")) return "Butchery";
-  if (key.includes("produce") || key.includes("lettuce") || key.includes("greens") || key.includes("apple")) return "Produce";
-  if (key.includes("grain") || key.includes("rice") || key.includes("flour") || key.includes("oat")) return "Grains";
-  if (key.includes("spice") || key.includes("curry") || key.includes("masala")) return "Spices";
-  if (key.includes("dairy") || key.includes("milk") || key.includes("cheese") || key.includes("yogurt")) return "Dairy";
+  if (
+    key.includes("meat") ||
+    key.includes("lamb") ||
+    key.includes("beef") ||
+    key.includes("poultry")
+  )
+    return "Butchery";
+  if (
+    key.includes("produce") ||
+    key.includes("lettuce") ||
+    key.includes("greens") ||
+    key.includes("apple")
+  )
+    return "Produce";
+  if (
+    key.includes("grain") ||
+    key.includes("rice") ||
+    key.includes("flour") ||
+    key.includes("oat")
+  )
+    return "Grains";
+  if (key.includes("spice") || key.includes("curry") || key.includes("masala"))
+    return "Spices";
+  if (
+    key.includes("dairy") ||
+    key.includes("milk") ||
+    key.includes("cheese") ||
+    key.includes("yogurt")
+  )
+    return "Dairy";
   return "General";
 }
 

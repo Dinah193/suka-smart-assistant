@@ -22,15 +22,12 @@ import BlueprintAdapter from "./BlueprintAdapter.js";
 import PlanningUIModel from "./PlanningUIModel.js";
 
 // SSA eventBus helper: tolerate different export shapes.
-// Expected typical locations: src/services/eventBus.js
-import * as EventBusModule from "../eventBus.js";
+// Expected typical locations: src/services/events/eventBus.js
+import * as EventBusModule from "../events/eventBus.js";
 
 function getEmitter() {
   const m = EventBusModule || {};
-  const bus =
-    m.eventBus ||
-    m.default ||
-    null;
+  const bus = m.eventBus || m.default || null;
 
   // Accept either bus.emit(name, payload) or exported emit(name, payload)
   const emitFn =
@@ -57,7 +54,9 @@ function safeArr(v) {
 }
 
 function normalizeDomain(domain) {
-  const d = String(domain || "").trim().toLowerCase();
+  const d = String(domain || "")
+    .trim()
+    .toLowerCase();
   if (["meals", "storehouse", "homestead"].includes(d)) return d;
   return "meals";
 }
@@ -71,7 +70,7 @@ function normalizeLexiconHits(hits = []) {
   const out = [];
   for (const h of safeArr(hits)) {
     const confidence = Number.isFinite(h?.confidence) ? h.confidence : 0.6;
-    const domain = h?.domain ? String(h.domain) : (h?.lexiconName || "unknown");
+    const domain = h?.domain ? String(h.domain) : h?.lexiconName || "unknown";
     const patternId = h?.patternId || h?.methodId || h?.id || null;
 
     out.push({
@@ -120,11 +119,17 @@ function applyLexiconActionsToContext(candidates, context) {
       if (type === "addNote" && a?.note) notes.push(String(a.note));
       if (type === "addWarning" && a?.warning) warnings.push(String(a.warning));
 
-      const key = a?.methodKey ? String(a.methodKey) : (c.methodId ? String(c.methodId) : null);
+      const key = a?.methodKey
+        ? String(a.methodKey)
+        : c.methodId
+        ? String(c.methodId)
+        : null;
       const amt = Number.isFinite(a?.amount) ? a.amount : 0.1;
 
-      if (type === "boostMethodKey" && key) boosts[key] = (boosts[key] || 0) + amt;
-      if (type === "downrankMethodKey" && key) downranks[key] = (downranks[key] || 0) + amt;
+      if (type === "boostMethodKey" && key)
+        boosts[key] = (boosts[key] || 0) + amt;
+      if (type === "downrankMethodKey" && key)
+        downranks[key] = (downranks[key] || 0) + amt;
       if (type === "blockMethodKey" && key) blocks.add(key);
     }
   }
@@ -153,7 +158,9 @@ function applyLexiconAdjustmentsToRanked(ranked = [], lexAdj = {}) {
       if (d) reasons.push(`Lexicon downrank applied (-${d.toFixed(2)}).`);
       return { ...r, score, reasons };
     })
-    .sort((a, b) => (b.score - a.score) || String(a.id).localeCompare(String(b.id)));
+    .sort(
+      (a, b) => b.score - a.score || String(a.id).localeCompare(String(b.id))
+    );
 }
 
 /**
@@ -162,9 +169,12 @@ function applyLexiconAdjustmentsToRanked(ranked = [], lexAdj = {}) {
  */
 export class PlanningOrchestrator {
   constructor(opts = {}) {
-    this.loader = opts.loader || new LayerAssetLoader({ devHotReload: !!opts.devHotReload });
+    this.loader =
+      opts.loader ||
+      new LayerAssetLoader({ devHotReload: !!opts.devHotReload });
     this.planningResolver = opts.planningResolver || new PlanningResolver();
-    this.seasonResolver = opts.seasonResolver || new SeasonResolver({ catalogs: null });
+    this.seasonResolver =
+      opts.seasonResolver || new SeasonResolver({ catalogs: null });
     this.leanOptimizer = opts.leanOptimizer || new LeanOptimizer();
     this.overrideResolver = opts.overrideResolver || new OverrideResolver();
 
@@ -175,7 +185,8 @@ export class PlanningOrchestrator {
     this.cultureResolver =
       opts.cultureResolver ||
       new CultureResolver({
-        getWorkflowOverlay: (id) => this.loader.getWorkflowOverlay?.(id) || null,
+        getWorkflowOverlay: (id) =>
+          this.loader.getWorkflowOverlay?.(id) || null,
       });
   }
 
@@ -204,8 +215,10 @@ export class PlanningOrchestrator {
     const lexHitsRaw = [];
     for (const name of lexiconNames) {
       try {
-        const hits = this.loader.matchLexicon?.(name, userInput, { domain }) || [];
-        for (const h of safeArr(hits)) lexHitsRaw.push({ ...h, lexiconName: name });
+        const hits =
+          this.loader.matchLexicon?.(name, userInput, { domain }) || [];
+        for (const h of safeArr(hits))
+          lexHitsRaw.push({ ...h, lexiconName: name });
       } catch (e) {
         // Do not hard-fail. Loader will surface in layerAssets tests.
       }
@@ -236,18 +249,32 @@ export class PlanningOrchestrator {
     const planningContext = {
       ...context,
       seasonTags: seasonal.tags,
-      feast: { active: seasonal.feastTags?.length > 0, tags: seasonal.feastTags },
+      feast: {
+        active: seasonal.feastTags?.length > 0,
+        tags: seasonal.feastTags,
+      },
     };
 
-    const resolved = this.planningResolver.resolve(intentCandidates, planningContext);
+    const resolved = this.planningResolver.resolve(
+      intentCandidates,
+      planningContext
+    );
     let ranked = resolved.ranked;
 
     // 6) Apply lexicon adjustments (boost/downrank/block) to ranked list
-    ranked = applyLexiconAdjustmentsToRanked(ranked, context.lexiconAdjustments);
+    ranked = applyLexiconAdjustmentsToRanked(
+      ranked,
+      context.lexiconAdjustments
+    );
 
     // 7) Apply household overrides (hard blocks, must-haves, params)
-    const patternMetaLookup = (patternId) => this.loader.getPatternMeta?.(patternId) || null;
-    const overrideRes = this.overrideResolver.apply(ranked, context.overrides || {}, patternMetaLookup);
+    const patternMetaLookup = (patternId) =>
+      this.loader.getPatternMeta?.(patternId) || null;
+    const overrideRes = this.overrideResolver.apply(
+      ranked,
+      context.overrides || {},
+      patternMetaLookup
+    );
     const rankedAfterOverrides = overrideRes.selected;
 
     // 8) Choose top patterns (finite) + build UI models
@@ -255,7 +282,10 @@ export class PlanningOrchestrator {
 
     // 9) Cultural overlay (optional + blend mode)
     const culturePrefs = context.culturePrefs || { enabled: false };
-    const cultureApplied = this.cultureResolver.apply(selectedTop, culturePrefs);
+    const cultureApplied = this.cultureResolver.apply(
+      selectedTop,
+      culturePrefs
+    );
 
     // 10) Lean optimizer recommendations (optional)
     const leanOut = this.leanOptimizer.optimize(
@@ -266,7 +296,9 @@ export class PlanningOrchestrator {
     );
 
     // 11) Build blueprints/sessions from patterns (may be multi-session)
-    const patterns = cultureApplied.selected.map((p) => this.loader.getPattern?.(p.id)).filter(Boolean);
+    const patterns = cultureApplied.selected
+      .map((p) => this.loader.getPattern?.(p.id))
+      .filter(Boolean);
 
     const blueprintBundle = this.blueprintAdapter.fromPatterns({
       domain,
@@ -285,7 +317,10 @@ export class PlanningOrchestrator {
       ranked: cultureApplied.selected,
       seasonal,
       culture: cultureApplied.blueprintSettings,
-      constraints: uniqTags([...seasonal.constraints, ...safeArr(planningContext.hintTags)]),
+      constraints: uniqTags([
+        ...seasonal.constraints,
+        ...safeArr(planningContext.hintTags),
+      ]),
       context: planningContext,
       lean: leanOut,
     });
@@ -311,8 +346,16 @@ export class PlanningOrchestrator {
 
     // 13) Emit events in SSA style
     emit("planning.resolved", { domain, payload });
-    emit("blueprint.built", { domain, blueprints: blueprintBundle, payloadId: payload.id });
-    emit("session.ready", { domain, sessions: blueprintBundle.sessions, payloadId: payload.id });
+    emit("blueprint.built", {
+      domain,
+      blueprints: blueprintBundle,
+      payloadId: payload.id,
+    });
+    emit("session.ready", {
+      domain,
+      sessions: blueprintBundle.sessions,
+      payloadId: payload.id,
+    });
 
     return payload;
   }
@@ -323,7 +366,10 @@ function uniqTags(tags = []) {
   const set = new Set();
   for (const t of safeArr(tags)) {
     const s = String(t);
-    if (!set.has(s)) { set.add(s); out.push(s); }
+    if (!set.has(s)) {
+      set.add(s);
+      out.push(s);
+    }
   }
   return out;
 }

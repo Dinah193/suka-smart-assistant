@@ -1,0 +1,411 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00.000Z",
+  "meta": {
+    "id": "cuisines.mediterranean.recipes.grilled_chicken_lemon_herbs",
+    "type": "recipe",
+    "domain": "cuisines",
+    "cuisineId": "cuisines.mediterranean",
+    "locale": "en-US",
+    "label": "Grilled Chicken with Lemon & Herbs",
+    "status": "canonical",
+    "tags": [
+      "mediterranean",
+      "grill",
+      "weeknight",
+      "high_protein",
+      "gluten_free",
+      "dairy_free",
+      "meal.dinner",
+      "method.grill",
+      "flavor.lemon",
+      "flavor.herb_forward",
+      "flavor.olive_oil",
+      "protein.chicken"
+    ],
+    "sources": [
+      {
+        "kind": "canonical",
+        "name": "SSA Canonical Catalog",
+        "notes": [
+          "Mediterranean-style grilled chicken with a bright lemon-herb marinade.",
+          "Designed for deterministic planners and recipe adapters (equipment + timing + substitutions)."
+        ]
+      }
+    ]
+  },
+  "summary": "Juicy grilled chicken marinated with lemon, olive oil, garlic, and Mediterranean herbs. Great with salad, rice, or pita.",
+  "yields": {
+    "servings": 4,
+    "amount": { "value": 4, "unit": "serving" }
+  },
+  "time": {
+    "prepMins": 15,
+    "cookMins": 18,
+    "restMins": 5,
+    "totalMins": 38,
+    "handsOffMins": 10
+  },
+  "difficulty": "beginner",
+  "safety": {
+    "foods": [
+      {
+        "id": "foodSafety.poultry",
+        "title": "Chicken safety",
+        "notes": [
+          "Cook chicken to a safe internal temperature (165°F / 74°C).",
+          "Avoid cross-contamination: separate raw chicken utensils/boards and wash hands."
+        ]
+      }
+    ]
+  },
+  "equipment": {
+    "required": [
+      { "id": "equipment.grill", "label": "Grill (gas/charcoal) or grill pan" },
+      { "id": "equipment.tongs", "label": "Tongs" },
+      {
+        "id": "equipment.instant_read_thermometer",
+        "label": "Instant-read thermometer"
+      },
+      { "id": "equipment.mixing_bowl", "label": "Mixing bowl" },
+      { "id": "equipment.measuring_spoons", "label": "Measuring spoons" },
+      { "id": "equipment.measuring_cups", "label": "Measuring cups" },
+      { "id": "equipment.knife", "label": "Knife" },
+      { "id": "equipment.cutting_board", "label": "Cutting board" }
+    ],
+    "optional": [
+      { "id": "equipment.microplane", "label": "Microplane (for lemon zest)" },
+      { "id": "equipment.grill_brush", "label": "Grill brush" },
+      {
+        "id": "equipment.cast_iron_skillet",
+        "label": "Cast-iron skillet (fallback sear)"
+      }
+    ]
+  },
+  "ingredients": [
+    {
+      "id": "ingredients.chicken_thighs_boneless_skinless",
+      "label": "Boneless skinless chicken thighs (or breasts)",
+      "amount": { "value": 680, "unit": "g" },
+      "notes": [
+        "About 1.5 lb. Thighs stay juicier; breasts cook faster and can dry out."
+      ]
+    },
+    {
+      "id": "ingredients.olive_oil",
+      "label": "Extra-virgin olive oil",
+      "amount": { "value": 60, "unit": "ml" },
+      "notes": ["1/4 cup"]
+    },
+    {
+      "id": "ingredients.lemon",
+      "label": "Lemon (zest + juice)",
+      "amount": { "value": 1, "unit": "each" },
+      "notes": ["Use zest and ~45 ml / 3 Tbsp juice."]
+    },
+    {
+      "id": "ingredients.garlic",
+      "label": "Garlic, minced",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": ["About 3–4 cloves"]
+    },
+    {
+      "id": "ingredients.oregano_dried",
+      "label": "Dried oregano",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "ingredients.thyme_dried",
+      "label": "Dried thyme",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredients.rosemary_dried",
+      "label": "Dried rosemary, crushed",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "notes": [
+        "Optional but very Mediterranean. Crush between fingers to release oils."
+      ]
+    },
+    {
+      "id": "ingredients.black_pepper",
+      "label": "Black pepper",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredients.kosher_salt",
+      "label": "Kosher salt",
+      "amount": { "value": 1.25, "unit": "tsp" },
+      "notes": ["Adjust if using fine salt (use ~3/4 tsp)."]
+    },
+    {
+      "id": "ingredients.paprika",
+      "label": "Paprika (sweet)",
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": ["Adds color and gentle warmth."]
+    },
+    {
+      "id": "ingredients.honey",
+      "label": "Honey (optional)",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": ["Balances acid; omit for zero-sugar preferences."]
+    },
+    {
+      "id": "ingredients.red_pepper_flakes",
+      "label": "Red pepper flakes (optional)",
+      "amount": { "value": 0.25, "unit": "tsp" },
+      "optional": true
+    }
+  ],
+  "ingredientGroups": [
+    {
+      "id": "group.marinade",
+      "label": "Lemon-Herb Marinade",
+      "items": [
+        "ingredients.olive_oil",
+        "ingredients.lemon",
+        "ingredients.garlic",
+        "ingredients.oregano_dried",
+        "ingredients.thyme_dried",
+        "ingredients.rosemary_dried",
+        "ingredients.black_pepper",
+        "ingredients.kosher_salt",
+        "ingredients.paprika",
+        "ingredients.honey",
+        "ingredients.red_pepper_flakes"
+      ]
+    },
+    {
+      "id": "group.protein",
+      "label": "Protein",
+      "items": ["ingredients.chicken_thighs_boneless_skinless"]
+    }
+  ],
+  "allergens": {
+    "contains": [],
+    "mayContain": [],
+    "notes": ["Naturally gluten-free and dairy-free as written."]
+  },
+  "diet": {
+    "flags": ["gluten_free", "dairy_free"],
+    "notes": [
+      "Pairs well with Mediterranean sides (salads, rice, roasted vegetables).",
+      "For keto/low-carb: serve with Greek salad or grilled vegetables."
+    ]
+  },
+  "methods": ["methods.marinade", "methods.grill", "methods.rest"],
+  "steps": [
+    {
+      "id": "step.01.make_marinade",
+      "title": "Make the lemon-herb marinade",
+      "body": "In a mixing bowl, whisk olive oil, lemon zest, lemon juice, minced garlic, oregano, thyme, rosemary, paprika, salt, and black pepper. Add honey and red pepper flakes if using.",
+      "timers": [],
+      "checks": ["Mixture should look emulsified and smell bright and herbal."]
+    },
+    {
+      "id": "step.02.marinade_chicken",
+      "title": "Marinate the chicken",
+      "body": "Add chicken to the bowl (or a zip-top bag). Turn to coat thoroughly. Cover and marinate at least 15 minutes at room temperature, or 2–12 hours refrigerated. If refrigerated, let chicken sit out 10–15 minutes before grilling for even cooking.",
+      "timers": [
+        {
+          "id": "timer.marinade_min",
+          "label": "Minimum marinade",
+          "minutes": 15
+        }
+      ],
+      "checks": ["Chicken is evenly coated with marinade."]
+    },
+    {
+      "id": "step.03.preheat_grill",
+      "title": "Preheat and prep the grill",
+      "body": "Preheat grill to medium-high (about 400–450°F / 205–230°C). Clean grates and lightly oil them to reduce sticking.",
+      "timers": [
+        { "id": "timer.preheat", "label": "Grill preheat", "minutes": 10 }
+      ],
+      "checks": ["Grates are hot and lightly oiled."]
+    },
+    {
+      "id": "step.04.grill_chicken",
+      "title": "Grill the chicken",
+      "body": "Place chicken on the grill. Grill thighs ~6–7 minutes per side (breasts ~5–6 minutes per side depending on thickness), turning once, until nicely charred and the thickest part reaches 165°F / 74°C. If flare-ups occur, move chicken to a cooler zone and continue cooking.",
+      "timers": [
+        { "id": "timer.side1", "label": "First side", "minutes": 7 },
+        { "id": "timer.side2", "label": "Second side", "minutes": 7 }
+      ],
+      "checks": [
+        "Good grill marks / char without burning.",
+        "Internal temp hits 165°F / 74°C in the thickest piece."
+      ]
+    },
+    {
+      "id": "step.05.rest_slice_serve",
+      "title": "Rest, slice, and serve",
+      "body": "Transfer chicken to a plate and rest 5 minutes. Slice if desired. Serve with a squeeze of fresh lemon and a drizzle of olive oil (optional).",
+      "timers": [{ "id": "timer.rest", "label": "Rest", "minutes": 5 }],
+      "checks": ["Juices settle; chicken stays moist when sliced."]
+    }
+  ],
+  "variations": [
+    {
+      "id": "variation.oven_roast",
+      "label": "Oven-roasted (no grill)",
+      "when": { "equipmentMissingAny": ["equipment.grill"] },
+      "adapt": {
+        "summary": "Roast on a sheet pan for similar flavor without grilling.",
+        "stepsPatch": [
+          {
+            "replaceStepId": "step.03.preheat_grill",
+            "with": {
+              "id": "step.03.preheat_oven",
+              "title": "Preheat the oven",
+              "body": "Heat oven to 425°F / 220°C. Line a sheet pan with foil or parchment and lightly oil it (or place a rack on the pan).",
+              "timers": [
+                {
+                  "id": "timer.preheat_oven",
+                  "label": "Oven preheat",
+                  "minutes": 10
+                }
+              ],
+              "checks": ["Oven fully preheated."]
+            }
+          },
+          {
+            "replaceStepId": "step.04.grill_chicken",
+            "with": {
+              "id": "step.04.roast_chicken",
+              "title": "Roast the chicken",
+              "body": "Arrange chicken on the prepared pan. Roast 18–25 minutes (depending on thickness), flipping once halfway, until 165°F / 74°C internal. Optional: broil 1–2 minutes to add color.",
+              "timers": [
+                { "id": "timer.roast", "label": "Roast", "minutes": 20 }
+              ],
+              "checks": [
+                "Internal temp hits 165°F / 74°C.",
+                "Edges are browned."
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "variation.grill_pan_stovetop",
+      "label": "Stovetop grill-pan / skillet",
+      "when": { "equipmentHasAll": ["equipment.stovetop"] },
+      "adapt": {
+        "summary": "Use a grill pan or cast-iron skillet for strong browning.",
+        "notes": [
+          "Ventilate well; use medium-high heat.",
+          "Cook in batches to avoid steaming."
+        ]
+      }
+    },
+    {
+      "id": "variation.yogurt_marinade",
+      "label": "Yogurt-lemon marinade (tenderizing)",
+      "when": { "ingredientsHasAny": ["ingredients.yogurt"] },
+      "adapt": {
+        "summary": "Add yogurt for extra tenderness and a slightly tangy finish.",
+        "ingredientPatch": [
+          {
+            "add": {
+              "id": "ingredients.greek_yogurt",
+              "label": "Greek yogurt",
+              "amount": { "value": 120, "unit": "g" },
+              "notes": ["About 1/2 cup; mix into marinade."]
+            }
+          }
+        ],
+        "notes": [
+          "If adding yogurt, reduce olive oil by ~15 ml (1 Tbsp) to keep marinade balanced."
+        ]
+      }
+    }
+  ],
+  "pairings": {
+    "suggested": [
+      {
+        "id": "dishes.greek_salad",
+        "label": "Greek salad",
+        "tags": ["salad", "fresh", "acid"]
+      },
+      {
+        "id": "dishes.roasted_vegetables",
+        "label": "Roasted vegetables",
+        "tags": ["veg", "olive_oil"]
+      },
+      { "id": "dishes.rice", "label": "Rice", "tags": ["starch"] },
+      { "id": "dishes.pita", "label": "Pita", "tags": ["bread"] },
+      {
+        "id": "dishes.tzatziki",
+        "label": "Tzatziki",
+        "tags": ["sauce", "cooling"]
+      }
+    ],
+    "notes": [
+      "If serving with pita, consider a simple cucumber-tomato salad and a yogurt sauce.",
+      "For meal-prep: serve over rice with roasted vegetables; keeps well 3–4 days refrigerated."
+    ]
+  },
+  "storage": {
+    "refrigerate": {
+      "maxDays": 4,
+      "notes": ["Cool quickly and store in an airtight container."]
+    },
+    "freeze": {
+      "maxDays": 90,
+      "notes": [
+        "Freeze cooked chicken portions. Thaw overnight in fridge and reheat gently."
+      ]
+    },
+    "reheat": {
+      "notes": [
+        "Reheat covered in a skillet with a splash of water, or in microwave at 50–70% power to avoid drying out."
+      ]
+    }
+  },
+  "planner": {
+    "course": "main",
+    "mealTags": ["dinner", "lunch", "meal_prep"],
+    "signals": {
+      "batchFriendly": true,
+      "weeknightPossible": true,
+      "leftoversGood": true,
+      "freezerFriendly": true
+    },
+    "nutritionHints": {
+      "proteinForward": true,
+      "vegForwardWhenPaired": true,
+      "notes": [
+        "Pair with salad/veg to align with Mediterranean plate model (veg-forward)."
+      ]
+    }
+  },
+  "compat": {
+    "ingredientsCanonical": [
+      "ingredients.chicken",
+      "ingredients.olive_oil",
+      "ingredients.lemon",
+      "ingredients.garlic",
+      "ingredients.oregano",
+      "ingredients.thyme",
+      "ingredients.rosemary",
+      "ingredients.paprika",
+      "ingredients.black_pepper",
+      "ingredients.salt"
+    ],
+    "keywords": [
+      "grilled chicken",
+      "lemon herb chicken",
+      "mediterranean chicken",
+      "olive oil marinade",
+      "weeknight grill"
+    ],
+    "aliases": [
+      "lemon herb grilled chicken",
+      "greek-style grilled chicken",
+      "lemon oregano chicken"
+    ]
+  }
+}

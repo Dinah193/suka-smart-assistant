@@ -1,8 +1,8 @@
 // src/pages/settings/views/CalendarSettingsPage.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { automation, emitProgress } from "@/services/automation/runtime";
-import { useCalendarStore } from "@/store/CalendarStore";         // assumed Zustand/Redux hook
-import { usePreferencesStore } from "@/store/PreferencesStore";   // assumed hook for global prefs
+import { useCalendarStore } from "@/store/CalendarStore"; // assumed Zustand/Redux hook
+import { usePreferencesStore } from "@/store/PreferencesStore"; // assumed hook for global prefs
 import { sabbathGuard } from "@/services/guardrails/sabbathGuard"; // wraps calls to avoid scheduling on Sabbath
 import { classNames } from "@/utils/css";
 import { formatDistanceToNow } from "date-fns";
@@ -16,7 +16,9 @@ const SectionCard = ({ title, subtitle, right, children }) => (
     <div className="flex items-start justify-between p-5 border-b border-base-200">
       <div>
         <h3 className="text-lg font-semibold">{title}</h3>
-        {subtitle ? <p className="text-sm opacity-70 mt-1">{subtitle}</p> : null}
+        {subtitle ? (
+          <p className="text-sm opacity-70 mt-1">{subtitle}</p>
+        ) : null}
       </div>
       {right}
     </div>
@@ -42,7 +44,14 @@ const ToggleRow = ({ label, hint, checked, onChange, disabled }) => (
   </div>
 );
 
-const SelectRow = ({ label, hint, value, onChange, options = [], disabled }) => (
+const SelectRow = ({
+  label,
+  hint,
+  value,
+  onChange,
+  options = [],
+  disabled,
+}) => (
   <div className="flex items-start justify-between py-3">
     <div className="pr-4">
       <p className="font-medium">{label}</p>
@@ -92,15 +101,24 @@ const InlineNotice = ({ tone = "info", children }) => {
 };
 
 const GhostButton = (props) => (
-  <button {...props} className={classNames("btn btn-ghost btn-sm", props.className)} />
+  <button
+    {...props}
+    className={classNames("btn btn-ghost btn-sm", props.className)}
+  />
 );
 
 const PrimaryButton = (props) => (
-  <button {...props} className={classNames("btn btn-primary", props.className)} />
+  <button
+    {...props}
+    className={classNames("btn btn-primary", props.className)}
+  />
 );
 
 const SubtleButton = (props) => (
-  <button {...props} className={classNames("btn btn-outline btn-sm", props.className)} />
+  <button
+    {...props}
+    className={classNames("btn btn-outline btn-sm", props.className)}
+  />
 );
 
 const Divider = () => <div className="border-t border-base-200 my-4" />;
@@ -158,7 +176,15 @@ function useAutomationGlue(onEvent) {
 /* Provider Connector Card                                                    */
 /* -------------------------------------------------------------------------- */
 
-const ProviderCard = ({ provider, connected, accountLabel, onConnect, onDisconnect, lastSync, syncing }) => {
+const ProviderCard = ({
+  provider,
+  connected,
+  accountLabel,
+  onConnect,
+  onDisconnect,
+  lastSync,
+  syncing,
+}) => {
   const logo = {
     google: "G",
     outlook: "O",
@@ -180,14 +206,18 @@ const ProviderCard = ({ provider, connected, accountLabel, onConnect, onDisconne
   return (
     <div className="rounded-xl border border-base-200 p-4 flex items-center justify-between bg-base-100">
       <div className="flex items-start gap-4">
-        <div className="w-10 h-10 rounded-xl bg-base-200 grid place-items-center text-sm font-bold">{logo}</div>
+        <div className="w-10 h-10 rounded-xl bg-base-200 grid place-items-center text-sm font-bold">
+          {logo}
+        </div>
         <div>
           <p className="font-semibold">{title}</p>
           <p className="text-sm opacity-70">{sub}</p>
           {connected ? (
             <p className="text-xs mt-1">
               Connected {accountLabel ? `as ${accountLabel}` : ""} · Last sync{" "}
-              {lastSync ? formatDistanceToNow(new Date(lastSync), { addSuffix: true }) : "—"}
+              {lastSync
+                ? formatDistanceToNow(new Date(lastSync), { addSuffix: true })
+                : "—"}
             </p>
           ) : (
             <p className="text-xs mt-1 opacity-70">Not connected</p>
@@ -232,18 +262,26 @@ export default function CalendarSettingsPage() {
 
   // Core settings
   const [timezone, setTimezone] = useState(
-    prefsStore.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "America/New_York"
+    prefsStore.timezone ||
+      Intl.DateTimeFormat().resolvedOptions().timeZone ||
+      "America/New_York"
   );
   const [weekStart, setWeekStart] = useState(calendarStore.weekStart || "sun");
-  const [defaultCalendar, setDefaultCalendar] = useState(calendarStore.defaultCalendar || "household");
+  const [defaultCalendar, setDefaultCalendar] = useState(
+    calendarStore.defaultCalendar || "household"
+  );
   const [autoSync, setAutoSync] = useState(calendarStore.autoSync ?? true);
-  const [sabbathBlock, setSabbathBlock] = useState(calendarStore.sabbathBlock ?? true);
+  const [sabbathBlock, setSabbathBlock] = useState(
+    calendarStore.sabbathBlock ?? true
+  );
 
   // Hebrew calendar alignment (your project note: full moon month start is supported)
   const [hebrewMode, setHebrewMode] = useState(
     calendarStore.hebrewMode || "fullMoon" // "fullMoon" | "newMoon" | "firstCrescent" | "noHebrew"
   );
-  const [autoMoedim, setAutoMoedim] = useState(calendarStore.autoMoedim ?? true);
+  const [autoMoedim, setAutoMoedim] = useState(
+    calendarStore.autoMoedim ?? true
+  );
 
   // ICS url
   const [icsUrl, setIcsUrl] = useState(calendarStore.icsUrl || "");
@@ -252,7 +290,9 @@ export default function CalendarSettingsPage() {
   const [providers, setProviders] = useState(() => ({
     google: calendarStore.google || { connected: false },
     outlook: calendarStore.outlook || { connected: false },
-    ics: { connected: !!(calendarStore.icsUrl && calendarStore.icsUrl.length > 3) },
+    ics: {
+      connected: !!(calendarStore.icsUrl && calendarStore.icsUrl.length > 3),
+    },
   }));
 
   const lastSync = calendarStore.lastSync || null;
@@ -286,14 +326,16 @@ export default function CalendarSettingsPage() {
     }
     if (event === "preferences.changed") {
       // Update visuals subtly
-      setToast({ tone: "info", text: "Preferences updated. Calendar will reflect new defaults." });
+      setToast({
+        tone: "info",
+        text: "Preferences updated. Calendar will reflect new defaults.",
+      });
     }
     if (event === "torah.profile.updated") {
       addBanner({
         key: "torah.updated",
         tone: "warning",
-        text:
-          "Torah dietary profile changed. Meal suggestions & labels may need review; resync events if you adjusted food rules.",
+        text: "Torah dietary profile changed. Meal suggestions & labels may need review; resync events if you adjusted food rules.",
         actions: [{ label: "Resync meals", fn: () => handleSync("meals") }],
       });
     }
@@ -326,7 +368,8 @@ export default function CalendarSettingsPage() {
     // Apply partial here
     if ("timezone" in partial) setTimezone(partial.timezone);
     if ("weekStart" in partial) setWeekStart(partial.weekStart);
-    if ("defaultCalendar" in partial) setDefaultCalendar(partial.defaultCalendar);
+    if ("defaultCalendar" in partial)
+      setDefaultCalendar(partial.defaultCalendar);
     if ("autoSync" in partial) setAutoSync(partial.autoSync);
     if ("sabbathBlock" in partial) setSabbathBlock(partial.sabbathBlock);
     if ("hebrewMode" in partial) setHebrewMode(partial.hebrewMode);
@@ -354,7 +397,10 @@ export default function CalendarSettingsPage() {
           ...partial,
         });
       } else {
-        await automation.request?.("calendar.saveSettings", { ...prev, ...partial });
+        await automation.request?.("calendar.saveSettings", {
+          ...prev,
+          ...partial,
+        });
       }
 
       setToast({
@@ -370,7 +416,10 @@ export default function CalendarSettingsPage() {
     } catch (e) {
       // Revert on error
       revert();
-      setToast({ tone: "error", text: `Failed to save ${descr}. Please try again.` });
+      setToast({
+        tone: "error",
+        text: `Failed to save ${descr}. Please try again.`,
+      });
     } finally {
       setBusy(false);
     }
@@ -378,7 +427,10 @@ export default function CalendarSettingsPage() {
 
   const suggestNBA = (partial) => {
     if ("hebrewMode" in partial || "autoMoedim" in partial) {
-      return { label: "Rebuild Moedim events", action: () => handleSync("moedim") };
+      return {
+        label: "Rebuild Moedim events",
+        action: () => handleSync("moedim"),
+      };
     }
     if ("timezone" in partial || "weekStart" in partial) {
       return { label: "Sync calendar now", action: () => handleSync("all") };
@@ -396,21 +448,35 @@ export default function CalendarSettingsPage() {
     try {
       if (provider === "ics") {
         if (!icsUrl || icsUrl.length < 8) {
-          setToast({ tone: "warning", text: "Enter a valid ICS URL before connecting." });
+          setToast({
+            tone: "warning",
+            text: "Enter a valid ICS URL before connecting.",
+          });
           return;
         }
       }
       const run = () =>
         provider === "ics"
-          ? calendarStore.connectICS?.(icsUrl) ?? automation.request?.("calendar.connect.ics", { icsUrl })
-          : calendarStore.connectProvider?.(provider) ?? automation.request?.("calendar.connect", { provider });
+          ? calendarStore.connectICS?.(icsUrl) ??
+            automation.request?.("calendar.connect.ics", { icsUrl })
+          : calendarStore.connectProvider?.(provider) ??
+            automation.request?.("calendar.connect", { provider });
 
       await run();
-      setProviders((p) => ({ ...p, [provider]: { ...(p[provider] || {}), connected: true } }));
-      setToast({ tone: "success", text: `${provider.toUpperCase()} connected.` });
+      setProviders((p) => ({
+        ...p,
+        [provider]: { ...(p[provider] || {}), connected: true },
+      }));
+      setToast({
+        tone: "success",
+        text: `${provider.toUpperCase()} connected.`,
+      });
       await handleSync("all");
     } catch (e) {
-      setToast({ tone: "error", text: `Failed to connect ${provider.toUpperCase()}.` });
+      setToast({
+        tone: "error",
+        text: `Failed to connect ${provider.toUpperCase()}.`,
+      });
     } finally {
       setBusy(false);
     }
@@ -418,10 +484,14 @@ export default function CalendarSettingsPage() {
 
   const handleDisconnect = async (provider) => {
     const prev = providers[provider];
-    setProviders((p) => ({ ...p, [provider]: { ...(p[provider] || {}), connected: false } }));
-    const { undo: revert } = undo.push(() =>
-      setProviders((p) => ({ ...p, [provider]: prev }))
-    , "Disconnect");
+    setProviders((p) => ({
+      ...p,
+      [provider]: { ...(p[provider] || {}), connected: false },
+    }));
+    const { undo: revert } = undo.push(
+      () => setProviders((p) => ({ ...p, [provider]: prev })),
+      "Disconnect"
+    );
 
     setBusy(true);
     try {
@@ -429,10 +499,17 @@ export default function CalendarSettingsPage() {
         calendarStore.disconnectProvider?.(provider) ??
         automation.request?.("calendar.disconnect", { provider });
       await run;
-      setToast({ tone: "success", text: `${provider.toUpperCase()} disconnected`, action: { label: "Undo", fn: revert } });
+      setToast({
+        tone: "success",
+        text: `${provider.toUpperCase()} disconnected`,
+        action: { label: "Undo", fn: revert },
+      });
     } catch (e) {
       revert();
-      setToast({ tone: "error", text: `Failed to disconnect ${provider.toUpperCase()}.` });
+      setToast({
+        tone: "error",
+        text: `Failed to disconnect ${provider.toUpperCase()}.`,
+      });
     } finally {
       setBusy(false);
     }
@@ -455,7 +532,10 @@ export default function CalendarSettingsPage() {
 
   /* ---------------------------- Derived data ----------------------------- */
   const emptyConnected = useMemo(
-    () => !providers.google?.connected && !providers.outlook?.connected && !providers.ics?.connected,
+    () =>
+      !providers.google?.connected &&
+      !providers.outlook?.connected &&
+      !providers.ics?.connected,
     [providers]
   );
 
@@ -472,12 +552,15 @@ export default function CalendarSettingsPage() {
         <div>
           <h1 className="text-2xl font-bold">Calendar Settings</h1>
           <p className="opacity-70">
-            Configure providers, defaults, and Hebrew calendar alignment. Changes save optimistically with Undo.
+            Configure providers, defaults, and Hebrew calendar alignment.
+            Changes save optimistically with Undo.
           </p>
         </div>
         <div className="flex gap-2">
           <GhostButton onClick={() => handleSync("all")}>Sync now</GhostButton>
-          <PrimaryButton onClick={() => openCalendarApp()}>Open Calendar</PrimaryButton>
+          <PrimaryButton onClick={() => openCalendarApp()}>
+            Open Calendar
+          </PrimaryButton>
         </div>
       </div>
 
@@ -493,7 +576,9 @@ export default function CalendarSettingsPage() {
                 </SubtleButton>
               ))}
               {b.dismissible !== false && (
-                <GhostButton onClick={() => dismissBanner(b.key)}>Dismiss</GhostButton>
+                <GhostButton onClick={() => dismissBanner(b.key)}>
+                  Dismiss
+                </GhostButton>
               )}
             </div>
           </div>
@@ -506,7 +591,10 @@ export default function CalendarSettingsPage() {
         subtitle="Link your external calendars to sync tasks, meals, holy days, and schedules."
         right={
           <span className="text-xs opacity-70">
-            Last sync: {lastSync ? formatDistanceToNow(new Date(lastSync), { addSuffix: true }) : "—"}
+            Last sync:{" "}
+            {lastSync
+              ? formatDistanceToNow(new Date(lastSync), { addSuffix: true })
+              : "—"}
           </span>
         }
       >
@@ -550,7 +638,11 @@ export default function CalendarSettingsPage() {
                 disabled={busy}
               />
               <div className="flex justify-end">
-                <SubtleButton onClick={() => optimisticSave({ icsUrl }, "ICS URL")}>Save URL</SubtleButton>
+                <SubtleButton
+                  onClick={() => optimisticSave({ icsUrl }, "ICS URL")}
+                >
+                  Save URL
+                </SubtleButton>
               </div>
             </div>
 
@@ -558,11 +650,16 @@ export default function CalendarSettingsPage() {
               <div className="rounded-xl border border-dashed border-base-300 p-6 grid place-items-center text-center">
                 <p className="font-medium">No calendars connected yet</p>
                 <p className="text-sm opacity-70 mt-1">
-                  Connect Google or Outlook for two-way sync, or add an ICS URL to import events.
+                  Connect Google or Outlook for two-way sync, or add an ICS URL
+                  to import events.
                 </p>
                 <div className="mt-3 flex gap-2">
-                  <PrimaryButton onClick={() => handleConnect("google")}>Connect Google</PrimaryButton>
-                  <SubtleButton onClick={() => handleConnect("outlook")}>Connect Outlook</SubtleButton>
+                  <PrimaryButton onClick={() => handleConnect("google")}>
+                    Connect Google
+                  </PrimaryButton>
+                  <SubtleButton onClick={() => handleConnect("outlook")}>
+                    Connect Outlook
+                  </SubtleButton>
                 </div>
               </div>
             )}
@@ -571,7 +668,10 @@ export default function CalendarSettingsPage() {
       </SectionCard>
 
       {/* Defaults & Behavior */}
-      <SectionCard title="Defaults & Behavior" subtitle="Set how your calendar behaves across the app.">
+      <SectionCard
+        title="Defaults & Behavior"
+        subtitle="Set how your calendar behaves across the app."
+      >
         {initialLoading ? (
           <Skeleton lines={5} />
         ) : (
@@ -580,7 +680,9 @@ export default function CalendarSettingsPage() {
               label="Default Calendar"
               hint="Where new tasks/events should be created by default."
               value={defaultCalendar}
-              onChange={(v) => optimisticSave({ defaultCalendar: v }, "Default calendar")}
+              onChange={(v) =>
+                optimisticSave({ defaultCalendar: v }, "Default calendar")
+              }
               options={[
                 { value: "household", label: "Household Calendar" },
                 { value: "meals", label: "Meals & Batch Cooking" },
@@ -593,7 +695,9 @@ export default function CalendarSettingsPage() {
             <SelectRow
               label="Start of Week"
               value={weekStart}
-              onChange={(v) => optimisticSave({ weekStart: v }, "Start of week")}
+              onChange={(v) =>
+                optimisticSave({ weekStart: v }, "Start of week")
+              }
               options={[
                 { value: "sun", label: "Sunday" },
                 { value: "mon", label: "Monday" },
@@ -611,7 +715,10 @@ export default function CalendarSettingsPage() {
                 { value: "America/Chicago", label: "America/Chicago" },
                 { value: "America/Denver", label: "America/Denver" },
                 { value: "America/Los_Angeles", label: "America/Los_Angeles" },
-                { value: Intl.DateTimeFormat().resolvedOptions().timeZone, label: "Auto-detected" },
+                {
+                  value: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                  label: "Auto-detected",
+                },
               ]}
               disabled={busy}
             />
@@ -619,14 +726,18 @@ export default function CalendarSettingsPage() {
               label="Auto-Sync in Background"
               hint="Keep your calendars fresh without manual sync."
               checked={autoSync}
-              onChange={(v) => optimisticSave({ autoSync: v }, "Background sync")}
+              onChange={(v) =>
+                optimisticSave({ autoSync: v }, "Background sync")
+              }
               disabled={busy}
             />
             <ToggleRow
               label="Sabbath Guard"
               hint="Avoid creating/editing events during Sabbath. Read-only sync allowed."
               checked={sabbathBlock}
-              onChange={(v) => optimisticSave({ sabbathBlock: v }, "Sabbath guard")}
+              onChange={(v) =>
+                optimisticSave({ sabbathBlock: v }, "Sabbath guard")
+              }
               disabled={busy}
             />
           </>
@@ -638,7 +749,11 @@ export default function CalendarSettingsPage() {
         title="Hebrew Calendar Alignment"
         subtitle="Generate holy days and align months per your rules (Full Moon, New Moon, First Crescent)."
         right={
-          <SubtleButton onClick={() => automation.emit?.("ui.navigate", { to: "/hebrew-calendar" })}>
+          <SubtleButton
+            onClick={() =>
+              automation.emit?.("ui.navigate", { to: "/hebrew-calendar" })
+            }
+          >
             Open Hebrew Calendar
           </SubtleButton>
         }
@@ -651,7 +766,9 @@ export default function CalendarSettingsPage() {
               label="Month Start Rule"
               hint="Your project notes prefer Full Moon as Day 1; other options are available."
               value={hebrewMode}
-              onChange={(v) => optimisticSave({ hebrewMode: v }, "Hebrew alignment")}
+              onChange={(v) =>
+                optimisticSave({ hebrewMode: v }, "Hebrew alignment")
+              }
               options={[
                 { value: "fullMoon", label: "Full Moon (Day 1)" },
                 { value: "newMoon", label: "Astronomical New Moon" },
@@ -664,15 +781,24 @@ export default function CalendarSettingsPage() {
               label="Auto-Generate Moedim"
               hint="Add appointed times/feast days to your default calendar."
               checked={autoMoedim}
-              onChange={(v) => optimisticSave({ autoMoedim: v }, "Moedim generation")}
+              onChange={(v) =>
+                optimisticSave({ autoMoedim: v }, "Moedim generation")
+              }
               disabled={busy}
             />
             <Divider />
             <div className="flex items-center gap-2">
-              <PrimaryButton onClick={() => handleSync("moedim")} disabled={busy}>
+              <PrimaryButton
+                onClick={() => handleSync("moedim")}
+                disabled={busy}
+              >
                 Rebuild Moedim Events
               </PrimaryButton>
-              <SubtleButton onClick={() => automation.emit?.("ui.navigate", { to: "/meals/plan" })}>
+              <SubtleButton
+                onClick={() =>
+                  automation.emit?.("ui.navigate", { to: "/meals/plan" })
+                }
+              >
                 Plan Meals for Holy Days
               </SubtleButton>
             </div>
@@ -681,19 +807,46 @@ export default function CalendarSettingsPage() {
       </SectionCard>
 
       {/* Next Best Actions */}
-      <SectionCard title="Recommended Next Steps" subtitle="Keep momentum with one clear action.">
+      <SectionCard
+        title="Recommended Next Steps"
+        subtitle="Keep momentum with one clear action."
+      >
         <div className="flex flex-wrap gap-2">
-          <PrimaryButton onClick={() => handleSync("all")}>Sync everything now</PrimaryButton>
-          <SubtleButton onClick={() => automation.emit?.("ui.navigate", { to: "/tier2/household/meals" })}>
+          <PrimaryButton onClick={() => handleSync("all")}>
+            Sync everything now
+          </PrimaryButton>
+          <SubtleButton
+            onClick={() =>
+              automation.emit?.("ui.navigate", { to: "/tier2/household/meals" })
+            }
+          >
             Resync meal events
           </SubtleButton>
-          <SubtleButton onClick={() => automation.emit?.("ui.navigate", { to: "/tier2/household/garden" })}>
+          <SubtleButton
+            onClick={() =>
+              automation.emit?.("ui.navigate", {
+                to: "/tier2/household/garden",
+              })
+            }
+          >
             Refresh garden tasks
           </SubtleButton>
-          <SubtleButton onClick={() => automation.emit?.("ui.navigate", { to: "/tier2/household/animals" })}>
+          <SubtleButton
+            onClick={() =>
+              automation.emit?.("ui.navigate", {
+                to: "/tier2/household/animals",
+              })
+            }
+          >
             Refresh animal tasks
           </SubtleButton>
-          <SubtleButton onClick={() => automation.emit?.("ui.navigate", { to: "/tier2/household/cleaning" })}>
+          <SubtleButton
+            onClick={() =>
+              automation.emit?.("ui.navigate", {
+                to: "/tier2/household/cleaning",
+              })
+            }
+          >
             Refresh cleaning rotations
           </SubtleButton>
         </div>
@@ -717,11 +870,17 @@ export default function CalendarSettingsPage() {
             <div className="flex items-center gap-3">
               <span>{toast.text}</span>
               {toast.action ? (
-                <button className="btn btn-xs" onClick={() => toast.action.fn?.()}>
+                <button
+                  className="btn btn-xs"
+                  onClick={() => toast.action.fn?.()}
+                >
                   {toast.action.label}
                 </button>
               ) : null}
-              <button className="btn btn-ghost btn-xs" onClick={() => setToast(null)}>
+              <button
+                className="btn btn-ghost btn-xs"
+                onClick={() => setToast(null)}
+              >
                 ✕
               </button>
             </div>

@@ -1,0 +1,231 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "type": "recipe",
+    "id": "bakery.glazed_donuts_yeast",
+    "slug": "glazed_donuts_yeast",
+    "name": "Glazed Yeast Donuts (Fried Dough Baseline)",
+    "version": "1.0.0",
+    "status": "canonical",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-18T00:00:00.000Z",
+    "updatedAt": "2026-01-18T00:00:00.000Z",
+    "locale": "en-US",
+    "difficulty": "advanced",
+    "tags": [
+      "bakery",
+      "donuts",
+      "yeasted",
+      "fried",
+      "glazed",
+      "breakfast",
+      "oil-management",
+      "proofing",
+      "baseline",
+      "make-ahead"
+    ],
+    "allergens": ["wheat", "eggs", "dairy"],
+    "description": "A canonical yeast-raised glazed donut baseline with clear oil temperature management, proofing cues, and glazing workflow. Includes commercial flour or fine fresh-milled flour guidance (choose one). Fresh-milled flour can reduce extensibility and increase absorption—expect slightly different handling and proof times."
+  },
+  "equipment": [
+    { "id": "stand_mixer", "label": "Stand mixer (recommended) or hand-knead" },
+    { "id": "mixing_bowl_large", "label": "Large mixing bowl" },
+    { "id": "kitchen_scale", "label": "Kitchen scale (recommended)" },
+    { "id": "rolling_pin", "label": "Rolling pin" },
+    { "id": "bench_scraper", "label": "Bench scraper" },
+    {
+      "id": "donut_cutter",
+      "label": "Donut cutter (or 3-inch + 1-inch cutters)"
+    },
+    { "id": "sheet_pan", "label": "Sheet pans" },
+    { "id": "parchment_paper", "label": "Parchment paper" },
+    { "id": "plastic_wrap", "label": "Plastic wrap or cover" },
+    {
+      "id": "deep_pot_or_dutch_oven",
+      "label": "Deep pot or Dutch oven (for frying)"
+    },
+    {
+      "id": "thermometer_fry",
+      "label": "Fry thermometer or instant-read thermometer (required for oil control)"
+    },
+    { "id": "spider", "label": "Spider strainer or slotted spoon" },
+    { "id": "cooling_rack", "label": "Cooling rack (over sheet pan)" },
+    { "id": "tongs", "label": "Tongs (optional)", "optional": true },
+    { "id": "whisk", "label": "Whisk" },
+    { "id": "bowl", "label": "Bowl (for glaze)" }
+  ],
+  "ingredients": [
+    {
+      "id": "milk_whole",
+      "label": "Whole milk",
+      "amount": { "value": 240, "unit": "ml" },
+      "notes": "About 1 cup. Warm to ~100–110°F (38–43°C)."
+    },
+    {
+      "id": "yeast_instant",
+      "label": "Instant yeast",
+      "amount": { "value": 7, "unit": "g" },
+      "notes": "About 2 1/4 tsp. Active dry can be used; bloom first."
+    },
+    {
+      "id": "sugar_granulated",
+      "label": "Granulated sugar",
+      "amount": { "value": 65, "unit": "g" },
+      "notes": "About 1/3 cup."
+    },
+    {
+      "id": "butter_unsalted",
+      "label": "Unsalted butter, melted and cooled slightly",
+      "amount": { "value": 60, "unit": "g" },
+      "notes": "About 4 tbsp."
+    },
+    {
+      "id": "eggs_large",
+      "label": "Large egg",
+      "amount": { "value": 1, "unit": "each" },
+      "notes": "Room temp preferred."
+    },
+    {
+      "id": "vanilla_extract_optional",
+      "label": "Vanilla extract (optional)",
+      "amount": { "value": 5, "unit": "ml" },
+      "notes": "About 1 tsp.",
+      "optional": true
+    },
+    {
+      "id": "salt_kosher",
+      "label": "Kosher salt",
+      "amount": { "value": 7, "unit": "g" },
+      "notes": "About 1 1/4 tsp."
+    },
+
+    {
+      "id": "flour_commercial_option",
+      "label": "Commercial flour option (use this OR fresh-milled option): bread flour or all-purpose",
+      "amount": { "value": 500, "unit": "g" },
+      "notes": "About 4 cups AP equivalent. Bread flour gives a bit more chew and strength."
+    },
+    {
+      "id": "flour_freshmilled_option",
+      "label": "Fresh-milled flour option (use this OR commercial option): fine-milled, sifted",
+      "amount": { "value": 500, "unit": "g" },
+      "notes": "Sift coarse bran for smoother dough and better rise. Fresh-milled absorbs more; you may need +15–60 ml extra milk/water."
+    },
+    {
+      "id": "liquid_adjustment_optional",
+      "label": "Extra milk/water (for fresh-milled adjustment)",
+      "amount": { "value": 45, "unit": "ml" },
+      "notes": "Add 15 ml at a time if dough feels stiff/dry; up to ~60 ml total.",
+      "optional": true
+    },
+
+    {
+      "id": "oil_for_frying",
+      "label": "Neutral frying oil (canola/peanut/vegetable)",
+      "amount": { "value": 1500, "unit": "ml" },
+      "notes": "Enough for 5–7 cm (2–3 in) depth depending on pot. Quantity varies by vessel."
+    },
+
+    {
+      "id": "glaze_powdered_sugar",
+      "label": "Powdered sugar (glaze)",
+      "amount": { "value": 360, "unit": "g" },
+      "notes": "About 3 cups."
+    },
+    {
+      "id": "glaze_milk",
+      "label": "Milk (glaze)",
+      "amount": { "value": 60, "unit": "ml" },
+      "notes": "About 4 tbsp; adjust for consistency."
+    },
+    {
+      "id": "glaze_vanilla",
+      "label": "Vanilla extract (glaze)",
+      "amount": { "value": 5, "unit": "ml" },
+      "notes": "About 1 tsp."
+    },
+    {
+      "id": "glaze_salt",
+      "label": "Pinch of salt (glaze)",
+      "amount": { "value": 1, "unit": "g" }
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_choose_flour",
+      "title": "Choose your flour option",
+      "body": "Use either the commercial flour option OR the fresh-milled flour option (not both). For fresh-milled flour, fine-mill and sift out coarse bran for best rise and smooth texture."
+    },
+    {
+      "id": "step_02_activate_yeast",
+      "title": "Activate yeast",
+      "body": "Warm milk to ~100–110°F (38–43°C). Whisk in a spoonful of the sugar and the yeast. If using active dry yeast, let stand 5–10 minutes until foamy."
+    },
+    {
+      "id": "step_03_mix_dough",
+      "title": "Mix dough",
+      "body": "Add remaining sugar, melted butter, egg, vanilla (optional), and salt to the milk/yeast mixture. Add flour and mix until a shaggy dough forms, then knead (mixer 6–9 minutes; by hand 10–12 minutes) until smooth and elastic. Dough should be soft and slightly tacky."
+    },
+    {
+      "id": "step_04_adjust_hydration_freshmilled",
+      "title": "Adjust hydration (fresh-milled handling)",
+      "body": "If using fresh-milled flour and dough feels stiff/dry, add extra milk/water 15 ml at a time while kneading until dough is soft and pliable. If dough is very sticky, add 10–20 g flour. Aim for a dough that stretches without tearing."
+    },
+    {
+      "id": "step_05_first_rise",
+      "title": "First rise",
+      "body": "Place dough in a lightly oiled bowl, cover, and let rise until doubled, 60–90 minutes depending on room temperature."
+    },
+    {
+      "id": "step_06_roll_and_cut",
+      "title": "Roll and cut donuts",
+      "body": "Turn dough onto a lightly floured surface. Roll to 12–14 mm thick (about 1/2 inch). Cut donuts and holes. Place on parchment-lined trays, leaving space between."
+    },
+    {
+      "id": "step_07_second_proof",
+      "title": "Second proof (critical)",
+      "body": "Cover and proof 30–60 minutes until puffy and jiggly. Properly proofed donuts feel lighter and spring back slowly when touched. Under-proofed donuts split and absorb oil; over-proofed donuts can collapse."
+    },
+    {
+      "id": "step_08_make_ahead_option",
+      "title": "Make-ahead option (overnight proof)",
+      "body": "After cutting, cover trays and refrigerate 8–16 hours. Next day, bring to room temperature and proof until puffy and jiggly (45–90 minutes) before frying."
+    },
+    {
+      "id": "step_09_heat_oil",
+      "title": "Heat oil (oil management pattern)",
+      "body": "Heat frying oil in a deep pot to 350°F (175°C). Maintain 345–355°F (174–179°C). Too low = greasy; too high = dark outside/raw inside. Monitor temperature continuously."
+    },
+    {
+      "id": "step_10_fry",
+      "title": "Fry donuts",
+      "body": "Fry 2–4 donuts at a time (do not crowd). Fry ~60–90 seconds per side until golden. Flip once. Remove to a rack over a sheet pan. Fry holes ~45–60 seconds total, stirring gently."
+    },
+    {
+      "id": "step_11_recover_oil_temp",
+      "title": "Recover oil temp between batches",
+      "body": "Let oil return to ~350°F (175°C) between batches. Crowding drops oil temperature and increases oil absorption."
+    },
+    {
+      "id": "step_12_make_glaze",
+      "title": "Make glaze",
+      "body": "Whisk powdered sugar, milk, vanilla, and salt until smooth. Adjust with a little more milk for thinner glaze or more sugar for thicker. Goal: glaze that coats in a thin, shiny layer."
+    },
+    {
+      "id": "step_13_glaze_warm",
+      "title": "Glaze while warm",
+      "body": "Dip warm (not hot) donuts into glaze, then place on rack to set. Glaze sets in 5–15 minutes depending on room humidity."
+    }
+  ],
+  "notes": [
+    "Oil + proofing patterns: Proper proofing reduces oil absorption. Keep oil at 345–355°F (174–179°C) for best texture.",
+    "Doneness cues: Donuts should be evenly golden and feel light. If they brown too fast, oil is too hot. If they take too long and feel greasy, oil is too cool or donuts are under-proofed.",
+    "Fresh-milled flour: Expect slightly longer proof time and possibly a bit more liquid. Sifting coarse bran improves rise and handling.",
+    "Safety: Never leave frying unattended. Use a stable pot and avoid water contact with hot oil."
+  ],
+  "storage": {
+    "roomTemp": "Best same day. Up to 1 day loosely covered (glaze may soften).",
+    "freezer": "Unglazed donuts freeze up to 1 month. Thaw and warm briefly, then glaze fresh."
+  }
+}

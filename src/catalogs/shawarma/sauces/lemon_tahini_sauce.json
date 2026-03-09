@@ -1,0 +1,323 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+
+  "meta": {
+    "id": "shawarma.sauces.lemon_tahini",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Lemon Tahini Sauce",
+    "subtitle": "Creamy sesame-lemon sauce for shawarma, falafel, roasted vegetables, and bowls",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalogs",
+      "notes": [
+        "Tahini thickens when first mixed with lemon; thinning with water is expected.",
+        "Flavor improves after a short rest (garlic mellows, sesame rounds out)."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "Levantine",
+    "subprofiles": ["shawarma", "sauce", "tahini", "lemon", "sesame"],
+    "category": "sauce",
+    "mealArchetypes": [
+      "meal_archetype.sauce",
+      "meal_archetype.wrap_components",
+      "meal_archetype.bowls"
+    ],
+    "servingStyles": ["street_food", "family_style", "bowls", "plates"],
+    "plannerTags": [
+      "shawarma",
+      "tahini_sauce",
+      "lemon",
+      "sesame",
+      "dairy_free",
+      "vegetarian",
+      "vegan",
+      "make_ahead",
+      "no_cook"
+    ]
+  },
+
+  "summary": "Classic lemon tahini sauce: tahini + lemon + garlic, loosened with water until silky. Great on shawarma, falafel, roasted veg, and grain bowls.",
+
+  "yield": {
+    "servings": 10,
+    "servingSize": { "value": 2, "unit": "tbsp" },
+    "notes": "Makes about 1 to 1 1/4 cups depending on tahini thickness and added water."
+  },
+
+  "time": {
+    "activeMins": 8,
+    "handsOffMins": 10,
+    "totalMins": 18
+  },
+
+  "difficulty": "beginner",
+
+  "signals": {
+    "batchFriendly": true,
+    "leftoversFriendly": true,
+    "weeknightPossible": true,
+    "freezerFriendly": false
+  },
+
+  "equipment": {
+    "minimum": [
+      "equipment.mixing_bowl",
+      "equipment.whisk",
+      "equipment.measuring_cups",
+      "equipment.measuring_spoons",
+      "equipment.citrus_juicer",
+      "equipment.knife"
+    ],
+    "recommended": [
+      "equipment.microplane",
+      "equipment.kitchen_scale",
+      "equipment.storage_container"
+    ],
+    "optional": [
+      {
+        "id": "equipment.blender",
+        "label": "Blender (optional)",
+        "notes": "Useful for ultra-smooth sauce or if adding herbs. Whisking works fine."
+      }
+    ]
+  },
+
+  "dietFlags": [
+    "diet.vegan",
+    "diet.vegetarian",
+    "diet.dairy_free",
+    "diet.no_egg"
+  ],
+  "allergens": {
+    "notes": [
+      "Contains sesame (tahini).",
+      "May contain traces of nuts depending on tahini brand/facility."
+    ],
+    "contains": ["allergen.sesame"]
+  },
+
+  "ingredients": [
+    {
+      "id": "ingredient.tahini",
+      "label": "Tahini (sesame paste), well-stirred",
+      "role": "base",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "notes": "Stir tahini thoroughly before measuring (oil separates)."
+    },
+    {
+      "id": "ingredient.lemon_juice",
+      "label": "Fresh lemon juice",
+      "role": "acid",
+      "amount": { "value": 0.25, "unit": "cup" },
+      "notes": "About 2 lemons. Add gradually; tahini will seize (thicken) at first—this is normal."
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic, finely grated or crushed",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "clove" },
+      "notes": "Use a microplane for smoothness; start with 1 clove and adjust."
+    },
+    {
+      "id": "ingredient.salt_kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 0.75, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.water_cold",
+      "label": "Cold water (to thin)",
+      "role": "thinner",
+      "amount": { "value": 0.333, "unit": "cup" },
+      "notes": "Add a little at a time until silky and pourable. You may need more or less depending on tahini."
+    },
+    {
+      "id": "ingredient.cumin_ground",
+      "label": "Ground cumin (optional)",
+      "role": "spice_optional",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "optional": true,
+      "notes": "Adds warm savory depth; common in shawarma-adjacent tahini sauces."
+    },
+    {
+      "id": "ingredient.olive_oil",
+      "label": "Olive oil (optional)",
+      "role": "finish_optional",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true,
+      "notes": "Adds richness and sheen; not required."
+    },
+    {
+      "id": "ingredient.parsley",
+      "label": "Parsley, finely chopped (optional)",
+      "role": "herb_optional",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true,
+      "notes": "For a green herb tahini sauce variation."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.001_mix_base",
+      "title": "Combine tahini, lemon, garlic, and salt",
+      "instructions": [
+        "Add tahini to a bowl.",
+        "Whisk in lemon juice gradually until the mixture thickens (it may look stiff or grainy at first).",
+        "Add grated garlic and salt; whisk until combined."
+      ],
+      "checks": [
+        "Sauce base is combined; thickening/seizing is expected at this stage."
+      ]
+    },
+    {
+      "id": "step.002_thin_with_water",
+      "title": "Thin to a silky sauce",
+      "instructions": [
+        "Add cold water 1 tablespoon at a time, whisking well after each addition.",
+        "Continue until the sauce turns smooth, pale, and pourable (like heavy cream or ranch dressing).",
+        "Taste and adjust: more lemon for brightness, more salt for balance."
+      ],
+      "checks": ["Sauce becomes lighter in color and smooth as water is added."]
+    },
+    {
+      "id": "step.003_optional_flavor",
+      "title": "Optional seasoning and finish",
+      "instructions": [
+        "If using, whisk in cumin for warmth and/or drizzle in olive oil for richness.",
+        "If adding parsley, stir in at the end (or blend briefly for a green sauce)."
+      ]
+    },
+    {
+      "id": "step.004_rest",
+      "title": "Rest to mellow and set",
+      "instructions": [
+        "Let the sauce rest 10 minutes before serving for best flavor.",
+        "If it thickens while resting, whisk in a splash of water to loosen."
+      ],
+      "timers": [{ "label": "Rest", "minutes": 10 }]
+    }
+  ],
+
+  "tasteProfile": {
+    "sesameRichness": 4,
+    "acidBrightness": 4,
+    "garlicIntensity": 2,
+    "notes": ["nutty", "bright", "creamy", "savory"]
+  },
+
+  "pairings": {
+    "bestWith": [
+      "shawarma.recipes.chicken_shawarma",
+      "shawarma.recipes.beef_shawarma",
+      "shawarma.recipes.lamb_shawarma",
+      "shawarma.recipes.shawarma_roasted_vegetables",
+      "shawarma.recipes.shawarma_flatbread_wrap",
+      "shawarma.recipes.shawarma_rice"
+    ],
+    "alsoGreatWith": ["falafel", "roasted_potatoes", "grain_bowls", "salad"],
+    "notes": [
+      "Use as a drizzle sauce for wraps and bowls.",
+      "Thin further with water for a dressing; keep thicker for spreading in wraps."
+    ]
+  },
+
+  "storage": {
+    "fridge": {
+      "duration": "5 days",
+      "notes": "Store in a sealed container. Sauce thickens when cold; whisk in water to loosen."
+    },
+    "freezer": {
+      "duration": "not_recommended",
+      "notes": "Freezing can cause separation and gritty texture."
+    },
+    "foodSafety": {
+      "notes": [
+        "Keep refrigerated; do not leave out for extended periods.",
+        "Use clean utensils to prevent spoilage."
+      ]
+    }
+  },
+
+  "planner": {
+    "prepTasks": [
+      { "task": "Juice lemons", "mins": 2 },
+      { "task": "Grate garlic", "mins": 1 },
+      { "task": "Whisk sauce", "mins": 5 }
+    ],
+    "batchNotes": [
+      "Double batch keeps well and supports multiple shawarma meals.",
+      "If making ahead, reserve a little water for thinning after chilling."
+    ]
+  },
+
+  "methods": ["technique.whisk", "technique.no_cook", "technique.sauce"],
+
+  "compat": {
+    "search": {
+      "aliases": [
+        "tahini sauce",
+        "lemon tahini",
+        "tahini dressing",
+        "sesame lemon sauce"
+      ],
+      "keywords": [
+        "tahini",
+        "sesame",
+        "lemon",
+        "garlic",
+        "sauce",
+        "shawarma",
+        "vegan"
+      ]
+    }
+  },
+
+  "notes": [
+    "If your tahini is very bitter, add 1–2 tsp honey or date syrup (non-vegan) or a pinch of sugar to balance (optional).",
+    "For a thinner drizzle: add more water and a splash more lemon at the end."
+  ],
+
+  "variations": [
+    {
+      "id": "variation.green_herb",
+      "label": "Green herb lemon tahini",
+      "when": { "preferences": ["herby"] },
+      "adapt": {
+        "notes": [
+          "Add 1/2 cup soft herbs (parsley/cilantro) and blend until smooth.",
+          "Thin with extra water as needed for drizzle consistency."
+        ]
+      }
+    },
+    {
+      "id": "variation_spicy",
+      "label": "Spicy lemon tahini",
+      "when": { "preferences": ["spicy"] },
+      "adapt": {
+        "notes": [
+          "Whisk in 1–2 tsp harissa or 1/2 tsp cayenne.",
+          "Add water slowly—spice pastes can change thickness."
+        ]
+      }
+    },
+    {
+      "id": "variation_no_garlic",
+      "label": "No-garlic lemon tahini",
+      "when": { "constraints": ["no_garlic"] },
+      "adapt": {
+        "notes": [
+          "Omit garlic and add 1/4 tsp onion powder or a pinch of cumin for savory depth (optional).",
+          "Increase lemon slightly for brightness if desired."
+        ]
+      }
+    }
+  ]
+}

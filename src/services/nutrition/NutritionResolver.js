@@ -22,11 +22,11 @@
  *   - nutrition.lookup.error
  */
 
-import eventBus from 'src/services/eventBus.js';
-import NutritionStore from 'src/data/nutrition/NutritionStore.js';
+import { emit as emitEventBus } from "@/services/events/eventBus";
+import NutritionStore from "@/data/nutrition/NutritionStore.js";
 
 /** Module identity for events */
-const SOURCE = 'NutritionResolver';
+const SOURCE = "NutritionResolver";
 
 /** Default staleness window for cached entries */
 const DEFAULT_MAX_AGE_DAYS = 180;
@@ -58,11 +58,16 @@ export async function resolve(foodName, options = {}) {
   };
 
   if (!isNonEmptyString(foodName)) {
-    emit('nutrition.lookup.error', { reason: 'INVALID_INPUT' });
-    return { ok: false, source: 'missing', error: 'Invalid foodName', reason: 'INVALID_INPUT' };
+    emit("nutrition.lookup.error", { reason: "INVALID_INPUT" });
+    return {
+      ok: false,
+      source: "missing",
+      error: "Invalid foodName",
+      reason: "INVALID_INPUT",
+    };
   }
 
-  emit('nutrition.lookup.started', { foodName });
+  emit("nutrition.lookup.started", { foodName });
 
   // 1) Try cache (NutritionStore does normalization internally in its getters)
   let cached = null;
@@ -70,17 +75,21 @@ export async function resolve(foodName, options = {}) {
     cached = await NutritionStore.getByNormalizedName(foodName);
   } catch (err) {
     // cache errors should not break flow — continue to API
-    emit('nutrition.lookup.error', { step: 'cache', message: err?.message || 'cache error' });
+    emit("nutrition.lookup.error", {
+      step: "cache",
+      message: err?.message || "cache error",
+    });
   }
 
-  const normalizedName = cached?.normalizedName || await bestEffortNormalize(foodName);
+  const normalizedName =
+    cached?.normalizedName || (await bestEffortNormalize(foodName));
 
   // Check staleness
   const stale = isStale(cached?.lastUpdated, opts.maxAgeDays);
 
   // If we have a fresh cache and we're not forcing freshness → return it.
   if (cached && !stale && !opts.preferFresh) {
-    emit('nutrition.lookup.cache.hit', {
+    emit("nutrition.lookup.cache.hit", {
       id: cached.id,
       normalizedName,
       lastUpdated: cached.lastUpdated,
@@ -90,7 +99,7 @@ export async function resolve(foodName, options = {}) {
     // may be retrieved from central DB when you add macro/micro tables.
     return {
       ok: true,
-      source: 'cache',
+      source: "cache",
       id: cached.id,
       normalizedName,
       nutrition: undefined,
@@ -100,9 +109,9 @@ export async function resolve(foodName, options = {}) {
 
   // 2) Cache miss or stale → try central API
   if (!cached) {
-    emit('nutrition.lookup.cache.miss', { normalizedName });
+    emit("nutrition.lookup.cache.miss", { normalizedName });
   } else {
-    emit('nutrition.lookup.cache.hit', {
+    emit("nutrition.lookup.cache.hit", {
       id: cached.id,
       normalizedName,
       lastUpdated: cached.lastUpdated,
@@ -116,19 +125,22 @@ export async function resolve(foodName, options = {}) {
     if (cached && opts.allowStale) {
       return {
         ok: true,
-        source: 'cache',
+        source: "cache",
         id: cached.id,
         normalizedName,
         nutrition: undefined,
         cache: { lastUpdated: cached.lastUpdated },
       };
     }
-    emit('nutrition.lookup.error', { reason: 'GATEWAY_UNAVAILABLE', normalizedName });
+    emit("nutrition.lookup.error", {
+      reason: "GATEWAY_UNAVAILABLE",
+      normalizedName,
+    });
     return {
       ok: false,
-      source: 'missing',
-      error: 'Central API unavailable',
-      reason: 'GATEWAY_UNAVAILABLE',
+      source: "missing",
+      error: "Central API unavailable",
+      reason: "GATEWAY_UNAVAILABLE",
     };
   }
 
@@ -136,18 +148,29 @@ export async function resolve(foodName, options = {}) {
   let apiResult = null;
   try {
     apiResult =
-      (typeof api.nutritionLookup === 'function' && (await api.nutritionLookup(normalizedName))) ||
-      (api.nutrition && typeof api.nutrition.lookup === 'function' && (await api.nutrition.lookup(normalizedName))) ||
-      (typeof api.getNutrition === 'function' && (await api.getNutrition(normalizedName))) ||
+      (typeof api.nutritionLookup === "function" &&
+        (await api.nutritionLookup(normalizedName))) ||
+      (api.nutrition &&
+        typeof api.nutrition.lookup === "function" &&
+        (await api.nutrition.lookup(normalizedName))) ||
+      (typeof api.getNutrition === "function" &&
+        (await api.getNutrition(normalizedName))) ||
       null;
   } catch (err) {
-    emit('nutrition.lookup.error', { step: 'api', message: err?.message || 'api error', normalizedName });
+    emit("nutrition.lookup.error", {
+      step: "api",
+      message: err?.message || "api error",
+      normalizedName,
+    });
   }
 
   if (apiResult && apiResult.ok && apiResult.data) {
     // 3) Persist minimal identity to local cache for offline use.
     //    (If you later add nutrition tables, upsert them here too.)
-    const id = apiResult.data.id || cached?.id || generateDeterministicId(normalizedName);
+    const id =
+      apiResult.data.id ||
+      cached?.id ||
+      generateDeterministicId(normalizedName);
     await NutritionStore.upsert({
       id,
       foodName,
@@ -155,11 +178,11 @@ export async function resolve(foodName, options = {}) {
       lastUpdated: nowISO(),
     });
 
-    emit('nutrition.lookup.api.fetched', { id, normalizedName });
+    emit("nutrition.lookup.api.fetched", { id, normalizedName });
 
     return {
       ok: true,
-      source: 'api',
+      source: "api",
       id,
       normalizedName,
       nutrition: apiResult.data, // pass through full payload to caller
@@ -168,13 +191,13 @@ export async function resolve(foodName, options = {}) {
   }
 
   // 4) Still not found → advise optional scrape later
-  emit('nutrition.lookup.api.notfound', { normalizedName });
+  emit("nutrition.lookup.api.notfound", { normalizedName });
 
   if (cached && opts.allowStale) {
     // Return stale cache if permitted — caller may schedule scrape separately.
     return {
       ok: true,
-      source: 'cache',
+      source: "cache",
       id: cached.id,
       normalizedName,
       nutrition: undefined,
@@ -184,10 +207,10 @@ export async function resolve(foodName, options = {}) {
 
   return {
     ok: false,
-    source: 'missing',
-    error: 'Nutrition not found in cache or API',
+    source: "missing",
+    error: "Nutrition not found in cache or API",
     normalizedName,
-    reason: 'SCRAPE_REQUIRED',
+    reason: "SCRAPE_REQUIRED",
   };
 }
 
@@ -196,7 +219,25 @@ export async function resolve(foodName, options = {}) {
 
 function emit(type, data) {
   try {
-    eventBus.emit('automation.event', {
+    // Prefer imported event bus emitter if available
+    if (typeof emitEventBus === "function") {
+      emitEventBus(type, {
+        type,
+        ts: nowISO(),
+        source: SOURCE,
+        data,
+      });
+      return;
+    }
+  } catch {
+    // fall through to no-op
+  }
+
+  // If emitEventBus isn't available (or throws), never crash
+  try {
+    // last resort: attempt global-like bus, but ignore if missing
+    // eslint-disable-next-line no-undef
+    eventBus?.emit?.("automation.event", {
       type,
       ts: nowISO(),
       source: SOURCE,
@@ -217,7 +258,7 @@ function toPositiveInt(n, fallback) {
 }
 
 function isNonEmptyString(v) {
-  return typeof v === 'string' && v.trim().length > 0;
+  return typeof v === "string" && v.trim().length > 0;
 }
 
 function daysBetween(iso) {
@@ -250,16 +291,17 @@ async function bestEffortNormalize(name) {
 
 /** Minimal local normalization (kept in sync with NutritionStore heuristics) */
 function localNormalize(name) {
-  if (!isNonEmptyString(name)) return '';
+  if (!isNonEmptyString(name)) return "";
   const base = name
     .toLowerCase()
-    .normalize('NFKD')
-    .replace(/\p{Diacritic}/gu, '')
-    .replace(/[^a-z0-9\s\-]/g, ' ')
-    .replace(/\s+/g, ' ')
+    .normalize("NFKD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[^a-z0-9\s\-]/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
   // very light plural → singular heuristic
-  const singular = base.endsWith('s') && !base.endsWith('ss') ? base.slice(0, -1) : base;
+  const singular =
+    base.endsWith("s") && !base.endsWith("ss") ? base.slice(0, -1) : base;
   return singular;
 }
 
@@ -271,7 +313,7 @@ function localNormalize(name) {
  */
 async function getGateway() {
   try {
-    const mod = await import(/* @vite-ignore */ 'src/services/dataGateway.js');
+    const mod = await import(/* @vite-ignore */ "@/services/dataGateway.js");
     // Normalize shape for callers
     const api = mod?.default || mod;
     return api || null;
@@ -304,4 +346,4 @@ function djb2(str) {
 //   tables here (inside the same resolve call) to keep a single-write path.
 // - Add rate-limit/backoff cache for gateway 404s to avoid repeated misses.
 
-export default { resolve }
+export default { resolve };

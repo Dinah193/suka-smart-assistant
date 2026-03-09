@@ -1,0 +1,147 @@
+[
+  {
+    "id": "dishes.bbq.pulled_pork_sandwich",
+    "label": "Pulled Pork Sandwich",
+    "tags": ["bbq", "pork", "sandwich", "smoked", "crowd_favorite"]
+  },
+  {
+    "id": "dishes.bbq.sliced_brisket",
+    "label": "Sliced Brisket",
+    "tags": ["bbq", "beef", "brisket", "smoked", "low_and_slow"]
+  },
+  {
+    "id": "dishes.bbq.burnt_ends",
+    "label": "Burnt Ends",
+    "tags": ["bbq", "beef", "brisket", "smoked", "bark", "party_food"]
+  },
+  {
+    "id": "dishes.bbq.spare_ribs",
+    "label": "Spare Ribs",
+    "tags": ["bbq", "pork", "ribs", "smoked", "glazed_optional"]
+  },
+  {
+    "id": "dishes.bbq.baby_back_ribs",
+    "label": "Baby Back Ribs",
+    "tags": ["bbq", "pork", "ribs", "smoked", "tender"]
+  },
+  {
+    "id": "dishes.bbq.st_louis_ribs",
+    "label": "St. Louis-Style Ribs",
+    "tags": ["bbq", "pork", "ribs", "smoked", "trimmed"]
+  },
+  {
+    "id": "dishes.bbq.smoked_chicken_quarters",
+    "label": "Smoked Chicken Quarters",
+    "tags": ["bbq", "chicken", "smoked", "budget_friendly"]
+  },
+  {
+    "id": "dishes.bbq.bbq_chicken_wings",
+    "label": "BBQ Chicken Wings",
+    "tags": ["bbq", "chicken", "wings", "grilled_or_smoked", "party_food"]
+  },
+  {
+    "id": "dishes.bbq.smoked_turkey_breast",
+    "label": "Smoked Turkey Breast",
+    "tags": ["bbq", "turkey", "smoked", "leaner_option"]
+  },
+  {
+    "id": "dishes.bbq.smoked_sausage_links",
+    "label": "Smoked Sausage Links",
+    "tags": ["bbq", "sausage", "smoked", "quick_finish"]
+  },
+  {
+    "id": "dishes.bbq.hot_links",
+    "label": "Hot Links",
+    "tags": ["bbq", "sausage", "spicy_optional", "smoked_or_grilled"]
+  },
+  {
+    "id": "dishes.bbq.bbq_burgers",
+    "label": "BBQ Burgers",
+    "tags": ["bbq", "beef", "grilled", "weeknight"]
+  },
+  {
+    "id": "dishes.bbq.bbq_meatloaf_slices",
+    "label": "BBQ Meatloaf Slices",
+    "tags": ["bbq", "beef", "baked", "glazed_optional", "meal_prep"]
+  },
+  {
+    "id": "dishes.bbq.smoked_salmon",
+    "label": "Smoked Salmon",
+    "tags": ["bbq", "fish", "smoked", "quick_smoke"]
+  },
+  {
+    "id": "dishes.bbq.grilled_shrimp_skewers",
+    "label": "Grilled Shrimp Skewers",
+    "tags": ["bbq", "seafood", "grilled", "quick"]
+  },
+  {
+    "id": "dishes.bbq.smoked_mac_and_cheese",
+    "label": "Smoked Mac and Cheese",
+    "tags": ["bbq", "side", "pasta", "smoke_kissed", "crowd_favorite"]
+  },
+  {
+    "id": "dishes.bbq.baked_beans",
+    "label": "BBQ Baked Beans",
+    "tags": ["bbq", "side", "beans", "sweet_savory"]
+  },
+  {
+    "id": "dishes.bbq.brunswick_stew",
+    "label": "Brunswick Stew",
+    "tags": ["bbq", "stew", "leftovers_friendly", "pulled_meat"]
+  },
+  {
+    "id": "dishes.bbq.collard_greens",
+    "label": "Collard Greens",
+    "tags": ["bbq", "side", "greens", "soul_food_adjacent"]
+  },
+  {
+    "id": "dishes.bbq.cole_slaw",
+    "label": "Coleslaw",
+    "tags": ["bbq", "side", "crunchy", "acidic", "cooling"]
+  },
+  {
+    "id": "dishes.bbq.potato_salad",
+    "label": "Potato Salad",
+    "tags": ["bbq", "side", "picnic", "creamy_or_vinegar"]
+  },
+  {
+    "id": "dishes.bbq.cornbread",
+    "label": "Cornbread",
+    "tags": ["bbq", "side", "bread", "southern"]
+  },
+  {
+    "id": "dishes.bbq.hushpuppies",
+    "label": "Hushpuppies",
+    "tags": ["bbq", "side", "fried", "southern"]
+  },
+  {
+    "id": "dishes.bbq.grilled_corn",
+    "label": "Grilled Corn",
+    "tags": ["bbq", "side", "vegetable", "grilled"]
+  },
+  {
+    "id": "dishes.bbq.pickles_onions",
+    "label": "Pickles & Onions",
+    "tags": ["bbq", "side", "condiment", "acidic", "cut_fat"]
+  },
+  {
+    "id": "dishes.bbq.white_sauce_alabama",
+    "label": "Alabama White Sauce",
+    "tags": ["bbq", "sauce", "mayo_based", "tangy"]
+  },
+  {
+    "id": "dishes.bbq.vinegar_sauce_carolina",
+    "label": "Carolina Vinegar Sauce",
+    "tags": ["bbq", "sauce", "vinegar", "tangy"]
+  },
+  {
+    "id": "dishes.bbq.tomato_based_bbq_sauce",
+    "label": "Tomato-Based BBQ Sauce",
+    "tags": ["bbq", "sauce", "tomato", "sweet_savory"]
+  },
+  {
+    "id": "dishes.bbq.dry_rub_classic",
+    "label": "Classic BBQ Dry Rub",
+    "tags": ["bbq", "seasoning", "rub", "bark_builder"]
+  }
+]

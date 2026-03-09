@@ -1,0 +1,414 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+
+  "meta": {
+    "id": "shawarma.recipes.shawarma_rice",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Shawarma Rice",
+    "subtitle": "Golden, aromatic rice to serve with chicken, beef, or lamb shawarma",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalogs",
+      "notes": [
+        "Designed as a shawarma-platter base: warm spice, subtle tang, and fluffy grains.",
+        "Works with basmati or jasmine; includes optional toasted vermicelli like many Middle Eastern rice styles."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "Levantine",
+    "subprofiles": ["shawarma", "rice", "side", "platter"],
+    "category": "side",
+    "mealArchetypes": [
+      "meal_archetype.rice_side",
+      "meal_archetype.platter_sides"
+    ],
+    "servingStyles": ["family_style", "plates", "street_food"],
+    "plannerTags": [
+      "shawarma",
+      "rice",
+      "side",
+      "weeknight_friendly",
+      "batch_friendly",
+      "leftovers_friendly",
+      "freezer_friendly_optional"
+    ]
+  },
+
+  "summary": "Fluffy golden rice seasoned with shawarma spices, turmeric, and aromatics. A perfect base for shawarma bowls and platters, with optional toasted vermicelli and a bright lemon finish.",
+
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 1.25, "unit": "cup" },
+    "notes": "Makes about 7–8 cups cooked rice."
+  },
+
+  "time": {
+    "activeMins": 15,
+    "handsOffMins": 20,
+    "totalMins": 35
+  },
+
+  "difficulty": "beginner",
+
+  "signals": {
+    "batchFriendly": true,
+    "leftoversFriendly": true,
+    "weeknightPossible": true,
+    "freezerFriendly": "conditional"
+  },
+
+  "equipment": {
+    "minimum": [
+      "equipment.pot_with_lid",
+      "equipment.measuring_cups",
+      "equipment.fork"
+    ],
+    "recommended": ["equipment.fine_mesh_sieve", "equipment.kettle"],
+    "optional": [
+      {
+        "id": "equipment.rice_cooker",
+        "label": "Rice cooker",
+        "notes": "If using a rice cooker, sauté aromatics/spices in a pan first, then add to cooker with rinsed rice and liquid."
+      }
+    ]
+  },
+
+  "dietFlags": [
+    "diet.vegan",
+    "diet.vegetarian",
+    "diet.dairy_free",
+    "diet.gluten_free_optional"
+  ],
+  "allergens": {
+    "notes": [
+      "If using vermicelli, choose gluten-free vermicelli to keep gluten-free.",
+      "If using butter/ghee, not dairy-free. Olive oil keeps it dairy-free."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "ingredient.rice_basmati",
+      "label": "Basmati rice (or long-grain jasmine)",
+      "role": "starch",
+      "amount": { "value": 2, "unit": "cup" },
+      "notes": "Rinse until water runs mostly clear for fluffy grains."
+    },
+    {
+      "id": "ingredient.olive_oil",
+      "label": "Olive oil",
+      "role": "fat",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "notes": "Or use ghee/butter for richer flavor (not dairy-free)."
+    },
+    {
+      "id": "ingredient.butter_or_ghee",
+      "label": "Butter or ghee",
+      "role": "fat",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true,
+      "notes": "Optional; swap with 1 tbsp more olive oil."
+    },
+    {
+      "id": "ingredient.onion",
+      "label": "Onion, finely diced",
+      "role": "aromatic",
+      "amount": { "value": 0.5, "unit": "cup" }
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 3, "unit": "clove" }
+    },
+    {
+      "id": "ingredient.shawarma_spice_blend",
+      "label": "Shawarma spice blend",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Use your SSA catalog blend (salt-free)."
+    },
+    {
+      "id": "ingredient.turmeric_ground",
+      "label": "Ground turmeric",
+      "role": "color",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.cumin_ground",
+      "label": "Ground cumin",
+      "role": "spice",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.coriander_ground",
+      "label": "Ground coriander",
+      "role": "spice",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.salt_kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 1.25, "unit": "tsp" },
+      "notes": "Adjust to taste; reduce if serving with salty meats/sauces."
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.bay_leaf",
+      "label": "Bay leaf",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.stock_chicken_or_veg",
+      "label": "Chicken stock or vegetable stock (or water)",
+      "role": "liquid",
+      "amount": { "value": 3, "unit": "cup" },
+      "notes": "Stock boosts flavor; water is fine."
+    },
+    {
+      "id": "ingredient.vermicelli",
+      "label": "Vermicelli noodles, broken (optional)",
+      "role": "texture",
+      "amount": { "value": 0.33, "unit": "cup" },
+      "optional": true,
+      "notes": "Classic Middle Eastern rice add-in. Omit to keep gluten-free."
+    },
+    {
+      "id": "ingredient.lemon",
+      "label": "Lemon juice",
+      "role": "acid_finish",
+      "amount": { "value": 1.5, "unit": "tbsp" },
+      "optional": true,
+      "notes": "Optional but recommended for brightness."
+    },
+    {
+      "id": "ingredient.parsley",
+      "label": "Parsley, chopped",
+      "role": "garnish",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.toasted_almonds",
+      "label": "Toasted sliced almonds (or pine nuts)",
+      "role": "garnish",
+      "amount": { "value": 0.25, "unit": "cup" },
+      "optional": true,
+      "notes": "Adds crunch; keep nut-free if needed."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.001_rinse",
+      "title": "Rinse and drain the rice",
+      "instructions": [
+        "Rinse rice under cool water until it runs mostly clear (30–60 seconds).",
+        "Drain well in a fine-mesh sieve."
+      ],
+      "timers": [{ "label": "Rinse rice", "minutes": 2 }],
+      "checks": ["Rice drained well (less sticky)"]
+    },
+    {
+      "id": "step.002_saute_aromatics",
+      "title": "Sauté aromatics and toast spices",
+      "instructions": [
+        "Heat olive oil (and butter/ghee if using) in a pot over medium heat.",
+        "Add onion and cook 3–5 minutes until softened.",
+        "Add garlic and cook 30 seconds until fragrant.",
+        "Stir in shawarma spice blend, turmeric, and optional cumin/coriander; toast 20–30 seconds."
+      ],
+      "timers": [
+        { "label": "Soften onion", "minutes": 4 },
+        { "label": "Toast spices", "minutes": 1 }
+      ],
+      "checks": ["Spices smell fragrant, not burnt"]
+    },
+    {
+      "id": "step.003_toast_vermicelli_optional",
+      "title": "Toast vermicelli (optional)",
+      "instructions": [
+        "If using vermicelli, add it to the pot and stir constantly 1–2 minutes until lightly golden.",
+        "Watch closely—vermicelli can burn quickly."
+      ],
+      "timers": [{ "label": "Toast vermicelli", "minutes": 2 }],
+      "checks": ["Lightly golden, not dark brown"]
+    },
+    {
+      "id": "step.004_toast_rice",
+      "title": "Coat and toast the rice",
+      "instructions": [
+        "Add drained rice to the pot.",
+        "Stir 60–90 seconds so grains are coated with the spiced oil and lightly toasted."
+      ],
+      "timers": [{ "label": "Toast rice", "minutes": 2 }],
+      "checks": ["Rice looks glossy and evenly coated"]
+    },
+    {
+      "id": "step.005_simmer",
+      "title": "Add liquid and simmer",
+      "instructions": [
+        "Add stock (or water), salt, pepper, and bay leaf (optional).",
+        "Bring to a gentle boil, then immediately reduce heat to low.",
+        "Cover tightly and simmer 15 minutes without lifting the lid."
+      ],
+      "timers": [{ "label": "Covered simmer", "minutes": 15 }],
+      "checks": ["Gentle simmer (not rapid boil)", "Lid stays on"]
+    },
+    {
+      "id": "step.006_rest_fluff",
+      "title": "Rest and fluff",
+      "instructions": [
+        "Turn off heat and let the rice rest, covered, for 10 minutes.",
+        "Remove bay leaf if used.",
+        "Fluff gently with a fork."
+      ],
+      "timers": [{ "label": "Covered rest", "minutes": 10 }],
+      "checks": ["Grains separate easily when fluffed"]
+    },
+    {
+      "id": "step.007_finish_serve",
+      "title": "Finish and serve",
+      "instructions": [
+        "Optional: stir in lemon juice for brightness.",
+        "Top with parsley and optional toasted almonds/pine nuts.",
+        "Serve with shawarma meats, toum, tahini sauce, pickles, and salad."
+      ],
+      "checks": ["Seasoning balanced (adjust salt/lemon as needed)"]
+    }
+  ],
+
+  "pairings": {
+    "bestWith": [
+      "shawarma.recipes.chicken_shawarma",
+      "shawarma.recipes.beef_shawarma",
+      "shawarma.recipes.lamb_shawarma",
+      "shawarma.recipes.mixed_shawarma_platter"
+    ],
+    "sauces": [
+      "component.toum",
+      "component.tahini_sauce",
+      "component.yogurt_sauce_optional"
+    ],
+    "sides": [
+      "side.pickles",
+      "side.cucumber_tomato_salad",
+      "side.heritage_slaw_optional"
+    ]
+  },
+
+  "storage": {
+    "fridge": {
+      "duration": "4 days",
+      "notes": "Cool quickly and store airtight. Reheat with a splash of water; cover to steam."
+    },
+    "freezer": {
+      "duration": "2 months",
+      "notes": "Freeze in flat portions. Reheat covered with a splash of water to restore fluffiness."
+    }
+  },
+
+  "planner": {
+    "prepTasks": [
+      { "task": "Rinse rice", "mins": 2 },
+      { "task": "Dice onion + mince garlic", "mins": 5 },
+      { "task": "Cook rice", "mins": 25 }
+    ],
+    "batchNotes": [
+      "Double the recipe for meal prep; rice is a strong bowl base for 3–4 days.",
+      "Keep lemon juice separate if freezing; add after reheating."
+    ]
+  },
+
+  "methods": [
+    "technique.saute",
+    "technique.toast_spices",
+    "technique.simmer",
+    "technique.steam_rest"
+  ],
+
+  "compat": {
+    "search": {
+      "aliases": [
+        "yellow shawarma rice",
+        "middle eastern rice",
+        "shawarma platter rice",
+        "spiced basmati rice"
+      ],
+      "keywords": [
+        "shawarma",
+        "basmati",
+        "turmeric",
+        "cumin",
+        "coriander",
+        "vermicelli",
+        "lemon",
+        "parsley"
+      ]
+    },
+    "normalization": {
+      "notes": [
+        "If you do not have shawarma spice blend, use: 1 tsp cumin + 1 tsp coriander + 1 tsp paprika + 1/2 tsp allspice + pinch cinnamon.",
+        "Stock can be swapped for water; add a bit more salt if using water."
+      ]
+    }
+  },
+
+  "notes": [
+    "For extra restaurant flavor, bloom the spices in fat and toast the rice briefly—don’t skip those steps.",
+    "If your rice cooker struggles with aromatics, sauté aromatics/spices first, then add to cooker.",
+    "For a richer platter, stir in 1–2 tbsp minced toasted onions or a spoon of pan drippings from shawarma meat."
+  ],
+
+  "variations": [
+    {
+      "id": "variation.rice_cooker",
+      "label": "Rice cooker method",
+      "when": { "equipment": ["equipment.rice_cooker"] },
+      "adapt": {
+        "notes": [
+          "Sauté onion/garlic/spices in a pan, then add to rice cooker with rinsed rice and liquid.",
+          "Cook on standard white rice setting; rest 10 minutes before fluffing."
+        ]
+      }
+    },
+    {
+      "id": "variation.extra_golden",
+      "label": "Extra golden rice",
+      "when": { "preferences": ["more_color"] },
+      "adapt": {
+        "notes": [
+          "Increase turmeric to 1 1/2 tsp and add 1 tsp paprika.",
+          "Finish with a tiny pinch of saffron if available."
+        ]
+      }
+    },
+    {
+      "id": "variation.gluten_free",
+      "label": "Gluten-free version",
+      "when": { "diet": ["diet.gluten_free"] },
+      "adapt": {
+        "notes": [
+          "Omit vermicelli or use gluten-free vermicelli.",
+          "Confirm stock is gluten-free."
+        ]
+      }
+    }
+  ]
+}

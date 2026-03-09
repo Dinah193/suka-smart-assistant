@@ -24,10 +24,10 @@
 // - Consistent payload shape: { type, ts, source, data } with ISO timestamps.
 //
 // ASSUMPTIONS
-// - src/services/eventBus.js exists
+// - src/services/events/eventBus.js exists
 // - src/config/featureFlags.json exists and has "familyFundMode"
-// - src/services/HubPacketFormatter.js exports formatCleaningSessionForHub
-// - src/services/FamilyFundConnector.js exists
+// - src/services/hub/HubPacketFormatter.js exports formatCleaningSessionForHub
+// - src/services/hub/FamilyFundConnector.js exists
 // - src/services/cleaning/CleaningSupplyMapper.js exists (optional)
 // - src/services/cleaning/CleaningSessionStore.js exists (optional)
 //
@@ -38,10 +38,10 @@
 //   CleaningSessionEngine.onSessionExecuted(sessionId, actuals)
 //
 
-import eventBus from "../../services/eventBus";
-import featureFlags from "../../config/featureFlags.json";
-import { formatCleaningSessionForHub } from "../../services/HubPacketFormatter";
-import FamilyFundConnector from "../../services/FamilyFundConnector";
+import eventBus from "../../services/events/eventBus";
+import featureFlags from "@/config/featureFlags.json";
+import { formatCleaningSessionForHub } from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 
 let CleaningSessionStore = null;
 let CleaningSupplyMapper = null;
@@ -113,7 +113,9 @@ const CleaningSessionEngine = {
    */
   async generateFromImports(importsArray, options = {}) {
     if (!Array.isArray(importsArray) || !importsArray.length) {
-      console.warn("[CleaningSessionEngine] generateFromImports: empty imports");
+      console.warn(
+        "[CleaningSessionEngine] generateFromImports: empty imports"
+      );
       return [];
     }
 
@@ -162,7 +164,10 @@ const CleaningSessionEngine = {
    */
   async onSessionExecuted(sessionId, actuals = {}) {
     let session = null;
-    if (CleaningSessionStore && typeof CleaningSessionStore.markExecuted === "function") {
+    if (
+      CleaningSessionStore &&
+      typeof CleaningSessionStore.markExecuted === "function"
+    ) {
       session = await CleaningSessionStore.markExecuted(sessionId, actuals);
     }
 
@@ -241,14 +246,21 @@ async function buildCleaningSessionFromTasks(tasks, ctx = {}) {
   let supplies = consolidateSupplies(tasks);
 
   // 2. Map supplies to inventory/storehouse if mapper present
-  if (ctx.attachSupplies && CleaningSupplyMapper && typeof CleaningSupplyMapper.map === "function") {
+  if (
+    ctx.attachSupplies &&
+    CleaningSupplyMapper &&
+    typeof CleaningSupplyMapper.map === "function"
+  ) {
     try {
       supplies = await CleaningSupplyMapper.map(supplies, {
         allowSubstitutions: true,
         domains: ["storehouse", "inventory"],
       });
     } catch (e) {
-      console.warn("[CleaningSessionEngine] supply mapper failed, using raw supplies", e);
+      console.warn(
+        "[CleaningSessionEngine] supply mapper failed, using raw supplies",
+        e
+      );
     }
   }
 
@@ -415,7 +427,10 @@ async function persistSession(session) {
       await CleaningSessionStore.save(session);
       return session;
     } catch (e) {
-      console.warn("[CleaningSessionEngine] persistSession failed, returning session only", e);
+      console.warn(
+        "[CleaningSessionEngine] persistSession failed, returning session only",
+        e
+      );
       return session;
     }
   }
@@ -488,7 +503,8 @@ function guessEquipmentFromTask(task = {}) {
 
   if (zone.includes("bathroom")) eq.push("bathroom-brush");
   if (zone.includes("kitchen")) eq.push("microfiber-cloth");
-  if (zone.includes("pantry") || zone.includes("storehouse")) eq.push("shop-vac");
+  if (zone.includes("pantry") || zone.includes("storehouse"))
+    eq.push("shop-vac");
   if (title.includes("mop") || zone.includes("utility")) eq.push("mop");
   if (title.includes("vacuum")) eq.push("vacuum");
   return eq.length ? eq : ["microfiber-cloth"];

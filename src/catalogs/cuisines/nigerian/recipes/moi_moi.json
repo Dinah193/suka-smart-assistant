@@ -1,0 +1,297 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "meta": {
+    "id": "cuisines.nigerian.moi_moi",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Moi Moi",
+    "description": "Nigerian moi moi (moin moin): steamed bean pudding made from peeled black-eyed peas blended with pepper, onions, and seasoning, then steamed until set. Often includes fish, egg, or liver.",
+    "tags": [
+      "cuisine.nigerian",
+      "steamed",
+      "beans",
+      "gluten_free",
+      "protein.flexible",
+      "meal_prep",
+      "party_food",
+      "breakfast"
+    ],
+    "source": {
+      "curation": "ssa",
+      "author": "Suka Smart Assistant",
+      "reference": "Classic moi moi method using peeled beans; standardized for SSA catalog.",
+      "url": ""
+    }
+  },
+  "summary": "Classic Nigerian moi moi: smooth blended black-eyed peas with pepper and onions, lightly enriched with oil, then steamed in cups until set—perfect alongside rice, pap, or as a protein-rich snack.",
+  "yields": {
+    "servings": 8,
+    "makes": "8–10 ramekins or foil packs"
+  },
+  "difficulty": "intermediate",
+  "time": {
+    "prepMinutes": 30,
+    "cookMinutes": 55,
+    "totalMinutes": 85
+  },
+  "diet": {
+    "suitableFor": ["gluten_free", "dairy_free"],
+    "notes": ["Naturally gluten-free and dairy-free; verify bouillon if used."]
+  },
+  "allergens": ["fish", "egg"],
+  "safety": {
+    "notes": [
+      "Steam until fully set (center not wet).",
+      "If adding fish, remove bones before serving."
+    ]
+  },
+  "ingredientGroups": [
+    {
+      "id": "group.beans_base",
+      "label": "Bean base",
+      "ingredients": [
+        {
+          "id": "ingredient.black_eyed_peas_peeled",
+          "label": "Black-eyed peas (peeled/skinless)",
+          "amount": {
+            "value": 500,
+            "unit": "g"
+          },
+          "notes": [
+            "If using unpeeled dry beans, soak and rub skins off; peeled beans blend smoother."
+          ]
+        },
+        {
+          "id": "ingredient.water_for_blending",
+          "label": "Water for blending (or light stock)",
+          "amount": {
+            "value": 600,
+            "unit": "ml"
+          },
+          "notes": ["Add gradually to reach a thick but pourable batter."]
+        }
+      ]
+    },
+    {
+      "id": "group.pepper_onion",
+      "label": "Pepper-onion blend",
+      "ingredients": [
+        {
+          "id": "ingredient.red_bell_pepper",
+          "label": "Red bell pepper",
+          "amount": {
+            "value": 200,
+            "unit": "g"
+          }
+        },
+        {
+          "id": "ingredient.scotch_bonnet",
+          "label": "Scotch bonnet or habanero",
+          "amount": {
+            "value": 10,
+            "unit": "g"
+          },
+          "notes": ["About 1 small pepper; reduce for mild."]
+        },
+        {
+          "id": "ingredient.onion_yellow",
+          "label": "Yellow onion",
+          "amount": {
+            "value": 200,
+            "unit": "g"
+          }
+        }
+      ]
+    },
+    {
+      "id": "group.seasoning_oil",
+      "label": "Seasoning and oil",
+      "ingredients": [
+        {
+          "id": "ingredient.vegetable_oil",
+          "label": "Neutral oil (vegetable/canola) or palm oil",
+          "amount": {
+            "value": 90,
+            "unit": "ml"
+          },
+          "notes": [
+            "Palm oil gives traditional color and flavor; neutral oil is lighter."
+          ]
+        },
+        {
+          "id": "ingredient.salt",
+          "label": "Salt",
+          "amount": {
+            "value": 7,
+            "unit": "g"
+          },
+          "notes": ["Add to taste depending on bouillon and mix-ins."]
+        },
+        {
+          "id": "ingredient.bouillon_powder",
+          "label": "Bouillon powder or cube (crumbled)",
+          "amount": {
+            "value": 4,
+            "unit": "g"
+          },
+          "notes": ["Optional; common in many versions."]
+        },
+        {
+          "id": "ingredient.curry_powder_optional",
+          "label": "Curry powder (optional)",
+          "amount": {
+            "value": 2,
+            "unit": "g"
+          }
+        },
+        {
+          "id": "ingredient.thyme_dried_optional",
+          "label": "Dried thyme (optional)",
+          "amount": {
+            "value": 1,
+            "unit": "g"
+          }
+        }
+      ]
+    },
+    {
+      "id": "group.mix_ins",
+      "label": "Mix-ins (optional but classic)",
+      "ingredients": [
+        {
+          "id": "ingredient.egg_boiled",
+          "label": "Hard-boiled eggs, quartered",
+          "amount": {
+            "value": 4,
+            "unit": "each"
+          },
+          "notes": ["Optional; 1–2 pieces per portion."]
+        },
+        {
+          "id": "ingredient.sardines_canned",
+          "label": "Canned sardines or mackerel, drained",
+          "amount": {
+            "value": 120,
+            "unit": "g"
+          },
+          "notes": ["Optional; flake into chunks."]
+        },
+        {
+          "id": "ingredient.beef_liver",
+          "label": "Beef liver, parboiled and diced small",
+          "amount": {
+            "value": 120,
+            "unit": "g"
+          },
+          "notes": ["Optional; parboil 8–10 minutes then dice."]
+        }
+      ]
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "ingredient.ramekins_or_foil",
+      "label": "Ramekins, heat-safe cups, or foil packs",
+      "amount": {
+        "value": 10,
+        "unit": "each"
+      },
+      "notes": ["Traditional: banana leaves; modern: foil packs or small cups."]
+    }
+  ],
+  "methods": ["steam", "blend"],
+  "compat": {
+    "equipmentRequired": [
+      "blender",
+      "bowl.mixing",
+      "spoon.wooden",
+      "pot.steamer_or_large_pot",
+      "ladle"
+    ],
+    "appliancesOptional": ["food_processor"],
+    "notes": [
+      "A high-speed blender yields the smoothest moi moi.",
+      "You can steam in a large pot with a rack or folded towel at the bottom."
+    ]
+  },
+  "steps": [
+    {
+      "id": "step.prep_steamer",
+      "title": "Set up the steamer",
+      "body": "Fill a large pot with 2–3 inches of water. Place a steamer rack or a folded towel at the bottom so cups don’t sit directly on the pot base. Bring to a gentle simmer while you blend the batter."
+    },
+    {
+      "id": "step.blend_pepper",
+      "title": "Blend pepper-onion mixture",
+      "body": "Blend red bell pepper, scotch bonnet (to taste), and onion with about 250 ml of the water until very smooth."
+    },
+    {
+      "id": "step.blend_beans",
+      "title": "Blend beans until smooth",
+      "body": "Add peeled black-eyed peas to the blender. Blend, adding remaining water gradually, until a smooth, thick, pourable batter forms. Work in batches if needed."
+    },
+    {
+      "id": "step.season_enrich",
+      "title": "Season and enrich the batter",
+      "body": "Pour batter into a mixing bowl. Stir in oil, salt, bouillon (optional), and optional curry/thyme. Mix well for 1–2 minutes to aerate slightly; taste for seasoning and adjust.",
+      "notes": [
+        "Batter should be pourable like a thick pancake batter—add small splashes of water if too thick."
+      ]
+    },
+    {
+      "id": "step.fill_molds",
+      "title": "Fill cups and add mix-ins",
+      "body": "Lightly oil cups/ramekins or prepare foil packs. Ladle batter to fill each about 3/4 full. Add mix-ins (egg piece, fish chunk, diced liver) into the center of each portion if using, then top with a little more batter as needed."
+    },
+    {
+      "id": "step.steam",
+      "title": "Steam until set",
+      "body": "Arrange cups in the steamer. Cover the pot (wrap lid with a towel if you want to reduce condensation dripping). Steam on medium heat until set and a tester comes out mostly clean, 45–60 minutes depending on cup size. Add more hot water to the pot if level gets low.",
+      "timers": [
+        {
+          "id": "timer.steam_moimoi",
+          "label": "Steam moi moi until set",
+          "minutes": 55
+        }
+      ]
+    },
+    {
+      "id": "step.rest_serve",
+      "title": "Rest and serve",
+      "body": "Let moi moi rest 5 minutes, then serve warm. Enjoy with rice/stew, pap (ogi), bread, or as a snack. Cool and refrigerate leftovers up to 4 days."
+    }
+  ],
+  "notes": [
+    "Texture key: use peeled beans and blend very smooth for classic custardy moi moi.",
+    "Water control: batter should pour; too much water makes soft/wet centers.",
+    "Condensation tip: wrap the lid with a clean towel to keep drips from pooling on top.",
+    "Flavor options: palm oil adds traditional color; neutral oil keeps it lighter.",
+    "Serving ideas: pairs well with jollof rice, fried rice, stew, or pap (ogi)."
+  ],
+  "variations": [
+    {
+      "id": "variation.banana_leaf",
+      "label": "Banana-leaf wrapped",
+      "notes": [
+        "Line cups or wrap in softened banana leaves for classic aroma; steam as directed."
+      ]
+    },
+    {
+      "id": "variation.mild_kid_friendly",
+      "label": "Mild / kid-friendly",
+      "notes": [
+        "Use only a small piece of scotch bonnet or omit; add more red bell pepper for flavor without heat."
+      ]
+    },
+    {
+      "id": "variation.fish_only",
+      "label": "Fish-focused",
+      "notes": [
+        "Use flaked mackerel/sardines and omit liver/egg; ensure bones are removed."
+      ]
+    }
+  ]
+}

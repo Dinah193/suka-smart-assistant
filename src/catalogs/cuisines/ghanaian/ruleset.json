@@ -1,0 +1,364 @@
+{
+  "$schema": "../../../schemas/ruleset.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "kind": "cuisine_ruleset",
+  "meta": {
+    "id": "cuisines.ghanaian.ruleset",
+    "type": "cuisine_ruleset",
+    "label": "Ghanaian Cuisine Ruleset",
+    "cuisineId": "cuisines.ghanaian",
+    "status": "canonical",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa",
+      "notes": [
+        "Deterministic cuisine rules for Ghanaian dish selection and planner tagging.",
+        "Workaround: Condition.value uses a string for numeric thresholds to avoid JSON Schema oneOf ambiguity (number vs integer)."
+      ]
+    }
+  },
+  "scope": {
+    "kind": "cuisine",
+    "cuisineId": "cuisines.ghanaian",
+    "locales": ["en-US"]
+  },
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true,
+    "tokens": {
+      "stopWords": [
+        "and",
+        "or",
+        "with",
+        "of",
+        "the",
+        "a",
+        "an",
+        "style",
+        "ghana",
+        "ghanaian"
+      ]
+    },
+    "ingredientAliases": {
+      "ingredient.black_eyed_peas": [
+        "black eyed peas",
+        "black-eye peas",
+        "blackeye peas",
+        "beans (black eye)",
+        "beans blackeyed"
+      ],
+      "ingredient.palm_oil": ["palm oil", "red palm oil", "zomi"],
+      "ingredient.okra": ["okro", "okra"],
+      "ingredient.scotch_bonnet": [
+        "scotch bonnet",
+        "habanero",
+        "kpakpo shito",
+        "hot pepper"
+      ],
+      "ingredient.fermented_corn_dough": [
+        "fermented corn dough",
+        "corn dough",
+        "kenkey dough",
+        "banku dough (corn)"
+      ],
+      "ingredient.fermented_cassava_dough": [
+        "fermented cassava dough",
+        "cassava dough",
+        "banku dough (cassava)"
+      ],
+      "ingredient.palm_nut_concentrate": [
+        "palm nut concentrate",
+        "palm nut cream",
+        "palm fruit concentrate",
+        "palm cream"
+      ],
+      "ingredient.peanut_butter_natural": [
+        "groundnut paste",
+        "peanut paste",
+        "natural peanut butter",
+        "peanut butter"
+      ],
+      "ingredient.dried_shrimp": ["dried shrimp", "shrimp powder"],
+      "ingredient.smoked_fish": [
+        "smoked fish",
+        "smoked tilapia",
+        "smoked mackerel"
+      ]
+    },
+    "dishAliases": {
+      "dish.ghanaian.red_red": [
+        "red red",
+        "ghana beans stew",
+        "beans stew",
+        "black-eyed pea stew"
+      ],
+      "dish.ghanaian.waakye": [
+        "waakye",
+        "rice and beans waakye",
+        "ghana rice and beans"
+      ],
+      "dish.ghanaian.groundnut_soup": [
+        "groundnut soup",
+        "peanut soup",
+        "ghana peanut soup"
+      ],
+      "dish.ghanaian.palm_nut_soup": [
+        "palm nut soup",
+        "palm fruit soup",
+        "abenkwan"
+      ],
+      "dish.ghanaian.light_soup": [
+        "light soup",
+        "ghana light soup",
+        "pepper soup (ghana)"
+      ],
+      "dish.ghanaian.okro_stew": ["okro stew", "okra stew", "okro soup"],
+      "dish.ghanaian.kenkey": ["kenkey", "dorkunu"],
+      "dish.ghanaian.banku": ["banku"],
+      "dish.ghanaian.omo_tuo": ["omo tuo", "omotuo", "rice balls"],
+      "dish.ghanaian.shito": [
+        "shito",
+        "black pepper sauce",
+        "ghana black pepper sauce"
+      ],
+      "dish.ghanaian.fresh_pepper_sauce": [
+        "fresh pepper sauce",
+        "pepper and onion sauce",
+        "kpakpo shito (fresh)"
+      ]
+    },
+    "equipmentAliases": {
+      "tool.pot_stock": ["pot", "stockpot", "soup pot"],
+      "tool.dutch_oven": ["dutch oven", "heavy pot"],
+      "tool.blender": ["blender", "liquidizer"],
+      "tool.pressure_cooker": ["pressure cooker", "instant pot"],
+      "tool.pan": ["pan", "skillet"],
+      "tool.grill": ["grill", "broiler"]
+    },
+    "methodAliases": {
+      "method.stew": ["stew", "cook down"],
+      "method.simmer": ["simmer", "gentle boil"],
+      "method.fry": ["fry", "shallow fry", "deep fry"],
+      "method.ferment": ["ferment", "sour"],
+      "method.grill": ["grill", "char", "broil"],
+      "method.blend": ["blend", "puree"]
+    }
+  },
+  "globals": {
+    "flavorProfile": {
+      "heatScale": "0-5",
+      "heatTypical": 2,
+      "saltTypical": 2,
+      "acidTypical": 1,
+      "smokeTypical": 1
+    },
+    "plannerDefaults": {
+      "preferSwallowWithSoups": true,
+      "preferCondimentsWithGrills": true,
+      "leftoversBias": "high"
+    }
+  },
+  "rules": [
+    {
+      "id": "gh.add_tag.cuisine_ghanaian",
+      "enabled": true,
+      "priority": 10,
+      "title": "Ensure cuisine.ghanaian tag",
+      "description": "If the evaluated item is Ghanaian cuisine-scoped, enforce the standard cuisine tag.",
+      "tags": ["tagging", "cuisine"],
+      "source": "ssa.catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          { "type": "eq", "path": "$.cuisineId", "value": "cuisines.ghanaian" },
+          {
+            "type": "intersects",
+            "path": "$.plannerTags",
+            "values": ["cuisine.ghanaian"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [{ "type": "addTag", "value": "cuisine.ghanaian" }]
+      }
+    },
+    {
+      "id": "gh.classify.soup_and_swallow",
+      "enabled": true,
+      "priority": 50,
+      "title": "Soups/stews: prefer swallow pairing and tag serving style",
+      "description": "If dish is soup/stew or archetype soup_and_swallow, add planner tags and pairing hints used by SSA.",
+      "tags": ["planner", "pairing", "archetype"],
+      "source": "ssa.catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          { "type": "eq", "path": "$.category", "value": "category.soup" },
+          { "type": "eq", "path": "$.category", "value": "category.stew" },
+          {
+            "type": "intersects",
+            "path": "$.mealArchetypes",
+            "values": ["archetype.soup_and_swallow"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "stew_and_starch" },
+          { "type": "addTag", "value": "swallow_pairing" },
+          {
+            "type": "set",
+            "path": "$.pairingHints.preferStarches",
+            "value": [
+              "dish.ghanaian.banku",
+              "dish.ghanaian.kenkey",
+              "dish.ghanaian.fufu",
+              "dish.ghanaian.omo_tuo"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "gh.score.boost.batch_friendly",
+      "enabled": true,
+      "priority": 80,
+      "title": "Boost batch-friendly dishes",
+      "description": "If signals indicate batch friendliness, increase score and add tag used by weekly planners.",
+      "tags": ["planner", "scoring", "batch"],
+      "source": "ssa.catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          { "type": "eq", "path": "$.signals.batchFriendly", "value": true },
+          {
+            "type": "intersects",
+            "path": "$.plannerTags",
+            "values": ["batch_friendly"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 0.35 },
+          { "type": "addTag", "value": "batch_friendly" }
+        ]
+      }
+    },
+    {
+      "id": "gh.score.boost.weeknight_possible",
+      "enabled": true,
+      "priority": 90,
+      "title": "Boost weeknight-possible dishes",
+      "description": "If signals indicate weeknightPossible, add tag and small score bump for weekday rotation.",
+      "tags": ["planner", "scoring", "weeknight"],
+      "source": "ssa.catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.signals.weeknightPossible",
+            "value": true
+          },
+          {
+            "type": "intersects",
+            "path": "$.plannerTags",
+            "values": ["weeknight_possible"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 0.2 },
+          { "type": "addTag", "value": "weeknight_possible" }
+        ]
+      }
+    },
+    {
+      "id": "gh.tag.freezer_friendly",
+      "enabled": true,
+      "priority": 110,
+      "title": "Tag freezer-friendly dishes",
+      "description": "If signals indicate freezer friendliness, add freezer tag used by bulk cooking/provisioning.",
+      "tags": ["planner", "storage", "freezer"],
+      "source": "ssa.catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          { "type": "eq", "path": "$.signals.freezerFriendly", "value": true },
+          {
+            "type": "intersects",
+            "path": "$.plannerTags",
+            "values": ["freezer_friendly"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [{ "type": "addTag", "value": "freezer_friendly" }]
+      }
+    },
+    {
+      "id": "gh.tag.pepper_forward",
+      "enabled": true,
+      "priority": 140,
+      "title": "Tag pepper-forward dishes from heatTypical",
+      "description": "When heatTypical is >= 3, add pepper_forward tag and a mild score bump. (Threshold is a string to avoid oneOf ambiguity.)",
+      "tags": ["tagging", "heat", "planner"],
+      "source": "ssa.catalog",
+      "stopOnMatch": false,
+      "when": { "type": "gte", "path": "$.heatTypical", "value": "3" },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "pepper_forward" },
+          { "type": "scoreAdjust", "scoreDelta": 0.1 }
+        ]
+      }
+    },
+    {
+      "id": "gh.defaults.condiment_for_grills",
+      "enabled": true,
+      "priority": 160,
+      "title": "For grilled dishes, prefer fresh pepper sauce and optionally shito",
+      "description": "Ghana grilled meals commonly pair with fresh pepper sauce; add pairing hints and tag.",
+      "tags": ["pairing", "grill"],
+      "source": "ssa.catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.techniques",
+            "values": ["method.grill"]
+          },
+          {
+            "type": "intersects",
+            "path": "$.mealArchetypes",
+            "values": ["archetype.grill_and_pepper"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "grill_and_pepper" },
+          {
+            "type": "set",
+            "path": "$.pairingHints.condiments",
+            "value": ["dish.ghanaian.fresh_pepper_sauce", "dish.ghanaian.shito"]
+          }
+        ]
+      }
+    }
+  ]
+}

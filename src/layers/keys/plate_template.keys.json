@@ -1,0 +1,872 @@
+{
+  "$schema": "./plate_template.keys.schema.json",
+  "keysetId": "ssa.plate_template",
+  "version": "1.0.0",
+  "generatedAt": "2026-01-10T03:57:56Z",
+  "notes": [
+    "Plate Template Keys define canonical identifiers and field names for plate templates used by SSA Farm-to-Table planning.",
+    "Use these keys across plate_templates.catalog.json, meal plan drafts, explain outputs, and UI rendering.",
+    "Keys are stable: do not rename ids; deprecate with replacementId if changes are required."
+  ],
+  "enums": {
+    "domains": [
+      "catalogs",
+      "meal_planning",
+      "ui",
+      "explain"
+    ],
+    "entities": [
+      "plate_template",
+      "role_spec",
+      "fallback",
+      "override",
+      "selection",
+      "explain"
+    ],
+    "valueTypes": [
+      "string",
+      "number",
+      "boolean",
+      "array",
+      "object",
+      "enum"
+    ],
+    "sensitivity": [
+      "public",
+      "internal",
+      "private"
+    ],
+    "lifecycle": [
+      "active",
+      "deprecated"
+    ],
+    "ratioModes": [
+      "fixed",
+      "range",
+      "adaptive",
+      "macro_balanced",
+      "protein_forward",
+      "vegetable_forward"
+    ],
+    "applyModes": [
+      "replace",
+      "add",
+      "remove",
+      "prefer",
+      "avoid",
+      "suggest"
+    ],
+    "priority": [
+      "low",
+      "medium",
+      "high",
+      "critical"
+    ]
+  },
+  "keys": [
+    {
+      "id": "plate_template.id",
+      "label": "Plate Template ID",
+      "domain": "catalogs",
+      "entity": "plate_template",
+      "valueType": "string",
+      "description": "Stable plate template identifier (e.g., plate.family_plate.standard).",
+      "required": true,
+      "aliases": [
+        "id",
+        "templateId",
+        "plateTemplateId"
+      ],
+      "examples": [
+        "plate.family_plate.standard"
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "plate_template.label",
+      "label": "Plate Template Label",
+      "domain": "catalogs",
+      "entity": "plate_template",
+      "valueType": "string",
+      "description": "Human-friendly plate template name.",
+      "required": true,
+      "aliases": [
+        "name",
+        "title"
+      ],
+      "examples": [
+        "Standard Family Plate"
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "plate_template.plate_type",
+      "label": "Plate Type",
+      "domain": "catalogs",
+      "entity": "plate_template",
+      "valueType": "string",
+      "description": "Plate type classification (bowl, plate, tray, soup, etc.).",
+      "required": true,
+      "aliases": [
+        "plateType"
+      ],
+      "examples": [
+        "plate"
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "plate_template.meal_times",
+      "label": "Meal Times",
+      "domain": "catalogs",
+      "entity": "plate_template",
+      "valueType": "array",
+      "description": "Meal times this template applies to (breakfast/lunch/dinner/snack).",
+      "required": true,
+      "aliases": [
+        "mealTimes"
+      ],
+      "examples": [
+        [
+          "dinner"
+        ]
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "plate_template.tags",
+      "label": "Template Tags",
+      "domain": "catalogs",
+      "entity": "plate_template",
+      "valueType": "array",
+      "description": "Tags for filtering (weekday, quick, feast, kid_friendly, etc.).",
+      "required": false,
+      "aliases": [
+        "tagIds"
+      ],
+      "examples": [
+        [
+          "weekday",
+          "balanced"
+        ]
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "plate_template.ratio_mode",
+      "label": "Ratio Mode",
+      "domain": "catalogs",
+      "entity": "plate_template",
+      "valueType": "enum",
+      "description": "How roles/ratios behave (fixed/range/adaptive/etc.).",
+      "required": true,
+      "aliases": [
+        "ratioMode"
+      ],
+      "examples": [
+        "fixed"
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "plate_template.prep_difficulty",
+      "label": "Prep Difficulty",
+      "domain": "catalogs",
+      "entity": "plate_template",
+      "valueType": "enum",
+      "description": "Prep difficulty hint (easy/moderate/advanced/expert).",
+      "required": true,
+      "aliases": [
+        "prepDifficulty"
+      ],
+      "examples": [
+        "moderate"
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "plate_template.typical_methods",
+      "label": "Typical Methods",
+      "domain": "catalogs",
+      "entity": "plate_template",
+      "valueType": "array",
+      "description": "Typical cooking methods for template.",
+      "required": true,
+      "aliases": [
+        "typicalMethods"
+      ],
+      "examples": [
+        [
+          "saute",
+          "simmer"
+        ]
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "role_spec.role_id",
+      "label": "Role ID",
+      "domain": "catalogs",
+      "entity": "role_spec",
+      "valueType": "string",
+      "description": "Role id for role spec row (role.protein.primary).",
+      "required": true,
+      "aliases": [
+        "role",
+        "roleId"
+      ],
+      "examples": [
+        "role.protein.primary"
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "role_spec.ratio",
+      "label": "Role Ratio",
+      "domain": "catalogs",
+      "entity": "role_spec",
+      "valueType": "number",
+      "description": "Ratio weight (0..1) used when ratioMode=fixed or as starting bias.",
+      "required": true,
+      "aliases": [
+        "ratio"
+      ],
+      "examples": [
+        0.35
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "role_spec.required",
+      "label": "Role Required",
+      "domain": "catalogs",
+      "entity": "role_spec",
+      "valueType": "boolean",
+      "description": "Whether role is required for a valid plate.",
+      "required": true,
+      "aliases": [
+        "required"
+      ],
+      "examples": [
+        true
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "role_spec.min_items",
+      "label": "Min Items",
+      "domain": "catalogs",
+      "entity": "role_spec",
+      "valueType": "number",
+      "description": "Minimum item count for this role.",
+      "required": true,
+      "aliases": [
+        "minItems"
+      ],
+      "examples": [
+        1
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "role_spec.max_items",
+      "label": "Max Items",
+      "domain": "catalogs",
+      "entity": "role_spec",
+      "valueType": "number",
+      "description": "Maximum item count for this role (0 or null means unlimited depending engine).",
+      "required": true,
+      "aliases": [
+        "maxItems"
+      ],
+      "examples": [
+        2
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "role_spec.component_groups",
+      "label": "Component Groups",
+      "domain": "catalogs",
+      "entity": "role_spec",
+      "valueType": "array",
+      "description": "Component group ids eligible for this role (ids defined in plate_templates catalog componentGroups or substitution groups).",
+      "required": true,
+      "aliases": [
+        "componentGroups"
+      ],
+      "examples": [
+        [
+          "group.protein.lean"
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "role_spec.unit_hint",
+      "label": "Unit Hint",
+      "domain": "catalogs",
+      "entity": "role_spec",
+      "valueType": "string",
+      "description": "Preferred unit hint for role portioning (g, oz, each).",
+      "required": true,
+      "aliases": [
+        "unitHint"
+      ],
+      "examples": [
+        "g"
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "role_spec.notes",
+      "label": "Role Notes",
+      "domain": "catalogs",
+      "entity": "role_spec",
+      "valueType": "string",
+      "description": "Notes to help UI/learning.",
+      "required": false,
+      "aliases": [
+        "notes"
+      ],
+      "examples": [
+        "Prefer lean proteins for weekday plates."
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "fallback.policy",
+      "label": "Fallback Policy",
+      "domain": "catalogs",
+      "entity": "fallback",
+      "valueType": "object",
+      "description": "Fallback policy object for missing roles/components.",
+      "required": true,
+      "aliases": [
+        "fallbackPolicy"
+      ],
+      "examples": [
+        {
+          "ifMissing": [
+            {
+              "role": "role.veg.side",
+              "strategy": [
+                "substitute",
+                "buy"
+              ]
+            }
+          ]
+        }
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "fallback.if_missing",
+      "label": "If Missing Rules",
+      "domain": "catalogs",
+      "entity": "fallback",
+      "valueType": "array",
+      "description": "Array of per-role missing rules.",
+      "required": false,
+      "aliases": [
+        "ifMissing"
+      ],
+      "examples": [
+        [
+          {
+            "role": "role.starch.primary",
+            "strategy": [
+              "substitute"
+            ]
+          }
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "fallback.if_missing.role_id",
+      "label": "Missing Role ID",
+      "domain": "catalogs",
+      "entity": "fallback",
+      "valueType": "string",
+      "description": "Role id referenced by a fallback rule.",
+      "required": false,
+      "aliases": [
+        "role"
+      ],
+      "examples": [
+        "role.starch.primary"
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "fallback.if_missing.strategy",
+      "label": "Missing Strategy",
+      "domain": "catalogs",
+      "entity": "fallback",
+      "valueType": "array",
+      "description": "Strategy list order (substitute, buy, grow, preserve, skip).",
+      "required": false,
+      "aliases": [
+        "strategy"
+      ],
+      "examples": [
+        [
+          "substitute",
+          "buy"
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "fallback.if_missing.notes",
+      "label": "Missing Strategy Notes",
+      "domain": "catalogs",
+      "entity": "fallback",
+      "valueType": "string",
+      "description": "Notes for the UI to explain fallback.",
+      "required": false,
+      "aliases": [
+        "notes"
+      ],
+      "examples": [
+        "If no rice, use potatoes or cornmeal."
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "fallback.sourcing_priority_default",
+      "label": "Default Sourcing Priority",
+      "domain": "catalogs",
+      "entity": "fallback",
+      "valueType": "array",
+      "description": "Default sourcing priority when making decisions.",
+      "required": false,
+      "aliases": [
+        "sourcingPriorityDefault"
+      ],
+      "examples": [
+        [
+          "inventory",
+          "garden",
+          "store"
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "override.cuisine_id",
+      "label": "Cuisine Override Map Key",
+      "domain": "catalogs",
+      "entity": "override",
+      "valueType": "string",
+      "description": "Cuisine id key for overrides map.",
+      "required": false,
+      "aliases": [
+        "cuisineId"
+      ],
+      "examples": [
+        "cuisine.indian.north"
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "override.typical_methods",
+      "label": "Override Typical Methods",
+      "domain": "catalogs",
+      "entity": "override",
+      "valueType": "array",
+      "description": "Override methods for cuisine context.",
+      "required": false,
+      "aliases": [
+        "typicalMethods"
+      ],
+      "examples": [
+        [
+          "simmer",
+          "toast_spices"
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "override.roles_override",
+      "label": "Override Roles",
+      "domain": "catalogs",
+      "entity": "override",
+      "valueType": "array",
+      "description": "Replacement role specs for cuisine context.",
+      "required": false,
+      "aliases": [
+        "rolesOverride"
+      ],
+      "examples": [
+        [
+          {
+            "role": "role.starch.primary",
+            "ratio": 0.4
+          }
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "override.role_tweaks",
+      "label": "Role Tweaks",
+      "domain": "catalogs",
+      "entity": "override",
+      "valueType": "object",
+      "description": "Per-role tweak hints; structure is flexible.",
+      "required": false,
+      "aliases": [
+        "roleTweaks"
+      ],
+      "examples": [
+        {
+          "role.starch.primary": {
+            "preferGroups": [
+              "group.starch.rice"
+            ]
+          }
+        }
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "override.notes",
+      "label": "Override Notes",
+      "domain": "catalogs",
+      "entity": "override",
+      "valueType": "string",
+      "description": "Notes about cuisine override.",
+      "required": false,
+      "aliases": [
+        "notes"
+      ],
+      "examples": [
+        "Indian plates often include both rice and bread."
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "component_group.id",
+      "label": "Component Group ID",
+      "domain": "catalogs",
+      "entity": "plate_template",
+      "valueType": "string",
+      "description": "Component group id declared in plate_templates catalog for matching components.",
+      "required": true,
+      "aliases": [
+        "id",
+        "groupId"
+      ],
+      "examples": [
+        "group.starch.rice"
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "component_group.label",
+      "label": "Component Group Label",
+      "domain": "catalogs",
+      "entity": "plate_template",
+      "valueType": "string",
+      "description": "Human-friendly label for component group.",
+      "required": true,
+      "aliases": [
+        "label",
+        "name"
+      ],
+      "examples": [
+        "Rice"
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "component_group.match",
+      "label": "Component Group Match",
+      "domain": "catalogs",
+      "entity": "plate_template",
+      "valueType": "object",
+      "description": "Match rules for group membership (categoryIds/tagsAny/includesComponentIds/etc.).",
+      "required": true,
+      "aliases": [
+        "match"
+      ],
+      "examples": [
+        {
+          "categoryIds": [
+            "cat.grain.rice"
+          ]
+        }
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "plan.selection.template_id",
+      "label": "Selected Template ID",
+      "domain": "meal_planning",
+      "entity": "selection",
+      "valueType": "string",
+      "description": "Template id chosen for a meal slot or day.",
+      "required": true,
+      "aliases": [
+        "templateId",
+        "plateTemplateId"
+      ],
+      "examples": [
+        "plate.family_plate.standard"
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "plan.selection.cuisine_id",
+      "label": "Selected Cuisine ID",
+      "domain": "meal_planning",
+      "entity": "selection",
+      "valueType": "string",
+      "description": "Cuisine id chosen for a meal slot or day.",
+      "required": false,
+      "aliases": [
+        "cuisineId"
+      ],
+      "examples": [
+        "cuisine.caribbean.jamaican"
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "plan.selection.roles",
+      "label": "Selected Roles",
+      "domain": "meal_planning",
+      "entity": "selection",
+      "valueType": "array",
+      "description": "Resolved role specs used for selection after overrides.",
+      "required": false,
+      "aliases": [
+        "roles"
+      ],
+      "examples": [
+        [
+          {
+            "role": "role.protein.primary",
+            "ratio": 0.35
+          }
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "plan.selection.items",
+      "label": "Selected Items",
+      "domain": "meal_planning",
+      "entity": "selection",
+      "valueType": "array",
+      "description": "Resolved component selections per role (planner output).",
+      "required": false,
+      "aliases": [
+        "items"
+      ],
+      "examples": [
+        [
+          {
+            "role": "role.starch.primary",
+            "componentId": "comp.rice.white_long_grain"
+          }
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "plan.selection.explain",
+      "label": "Explain Block",
+      "domain": "explain",
+      "entity": "explain",
+      "valueType": "object",
+      "description": "Explain payload for why the planner picked this template/roles/items.",
+      "required": false,
+      "aliases": [
+        "explain"
+      ],
+      "examples": [
+        {
+          "why": "Balanced dinner plate.",
+          "howPlannerUses": [
+            "ratioMode=fixed"
+          ]
+        }
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "plan.selection.gaps",
+      "label": "Selection Gaps",
+      "domain": "meal_planning",
+      "entity": "selection",
+      "valueType": "array",
+      "description": "Gaps discovered (missing components by role).",
+      "required": false,
+      "aliases": [
+        "gaps"
+      ],
+      "examples": [
+        [
+          {
+            "role": "role.veg.side",
+            "missingGroup": "group.veg.leafy"
+          }
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "plan.selection.actions",
+      "label": "Selection Actions",
+      "domain": "meal_planning",
+      "entity": "selection",
+      "valueType": "array",
+      "description": "Actions suggested (buy/grow/substitute/preserve).",
+      "required": false,
+      "aliases": [
+        "actions"
+      ],
+      "examples": [
+        [
+          {
+            "type": "buy",
+            "componentId": "comp.collards"
+          }
+        ]
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "ui.template.badge",
+      "label": "UI Badge",
+      "domain": "ui",
+      "entity": "plate_template",
+      "valueType": "string",
+      "description": "Badge label for UI (e.g., Quick, Feast, Budget).",
+      "required": false,
+      "aliases": [
+        "badge"
+      ],
+      "examples": [
+        "Balanced"
+      ],
+      "sensitivity": "public",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "ui.template.icon",
+      "label": "UI Icon",
+      "domain": "ui",
+      "entity": "plate_template",
+      "valueType": "string",
+      "description": "Icon identifier for template.",
+      "required": false,
+      "aliases": [
+        "icon"
+      ],
+      "examples": [
+        "Utensils"
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    },
+    {
+      "id": "ui.template.sort_order",
+      "label": "UI Sort Order",
+      "domain": "ui",
+      "entity": "plate_template",
+      "valueType": "number",
+      "description": "Sort order in lists.",
+      "required": false,
+      "aliases": [
+        "sortOrder"
+      ],
+      "examples": [
+        20
+      ],
+      "sensitivity": "internal",
+      "lifecycle": "active",
+      "replacementId": null
+    }
+  ]
+}

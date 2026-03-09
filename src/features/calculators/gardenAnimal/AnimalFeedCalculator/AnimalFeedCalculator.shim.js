@@ -30,39 +30,64 @@ let familyFundMode = false;
 let HubPacketFormatter = null;
 let FamilyFundConnector = null;
 
-try {
-  // eslint-disable-next-line import/no-unresolved
-  const eventBus = require("@/services/eventBus");
-  if (eventBus && typeof eventBus.emit === "function") {
-    emit = eventBus.emit;
+let _depsInit = false;
+
+/**
+ * Browser-safe soft dependency loader (Vite-friendly).
+ * Uses dynamic import() instead of node:require to avoid build externalization.
+ */
+async function ensureDepsLoaded() {
+  if (_depsInit) return;
+  _depsInit = true;
+
+  try {
+    // eslint-disable-next-line import/no-unresolved
+    const eventBusMod = await import("@/services/events/eventBus");
+    const eventBus = eventBusMod?.default || eventBusMod;
+    if (eventBus && typeof eventBus.emit === "function") {
+      emit = eventBus.emit;
+    }
+  } catch {
+    // no-op fallback; keep shim usable in isolation / tests
   }
-} catch {
-  // no-op fallback; keep shim usable in isolation / tests
-}
 
-try {
-  // eslint-disable-next-line import/no-unresolved
-  const flags = require("@/services/featureFlags");
-  if (flags) {
-    // project-specific: familyFundMode may be a boolean export or a getter
-    familyFundMode = !!(flags.familyFundMode || flags.getFamilyFundMode?.());
+  try {
+    // eslint-disable-next-line import/no-unresolved
+    const flagsMod = await import("@/config/featureFlags");
+    const flags = flagsMod?.default || flagsMod;
+
+    if (flags) {
+      // project-specific: familyFundMode may be:
+      // - boolean: flags.familyFundMode
+      // - getter: flags.getFamilyFundMode()
+      // - function: flags.isFamilyFundMode()
+      familyFundMode = !!(
+        flags.familyFundMode ||
+        (typeof flags.getFamilyFundMode === "function" &&
+          flags.getFamilyFundMode()) ||
+        (typeof flags.isFamilyFundMode === "function" &&
+          flags.isFamilyFundMode())
+      );
+    }
+  } catch {
+    // ignore, default false
   }
-} catch {
-  // ignore, default false
-}
 
-try {
-  // eslint-disable-next-line import/no-unresolved
-  HubPacketFormatter = require("@/services/HubPacketFormatter");
-} catch {
-  // optional
-}
+  try {
+    // eslint-disable-next-line import/no-unresolved
+    const hubFmtMod = await import("@/services/hub/HubPacketFormatter");
+    HubPacketFormatter = hubFmtMod?.default || hubFmtMod || null;
+  } catch {
+    // optional
+  }
 
-try {
-  // eslint-disable-next-line import/no-unresolved
-  FamilyFundConnector = require("@/services/FamilyFundConnector");
-} catch {
-  // optional
+  try {
+    // eslint-disable-next-line import/no-unresolved
+    const hubConnMod = await import("@/services/hub/FamilyFundConnector");
+    FamilyFundConnector = hubConnMod?.default || hubConnMod || null;
+  } catch {
+    // optional
+  }
 }
 
 /* -------------------------------------------------------------------------- */
@@ -160,7 +185,7 @@ function safeEmit(type, data) {
       type,
       ts: nowIso(),
       source: MODULE_SOURCE,
-      data
+      data,
     });
   } catch {
     // swallow; calculator should not crash app
@@ -191,7 +216,7 @@ function getDmIntakePercent(subject) {
 
   if (species === "goat" || species === "sheep") {
     if (cls.includes("lact")) return 4; // 4% BW DM for lactating small ruminants
-    return 3; // 3% BW DM default
+    return 3; // 3% BW default
   }
 
   if (species === "cattle" || species === "cow" || species === "steer") {
@@ -216,8 +241,12 @@ function getDmIntakePercent(subject) {
  * @returns {{ items: any[], totals: { asFedKgPerHeadPerDay:number, dryMatterKgPerHeadPerDay:number, estimatedCostPerHeadPerDay:number } }}
  */
 function buildSimpleRation(feedInventory, dmKgPerHeadPerDay) {
-  const forage = feedInventory?.find((f) => (f.category || "").toLowerCase() === "forage");
-  const grain = feedInventory?.find((f) => (f.category || "").toLowerCase() === "grain");
+  const forage = feedInventory?.find(
+    (f) => (f.category || "").toLowerCase() === "forage"
+  );
+  const grain = feedInventory?.find(
+    (f) => (f.category || "").toLowerCase() === "grain"
+  );
 
   const rationItems = [];
   let totalAsFed = 0;
@@ -244,7 +273,7 @@ function buildSimpleRation(feedInventory, dmKgPerHeadPerDay) {
       energyMjPerKgDM: forage.energyMjPerKgDM || 0,
       estimatedCostPerKgAsFed: forage.unitCostPerKg || 0,
       feedingTimeHints: ["morning", "evening"],
-      notes: ""
+      notes: "",
     });
   }
 
@@ -265,7 +294,7 @@ function buildSimpleRation(feedInventory, dmKgPerHeadPerDay) {
       energyMjPerKgDM: grain.energyMjPerKgDM || 0,
       estimatedCostPerKgAsFed: grain.unitCostPerKg || 0,
       feedingTimeHints: ["evening"],
-      notes: ""
+      notes: "",
     });
   }
 
@@ -282,7 +311,7 @@ function buildSimpleRation(feedInventory, dmKgPerHeadPerDay) {
       energyMjPerKgDM: 0,
       estimatedCostPerKgAsFed: 0,
       feedingTimeHints: ["morning", "evening"],
-      notes: "No feed inventory linked; generic placeholder."
+      notes: "No feed inventory linked; generic placeholder.",
     });
     totalAsFed = dmKgPerHeadPerDay;
   }
@@ -294,8 +323,8 @@ function buildSimpleRation(feedInventory, dmKgPerHeadPerDay) {
       dryMatterKgPerHeadPerDay: dmKgPerHeadPerDay,
       proteinPctOfDM: 0, // can be filled by weighted avg later
       energyMjPerHeadPerDay: 0,
-      estimatedCostPerHeadPerDay: totalCost
-    }
+      estimatedCostPerHeadPerDay: totalCost,
+    },
   };
 }
 
@@ -318,7 +347,8 @@ function buildBatchAndDemand(result, feedInventory, horizonDays) {
       const key = item.feedItemId;
       const perDayAsFedAllHeads = (item.asFedKgPerHeadPerDay || 0) * count;
       const horizonAsFed = perDayAsFedAllHeads * horizonDays;
-      const horizonDm = (item.dryMatterKgPerHeadPerDay || 0) * count * horizonDays;
+      const horizonDm =
+        (item.dryMatterKgPerHeadPerDay || 0) * count * horizonDays;
 
       // Batch requirements
       const batch = batchMap.get(key) || {
@@ -326,7 +356,7 @@ function buildBatchAndDemand(result, feedInventory, horizonDays) {
         name: item.name,
         totalAsFedKg: 0,
         totalDryMatterKg: 0,
-        estimatedCostTotal: 0
+        estimatedCostTotal: 0,
       };
       batch.totalAsFedKg += horizonAsFed;
       batch.totalDryMatterKg += horizonDm;
@@ -345,7 +375,7 @@ function buildBatchAndDemand(result, feedInventory, horizonDays) {
         currentInventoryKg: invKg,
         projectedUsageKg: 0,
         projectedShortageKg: 0,
-        estimatedRunoutDate: null
+        estimatedRunoutDate: null,
       };
       demand.projectedUsageKg += horizonAsFed;
       demandMap.set(key, demand);
@@ -355,21 +385,27 @@ function buildBatchAndDemand(result, feedInventory, horizonDays) {
   const today = new Date();
   const batchPlan = Array.from(batchMap.values());
   const demandProjection = Array.from(demandMap.values()).map((d) => {
-    const projectedShortageKg = Math.max(0, d.projectedUsageKg - d.currentInventoryKg);
+    const projectedShortageKg = Math.max(
+      0,
+      d.projectedUsageKg - d.currentInventoryKg
+    );
     let estimatedRunoutDate = null;
     if (d.currentInventoryKg > 0 && d.projectedUsageKg > 0) {
       // naive: assume linear usage over horizon
       const dailyUse = d.projectedUsageKg / horizonDays;
-      const daysUntilRunout = dailyUse > 0 ? d.currentInventoryKg / dailyUse : Infinity;
+      const daysUntilRunout =
+        dailyUse > 0 ? d.currentInventoryKg / dailyUse : Infinity;
       if (Number.isFinite(daysUntilRunout)) {
-        const runout = new Date(today.getTime() + daysUntilRunout * 24 * 60 * 60 * 1000);
+        const runout = new Date(
+          today.getTime() + daysUntilRunout * 24 * 60 * 60 * 1000
+        );
         estimatedRunoutDate = runout.toISOString().slice(0, 10);
       }
     }
     return {
       ...d,
       projectedShortageKg,
-      estimatedRunoutDate
+      estimatedRunoutDate,
     };
   });
 
@@ -396,7 +432,7 @@ function emitShortageEvents(result) {
       projectedShortageKg: entry.projectedShortageKg,
       currentInventoryKg: entry.currentInventoryKg,
       projectedUsageKg: entry.projectedUsageKg,
-      estimatedRunoutDate: entry.estimatedRunoutDate
+      estimatedRunoutDate: entry.estimatedRunoutDate,
     });
   }
 }
@@ -414,7 +450,7 @@ async function exportToHubIfEnabled(result) {
       nodeKey: NODE_KEY,
       calculatedAt: result.context?.calculatedAt,
       farmLocation: result.context?.farmLocation || null,
-      analytics: result.analytics || null
+      analytics: result.analytics || null,
     };
 
     const packet =
@@ -430,7 +466,7 @@ async function exportToHubIfEnabled(result) {
       nodeKey: NODE_KEY,
       ts: nowIso(),
       payloadKind: "animals.feed.plan",
-      status: "success"
+      status: "success",
     });
   } catch {
     // fail silently per spec
@@ -457,15 +493,18 @@ function computeAnimalFeedPlan(req) {
       nodeKey,
       result: null,
       warnings: ["No animals provided to AnimalFeedCalculator."],
-      error: "NO_ANIMALS"
+      error: "NO_ANIMALS",
     };
   }
 
   /** @type {FeedInventoryItem[]} */
-  const feedInventory = Array.isArray(req.feedInventory) ? req.feedInventory : [];
+  const feedInventory = Array.isArray(req.feedInventory)
+    ? req.feedInventory
+    : [];
 
   const horizonDays = getPlanningHorizonDays(req.context);
-  const unitSystem = req.context?.unitSystem === "imperial" ? "imperial" : "metric";
+  const unitSystem =
+    req.context?.unitSystem === "imperial" ? "imperial" : "metric";
 
   /** @type {AnimalFeedCalculatorResult} */
   const result = {
@@ -475,7 +514,7 @@ function computeAnimalFeedPlan(req) {
       planningHorizonDays: horizonDays,
       unitSystem,
       farmLocation: req.context?.farmLocation || null,
-      notes: req.context?.notes || ""
+      notes: req.context?.notes || "",
     },
     animals: req.animals,
     dailyFeedPlan: [],
@@ -483,7 +522,7 @@ function computeAnimalFeedPlan(req) {
     feedDemandProjection: [],
     nutritionGaps: [],
     analytics: {},
-    warnings
+    warnings,
   };
 
   let totalAsFedKgPerDay = 0;
@@ -492,15 +531,26 @@ function computeAnimalFeedPlan(req) {
 
   // Build daily feed plans for each animal subject
   for (const subject of req.animals) {
-    if (!subject || !Number.isFinite(subject.weightKg) || subject.weightKg <= 0) {
-      warnings.push(`Animal ${subject?.displayName || subject?.id || "unknown"} is missing a valid weightKg.`);
+    if (
+      !subject ||
+      !Number.isFinite(subject.weightKg) ||
+      subject.weightKg <= 0
+    ) {
+      warnings.push(
+        `Animal ${
+          subject?.displayName || subject?.id || "unknown"
+        } is missing a valid weightKg.`
+      );
       continue;
     }
 
     const dmPctBw = getDmIntakePercent(subject);
     const dmKgPerHeadPerDay = (subject.weightKg * dmPctBw) / 100;
 
-    const { items, totals } = buildSimpleRation(feedInventory, dmKgPerHeadPerDay);
+    const { items, totals } = buildSimpleRation(
+      feedInventory,
+      dmKgPerHeadPerDay
+    );
 
     const count = subject.count || 1;
     totalAsFedKgPerDay += totals.asFedKgPerHeadPerDay * count;
@@ -517,7 +567,7 @@ function computeAnimalFeedPlan(req) {
       totals,
       instructions: `Feed approximately ${totals.asFedKgPerHeadPerDay.toFixed(
         2
-      )} kg per head per day (split into 2 feedings).`
+      )} kg per head per day (split into 2 feedings).`,
     });
   }
 
@@ -528,27 +578,30 @@ function computeAnimalFeedPlan(req) {
     totalAsFedKgPerDay,
     totalDryMatterKgPerDay: totalDmKgPerDay,
     estimatedFeedCostPerDay: totalCostPerDay,
-    projectedShortageDays: result.feedDemandProjection?.reduce((min, d) => {
-      if (!d.estimatedRunoutDate) return min;
-      const runout = new Date(d.estimatedRunoutDate);
-      const today = new Date(result.context.calculatedAt);
-      const diffDays = Math.round((runout.getTime() - today.getTime()) / (24 * 60 * 60 * 1000));
-      if (!Number.isFinite(diffDays) || diffDays < 0) return min;
-      if (min == null) return diffDays;
-      return Math.min(min, diffDays);
-    }, null) ?? null
+    projectedShortageDays:
+      result.feedDemandProjection?.reduce((min, d) => {
+        if (!d.estimatedRunoutDate) return min;
+        const runout = new Date(d.estimatedRunoutDate);
+        const today = new Date(result.context.calculatedAt);
+        const diffDays = Math.round(
+          (runout.getTime() - today.getTime()) / (24 * 60 * 60 * 1000)
+        );
+        if (!Number.isFinite(diffDays) || diffDays < 0) return min;
+        if (min == null) return diffDays;
+        return Math.min(min, diffDays);
+      }, null) ?? null,
   };
 
   // Emit core events
   safeEmit("animals.feed.plan.calculated", {
     nodeKey,
-    result
+    result,
   });
 
   safeEmit("planningGraph.node.updated", {
     nodeKey,
     timestamp: result.context.calculatedAt,
-    analytics: result.analytics
+    analytics: result.analytics,
   });
 
   emitShortageEvents(result);
@@ -558,7 +611,7 @@ function computeAnimalFeedPlan(req) {
     nodeKey,
     result,
     warnings,
-    error: null
+    error: null,
   };
 }
 
@@ -574,6 +627,8 @@ function computeAnimalFeedPlan(req) {
  * @returns {Promise<AnimalFeedShimResponse>}
  */
 async function runAnimalFeedCalculatorShim(req) {
+  await ensureDepsLoaded();
+
   const safeReq = req || /** @type {AnimalFeedShimRequest} */ ({});
   const response = computeAnimalFeedPlan(safeReq);
 
@@ -585,7 +640,4 @@ async function runAnimalFeedCalculatorShim(req) {
   return response;
 }
 
-module.exports = {
-  runAnimalFeedCalculatorShim,
-  computeAnimalFeedPlan
-};
+export { runAnimalFeedCalculatorShim, computeAnimalFeedPlan };

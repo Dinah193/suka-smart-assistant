@@ -28,21 +28,23 @@ const path = require("path");
 // ---------- Dependencies (defensive requires) ----------
 let eventBus = { emit: function () {} };
 try {
-  const eb = require("@/services/eventBus");
-  eventBus = eb && (eb.default || eb.eventBus || eb) || eventBus;
+  const eb = require("@/services/events/eventBus");
+  eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch (_) {}
 
 let featureFlags = { familyFundMode: false };
 try {
   const ff = require("@/config/featureFlags");
-  featureFlags = ff && (ff.default || ff) || featureFlags;
+  featureFlags = (ff && (ff.default || ff)) || featureFlags;
 } catch (_) {}
 
 let SessionStore = null; // assumed API shown below
 try {
   SessionStore = require("@/engines/scheduling/SessionStore");
 } catch (_) {
-  try { SessionStore = require("@/engines/scheduling/sessionStore"); } catch (_) {}
+  try {
+    SessionStore = require("@/engines/scheduling/sessionStore");
+  } catch (_) {}
 }
 
 let prioritiesPolicy = null; // assumed: scoreSessions(sessions, ctx)
@@ -61,9 +63,13 @@ try {
 } catch (_) {}
 
 let HubPacketFormatter = null;
-try { HubPacketFormatter = require("@/services/hub/HubPacketFormatter"); } catch (_) {}
+try {
+  HubPacketFormatter = require("@/services/hub/HubPacketFormatter");
+} catch (_) {}
 let FamilyFundConnector = null;
-try { FamilyFundConnector = require("@/services/hub/FamilyFundConnector"); } catch (_) {}
+try {
+  FamilyFundConnector = require("@/services/hub/FamilyFundConnector");
+} catch (_) {}
 
 // ---------- Public API ----------
 module.exports = {
@@ -87,27 +93,51 @@ module.exports = {
     // Fetch sessions: admitted + near-term candidates
     const store = resolveSessionStore();
     if (!store) {
-      emit("planning.today.compile.skipped", { reason: "missing-session-store" });
+      emit("planning.today.compile.skipped", {
+        reason: "missing-session-store",
+      });
       return { ok: false, reason: "missing-session-store" };
     }
 
     // 1) Pull already-admitted sessions in the window
-    const admitted = await safeCall(store.listAdmittedInWindow, store, windowStart, windowEnd);
+    const admitted = await safeCall(
+      store.listAdmittedInWindow,
+      store,
+      windowStart,
+      windowEnd
+    );
 
     // 2) Pull candidates with deadlines today (or overdue), not yet admitted
-    const candidates = await safeCall(store.listCandidatesByDeadline, store, startOfLocalDay(windowStart), endOfLocalDay(windowEnd));
+    const candidates = await safeCall(
+      store.listCandidatesByDeadline,
+      store,
+      startOfLocalDay(windowStart),
+      endOfLocalDay(windowEnd)
+    );
 
     // 3) Merge, dedupe by sessionId
     const basePlan = dedupeById([].concat(admitted || [], candidates || []));
 
     // 4) Score & order via priorities (EDF + rules) when available
-    const scored = await applyPriorities(basePlan, { now: new Date(), timezone });
+    const scored = await applyPriorities(basePlan, {
+      now: new Date(),
+      timezone,
+    });
 
     // 5) Respect constraints (quiet hours, sabbath/holy days, safety, prefs)
-    const constrained = await applyConstraints(scored, { windowStart, windowEnd, timezone });
+    const constrained = await applyConstraints(scored, {
+      windowStart,
+      windowEnd,
+      timezone,
+    });
 
     // 6) Fill gaps with light suggestions from options engine
-    const withGapFills = await fillGaps(constrained, { windowStart, windowEnd, timezone, maxGapFills });
+    const withGapFills = await fillGaps(constrained, {
+      windowStart,
+      windowEnd,
+      timezone,
+      maxGapFills,
+    });
 
     // 7) Final ordering, clamping to window
     const finalPlan = finalizeOrdering(withGapFills, windowStart, windowEnd);
@@ -122,9 +152,11 @@ module.exports = {
         total: finalPlan.length,
         admitted: (admitted || []).length,
         candidates: (candidates || []).length,
-        suggested: finalPlan.filter(x => x.meta && x.meta.kind === "suggested").length
+        suggested: finalPlan.filter(
+          (x) => x.meta && x.meta.kind === "suggested"
+        ).length,
       },
-      sessions: finalPlan.map(projectSession)
+      sessions: finalPlan.map(projectSession),
     };
 
     emit("planning.today.compiled", { rollup });
@@ -134,11 +166,11 @@ module.exports = {
       type: "planning.today.compiled",
       ts: new Date().toISOString(),
       source: "runtime.jobs.compileTodayPlan",
-      data: rollup
+      data: rollup,
     });
 
     return { ok: true, planCount: finalPlan.length };
-  }
+  },
 };
 
 // ---------- Helpers ----------
@@ -147,13 +179,22 @@ function normalizeArgs(args) {
   const tz = (args && args.timezone) || "America/Chicago";
   const startHHmm = (args && args.windowStartLocal) || "06:00";
   const endHHmm = (args && args.windowEndLocal) || "23:59";
-  const maxGapFills = Number((args && args.maxGapFills) != null ? args.maxGapFills : 3);
-  if (!/^\d{2}:\d{2}$/.test(startHHmm) || !/^\d{2}:\d{2}$/.test(endHHmm)) return null;
+  const maxGapFills = Number(
+    (args && args.maxGapFills) != null ? args.maxGapFills : 3
+  );
+  if (!/^\d{2}:\d{2}$/.test(startHHmm) || !/^\d{2}:\d{2}$/.test(endHHmm))
+    return null;
 
   const now = new Date();
   const windowStart = localDateWithTime(now, startHHmm, tz);
   const windowEnd = localDateWithTime(now, endHHmm, tz);
-  if (!(windowStart instanceof Date) || isNaN(windowStart) || !(windowEnd instanceof Date) || isNaN(windowEnd)) return null;
+  if (
+    !(windowStart instanceof Date) ||
+    isNaN(windowStart) ||
+    !(windowEnd instanceof Date) ||
+    isNaN(windowEnd)
+  )
+    return null;
   if (windowEnd <= windowStart) return null;
 
   return { timezone: tz, windowStart, windowEnd, maxGapFills };
@@ -162,15 +203,21 @@ function normalizeArgs(args) {
 function resolveSessionStore() {
   if (!SessionStore) return null;
   // Support either class with static methods, instance, or plain module fns
-  if (typeof SessionStore.listAdmittedInWindow === "function") return SessionStore;
-  if (SessionStore && typeof SessionStore.getInstance === "function") return SessionStore.getInstance();
-  if (SessionStore && typeof SessionStore.default === "object") return SessionStore.default;
+  if (typeof SessionStore.listAdmittedInWindow === "function")
+    return SessionStore;
+  if (SessionStore && typeof SessionStore.getInstance === "function")
+    return SessionStore.getInstance();
+  if (SessionStore && typeof SessionStore.default === "object")
+    return SessionStore.default;
   return SessionStore;
 }
 
 async function applyPriorities(sessions, ctx) {
   if (!Array.isArray(sessions) || !sessions.length) return [];
-  if (!prioritiesPolicy || typeof prioritiesPolicy.scoreSessions !== "function") {
+  if (
+    !prioritiesPolicy ||
+    typeof prioritiesPolicy.scoreSessions !== "function"
+  ) {
     // Fallback: EDF (earliest-deadline-first), then hard-before-soft, then duration asc
     return sessions.slice().sort((a, b) => {
       const da = toTime(a.deadlineISO);
@@ -202,20 +249,30 @@ async function applyConstraints(sessions, ctx) {
   }
 }
 
-async function fillGaps(sessions, { windowStart, windowEnd, timezone, maxGapFills }) {
-  if (!optionsEngine || typeof optionsEngine.suggestGaps !== "function" || maxGapFills <= 0) return sessions;
+async function fillGaps(
+  sessions,
+  { windowStart, windowEnd, timezone, maxGapFills }
+) {
+  if (
+    !optionsEngine ||
+    typeof optionsEngine.suggestGaps !== "function" ||
+    maxGapFills <= 0
+  )
+    return sessions;
   try {
     const suggestions = await optionsEngine.suggestGaps({
       windowStartISO: windowStart.toISOString(),
       windowEndISO: windowEnd.toISOString(),
       existing: sessions,
       timezone,
-      limit: maxGapFills
+      limit: maxGapFills,
     });
-    const normalized = (Array.isArray(suggestions) ? suggestions : []).map(s => ({
-      ...s,
-      meta: { ...(s.meta || {}), kind: "suggested" }
-    }));
+    const normalized = (Array.isArray(suggestions) ? suggestions : []).map(
+      (s) => ({
+        ...s,
+        meta: { ...(s.meta || {}), kind: "suggested" },
+      })
+    );
     return dedupeById(sessions.concat(normalized));
   } catch (_) {
     return sessions;
@@ -224,7 +281,7 @@ async function fillGaps(sessions, { windowStart, windowEnd, timezone, maxGapFill
 
 function finalizeOrdering(sessions, windowStart, windowEnd) {
   const clamped = sessions
-    .map(s => clampToWindow(s, windowStart, windowEnd))
+    .map((s) => clampToWindow(s, windowStart, windowEnd))
     .filter(Boolean);
 
   // Stable sort: by plannedStartISO then priorityScore desc then EDF
@@ -243,21 +300,27 @@ function finalizeOrdering(sessions, windowStart, windowEnd) {
 
 function clampToWindow(session, winStart, winEnd) {
   const s0 = toTime(session.plannedStartISO || session.suggestedStartISO);
-  const e0 = s0 + (Number(session.estimatedMinutes || 0) * 60000);
-  const s = Math.max(s0 || toTime(winStart.toISOString()), toTime(winStart.toISOString()));
-  const e = Math.min(e0 || toTime(winEnd.toISOString()), toTime(winEnd.toISOString()));
+  const e0 = s0 + Number(session.estimatedMinutes || 0) * 60000;
+  const s = Math.max(
+    s0 || toTime(winStart.toISOString()),
+    toTime(winStart.toISOString())
+  );
+  const e = Math.min(
+    e0 || toTime(winEnd.toISOString()),
+    toTime(winEnd.toISOString())
+  );
   if (!(s < e)) return null;
   return {
     ...session,
     plannedStartISO: new Date(s).toISOString(),
-    plannedEndISO: new Date(e).toISOString()
+    plannedEndISO: new Date(e).toISOString(),
   };
 }
 
 function projectSession(s) {
   return {
     id: s.id,
-    domain: s.domain,          // e.g., cooking/cleaning/garden/animal/preservation
+    domain: s.domain, // e.g., cooking/cleaning/garden/animal/preservation
     title: s.title,
     equipment: s.equipment || [],
     estimatedMinutes: Number(s.estimatedMinutes || 0),
@@ -266,7 +329,7 @@ function projectSession(s) {
     deadlineISO: s.deadlineISO || null,
     plannedStartISO: s.plannedStartISO || null,
     plannedEndISO: s.plannedEndISO || null,
-    meta: s.meta || {}
+    meta: s.meta || {},
   };
 }
 
@@ -295,7 +358,7 @@ function emit(type, data) {
       type: type,
       ts: new Date().toISOString(),
       source: "runtime.jobs.compileTodayPlan",
-      data: data
+      data: data,
     });
   } catch (_) {}
 }

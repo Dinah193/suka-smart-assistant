@@ -21,27 +21,27 @@
 /* Imports                                                                    */
 /* -------------------------------------------------------------------------- */
 
-import { emit as emitEvent } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit as emitEvent } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
 import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
 import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
 
-import { checkBudget } from "@/agents/runtime/budget";
-import { canInvokeReasoner } from "@/agents/runtime/gating";
-import { evaluateConfidence } from "@/agents/runtime/confidence";
+import { checkBudget } from "@/agents/runtime/reasoner/budget";
+import { canInvokeReasoner } from "@/reasoner/gating";
+import { evaluateConfidence } from "@/agents/runtime/reasoner/confidence";
 import { getPreservationContext } from "@/agents/runtime/selectors";
-import { applyFreshnessRules } from "@/agents/runtime/freshness";
+import { applyFreshnessRules } from "@/agents/runtime/reasoner/freshness";
 
 import { maybeGetCached, updateCache } from "@/agents/cache/memo";
 import { makeCacheKey } from "@/agents/cache/keys";
 
 import { selectMode } from "@/agents/modes/map";
-import { validateWithSchema } from "@/agents/modes/validate";
-import { buildPrompt } from "@/agents/prompts/templates";
+import { validateWithSchema } from "@/agents/runtime/reasoner/modes/validator";
+import { buildPrompt } from "@/agents/runtime/reasoner/prompts/templates";
 import { callReasoner } from "@/agents/runtime/reasoner";
 
-import { composeSessionsFromPreservationPlan } from "@/skills/sessions/compose";
+import { composeSessionsFromPreservationPlan } from "@agents/skills/sessions/compose";
 
 /* -------------------------------------------------------------------------- */
 /* JSDoc Types                                                                */
@@ -85,7 +85,9 @@ function pushDebug(debugArr, label, payload) {
  * @returns {string}
  */
 function normalizeIntent(intent) {
-  const raw = String(intent || "").toLowerCase().trim();
+  const raw = String(intent || "")
+    .toLowerCase()
+    .trim();
 
   const map = {
     // legacy queue / planning
@@ -182,8 +184,13 @@ export async function invokeShim(req) {
       return makeShimResponse({
         ok: false,
         mode: "preservation/unknown",
-        data: { reason: "invalid_request", detail: "ShimRequest must be an object." },
-        warnings: [{ code: "invalid_request", message: "Request must be an object." }],
+        data: {
+          reason: "invalid_request",
+          detail: "ShimRequest must be an object.",
+        },
+        warnings: [
+          { code: "invalid_request", message: "Request must be an object." },
+        ],
         debug,
       });
     }
@@ -260,7 +267,13 @@ export async function invokeShim(req) {
     // -----------------------------------------------------------------------
     // Gating (when not allowed to call Reasoner)
     // -----------------------------------------------------------------------
-    const gating = await canInvokeReasoner({ domain, intent: normalizedIntent, mode, runtime, input });
+    const gating = await canInvokeReasoner({
+      domain,
+      intent: normalizedIntent,
+      mode,
+      runtime,
+      input,
+    });
     pushDebug(debug, "gating.result", gating);
 
     if (!gating.allowed) {
@@ -272,7 +285,12 @@ export async function invokeShim(req) {
         type: "reasoner.gated",
         ts: nowISO(),
         source: "agents/shims/preservation",
-        data: { domain, intent: normalizedIntent, mode: mode.name, reason: gating.reason || null },
+        data: {
+          domain,
+          intent: normalizedIntent,
+          mode: mode.name,
+          reason: gating.reason || null,
+        },
       });
       return makeShimResponse({
         ok: false,
@@ -286,8 +304,15 @@ export async function invokeShim(req) {
     // -----------------------------------------------------------------------
     // Context & freshness
     // -----------------------------------------------------------------------
-    const context = await getPreservationContext({ domain, intent: normalizedIntent, input, runtime });
-    pushDebug(debug, "context.loaded", { contextSummary: context?.summary || null });
+    const context = await getPreservationContext({
+      domain,
+      intent: normalizedIntent,
+      input,
+      runtime,
+    });
+    pushDebug(debug, "context.loaded", {
+      contextSummary: context?.summary || null,
+    });
 
     const { input: freshInput, context: freshContext } = applyFreshnessRules({
       domain,
@@ -303,7 +328,12 @@ export async function invokeShim(req) {
     // -----------------------------------------------------------------------
     // Memoization / cache
     // -----------------------------------------------------------------------
-    const cacheKey = makeCacheKey({ domain, intent: normalizedIntent, mode: mode.name, input: freshInput });
+    const cacheKey = makeCacheKey({
+      domain,
+      intent: normalizedIntent,
+      mode: mode.name,
+      input: freshInput,
+    });
     let cached = null;
 
     if (mode.cache !== false) {
@@ -317,8 +347,17 @@ export async function invokeShim(req) {
         });
         pushDebug(debug, "cache.hit", { cacheKey });
 
-        const normalizedFromCache = await normalizeOutput(normalizedIntent, mode, cached);
-        const data = await buildShimData(normalizedIntent, mode, normalizedFromCache, runtime);
+        const normalizedFromCache = await normalizeOutput(
+          normalizedIntent,
+          mode,
+          cached
+        );
+        const data = await buildShimData(
+          normalizedIntent,
+          mode,
+          normalizedFromCache,
+          runtime
+        );
 
         return makeShimResponse({
           ok: true,
@@ -356,7 +395,9 @@ export async function invokeShim(req) {
       runtime,
     });
 
-    pushDebug(debug, "prompt.built", { promptPreview: prompt?.preview || null });
+    pushDebug(debug, "prompt.built", {
+      promptPreview: prompt?.preview || null,
+    });
 
     // -----------------------------------------------------------------------
     // Budget enforcement
@@ -380,7 +421,12 @@ export async function invokeShim(req) {
         type: "reasoner.budget.exceeded",
         ts: nowISO(),
         source: "agents/shims/preservation",
-        data: { domain, intent: normalizedIntent, mode: mode.name, ...budgetResult },
+        data: {
+          domain,
+          intent: normalizedIntent,
+          mode: mode.name,
+          ...budgetResult,
+        },
       });
       return makeShimResponse({
         ok: false,
@@ -493,7 +539,8 @@ export async function invokeShim(req) {
     if (!confidence.ok) {
       warnings.push({
         code: "low_confidence",
-        message: confidence.reason || "Reasoner result below confidence threshold.",
+        message:
+          confidence.reason || "Reasoner result below confidence threshold.",
       });
       // We still return the result but flag low confidence; callers may decide.
     }
@@ -523,8 +570,18 @@ export async function invokeShim(req) {
     // -----------------------------------------------------------------------
     // Normalization → Shim-level data
     // -----------------------------------------------------------------------
-    const normalized = await normalizeOutput(normalizedIntent, mode, validation.data);
-    const data = await buildShimData(normalizedIntent, mode, normalized, runtime, reasonerResult);
+    const normalized = await normalizeOutput(
+      normalizedIntent,
+      mode,
+      validation.data
+    );
+    const data = await buildShimData(
+      normalizedIntent,
+      mode,
+      normalized,
+      runtime,
+      reasonerResult
+    );
 
     // -----------------------------------------------------------------------
     // Optional Hub export (familyFundMode)
@@ -548,14 +605,23 @@ export async function invokeShim(req) {
           type: "session.exported",
           ts: nowISO(),
           source: "agents/shims/preservation",
-          data: { domain, intent: normalizedIntent, mode: mode.name, hubPacketId: hubPacket?.id || null },
+          data: {
+            domain,
+            intent: normalizedIntent,
+            mode: mode.name,
+            hubPacketId: hubPacket?.id || null,
+          },
         });
 
-        pushDebug(debug, "hub.exported", { hubPacketId: hubPacket?.id || null });
+        pushDebug(debug, "hub.exported", {
+          hubPacketId: hubPacket?.id || null,
+        });
       } catch (e) {
         warnings.push({
           code: "hub_export_failed",
-          message: `Failed to export preservation data to Hub: ${e?.message || String(e)}`,
+          message: `Failed to export preservation data to Hub: ${
+            e?.message || String(e)
+          }`,
         });
         pushDebug(debug, "hub.export.error", { error: String(e) });
       }
@@ -579,7 +645,10 @@ export async function invokeShim(req) {
       mode: "preservation/error",
       data: {
         reason: "exception",
-        error: { message: err?.message || String(err), stack: err?.stack || null },
+        error: {
+          message: err?.message || String(err),
+          stack: err?.stack || null,
+        },
       },
       warnings,
       debug,
@@ -670,7 +739,13 @@ async function normalizeOutput(normalizedIntent, mode, raw) {
  * @param {Object} [reasonerResult]
  * @returns {Promise<Object>}
  */
-async function buildShimData(normalizedIntent, mode, normalized, runtime, reasonerResult) {
+async function buildShimData(
+  normalizedIntent,
+  mode,
+  normalized,
+  runtime,
+  reasonerResult
+) {
   const base = {
     intent: normalizedIntent,
     mode: mode.name,
@@ -679,26 +754,38 @@ async function buildShimData(normalizedIntent, mode, normalized, runtime, reason
   };
 
   // Only some intents need preservation sessions.
-  if (normalizedIntent === "planJobs" || normalizedIntent === "simulate" || normalizedIntent === "methodPlan") {
+  if (
+    normalizedIntent === "planJobs" ||
+    normalizedIntent === "simulate" ||
+    normalizedIntent === "methodPlan"
+  ) {
     let planForSessions = null;
 
     if (normalizedIntent === "planJobs") {
       planForSessions = normalized.plan || null;
     } else if (normalizedIntent === "simulate") {
       // simulate result may include a full plan in `preview.plan`
-      planForSessions = normalized.preview?.plan || normalized.commitPacket?.plan || null;
+      planForSessions =
+        normalized.preview?.plan || normalized.commitPacket?.plan || null;
     } else if (normalizedIntent === "methodPlan") {
       // single job item → we treat as a 1-job plan
       planForSessions = normalized.plan
-        ? { planned: [normalized.plan], blocked: [], timezone: runtime?.timezone || null }
+        ? {
+            planned: [normalized.plan],
+            blocked: [],
+            timezone: runtime?.timezone || null,
+          }
         : null;
     }
 
     if (planForSessions) {
       try {
-        const sessions = await composeSessionsFromPreservationPlan(planForSessions, {
-          runtime,
-        });
+        const sessions = await composeSessionsFromPreservationPlan(
+          planForSessions,
+          {
+            runtime,
+          }
+        );
 
         return {
           ...base,

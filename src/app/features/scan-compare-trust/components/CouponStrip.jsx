@@ -45,7 +45,7 @@ import React, { useEffect, useMemo, useState } from "react";
 /* ----------------------------- Optional dependencies ----------------------------- */
 let eventBus = { emit: () => {}, on: () => {}, off: () => {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch (_e) {}
 
@@ -78,7 +78,9 @@ try {
 const CURRENCY = "USD";
 const fmtMoney = (n, currency = CURRENCY) =>
   typeof n === "number"
-    ? new Intl.NumberFormat(undefined, { style: "currency", currency }).format(n)
+    ? new Intl.NumberFormat(undefined, { style: "currency", currency }).format(
+        n
+      )
     : "";
 
 const daysLeft = (iso) => {
@@ -100,7 +102,8 @@ const uniqueById = (arr) => {
   const seen = new Set();
   const out = [];
   for (const x of arr || []) {
-    const id = x?.id || `${x?.code || ""}-${x?.title || ""}-${x?.expiresISO || ""}`;
+    const id =
+      x?.id || `${x?.code || ""}-${x?.title || ""}-${x?.expiresISO || ""}`;
     if (!seen.has(id)) {
       seen.add(id);
       out.push({ ...x, id });
@@ -110,7 +113,9 @@ const uniqueById = (arr) => {
 };
 
 const normalizeStoreId = (store) =>
-  store?.id || store?.slug || (store?.name ? store.name.toLowerCase().replace(/\s+/g, "-") : null);
+  store?.id ||
+  store?.slug ||
+  (store?.name ? store.name.toLowerCase().replace(/\s+/g, "-") : null);
 
 /** Naive matching: by UPC -> brand -> category. Returns {couponId: countMatches} */
 function matchCouponsToOffers(coupons = [], offers = [], store) {
@@ -120,9 +125,28 @@ function matchCouponsToOffers(coupons = [], offers = [], store) {
     let count = 0;
     for (const o of offers || []) {
       if (o?.store && String(o.store).toLowerCase() !== sname) continue; // focus current store
-      if (Array.isArray(c.upcs) && c.upcs.includes(o.upc)) { count++; continue; }
-      if (Array.isArray(c.brands) && c.brands.map((b)=>b?.toLowerCase()).includes((o.brand||"").toLowerCase())) { count++; continue; }
-      if (Array.isArray(c.categories) && c.categories.map((b)=>b?.toLowerCase()).includes((o.category||"").toLowerCase())) { count++; continue; }
+      if (Array.isArray(c.upcs) && c.upcs.includes(o.upc)) {
+        count++;
+        continue;
+      }
+      if (
+        Array.isArray(c.brands) &&
+        c.brands
+          .map((b) => b?.toLowerCase())
+          .includes((o.brand || "").toLowerCase())
+      ) {
+        count++;
+        continue;
+      }
+      if (
+        Array.isArray(c.categories) &&
+        c.categories
+          .map((b) => b?.toLowerCase())
+          .includes((o.category || "").toLowerCase())
+      ) {
+        count++;
+        continue;
+      }
     }
     res.set(c.id, count);
   }
@@ -134,36 +158,66 @@ function CouponChip({ c, appliesToCount, onClip, onApply, onCopy, onOpen }) {
   const dleft = daysLeft(c.expiresISO);
   const tone = badgeTone(dleft);
   const label =
-    c.type === "amount" ? `−${fmtMoney(c.value)}`
-      : c.type === "percent" ? `−${c.value}%`
-      : c.type === "bogo" ? "BOGO"
-      : c.type === "freeShip" ? "Free Ship"
+    c.type === "amount"
+      ? `−${fmtMoney(c.value)}`
+      : c.type === "percent"
+      ? `−${c.value}%`
+      : c.type === "bogo"
+      ? "BOGO"
+      : c.type === "freeShip"
+      ? "Free Ship"
       : "Deal";
 
   return (
-    <div className={`inline-flex items-center gap-2 border ${tone} rounded-xl px-2.5 py-1.5 mr-2 mb-2`}>
+    <div
+      className={`inline-flex items-center gap-2 border ${tone} rounded-xl px-2.5 py-1.5 mr-2 mb-2`}
+    >
       <span className="text-xs font-semibold">{label}</span>
-      {c.code ? <span className="text-[11px] font-mono bg-gray-50 px-1 py-0.5 rounded border">{c.code}</span> : null}
+      {c.code ? (
+        <span className="text-[11px] font-mono bg-gray-50 px-1 py-0.5 rounded border">
+          {c.code}
+        </span>
+      ) : null}
       {appliesToCount > 0 ? (
-        <span className="text-[11px] text-gray-600">applies to {appliesToCount}</span>
+        <span className="text-[11px] text-gray-600">
+          applies to {appliesToCount}
+        </span>
       ) : null}
       {dleft != null ? (
-        <span className="text-[10px] px-1 py-0.5 rounded border">{dleft <= 0 ? "expires today" : `${dleft}d left`}</span>
+        <span className="text-[10px] px-1 py-0.5 rounded border">
+          {dleft <= 0 ? "expires today" : `${dleft}d left`}
+        </span>
       ) : null}
       <div className="flex items-center gap-1 pl-1 border-l">
-        <button className="text-[11px] px-1.5 py-0.5 rounded border hover:shadow-sm" title="Clip" onClick={onClip}>
+        <button
+          className="text-[11px] px-1.5 py-0.5 rounded border hover:shadow-sm"
+          title="Clip"
+          onClick={onClip}
+        >
           {c.clipped ? "✓ Clipped" : "Clip"}
         </button>
-        <button className="text-[11px] px-1.5 py-0.5 rounded border hover:shadow-sm" title="Apply" onClick={onApply}>
+        <button
+          className="text-[11px] px-1.5 py-0.5 rounded border hover:shadow-sm"
+          title="Apply"
+          onClick={onApply}
+        >
           Apply
         </button>
         {c.code ? (
-          <button className="text-[11px] px-1.5 py-0.5 rounded border hover:shadow-sm" title="Copy code" onClick={onCopy}>
+          <button
+            className="text-[11px] px-1.5 py-0.5 rounded border hover:shadow-sm"
+            title="Copy code"
+            onClick={onCopy}
+          >
             Copy
           </button>
         ) : null}
         {c.url ? (
-          <button className="text-[11px] px-1.5 py-0.5 rounded border hover:shadow-sm" title="Open" onClick={onOpen}>
+          <button
+            className="text-[11px] px-1.5 py-0.5 rounded border hover:shadow-sm"
+            title="Open"
+            onClick={onOpen}
+          >
             Open
           </button>
         ) : null}
@@ -202,7 +256,10 @@ export default function CouponStrip({
         const fetched = await couponService.listActiveForStore(storeId);
         if (!alive) return;
         setCoupons(uniqueById([...(couponsProp || []), ...(fetched || [])]));
-        analytics.track("couponstrip_fetched", { storeId, count: fetched?.length || 0 });
+        analytics.track("couponstrip_fetched", {
+          storeId,
+          count: fetched?.length || 0,
+        });
       } catch (e) {
         console.error(e);
       } finally {
@@ -210,12 +267,17 @@ export default function CouponStrip({
       }
     }
     go();
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storeId]);
 
   /* -------------------------- Matching & derived metrics ------------------------- */
-  const matchMap = useMemo(() => matchCouponsToOffers(coupons, offers, store), [coupons, offers, store]);
+  const matchMap = useMemo(
+    () => matchCouponsToOffers(coupons, offers, store),
+    [coupons, offers, store]
+  );
 
   const sorted = useMemo(() => {
     const arr = coupons.slice();
@@ -227,8 +289,18 @@ export default function CouponStrip({
       const mA = matchMap.get(a.id) || 0;
       const mB = matchMap.get(b.id) || 0;
       if (mA !== mB) return mB - mA;
-      const vA = a.type === "amount" ? (a.value || 0) : a.type === "percent" ? (a.value || 0) : 0;
-      const vB = b.type === "amount" ? (b.value || 0) : b.type === "percent" ? (b.value || 0) : 0;
+      const vA =
+        a.type === "amount"
+          ? a.value || 0
+          : a.type === "percent"
+          ? a.value || 0
+          : 0;
+      const vB =
+        b.type === "amount"
+          ? b.value || 0
+          : b.type === "percent"
+          ? b.value || 0
+          : 0;
       return vB - vA;
     });
     return arr;
@@ -240,7 +312,10 @@ export default function CouponStrip({
   useEffect(() => {
     if (sorted.length) {
       eventBus.emit("coupons:strip:rendered", {
-        storeId, count: sorted.length, topId: sorted[0]?.id, context: "CouponStrip"
+        storeId,
+        count: sorted.length,
+        topId: sorted[0]?.id,
+        context: "CouponStrip",
       });
     }
   }, [sorted, storeId]);
@@ -252,12 +327,24 @@ export default function CouponStrip({
         await couponService.clip(c.id, { storeId });
       }
       analytics.track("coupon_clip", { storeId, couponId: c.id });
-      eventBus.emit("coupons:clip", { couponId: c.id, storeId, source: "CouponStrip" });
-      setCoupons((prev) => prev.map((x) => (x.id === c.id ? { ...x, clipped: true } : x)));
-      eventBus.emit("ui:toast", { type: "success", message: "Coupon clipped." });
+      eventBus.emit("coupons:clip", {
+        couponId: c.id,
+        storeId,
+        source: "CouponStrip",
+      });
+      setCoupons((prev) =>
+        prev.map((x) => (x.id === c.id ? { ...x, clipped: true } : x))
+      );
+      eventBus.emit("ui:toast", {
+        type: "success",
+        message: "Coupon clipped.",
+      });
     } catch (e) {
       console.error(e);
-      eventBus.emit("ui:toast", { type: "error", message: "Could not clip coupon." });
+      eventBus.emit("ui:toast", {
+        type: "error",
+        message: "Could not clip coupon.",
+      });
     }
   };
 
@@ -267,17 +354,43 @@ export default function CouponStrip({
       const sname = (store?.name || "").toLowerCase();
       if (o?.store && String(o.store).toLowerCase() !== sname) return false;
       if (Array.isArray(c.upcs) && c.upcs.includes(o.upc)) return true;
-      if (Array.isArray(c.brands) && c.brands.map((b)=>b?.toLowerCase()).includes((o.brand||"").toLowerCase())) return true;
-      if (Array.isArray(c.categories) && c.categories.map((b)=>b?.toLowerCase()).includes((o.category||"").toLowerCase())) return true;
+      if (
+        Array.isArray(c.brands) &&
+        c.brands
+          .map((b) => b?.toLowerCase())
+          .includes((o.brand || "").toLowerCase())
+      )
+        return true;
+      if (
+        Array.isArray(c.categories) &&
+        c.categories
+          .map((b) => b?.toLowerCase())
+          .includes((o.category || "").toLowerCase())
+      )
+        return true;
       return false;
     });
 
     if (candidates.length === 1) {
-      eventBus.emit("pricing:coupon:apply", { couponId: c.id, offer: candidates[0], storeId, source: "CouponStrip" });
+      eventBus.emit("pricing:coupon:apply", {
+        couponId: c.id,
+        offer: candidates[0],
+        storeId,
+        source: "CouponStrip",
+      });
     } else {
-      eventBus.emit("pricing:coupon:picker:open", { coupon: c, offers: candidates, storeId, source: "CouponStrip" });
+      eventBus.emit("pricing:coupon:picker:open", {
+        coupon: c,
+        offers: candidates,
+        storeId,
+        source: "CouponStrip",
+      });
     }
-    analytics.track("coupon_apply_click", { storeId, couponId: c.id, candidates: candidates.length });
+    analytics.track("coupon_apply_click", {
+      storeId,
+      couponId: c.id,
+      candidates: candidates.length,
+    });
   };
 
   const copyCode = async (c) => {
@@ -285,16 +398,29 @@ export default function CouponStrip({
       if (c.code) await navigator.clipboard.writeText(c.code);
       eventBus.emit("ui:toast", { type: "success", message: "Code copied." });
     } catch (_e) {
-      eventBus.emit("ui:toast", { type: "info", message: c.code ? `Code: ${c.code}` : "No code" });
+      eventBus.emit("ui:toast", {
+        type: "info",
+        message: c.code ? `Code: ${c.code}` : "No code",
+      });
     }
     analytics.track("coupon_copy_code", { storeId, couponId: c.id });
   };
 
   const openSource = (c) => {
-    analytics.track("coupon_open_source", { storeId, couponId: c.id, url: c.url });
-    eventBus.emit("coupons:open", { couponId: c.id, url: c.url, source: "CouponStrip" });
+    analytics.track("coupon_open_source", {
+      storeId,
+      couponId: c.id,
+      url: c.url,
+    });
+    eventBus.emit("coupons:open", {
+      couponId: c.id,
+      url: c.url,
+      source: "CouponStrip",
+    });
     if (c.url && typeof window !== "undefined") {
-      try { window.open(c.url, "_blank", "noopener,noreferrer"); } catch (_e) {}
+      try {
+        window.open(c.url, "_blank", "noopener,noreferrer");
+      } catch (_e) {}
     }
   };
 
@@ -303,16 +429,29 @@ export default function CouponStrip({
     if (!unclipped.length) return;
     try {
       if (couponService?.bulkClip) {
-        await couponService.bulkClip(unclipped.map((c) => c.id), { storeId });
+        await couponService.bulkClip(
+          unclipped.map((c) => c.id),
+          { storeId }
+        );
       } else {
         for (const c of unclipped) await clip(c);
       }
       analytics.track("coupon_clip_all", { storeId, count: unclipped.length });
-      eventBus.emit("ui:toast", { type: "success", message: `Clipped ${unclipped.length} coupons.` });
-      setCoupons((prev) => prev.map((x) => (unclipped.some((u) => u.id === x.id) ? { ...x, clipped: true } : x)));
+      eventBus.emit("ui:toast", {
+        type: "success",
+        message: `Clipped ${unclipped.length} coupons.`,
+      });
+      setCoupons((prev) =>
+        prev.map((x) =>
+          unclipped.some((u) => u.id === x.id) ? { ...x, clipped: true } : x
+        )
+      );
     } catch (e) {
       console.error(e);
-      eventBus.emit("ui:toast", { type: "error", message: "Bulk clip failed." });
+      eventBus.emit("ui:toast", {
+        type: "error",
+        message: "Bulk clip failed.",
+      });
     }
   };
 
@@ -322,8 +461,12 @@ export default function CouponStrip({
       type: "coupon_run",
       label: `Coupon Run — ${store?.name || storeId || "Store"}`,
       items: sorted.map((c) => ({
-        couponId: c.id, title: c.title || c.description || c.code || c.type,
-        expiresISO: c.expiresISO, code: c.code, value: c.value, type: c.type
+        couponId: c.id,
+        title: c.title || c.description || c.code || c.type,
+        expiresISO: c.expiresISO,
+        code: c.code,
+        value: c.value,
+        type: c.type,
       })),
       createdAt: Date.now(),
       source: "CouponStrip",
@@ -331,17 +474,27 @@ export default function CouponStrip({
     try {
       if (favSessions?.add) await favSessions.add(payload);
       else eventBus.emit("favorites:session:add", payload);
-      analytics.track("favorites_coupon_run_saved", { storeId, count: sorted.length });
-      eventBus.emit("ui:toast", { type: "success", message: "Saved Coupon Run to favorites." });
+      analytics.track("favorites_coupon_run_saved", {
+        storeId,
+        count: sorted.length,
+      });
+      eventBus.emit("ui:toast", {
+        type: "success",
+        message: "Saved Coupon Run to favorites.",
+      });
     } catch (e) {
       console.error(e);
-      eventBus.emit("ui:toast", { type: "error", message: "Could not save Coupon Run." });
+      eventBus.emit("ui:toast", {
+        type: "error",
+        message: "Could not save Coupon Run.",
+      });
     }
   };
 
   const saveWeeklySweepSchedule = async () => {
     const hint = priceCycle ? priceCycle.getHint({ store: storeId }) : null;
-    const rrule = hint?.rrule || "FREQ=WEEKLY;BYDAY=MO;BYHOUR=9;BYMINUTE=0;BYSECOND=0";
+    const rrule =
+      hint?.rrule || "FREQ=WEEKLY;BYDAY=MO;BYHOUR=9;BYMINUTE=0;BYSECOND=0";
     const payload = {
       label: `Weekly coupon sweep — ${store?.name || storeId || "Store"}`,
       when: rrule,
@@ -358,10 +511,16 @@ export default function CouponStrip({
         eventBus.emit("favorites:schedule:add", payload);
       }
       analytics.track("favorites_weekly_coupon_sweep_saved", { storeId });
-      eventBus.emit("ui:toast", { type: "success", message: "We’ll remind you weekly." });
+      eventBus.emit("ui:toast", {
+        type: "success",
+        message: "We’ll remind you weekly.",
+      });
     } catch (e) {
       console.error(e);
-      eventBus.emit("ui:toast", { type: "error", message: "Could not save schedule." });
+      eventBus.emit("ui:toast", {
+        type: "error",
+        message: "Could not save schedule.",
+      });
     }
   };
 
@@ -369,14 +528,22 @@ export default function CouponStrip({
   if (!storeId) return null;
 
   const count = sorted.length;
-  const expiringSoon = sorted.filter((c) => (daysLeft(c.expiresISO) ?? 99) <= 3).length;
+  const expiringSoon = sorted.filter(
+    (c) => (daysLeft(c.expiresISO) ?? 99) <= 3
+  ).length;
 
   return (
     <div className={`w-full mb-3 ${dense ? "" : "mt-2"}`}>
-      <div className={`rounded-xl border ${dense ? "p-2" : "p-3"} bg-gradient-to-r from-amber-50 to-amber-100`}>
+      <div
+        className={`rounded-xl border ${
+          dense ? "p-2" : "p-3"
+        } bg-gradient-to-r from-amber-50 to-amber-100`}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold">Active coupons at {store?.name || storeId}</span>
+            <span className="text-sm font-semibold">
+              Active coupons at {store?.name || storeId}
+            </span>
             <span className="text-[11px] px-1.5 py-0.5 rounded-md border bg-white">
               {loading ? "Loading…" : `${count} found`}
             </span>
@@ -440,7 +607,10 @@ export default function CouponStrip({
                   <button
                     className="text-xs underline ml-1"
                     onClick={() =>
-                      eventBus.emit("coupons:list:open", { storeId, source: "CouponStrip" })
+                      eventBus.emit("coupons:list:open", {
+                        storeId,
+                        source: "CouponStrip",
+                      })
                     }
                     title="Open all coupons"
                   >
@@ -449,7 +619,9 @@ export default function CouponStrip({
                 ) : null}
               </div>
             ) : (
-              <div className="text-xs text-gray-600 italic">No coupons right now — try a weekly sweep.</div>
+              <div className="text-xs text-gray-600 italic">
+                No coupons right now — try a weekly sweep.
+              </div>
             )}
           </div>
         )}

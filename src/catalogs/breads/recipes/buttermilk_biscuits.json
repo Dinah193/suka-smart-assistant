@@ -1,0 +1,290 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00Z",
+
+  "meta": {
+    "id": "breads.buttermilk_biscuits",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Flaky Southern Buttermilk Biscuits",
+    "subtitle": "Tender, layered, flaky biscuits • staple side bread • fresh milled or commercial flour",
+    "source": {
+      "kind": "ssa-canonical",
+      "notes": "Canonical Southern-style buttermilk biscuits. Laminated folds for flake; minimal handling for tenderness. Includes fresh-milled guidance."
+    }
+  },
+
+  "classification": {
+    "cuisine": "breads",
+    "category": "quick bread",
+    "subprofiles": ["biscuits", "southern", "buttermilk", "flaky", "laminated"],
+    "mealArchetypes": ["side bread", "breakfast", "sandwich", "comfort food"],
+    "servingStyles": ["round", "split"],
+    "plannerTags": [
+      "biscuits",
+      "southern",
+      "buttermilk",
+      "flaky",
+      "quick bread",
+      "freezer-friendly"
+    ]
+  },
+
+  "yield": {
+    "servings": 8,
+    "servingSize": { "value": 1, "unit": "biscuit" },
+    "notes": "8–10 biscuits (2.5–3 inch / 6–7.5 cm) depending on cutter size."
+  },
+
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 20,
+    "totalMins": 45
+  },
+
+  "difficulty": "beginner",
+
+  "equipment": {
+    "minimum": ["mixing bowl", "baking sheet", "oven"],
+    "recommended": [
+      "scale",
+      "pastry cutter or fork",
+      "bench scraper",
+      "biscuit cutter (2.5–3 in)",
+      "parchment paper"
+    ],
+    "optional": ["cast iron skillet", "pastry brush", "wire rack"]
+  },
+
+  "dietFlags": ["vegetarian"],
+  "allergens": ["wheat", "gluten", "milk"],
+
+  "signals": {
+    "quickBread": true,
+    "sideBread": true,
+    "flaky": true,
+    "freezerFriendly": true,
+    "kidFriendly": true
+  },
+
+  "tasteProfile": {
+    "sweetness": "none",
+    "saltiness": "moderate",
+    "richness": "medium",
+    "crumb": "tender",
+    "layers": "high",
+    "notes": "Buttery aroma, tang from buttermilk, crisp edges with soft layered interior."
+  },
+
+  "ingredients": [
+    {
+      "id": "flour",
+      "label": "All-purpose flour (or fresh milled wheat flour—see Fresh-Milled Notes)",
+      "role": "base",
+      "amount": { "value": 300, "unit": "g" },
+      "notes": "AP flour is classic for tender biscuits. If using bread flour, expect chewier texture."
+    },
+    {
+      "id": "baking_powder",
+      "label": "Baking powder",
+      "role": "leavening",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": "About 1 tablespoon."
+    },
+    {
+      "id": "baking_soda",
+      "label": "Baking soda",
+      "role": "leavening",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1/2 teaspoon. Helps react with buttermilk for lift and browning."
+    },
+    {
+      "id": "sugar",
+      "label": "Sugar (optional)",
+      "role": "seasoning",
+      "amount": { "value": 8, "unit": "g" },
+      "optional": true,
+      "notes": "About 2 teaspoons. Classic Southern biscuits are not sweet; this improves browning."
+    },
+    {
+      "id": "salt",
+      "label": "Fine salt",
+      "role": "seasoning",
+      "amount": { "value": 7, "unit": "g" },
+      "notes": "About 1 1/4 teaspoons."
+    },
+    {
+      "id": "butter",
+      "label": "Unsalted butter, very cold (cut into cubes)",
+      "role": "fat",
+      "amount": { "value": 113, "unit": "g" },
+      "notes": "1 stick. Cold butter is key for flaky layers."
+    },
+    {
+      "id": "buttermilk",
+      "label": "Cold buttermilk",
+      "role": "hydration",
+      "amount": { "value": 240, "unit": "g" },
+      "notes": "About 1 cup. Hold back ~30g and add only if dough seems dry."
+    },
+    {
+      "id": "top_wash",
+      "label": "Melted butter (to brush tops, optional)",
+      "role": "finish",
+      "amount": { "value": 14, "unit": "g" },
+      "optional": true,
+      "notes": "About 1 tablespoon."
+    },
+    {
+      "id": "bench_flour",
+      "label": "Extra flour for dusting",
+      "role": "prep",
+      "amount": { "value": 20, "unit": "g" },
+      "optional": true
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Chill + preheat",
+      "instructions": [
+        "Heat oven to 450°F (232°C). Line a baking sheet with parchment (or use a lightly greased cast iron skillet).",
+        "Keep buttermilk cold. If your kitchen is warm, chill the flour bowl and cutter.",
+        "Optional: place cubed butter in the freezer 10 minutes while you measure dry ingredients."
+      ],
+      "activeMins": 5,
+      "temperature": { "type": "oven", "value": 450, "unit": "F" }
+    },
+    {
+      "id": "step_02",
+      "title": "Mix dry ingredients",
+      "instructions": [
+        "In a bowl, whisk flour, baking powder, baking soda, salt, and sugar (if using)."
+      ],
+      "activeMins": 2
+    },
+    {
+      "id": "step_03",
+      "title": "Cut in the cold butter",
+      "instructions": [
+        "Add cold butter cubes to the flour mixture.",
+        "Cut butter into flour using a pastry cutter (or rub quickly with fingertips) until you have a mix of pea-sized pieces plus some flatter butter shards.",
+        "Those butter shards create layers and flake."
+      ],
+      "activeMins": 6
+    },
+    {
+      "id": "step_04",
+      "title": "Add buttermilk and form dough",
+      "instructions": [
+        "Make a well in the center and pour in most of the cold buttermilk (hold back ~30g).",
+        "Stir gently with a fork/spatula until a shaggy dough forms. Add more buttermilk only if you still have lots of dry flour.",
+        "Do not knead; the dough should look rough and slightly sticky."
+      ],
+      "activeMins": 4
+    },
+    {
+      "id": "step_05",
+      "title": "Laminate (folds for flake)",
+      "instructions": [
+        "Turn dough onto a lightly floured surface and gently pat into a rectangle about 3/4 inch (2 cm) thick.",
+        "Fold into thirds like a letter (left over center, right over center). Rotate 90 degrees.",
+        "Pat again into a rectangle and repeat 2 more times (total 3 folds).",
+        "After final fold, pat dough to 3/4–1 inch (2–2.5 cm) thick."
+      ],
+      "activeMins": 6
+    },
+    {
+      "id": "step_06",
+      "title": "Cut biscuits (straight down)",
+      "instructions": [
+        "Use a sharp biscuit cutter (2.5–3 inch). Press straight down—do not twist (twisting seals edges and reduces rise).",
+        "Place biscuits close together on the sheet for taller sides (touching) or spaced apart for crispier edges.",
+        "Gather scraps gently, stack (don’t knead), pat, and cut remaining biscuits."
+      ],
+      "activeMins": 5
+    },
+    {
+      "id": "step_07",
+      "title": "Bake",
+      "instructions": [
+        "Bake at 450°F (232°C) for 12–15 minutes until tall and deeply golden on top.",
+        "Optional: rotate the pan at the 10-minute mark if your oven browns unevenly."
+      ],
+      "handsOffMins": 14,
+      "timers": [{ "label": "Bake (start checking)", "mins": 12 }],
+      "temperature": { "type": "oven", "value": 450, "unit": "F" }
+    },
+    {
+      "id": "step_08",
+      "title": "Finish and serve",
+      "instructions": [
+        "Optional: brush hot biscuits with melted butter for extra softness and shine.",
+        "Cool 5 minutes, split, and serve warm."
+      ],
+      "handsOffMins": 5,
+      "timers": [{ "label": "Rest", "mins": 5 }]
+    }
+  ],
+
+  "freshMilledNotes": {
+    "summary": "Fresh milled flour can make biscuits heavier and thirstier; sifting or blending improves tenderness and rise.",
+    "guidelines": [
+      "Best texture: use a blend of 50–70% fresh milled flour + 30–50% all-purpose flour.",
+      "If using 100% fresh milled, sift/bolt to remove some bran for better lift and tenderness.",
+      "Fresh milled flour often needs a touch more liquid: be ready to add +10–25g buttermilk if the dough stays dry and floury.",
+      "Handle gently and avoid extra kneading—whole grain dough tightens fast.",
+      "Chilling is extra important: keep butter colder and work quickly to preserve flakes."
+    ],
+    "hydrationAdjustment": {
+      "holdBackWaterG": 30,
+      "rangeAddBackG": [0, 25]
+    }
+  },
+
+  "storage": {
+    "counter": "Best same day. Store airtight at room temp up to 1 day; rewarm to refresh.",
+    "fridge": "Up to 3 days airtight. Rewarm in oven/toaster oven for best texture.",
+    "freezer": "Freeze baked biscuits up to 2 months. Rewarm at 350°F (175°C) 10–12 minutes.",
+    "makeAhead": "Freeze unbaked cut biscuits on a tray, then bag. Bake from frozen at 450°F, adding 2–4 minutes."
+  },
+
+  "variations": [
+    {
+      "name": "Self-rising flour shortcut",
+      "change": "Use 300g self-rising flour + omit baking powder/soda + reduce salt to 3g.",
+      "notes": "Texture remains tender; still keep butter and buttermilk cold."
+    },
+    {
+      "name": "Cream biscuits (no butter cutting)",
+      "change": "Replace butter + buttermilk with 360g heavy cream. Mix gently and cut; bake 12–15 min at 450°F.",
+      "notes": "Very easy; less flaky than laminated butter biscuits but extremely tender."
+    },
+    {
+      "name": "Cheddar chive biscuits",
+      "change": "Fold in 100g shredded cheddar + 10g chopped chives after adding buttermilk.",
+      "notes": "Add 10–20g extra buttermilk if dough feels dry."
+    }
+  ],
+
+  "notes": [
+    "Cold fat + hot oven = flake. If butter melts before baking, biscuits will be flatter.",
+    "Do not twist the cutter; straight cuts help biscuits rise.",
+    "For tallest biscuits, place them touching on the pan; for crispier sides, space them apart."
+  ],
+
+  "links": {
+    "related": [
+      "breads/recipes/banana_bread",
+      "breads/recipes/sandwich_bread_white"
+    ]
+  },
+
+  "audit": {
+    "tested": true,
+    "testNotes": "Canonical laminated Southern biscuits with buttermilk tang. Designed for reliable rise and flake with minimal handling."
+  }
+}

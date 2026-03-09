@@ -3,7 +3,7 @@
  * cleanplan.validate.js — Canonical validator/normalizer for Cleaning Plans (ES2015-safe)
  *
  * Integrations (defensive):
- *  - eventBus            (@/services/eventBus)
+ *  - eventBus            (@/services/events/eventBus)
  *  - scheduleHelpers     (@/services/scheduleHelpers)   // soak/pre-treat/dwell timers, pre-steps
  *  - placementRules      (@/engines/placementRules)     // zone/room constraints (quiet hours, occupancy)
  *  - workPrepConsolidation (@/engines/workPrepConsolidation) // batching by room/supply/tool
@@ -27,34 +27,52 @@
     }
   }
 
-  var eventBus =
-    (safeRequire("@/services/eventBus") || {}).eventBus ||
-    (safeRequire("@/services/eventBus") || {}).default ||
-    { emit: function () {}, on: function(){}, off: function(){} };
+  var eventBus = (safeRequire("@/services/events/eventBus") || {}).eventBus ||
+    (safeRequire("@/services/events/eventBus") || {}).default || {
+      emit: function () {},
+      on: function () {},
+      off: function () {},
+    };
 
   var scheduleHelpers =
     safeRequire("@/services/scheduleHelpers") ||
     safeRequire("../../services/scheduleHelpers") ||
     {};
   var placementRules = safeRequire("@/engines/placementRules") || {};
-  var workPrepConsolidation = safeRequire("@/engines/workPrepConsolidation") || {};
+  var workPrepConsolidation =
+    safeRequire("@/engines/workPrepConsolidation") || {};
   var listBuilder = safeRequire("@/engines/listBuilder") || {};
 
   var AjvCtor = safeRequire("ajv/dist/2020") || safeRequire("ajv");
-  var addFormats = safeRequire("ajv-formats") || function () { return function () {}; };
+  var addFormats =
+    safeRequire("ajv-formats") ||
+    function () {
+      return function () {};
+    };
 
   // ----------------------------- Utilities -----------------------------
   var ID_RX = /^[a-z]+:[A-Za-z0-9_\-:.]+$/;
   var BLEACH_NAMES = ["bleach", "sodium hypochlorite", "chlorine"];
   var AMMONIA_NAMES = ["ammonia", "ammonium hydroxide"];
-  var ACIDIC_NAMES = ["acid", "hydrochloric", "muriatic", "phosphoric", "vinegar", "acetic", "citric"];
+  var ACIDIC_NAMES = [
+    "acid",
+    "hydrochloric",
+    "muriatic",
+    "phosphoric",
+    "vinegar",
+    "acetic",
+    "citric",
+  ];
 
-  function nowISO() { return new Date().toISOString(); }
+  function nowISO() {
+    return new Date().toISOString();
+  }
 
   function toISO(d) {
     if (!d) return null;
     if (typeof d === "string") {
-      if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return new Date(d + "T00:00:00Z").toISOString();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(d))
+        return new Date(d + "T00:00:00Z").toISOString();
       if (!isNaN(Date.parse(d))) return new Date(d).toISOString();
       return null;
     }
@@ -62,7 +80,9 @@
     return null;
   }
 
-  function coerceArray(x) { return x == null ? [] : (Array.isArray(x) ? x : [x]); }
+  function coerceArray(x) {
+    return x == null ? [] : Array.isArray(x) ? x : [x];
+  }
 
   function ensureId(prefix, idCandidate) {
     var base = (idCandidate || "").toString().trim();
@@ -85,21 +105,25 @@
 
   function byIdMap(arr) {
     var map = Object.create(null);
-    for (var i = 0; i < arr.length; i++) if (arr[i] && arr[i].id) map[arr[i].id] = arr[i];
+    for (var i = 0; i < arr.length; i++)
+      if (arr[i] && arr[i].id) map[arr[i].id] = arr[i];
     return map;
   }
 
   function minutesOverlap(aStart, aDur, bStart, bDur) {
     if (!aStart || !bStart) return false;
-    var a0 = Date.parse(aStart), a1 = a0 + (Number(aDur) || 0) * 60000;
-    var b0 = Date.parse(bStart), b1 = b0 + (Number(bDur) || 0) * 60000;
+    var a0 = Date.parse(aStart),
+      a1 = a0 + (Number(aDur) || 0) * 60000;
+    var b0 = Date.parse(bStart),
+      b1 = b0 + (Number(bDur) || 0) * 60000;
     return a0 < b1 && b0 < a1;
   }
 
   function containsAny(str, needles) {
     if (!str) return false;
     var s = String(str).toLowerCase();
-    for (var i = 0; i < needles.length; i++) if (s.indexOf(needles[i]) >= 0) return true;
+    for (var i = 0; i < needles.length; i++)
+      if (s.indexOf(needles[i]) >= 0) return true;
     return false;
   }
 
@@ -115,26 +139,42 @@
       $schema: "https://json-schema.org/draft/2020-12/schema",
       $id: "urn:suka:contracts:cleanplan",
       title: "Clean Plan Contract (Fallback)",
-      description: "Fallback schema for cleaning plans when canonical file is unavailable.",
+      description:
+        "Fallback schema for cleaning plans when canonical file is unavailable.",
       type: "object",
       additionalProperties: false,
       required: ["id", "x-domain", "householdId", "period", "rooms", "tasks"],
       properties: {
-        id: { type: "string", pattern: "^(workplan|cleanplan):[A-Za-z0-9_\\-:.]+$" },
+        id: {
+          type: "string",
+          pattern: "^(workplan|cleanplan):[A-Za-z0-9_\\-:.]+$",
+        },
         title: { type: "string", default: "Cleaning Plan" },
         "x-version": { type: "string", default: "1.0.0" },
         "x-domain": { const: "cleaning" },
         householdId: { type: "string" },
-        createdAt: { type: "string", format: "date-time", default: function(){ return nowISO(); } },
-        updatedAt: { type: "string", format: "date-time", default: function(){ return nowISO(); } },
+        createdAt: {
+          type: "string",
+          format: "date-time",
+          default: function () {
+            return nowISO();
+          },
+        },
+        updatedAt: {
+          type: "string",
+          format: "date-time",
+          default: function () {
+            return nowISO();
+          },
+        },
         period: {
           type: "object",
           additionalProperties: false,
           required: ["start", "end"],
           properties: {
             start: { type: "string", format: "date-time" },
-            end: { type: "string", format: "date-time" }
-          }
+            end: { type: "string", format: "date-time" },
+          },
         },
         settings: {
           type: "object",
@@ -146,13 +186,23 @@
               type: "object",
               additionalProperties: false,
               properties: {
-                startHour: { type: "integer", minimum: 0, maximum: 23, default: 21 },
-                endHour: { type: "integer", minimum: 0, maximum: 23, default: 7 }
+                startHour: {
+                  type: "integer",
+                  minimum: 0,
+                  maximum: 23,
+                  default: 21,
+                },
+                endHour: {
+                  type: "integer",
+                  minimum: 0,
+                  maximum: 23,
+                  default: 7,
+                },
               },
-              default: {}
-            }
+              default: {},
+            },
           },
-          default: {}
+          default: {},
         },
         rooms: {
           type: "array",
@@ -170,12 +220,12 @@
                 additionalProperties: true,
                 properties: {
                   noNoise: { type: "boolean", default: false },
-                  requiresVentilation: { type: "boolean", default: false }
+                  requiresVentilation: { type: "boolean", default: false },
                 },
-                default: {}
-              }
-            }
-          }
+                default: {},
+              },
+            },
+          },
         },
         surfaces: {
           type: "array",
@@ -188,9 +238,9 @@
               id: { type: "string" },
               roomId: { type: "string" },
               material: { type: "string" }, // tile, hardwood, stainless, glass, fabric, etc.
-              notes: { type: "string" }
-            }
-          }
+              notes: { type: "string" },
+            },
+          },
         },
         tasks: {
           type: "array",
@@ -204,13 +254,32 @@
               title: { type: "string" },
               kind: {
                 type: "string",
-                enum: ["sweep","vacuum","mop","dust","sanitize","laundry","dishes","trash","maintenance","organize"]
+                enum: [
+                  "sweep",
+                  "vacuum",
+                  "mop",
+                  "dust",
+                  "sanitize",
+                  "laundry",
+                  "dishes",
+                  "trash",
+                  "maintenance",
+                  "organize",
+                ],
               },
               scheduledAt: { type: "string", format: "date-time" },
               durationMin: { type: "number", default: 20 },
               roomId: { type: "string" },
-              surfaceIds: { type: "array", items: { type: "string" }, default: [] },
-              dependencies: { type: "array", items: { type: "string" }, default: [] },
+              surfaceIds: {
+                type: "array",
+                items: { type: "string" },
+                default: [],
+              },
+              dependencies: {
+                type: "array",
+                items: { type: "string" },
+                default: [],
+              },
               supplies: {
                 type: "array",
                 default: [],
@@ -221,9 +290,9 @@
                   properties: {
                     sku: { type: "string" },
                     name: { type: "string" },
-                    amount: { type: "string" } // e.g., "50ml", "1 pad", "2 bags"
-                  }
-                }
+                    amount: { type: "string" }, // e.g., "50ml", "1 pad", "2 bags"
+                  },
+                },
               },
               tools: { type: "array", items: { type: "string" }, default: [] }, // vacuum, mop, bucket, squeegee
               ppe: { type: "array", items: { type: "string" }, default: [] },
@@ -233,16 +302,16 @@
                 additionalProperties: true,
                 properties: {
                   required: { type: "boolean", default: false },
-                  reentryAt: { type: "string", format: "date-time" }
+                  reentryAt: { type: "string", format: "date-time" },
                 },
-                default: {}
+                default: {},
               },
               flags: { type: "array", items: { type: "string" }, default: [] },
-              notes: { type: "string" }
-            }
-          }
-        }
-      }
+              notes: { type: "string" },
+            },
+          },
+        },
+      },
     };
   }
 
@@ -255,9 +324,13 @@
       allowUnionTypes: true,
       removeAdditional: false,
       useDefaults: "empty",
-      coerceTypes: true
+      coerceTypes: true,
     });
-    try { addFormats(ajv); } catch (e) { /* no-op */ }
+    try {
+      addFormats(ajv);
+    } catch (e) {
+      /* no-op */
+    }
     return ajv;
   }
 
@@ -274,53 +347,70 @@
     plan.period.start = toISO(plan.period.start) || nowISO();
     plan.period.end =
       toISO(plan.period.end) ||
-      new Date(Date.parse(plan.period.start) + 7 * 24 * 3600 * 1000).toISOString();
+      new Date(
+        Date.parse(plan.period.start) + 7 * 24 * 3600 * 1000
+      ).toISOString();
 
     plan.settings = plan.settings || {};
-    if (!plan.settings.quietHours) plan.settings.quietHours = { startHour: 21, endHour: 7 };
+    if (!plan.settings.quietHours)
+      plan.settings.quietHours = { startHour: 21, endHour: 7 };
 
-    plan.rooms = uniqueBy(coerceArray(plan.rooms), function (r) { return r && r.id ? r.id : JSON.stringify(r); })
-      .map(function (r) {
-        var rr = Object.assign({ floor: "main", constraints: {} }, r || {});
-        rr.id = ensureId("room", rr.id);
-        rr.name = rr.name || rr.id;
-        rr.constraints = rr.constraints || {};
-        return rr;
+    plan.rooms = uniqueBy(coerceArray(plan.rooms), function (r) {
+      return r && r.id ? r.id : JSON.stringify(r);
+    }).map(function (r) {
+      var rr = Object.assign({ floor: "main", constraints: {} }, r || {});
+      rr.id = ensureId("room", rr.id);
+      rr.name = rr.name || rr.id;
+      rr.constraints = rr.constraints || {};
+      return rr;
+    });
+
+    var roomIds = plan.rooms.map(function (r) {
+      return r.id;
+    });
+
+    plan.surfaces = uniqueBy(coerceArray(plan.surfaces), function (s) {
+      return s && s.id ? s.id : JSON.stringify(s);
+    }).map(function (s) {
+      var ss = Object.assign({}, s || {});
+      ss.id = ensureId("surface", ss.id);
+      if (!ss.roomId && roomIds[0]) ss.roomId = roomIds[0];
+      return ss;
+    });
+
+    var surfaceIds = plan.surfaces.map(function (s) {
+      return s.id;
+    });
+
+    plan.tasks = uniqueBy(coerceArray(plan.tasks), function (t) {
+      return t && t.id ? t.id : t && t.title ? t.title : JSON.stringify(t);
+    }).map(function (t) {
+      var tt = Object.assign({ durationMin: 20, dwellTimeMin: 0 }, t || {});
+      tt.id = ensureId("task", tt.id);
+      tt.title = tt.title || tt.id;
+      tt.kind = tt.kind || "sanitize";
+      tt.scheduledAt = toISO(tt.scheduledAt) || plan.period.start;
+      tt.roomId =
+        tt.roomId && roomIds.indexOf(tt.roomId) >= 0
+          ? tt.roomId
+          : roomIds[0] || null;
+      tt.surfaceIds = coerceArray(tt.surfaceIds).filter(function (id) {
+        return surfaceIds.indexOf(id) >= 0;
       });
-
-    var roomIds = plan.rooms.map(function (r) { return r.id; });
-
-    plan.surfaces = uniqueBy(coerceArray(plan.surfaces), function (s) { return s && s.id ? s.id : JSON.stringify(s); })
-      .map(function (s) {
-        var ss = Object.assign({}, s || {});
-        ss.id = ensureId("surface", ss.id);
-        if (!ss.roomId && roomIds[0]) ss.roomId = roomIds[0];
-        return ss;
-      });
-
-    var surfaceIds = plan.surfaces.map(function (s) { return s.id; });
-
-    plan.tasks = uniqueBy(coerceArray(plan.tasks), function (t) { return t && t.id ? t.id : t && t.title ? t.title : JSON.stringify(t); })
-      .map(function (t) {
-        var tt = Object.assign({ durationMin: 20, dwellTimeMin: 0 }, t || {});
-        tt.id = ensureId("task", tt.id);
-        tt.title = tt.title || tt.id;
-        tt.kind = tt.kind || "sanitize";
-        tt.scheduledAt = toISO(tt.scheduledAt) || plan.period.start;
-        tt.roomId = tt.roomId && roomIds.indexOf(tt.roomId) >= 0 ? tt.roomId : (roomIds[0] || null);
-        tt.surfaceIds = coerceArray(tt.surfaceIds).filter(function (id) { return surfaceIds.indexOf(id) >= 0; });
-        tt.dependencies = coerceArray(tt.dependencies);
-        tt.supplies = coerceArray(tt.supplies);
-        tt.tools = coerceArray(tt.tools);
-        tt.ppe = coerceArray(tt.ppe);
-        tt.ventilation = tt.ventilation || {};
-        if (tt.ventilation.required && !tt.ventilation.reentryAt) {
-          // default reentry = scheduledAt + max(dwell, 15 min)
-          var extra = Math.max(Number(tt.dwellTimeMin) || 0, 15) * 60000;
-          tt.ventilation.reentryAt = new Date(Date.parse(tt.scheduledAt) + extra).toISOString();
-        }
-        return tt;
-      });
+      tt.dependencies = coerceArray(tt.dependencies);
+      tt.supplies = coerceArray(tt.supplies);
+      tt.tools = coerceArray(tt.tools);
+      tt.ppe = coerceArray(tt.ppe);
+      tt.ventilation = tt.ventilation || {};
+      if (tt.ventilation.required && !tt.ventilation.reentryAt) {
+        // default reentry = scheduledAt + max(dwell, 15 min)
+        var extra = Math.max(Number(tt.dwellTimeMin) || 0, 15) * 60000;
+        tt.ventilation.reentryAt = new Date(
+          Date.parse(tt.scheduledAt) + extra
+        ).toISOString();
+      }
+      return tt;
+    });
 
     return plan;
   }
@@ -333,7 +423,11 @@
 
     // Period order
     if (Date.parse(plan.period.start) > Date.parse(plan.period.end)) {
-      warnings.push({ code: "period.order", level: "error", msg: "Period start is after end." });
+      warnings.push({
+        code: "period.order",
+        level: "error",
+        msg: "Period start is after end.",
+      });
     }
 
     // Quiet hours helper
@@ -341,14 +435,20 @@
       try {
         var d = new Date(dateStr);
         var h = d.getUTCHours(); // UTC; still useful as heuristic without tz DB
-        var start = (plan.settings.quietHours && plan.settings.quietHours.startHour != null)
-          ? plan.settings.quietHours.startHour : 21;
-        var end = (plan.settings.quietHours && plan.settings.quietHours.endHour != null)
-          ? plan.settings.quietHours.endHour : 7;
+        var start =
+          plan.settings.quietHours && plan.settings.quietHours.startHour != null
+            ? plan.settings.quietHours.startHour
+            : 21;
+        var end =
+          plan.settings.quietHours && plan.settings.quietHours.endHour != null
+            ? plan.settings.quietHours.endHour
+            : 7;
         if (start < end) return h >= start && h < end;
         // wraps midnight
         return h >= start || h < end;
-      } catch (e) { return false; }
+      } catch (e) {
+        return false;
+      }
     }
 
     // Task sanity + chemical safety
@@ -356,18 +456,36 @@
       var t = plan.tasks[i];
 
       if (t.roomId && !roomMap[t.roomId]) {
-        warnings.push({ code: "task.room.missing", level: "error", taskId: t.id, msg: "Task room does not exist: " + t.roomId });
+        warnings.push({
+          code: "task.room.missing",
+          level: "error",
+          taskId: t.id,
+          msg: "Task room does not exist: " + t.roomId,
+        });
       }
 
       for (var s = 0; s < t.surfaceIds.length; s++) {
         if (!surfaceMap[t.surfaceIds[s]]) {
-          warnings.push({ code: "task.surface.missing", level: "error", taskId: t.id, msg: "Unknown surface: " + t.surfaceIds[s] });
+          warnings.push({
+            code: "task.surface.missing",
+            level: "error",
+            taskId: t.id,
+            msg: "Unknown surface: " + t.surfaceIds[s],
+          });
         }
       }
 
       // dwell time basic check
-      if ((t.kind === "sanitize" || t.kind === "mop") && (Number(t.dwellTimeMin) || 0) <= 0) {
-        warnings.push({ code: "dwell.missing", level: "warn", taskId: t.id, msg: "Consider setting dwellTimeMin for disinfectants or wet cleaning." });
+      if (
+        (t.kind === "sanitize" || t.kind === "mop") &&
+        (Number(t.dwellTimeMin) || 0) <= 0
+      ) {
+        warnings.push({
+          code: "dwell.missing",
+          level: "warn",
+          taskId: t.id,
+          msg: "Consider setting dwellTimeMin for disinfectants or wet cleaning.",
+        });
       }
 
       // Sabbath guard
@@ -375,21 +493,42 @@
         try {
           var day = new Date(t.scheduledAt).getUTCDay(); // 6 = Saturday
           if (day === 6) {
-            warnings.push({ code: "sabbath.guard", level: "info", taskId: t.id, msg: "Sabbath guard enabled — consider rescheduling Saturday tasks." });
+            warnings.push({
+              code: "sabbath.guard",
+              level: "info",
+              taskId: t.id,
+              msg: "Sabbath guard enabled — consider rescheduling Saturday tasks.",
+            });
           }
-        } catch (e) { /* no-op */ }
+        } catch (e) {
+          /* no-op */
+        }
       }
 
       // Quiet hours (noisy tools)
-      if (isQuietHour(t.scheduledAt) && (t.tools || []).some(function (x) {
-        var n = (x || "").toLowerCase();
-        return n.indexOf("vacuum") >= 0 || n.indexOf("machine") >= 0 || n.indexOf("blower") >= 0;
-      })) {
-        warnings.push({ code: "quiet.hours", level: "info", taskId: t.id, msg: "Noisy tool scheduled during quiet hours." });
+      if (
+        isQuietHour(t.scheduledAt) &&
+        (t.tools || []).some(function (x) {
+          var n = (x || "").toLowerCase();
+          return (
+            n.indexOf("vacuum") >= 0 ||
+            n.indexOf("machine") >= 0 ||
+            n.indexOf("blower") >= 0
+          );
+        })
+      ) {
+        warnings.push({
+          code: "quiet.hours",
+          level: "info",
+          taskId: t.id,
+          msg: "Noisy tool scheduled during quiet hours.",
+        });
       }
 
       // Chemical incompatibility (bleach + ammonia OR bleach + acids)
-      var hasBleach = false, hasAmmonia = false, hasAcid = false;
+      var hasBleach = false,
+        hasAmmonia = false,
+        hasAcid = false;
       for (var q = 0; q < (t.supplies || []).length; q++) {
         var nm = ((t.supplies[q] && t.supplies[q].name) || "").toLowerCase();
         if (containsAny(nm, BLEACH_NAMES)) hasBleach = true;
@@ -397,19 +536,46 @@
         if (containsAny(nm, ACIDIC_NAMES)) hasAcid = true;
       }
       if (hasBleach && hasAmmonia) {
-        warnings.push({ code: "chem.bleach_ammonia", level: "error", taskId: t.id, msg: "Do not mix bleach and ammonia." });
+        warnings.push({
+          code: "chem.bleach_ammonia",
+          level: "error",
+          taskId: t.id,
+          msg: "Do not mix bleach and ammonia.",
+        });
       }
       if (hasBleach && hasAcid) {
-        warnings.push({ code: "chem.bleach_acid", level: "error", taskId: t.id, msg: "Do not mix bleach with acids (vinegar, muriatic, etc.)." });
+        warnings.push({
+          code: "chem.bleach_acid",
+          level: "error",
+          taskId: t.id,
+          msg: "Do not mix bleach with acids (vinegar, muriatic, etc.).",
+        });
       }
 
       // Ventilation logic
       if (t.ventilation && t.ventilation.required) {
-        if (!t.ventilation.reentryAt || Date.parse(t.ventilation.reentryAt) <= Date.parse(t.scheduledAt)) {
-          warnings.push({ code: "ventilation.reentry", level: "error", taskId: t.id, msg: "Re-entry time must be after task time when ventilation is required." });
+        if (
+          !t.ventilation.reentryAt ||
+          Date.parse(t.ventilation.reentryAt) <= Date.parse(t.scheduledAt)
+        ) {
+          warnings.push({
+            code: "ventilation.reentry",
+            level: "error",
+            taskId: t.id,
+            msg: "Re-entry time must be after task time when ventilation is required.",
+          });
         }
-        if (t.roomId && roomMap[t.roomId] && !roomMap[t.roomId].constraints.requiresVentilation) {
-          warnings.push({ code: "ventilation.room.flag", level: "info", taskId: t.id, msg: "Mark room as requiresVentilation or review chemical choice." });
+        if (
+          t.roomId &&
+          roomMap[t.roomId] &&
+          !roomMap[t.roomId].constraints.requiresVentilation
+        ) {
+          warnings.push({
+            code: "ventilation.room.flag",
+            level: "info",
+            taskId: t.id,
+            msg: "Mark room as requiresVentilation or review chemical choice.",
+          });
         }
       }
     }
@@ -421,15 +587,26 @@
       for (var b = a + 1; b < plan.tasks.length; b++) {
         var B = plan.tasks[b];
         if (!B.tools || !B.tools.length) continue;
-        var shared = A.tools.filter(function (tool) { return B.tools.indexOf(tool) >= 0; });
-        if (shared.length && minutesOverlap(A.scheduledAt, A.durationMin, B.scheduledAt, B.durationMin)) {
+        var shared = A.tools.filter(function (tool) {
+          return B.tools.indexOf(tool) >= 0;
+        });
+        if (
+          shared.length &&
+          minutesOverlap(
+            A.scheduledAt,
+            A.durationMin,
+            B.scheduledAt,
+            B.durationMin
+          )
+        ) {
           // If they share a room, it’s a stronger warning
-          var level = (A.roomId && B.roomId && A.roomId === B.roomId) ? "warn" : "info";
+          var level =
+            A.roomId && B.roomId && A.roomId === B.roomId ? "warn" : "info";
           warnings.push({
             code: "tools.overlap",
             level: level,
             taskIds: [A.id, B.id],
-            msg: "Overlapping tasks share tools: " + shared.join(", ")
+            msg: "Overlapping tasks share tools: " + shared.join(", "),
           });
         }
       }
@@ -438,11 +615,27 @@
     // Room stepping conflicts (mop while vacuuming the same room)
     for (var i1 = 0; i1 < plan.tasks.length; i1++) {
       for (var i2 = i1 + 1; i2 < plan.tasks.length; i2++) {
-        var T1 = plan.tasks[i1], T2 = plan.tasks[i2];
-        if (T1.roomId && T2.roomId && T1.roomId === T2.roomId && minutesOverlap(T1.scheduledAt, T1.durationMin, T2.scheduledAt, T2.durationMin)) {
+        var T1 = plan.tasks[i1],
+          T2 = plan.tasks[i2];
+        if (
+          T1.roomId &&
+          T2.roomId &&
+          T1.roomId === T2.roomId &&
+          minutesOverlap(
+            T1.scheduledAt,
+            T1.durationMin,
+            T2.scheduledAt,
+            T2.durationMin
+          )
+        ) {
           var pair = [T1.kind, T2.kind].sort().join("+");
           if (pair.indexOf("mop") >= 0 && pair.indexOf("vacuum") >= 0) {
-            warnings.push({ code: "room.wet_vs_vacuum", level: "warn", taskIds: [T1.id, T2.id], msg: "Vacuuming overlaps with mopping in the same room." });
+            warnings.push({
+              code: "room.wet_vs_vacuum",
+              level: "warn",
+              taskIds: [T1.id, T2.id],
+              msg: "Vacuuming overlaps with mopping in the same room.",
+            });
           }
         }
       }
@@ -451,27 +644,47 @@
     // Optional: placement rules (e.g., chemicals not allowed on certain surfaces)
     if (placementRules && typeof placementRules.validate === "function") {
       try {
-        var pr = placementRules.validate({ rooms: plan.rooms, surfaces: plan.surfaces, tasks: plan.tasks, domain: "cleaning" });
+        var pr = placementRules.validate({
+          rooms: plan.rooms,
+          surfaces: plan.surfaces,
+          tasks: plan.tasks,
+          domain: "cleaning",
+        });
         if (pr && pr.warnings && pr.warnings.length) {
           for (var w = 0; w < pr.warnings.length; w++) {
             var W = pr.warnings[w];
-            warnings.push({ code: "placement." + (W.code || "rule"), level: W.level || "warn", msg: W.msg || "Placement rule warning." });
+            warnings.push({
+              code: "placement." + (W.code || "rule"),
+              level: W.level || "warn",
+              msg: W.msg || "Placement rule warning.",
+            });
           }
         }
-      } catch (e) { /* no-op */ }
+      } catch (e) {
+        /* no-op */
+      }
     }
 
     // Optional: pre-steps (soak, pre-treat, schedule sequences)
-    if (scheduleHelpers && typeof scheduleHelpers.computePresteps === "function") {
+    if (
+      scheduleHelpers &&
+      typeof scheduleHelpers.computePresteps === "function"
+    ) {
       try {
         var pre = scheduleHelpers.computePresteps(plan.tasks || []);
         if (pre && pre.alerts && pre.alerts.length) {
           for (var p = 0; p < pre.alerts.length; p++) {
             var al = pre.alerts[p];
-            warnings.push({ code: "prestep." + (al.code || "alert"), level: al.level || "info", msg: al.msg || "Pre-step advisory." });
+            warnings.push({
+              code: "prestep." + (al.code || "alert"),
+              level: al.level || "info",
+              msg: al.msg || "Pre-step advisory.",
+            });
           }
         }
-      } catch (e) { /* no-op */ }
+      } catch (e) {
+        /* no-op */
+      }
     }
 
     return warnings;
@@ -479,7 +692,18 @@
 
   // ----------------------------- Metrics -----------------------------
   function computeMetrics(plan) {
-    var tasksByKind = { sweep:0, vacuum:0, mop:0, dust:0, sanitize:0, laundry:0, dishes:0, trash:0, maintenance:0, organize:0 };
+    var tasksByKind = {
+      sweep: 0,
+      vacuum: 0,
+      mop: 0,
+      dust: 0,
+      sanitize: 0,
+      laundry: 0,
+      dishes: 0,
+      trash: 0,
+      maintenance: 0,
+      organize: 0,
+    };
     var totalMinutes = 0;
     var ventilationHolds = [];
     var supplies = [];
@@ -489,15 +713,24 @@
       tasksByKind[t.kind] = (tasksByKind[t.kind] || 0) + 1;
       totalMinutes += Number(t.durationMin) || 0;
       if (t.ventilation && t.ventilation.required && t.ventilation.reentryAt) {
-        ventilationHolds.push({ taskId: t.id, reentryAt: t.ventilation.reentryAt });
+        ventilationHolds.push({
+          taskId: t.id,
+          reentryAt: t.ventilation.reentryAt,
+        });
       }
     }
 
     // Consolidate supplies using listBuilder if present
     if (listBuilder && typeof listBuilder.buildSupplies === "function") {
       try {
-        supplies = listBuilder.buildSupplies({ tasks: plan.tasks, domain: "cleaning" }) || [];
-      } catch (e) { /* no-op */ }
+        supplies =
+          listBuilder.buildSupplies({
+            tasks: plan.tasks,
+            domain: "cleaning",
+          }) || [];
+      } catch (e) {
+        /* no-op */
+      }
     } else {
       // Fallback basic consolidation by name/sku
       var acc = Object.create(null);
@@ -508,14 +741,16 @@
           acc[key] = (acc[key] || 0) + 1;
         }
       }
-      supplies = Object.keys(acc).map(function (k) { return { key: k, qty: acc[k] }; });
+      supplies = Object.keys(acc).map(function (k) {
+        return { key: k, qty: acc[k] };
+      });
     }
 
     return {
       tasksByKind: tasksByKind,
       totalMinutes: totalMinutes,
       ventilationHolds: ventilationHolds,
-      supplies: supplies
+      supplies: supplies,
     };
   }
 
@@ -554,12 +789,15 @@
             instancePath: e.instancePath || "",
             keyword: e.keyword,
             message: e.message,
-            params: e.params
+            params: e.params,
           };
         });
       }
     } catch (e) {
-      errors.push({ keyword: "exception", message: e && e.message ? e.message : "Validation exception." });
+      errors.push({
+        keyword: "exception",
+        message: e && e.message ? e.message : "Validation exception.",
+      });
       ok = false;
     }
 
@@ -567,19 +805,37 @@
     var metrics = computeMetrics(normalized);
 
     // Optional: consolidation hints
-    if (workPrepConsolidation && typeof workPrepConsolidation.analyze === "function") {
+    if (
+      workPrepConsolidation &&
+      typeof workPrepConsolidation.analyze === "function"
+    ) {
       try {
-        var cr = workPrepConsolidation.analyze({ tasks: normalized.tasks, domain: "cleaning" });
+        var cr = workPrepConsolidation.analyze({
+          tasks: normalized.tasks,
+          domain: "cleaning",
+        });
         if (cr && cr.warnings && cr.warnings.length) {
           for (var i = 0; i < cr.warnings.length; i++) {
             var w = cr.warnings[i];
-            warnings.push({ code: "consolidation." + (w.code || "hint"), level: w.level || "info", msg: w.msg || "Consolidation hint." });
+            warnings.push({
+              code: "consolidation." + (w.code || "hint"),
+              level: w.level || "info",
+              msg: w.msg || "Consolidation hint.",
+            });
           }
         }
-      } catch (e) { /* no-op */ }
+      } catch (e) {
+        /* no-op */
+      }
     }
 
-    var result = { ok: ok && errors.length === 0, errors: errors, warnings: warnings, normalized: normalized, metrics: metrics };
+    var result = {
+      ok: ok && errors.length === 0,
+      errors: errors,
+      warnings: warnings,
+      normalized: normalized,
+      metrics: metrics,
+    };
 
     // Emit events
     if (emit) {
@@ -591,30 +847,51 @@
             metrics: metrics,
             warnings: warnings,
             ts: nowISO(),
-            source: opts.source || "validator"
+            source: opts.source || "validator",
           });
           // NBA nudge (defensive)
           eventBus.emit("nba.updated", {
             scope: "cleaning",
             planId: normalized.id,
             hints: [
-              warnings.some(function (w) { return w.code.indexOf("chem.") === 0; })
-                ? { code: "resolve_chem_conflicts", label: "Fix chemical conflicts", weight: 0.9 }
-                : warnings.some(function (w) { return w.code.indexOf("tools.overlap") === 0 || w.code.indexOf("room.wet_vs_vacuum") === 0; })
-                  ? { code: "reschedule_conflicts", label: "Resolve room/tool overlaps", weight: 0.7 }
-                  : { code: "review_plan", label: "Review cleaning plan", weight: 0.3 }
+              warnings.some(function (w) {
+                return w.code.indexOf("chem.") === 0;
+              })
+                ? {
+                    code: "resolve_chem_conflicts",
+                    label: "Fix chemical conflicts",
+                    weight: 0.9,
+                  }
+                : warnings.some(function (w) {
+                    return (
+                      w.code.indexOf("tools.overlap") === 0 ||
+                      w.code.indexOf("room.wet_vs_vacuum") === 0
+                    );
+                  })
+                ? {
+                    code: "reschedule_conflicts",
+                    label: "Resolve room/tool overlaps",
+                    weight: 0.7,
+                  }
+                : {
+                    code: "review_plan",
+                    label: "Review cleaning plan",
+                    weight: 0.3,
+                  },
             ],
-            ts: nowISO()
+            ts: nowISO(),
           });
         } else {
           eventBus.emit("cleanplan.validation_failed", {
             planId: normalized.id,
             errors: errors,
             ts: nowISO(),
-            source: opts.source || "validator"
+            source: opts.source || "validator",
           });
         }
-      } catch (e) { /* no-op */ }
+      } catch (e) {
+        /* no-op */
+      }
     }
 
     return result;
@@ -627,8 +904,12 @@
       normalizeCleanPlan: normalizeCleanPlan,
       computeWarnings: computeWarnings,
       computeMetrics: computeMetrics,
-      get schema() { return _schema || loadSchema(); },
-      get ajv() { return _ajv || buildAjv(); }
+      get schema() {
+        return _schema || loadSchema();
+      },
+      get ajv() {
+        return _ajv || buildAjv();
+      },
     };
   } else {
     // global fallback

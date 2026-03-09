@@ -22,16 +22,16 @@
 // - Every emitted payload has shape: { type, ts, source, data } with ISO timestamps
 //
 // ASSUMPTIONS
-// - src/services/eventBus.js exists
+// - src/services/events/eventBus.js exists
 // - src/config/featureFlags.json exists
-// - src/services/HubPacketFormatter.js exports formatMealAnalyticsForHub
-// - src/services/FamilyFundConnector.js exists
+// - src/services/hub/HubPacketFormatter.js exports formatMealAnalyticsForHub
+// - src/services/hub/FamilyFundConnector.js exists
 // - src/services/dataGateway.js or local Dexie store can be used (we soft-import)
 
-import eventBus from "../../services/eventBus";
-import featureFlags from "../../config/featureFlags.json";
-import { formatMealAnalyticsForHub } from "../../services/HubPacketFormatter";
-import FamilyFundConnector from "../../services/FamilyFundConnector";
+import eventBus from "../../services/events/eventBus";
+import featureFlags from "@/config/featureFlags.json";
+import { formatMealAnalyticsForHub } from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 
 let dataGateway = null;
 try {
@@ -109,7 +109,9 @@ const MealAnalytics = {
   async reset() {
     _state = { ...DEFAULT_STATE, lastUpdated: new Date().toISOString() };
     await safePersistState(_state);
-    const evt = emitEvent("analytics.meals.updated", { snapshot: getSnapshot() });
+    const evt = emitEvent("analytics.meals.updated", {
+      snapshot: getSnapshot(),
+    });
     await exportToHubIfEnabled(evt);
   },
 };
@@ -203,7 +205,8 @@ async function handleImportParsed(evt) {
   // We won't store full imports here — that belongs to intelligence layer.
   // But we can prime cuisine / equipment frequencies if they’re obvious.
   if (d.normalized) {
-    const guessCuisines = d.normalized.tags?.filter((t) => t.startsWith("cuisine:")) || [];
+    const guessCuisines =
+      d.normalized.tags?.filter((t) => t.startsWith("cuisine:")) || [];
     guessCuisines.forEach((tag) => {
       const c = tag.replace("cuisine:", "");
       bumpCuisine(c);
@@ -343,7 +346,10 @@ function getSnapshot() {
       importVsLocal: calcRatio(_state.fromImports, _state.fromLocal),
       gardenHitRate: calcRatio(_state.fromGarden, _state.totalMealsExecuted),
       animalHitRate: calcRatio(_state.fromAnimal, _state.totalMealsExecuted),
-      storehouseHitRate: calcRatio(_state.fromStorehouse, _state.totalMealsExecuted),
+      storehouseHitRate: calcRatio(
+        _state.fromStorehouse,
+        _state.totalMealsExecuted
+      ),
     },
   };
 }

@@ -30,7 +30,7 @@
  * - scrape.scheduler.idle        {}
  */
 
-import eventBus from '../eventBus.js';
+import eventBus from "../events/eventBus.js";
 
 // Soft imports (optional). If missing, features degrade gracefully.
 let featureFlags = { familyFundMode: false };
@@ -40,19 +40,19 @@ let ScraperEngine = null;
 
 (async () => {
   try {
-    const mod = await import('../../config/featureFlags.js');
+    const mod = await import("@/config/featureFlags.json");
     featureFlags = mod.default || mod || featureFlags;
   } catch {}
   try {
-    const mod = await import('../../hub/HubPacketFormatter.js');
+    const mod = await import("@/services/hub/HubPacketFormatter.js");
     HubPacketFormatter = mod.default || mod;
   } catch {}
   try {
-    const mod = await import('../../hub/FamilyFundConnector.js');
+    const mod = await import("@/services/hub/FamilyFundConnector.js");
     FamilyFundConnector = mod.default || mod;
   } catch {}
   try {
-    const mod = await import('./ScraperEngine.js');
+    const mod = await import("./ScraperEngine.js");
     ScraperEngine = mod.default || mod;
   } catch {}
 })();
@@ -61,9 +61,10 @@ let ScraperEngine = null;
 /* Utilities                                                                  */
 /* -------------------------------------------------------------------------- */
 
-const SOURCE = 'ScraperScheduler';
+const SOURCE = "ScraperScheduler";
 const nowISO = () => new Date().toISOString();
-const emit = (type, data) => eventBus.emit({ type, ts: nowISO(), source: SOURCE, data });
+const emit = (type, data) =>
+  eventBus.emit({ type, ts: nowISO(), source: SOURCE, data });
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -77,7 +78,7 @@ function tryParseURL(u) {
 
 function safeHostname(u) {
   const url = tryParseURL(u);
-  return url ? url.hostname.toLowerCase() : '';
+  return url ? url.hostname.toLowerCase() : "";
 }
 
 function clamp(n, min, max) {
@@ -113,28 +114,32 @@ async function exportToHubIfEnabled(payload) {
 const robotsCache = new Map(); // host -> { fetchedAt: ms, rules: Map<ua,{allow:[], disallow:[]}> }
 
 function parseRobotsTxt(text) {
-  const lines = (text || '').split(/\r?\n/);
+  const lines = (text || "").split(/\r?\n/);
   const groups = [];
   let current = { userAgents: [], allow: [], disallow: [] };
 
   for (const raw of lines) {
     const line = raw.trim();
-    if (!line || line.startsWith('#')) continue;
-    const [k0, ...rest] = line.split(':');
+    if (!line || line.startsWith("#")) continue;
+    const [k0, ...rest] = line.split(":");
     if (!k0 || rest.length === 0) continue;
     const key = k0.trim().toLowerCase();
-    const val = rest.join(':').trim();
+    const val = rest.join(":").trim();
 
-    if (key === 'user-agent') {
+    if (key === "user-agent") {
       // start a new group if the previous has content
-      if (current.userAgents.length || current.allow.length || current.disallow.length) {
+      if (
+        current.userAgents.length ||
+        current.allow.length ||
+        current.disallow.length
+      ) {
         groups.push(current);
         current = { userAgents: [], allow: [], disallow: [] };
       }
       current.userAgents.push(val.toLowerCase());
-    } else if (key === 'allow') {
+    } else if (key === "allow") {
       current.allow.push(val);
-    } else if (key === 'disallow') {
+    } else if (key === "disallow") {
       current.disallow.push(val);
     } // ignore others for simplicity
   }
@@ -143,7 +148,7 @@ function parseRobotsTxt(text) {
   // reduce to map of UA -> rules
   const rules = new Map();
   for (const g of groups) {
-    for (const ua of g.userAgents.length ? g.userAgents : ['*']) {
+    for (const ua of g.userAgents.length ? g.userAgents : ["*"]) {
       const prev = rules.get(ua) || { allow: [], disallow: [] };
       rules.set(ua, {
         allow: prev.allow.concat(g.allow || []),
@@ -156,35 +161,36 @@ function parseRobotsTxt(text) {
 
 function pathMatchesRule(pathname, rule) {
   if (!rule) return false;
-  if (rule === '/') return true;
+  if (rule === "/") return true;
   // Basic prefix match per common robots semantics.
   return pathname.startsWith(rule);
 }
 
 function evaluateRobots(rulesMap, userAgent, path) {
   // Pick the most specific user-agent group; if none, use '*'
-  const ua = (userAgent || '').toLowerCase();
-  const uaRules = rulesMap.get(ua) || rulesMap.get('*') || { allow: [], disallow: [] };
+  const ua = (userAgent || "").toLowerCase();
+  const uaRules = rulesMap.get(ua) ||
+    rulesMap.get("*") || { allow: [], disallow: [] };
 
   // Longest rule wins between allow/disallow (simple approximation)
   const matches = [];
   for (const d of uaRules.disallow) {
-    if (pathMatchesRule(path, d)) matches.push({ rule: d, type: 'disallow' });
+    if (pathMatchesRule(path, d)) matches.push({ rule: d, type: "disallow" });
   }
   for (const a of uaRules.allow) {
-    if (pathMatchesRule(path, a)) matches.push({ rule: a, type: 'allow' });
+    if (pathMatchesRule(path, a)) matches.push({ rule: a, type: "allow" });
   }
   if (!matches.length) return true;
 
   matches.sort((a, b) => b.rule.length - a.rule.length);
-  return matches[0].type === 'allow';
+  return matches[0].type === "allow";
 }
 
 async function fetchRobots(host, fetchFn, proxy) {
   const url = `https://${host}/robots.txt`;
   const targetUrl = proxy ? `${proxy}${encodeURIComponent(url)}` : url;
   try {
-    const res = await fetchFn(targetUrl, { method: 'GET' });
+    const res = await fetchFn(targetUrl, { method: "GET" });
     if (!res.ok) return null;
     const text = await res.text();
     return text;
@@ -193,7 +199,10 @@ async function fetchRobots(host, fetchFn, proxy) {
   }
 }
 
-async function canFetch(urlStr, { userAgent, robotsTtlMs = 24 * 60 * 60 * 1000, proxy } = {}) {
+async function canFetch(
+  urlStr,
+  { userAgent, robotsTtlMs = 24 * 60 * 60 * 1000, proxy } = {}
+) {
   const u = tryParseURL(urlStr);
   if (!u) return true; // if malformed, let the scheduler reject separately
 
@@ -212,7 +221,7 @@ async function canFetch(urlStr, { userAgent, robotsTtlMs = 24 * 60 * 60 * 1000, 
     // If unreachable, be permissive
     robotsCache.set(host, {
       fetchedAt: now,
-      rules: new Map([['*', { allow: [], disallow: [] }]]),
+      rules: new Map([["*", { allow: [], disallow: [] }]]),
     });
     return true;
   }
@@ -300,7 +309,7 @@ class PriorityQueue {
 /* -------------------------------------------------------------------------- */
 
 const DEFAULTS = Object.freeze({
-  userAgent: 'SukaSmartAssistantBot/1.0 (+https://example.local)',
+  userAgent: "SukaSmartAssistantBot/1.0 (+https://example.local)",
   concurrency: 2,
   maxRetries: 2,
   backoffBaseMs: 750, // exponential backoff multiplier
@@ -343,12 +352,12 @@ export class ScraperScheduler {
    */
   add(url, opts = {}) {
     if (!this._shouldSchedule(url)) {
-      emit('scrape.schedule.skipped', { url, reason: 'guard-reject' });
+      emit("scrape.schedule.skipped", { url, reason: "guard-reject" });
       return false;
     }
     const u = tryParseURL(url);
     if (!u) {
-      emit('scrape.schedule.skipped', { url, reason: 'malformed-url' });
+      emit("scrape.schedule.skipped", { url, reason: "malformed-url" });
       return false;
     }
 
@@ -365,7 +374,7 @@ export class ScraperScheduler {
       addedAt: Date.now(),
     };
     this._queue.push(task);
-    emit('scrape.schedule.added', { url, priority: task.priority });
+    emit("scrape.schedule.added", { url, priority: task.priority });
     this._kick();
     return true;
   }
@@ -374,7 +383,7 @@ export class ScraperScheduler {
     let count = 0;
     for (const it of items) {
       if (!it) continue;
-      if (typeof it === 'string') {
+      if (typeof it === "string") {
         if (this.add(it)) count++;
       } else if (it.url) {
         if (this.add(it.url, it)) count++;
@@ -393,12 +402,12 @@ export class ScraperScheduler {
   }
 
   onResult(fn) {
-    if (typeof fn === 'function') this._observers.add(fn);
+    if (typeof fn === "function") this._observers.add(fn);
     return () => this._observers.delete(fn);
   }
 
   setShouldScheduleGuard(fn) {
-    if (typeof fn === 'function') this._shouldSchedule = fn;
+    if (typeof fn === "function") this._shouldSchedule = fn;
   }
 
   setGlobalConcurrency(n) {
@@ -407,7 +416,7 @@ export class ScraperScheduler {
   }
 
   setRateLimitForHost(host, { ratePerMinute, burst } = {}) {
-    const h = (host || '').toLowerCase();
+    const h = (host || "").toLowerCase();
     if (!h) return;
     this._buckets.set(
       h,
@@ -429,7 +438,7 @@ export class ScraperScheduler {
 
   cancel(urlOrPredicate) {
     if (!urlOrPredicate) return 0;
-    if (typeof urlOrPredicate === 'function') {
+    if (typeof urlOrPredicate === "function") {
       return this._queue.remove(urlOrPredicate);
     }
     const target = String(urlOrPredicate);
@@ -456,7 +465,7 @@ export class ScraperScheduler {
       this._runOne(next);
     }
     if (this._working === 0 && this._queue.length === 0) {
-      emit('scrape.scheduler.idle', {});
+      emit("scrape.scheduler.idle", {});
     }
   }
 
@@ -485,26 +494,34 @@ export class ScraperScheduler {
         proxy: this.cfg.proxy,
       });
       if (!allowed) {
-        emit('scrape.request.blocked', { url: task.url, reason: 'robots' });
+        emit("scrape.request.blocked", { url: task.url, reason: "robots" });
         this._working -= 1;
         this._kick();
         return;
       }
 
       // per-host rate limiting
-      const bucket = this._buckets.get(task.host) || new TokenBucket(this.cfg.perHost);
+      const bucket =
+        this._buckets.get(task.host) || new TokenBucket(this.cfg.perHost);
       this._buckets.set(task.host, bucket);
       const delay = await bucket.takeOrDelay();
       if (delay > 0) {
-        emit('scrape.request.throttled', { url: task.url, host: task.host, delayMs: delay });
+        emit("scrape.request.throttled", {
+          url: task.url,
+          host: task.host,
+          delayMs: delay,
+        });
       }
 
       // perform scrape
-      const started = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
-      emit('scrape.request.sent', { url: task.url });
+      const started =
+        typeof performance !== "undefined" && performance.now
+          ? performance.now()
+          : Date.now();
+      emit("scrape.request.sent", { url: task.url });
 
-      if (!ScraperEngine || typeof ScraperEngine.scrape !== 'function') {
-        throw new Error('ScraperEngine not available');
+      if (!ScraperEngine || typeof ScraperEngine.scrape !== "function") {
+        throw new Error("ScraperEngine not available");
       }
 
       const result = await ScraperEngine.scrape(task.url, {
@@ -514,13 +531,16 @@ export class ScraperScheduler {
         proxy: this.cfg.proxy,
       });
 
-      const ended = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+      const ended =
+        typeof performance !== "undefined" && performance.now
+          ? performance.now()
+          : Date.now();
       const durationMs = ended - started;
 
-      emit('scrape.result.received', {
+      emit("scrape.result.received", {
         url: task.url,
         status: result?.status ?? 0,
-        type: result?.type ?? 'unknown',
+        type: result?.type ?? "unknown",
         durationMs: Math.round(durationMs),
       });
 
@@ -533,7 +553,10 @@ export class ScraperScheduler {
         }
       }
     } catch (error) {
-      emit('scrape.error', { url: task.url, error: String(error?.message || error) });
+      emit("scrape.error", {
+        url: task.url,
+        error: String(error?.message || error),
+      });
 
       // backoff + retry
       if (task.retries < this.cfg.maxRetries) {

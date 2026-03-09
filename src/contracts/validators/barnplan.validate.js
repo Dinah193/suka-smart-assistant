@@ -24,17 +24,27 @@
     }
   }
 
-  var eventBus =
-    (safeRequire("@/services/eventBus") || {}).eventBus ||
-    (safeRequire("@/services/eventBus") || {}).default ||
-    { emit: function () {}, on: function () {}, off: function () {} };
+  var eventBus = (safeRequire("@/services/events/eventBus") || {}).eventBus ||
+    (safeRequire("@/services/events/eventBus") || {}).default || {
+      emit: function () {},
+      on: function () {},
+      off: function () {},
+    };
 
-  var scheduleHelpers = safeRequire("@/services/scheduleHelpers") || safeRequire("../../services/scheduleHelpers") || {};
+  var scheduleHelpers =
+    safeRequire("@/services/scheduleHelpers") ||
+    safeRequire("../../services/scheduleHelpers") ||
+    {};
   var placementRules = safeRequire("@/engines/placementRules") || {};
-  var workPrepConsolidation = safeRequire("@/engines/workPrepConsolidation") || {};
+  var workPrepConsolidation =
+    safeRequire("@/engines/workPrepConsolidation") || {};
   var listBuilder = safeRequire("@/engines/listBuilder") || {};
   var AjvCtor = safeRequire("ajv/dist/2020") || safeRequire("ajv");
-  var addFormats = safeRequire("ajv-formats") || function () { return function () {}; };
+  var addFormats =
+    safeRequire("ajv-formats") ||
+    function () {
+      return function () {};
+    };
 
   // ----------------------------- Utilities -----------------------------
   var ID_RX = /^[a-z]+:[A-Za-z0-9_\-:.]+$/;
@@ -112,35 +122,59 @@
       $schema: "https://json-schema.org/draft/2020-12/schema",
       $id: "urn:suka:contracts:barnplan",
       title: "Barn Plan Contract (Fallback)",
-      description: "Fallback schema used when the canonical JSON file is unavailable.",
+      description:
+        "Fallback schema used when the canonical JSON file is unavailable.",
       type: "object",
       additionalProperties: false,
-      required: ["id", "x-domain", "householdId", "period", "animals", "zones", "tasks"],
+      required: [
+        "id",
+        "x-domain",
+        "householdId",
+        "period",
+        "animals",
+        "zones",
+        "tasks",
+      ],
       properties: {
-        id: { type: "string", pattern: "^(workplan|barnplan):[A-Za-z0-9_\\-:.]+$" },
+        id: {
+          type: "string",
+          pattern: "^(workplan|barnplan):[A-Za-z0-9_\\-:.]+$",
+        },
         title: { type: "string", default: "Barn Plan" },
         "x-version": { type: "string", default: "1.0.0" },
         "x-domain": { const: "animals" },
         householdId: { type: "string" },
-        createdAt: { type: "string", format: "date-time", default: function () { return nowISO(); } },
-        updatedAt: { type: "string", format: "date-time", default: function () { return nowISO(); } },
+        createdAt: {
+          type: "string",
+          format: "date-time",
+          default: function () {
+            return nowISO();
+          },
+        },
+        updatedAt: {
+          type: "string",
+          format: "date-time",
+          default: function () {
+            return nowISO();
+          },
+        },
         period: {
           type: "object",
           additionalProperties: false,
           required: ["start", "end"],
           properties: {
             start: { type: "string", format: "date-time" },
-            end: { type: "string", format: "date-time" }
-          }
+            end: { type: "string", format: "date-time" },
+          },
         },
         settings: {
           type: "object",
           additionalProperties: true,
           properties: {
             sabbathGuard: { type: "boolean", default: false },
-            timezone: { type: "string" }
+            timezone: { type: "string" },
           },
-          default: {}
+          default: {},
         },
         zones: {
           type: "array",
@@ -151,11 +185,22 @@
             properties: {
               id: { type: "string" },
               name: { type: "string" },
-              kind: { type: "string", enum: ["barn", "pasture", "coop", "pen", "storage", "processing"], default: "barn" },
-              constraints: { type: "object", additionalProperties: true }
-            }
+              kind: {
+                type: "string",
+                enum: [
+                  "barn",
+                  "pasture",
+                  "coop",
+                  "pen",
+                  "storage",
+                  "processing",
+                ],
+                default: "barn",
+              },
+              constraints: { type: "object", additionalProperties: true },
+            },
           },
-          default: []
+          default: [],
         },
         animals: {
           type: "array",
@@ -167,13 +212,17 @@
               id: { type: "string" },
               species: { type: "string" }, // e.g., chicken, sheep, goat, cow
               name: { type: "string" },
-              sex: { type: "string", enum: ["male", "female", "unknown"], default: "unknown" },
+              sex: {
+                type: "string",
+                enum: ["male", "female", "unknown"],
+                default: "unknown",
+              },
               ageMonths: { type: "number" },
               tags: { type: "array", items: { type: "string" }, default: [] },
-              locationZoneId: { type: "string" }
-            }
+              locationZoneId: { type: "string" },
+            },
           },
-          default: []
+          default: [],
         },
         tasks: {
           type: "array",
@@ -185,12 +234,23 @@
             properties: {
               id: { type: "string" },
               title: { type: "string" },
-              kind: { type: "string", enum: ["care", "butchery", "maintenance", "cleaning"] },
+              kind: {
+                type: "string",
+                enum: ["care", "butchery", "maintenance", "cleaning"],
+              },
               scheduledAt: { type: "string", format: "date-time" },
               durationMin: { type: "number", default: 30 },
               zoneId: { type: "string" },
-              animalIds: { type: "array", items: { type: "string" }, default: [] },
-              dependencies: { type: "array", items: { type: "string" }, default: [] },
+              animalIds: {
+                type: "array",
+                items: { type: "string" },
+                default: [],
+              },
+              dependencies: {
+                type: "array",
+                items: { type: "string" },
+                default: [],
+              },
               resources: {
                 type: "object",
                 additionalProperties: true,
@@ -208,13 +268,13 @@
                           properties: {
                             sku: { type: "string" },
                             name: { type: "string" },
-                            amount: { type: "string" }
-                          }
+                            amount: { type: "string" },
+                          },
                         },
-                        default: []
-                      }
+                        default: [],
+                      },
                     },
-                    default: {}
+                    default: {},
                   },
                   meds: {
                     type: "array",
@@ -225,29 +285,37 @@
                       required: ["name"],
                       properties: {
                         name: { type: "string" },
-                        dose: { type: "string" }
-                      }
-                    }
+                        dose: { type: "string" },
+                      },
+                    },
                   },
-                  equipment: { type: "array", items: { type: "string" }, default: [] },
-                  ppe: { type: "array", items: { type: "string" }, default: [] }
+                  equipment: {
+                    type: "array",
+                    items: { type: "string" },
+                    default: [],
+                  },
+                  ppe: {
+                    type: "array",
+                    items: { type: "string" },
+                    default: [],
+                  },
                 },
-                default: {}
+                default: {},
               },
               withhold: {
                 type: "object",
                 additionalProperties: true,
                 properties: {
                   product: { type: "string", enum: ["milk", "eggs", "meat"] },
-                  until: { type: "string", format: "date-time" }
-                }
+                  until: { type: "string", format: "date-time" },
+                },
               },
               flags: { type: "array", items: { type: "string" }, default: [] },
-              notes: { type: "string" }
-            }
-          }
-        }
-      }
+              notes: { type: "string" },
+            },
+          },
+        },
+      },
     };
   }
 
@@ -260,11 +328,13 @@
       allowUnionTypes: true,
       removeAdditional: false,
       useDefaults: "empty",
-      coerceTypes: true
+      coerceTypes: true,
     });
     try {
       addFormats(ajv);
-    } catch (e) { /* no-op */ }
+    } catch (e) {
+      /* no-op */
+    }
     return ajv;
   }
 
@@ -282,51 +352,73 @@
     // default end = start + 7d
     plan.period.end =
       toISO(plan.period.end) ||
-      new Date(Date.parse(plan.period.start) + 7 * 24 * 3600 * 1000).toISOString();
+      new Date(
+        Date.parse(plan.period.start) + 7 * 24 * 3600 * 1000
+      ).toISOString();
 
     plan.settings = plan.settings || {};
-    plan.zones = uniqueBy(coerceArray(plan.zones), function (z) { return z && z.id ? z.id : JSON.stringify(z); })
-      .map(function (z) {
-        var zz = Object.assign({ kind: "barn", constraints: {} }, z || {});
-        zz.id = ensureId("zone", zz.id);
-        zz.name = zz.name || zz.id;
-        return zz;
-      });
+    plan.zones = uniqueBy(coerceArray(plan.zones), function (z) {
+      return z && z.id ? z.id : JSON.stringify(z);
+    }).map(function (z) {
+      var zz = Object.assign({ kind: "barn", constraints: {} }, z || {});
+      zz.id = ensureId("zone", zz.id);
+      zz.name = zz.name || zz.id;
+      return zz;
+    });
 
-    plan.animals = uniqueBy(coerceArray(plan.animals), function (a) { return a && a.id ? a.id : JSON.stringify(a); })
-      .map(function (a) {
-        var aa = Object.assign({ sex: "unknown", tags: [] }, a || {});
-        aa.id = ensureId("animal", aa.id);
-        if (aa.locationZoneId == null && plan.zones[0]) aa.locationZoneId = plan.zones[0].id;
-        return aa;
-      });
+    plan.animals = uniqueBy(coerceArray(plan.animals), function (a) {
+      return a && a.id ? a.id : JSON.stringify(a);
+    }).map(function (a) {
+      var aa = Object.assign({ sex: "unknown", tags: [] }, a || {});
+      aa.id = ensureId("animal", aa.id);
+      if (aa.locationZoneId == null && plan.zones[0])
+        aa.locationZoneId = plan.zones[0].id;
+      return aa;
+    });
 
-    var zoneIds = plan.zones.map(function (z) { return z.id; });
-    var animalIds = plan.animals.map(function (a) { return a.id; });
+    var zoneIds = plan.zones.map(function (z) {
+      return z.id;
+    });
+    var animalIds = plan.animals.map(function (a) {
+      return a.id;
+    });
 
-    plan.tasks = uniqueBy(coerceArray(plan.tasks), function (t) { return t && t.id ? t.id : t && t.title ? t.title : JSON.stringify(t); })
-      .map(function (t) {
-        var tt = Object.assign({ durationMin: 30 }, t || {});
-        tt.id = ensureId("task", tt.id);
-        tt.title = tt.title || tt.id;
-        tt.kind = tt.kind || "care";
-        tt.scheduledAt = toISO(tt.scheduledAt) || plan.period.start;
-        tt.zoneId = tt.zoneId && zoneIds.indexOf(tt.zoneId) >= 0 ? tt.zoneId : (plan.zones[0] && plan.zones[0].id);
-        tt.animalIds = coerceArray(tt.animalIds).filter(function (id) { return animalIds.indexOf(id) >= 0; });
-        tt.dependencies = coerceArray(tt.dependencies);
-        tt.resources = Object.assign({ water: false, feed: { items: [] }, meds: [], equipment: [], ppe: [] }, tt.resources || {});
-        tt.flags = coerceArray(tt.flags);
-        if (tt.resources.meds && tt.resources.meds.length && !tt.withhold) {
-          // heuristic default: 48h withhold for meat/milk when meds present
-          var until = new Date(Date.parse(tt.scheduledAt) + 48 * 3600 * 1000).toISOString();
-          tt.withhold = { product: "meat", until: until };
-        }
-        if (tt.withhold) {
-          tt.withhold.product = tt.withhold.product || "meat";
-          tt.withhold.until = toISO(tt.withhold.until) || new Date(Date.parse(tt.scheduledAt) + 24 * 3600 * 1000).toISOString();
-        }
-        return tt;
+    plan.tasks = uniqueBy(coerceArray(plan.tasks), function (t) {
+      return t && t.id ? t.id : t && t.title ? t.title : JSON.stringify(t);
+    }).map(function (t) {
+      var tt = Object.assign({ durationMin: 30 }, t || {});
+      tt.id = ensureId("task", tt.id);
+      tt.title = tt.title || tt.id;
+      tt.kind = tt.kind || "care";
+      tt.scheduledAt = toISO(tt.scheduledAt) || plan.period.start;
+      tt.zoneId =
+        tt.zoneId && zoneIds.indexOf(tt.zoneId) >= 0
+          ? tt.zoneId
+          : plan.zones[0] && plan.zones[0].id;
+      tt.animalIds = coerceArray(tt.animalIds).filter(function (id) {
+        return animalIds.indexOf(id) >= 0;
       });
+      tt.dependencies = coerceArray(tt.dependencies);
+      tt.resources = Object.assign(
+        { water: false, feed: { items: [] }, meds: [], equipment: [], ppe: [] },
+        tt.resources || {}
+      );
+      tt.flags = coerceArray(tt.flags);
+      if (tt.resources.meds && tt.resources.meds.length && !tt.withhold) {
+        // heuristic default: 48h withhold for meat/milk when meds present
+        var until = new Date(
+          Date.parse(tt.scheduledAt) + 48 * 3600 * 1000
+        ).toISOString();
+        tt.withhold = { product: "meat", until: until };
+      }
+      if (tt.withhold) {
+        tt.withhold.product = tt.withhold.product || "meat";
+        tt.withhold.until =
+          toISO(tt.withhold.until) ||
+          new Date(Date.parse(tt.scheduledAt) + 24 * 3600 * 1000).toISOString();
+      }
+      return tt;
+    });
 
     return plan;
   }
@@ -339,55 +431,113 @@
 
     // Period sanity
     if (Date.parse(plan.period.start) > Date.parse(plan.period.end)) {
-      warnings.push({ code: "period.order", level: "error", msg: "Period start is after end." });
+      warnings.push({
+        code: "period.order",
+        level: "error",
+        msg: "Period start is after end.",
+      });
     }
 
     // Tasks sanity
     for (var i = 0; i < plan.tasks.length; i++) {
       var t = plan.tasks[i];
       if (!zoneMap[t.zoneId]) {
-        warnings.push({ code: "task.zone.missing", level: "error", taskId: t.id, msg: "Task zone does not exist: " + t.zoneId });
+        warnings.push({
+          code: "task.zone.missing",
+          level: "error",
+          taskId: t.id,
+          msg: "Task zone does not exist: " + t.zoneId,
+        });
       }
       // animal references
       for (var j = 0; j < t.animalIds.length; j++) {
         if (!animalMap[t.animalIds[j]]) {
-          warnings.push({ code: "task.animal.missing", level: "error", taskId: t.id, msg: "Task references unknown animal: " + t.animalIds[j] });
+          warnings.push({
+            code: "task.animal.missing",
+            level: "error",
+            taskId: t.id,
+            msg: "Task references unknown animal: " + t.animalIds[j],
+          });
         }
       }
       // withhold window
-      if (t.withhold && t.withhold.until && Date.parse(t.withhold.until) <= Date.parse(t.scheduledAt)) {
-        warnings.push({ code: "withhold.order", level: "error", taskId: t.id, msg: "Withhold 'until' must be after the task time." });
+      if (
+        t.withhold &&
+        t.withhold.until &&
+        Date.parse(t.withhold.until) <= Date.parse(t.scheduledAt)
+      ) {
+        warnings.push({
+          code: "withhold.order",
+          level: "error",
+          taskId: t.id,
+          msg: "Withhold 'until' must be after the task time.",
+        });
       }
       // task inside plan period (soft warning)
-      if (Date.parse(t.scheduledAt) < Date.parse(plan.period.start) || Date.parse(t.scheduledAt) > Date.parse(plan.period.end)) {
-        warnings.push({ code: "task.outside.period", level: "warn", taskId: t.id, msg: "Task is scheduled outside the plan period." });
+      if (
+        Date.parse(t.scheduledAt) < Date.parse(plan.period.start) ||
+        Date.parse(t.scheduledAt) > Date.parse(plan.period.end)
+      ) {
+        warnings.push({
+          code: "task.outside.period",
+          level: "warn",
+          taskId: t.id,
+          msg: "Task is scheduled outside the plan period.",
+        });
       }
       // Sabbath guard
       if (plan.settings && plan.settings.sabbathGuard) {
         try {
           var day = new Date(t.scheduledAt).getUTCDay(); // 6 = Saturday (UTC)
           if (day === 6) {
-            warnings.push({ code: "sabbath.guard", level: "info", taskId: t.id, msg: "Sabbath guard enabled — consider rescheduling Saturday tasks." });
+            warnings.push({
+              code: "sabbath.guard",
+              level: "info",
+              taskId: t.id,
+              msg: "Sabbath guard enabled — consider rescheduling Saturday tasks.",
+            });
           }
-        } catch (e) { /* no-op */ }
+        } catch (e) {
+          /* no-op */
+        }
       }
     }
 
     // Resource overlaps (equipment/time conflicts)
     for (var a = 0; a < plan.tasks.length; a++) {
       var A = plan.tasks[a];
-      if (!A.resources || !A.resources.equipment || !A.resources.equipment.length) continue;
+      if (
+        !A.resources ||
+        !A.resources.equipment ||
+        !A.resources.equipment.length
+      )
+        continue;
       for (var b = a + 1; b < plan.tasks.length; b++) {
         var B = plan.tasks[b];
-        if (!B.resources || !B.resources.equipment || !B.resources.equipment.length) continue;
+        if (
+          !B.resources ||
+          !B.resources.equipment ||
+          !B.resources.equipment.length
+        )
+          continue;
 
-        var shared = A.resources.equipment.filter(function (eq) { return B.resources.equipment.indexOf(eq) >= 0; });
-        if (shared.length && minutesOverlap(A.scheduledAt, A.durationMin, B.scheduledAt, B.durationMin)) {
+        var shared = A.resources.equipment.filter(function (eq) {
+          return B.resources.equipment.indexOf(eq) >= 0;
+        });
+        if (
+          shared.length &&
+          minutesOverlap(
+            A.scheduledAt,
+            A.durationMin,
+            B.scheduledAt,
+            B.durationMin
+          )
+        ) {
           warnings.push({
             code: "equipment.overlap",
             level: "warn",
             taskIds: [A.id, B.id],
-            msg: "Overlapping tasks share equipment: " + shared.join(", ")
+            msg: "Overlapping tasks share equipment: " + shared.join(", "),
           });
         }
       }
@@ -396,25 +546,47 @@
     // Optional: consult placementRules for zone/species constraints
     if (placementRules && typeof placementRules.validate === "function") {
       try {
-        var pr = placementRules.validate({ zones: plan.zones, animals: plan.animals });
+        var pr = placementRules.validate({
+          zones: plan.zones,
+          animals: plan.animals,
+        });
         if (pr && pr.warnings && pr.warnings.length) {
-          warnings = warnings.concat(pr.warnings.map(function (w) {
-            return { code: "placement." + (w.code || "rule"), level: w.level || "warn", msg: w.msg || "Placement rule warning." };
-          }));
+          warnings = warnings.concat(
+            pr.warnings.map(function (w) {
+              return {
+                code: "placement." + (w.code || "rule"),
+                level: w.level || "warn",
+                msg: w.msg || "Placement rule warning.",
+              };
+            })
+          );
         }
-      } catch (e) { /* no-op */ }
+      } catch (e) {
+        /* no-op */
+      }
     }
 
     // Optional: pre-steps from scheduleHelpers (defrost/marinate/preheat-esque) mapped to animal meds withholding etc.
-    if (scheduleHelpers && typeof scheduleHelpers.computePresteps === "function") {
+    if (
+      scheduleHelpers &&
+      typeof scheduleHelpers.computePresteps === "function"
+    ) {
       try {
         var pre = scheduleHelpers.computePresteps(plan.tasks || []);
         if (pre && pre.alerts && pre.alerts.length) {
-          warnings = warnings.concat(pre.alerts.map(function (al) {
-            return { code: "prestep." + (al.code || "alert"), level: al.level || "info", msg: al.msg || "Pre-step advisory." };
-          }));
+          warnings = warnings.concat(
+            pre.alerts.map(function (al) {
+              return {
+                code: "prestep." + (al.code || "alert"),
+                level: al.level || "info",
+                msg: al.msg || "Pre-step advisory.",
+              };
+            })
+          );
         }
-      } catch (e) { /* no-op */ }
+      } catch (e) {
+        /* no-op */
+      }
     }
 
     return warnings;
@@ -440,7 +612,7 @@
         withholds.push({
           taskId: t.id,
           product: t.withhold.product,
-          until: t.withhold.until
+          until: t.withhold.until,
         });
       }
     }
@@ -449,24 +621,35 @@
     var supplies = [];
     if (listBuilder && typeof listBuilder.buildSupplies === "function") {
       try {
-        supplies = listBuilder.buildSupplies({ tasks: plan.tasks, domain: "animals" }) || [];
-      } catch (e) { /* no-op */ }
+        supplies =
+          listBuilder.buildSupplies({ tasks: plan.tasks, domain: "animals" }) ||
+          [];
+      } catch (e) {
+        /* no-op */
+      }
     } else {
       // minimal fallback: gather feed SKUs & meds
       var skuMap = {};
       for (var k = 0; k < plan.tasks.length; k++) {
-        var res = (plan.tasks[k].resources && plan.tasks[k].resources.feed && plan.tasks[k].resources.feed.items) || [];
+        var res =
+          (plan.tasks[k].resources &&
+            plan.tasks[k].resources.feed &&
+            plan.tasks[k].resources.feed.items) ||
+          [];
         for (var r = 0; r < res.length; r++) {
           var key = res[r].sku || res[r].name || "feed";
           skuMap[key] = (skuMap[key] || 0) + 1;
         }
-        var meds = (plan.tasks[k].resources && plan.tasks[k].resources.meds) || [];
+        var meds =
+          (plan.tasks[k].resources && plan.tasks[k].resources.meds) || [];
         for (var m = 0; m < meds.length; m++) {
           var mk = meds[m].name || "medication";
           skuMap[mk] = (skuMap[mk] || 0) + 1;
         }
       }
-      supplies = Object.keys(skuMap).map(function (key) { return { key: key, qty: skuMap[key] }; });
+      supplies = Object.keys(skuMap).map(function (key) {
+        return { key: key, qty: skuMap[key] };
+      });
     }
 
     return {
@@ -474,7 +657,7 @@
       tasksByKind: tasksByKind,
       totalMinutes: totalMinutes,
       withholds: withholds,
-      supplies: supplies
+      supplies: supplies,
     };
   }
 
@@ -513,12 +696,15 @@
             instancePath: e.instancePath || "",
             keyword: e.keyword,
             message: e.message,
-            params: e.params
+            params: e.params,
           };
         });
       }
     } catch (e) {
-      errors.push({ keyword: "exception", message: e && e.message ? e.message : "Validation exception." });
+      errors.push({
+        keyword: "exception",
+        message: e && e.message ? e.message : "Validation exception.",
+      });
       ok = false;
     }
 
@@ -527,18 +713,38 @@
     var metrics = computeMetrics(normalized);
 
     // Optional: consolidation advisor
-    if (workPrepConsolidation && typeof workPrepConsolidation.analyze === "function") {
+    if (
+      workPrepConsolidation &&
+      typeof workPrepConsolidation.analyze === "function"
+    ) {
       try {
-        var cr = workPrepConsolidation.analyze({ tasks: normalized.tasks, domain: "animals" });
+        var cr = workPrepConsolidation.analyze({
+          tasks: normalized.tasks,
+          domain: "animals",
+        });
         if (cr && cr.warnings && cr.warnings.length) {
-          warnings = warnings.concat(cr.warnings.map(function (w) {
-            return { code: "consolidation." + (w.code || "hint"), level: w.level || "info", msg: w.msg || "Consolidation hint." };
-          }));
+          warnings = warnings.concat(
+            cr.warnings.map(function (w) {
+              return {
+                code: "consolidation." + (w.code || "hint"),
+                level: w.level || "info",
+                msg: w.msg || "Consolidation hint.",
+              };
+            })
+          );
         }
-      } catch (e) { /* no-op */ }
+      } catch (e) {
+        /* no-op */
+      }
     }
 
-    var result = { ok: ok && errors.length === 0, errors: errors, warnings: warnings, normalized: normalized, metrics: metrics };
+    var result = {
+      ok: ok && errors.length === 0,
+      errors: errors,
+      warnings: warnings,
+      normalized: normalized,
+      metrics: metrics,
+    };
 
     // Emit events for orchestration
     if (emit) {
@@ -550,7 +756,7 @@
             metrics: metrics,
             warnings: warnings,
             ts: nowISO(),
-            source: opts.source || "validator"
+            source: opts.source || "validator",
           });
           // Next Best Action nudge (defensive)
           if (eventBus.emit) {
@@ -558,11 +764,21 @@
               scope: "animals",
               planId: normalized.id,
               hints: [
-                warnings.some(function (w) { return w.code.indexOf("equipment.overlap") === 0; })
-                  ? { code: "reschedule_conflicts", label: "Resolve overlapping equipment", weight: 0.7 }
-                  : { code: "review_plan", label: "Review barn plan", weight: 0.3 }
+                warnings.some(function (w) {
+                  return w.code.indexOf("equipment.overlap") === 0;
+                })
+                  ? {
+                      code: "reschedule_conflicts",
+                      label: "Resolve overlapping equipment",
+                      weight: 0.7,
+                    }
+                  : {
+                      code: "review_plan",
+                      label: "Review barn plan",
+                      weight: 0.3,
+                    },
               ],
-              ts: nowISO()
+              ts: nowISO(),
             });
           }
         } else {
@@ -570,10 +786,12 @@
             planId: normalized.id,
             errors: errors,
             ts: nowISO(),
-            source: opts.source || "validator"
+            source: opts.source || "validator",
           });
         }
-      } catch (e) { /* no-op */ }
+      } catch (e) {
+        /* no-op */
+      }
     }
 
     return result;
@@ -586,8 +804,12 @@
       normalizeBarnPlan: normalizeBarnPlan,
       computeWarnings: computeWarnings,
       computeMetrics: computeMetrics,
-      get schema() { return _schema || loadSchema(); },
-      get ajv() { return _ajv || buildAjv(); }
+      get schema() {
+        return _schema || loadSchema();
+      },
+      get ajv() {
+        return _ajv || buildAjv();
+      },
     };
   } else {
     // global fallback

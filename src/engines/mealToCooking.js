@@ -34,14 +34,14 @@ async function softImport(modulePath) {
 
 //// Dependencies (loaded at start()) //////////////////////////////////////////
 
-let eventBus;                    // required
+let eventBus; // required
 let featureFlags = { familyFundMode: false };
-let InventoryService;            // optional
-let RecipeStore;                 // optional (recipes/templates/techniques)
-let HouseholdPrefs;              // optional (doneness, dietary, appliances, sabbath guard)
-let HubPacketFormatter;          // optional
-let FamilyFundConnector;         // optional
-let GuardPolicies;               // optional (quiet hours, sabbath, weather, etc.)
+let InventoryService; // optional
+let RecipeStore; // optional (recipes/templates/techniques)
+let HouseholdPrefs; // optional (doneness, dietary, appliances, sabbath guard)
+let HubPacketFormatter; // optional
+let FamilyFundConnector; // optional
+let GuardPolicies; // optional (quiet hours, sabbath, weather, etc.)
 
 //// Small utilities ////////////////////////////////////////////////////////////
 
@@ -55,7 +55,11 @@ function safeId(prefix = "cook") {
 }
 
 function sanitize(obj) {
-  try { return JSON.parse(JSON.stringify(obj)); } catch { return undefined; }
+  try {
+    return JSON.parse(JSON.stringify(obj));
+  } catch {
+    return undefined;
+  }
 }
 
 function safeError(err) {
@@ -70,7 +74,9 @@ function emit(type, source, data) {
 async function exportToHubIfEnabled(payload) {
   try {
     if (!featureFlags?.familyFundMode) return;
-    const packet = HubPacketFormatter?.format?.(payload, { stream: "mealToCooking" });
+    const packet = HubPacketFormatter?.format?.(payload, {
+      stream: "mealToCooking",
+    });
     if (!packet) return;
     await FamilyFundConnector?.send?.(packet);
   } catch {
@@ -85,12 +91,12 @@ const state = {
   processing: false,
   queue: [],
   config: {
-    lookaheadMinutes: 90,           // suggest session start within this window if no exact time
-    defaultCookMinutes: 30,         // fallback
-    reserveStrategy: "soft",        // "soft" | "hard" | "none"
-    enforceGuardsOnSchedule: true,  // apply quiet hours/sabbath guard hints to schedule
-    minPrepLeadMinutes: 10,         // generic lead time for hidden prep anchors
-    enableSubstitutions: true,      // try to suggest subs when shortages occur
+    lookaheadMinutes: 90, // suggest session start within this window if no exact time
+    defaultCookMinutes: 30, // fallback
+    reserveStrategy: "soft", // "soft" | "hard" | "none"
+    enforceGuardsOnSchedule: true, // apply quiet hours/sabbath guard hints to schedule
+    minPrepLeadMinutes: 10, // generic lead time for hidden prep anchors
+    enableSubstitutions: true, // try to suggest subs when shortages occur
   },
 };
 
@@ -107,7 +113,9 @@ async function getRecipeForMeal(meal) {
     try {
       const r = await RecipeStore.getById(meal.recipeId);
       if (r) return r;
-    } catch {/* noop */}
+    } catch {
+      /* noop */
+    }
   }
 
   // Fallback to title search.
@@ -115,7 +123,9 @@ async function getRecipeForMeal(meal) {
     try {
       const hits = await RecipeStore.searchByTitle(meal.title, { limit: 1 });
       if (Array.isArray(hits) && hits[0]) return hits[0];
-    } catch {/* noop */}
+    } catch {
+      /* noop */
+    }
   }
 
   return null;
@@ -171,25 +181,50 @@ function synthesizePrepTasks(recipe, prefs, meal) {
   // Appliances: preheat oven/air fryer/sous-vide bath if indicated
   const methods = recipe?.methods || recipe?.techniques || [];
   if (methods.some((m) => /oven|bake|roast/i.test(m))) {
-    tasks.push(t("Preheat oven", "Auto-added by mealToCooking; adjust temp in step details.", 10));
+    tasks.push(
+      t(
+        "Preheat oven",
+        "Auto-added by mealToCooking; adjust temp in step details.",
+        10
+      )
+    );
   }
   if (methods.some((m) => /air.?fry/i.test(m))) {
     tasks.push(t("Preheat air fryer", "Auto-added by mealToCooking.", 5));
   }
   if (methods.some((m) => /sous.?vide/i.test(m))) {
-    tasks.push(t("Heat sous-vide bath", "Bring water bath to target temp.", 20));
+    tasks.push(
+      t("Heat sous-vide bath", "Bring water bath to target temp.", 20)
+    );
   }
 
   // Boil water for pasta/veg
-  const needsBoil = (recipe?.coreIngredients || recipe?.ingredients || [])
-    .some((i) => new RegExp("\\b(pasta|noodles|potato|greens)\\b", "i").test(i?.name || i));
+  const needsBoil = (recipe?.coreIngredients || recipe?.ingredients || []).some(
+    (i) =>
+      new RegExp("\\b(pasta|noodles|potato|greens)\\b", "i").test(i?.name || i)
+  );
   if (needsBoil || methods.some((m) => /blanch|boil/i.test(m))) {
-    tasks.push(t("Set pot to boil", "Start water early so it's ready for pasta/blanching.", 10));
+    tasks.push(
+      t(
+        "Set pot to boil",
+        "Start water early so it's ready for pasta/blanching.",
+        10
+      )
+    );
   }
 
   // Thaw proteins if frozen flag present on meal or recipe (heuristic)
-  if (meal?.flags?.includes("frozen") || recipe?.flags?.includes("frozen-protein")) {
-    tasks.push(t("Thaw protein", "Move from freezer to fridge or use cold-water method.", 30));
+  if (
+    meal?.flags?.includes("frozen") ||
+    recipe?.flags?.includes("frozen-protein")
+  ) {
+    tasks.push(
+      t(
+        "Thaw protein",
+        "Move from freezer to fridge or use cold-water method.",
+        30
+      )
+    );
   }
 
   // Soak beans/grains if present and dry
@@ -197,18 +232,28 @@ function synthesizePrepTasks(recipe, prefs, meal) {
     /dry (bean|chickpea|lentil)/i.test(i?.name || i)
   );
   if (hasDryLegume) {
-    tasks.push(t("Soak legumes", "Overnight preferred; quick-soak if short on time.", 60));
+    tasks.push(
+      t("Soak legumes", "Overnight preferred; quick-soak if short on time.", 60)
+    );
   }
 
   // Marinate when marinade is referenced
   const needsMarinade = methods.some((m) => /marinat/i.test(m));
   if (needsMarinade) {
-    tasks.push(t("Prepare marinade", "Mix and coat protein; rest per recipe.", 15));
+    tasks.push(
+      t("Prepare marinade", "Mix and coat protein; rest per recipe.", 15)
+    );
   }
 
   // Preference-driven anchors (dietary rinses, kosher-style rinsing, etc.)
   if (prefs?.rinsingPolicy === "always") {
-    tasks.push(t("Rinse produce", "Household preference: always rinse produce before use.", 5));
+    tasks.push(
+      t(
+        "Rinse produce",
+        "Household preference: always rinse produce before use.",
+        5
+      )
+    );
   }
 
   return tasks;
@@ -223,10 +268,13 @@ function buildCookingSession(recipe, meal, prefs) {
   const prepTasks = synthesizePrepTasks(recipe, prefs, meal);
 
   // Target window: respect meal.slot if present, else near-term window
-  const from = meal?.slot?.start ??
-    new Date(Date.now() + 5 * 60 * 1000).toISOString(); // 5 min from now
-  const to = meal?.slot?.end ??
-    new Date(Date.now() + state.config.lookaheadMinutes * 60 * 1000).toISOString();
+  const from =
+    meal?.slot?.start ?? new Date(Date.now() + 5 * 60 * 1000).toISOString(); // 5 min from now
+  const to =
+    meal?.slot?.end ??
+    new Date(
+      Date.now() + state.config.lookaheadMinutes * 60 * 1000
+    ).toISOString();
 
   const session = {
     id,
@@ -248,7 +296,8 @@ function buildCookingSession(recipe, meal, prefs) {
       dietary: prefs?.dietary || [],
       // lightweight projection used by automation UI
       projection: {
-        estimatedCookMinutes: recipe?.estimatedMinutes || state.config.defaultCookMinutes,
+        estimatedCookMinutes:
+          recipe?.estimatedMinutes || state.config.defaultCookMinutes,
       },
     },
     session: {
@@ -259,8 +308,10 @@ function buildCookingSession(recipe, meal, prefs) {
           id: safeId("task"),
           type: "cook",
           title: recipe?.title || "Cook",
-          notes: "Session auto-generated by mealToCooking; detailed steps resolved at start.",
-          estimatedMinutes: recipe?.estimatedMinutes || state.config.defaultCookMinutes,
+          notes:
+            "Session auto-generated by mealToCooking; detailed steps resolved at start.",
+          estimatedMinutes:
+            recipe?.estimatedMinutes || state.config.defaultCookMinutes,
         },
         {
           id: safeId("task"),
@@ -289,7 +340,11 @@ function deriveAnchors(meal, recipe, prefs) {
     anchors.push({ type: "protein", label: recipe.proteins[0], weight: 0.5 });
   }
   if (Array.isArray(recipe?.techniques) && recipe.techniques.length) {
-    anchors.push({ type: "technique", label: recipe.techniques[0], weight: 0.4 });
+    anchors.push({
+      type: "technique",
+      label: recipe.techniques[0],
+      weight: 0.4,
+    });
   }
   // preference anchors (appliance availability)
   if (prefs?.appliances?.includes("pressure-cooker")) {
@@ -301,9 +356,11 @@ function deriveAnchors(meal, recipe, prefs) {
 function deriveGuardsHints(prefs) {
   if (!state.config.enforceGuardsOnSchedule) return [];
   const hints = [];
-  if (prefs?.guards?.quietHours) hints.push({ type: "quiet-hours", policy: "avoid" });
+  if (prefs?.guards?.quietHours)
+    hints.push({ type: "quiet-hours", policy: "avoid" });
   if (prefs?.guards?.sabbath) hints.push({ type: "sabbath", policy: "avoid" });
-  if (prefs?.guards?.weather) hints.push({ type: "weather", policy: "prefer-indoor" });
+  if (prefs?.guards?.weather)
+    hints.push({ type: "weather", policy: "prefer-indoor" });
   return hints;
 }
 
@@ -313,12 +370,14 @@ function deriveGuardsHints(prefs) {
  */
 async function checkInventoryAndMaybeReserve(recipe, meal) {
   const ingredients = recipe?.ingredients || [];
-  if (!ingredients.length) return { ok: true, reservationId: null, shortages: [] };
+  if (!ingredients.length)
+    return { ok: true, reservationId: null, shortages: [] };
 
   if (!InventoryService?.checkAvailability) {
     // Degraded: cannot check; allow session creation, rely on runtime guard.
     emit("engine.warning", "engines/mealToCooking", {
-      message: "InventoryService.checkAvailability unavailable; skipping availability check.",
+      message:
+        "InventoryService.checkAvailability unavailable; skipping availability check.",
       mealId: meal?.id || null,
       recipeId: recipe?.id || null,
     });
@@ -330,7 +389,8 @@ async function checkInventoryAndMaybeReserve(recipe, meal) {
     availability = await InventoryService.checkAvailability(ingredients);
   } catch (err) {
     emit("engine.warning", "engines/mealToCooking", {
-      message: "Inventory availability check failed; proceeding without reservation.",
+      message:
+        "Inventory availability check failed; proceeding without reservation.",
       error: safeError(err),
       mealId: meal?.id || null,
       recipeId: recipe?.id || null,
@@ -380,13 +440,17 @@ async function checkInventoryAndMaybeReserve(recipe, meal) {
       }
 
       return {
-        ok: shortages.length === 0 || state.config.reserveStrategy === "hard" ? true : true,
+        ok:
+          shortages.length === 0 || state.config.reserveStrategy === "hard"
+            ? true
+            : true,
         reservationId: reservation?.id || null,
         shortages,
       };
     } catch (err) {
       emit("engine.warning", "engines/mealToCooking", {
-        message: "Inventory reservation failed; proceeding without reservation.",
+        message:
+          "Inventory reservation failed; proceeding without reservation.",
         error: safeError(err),
         mealId: meal?.id || null,
         recipeId: recipe?.id || null,
@@ -416,7 +480,7 @@ function suggestSubstitutions(shortages) {
 
 async function processMealRecord(meal) {
   // meal: { id, recipeId?, title?, slot?:{start,end,label}, flags?[], notes? }
-  if (!meal || (typeof meal !== "object")) {
+  if (!meal || typeof meal !== "object") {
     emit("engine.warning", "engines/mealToCooking", {
       message: "Invalid meal payload.",
       preview: sanitize(meal),
@@ -518,25 +582,18 @@ export async function start(config = {}) {
 
   state.config = { ...state.config, ...config };
 
-  const [
-    evb,
-    ff,
-    inv,
-    rec,
-    prefs,
-    hubFmt,
-    hubConn,
-    guards,
-  ] = await Promise.all([
-    softImport("../services/eventBus.js"),
-    softImport("../config/featureFlags.js"),
-    softImport("../domain/inventory/InventoryService.js"),
-    softImport("../stores/RecipeStore.js"),
-    softImport("../services/HouseholdPrefs.js"),
-    softImport("../hub/HubPacketFormatter.js"),
-    softImport("../hub/FamilyFundConnector.js"),
-    softImport("../services/guards/policies.js"),
-  ]);
+  const [evb, ff, inv, rec, prefs, hubFmt, hubConn, guards] = await Promise.all(
+    [
+      softImport("../services/events/eventBus.js"),
+      softImport("@/config/featureFlags.json"),
+      softImport("../domain/inventory/InventoryService.js"),
+      softImport("../stores/RecipeStore.js"),
+      softImport("../services/HouseholdPrefs.js"),
+      softImport("@/services/hub/HubPacketFormatter.js"),
+      softImport("@/services/hub/FamilyFundConnector.js"),
+      softImport("../services/guards/policies.js"),
+    ]
+  );
 
   eventBus = evb?.default || evb || eventBus;
   featureFlags = ff?.default || ff || featureFlags;
@@ -548,7 +605,9 @@ export async function start(config = {}) {
   GuardPolicies = guards?.default || guards || GuardPolicies;
 
   if (!eventBus?.on || !eventBus?.emit) {
-    throw new Error("mealToCooking requires a functional eventBus with on/emit.");
+    throw new Error(
+      "mealToCooking requires a functional eventBus with on/emit."
+    );
   }
 
   // Canonical entry: a user or importer planned a meal
@@ -566,16 +625,22 @@ export async function start(config = {}) {
   // Importer entry: parsed a meal plan from outside site/app
   eventBus.on("import.parsed", (evt) => {
     const d = evt?.data;
-    if (d?.domain === "meals" && d?.type === "plan" && Array.isArray(d?.items)) {
-      d.items.forEach((m) => enqueue({
-        id: m.id || safeId("meal"),
-        recipeId: m.recipeId,
-        title: m.title || d?.meta?.title,
-        slot: m.slot || d?.slot || null,
-        flags: m.flags || [],
-        notes: m.notes,
-        sourceImport: sanitize(d?.source),
-      }));
+    if (
+      d?.domain === "meals" &&
+      d?.type === "plan" &&
+      Array.isArray(d?.items)
+    ) {
+      d.items.forEach((m) =>
+        enqueue({
+          id: m.id || safeId("meal"),
+          recipeId: m.recipeId,
+          title: m.title || d?.meta?.title,
+          slot: m.slot || d?.slot || null,
+          flags: m.flags || [],
+          notes: m.notes,
+          sourceImport: sanitize(d?.source),
+        })
+      );
     }
   });
 

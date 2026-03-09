@@ -24,9 +24,9 @@
  *   synthesis.leadtime.started | synthesis.leadtime.item | synthesis.leadtime.completed | synthesis.leadtime.error
  */
 
-import eventBus from 'src/services/eventBus.js';
+import { emit as emitEventBus } from "@/services/events/eventBus";
 
-const SOURCE = 'LeadTimeCalculator';
+const SOURCE = "LeadTimeCalculator";
 
 // ───────────────────────────────────────────────────────────────────────────────
 // Public API
@@ -46,7 +46,10 @@ const SOURCE = 'LeadTimeCalculator';
  *
  * @returns {Promise<{ ok: boolean, items: Array<RequirementBundle>, metrics: object }>}
  */
-export async function calculate({ imports = [], context = {} } = {}, options = {}) {
+export async function calculate(
+  { imports = [], context = {} } = {},
+  options = {}
+) {
   const tsStart = nowISO();
 
   if (!Array.isArray(imports)) {
@@ -59,9 +62,9 @@ export async function calculate({ imports = [], context = {} } = {}, options = {
     useScrapedFirst: options.useScrapedFirst !== false, // default true
   };
 
-  emit('synthesis.leadtime.started', {
+  emit("synthesis.leadtime.started", {
     count: imports.length,
-    domains: unique(imports.map((i) => (i.domain || '').toLowerCase())),
+    domains: unique(imports.map((i) => (i.domain || "").toLowerCase())),
   });
 
   const knowledge = await loadTables(); // optional, may be null
@@ -73,15 +76,15 @@ export async function calculate({ imports = [], context = {} } = {}, options = {
       const bundle = await computeForImport(imp, ctx, opts, knowledge);
       results.push(bundle);
       rationales.push(...bundle.requirements.flatMap((r) => r.rationale || []));
-      emit('synthesis.leadtime.item', {
+      emit("synthesis.leadtime.item", {
         importId: imp.id || null,
         title: imp.title || null,
         reqCount: bundle.requirements.length,
       });
     } catch (err) {
-      emit('synthesis.leadtime.error', {
+      emit("synthesis.leadtime.error", {
         importId: imp?.id || null,
-        message: err?.message || 'compute error',
+        message: err?.message || "compute error",
       });
     }
   }
@@ -92,7 +95,11 @@ export async function calculate({ imports = [], context = {} } = {}, options = {
       ? 0
       : Math.round(
           (100 *
-            allReq.reduce((acc, r) => acc + (pctDelta(r.baseMinutes, r.adjustedMinutes) || 0), 0)) /
+            allReq.reduce(
+              (acc, r) =>
+                acc + (pctDelta(r.baseMinutes, r.adjustedMinutes) || 0),
+              0
+            )) /
             allReq.length
         ) / 100;
 
@@ -107,7 +114,7 @@ export async function calculate({ imports = [], context = {} } = {}, options = {
     },
   };
 
-  emit('synthesis.leadtime.completed', {
+  emit("synthesis.leadtime.completed", {
     total: allReq.length,
     avgAdjustmentPct: avgAdj,
   });
@@ -121,9 +128,9 @@ export async function calculate({ imports = [], context = {} } = {}, options = {
  * @param {(args:{ requirement: Requirement, ctx: Ctx, item: any }) => Requirement|void|Promise<Requirement|void>} fn
  */
 export function registerAdjuster(id, fn) {
-  if (!id || typeof fn !== 'function') return;
+  if (!id || typeof fn !== "function") return;
   ADJUSTERS.set(id, fn);
-  emit('synthesis.leadtime.adjuster.registered', { id });
+  emit("synthesis.leadtime.adjuster.registered", { id });
 }
 
 /**
@@ -132,9 +139,9 @@ export function registerAdjuster(id, fn) {
  * @param {(args:{ item:any, ctx: Ctx, knowledge:any }) => (BaseEstimate|null|Promise<BaseEstimate|null>)} fn
  */
 export function registerEstimator(id, fn) {
-  if (!id || typeof fn !== 'function') return;
+  if (!id || typeof fn !== "function") return;
   ESTIMATORS.set(id, fn);
-  emit('synthesis.leadtime.estimator.registered', { id });
+  emit("synthesis.leadtime.estimator.registered", { id });
 }
 
 // ───────────────────────────────────────────────────────────────────────────────
@@ -150,8 +157,8 @@ async function computeForImport(item, ctx, opts, knowledge) {
 
   return {
     importId: item.id || null,
-    domain: (item.domain || '').toLowerCase(),
-    title: item.title || '',
+    domain: (item.domain || "").toLowerCase(),
+    title: item.title || "",
     requirements: adjusted,
   };
 }
@@ -160,7 +167,11 @@ async function estimateBaseRequirements(item, ctx, opts, knowledge) {
   const out = [];
 
   // 1) Use scraped lead times when provided
-  if (opts.useScrapedFirst && item?.meta?.leadTimes && Array.isArray(item.meta.leadTimes)) {
+  if (
+    opts.useScrapedFirst &&
+    item?.meta?.leadTimes &&
+    Array.isArray(item.meta.leadTimes)
+  ) {
     for (const lt of item.meta.leadTimes) {
       const base = normalizeBaseEstimate(lt, item);
       if (base) out.push(base);
@@ -168,43 +179,79 @@ async function estimateBaseRequirements(item, ctx, opts, knowledge) {
   }
 
   // 2) Derive from methods/equipment/items and knowledge/heuristics
-  const methods = (item.methods || []).map((m) => String(m || '').toLowerCase());
-  const equipment = (item.equipment || []).map((e) => String(e || '').toLowerCase());
-  const names = (item.items || []).map((x) => String(x?.name || '').toLowerCase());
+  const methods = (item.methods || []).map((m) =>
+    String(m || "").toLowerCase()
+  );
+  const equipment = (item.equipment || []).map((e) =>
+    String(e || "").toLowerCase()
+  );
+  const names = (item.items || []).map((x) =>
+    String(x?.name || "").toLowerCase()
+  );
 
   // thaw
-  if (names.some((n) => /(chicken|beef|pork|lamb|fish)/.test(n)) || methods.some((m) => /thaw|defrost/.test(m))) {
-    const est = (await callEstimator('thaw', { item, ctx, knowledge })) || thawHeuristic(item, knowledge);
+  if (
+    names.some((n) => /(chicken|beef|pork|lamb|fish)/.test(n)) ||
+    methods.some((m) => /thaw|defrost/.test(m))
+  ) {
+    const est =
+      (await callEstimator("thaw", { item, ctx, knowledge })) ||
+      thawHeuristic(item, knowledge);
     if (est) out.push(est);
   }
 
   // soak (legumes, grains)
-  if (names.some((n) => /(chickpea|garbanzo|bean|lentil|pea|barley)/.test(n)) || methods.some((m) => /soak/.test(m))) {
-    const est = (await callEstimator('soak', { item, ctx, knowledge })) || soakHeuristic(item, knowledge);
+  if (
+    names.some((n) => /(chickpea|garbanzo|bean|lentil|pea|barley)/.test(n)) ||
+    methods.some((m) => /soak/.test(m))
+  ) {
+    const est =
+      (await callEstimator("soak", { item, ctx, knowledge })) ||
+      soakHeuristic(item, knowledge);
     if (est) out.push(est);
   }
 
   // preheat (oven)
-  if (methods.some((m) => /bake|roast|preheat/.test(m)) || equipment.includes('oven')) {
-    const est = (await callEstimator('preheat', { item, ctx, knowledge })) || preheatHeuristic(item, knowledge);
+  if (
+    methods.some((m) => /bake|roast|preheat/.test(m)) ||
+    equipment.includes("oven")
+  ) {
+    const est =
+      (await callEstimator("preheat", { item, ctx, knowledge })) ||
+      preheatHeuristic(item, knowledge);
     if (est) out.push(est);
   }
 
   // proof dough
-  if (names.some((n) => /(dough|yeast|bread)/.test(n)) || methods.some((m) => /proof|rise/.test(m))) {
-    const est = (await callEstimator('proof', { item, ctx, knowledge })) || proofHeuristic(item, knowledge);
+  if (
+    names.some((n) => /(dough|yeast|bread)/.test(n)) ||
+    methods.some((m) => /proof|rise/.test(m))
+  ) {
+    const est =
+      (await callEstimator("proof", { item, ctx, knowledge })) ||
+      proofHeuristic(item, knowledge);
     if (est) out.push(est);
   }
 
   // sterilize jars (preservation)
-  if ((item.domain || '').toLowerCase() === 'preservation' || names.some((n) => /jar/.test(n))) {
-    const est = (await callEstimator('sterilize', { item, ctx, knowledge })) || sterilizeHeuristic(item, knowledge);
+  if (
+    (item.domain || "").toLowerCase() === "preservation" ||
+    names.some((n) => /jar/.test(n))
+  ) {
+    const est =
+      (await callEstimator("sterilize", { item, ctx, knowledge })) ||
+      sterilizeHeuristic(item, knowledge);
     if (est) out.push(est);
   }
 
   // sanitizer contact (cleaning)
-  if ((item.domain || '').toLowerCase() === 'cleaning' && (item.title || '').toLowerCase().includes('sanitize')) {
-    const est = (await callEstimator('sanitizeContact', { item, ctx, knowledge })) || sanitizeContactHeuristic(item, knowledge);
+  if (
+    (item.domain || "").toLowerCase() === "cleaning" &&
+    (item.title || "").toLowerCase().includes("sanitize")
+  ) {
+    const est =
+      (await callEstimator("sanitizeContact", { item, ctx, knowledge })) ||
+      sanitizeContactHeuristic(item, knowledge);
     if (est) out.push(est);
   }
 
@@ -216,52 +263,79 @@ async function estimateBaseRequirements(item, ctx, opts, knowledge) {
 
 function thawHeuristic(item, knowledge) {
   // Prefer item.meta.massKg when present
-  const massKg = numberOrNull(item?.meta?.massKg) || guessMassFromItems(item.items);
+  const massKg =
+    numberOrNull(item?.meta?.massKg) || guessMassFromItems(item.items);
   // default: ~10h per 2.5kg in fridge; fish fillets ~8h per 2.5kg
-  const isFish = hasAny(item.items, (x) => /fish/.test((x?.name || '').toLowerCase()));
+  const isFish = hasAny(item.items, (x) =>
+    /fish/.test((x?.name || "").toLowerCase())
+  );
   const minPerKg =
-    getFromTable(knowledge, 'thaw.minPerKg.fridge') ??
-    (isFish ? 320 : 400); // minutes per kg
-  if (!massKg) return baseReq('thaw', 8 * 60, { mode: 'fridge', rationale: ['default mass'] }, item);
-  return baseReq('thaw', Math.ceil(minPerKg * massKg), { mode: 'fridge', massKg }, item);
+    getFromTable(knowledge, "thaw.minPerKg.fridge") ?? (isFish ? 320 : 400); // minutes per kg
+  if (!massKg)
+    return baseReq(
+      "thaw",
+      8 * 60,
+      { mode: "fridge", rationale: ["default mass"] },
+      item
+    );
+  return baseReq(
+    "thaw",
+    Math.ceil(minPerKg * massKg),
+    { mode: "fridge", massKg },
+    item
+  );
 }
 
 function soakHeuristic(item, knowledge) {
   // Default: dried beans ~8-12h; lentils ~2-4h (no-soak acceptable).
-  const isLentil = hasAny(item.items, (x) => /lentil/.test((x?.name || '').toLowerCase()));
+  const isLentil = hasAny(item.items, (x) =>
+    /lentil/.test((x?.name || "").toLowerCase())
+  );
   const base =
-    getFromTable(knowledge, `soak.${isLentil ? 'lentilHours' : 'beansHours'}`) ??
-    (isLentil ? 3 * 60 : 9 * 60);
-  return baseReq('soak', base, { legume: isLentil ? 'lentil' : 'beans' }, item);
+    getFromTable(
+      knowledge,
+      `soak.${isLentil ? "lentilHours" : "beansHours"}`
+    ) ?? (isLentil ? 3 * 60 : 9 * 60);
+  return baseReq("soak", base, { legume: isLentil ? "lentil" : "beans" }, item);
 }
 
 function preheatHeuristic(item, knowledge) {
   // If a target temp is present in meta, use it; else 205°C default baking temp.
   const targetC = numberOrNull(item?.meta?.ovenTargetC) ?? 205;
   // Preheat rate: user pref or table; fallback 8°C/min.
-  const rate = getFromTable(knowledge, 'preheat.cPerMin') ?? 8;
+  const rate = getFromTable(knowledge, "preheat.cPerMin") ?? 8;
   // Start from room temp ~22°C unless table provides baseline
   const startC = numberOrNull(knowledge?.ambient?.kitchenC) ?? 22;
   const minutes = Math.ceil(Math.max(0, targetC - startC) / rate);
-  return baseReq('preheat', minutes, { targetC, rateCPerMin: rate }, item);
+  return baseReq("preheat", minutes, { targetC, rateCPerMin: rate }, item);
 }
 
 function proofHeuristic(item, knowledge) {
   // Proof dependent on room temp and hydration; default 60–90 min at 24°C.
-  const base = getFromTable(knowledge, 'proof.baseMin') ?? 75;
-  return baseReq('proof', base, { hydrationPct: numberOrNull(item?.meta?.hydrationPct) || null }, item);
+  const base = getFromTable(knowledge, "proof.baseMin") ?? 75;
+  return baseReq(
+    "proof",
+    base,
+    { hydrationPct: numberOrNull(item?.meta?.hydrationPct) || null },
+    item
+  );
 }
 
 function sterilizeHeuristic(item, knowledge) {
   // Boiling-water canning sterilization: base 10 min at sea level + altitude adjustment.
-  const base = getFromTable(knowledge, 'sterilize.baseMin') ?? 10;
-  return baseReq('sterilize', base, { method: 'boil' }, item);
+  const base = getFromTable(knowledge, "sterilize.baseMin") ?? 10;
+  return baseReq("sterilize", base, { method: "boil" }, item);
 }
 
 function sanitizeContactHeuristic(item, knowledge) {
   // Typical sanitizer contact time: 10 minutes
-  const base = getFromTable(knowledge, 'sanitize.contactMin') ?? 10;
-  return baseReq('sanitizeContact', base, { product: item?.meta?.sanitizer || 'generic' }, item);
+  const base = getFromTable(knowledge, "sanitize.contactMin") ?? 10;
+  return baseReq(
+    "sanitizeContact",
+    base,
+    { product: item?.meta?.sanitizer || "generic" },
+    item
+  );
 }
 
 // ───────────────────────────────────────────────────────────────────────────────
@@ -273,8 +347,8 @@ const ESTIMATORS = new Map();
 // Built-in adjusters
 
 // Altitude affects boil-based times (sterilize, some bean soaking softening assumptions)
-registerAdjuster('altitude.boil', ({ requirement, ctx }) => {
-  if (!['sterilize'].includes(requirement.kind)) return;
+registerAdjuster("altitude.boil", ({ requirement, ctx }) => {
+  if (!["sterilize"].includes(requirement.kind)) return;
   const meters = numberOrNull(ctx.prefs?.house?.altitudeMeters);
   if (!meters || meters <= 0) return;
 
@@ -285,9 +359,11 @@ registerAdjuster('altitude.boil', ({ requirement, ctx }) => {
 });
 
 // Room temperature affects proof times
-registerAdjuster('roomTemp.proof', ({ requirement, ctx }) => {
-  if (requirement.kind !== 'proof') return;
-  const roomC = numberOrNull(ctx.prefs?.temp?.roomC) ?? numberOrNull(ctx.environment?.roomC);
+registerAdjuster("roomTemp.proof", ({ requirement, ctx }) => {
+  if (requirement.kind !== "proof") return;
+  const roomC =
+    numberOrNull(ctx.prefs?.temp?.roomC) ??
+    numberOrNull(ctx.environment?.roomC);
   if (!roomC) return;
   // Approx: each 5°C below 24°C increases time by ~50%; above reduces
   const delta = roomC - 24;
@@ -298,19 +374,21 @@ registerAdjuster('roomTemp.proof', ({ requirement, ctx }) => {
 });
 
 // Oven performance affects preheat
-registerAdjuster('oven.rate', ({ requirement, ctx }) => {
-  if (requirement.kind !== 'preheat') return;
+registerAdjuster("oven.rate", ({ requirement, ctx }) => {
+  if (requirement.kind !== "preheat") return;
   const userRate = numberOrNull(ctx.prefs?.kitchen?.ovenPreheatRateCPerMin);
   if (!userRate) return;
   const targetC = requirement.meta.targetC ?? 205;
   const startC = numberOrNull(ctx.environment?.kitchenC) ?? 22;
-  requirement.adjustedMinutes = Math.ceil(Math.max(0, targetC - startC) / userRate);
+  requirement.adjustedMinutes = Math.ceil(
+    Math.max(0, targetC - startC) / userRate
+  );
   requirement.rationale.push(`oven rate ${userRate}°C/min`);
 });
 
 // Batch size affects soak/thaw (more mass → longer)
-registerAdjuster('batch.mass', ({ requirement, item, ctx }) => {
-  if (!['soak', 'thaw'].includes(requirement.kind)) return;
+registerAdjuster("batch.mass", ({ requirement, item, ctx }) => {
+  if (!["soak", "thaw"].includes(requirement.kind)) return;
   const factor = numberOrNull(ctx.prefs?.batch?.sizeMultiplier);
   if (!factor || factor <= 1) return;
   const add = Math.ceil(requirement.adjustedMinutes * (factor - 1) * 0.5); // half-scale
@@ -319,8 +397,8 @@ registerAdjuster('batch.mass', ({ requirement, item, ctx }) => {
 });
 
 // Safety floor for sanitizer contact — never below label
-registerAdjuster('sanitize.min', ({ requirement, ctx }) => {
-  if (requirement.kind !== 'sanitizeContact') return;
+registerAdjuster("sanitize.min", ({ requirement, ctx }) => {
+  if (requirement.kind !== "sanitizeContact") return;
   const labelMin = toInt(ctx.prefs?.cleaning?.sanitizerContactMin, 10);
   if (requirement.adjustedMinutes < labelMin) {
     requirement.rationale.push(`floor to label ${labelMin} min`);
@@ -335,7 +413,7 @@ function buildCtx(context = {}) {
   const now = context.now ? new Date(context.now) : new Date();
   return {
     now,
-    tz: context.tz || 'UTC',
+    tz: context.tz || "UTC",
     prefs: context.prefs || {},
     environment: context.environment || {},
     inventory: context.inventory || {},
@@ -344,7 +422,9 @@ function buildCtx(context = {}) {
 
 async function loadTables() {
   try {
-    const mod = await import(/* @vite-ignore */ 'src/data/knowledge/LeadTimeTables.js');
+    const mod = await import(
+      /* @vite-ignore */ "/src/data/knowledge/LeadTimeTables.js"
+    );
     return mod?.default || mod;
   } catch {
     return null;
@@ -362,11 +442,15 @@ async function callEstimator(kind, args) {
 }
 
 async function applyAdjusters(base, ctx, item) {
-  const req = { ...base, adjustedMinutes: base.baseMinutes, rationale: base.rationale ? base.rationale.slice() : [] };
+  const req = {
+    ...base,
+    adjustedMinutes: base.baseMinutes,
+    rationale: base.rationale ? base.rationale.slice() : [],
+  };
   for (const [, fn] of ADJUSTERS.entries()) {
     try {
       const out = await fn({ requirement: req, ctx, item });
-      if (out && typeof out === 'object') {
+      if (out && typeof out === "object") {
         // adjuster may return a new requirement object; merge conservatively
         req.adjustedMinutes = toInt(out.adjustedMinutes, req.adjustedMinutes);
         req.meta = { ...(req.meta || {}), ...(out.meta || {}) };
@@ -381,15 +465,19 @@ async function applyAdjusters(base, ctx, item) {
 
 function finalizeRequirement(req, ctx, opts) {
   // Establish window ending at the desired start (if provided) or "now + lookahead"
-  const horizon = new Date(ctx.now.getTime() + opts.lookaheadHours * 60 * 60 * 1000);
+  const horizon = new Date(
+    ctx.now.getTime() + opts.lookaheadHours * 60 * 60 * 1000
+  );
   const end = toISO(req.meta?.desiredStart || horizon);
-  const start = toISO(new Date(new Date(end).getTime() - req.adjustedMinutes * 60 * 1000));
+  const start = toISO(
+    new Date(new Date(end).getTime() - req.adjustedMinutes * 60 * 1000)
+  );
   return { ...req, window: { start, end } };
 }
 
 function baseReq(kind, minutes, meta, item) {
   return {
-    id: `${kind}:${(item?.id || item?.title || 'item').toString()}`,
+    id: `${kind}:${(item?.id || item?.title || "item").toString()}`,
     label: humanize(kind),
     kind,
     baseMinutes: toInt(minutes, 0),
@@ -401,16 +489,19 @@ function baseReq(kind, minutes, meta, item) {
 
 function normalizeBaseEstimate(x, item) {
   if (!x) return null;
-  if (typeof x === 'number') return baseReq('custom', x, { source: 'scraped' }, item);
-  if (typeof x === 'object' && Number.isFinite(x.minutes)) {
+  if (typeof x === "number")
+    return baseReq("custom", x, { source: "scraped" }, item);
+  if (typeof x === "object" && Number.isFinite(x.minutes)) {
     return {
-      id: x.id || `scraped:${item?.id || item?.title || ''}:${x.kind || 'custom'}`,
-      label: x.label || humanize(x.kind || 'custom'),
-      kind: x.kind || 'custom',
+      id:
+        x.id ||
+        `scraped:${item?.id || item?.title || ""}:${x.kind || "custom"}`,
+      label: x.label || humanize(x.kind || "custom"),
+      kind: x.kind || "custom",
       baseMinutes: toInt(x.minutes, 0),
       adjustedMinutes: toInt(x.minutes, 0),
-      rationale: x.rationale ? x.rationale.slice() : ['scraped'],
-      meta: { ...(x.meta || {}), source: x.meta?.source || 'scraped' },
+      rationale: x.rationale ? x.rationale.slice() : ["scraped"],
+      meta: { ...(x.meta || {}), source: x.meta?.source || "scraped" },
     };
   }
   return null;
@@ -418,7 +509,7 @@ function normalizeBaseEstimate(x, item) {
 
 function getFromTable(knowledge, path) {
   if (!knowledge) return null;
-  const parts = String(path).split('.');
+  const parts = String(path).split(".");
   let cur = knowledge;
   for (const p of parts) {
     cur = cur?.[p];
@@ -459,8 +550,8 @@ function unique(arr) {
   return Array.from(new Set(arr));
 }
 function humanize(id) {
-  return String(id || '')
-    .replace(/[-_.]/g, ' ')
+  return String(id || "")
+    .replace(/[-_.]/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 function guessMassFromItems(items = []) {
@@ -468,7 +559,7 @@ function guessMassFromItems(items = []) {
   for (const it of items) {
     if (numberOrNull(it?.qtyKg)) return numberOrNull(it.qtyKg);
     const q = numberOrNull(it?.qty);
-    const unit = String(it?.unit || '').toLowerCase();
+    const unit = String(it?.unit || "").toLowerCase();
     if (q && /kg|kilogram/.test(unit)) return q;
     if (q && /g|gram/.test(unit)) return q / 1000;
     if (q && /lb|pound/.test(unit)) return q * 0.453592;
@@ -481,7 +572,7 @@ function guessMassFromItems(items = []) {
 
 function emit(type, data) {
   try {
-    eventBus.emit('automation.event', {
+    eventBus.emit("automation.event", {
       type,
       ts: nowISO(),
       source: SOURCE,

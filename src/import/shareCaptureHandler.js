@@ -22,7 +22,7 @@
 // KEY FEATURES
 // - Multi-domain detection from URL + keywords (recipe, cleaning, garden/seed,
 //   animal/butchery, storehouse, video/how-to).
-// - Event-driven: emits { type, ts, source, data } to src/services/eventBus.js
+// - Event-driven: emits { type, ts, source, data } to src/services/events/eventBus.js
 // - Forward-thinking: easy to add new detectors and new domains
 // - Defensive: does not crash the UI; returns structured results
 // - SSA-first: SSA owns the data; Hub export is *optional* (familyFundMode)
@@ -30,7 +30,7 @@
 //   but possible if we parsed inline data), we also call exportToHubIfEnabled.
 //
 // ASSUMPTIONS
-// - src/services/eventBus.js exists and exposes `emit(evt)`
+// - src/services/events/eventBus.js exists and exposes `emit(evt)`
 // - src/config/featureFlags.js exists
 // - src/services/hub/HubPacketFormatter.js & src/services/hub/FamilyFundConnector.js exist
 // - The server route is mounted at `/api/import`
@@ -46,8 +46,8 @@
 
 /* eslint-disable no-console */
 
-import eventBus from '../services/eventBus.js';
-import featureFlags from '../config/featureFlags.js';
+import eventBus from "../services/events/eventBus.js";
+import featureFlags from "@/config/featureFlags.json";
 
 // Soft imports for Hub (fail silently on web)
 let HubPacketFormatter = null;
@@ -56,9 +56,9 @@ try {
   // These may not exist in basic SSA builds or in browser-only bundles
   // The bundler/tree-shaker may also drop them; that's fine.
   // eslint-disable-next-line import/no-unresolved, global-require
-  HubPacketFormatter = require('../services/hub/HubPacketFormatter.js');
+  HubPacketFormatter = require("@/services/hub/HubPacketFormatter.js");
   // eslint-disable-next-line import/no-unresolved, global-require
-  FamilyFundConnector = require('../services/hub/FamilyFundConnector.js');
+  FamilyFundConnector = require("@/services/hub/FamilyFundConnector.js");
 } catch (err) {
   // ignore
 }
@@ -74,7 +74,7 @@ function emitEvent(type, source, data = {}) {
     data,
   };
   try {
-    if (eventBus && typeof eventBus.emit === 'function') {
+    if (eventBus && typeof eventBus.emit === "function") {
       eventBus.emit(evt);
     }
   } catch (err) {
@@ -104,96 +104,96 @@ async function exportToHubIfEnabled(payload) {
 // guessDomain – determine which import domain this is
 // Forward-thinking: add more detectors / rules / signatures here
 // -----------------------------------------------------------------------------
-function guessDomain({ url = '', title = '', text = '' }) {
+export function guessDomain({ url = "", title = "", text = "" }) {
   const lowerUrl = url.toLowerCase();
   const lowerTitle = title.toLowerCase();
   const lowerText = text.toLowerCase();
 
   // recipes / food
   if (
-    lowerUrl.includes('allrecipes') ||
-    lowerUrl.includes('loveandlemons') ||
-    lowerUrl.includes('foodnetwork') ||
-    lowerUrl.includes('/recipe') ||
-    lowerTitle.includes('recipe') ||
-    lowerText.includes('ingredients:')
+    lowerUrl.includes("allrecipes") ||
+    lowerUrl.includes("loveandlemons") ||
+    lowerUrl.includes("foodnetwork") ||
+    lowerUrl.includes("/recipe") ||
+    lowerTitle.includes("recipe") ||
+    lowerText.includes("ingredients:")
   ) {
-    return 'recipe';
+    return "recipe";
   }
 
   // cleaning
   if (
-    lowerUrl.includes('clean') ||
-    lowerTitle.includes('declutter') ||
-    lowerText.includes('laundry') ||
-    lowerText.includes('bathroom') ||
-    lowerText.includes('kitchen cleaning')
+    lowerUrl.includes("clean") ||
+    lowerTitle.includes("declutter") ||
+    lowerText.includes("laundry") ||
+    lowerText.includes("bathroom") ||
+    lowerText.includes("kitchen cleaning")
   ) {
-    return 'cleaning';
+    return "cleaning";
   }
 
   // garden / seed
   if (
-    lowerUrl.includes('seed') ||
-    lowerUrl.includes('garden') ||
-    lowerTitle.includes('garden') ||
-    lowerText.includes('sow ') ||
-    lowerText.includes('transplant') ||
-    lowerText.includes('harvest')
+    lowerUrl.includes("seed") ||
+    lowerUrl.includes("garden") ||
+    lowerTitle.includes("garden") ||
+    lowerText.includes("sow ") ||
+    lowerText.includes("transplant") ||
+    lowerText.includes("harvest")
   ) {
-    return 'garden';
+    return "garden";
   }
 
   // animal / butchery
   if (
-    lowerUrl.includes('butcher') ||
-    lowerUrl.includes('animal') ||
-    lowerText.includes('slaughter') ||
-    lowerText.includes('pasture') ||
-    lowerText.includes('goat') ||
-    lowerText.includes('sheep') ||
-    lowerText.includes('lamb')
+    lowerUrl.includes("butcher") ||
+    lowerUrl.includes("animal") ||
+    lowerText.includes("slaughter") ||
+    lowerText.includes("pasture") ||
+    lowerText.includes("goat") ||
+    lowerText.includes("sheep") ||
+    lowerText.includes("lamb")
   ) {
-    return 'animal';
+    return "animal";
   }
 
   // storehouse / pantry / preservation
   if (
-    lowerUrl.includes('pantry') ||
-    lowerUrl.includes('storehouse') ||
-    lowerText.includes('canning') ||
-    lowerText.includes('dehydrate') ||
-    lowerText.includes('preserve')
+    lowerUrl.includes("pantry") ||
+    lowerUrl.includes("storehouse") ||
+    lowerText.includes("canning") ||
+    lowerText.includes("dehydrate") ||
+    lowerText.includes("preserve")
   ) {
-    return 'storehouse';
+    return "storehouse";
   }
 
   // video / how-to
   if (
-    lowerUrl.includes('youtube') ||
-    lowerUrl.includes('tiktok') ||
-    lowerUrl.includes('facebook.com/watch') ||
-    lowerUrl.includes('vimeo') ||
-    lowerText.includes('how to ') ||
-    lowerTitle.includes('how to')
+    lowerUrl.includes("youtube") ||
+    lowerUrl.includes("tiktok") ||
+    lowerUrl.includes("facebook.com/watch") ||
+    lowerUrl.includes("vimeo") ||
+    lowerText.includes("how to ") ||
+    lowerTitle.includes("how to")
   ) {
-    return 'video';
+    return "video";
   }
 
   // default
-  return 'unknown';
+  return "unknown";
 }
 
 // -----------------------------------------------------------------------------
 // buildImportEnvelope – create the SSA-shaped packet
 // -----------------------------------------------------------------------------
-function buildImportEnvelope(rawShare, options = {}) {
+export function buildImportEnvelope(rawShare, options = {}) {
   const {
-    url = '',
-    title = '',
-    text = '',
-    html = '',
-    site = '',
+    url = "",
+    title = "",
+    text = "",
+    html = "",
+    site = "",
     media = null, // e.g. FileList from share target
   } = rawShare || {};
 
@@ -203,9 +203,9 @@ function buildImportEnvelope(rawShare, options = {}) {
   return {
     id: options.id || `share_${Date.now()}`,
     kind: domain, // SSA server will re-check this
-    source: 'client:share',
+    source: "client:share",
     importedAt: now,
-    site: site || (url ? new URL(url).hostname : ''),
+    site: site || (url ? new URL(url).hostname : ""),
     url,
     title,
     text,
@@ -213,12 +213,12 @@ function buildImportEnvelope(rawShare, options = {}) {
     media,
     meta: {
       capturedAt: now,
-      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
-      lang: typeof navigator !== 'undefined' ? navigator.language : '',
+      userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "",
+      lang: typeof navigator !== "undefined" ? navigator.language : "",
       clientHints: options.clientHints || null,
     },
     // forward-thinking: let the server know we came from share/bookmarklet
-    channel: 'share',
+    channel: "share",
   };
 }
 
@@ -226,13 +226,13 @@ function buildImportEnvelope(rawShare, options = {}) {
 // sendToServer – POST to /api/import
 // -----------------------------------------------------------------------------
 async function sendToServer(envelope, options = {}) {
-  const endpoint = options.endpoint || '/api/import';
+  const endpoint = options.endpoint || "/api/import";
 
   try {
     const res = await fetch(endpoint, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(envelope),
     });
@@ -270,13 +270,13 @@ async function sendToServer(envelope, options = {}) {
 // returns a structured result so UI can show success/failure
 // -----------------------------------------------------------------------------
 export async function captureFromShareTarget(rawShare, options = {}) {
-  if (!rawShare || typeof rawShare !== 'object') {
-    emitEvent('import.share.invalid', 'client:share', {
-      reason: 'No share payload',
+  if (!rawShare || typeof rawShare !== "object") {
+    emitEvent("import.share.invalid", "client:share", {
+      reason: "No share payload",
     });
     return {
       ok: false,
-      error: 'No share payload provided.',
+      error: "No share payload provided.",
     };
   }
 
@@ -284,13 +284,13 @@ export async function captureFromShareTarget(rawShare, options = {}) {
   const envelope = buildImportEnvelope(rawShare, options);
 
   // 2. Emit local capture event
-  emitEvent('import.share.captured', 'client:share', envelope);
+  emitEvent("import.share.captured", "client:share", envelope);
 
   // 3. If the client already parsed something household-changing (rare),
   //    push to Hub immediately (best-effort)
   if (envelope.generated || envelope.inventory || envelope.storehouse) {
     await exportToHubIfEnabled({
-      source: 'client:share',
+      source: "client:share",
       at: new Date().toISOString(),
       envelope,
     });
@@ -300,7 +300,7 @@ export async function captureFromShareTarget(rawShare, options = {}) {
   const serverRes = await sendToServer(envelope, options);
 
   if (!serverRes.ok) {
-    emitEvent('import.share.failed', 'client:share', {
+    emitEvent("import.share.failed", "client:share", {
       envelopeId: envelope.id,
       status: serverRes.status,
       error: serverRes.error || (serverRes.data && serverRes.data.error),
@@ -311,13 +311,13 @@ export async function captureFromShareTarget(rawShare, options = {}) {
       error:
         serverRes.error ||
         (serverRes.data && serverRes.data.error) ||
-        'Import failed on server.',
+        "Import failed on server.",
     };
   }
 
   // 5. Server responded OK → emit parsed event mirror
   //    (this is useful for optimistic UIs)
-  emitEvent('import.share.forwarded', 'client:share', {
+  emitEvent("import.share.forwarded", "client:share", {
     envelopeId: envelope.id,
     server: serverRes.data,
   });
@@ -334,7 +334,7 @@ export async function captureFromShareTarget(rawShare, options = {}) {
 // Convenience export for bookmarklets or inline scripts
 // window.__sukaShareCapture && window.__sukaShareCapture(...)
 // -----------------------------------------------------------------------------
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   // attach only once
   if (!window.__sukaShareCapture) {
     window.__sukaShareCapture = (payload, opts) =>

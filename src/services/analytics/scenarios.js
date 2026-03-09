@@ -21,12 +21,30 @@ import EventEmitter from "eventemitter3";
 let automation;
 let eventBus;
 let PreferencesStore, CoalitionStore, GroupStore, MarketplaceStore;
-try { ({ automation } = await import("@/services/automation/runtime")); } catch {}
-try { ({ eventBus } = await import("@/services/events/eventBus")); } catch {}
-try { ({ usePreferencesStore: PreferencesStore } = await import("@/store/PreferencesStore")); } catch {}
-try { ({ useCoalitionStore: CoalitionStore } = await import("@/store/CoalitionStore")); } catch {}
-try { ({ useGroupStore: GroupStore } = await import("@/store/GroupStore")); } catch {}
-try { ({ useMarketplaceStore: MarketplaceStore } = await import("@/store/MarketplaceStore")); } catch {}
+try {
+  ({ automation } = await import("@/services/automation/runtime"));
+} catch {}
+try {
+  ({ eventBus } = await import("@/services/events/eventBus"));
+} catch {}
+try {
+  ({ usePreferencesStore: PreferencesStore } = await import(
+    "@/store/PreferencesStore"
+  ));
+} catch {}
+try {
+  ({ useCoalitionStore: CoalitionStore } = await import(
+    "@/store/CoalitionStore"
+  ));
+} catch {}
+try {
+  ({ useGroupStore: GroupStore } = await import("@/store/GroupStore"));
+} catch {}
+try {
+  ({ useMarketplaceStore: MarketplaceStore } = await import(
+    "@/store/MarketplaceStore"
+  ));
+} catch {}
 
 /* -----------------------------------------------------------------------------
    Tiny platform helpers
@@ -38,8 +56,20 @@ const round2 = (n) => Math.round((Number(n || 0) + Number.EPSILON) * 100) / 100;
 const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 
 const safeJSON = {
-  parse: (s, f = null) => { try { return JSON.parse(s); } catch { return f; } },
-  stringify: (o) => { try { return JSON.stringify(o); } catch { return ""; } },
+  parse: (s, f = null) => {
+    try {
+      return JSON.parse(s);
+    } catch {
+      return f;
+    }
+  },
+  stringify: (o) => {
+    try {
+      return JSON.stringify(o);
+    } catch {
+      return "";
+    }
+  },
 };
 
 const storage = (() => {
@@ -81,7 +111,12 @@ function on(topic, handler) {
       unsubs.push(() => eventBus.off?.(topic, handler));
     }
   } catch {}
-  return () => unsubs.forEach((u) => { try { u(); } catch {} });
+  return () =>
+    unsubs.forEach((u) => {
+      try {
+        u();
+      } catch {}
+    });
 }
 
 /* -----------------------------------------------------------------------------
@@ -103,9 +138,17 @@ function registerIA() {
     section: "Analytics",
     items: [
       { to: "/analytics/scenarios", label: "Scenarios", icon: "beaker" },
-      { to: "/analytics/scenarios/create", label: "New Scenario", icon: "plus-circle" },
+      {
+        to: "/analytics/scenarios/create",
+        label: "New Scenario",
+        icon: "plus-circle",
+      },
       { to: "/analytics/scenarios/compare", label: "Compare", icon: "scales" },
-      { to: "/analytics/scenarios/coalition", label: "Coalitions", icon: "users" },
+      {
+        to: "/analytics/scenarios/coalition",
+        label: "Coalitions",
+        icon: "users",
+      },
     ],
   });
 }
@@ -113,13 +156,15 @@ function registerIA() {
 /* -----------------------------------------------------------------------------
    Registry + state + undo + persistence
 ----------------------------------------------------------------------------- */
-const REGISTRY = new Map();      // id -> ScenarioDef
-const RUNS = new Map();          // runId -> ScenarioRun
-const COMPARISONS = new Map();   // cmpId -> { id, runIds, summary, at }
+const REGISTRY = new Map(); // id -> ScenarioDef
+const RUNS = new Map(); // runId -> ScenarioRun
+const COMPARISONS = new Map(); // cmpId -> { id, runIds, summary, at }
 const UNDO = [];
 let __booted = false;
 
-function snap(obj) { return JSON.parse(JSON.stringify(obj)); }
+function snap(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
 
 function persist() {
   storage.save({
@@ -132,11 +177,15 @@ function restore() {
   const s = storage.load();
   if (!s) return;
   try {
-    REGISTRY.clear(); RUNS.clear(); COMPARISONS.clear();
+    REGISTRY.clear();
+    RUNS.clear();
+    COMPARISONS.clear();
     (s.REGISTRY || []).forEach(([k, v]) => REGISTRY.set(k, v));
     (s.RUNS || []).forEach(([k, v]) => RUNS.set(k, v));
     (s.COMPARISONS || []).forEach(([k, v]) => COMPARISONS.set(k, v));
-  } catch (e) { console.warn("[scenarios] restore failed:", e?.message || e); }
+  } catch (e) {
+    console.warn("[scenarios] restore failed:", e?.message || e);
+  }
 }
 
 function mutate(fn, meta = { reason: "unknown" }) {
@@ -148,7 +197,9 @@ function mutate(fn, meta = { reason: "unknown" }) {
   fn();
   persist();
   UNDO.push(() => {
-    REGISTRY.clear(); RUNS.clear(); COMPARISONS.clear();
+    REGISTRY.clear();
+    RUNS.clear();
+    COMPARISONS.clear();
     prev.REGISTRY.forEach(([k, v]) => REGISTRY.set(k, v));
     prev.RUNS.forEach(([k, v]) => RUNS.set(k, v));
     prev.COMPARISONS.forEach(([k, v]) => COMPARISONS.set(k, v));
@@ -172,12 +223,16 @@ export function undoScenarioChange() {
    }
 ----------------------------------------------------------------------------- */
 export function registerScenario(def) {
-  if (!def?.id || typeof def?.evaluator !== "function") throw new Error("Invalid scenario definition");
-  mutate(() => REGISTRY.set(def.id, def), { reason: "registerScenario", id: def.id });
+  if (!def?.id || typeof def?.evaluator !== "function")
+    throw new Error("Invalid scenario definition");
+  mutate(() => REGISTRY.set(def.id, def), {
+    reason: "registerScenario",
+    id: def.id,
+  });
 }
 export function listScenarios({ tag } = {}) {
   const all = Array.from(REGISTRY.values());
-  return tag ? all.filter(s => (s.tags || []).includes(tag)) : all;
+  return tag ? all.filter((s) => (s.tags || []).includes(tag)) : all;
 }
 export function removeScenario(id) {
   mutate(() => REGISTRY.delete(id), { reason: "removeScenario", id });
@@ -206,7 +261,11 @@ function scoringWeights() {
   try {
     const prefs = PreferencesStore?.();
     const w = prefs?.analytics?.scenarioWeights;
-    if (w) return { ...{ cost: 0.35, time: 0.25, availability: 0.25, diversity: 0.15 }, ...w };
+    if (w)
+      return {
+        ...{ cost: 0.35, time: 0.25, availability: 0.25, diversity: 0.15 },
+        ...w,
+      };
   } catch {}
   return { cost: 0.35, time: 0.25, availability: 0.25, diversity: 0.15 };
 }
@@ -214,39 +273,67 @@ function scoringWeights() {
 /* -----------------------------------------------------------------------------
    Run + Compare
 ----------------------------------------------------------------------------- */
-export async function runScenario({ scenarioId, inputs = {}, contextProvider, timeoutMs = 15000 }) {
+export async function runScenario({
+  scenarioId,
+  inputs = {},
+  contextProvider,
+  timeoutMs = 15000,
+}) {
   const def = REGISTRY.get(scenarioId);
   if (!def) throw new Error(`Scenario "${scenarioId}" not found`);
 
-  const context = typeof contextProvider === "function" ? await contextProvider() : {};
+  const context =
+    typeof contextProvider === "function" ? await contextProvider() : {};
   if (def.guard) {
     try {
       const ok = await def.guard(context, inputs);
       if (!ok) throw new Error("Scenario guard prevented execution");
-    } catch (e) { throw new Error(e?.message || "Scenario guard failed"); }
+    } catch (e) {
+      throw new Error(e?.message || "Scenario guard failed");
+    }
   }
 
-  const helpers = { sum, uniq, uniqBy, estimateRecipeCost, detectMissing, round: round2, clamp };
-  const exec = Promise.resolve(def.evaluator(context, { ...(def.inputs || {}), ...inputs }, helpers));
-  const metrics = await withTimeout(exec, timeoutMs, `Scenario "${scenarioId}" timed out`);
+  const helpers = {
+    sum,
+    uniq,
+    uniqBy,
+    estimateRecipeCost,
+    detectMissing,
+    round: round2,
+    clamp,
+  };
+  const exec = Promise.resolve(
+    def.evaluator(context, { ...(def.inputs || {}), ...inputs }, helpers)
+  );
+  const metrics = await withTimeout(
+    exec,
+    timeoutMs,
+    `Scenario "${scenarioId}" timed out`
+  );
 
   const id = crypto.randomUUID?.() || `run_${Date.now()}`;
-  mutate(() => RUNS.set(id, { id, scenarioId, inputs, metrics, at: now() }), { reason: "runScenario", scenarioId });
+  mutate(() => RUNS.set(id, { id, scenarioId, inputs, metrics, at: now() }), {
+    reason: "runScenario",
+    scenarioId,
+  });
   suggestAfterRun(def, metrics);
   return RUNS.get(id);
 }
 
 export function listRuns({ scenarioId } = {}) {
   const all = Array.from(RUNS.values()).sort((a, b) => b.at - a.at);
-  return scenarioId ? all.filter(r => r.scenarioId === scenarioId) : all;
+  return scenarioId ? all.filter((r) => r.scenarioId === scenarioId) : all;
 }
 
 export function compareRuns(runIds = []) {
-  const runs = runIds.map(id => RUNS.get(id)).filter(Boolean);
+  const runs = runIds.map((id) => RUNS.get(id)).filter(Boolean);
   if (runs.length < 2) throw new Error("Need at least two runs to compare");
   const summary = buildComparisonSummary(runs);
   const id = crypto.randomUUID?.() || `cmp_${Date.now()}`;
-  mutate(() => COMPARISONS.set(id, { id, runIds, summary, at: now() }), { reason: "compareRuns", runCount: runs.length });
+  mutate(() => COMPARISONS.set(id, { id, runIds, summary, at: now() }), {
+    reason: "compareRuns",
+    runCount: runs.length,
+  });
   suggestAfterCompare(summary);
   return COMPARISONS.get(id);
 }
@@ -264,10 +351,13 @@ function buildComparisonSummary(runs) {
   const scored = runs.map((r) => {
     const m = r.metrics || {};
     const cost = Number(m.cost?.total ?? 0);
-    const time = Number(m.time?.prepMinutes ?? 0) + Number(m.time?.cookMinutes ?? 0);
+    const time =
+      Number(m.time?.prepMinutes ?? 0) + Number(m.time?.cookMinutes ?? 0);
     const shortage = Number(m.availability?.missingItems?.length ?? 0);
     const subs = Number(m.availability?.substitutionCount ?? 0);
-    const diversity = Number(m.diversity?.uniqueCuisines ?? 0) + Number(m.diversity?.uniqueProteins ?? 0);
+    const diversity =
+      Number(m.diversity?.uniqueCuisines ?? 0) +
+      Number(m.diversity?.uniqueProteins ?? 0);
 
     // normalize → higher is better
     // caps keep scale sane for UI
@@ -292,7 +382,12 @@ function buildComparisonSummary(runs) {
   const radar = buildRadar(scored);
 
   // Menu overlap signal (helps shared family planning & creator bundles)
-  const overlap = menuOverlap(scored.map(s => ({ runId: s.runId, ids: s.metrics?.menu?.recipeIds || [] })));
+  const overlap = menuOverlap(
+    scored.map((s) => ({
+      runId: s.runId,
+      ids: s.metrics?.menu?.recipeIds || [],
+    }))
+  );
 
   return { scored, winner, deltas, radar, overlap };
 }
@@ -303,8 +398,9 @@ function buildDeltas(scored) {
   const bm = base.metrics || {};
   const bCost = bm.cost?.total ?? 0;
   const bTime = (bm.time?.prepMinutes ?? 0) + (bm.time?.cookMinutes ?? 0);
-  const bShort = (bm.availability?.missingItems?.length ?? 0);
-  const bDiv = (bm.diversity?.uniqueCuisines ?? 0) + (bm.diversity?.uniqueProteins ?? 0);
+  const bShort = bm.availability?.missingItems?.length ?? 0;
+  const bDiv =
+    (bm.diversity?.uniqueCuisines ?? 0) + (bm.diversity?.uniqueProteins ?? 0);
 
   return scored.slice(1).map((s) => {
     const m = s.metrics || {};
@@ -313,9 +409,14 @@ function buildDeltas(scored) {
       vsWinner: {
         score: round2(base.score - s.score),
         costDiff: round2((m.cost?.total ?? 0) - bCost),
-        timeDiff:  round2(((m.time?.prepMinutes ?? 0) + (m.time?.cookMinutes ?? 0)) - bTime),
-        shortageDiff: ((m.availability?.missingItems?.length ?? 0) - bShort),
-        diversityDiff: (((m.diversity?.uniqueCuisines ?? 0) + (m.diversity?.uniqueProteins ?? 0)) - bDiv),
+        timeDiff: round2(
+          (m.time?.prepMinutes ?? 0) + (m.time?.cookMinutes ?? 0) - bTime
+        ),
+        shortageDiff: (m.availability?.missingItems?.length ?? 0) - bShort,
+        diversityDiff:
+          (m.diversity?.uniqueCuisines ?? 0) +
+          (m.diversity?.uniqueProteins ?? 0) -
+          bDiv,
       },
     };
   });
@@ -326,28 +427,47 @@ function buildRadar(scored) {
   return scored.map((s) => {
     const m = s.metrics || {};
     const costAxis = 100 - clamp((m.cost?.total ?? 0) / 10, 0, 100);
-    const timeAxis = 100 - clamp(((m.time?.prepMinutes ?? 0) + (m.time?.cookMinutes ?? 0)), 0, 100);
-    const availAxis = 100 - clamp(((m.availability?.missingItems?.length ?? 0) * 10), 0, 100);
-    const divAxis = clamp(((m.diversity?.uniqueCuisines ?? 0) + (m.diversity?.uniqueProteins ?? 0)), 0, 100);
-    return { runId: s.runId, axes: { cost: round2(costAxis), time: round2(timeAxis), availability: round2(availAxis), diversity: round2(divAxis) } };
+    const timeAxis =
+      100 -
+      clamp((m.time?.prepMinutes ?? 0) + (m.time?.cookMinutes ?? 0), 0, 100);
+    const availAxis =
+      100 - clamp((m.availability?.missingItems?.length ?? 0) * 10, 0, 100);
+    const divAxis = clamp(
+      (m.diversity?.uniqueCuisines ?? 0) + (m.diversity?.uniqueProteins ?? 0),
+      0,
+      100
+    );
+    return {
+      runId: s.runId,
+      axes: {
+        cost: round2(costAxis),
+        time: round2(timeAxis),
+        availability: round2(availAxis),
+        diversity: round2(divAxis),
+      },
+    };
   });
 }
 
 function menuOverlap(entries) {
   // Jaccard-esque overlap across runs to surface “anchor dinners”
-  const sets = entries.map(e => new Set(e.ids));
-  const all = new Set(entries.flatMap(e => e.ids));
+  const sets = entries.map((e) => new Set(e.ids));
+  const all = new Set(entries.flatMap((e) => e.ids));
   const freq = new Map();
   for (const id of all) {
     let n = 0;
     for (const st of sets) if (st.has(id)) n++;
     freq.set(id, n);
   }
-  const shared = Array.from(freq.entries()).filter(([, n]) => n >= 2).sort((a, b) => b[1] - a[1]);
+  const shared = Array.from(freq.entries())
+    .filter(([, n]) => n >= 2)
+    .sort((a, b) => b[1] - a[1]);
   const overlapIndex = all.size ? round2(shared.length / all.size) : 0;
   return {
     overlapIndex,
-    topShared: shared.slice(0, 6).map(([recipeId, runs]) => ({ recipeId, runs })),
+    topShared: shared
+      .slice(0, 6)
+      .map(([recipeId, runs]) => ({ recipeId, runs })),
   };
 }
 
@@ -360,24 +480,52 @@ function suggest(message, actions = [], source = "analytics.scenarios") {
 function suggestAfterRun(def, metrics) {
   const actions = [];
   const miss = metrics?.availability?.missingItems?.length ?? 0;
-  if (miss > 0) actions.push({ label: `Fix ${miss} missing items`, topic: "grocery.generate.request", payload: { horizonDays: 7 } });
-  if ((metrics?.labels?.needed ?? 0) > 0) actions.push({ label: "Print labels", topic: "export.labels.open" });
-  if (metrics?.storehouse && (Object.keys(metrics.storehouse.used || {}).length || Object.keys(metrics.storehouse.added || {}).length)) {
+  if (miss > 0)
+    actions.push({
+      label: `Fix ${miss} missing items`,
+      topic: "grocery.generate.request",
+      payload: { horizonDays: 7 },
+    });
+  if ((metrics?.labels?.needed ?? 0) > 0)
+    actions.push({ label: "Print labels", topic: "export.labels.open" });
+  if (
+    metrics?.storehouse &&
+    (Object.keys(metrics.storehouse.used || {}).length ||
+      Object.keys(metrics.storehouse.added || {}).length)
+  ) {
     actions.push({ label: "Update storehouse", topic: "inventory.open" });
   }
-  actions.push({ label: "Share with family", topic: "share.open" }, { label: "Add tasks to calendar", topic: "calendar.create.bulk" });
-  suggest(`Scenario "${def.label}" evaluated. Next step?`, actions, "scenario.run");
+  actions.push(
+    { label: "Share with family", topic: "share.open" },
+    { label: "Add tasks to calendar", topic: "calendar.create.bulk" }
+  );
+  suggest(
+    `Scenario "${def.label}" evaluated. Next step?`,
+    actions,
+    "scenario.run"
+  );
 }
 function suggestAfterCompare(summary) {
   const winnerLabel = summary?.winner?.label || "Best option";
-  const shared = (summary?.overlap?.topShared || []).slice(0, 3).map(x => x.recipeId);
+  const shared = (summary?.overlap?.topShared || [])
+    .slice(0, 3)
+    .map((x) => x.recipeId);
   const actions = [
     { label: "Apply to Meal Plan", topic: "mealplan.apply.fromScenario" },
     { label: "Save as Preset", topic: "scenario.savePreset.open" },
     { label: "Share Decision", topic: "share.open" },
   ];
-  if (shared.length) actions.unshift({ label: "Set Anchor Dinners", topic: "mealplan.anchors.set", payload: { recipeIds: shared } });
-  suggest(`${winnerLabel} wins. Apply, save, or set anchors?`, actions, "scenario.compare");
+  if (shared.length)
+    actions.unshift({
+      label: "Set Anchor Dinners",
+      topic: "mealplan.anchors.set",
+      payload: { recipeIds: shared },
+    });
+  suggest(
+    `${winnerLabel} wins. Apply, save, or set anchors?`,
+    actions,
+    "scenario.compare"
+  );
 }
 
 /* -----------------------------------------------------------------------------
@@ -388,21 +536,40 @@ registerDefaultScenario({
   label: "Diet Rule: Shellfish Allowed vs Disallowed",
   tags: ["meals", "diet"],
   inputs: { allowed: true },
-  evaluator: (ctx, { allowed }, { estimateRecipeCost, detectMissing, uniq }) => {
-    const recipes = (ctx.mealPlan?.recipes || []).filter(r => allowed || !((r.tags || []).includes("shellfish")));
-    const cost = recipes.reduce((sum, r) => sum + (estimateRecipeCost(r, ctx) || 0), 0);
+  evaluator: (
+    ctx,
+    { allowed },
+    { estimateRecipeCost, detectMissing, uniq }
+  ) => {
+    const recipes = (ctx.mealPlan?.recipes || []).filter(
+      (r) => allowed || !(r.tags || []).includes("shellfish")
+    );
+    const cost = recipes.reduce(
+      (sum, r) => sum + (estimateRecipeCost(r, ctx) || 0),
+      0
+    );
     const missingItems = detectMissing(recipes, ctx.inventory);
     const time = {
-      prepMinutes: sum(recipes.map(r => r.prepMinutes || 10)),
-      cookMinutes: sum(recipes.map(r => r.cookMinutes || 20)),
+      prepMinutes: sum(recipes.map((r) => r.prepMinutes || 10)),
+      cookMinutes: sum(recipes.map((r) => r.cookMinutes || 20)),
     };
     return {
-      cost: { total: round2(cost), perMeal: round2(cost / Math.max(recipes.length, 1)) },
+      cost: {
+        total: round2(cost),
+        perMeal: round2(cost / Math.max(recipes.length, 1)),
+      },
       availability: { missingItems, substitutionCount: 0 },
-      diversity: { uniqueCuisines: uniq(recipes.map(r => r.cuisine)).length, uniqueProteins: uniq(recipes.map(r => r.protein)).length },
+      diversity: {
+        uniqueCuisines: uniq(recipes.map((r) => r.cuisine)).length,
+        uniqueProteins: uniq(recipes.map((r) => r.protein)).length,
+      },
       time,
-      menu: { recipeIds: recipes.map(r => r.id) },
-      notes: [allowed ? "Broader menu may reduce substitutions." : "Filtered to compliant dishes."],
+      menu: { recipeIds: recipes.map((r) => r.id) },
+      notes: [
+        allowed
+          ? "Broader menu may reduce substitutions."
+          : "Filtered to compliant dishes.",
+      ],
     };
   },
 });
@@ -415,15 +582,31 @@ registerDefaultScenario({
   evaluator: (ctx, { tier }, { estimateRecipeCost, detectMissing, uniq }) => {
     const mult = tier === "tight" ? 0.9 : tier === "abundant" ? 1.15 : 1.0;
     const recipes = ctx.mealPlan?.recipes || [];
-    const baseCost = recipes.reduce((sum, r) => sum + (estimateRecipeCost(r, ctx) || 0), 0);
+    const baseCost = recipes.reduce(
+      (sum, r) => sum + (estimateRecipeCost(r, ctx) || 0),
+      0
+    );
     const missingItems = detectMissing(recipes, ctx.inventory);
     return {
-      cost: { total: round2(baseCost * mult), perMeal: round2((baseCost * mult) / Math.max(recipes.length, 1)) },
+      cost: {
+        total: round2(baseCost * mult),
+        perMeal: round2((baseCost * mult) / Math.max(recipes.length, 1)),
+      },
       availability: { missingItems, substitutionCount: 0 },
-      diversity: { uniqueCuisines: uniq(recipes.map(r => r.cuisine)).length, uniqueProteins: uniq(recipes.map(r => r.protein)).length },
-      time: { prepMinutes: sum(recipes.map(r => r.prepMinutes || 10)), cookMinutes: sum(recipes.map(r => r.cookMinutes || 20)) },
-      menu: { recipeIds: recipes.map(r => r.id) },
-      notes: [`"${tier}" tier adjusts expected spend by ${(mult * 100 - 100).toFixed(0)}%.`],
+      diversity: {
+        uniqueCuisines: uniq(recipes.map((r) => r.cuisine)).length,
+        uniqueProteins: uniq(recipes.map((r) => r.protein)).length,
+      },
+      time: {
+        prepMinutes: sum(recipes.map((r) => r.prepMinutes || 10)),
+        cookMinutes: sum(recipes.map((r) => r.cookMinutes || 20)),
+      },
+      menu: { recipeIds: recipes.map((r) => r.id) },
+      notes: [
+        `"${tier}" tier adjusts expected spend by ${(mult * 100 - 100).toFixed(
+          0
+        )}%.`,
+      ],
     };
   },
 });
@@ -436,16 +619,34 @@ registerDefaultScenario({
   evaluator: (ctx, { mode }, { estimateRecipeCost, detectMissing, uniq }) => {
     const recipes = ctx.mealPlan?.recipes || [];
     const localBonus = mode === "local" ? -0.08 : 0.05;
-    const cost = recipes.reduce((sum, r) => sum + (estimateRecipeCost(r, ctx) || 0), 0) * (1 + localBonus);
+    const cost =
+      recipes.reduce((sum, r) => sum + (estimateRecipeCost(r, ctx) || 0), 0) *
+      (1 + localBonus);
     const seasonal = ctx.seasons?.inSeasonIds || [];
-    const missingItems = mode === "local" ? detectMissing(recipes, ctx.inventory, seasonal) : detectMissing(recipes, ctx.inventory);
+    const missingItems =
+      mode === "local"
+        ? detectMissing(recipes, ctx.inventory, seasonal)
+        : detectMissing(recipes, ctx.inventory);
     return {
-      cost: { total: round2(cost), perMeal: round2(cost / Math.max(recipes.length, 1)) },
+      cost: {
+        total: round2(cost),
+        perMeal: round2(cost / Math.max(recipes.length, 1)),
+      },
       availability: { missingItems, substitutionCount: 0 },
-      diversity: { uniqueCuisines: uniq(recipes.map(r => r.cuisine)).length, uniqueProteins: uniq(recipes.map(r => r.protein)).length },
-      time: { prepMinutes: sum(recipes.map(r => r.prepMinutes || 10)), cookMinutes: sum(recipes.map(r => r.cookMinutes || 20)) },
-      menu: { recipeIds: recipes.map(r => r.id) },
-      notes: [mode === "local" ? "Seasonality may increase missing items." : "Relaxed seasonality; availability often improves at higher cost."],
+      diversity: {
+        uniqueCuisines: uniq(recipes.map((r) => r.cuisine)).length,
+        uniqueProteins: uniq(recipes.map((r) => r.protein)).length,
+      },
+      time: {
+        prepMinutes: sum(recipes.map((r) => r.prepMinutes || 10)),
+        cookMinutes: sum(recipes.map((r) => r.cookMinutes || 20)),
+      },
+      menu: { recipeIds: recipes.map((r) => r.id) },
+      notes: [
+        mode === "local"
+          ? "Seasonality may increase missing items."
+          : "Relaxed seasonality; availability often improves at higher cost.",
+      ],
     };
   },
 });
@@ -456,19 +657,35 @@ registerDefaultScenario({
   tags: ["meals", "time"],
   inputs: { window: "weeknight" },
   evaluator: (ctx, { window }, { estimateRecipeCost, detectMissing, uniq }) => {
-    const recipes = (ctx.mealPlan?.recipes || []).filter(r => {
+    const recipes = (ctx.mealPlan?.recipes || []).filter((r) => {
       const total = (r.prepMinutes || 10) + (r.cookMinutes || 20);
       return window === "weeknight" ? total <= 45 : true;
     });
-    const cost = recipes.reduce((sum, r) => sum + (estimateRecipeCost(r, ctx) || 0), 0);
+    const cost = recipes.reduce(
+      (sum, r) => sum + (estimateRecipeCost(r, ctx) || 0),
+      0
+    );
     const missingItems = detectMissing(recipes, ctx.inventory);
     return {
-      cost: { total: round2(cost), perMeal: round2(cost / Math.max(recipes.length, 1)) },
+      cost: {
+        total: round2(cost),
+        perMeal: round2(cost / Math.max(recipes.length, 1)),
+      },
       availability: { missingItems, substitutionCount: 0 },
-      diversity: { uniqueCuisines: uniq(recipes.map(r => r.cuisine)).length, uniqueProteins: uniq(recipes.map(r => r.protein)).length },
-      time: { prepMinutes: sum(recipes.map(r => r.prepMinutes || 10)), cookMinutes: sum(recipes.map(r => r.cookMinutes || 20)) },
-      menu: { recipeIds: recipes.map(r => r.id) },
-      notes: [window === "weeknight" ? "≤45 minutes for easier evenings." : "Weekend allows longer cooks and more variety."],
+      diversity: {
+        uniqueCuisines: uniq(recipes.map((r) => r.cuisine)).length,
+        uniqueProteins: uniq(recipes.map((r) => r.protein)).length,
+      },
+      time: {
+        prepMinutes: sum(recipes.map((r) => r.prepMinutes || 10)),
+        cookMinutes: sum(recipes.map((r) => r.cookMinutes || 20)),
+      },
+      menu: { recipeIds: recipes.map((r) => r.id) },
+      notes: [
+        window === "weeknight"
+          ? "≤45 minutes for easier evenings."
+          : "Weekend allows longer cooks and more variety.",
+      ],
     };
   },
 });
@@ -483,9 +700,13 @@ registerDefaultScenario({
   inputs: { price: 9.99 },
   evaluator: (ctx, { price }) => {
     // Very lightweight: estimate fit by overlap with “popular” recipes & macro-friendly bias
-    const popularIds = new Set((ctx.market?.popularRecipeIds || []).slice(0, 20));
-    const planIds = (ctx.mealPlan?.recipes || []).map(r => r.id);
-    const overlap = planIds.filter(id => popularIds.has(id)).length / Math.max(1, planIds.length);
+    const popularIds = new Set(
+      (ctx.market?.popularRecipeIds || []).slice(0, 20)
+    );
+    const planIds = (ctx.mealPlan?.recipes || []).map((r) => r.id);
+    const overlap =
+      planIds.filter((id) => popularIds.has(id)).length /
+      Math.max(1, planIds.length);
     const macroBias = ctx.preferences?.cooking?.macroBias || "balanced"; // e.g., high-protein
     const macroFit = macroBias === "balanced" ? 0.9 : 0.8; // placeholder
 
@@ -503,8 +724,12 @@ registerDefaultScenario({
    Coalition helpers (optional)
 ----------------------------------------------------------------------------- */
 async function resolveMemberKitchen(userId) {
-  try { return await CoalitionStore?.getMemberKitchen?.(userId); } catch {}
-  try { return await GroupStore?.getMemberKitchen?.(userId); } catch {}
+  try {
+    return await CoalitionStore?.getMemberKitchen?.(userId);
+  } catch {}
+  try {
+    return await GroupStore?.getMemberKitchen?.(userId);
+  } catch {}
   return null;
 }
 
@@ -531,10 +756,19 @@ function registerListeners() {
       emit("analytics.nudge", {
         at: now(),
         source: "analytics.scenarios",
-        message: "Context changed. Re-run your scenarios to keep decisions sharp.",
+        message:
+          "Context changed. Re-run your scenarios to keep decisions sharp.",
         actions: [
-          { label: "Open Scenarios", topic: "ui.goto", payload: { to: "/analytics/scenarios" } },
-          { label: "Compare Runs", topic: "ui.goto", payload: { to: "/analytics/scenarios/compare" } },
+          {
+            label: "Open Scenarios",
+            topic: "ui.goto",
+            payload: { to: "/analytics/scenarios" },
+          },
+          {
+            label: "Compare Runs",
+            topic: "ui.goto",
+            payload: { to: "/analytics/scenarios/compare" },
+          },
         ],
       });
     });
@@ -556,10 +790,19 @@ export function bootstrapScenarioAnalytics() {
 
   if (REGISTRY.size === 0) {
     emit("analytics.empty", {
-      message: "No scenarios yet. Try a quick one (Shellfish toggle, Budget tiers).",
+      message:
+        "No scenarios yet. Try a quick one (Shellfish toggle, Budget tiers).",
       actions: [
-        { label: "Create Scenario", topic: "ui.goto", payload: { to: "/analytics/scenarios/create" } },
-        { label: "Browse Defaults", topic: "ui.goto", payload: { to: "/analytics/scenarios" } },
+        {
+          label: "Create Scenario",
+          topic: "ui.goto",
+          payload: { to: "/analytics/scenarios/create" },
+        },
+        {
+          label: "Browse Defaults",
+          topic: "ui.goto",
+          payload: { to: "/analytics/scenarios" },
+        },
       ],
     });
   }
@@ -571,18 +814,35 @@ export function bootstrapScenarioAnalytics() {
 /* -----------------------------------------------------------------------------
    Optional getters for widgets
 ----------------------------------------------------------------------------- */
-export function getScenarioRegistrySnapshot() { return snap(Array.from(REGISTRY.values())); }
-export function getRunsSnapshot() { return snap(Array.from(RUNS.values()).sort((a, b) => b.at - a.at)); }
-export function getComparisonsSnapshot() { return snap(Array.from(COMPARISONS.values()).sort((a, b) => b.at - a.at)); }
+export function getScenarioRegistrySnapshot() {
+  return snap(Array.from(REGISTRY.values()));
+}
+export function getRunsSnapshot() {
+  return snap(Array.from(RUNS.values()).sort((a, b) => b.at - a.at));
+}
+export function getComparisonsSnapshot() {
+  return snap(Array.from(COMPARISONS.values()).sort((a, b) => b.at - a.at));
+}
 
 /* -----------------------------------------------------------------------------
    Utilities & estimators (swappable with domain logic)
 ----------------------------------------------------------------------------- */
-function sum(arr) { return (arr || []).reduce((a, b) => a + (Number(b) || 0), 0); }
-function uniq(arr) { return Array.from(new Set((arr || []).filter(Boolean))); }
+function sum(arr) {
+  return (arr || []).reduce((a, b) => a + (Number(b) || 0), 0);
+}
+function uniq(arr) {
+  return Array.from(new Set((arr || []).filter(Boolean)));
+}
 function uniqBy(arr, keyFn) {
-  const seen = new Set(); const out = [];
-  for (const it of (arr || [])) { const key = keyFn(it); if (!seen.has(key)) { seen.add(key); out.push(it); } }
+  const seen = new Set();
+  const out = [];
+  for (const it of arr || []) {
+    const key = keyFn(it);
+    if (!seen.has(key)) {
+      seen.add(key);
+      out.push(it);
+    }
+  }
   return out;
 }
 function estimateRecipeCost(recipe, ctx) {
@@ -595,7 +855,12 @@ function estimateRecipeCost(recipe, ctx) {
   }, 0);
 }
 function detectMissing(recipes, inventory, requireInSeasonIds) {
-  const inv = new Map((inventory?.items || []).map((row) => [String(row.itemId || row.name).toLowerCase(), Number(row.qty || 0)]));
+  const inv = new Map(
+    (inventory?.items || []).map((row) => [
+      String(row.itemId || row.name).toLowerCase(),
+      Number(row.qty || 0),
+    ])
+  );
   const missing = [];
   (recipes || []).forEach((r) => {
     (r.ingredients || []).forEach((ing) => {
@@ -604,17 +869,34 @@ function detectMissing(recipes, inventory, requireInSeasonIds) {
       const have = inv.get(key) ?? 0;
       if (Array.isArray(requireInSeasonIds) && requireInSeasonIds.length > 0) {
         const inSeason = requireInSeasonIds.includes(ing.itemId);
-        if (!inSeason) missing.push({ itemId: ing.itemId, name: ing.name, reason: "off-season" });
+        if (!inSeason)
+          missing.push({
+            itemId: ing.itemId,
+            name: ing.name,
+            reason: "off-season",
+          });
       }
-      if (have < needed) missing.push({ itemId: ing.itemId, name: ing.name, reason: "insufficient" });
+      if (have < needed)
+        missing.push({
+          itemId: ing.itemId,
+          name: ing.name,
+          reason: "insufficient",
+        });
     });
   });
   return uniqBy(missing, (m) => `${m.itemId || m.name}:${m.reason}`);
 }
 async function withTimeout(promise, ms, msg = "Timed out") {
   if (!ms || ms <= 0) return promise;
-  let t; const timeout = new Promise((_, rej) => t = setTimeout(() => rej(new Error(msg)), ms));
-  try { return await Promise.race([promise, timeout]); } finally { clearTimeout(t); }
+  let t;
+  const timeout = new Promise(
+    (_, rej) => (t = setTimeout(() => rej(new Error(msg)), ms))
+  );
+  try {
+    return await Promise.race([promise, timeout]);
+  } finally {
+    clearTimeout(t);
+  }
 }
 
 /* -----------------------------------------------------------------------------
@@ -637,7 +919,13 @@ async function withTimeout(promise, ms, msg = "Timed out") {
             at: now(),
             source: "analytics.scenarios",
             message: "No recent scenario runs. Want to try a quick scenario?",
-            actions: [{ label: "Open Scenarios", topic: "ui.goto", payload: { to: "/analytics/scenarios" } }],
+            actions: [
+              {
+                label: "Open Scenarios",
+                topic: "ui.goto",
+                payload: { to: "/analytics/scenarios" },
+              },
+            ],
           });
         }
         return { ok: true, count: runs.length };

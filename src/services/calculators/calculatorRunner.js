@@ -34,7 +34,7 @@
  * - This runner is defensive and will gracefully handle missing exports.
  */
 
-import eventBus from "@/services/eventBus";
+import eventBus from "@/services/events/eventBus";
 import {
   getCalculator,
   getCalculatorShimLoader,
@@ -526,7 +526,9 @@ function buildSessionFromResult(calculatorId, shim, result, context) {
 function fallbackSessionTitle(calculatorId) {
   const parts = calculatorId.split(".");
   const raw = parts[parts.length - 1] || calculatorId;
-  const pretty = raw.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/[\._-]/g, " ");
+  const pretty = raw
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/[\._-]/g, " ");
   return `Session from ${pretty}`;
 }
 
@@ -578,7 +580,9 @@ function sanitizeContext(context = {}) {
 
   return {
     userId:
-      typeof ctx.userId === "string" && ctx.userId.trim() ? ctx.userId : undefined,
+      typeof ctx.userId === "string" && ctx.userId.trim()
+        ? ctx.userId
+        : undefined,
     householdId:
       typeof ctx.householdId === "string" && ctx.householdId.trim()
         ? ctx.householdId

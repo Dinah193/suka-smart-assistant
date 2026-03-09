@@ -37,14 +37,21 @@
 // -----------------------------------------------------------------------------
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { AlertTriangle, Clock, Timer, ScanLine, Info, RefreshCw } from "lucide-react";
+import {
+  AlertTriangle,
+  Clock,
+  Timer,
+  ScanLine,
+  Info,
+  RefreshCw,
+} from "lucide-react";
 
 let eventBus = { emit: () => {}, on: () => {}, off: () => {} };
 try {
   // Defensive import; panel still works if bus not present.
   // eslint-disable-next-line import/no-unresolved
-  const eb = require("@/services/eventBus");
-  eventBus = eb && (eb.default || eb.eventBus || eb) || eventBus;
+  const eb = require("@/services/events/eventBus");
+  eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch (_) {}
 
 const SOURCE = "ui.components.scheduling.TodayPlanPanel";
@@ -90,12 +97,15 @@ export default function TodayPlanPanel({
 
   // Preprocess sessions for the day view
   const rows = useMemo(() => {
-    const mapped = (Array.isArray(sessions) ? sessions : []).map((s) => toRow(s, timezone, day));
+    const mapped = (Array.isArray(sessions) ? sessions : []).map((s) =>
+      toRow(s, timezone, day)
+    );
     // Sort by start then deadline then priority desc
     mapped.sort((a, b) => {
       if (a.hasTimes && b.hasTimes) {
         if (a.startMin !== b.startMin) return a.startMin - b.startMin;
-        if (a.deadlineMin !== b.deadlineMin) return a.deadlineMin - b.deadlineMin;
+        if (a.deadlineMin !== b.deadlineMin)
+          return a.deadlineMin - b.deadlineMin;
       } else if (a.hasTimes !== b.hasTimes) {
         return a.hasTimes ? -1 : 1;
       }
@@ -221,7 +231,11 @@ function Row({ row, compact, onClick }) {
       <div className="absolute left-3 top-1.5 bottom-1.5 w-20">
         <div className="flex flex-col h-full justify-between">
           <div className="text-[13px] font-medium text-slate-800 line-clamp-2 pr-2">
-            <span className={`inline-block px-1.5 py-0.5 mr-1 rounded-md text-white ${domainBadge(row.domain)}`}>
+            <span
+              className={`inline-block px-1.5 py-0.5 mr-1 rounded-md text-white ${domainBadge(
+                row.domain
+              )}`}
+            >
               {domainShort(row.domain)}
             </span>
             {row.title}
@@ -230,7 +244,9 @@ function Row({ row, compact, onClick }) {
             <Timer className="w-3 h-3" />
             <span>{row.estimatedMinutes}m</span>
             {row.priority != null && (
-              <span className="ml-1 rounded px-1 bg-slate-100 text-slate-600">P{row.priority}</span>
+              <span className="ml-1 rounded px-1 bg-slate-100 text-slate-600">
+                P{row.priority}
+              </span>
             )}
           </div>
         </div>
@@ -441,30 +457,56 @@ function toParts(d, tz) {
 // Styling helpers
 function domainBadge(domain) {
   switch (String(domain || "general").toLowerCase()) {
-    case "cooking": return "bg-emerald-600";
-    case "cleaning": return "bg-sky-600";
-    case "garden": return "bg-lime-600";
-    case "animal": return "bg-amber-600";
-    case "preservation": return "bg-fuchsia-600";
-    case "storehouse": return "bg-indigo-600";
-    default: return "bg-slate-600";
+    case "cooking":
+      return "bg-emerald-600";
+    case "cleaning":
+      return "bg-sky-600";
+    case "garden":
+      return "bg-lime-600";
+    case "animal":
+      return "bg-amber-600";
+    case "preservation":
+      return "bg-fuchsia-600";
+    case "storehouse":
+      return "bg-indigo-600";
+    default:
+      return "bg-slate-600";
   }
 }
 function domainShort(domain) {
   switch (String(domain || "gen").toLowerCase()) {
-    case "cooking": return "CK";
-    case "cleaning": return "CL";
-    case "garden": return "GD";
-    case "animal": return "AN";
-    case "preservation": return "PR";
-    case "storehouse": return "SH";
-    default: return "GN";
+    case "cooking":
+      return "CK";
+    case "cleaning":
+      return "CL";
+    case "garden":
+      return "GD";
+    case "animal":
+      return "AN";
+    case "preservation":
+      return "PR";
+    case "storehouse":
+      return "SH";
+    default:
+      return "GN";
   }
 }
 
 // Small utils
-function clampPos(n) { const x = Number(n) || 0; return x < 0 ? 0 : x; }
-function clampRange(n, lo, hi) { return Math.min(hi, Math.max(lo, n)); }
-function clamp01(x) { return Math.min(1, Math.max(0, x)); }
-function pad2(n) { return String(n).padStart(2, "0"); }
-function safeInt(v, fallback) { const n = Number(v); return Number.isFinite(n) ? n : (fallback || 0); }
+function clampPos(n) {
+  const x = Number(n) || 0;
+  return x < 0 ? 0 : x;
+}
+function clampRange(n, lo, hi) {
+  return Math.min(hi, Math.max(lo, n));
+}
+function clamp01(x) {
+  return Math.min(1, Math.max(0, x));
+}
+function pad2(n) {
+  return String(n).padStart(2, "0");
+}
+function safeInt(v, fallback) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : fallback || 0;
+}

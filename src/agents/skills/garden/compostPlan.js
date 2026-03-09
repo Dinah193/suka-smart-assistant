@@ -23,10 +23,10 @@
  */
 
 import { db } from "../../../services/db";
-import { emitEvent } from "../../../services/eventBus";
-import { familyFundMode } from "../../../services/featureFlags";
-import { HubPacketFormatter } from "../../../services/hub/HubPacketFormatter";
-import { FamilyFundConnector } from "../../../services/hub/FamilyFundConnector";
+import { emitEvent } from "../../../services/events/eventBus";
+import { familyFundMode } from "../../../config/featureFlags";
+import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
+import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
 
 /* -------------------------------------------------------------------------- */
 /* Typedefs                                                                   */
@@ -173,7 +173,8 @@ function isGreen(material) {
   if (material.tags?.includes("green")) return true;
   if (material.moisture === "wet") return true;
   if (material.category === "kitchen") return true;
-  if (material.category === "animal" && material.tags?.includes("manure")) return true;
+  if (material.category === "animal" && material.tags?.includes("manure"))
+    return true;
   return false;
 }
 
@@ -181,7 +182,8 @@ function isBrown(material) {
   if (!material) return false;
   if (material.tags?.includes("brown")) return true;
   if (material.moisture === "dry") return true;
-  if (material.category === "paper" || material.category === "wood") return true;
+  if (material.category === "paper" || material.category === "wood")
+    return true;
   if (material.tags?.includes("bedding")) return true;
   return false;
 }
@@ -203,8 +205,10 @@ function isWormFriendly(material) {
   if (material.tags?.includes("spicy")) return false;
   if (material.tags?.includes("onion")) return false;
   if (material.tags?.includes("garlic")) return false;
-  if (material.tags?.includes("meat") || material.tags?.includes("dairy")) return false;
-  if (material.category === "paper" && material.tags?.includes("shiny")) return false;
+  if (material.tags?.includes("meat") || material.tags?.includes("dairy"))
+    return false;
+  if (material.category === "paper" && material.tags?.includes("shiny"))
+    return false;
   return material.category === "kitchen" || material.tags?.includes("soft");
 }
 
@@ -528,7 +532,12 @@ export async function planCompostForMaterials(materials, options = {}) {
     try {
       // Score bins specifically for this material, then sort.
       const scored = baseDestinations.map((dest) => {
-        if (dest.kind === "compostBin" || dest.kind === "wormBin" || dest.kind === "leafPile" || dest.kind === "mulchInPlace") {
+        if (
+          dest.kind === "compostBin" ||
+          dest.kind === "wormBin" ||
+          dest.kind === "leafPile" ||
+          dest.kind === "mulchInPlace"
+        ) {
           // If dest was built from a real bin, we can re-score from bin record.
           if (dest.binId && bins.length) {
             const bin = bins.find((b) => b.id === dest.binId);
@@ -540,7 +549,11 @@ export async function planCompostForMaterials(materials, options = {}) {
         // Generic fallback score.
         let score = 0;
         if (dest.kind === "trash" && isRisky(material)) score += 10;
-        if (dest.kind === "compostBin" && (isGreen(material) || isBrown(material))) score += 5;
+        if (
+          dest.kind === "compostBin" &&
+          (isGreen(material) || isBrown(material))
+        )
+          score += 5;
         if (dest.kind === "leafPile" && isBrown(material)) score += 6;
         if (dest.kind === "wormBin" && isWormFriendly(material)) score += 7;
         return { dest, score };
@@ -549,7 +562,10 @@ export async function planCompostForMaterials(materials, options = {}) {
       scored.sort((a, b) => b.score - a.score);
 
       const sortedDestinations = scored.map((s) => s.dest);
-      const swapOptions = buildSwapOptionsForMaterial(material, sortedDestinations);
+      const swapOptions = buildSwapOptionsForMaterial(
+        material,
+        sortedDestinations
+      );
       result.swapOptions = swapOptions;
 
       // Resume-friendly chosen option
@@ -567,8 +583,7 @@ export async function planCompostForMaterials(materials, options = {}) {
         materialId: material.id,
         routeId,
         optionsCount: swapOptions.length,
-        autoSelectedId:
-          swapOptions.find((opt) => opt.autoSelected)?.id || null,
+        autoSelectedId: swapOptions.find((opt) => opt.autoSelected)?.id || null,
       });
     } catch (err) {
       // eslint-disable-next-line no-console

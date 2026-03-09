@@ -1,0 +1,1109 @@
+{
+  "$schema": "../../../schemas/cuisine.profile.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19",
+
+  "meta": {
+    "id": "cuisines.levantine",
+    "type": "cuisine_profile",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Levantine",
+    "shortName": "Levant",
+    "description": "Eastern Mediterranean cooking focused on olive oil, lemon, garlic, herbs, legumes, grains, grilled meats, and bright mezze. Built around balance: fresh + acid + savory aromatics, with creamy dips and warm spices used gently.",
+    "originRegions": ["Eastern Mediterranean", "Levant"],
+    "regions": ["Levant", "Eastern Mediterranean", "Middle East"],
+    "primaryCountriesAndIslands": [
+      "Lebanon",
+      "Syria",
+      "Palestine",
+      "Jordan",
+      "Israel",
+      "Cyprus"
+    ],
+    "tags": [
+      "cuisine.levantine",
+      "region.eastern_mediterranean",
+      "profile.core",
+      "olive_oil.forward",
+      "lemon.forward",
+      "herb.forward",
+      "mezze.pattern",
+      "grill.friendly",
+      "legume.forward",
+      "grain.forward"
+    ],
+    "icon": "icon.cuisine.levantine",
+    "colorHint": "olive_lemon",
+    "version": "1.0.0",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-19",
+    "updatedAt": "2026-01-19",
+    "status": "canonical",
+    "source": {
+      "curation": "SSA canonical Levantine profile built for deterministic meal planning, substitution guidance, and pantry tiering.",
+      "maintainer": "SSA",
+      "license": "CC-BY-4.0",
+      "attribution": "General Levantine culinary tradition (regional composite).",
+      "kind": "catalog",
+      "author": "SSA",
+      "origin": "cuisines/levantine",
+      "type": "curated_profile",
+      "notes": "IDs are SSA-normalized (lowercase, a-z0-9_.-). Ingredient/equipment IDs are designed to align with SSA ingredient/method catalogs where present."
+    },
+    "family": {
+      "parent": "cuisines.mediterranean",
+      "siblings": ["cuisines.turkish", "cuisines.greek", "cuisines.egyptian"],
+      "overlapsWith": [
+        {
+          "id": "cuisines.mediterranean",
+          "reason": "Olive oil + lemon + herbs + grains/legumes overlap strongly; Levantine emphasizes mezze structure, tahini/garlic sauces, and specific spice/herb signatures."
+        },
+        {
+          "id": "cuisines.north_african",
+          "reason": "Shared spices and grilled meats; Levantine tends to be brighter (lemon/herbs) and less chili-heavy than many North African profiles."
+        }
+      ]
+    },
+    "subprofiles": [
+      {
+        "id": "cuisines.levantine.lebanese",
+        "name": "Lebanese",
+        "signatureNotes": "Strong mezze culture; garlic-lemon sauces; abundant herbs; grilled meats; kibbeh family dishes.",
+        "commonSauceBases": [
+          "sauce.toum",
+          "sauce.tahini_lemon",
+          "sauce.tomato_garlic"
+        ]
+      },
+      {
+        "id": "cuisines.levantine.palestinian",
+        "name": "Palestinian",
+        "signatureNotes": "Olive oil breads, musakhan flavors (sumac/onion), maqluba-style rice dishes, and seasonal produce.",
+        "commonSauceBases": ["sauce.tahini_lemon", "sauce.tomato_garlic"]
+      },
+      {
+        "id": "cuisines.levantine.syrian",
+        "name": "Syrian",
+        "signatureNotes": "Warm spice layering (allspice/cinnamon) in savory dishes; nutty elements; stews and stuffed vegetables.",
+        "commonSauceBases": ["sauce.tomato_garlic", "sauce.yogurt_garlic"]
+      },
+      {
+        "id": "cuisines.levantine.jordanian",
+        "name": "Jordanian",
+        "signatureNotes": "Roasts and rice-centered platters; yogurt accompaniments; grilled skewers.",
+        "commonSauceBases": ["sauce.yogurt_garlic", "sauce.tahini_lemon"]
+      }
+    ]
+  },
+
+  "notes": [
+    "This profile is intended to support SSA planners, recipe adapters, and pantry recommendations.",
+    "Flavor defaults prioritize olive oil, lemon, garlic, parsley/mint, cumin, sumac, and allspice in gentle amounts.",
+    "Heat in Levantine cooking is generally low-to-medium (not chili-forward as a default), but optional pepper/chili condiments exist."
+  ],
+
+  "plannerDefaults": {
+    "servingStyles": [
+      "family_style",
+      "plates",
+      "bowls",
+      "snacks",
+      "street_food"
+    ],
+    "weeknightBias": "High. Many dishes are grill-friendly, sheet-pan friendly, and mezze can be assembled quickly with pantry staples.",
+    "leftoversStrategy": "batch_and_remix",
+    "batchCookingBias": {
+      "level": "high",
+      "bestBatches": [
+        "dish.levantine.hummus",
+        "dish.levantine.baba_ganoush",
+        "dish.levantine.mujaddara",
+        "dish.levantine.lentil_soup",
+        "dish.levantine.pickled_turnips",
+        "dish.levantine.toum"
+      ],
+      "notes": "Batch sauces/dips (tahini-lemon, toum) and legumes (chickpeas/lentils) to remix into bowls, wraps, and mezze boards."
+    },
+    "spiceHeatDefault": "low",
+    "saltinessDefault": "medium",
+    "sournessDefault": "high",
+    "sweetnessDefault": "low",
+    "umamiDefault": "medium",
+    "oilUseDefault": "medium",
+    "preferredCookingFats": ["fat.olive_oil", "fat.ghee", "fat.butter"],
+    "primaryStarches": [
+      "grain.rice",
+      "bread.pita",
+      "grain.bulgur",
+      "grain.couscous"
+    ],
+    "primaryProteins": [
+      "protein.chicken",
+      "protein.lamb",
+      "protein.beef",
+      "protein.fish",
+      "protein.chickpeas",
+      "protein.lentils"
+    ],
+    "defaultMealArchetypes": [
+      "meal_archetype.mezze_board",
+      "meal_archetype.grill_plate",
+      "meal_archetype.rice_platter",
+      "meal_archetype.legume_stew",
+      "meal_archetype.wrap_sandwich",
+      "meal_archetype.soup_and_bread"
+    ],
+    "defaultPlateTemplateIds": [
+      "plate.levantine.mezze",
+      "plate.levantine.grill",
+      "plate.levantine.bowl",
+      "plate.levantine.rice_platter"
+    ]
+  },
+
+  "flavorSystem": {
+    "signatureNotes": [
+      "Bright lemon + garlic over olive oil",
+      "Fresh herbs (parsley/mint/dill) used generously",
+      "Gentle warm spices (cumin, allspice, cinnamon) layered subtly",
+      "Toasty sesame (tahini) and nutty notes (pine nuts, walnuts) as optional enrichers",
+      "Acid balance often comes from lemon, sumac, and pickles"
+    ],
+    "aromaticsCore": [
+      "aromatic.garlic",
+      "aromatic.onion",
+      "aromatic.green_onion",
+      "aromatic.lemon_zest",
+      "aromatic.parsley",
+      "aromatic.mint",
+      "aromatic.dill"
+    ],
+    "spiceCore": [
+      "spice.cumin",
+      "spice.coriander",
+      "spice.sumac",
+      "spice.allspice",
+      "spice.cinnamon",
+      "spice.black_pepper",
+      "spice.paprika"
+    ],
+    "umamiBuilders": [
+      "umami.tomato_paste",
+      "umami.roasted_tomato",
+      "umami.stock_chicken",
+      "umami.stock_vegetable",
+      "umami.yogurt",
+      "umami.tahini"
+    ],
+    "acidOptions": [
+      "acid.lemon",
+      "acid.sumac",
+      "acid.pomegranate_molasses",
+      "acid.vinegar",
+      "acid.pickles"
+    ],
+    "sweetBalanceOptions": [
+      "sweetness.onion_caramelized",
+      "sweetness.roasted_pepper",
+      "sweetness.honey",
+      "sweetness.date"
+    ],
+    "heatOptions": [
+      "heat.black_pepper",
+      "heat.aleppo_pepper",
+      "heat.chili_flake",
+      "heat.fresh_chili"
+    ]
+  },
+
+  "pantryTiers": {
+    "tier0_minimum": {
+      "description": "Enough to produce a recognizable Levantine meal with basic shopping.",
+      "items": [
+        "fat.olive_oil",
+        "acid.lemon",
+        "aromatic.garlic",
+        "aromatic.onion",
+        "spice.cumin",
+        "spice.black_pepper",
+        "salt.kosher",
+        "legume.chickpeas",
+        "legume.lentils",
+        "grain.rice",
+        "bread.pita",
+        "condiment.tahini"
+      ]
+    },
+    "tier1_core": {
+      "description": "Core pantry to cover mezze, grills, soups, and rice platters on repeat.",
+      "items": [
+        "spice.sumac",
+        "spice.coriander",
+        "spice.allspice",
+        "spice.paprika",
+        "aromatic.parsley",
+        "aromatic.mint",
+        "condiment.tomato_paste",
+        "condiment.yogurt_plain",
+        "condiment.pickles_mixed",
+        "condiment.pomegranate_molasses",
+        "grain.bulgur",
+        "produce.cucumber",
+        "produce.tomato",
+        "produce.lettuce",
+        "produce.eggplant",
+        "produce.bell_pepper"
+      ]
+    },
+    "tier2_traditional": {
+      "description": "Traditional depth items that unlock hallmark dishes and authentic finishing.",
+      "items": [
+        "spice.aleppo_pepper",
+        "spice.cinnamon",
+        "spice.cardamom",
+        "spice.nutmeg",
+        "herb.dried_mint",
+        "condiment.toum",
+        "condiment.rose_water",
+        "condiment.orange_blossom_water",
+        "nut.pine_nuts",
+        "nut.walnuts",
+        "fruit.dates",
+        "grain.freekeh",
+        "cheese.halloumi",
+        "cheese.feta",
+        "meat.lamb",
+        "meat.chicken_thigh"
+      ]
+    },
+    "tier3_specialty": {
+      "description": "Specialty items for regional subprofiles and advanced pastry/holiday dishes.",
+      "items": [
+        "spice.mahlab",
+        "spice.mastic",
+        "flour.semolina",
+        "sweetener.grape_molasses",
+        "condiment.tamarind",
+        "nut.pistachio",
+        "dairy.clotted_cream",
+        "phyllo.dough",
+        "grain.fine_bulgur",
+        "preserve.grape_leaves"
+      ]
+    }
+  },
+
+  "techniquesEmphasis": {
+    "primary": [
+      "method.grill",
+      "method.roast",
+      "method.saute",
+      "method.simmer",
+      "method.braise",
+      "method.stew",
+      "method.soak_legumes",
+      "method.emulsify",
+      "method.chop_fine",
+      "method.pickling_quick"
+    ],
+    "common": [
+      "method.sheet_pan",
+      "method.pan_sear",
+      "method.poach",
+      "method.steam",
+      "method.toast_spices",
+      "method.marinade",
+      "method.blend",
+      "method.puree",
+      "method.reduce"
+    ],
+    "notes": [
+      "Mezze relies on texture control: very fine chopping (tabbouleh), smooth purees (hummus), and emulsions (toum, tahini-lemon).",
+      "Grilling and roasting are common weeknight anchors; stews and rice platters appear more often on weekends/holidays.",
+      "Pickles and acids are used to reset the palate across a spread."
+    ]
+  },
+
+  "dishArchetypes": [
+    {
+      "id": "archetype.levantine.mezze_board",
+      "label": "Mezze Board",
+      "description": "A balanced spread of dips, salads, pickles, bread, and optional grilled protein.",
+      "commonExamples": [
+        "Hummus + baba ghanoush + tabbouleh + pickles + pita",
+        "Labneh + fattoush + muhammara + olives + grilled chicken"
+      ],
+      "defaults": {
+        "baseOptions": [
+          "dish.levantine.hummus",
+          "dish.levantine.labneh",
+          "dish.levantine.baba_ganoush"
+        ],
+        "vegOptions": [
+          "dish.levantine.fattoush",
+          "dish.levantine.tabbouleh",
+          "dish.levantine.cucumber_tomato_salad"
+        ],
+        "sideOptions": [
+          "condiment.pickles_mixed",
+          "condiment.olives",
+          "bread.pita"
+        ],
+        "garnishOptions": [
+          "garnish.olive_oil",
+          "garnish.sumac",
+          "garnish.parsley"
+        ],
+        "pairings": ["sauce.tahini_lemon", "sauce.toum"]
+      }
+    },
+    {
+      "id": "archetype.levantine.grill_plate",
+      "label": "Grill Plate",
+      "description": "Grilled skewers or cutlets served with a starch, salad, and sauce.",
+      "commonExamples": [
+        "Shish tawook + rice + fattoush + toum",
+        "Kofta + pita + tahini sauce + pickles"
+      ],
+      "defaults": {
+        "proteinOptions": [
+          "protein.chicken",
+          "protein.lamb",
+          "protein.beef",
+          "protein.fish"
+        ],
+        "starchOptions": ["grain.rice", "bread.pita", "grain.bulgur"],
+        "vegOptions": [
+          "dish.levantine.fattoush",
+          "dish.levantine.cucumber_tomato_salad"
+        ],
+        "sauceOptions": [
+          "sauce.toum",
+          "sauce.tahini_lemon",
+          "sauce.yogurt_garlic"
+        ],
+        "garnishOptions": [
+          "garnish.lemon_wedges",
+          "garnish.parsley",
+          "garnish.sumac"
+        ]
+      }
+    },
+    {
+      "id": "archetype.levantine.legume_bowl",
+      "label": "Legume Bowl",
+      "description": "Beans/lentils over grains with onions, herbs, and bright sauce; built for batch cooking.",
+      "commonExamples": [
+        "Mujaddara bowl + salad + yogurt",
+        "Chickpeas + tahini lemon + chopped veggies"
+      ],
+      "defaults": {
+        "legumeOptions": ["legume.lentils", "legume.chickpeas"],
+        "grainOptions": ["grain.rice", "grain.bulgur", "grain.freekeh"],
+        "vegOptions": ["produce.cucumber", "produce.tomato", "produce.onion"],
+        "sauceOptions": ["sauce.tahini_lemon", "sauce.yogurt_garlic"],
+        "garnishOptions": [
+          "garnish.olive_oil",
+          "garnish.sumac",
+          "garnish.herbs_mixed"
+        ]
+      }
+    },
+    {
+      "id": "archetype.levantine.soup_and_bread",
+      "label": "Soup + Bread",
+      "description": "Light brothy or blended soup served with pita and lemon/herbs.",
+      "commonExamples": [
+        "Lentil soup + pita + lemon",
+        "Chicken lemon soup + herb salad"
+      ],
+      "defaults": {
+        "stew_baseOptions": [
+          "dish.levantine.lentil_soup",
+          "dish.levantine.chicken_lemon_soup"
+        ],
+        "sideOptions": ["bread.pita", "condiment.pickles_mixed"],
+        "garnishOptions": [
+          "garnish.lemon_wedges",
+          "garnish.parsley",
+          "garnish.olive_oil"
+        ]
+      }
+    }
+  ],
+
+  "ingredientPreferences": {
+    "preferred": [
+      "fat.olive_oil",
+      "acid.lemon",
+      "aromatic.garlic",
+      "aromatic.parsley",
+      "aromatic.mint",
+      "spice.cumin",
+      "spice.sumac",
+      "condiment.tahini",
+      "condiment.yogurt_plain",
+      "legume.chickpeas",
+      "legume.lentils",
+      "grain.bulgur",
+      "grain.rice",
+      "produce.cucumber",
+      "produce.tomato",
+      "produce.eggplant"
+    ],
+    "optional_traditional": [
+      "acid.pomegranate_molasses",
+      "nut.pine_nuts",
+      "nut.walnuts",
+      "cheese.halloumi",
+      "cheese.feta",
+      "condiment.rose_water",
+      "condiment.orange_blossom_water",
+      "grain.freekeh"
+    ],
+    "avoid_or_limit": [
+      {
+        "id": "ingredient.heavy_cream",
+        "label": "Heavy cream",
+        "reason": "Not typical in most Levantine savory patterns; yogurt/labneh are preferred for creamy elements."
+      },
+      {
+        "id": "spice.extreme_chili_heat",
+        "label": "Very high chili heat blends",
+        "reason": "Levantine heat is usually optional and moderate; extreme chili-forward blends can overwhelm lemon/herb balance."
+      }
+    ]
+  },
+
+  "substitutionGuidance": {
+    "proteinSubstitutions": [
+      {
+        "for": "protein.lamb",
+        "options": ["protein.beef", "protein.goat"],
+        "notes": "For kofta/kebab patterns, beef or goat work well; keep fat moderate for juiciness."
+      },
+      {
+        "for": "protein.chicken_thigh",
+        "options": ["protein.chicken_breast", "protein.turkey_thigh"],
+        "notes": "Thigh is preferred for grill juiciness; if using breast, shorten cook time and increase marinade oil/yogurt slightly."
+      }
+    ],
+    "sideSubstitutions": [
+      {
+        "for": "bread.pita",
+        "options": ["bread.flatbread", "grain.rice", "grain.bulgur"],
+        "notes": "Use rice/bulgur when bread isn’t available; keep a dip/sauce element for balance."
+      },
+      {
+        "for": "condiment.tahini",
+        "options": ["nut.sesame_paste", "nut.cashew_butter"],
+        "notes": "Cashew butter can mimic tahini creaminess in a pinch; adjust with lemon and water to thin."
+      }
+    ],
+    "thickenerSubstitutions": [
+      {
+        "for": "thickener.tahini",
+        "options": ["thickener.yogurt", "thickener.blended_chickpeas"],
+        "notes": "For sauces, yogurt or blended chickpeas can add body; preserve lemon/garlic profile."
+      }
+    ],
+    "notes": [
+      "When substituting, preserve the Levantine balance: acid (lemon/sumac) + herb freshness + olive oil richness.",
+      "If herbs are limited, lean on lemon zest and dried mint to keep the signature aromatic lift."
+    ]
+  },
+
+  "mealTemplates": [
+    {
+      "id": "template.levantine.weeknight_grill",
+      "label": "Weeknight Grill Plate",
+      "archetypeId": "meal_archetype.grill_plate",
+      "components": [
+        {
+          "role": "protein",
+          "ingredientIds": [
+            "protein.chicken",
+            "protein.lamb",
+            "protein.beef",
+            "protein.fish"
+          ],
+          "chooseOne": true,
+          "notes": "Marinate with lemon, garlic, olive oil; optionally add yogurt for chicken."
+        },
+        {
+          "role": "starch",
+          "ingredientIds": ["grain.rice", "bread.pita", "grain.bulgur"],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "ingredientIds": [
+            "produce.cucumber",
+            "produce.tomato",
+            "produce.lettuce",
+            "produce.eggplant"
+          ],
+          "chooseOne": false,
+          "notes": "Salad or roasted vegetables."
+        },
+        {
+          "role": "sauce",
+          "ingredientIds": [
+            "sauce.toum",
+            "sauce.tahini_lemon",
+            "sauce.yogurt_garlic"
+          ],
+          "chooseOne": true
+        }
+      ],
+      "prepNotes": [
+        "Batch a lemon-garlic marinade base.",
+        "Keep a jar of quick pickles in the fridge to complete the plate."
+      ]
+    },
+    {
+      "id": "template.levantine.mezze_fast",
+      "label": "Fast Mezze",
+      "archetypeId": "meal_archetype.mezze_board",
+      "components": [
+        {
+          "role": "base",
+          "ingredientIds": [
+            "dish.levantine.hummus",
+            "dish.levantine.labneh",
+            "dish.levantine.baba_ganoush"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "side",
+          "ingredientIds": [
+            "bread.pita",
+            "condiment.olives",
+            "condiment.pickles_mixed"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "veg",
+          "ingredientIds": [
+            "dish.levantine.fattoush",
+            "dish.levantine.cucumber_tomato_salad"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "garnish",
+          "ingredientIds": [
+            "garnish.olive_oil",
+            "garnish.sumac",
+            "garnish.parsley"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "prepNotes": [
+        "Keep chickpeas cooked (or canned) and tahini on hand for instant hummus.",
+        "Make toum weekly if garlic lovers; otherwise keep tahini-lemon sauce."
+      ]
+    }
+  ],
+
+  "safetyNotes": [
+    {
+      "id": "safety.sesame_allergen",
+      "label": "Sesame (tahini) allergen awareness",
+      "notes": [
+        "Tahini (sesame) is common in sauces and dips; flag for sesame allergy.",
+        "Offer yogurt-lemon sauce or garlic-lemon oil dressing as alternatives."
+      ]
+    },
+    {
+      "id": "safety.garlic_emulsion",
+      "label": "Garlic emulsion handling (toum)",
+      "notes": [
+        "Use clean utensils; store toum refrigerated and discard if off odor develops.",
+        "If using raw egg whites in any emulsion variant, follow safe egg handling or use pasteurized egg."
+      ]
+    }
+  ],
+
+  "searchHints": {
+    "keywords": [
+      "mezze",
+      "hummus",
+      "tahini",
+      "toum",
+      "fattoush",
+      "tabbouleh",
+      "shawarma",
+      "kofta",
+      "kebab",
+      "sumac",
+      "pomegranate molasses",
+      "bulgur",
+      "mujaddara"
+    ],
+    "commonAlternateNames": [
+      "Levant",
+      "Eastern Mediterranean",
+      "Lebanese-style",
+      "Syrian-style",
+      "Palestinian-style",
+      "Jordanian-style"
+    ]
+  },
+
+  "pantry": {
+    "freshCore": [
+      "produce.lemon",
+      "produce.garlic",
+      "produce.onion",
+      "produce.parsley",
+      "produce.mint",
+      "produce.cucumber",
+      "produce.tomato"
+    ],
+    "proteinsCommon": [
+      "protein.chicken",
+      "protein.lamb",
+      "protein.beef",
+      "protein.fish",
+      "protein.chickpeas",
+      "protein.lentils",
+      "protein.yogurt"
+    ],
+    "produceCommon": [
+      "produce.eggplant",
+      "produce.bell_pepper",
+      "produce.zucchini",
+      "produce.lettuce",
+      "produce.potato"
+    ],
+    "availabilityNotes": [
+      {
+        "ingredient": "spice.sumac",
+        "fallbacks": ["acid.lemon", "acid.vinegar"],
+        "note": "If sumac isn’t available, use lemon juice + zest to approximate brightness; vinegar can stand in for tang but changes aroma."
+      },
+      {
+        "ingredient": "acid.pomegranate_molasses",
+        "fallbacks": ["acid.lemon", "sweetener.honey", "acid.vinegar"],
+        "note": "For a quick substitute: combine lemon + a touch of honey + a splash of vinegar; it won’t be identical but restores sweet-tart balance."
+      }
+    ],
+    "coreStaples": {
+      "dry": [
+        "legume.chickpeas",
+        "legume.lentils",
+        "grain.rice",
+        "grain.bulgur",
+        "salt.kosher",
+        "spice.cumin",
+        "spice.black_pepper",
+        "spice.paprika"
+      ],
+      "condiments": [
+        "fat.olive_oil",
+        "condiment.tahini",
+        "condiment.tomato_paste",
+        "condiment.pickles_mixed",
+        "condiment.olives"
+      ]
+    },
+    "optionalRegionalStaples": {
+      "spices_and_finishes": [
+        "spice.sumac",
+        "spice.allspice",
+        "spice.aleppo_pepper",
+        "acid.pomegranate_molasses"
+      ],
+      "dairy_and_nuts": [
+        "condiment.yogurt_plain",
+        "cheese.halloumi",
+        "nut.pine_nuts",
+        "nut.walnuts"
+      ]
+    }
+  },
+
+  "techniques": {
+    "coreMethods": [
+      "method.grill",
+      "method.roast",
+      "method.saute",
+      "method.simmer",
+      "method.braise",
+      "method.emulsify",
+      "method.blend",
+      "method.puree",
+      "method.marinade",
+      "method.pickling_quick"
+    ],
+    "hallmarkProcesses": [
+      {
+        "id": "process.tahini_lemon_sauce",
+        "name": "Tahini-Lemon Sauce",
+        "steps": [
+          "step.whisk_tahini",
+          "step.add_lemon",
+          "step.thin_with_water",
+          "step.season_garlic_salt"
+        ],
+        "notes": "Tahini seizes with acid; add water gradually to loosen into a creamy sauce."
+      },
+      {
+        "id": "process.toum_emulsion",
+        "name": "Toum (Garlic Emulsion)",
+        "steps": [
+          "step.mash_garlic_salt",
+          "step.emulsify_oil",
+          "step.add_lemon",
+          "step.adjust_texture"
+        ],
+        "notes": "Add oil slowly for a stable emulsion; keep bowl and tools dry."
+      }
+    ],
+    "equipmentAffinity": {
+      "helpfulFor": {
+        "method.emulsify": [
+          "tool.immersion_blender",
+          "tool.food_processor",
+          "tool.blender"
+        ],
+        "method.grill": [
+          "appliance.grill",
+          "tool.grill_pan",
+          "tool.meat_thermometer"
+        ],
+        "method.blend": ["appliance.blender", "appliance.food_processor"]
+      }
+    },
+    "signatureMethods": [
+      "Bright finishing with lemon and herbs at the end (not cooked out).",
+      "Emulsified garlic sauces (toum) and tahini-based sauces as core structure.",
+      "Toasty spice and nut garnishes for contrast."
+    ]
+  },
+
+  "equipment": {
+    "recommended": [
+      "tool.chef_knife",
+      "tool.cutting_board",
+      "tool.citrus_juicer",
+      "tool.microplane",
+      "tool.immersion_blender",
+      "tool.food_processor",
+      "tool.grill_pan",
+      "tool.meat_thermometer",
+      "tool.sheet_pan"
+    ],
+    "optionalButHelpful": [
+      "tool.mortar_pestle",
+      "tool.skewers",
+      "tool.salad_spinner",
+      "tool.rice_cooker"
+    ],
+    "notes": [
+      "A blender or food processor dramatically improves dip texture (hummus, baba ghanoush, muhammara).",
+      "A microplane helps keep garlic and lemon zest fine and aromatic for sauces and salads."
+    ]
+  },
+
+  "dietAndAllergens": {
+    "commonAllergens": [
+      "allergen.sesame",
+      "allergen.dairy",
+      "allergen.gluten",
+      "allergen.tree_nuts"
+    ],
+    "dietCompatibility": {
+      "diet.vegetarian": "high",
+      "diet.vegan": "high",
+      "diet.pescatarian": "high",
+      "diet.gluten_free": "medium",
+      "diet.keto": "medium"
+    }
+  },
+
+  "signatureDishes": {
+    "core": [
+      {
+        "id": "dish.levantine.hummus",
+        "name": "Hummus",
+        "subprofiles": [
+          "cuisines.levantine.lebanese",
+          "cuisines.levantine.palestinian"
+        ],
+        "difficulty": "beginner",
+        "heatTypical": 0,
+        "notes": "Chickpeas + tahini + lemon + garlic; olive oil finish."
+      },
+      {
+        "id": "dish.levantine.fattoush",
+        "name": "Fattoush",
+        "difficulty": "beginner",
+        "heatTypical": 0,
+        "notes": "Crunchy salad with lemon/sumac dressing; includes toasted pita."
+      },
+      {
+        "id": "dish.levantine.tabbouleh",
+        "name": "Tabbouleh",
+        "difficulty": "intermediate",
+        "heatTypical": 0,
+        "notes": "Parsley-forward herb salad; fine chopping is key."
+      },
+      {
+        "id": "dish.levantine.mujaddara",
+        "name": "Mujaddara",
+        "difficulty": "beginner",
+        "heatTypical": 0,
+        "notes": "Lentils + rice + caramelized onions; excellent batch meal."
+      },
+      {
+        "id": "dish.levantine.shawarma_chicken",
+        "name": "Chicken Shawarma",
+        "difficulty": "intermediate",
+        "heatTypical": 1,
+        "notes": "Warm spiced chicken, served in wraps with toum or tahini."
+      },
+      {
+        "id": "dish.levantine.kofta_kebab",
+        "name": "Kofta Kebab",
+        "difficulty": "intermediate",
+        "heatTypical": 1,
+        "notes": "Spiced ground meat skewers; pairs with tahini or yogurt sauces."
+      },
+      {
+        "id": "dish.levantine.baba_ganoush",
+        "name": "Baba Ghanoush",
+        "difficulty": "intermediate",
+        "heatTypical": 0,
+        "notes": "Smoky eggplant dip; tahini + lemon; olive oil finish."
+      }
+    ],
+    "dessertsAndDrinks": [
+      {
+        "id": "dish.levantine.mint_tea",
+        "name": "Mint Tea",
+        "difficulty": "beginner",
+        "heatTypical": 0,
+        "notes": "Fresh mint infusion; often lightly sweetened."
+      },
+      {
+        "id": "dish.levantine.baklava",
+        "name": "Baklava (regional overlap)",
+        "difficulty": "advanced",
+        "heatTypical": 0,
+        "notes": "Phyllo + nuts + syrup; shared across Eastern Mediterranean cuisines."
+      }
+    ],
+    "examples": [
+      "Hummus, baba ghanoush, muhammara, labneh, fattoush, tabbouleh, falafel, shawarma, kofta kebab, mujaddara, lentil soup, stuffed grape leaves"
+    ],
+    "mealPatterns": [
+      "Mezze spread + grilled protein + bread",
+      "Grain/legume bowl + herb salad + tahini sauce",
+      "Wrap sandwich + pickles + side salad",
+      "Soup + pita + lemon finish"
+    ]
+  },
+
+  "pairingRules": {
+    "typicalStarches": [
+      "bread.pita",
+      "grain.rice",
+      "grain.bulgur",
+      "grain.freekeh"
+    ],
+    "typicalVegSides": [
+      "dish.levantine.fattoush",
+      "dish.levantine.tabbouleh",
+      "dish.levantine.cucumber_tomato_salad"
+    ],
+    "typicalCondiments": [
+      "sauce.toum",
+      "sauce.tahini_lemon",
+      "condiment.pickles_mixed",
+      "condiment.olives"
+    ],
+    "typicalFlavorPairings": [
+      {
+        "with": "protein.chicken",
+        "pair": ["sauce.toum", "acid.lemon", "spice.sumac"],
+        "note": "Chicken loves garlic emulsions and lemon; sumac adds dry tang for wraps and platters."
+      },
+      {
+        "with": "protein.lamb",
+        "pair": ["spice.cumin", "spice.allspice", "sauce.tahini_lemon"],
+        "note": "Warm spices + tahini-lemon sauce balance lamb richness."
+      },
+      {
+        "with": "produce.eggplant",
+        "pair": ["condiment.tahini", "acid.lemon", "fat.olive_oil"],
+        "note": "Tahini + lemon + olive oil turn eggplant into a core dip/salad base."
+      }
+    ],
+    "antiPairings": [
+      {
+        "id": "anti.heavy_sweet_sauces",
+        "avoid": ["sauce.sugary_bbq", "sauce.very_sweet_glaze"],
+        "note": "Heavy sweet sauces can overpower the lemon/herb brightness typical of Levantine profiles."
+      }
+    ]
+  },
+
+  "substitutions": {
+    "ingredientRules": [
+      {
+        "id": "sub.lemon_to_sumac",
+        "whenMissing": ["spice.sumac"],
+        "use": ["acid.lemon", "aromatic.lemon_zest"],
+        "notes": "Use extra lemon zest + juice to approximate sumac’s bright tang."
+      },
+      {
+        "id": "sub.tahini_to_yogurt",
+        "whenMissing": ["condiment.tahini"],
+        "use": ["condiment.yogurt_plain", "acid.lemon", "aromatic.garlic"],
+        "notes": "Yogurt-lemon-garlic sauce can stand in for tahini sauce when sesame is unavailable or avoided."
+      }
+    ],
+    "methodRules": [
+      {
+        "id": "method.no_grill_roast",
+        "whenNoEquipment": ["appliance.grill"],
+        "adapt": "method.roast",
+        "notes": "Use sheet-pan roasting or broiler to mimic grill char; finish with lemon and herbs."
+      }
+    ],
+    "rules": [
+      {
+        "type": "preserve_balance",
+        "notes": "When swapping proteins or bases, preserve: acid + herb freshness + olive oil richness. Add pickles if the plate feels flat."
+      }
+    ]
+  },
+
+  "planningHints": {
+    "batchFriendly": [
+      {
+        "id": "batch.hummus",
+        "name": "Batch hummus",
+        "makes": "dish.levantine.hummus",
+        "freezerFriendly": false,
+        "notes": "Keeps 4–5 days refrigerated. Great for wraps, bowls, and snacks."
+      },
+      {
+        "id": "batch.mujaddara",
+        "name": "Batch mujaddara",
+        "makes": "dish.levantine.mujaddara",
+        "freezerFriendly": true,
+        "notes": "Freeze portions; reheat and top with salad + sauce for fast meals."
+      },
+      {
+        "id": "batch.toum",
+        "name": "Batch toum",
+        "makes": "sauce.toum",
+        "freezerFriendly": false,
+        "notes": "Refrigerate in a clean jar; use as a sauce, spread, or marinade booster."
+      }
+    ],
+    "weeknightShortcuts": [
+      "Use canned chickpeas to make hummus in 10 minutes; finish with olive oil + paprika + parsley.",
+      "Sheet-pan shawarma spiced chicken: roast, then serve as wraps with pickles and toum.",
+      "Keep a jar of quick pickles and a ready tahini-lemon sauce to complete plates instantly."
+    ],
+    "seasonality": [
+      {
+        "season": "season.spring",
+        "focus": ["produce.herbs", "produce.cucumber", "produce.lemon"]
+      },
+      {
+        "season": "season.summer",
+        "focus": ["produce.tomato", "produce.eggplant", "produce.pepper"]
+      },
+      {
+        "season": "season.fall",
+        "focus": ["produce.eggplant", "produce.onion", "grain.bulgur"]
+      },
+      {
+        "season": "season.winter",
+        "focus": ["legume.lentils", "grain.rice", "produce.lemon"]
+      }
+    ]
+  },
+
+  "ui": {
+    "heroSuggestions": [
+      {
+        "title": "Fast Mezze Starters",
+        "items": [
+          "dish.levantine.hummus",
+          "dish.levantine.baba_ganoush",
+          "dish.levantine.fattoush"
+        ]
+      },
+      {
+        "title": "Grill & Wrap Favorites",
+        "items": [
+          "dish.levantine.shawarma_chicken",
+          "dish.levantine.kofta_kebab",
+          "sauce.toum"
+        ]
+      },
+      {
+        "title": "Batch Staples",
+        "items": [
+          "dish.levantine.mujaddara",
+          "dish.levantine.lentil_soup",
+          "sauce.tahini_lemon"
+        ]
+      }
+    ],
+    "searchBoostTerms": [
+      "mezze",
+      "tahini",
+      "toum",
+      "sumac",
+      "shawarma",
+      "kofta",
+      "tabbouleh",
+      "fattoush",
+      "hummus",
+      "mujaddara",
+      "falafel"
+    ],
+    "colorHints": {
+      "primary": "olive",
+      "accent": "lemon",
+      "secondary": "sumac"
+    },
+    "iconHints": [
+      "icon.olive_oil",
+      "icon.lemon",
+      "icon.herbs",
+      "icon.grill",
+      "icon.mezze"
+    ]
+  },
+
+  "compat": {
+    "recipeTagDefaults": [
+      "cuisine.levantine",
+      "profile.levantine",
+      "olive_oil.forward",
+      "lemon.forward",
+      "herb.forward"
+    ],
+    "defaultPlateTemplateIds": [
+      "plate.levantine.mezze",
+      "plate.levantine.grill",
+      "plate.levantine.bowl"
+    ],
+    "notes": [
+      "This profile assumes SSA canonical ids for common ingredients/methods; if your ingredient catalog differs, add cuisine-level alias maps in a Levantine ruleset.",
+      "Planner can treat mezze as a meal archetype with multiple small components and at least one sauce/acid element."
+    ]
+  }
+}

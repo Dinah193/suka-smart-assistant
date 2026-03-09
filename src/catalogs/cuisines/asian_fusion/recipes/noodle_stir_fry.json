@@ -1,0 +1,498 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+
+  "meta": {
+    "id": "recipes.asian_fusion.noodle_stir_fry",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Asian-Fusion Noodle Stir-Fry",
+    "subtitle": "Fast noodles with crisp-tender vegetables and a soy-ginger-garlic sauce (mix-and-match protein).",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalog",
+      "notes": [
+        "Designed for SSA planners: weeknight-ready, highly adaptable, works with pantry noodles and mixed vegetables.",
+        "Sauce uses an optional cornstarch slurry for cling; can be made gluten-free with tamari + GF noodles."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.asian_fusion",
+    "category": "main",
+    "mealArchetypes": [
+      "archetype.noodles",
+      "archetype.bowls",
+      "archetype.stir_fry"
+    ],
+    "servingStyles": ["serving.bowls", "serving.family_style"],
+    "plannerTags": [
+      "asian_fusion",
+      "noodles",
+      "stir_fry",
+      "weeknight",
+      "one_pan",
+      "customizable",
+      "batch_friendly",
+      "dairy_free"
+    ]
+  },
+
+  "summary": "A flexible noodle stir-fry with vegetables and a quick soy-ginger-garlic sauce. Choose your noodles, choose your veg, add optional protein, and finish with sesame and citrus.",
+
+  "yield": {
+    "servings": 4,
+    "notes": "4 moderate bowls or 3 large bowls."
+  },
+
+  "time": {
+    "activeMins": 22,
+    "totalMins": 25,
+    "handsOffMins": 3
+  },
+
+  "difficulty": "beginner",
+
+  "signals": {
+    "weeknightPossible": true,
+    "batchFriendly": true,
+    "leftoversGood": true,
+    "freezerFriendly": "low",
+    "onePan": true,
+    "vegetarian": "protein_optional"
+  },
+
+  "tasteProfile": {
+    "salty": 3,
+    "sweet": 1,
+    "sour": 1,
+    "spicy": 0,
+    "umami": 3,
+    "signature": ["soy", "ginger", "garlic"],
+    "finish": ["sesame_optional", "lime_optional", "chili_optional"]
+  },
+
+  "equipment": {
+    "minimum": [
+      "tool.pot",
+      "tool.pan_large",
+      "tool.colander",
+      "tool.knife",
+      "tool.board"
+    ],
+    "recommended": [
+      "tool.wok",
+      "tool.microplane",
+      "tool.small_bowl",
+      "tool.whisk",
+      "tool.tongs"
+    ],
+    "optional": [
+      {
+        "id": "tool.lid",
+        "label": "Pan lid",
+        "required": false,
+        "notes": "Helpful for a short steam if using dense vegetables (e.g., broccoli stems)."
+      }
+    ]
+  },
+
+  "dietFlags": [
+    "diet.dairy_free",
+    "diet.vegetarian_option",
+    "diet.vegan_option"
+  ],
+
+  "allergens": {
+    "contains": [
+      "allergen.soy",
+      "allergen.sesame_optional",
+      "allergen.wheat_optional"
+    ],
+    "notes": [
+      "Use tamari + gluten-free noodles for gluten-free.",
+      "If using oyster sauce or fish sauce, note those may contain shellfish/fish."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "noodles",
+      "label": "Noodles (lo mein, ramen, rice noodles, or spaghetti in a pinch)",
+      "amount": { "value": 12, "unit": "oz" },
+      "notes": [
+        "For rice noodles, soak/cook per package and rinse briefly to stop cooking.",
+        "For ramen bricks, discard seasoning packet and cook noodles separately."
+      ]
+    },
+    {
+      "id": "oil.neutral",
+      "label": "Neutral oil (avocado, grapeseed, or canola)",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic, minced",
+      "amount": { "value": 3, "unit": "cloves" }
+    },
+    {
+      "id": "ginger.fresh",
+      "label": "Fresh ginger, grated or minced",
+      "amount": { "value": 1, "unit": "tbsp" }
+    },
+
+    {
+      "id": "broccoli",
+      "label": "Broccoli florets",
+      "amount": { "value": 2, "unit": "cups" },
+      "optional": true
+    },
+    {
+      "id": "carrot",
+      "label": "Carrots, thinly sliced",
+      "amount": { "value": 1, "unit": "cup" },
+      "optional": true
+    },
+    {
+      "id": "bell_pepper",
+      "label": "Bell pepper, sliced",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "snap_peas_or_green_beans",
+      "label": "Snap peas or green beans",
+      "amount": { "value": 1.5, "unit": "cups" },
+      "optional": true
+    },
+    {
+      "id": "mushrooms",
+      "label": "Mushrooms, sliced",
+      "amount": { "value": 2, "unit": "cups" },
+      "optional": true
+    },
+    {
+      "id": "cabbage",
+      "label": "Cabbage, thinly sliced",
+      "amount": { "value": 2, "unit": "cups" },
+      "optional": true,
+      "notes": ["Napa, green cabbage, or a bag of coleslaw mix works well."]
+    },
+
+    {
+      "id": "soy_sauce",
+      "label": "Soy sauce (or tamari)",
+      "amount": { "value": 4, "unit": "tbsp" }
+    },
+    {
+      "id": "vinegar.rice",
+      "label": "Rice vinegar",
+      "amount": { "value": 1.5, "unit": "tbsp" }
+    },
+    {
+      "id": "sweetener",
+      "label": "Honey, brown sugar, or maple syrup",
+      "amount": { "value": 2, "unit": "tsp" },
+      "optional": true,
+      "notes": ["Optional; balances salt/acid. Reduce or omit for low-sugar."]
+    },
+    {
+      "id": "water_or_broth",
+      "label": "Water or broth",
+      "amount": { "value": 0.33, "unit": "cup" }
+    },
+    {
+      "id": "cornstarch",
+      "label": "Cornstarch (optional, for sauce cling)",
+      "amount": { "value": 2, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "sesame_oil",
+      "label": "Toasted sesame oil (finish)",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+
+    {
+      "id": "protein_optional",
+      "label": "Optional cooked protein (chicken, shrimp, tofu, beef, or eggs)",
+      "amount": { "value": 2, "unit": "cups" },
+      "optional": true,
+      "notes": [
+        "If protein is raw, cook it first in the pan, remove, then proceed with vegetables and add back at the end."
+      ]
+    },
+
+    {
+      "id": "chili_flakes",
+      "label": "Red pepper flakes or chili crisp (optional)",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "scallions",
+      "label": "Green onions, sliced (optional garnish)",
+      "amount": { "value": 2, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "sesame_seeds",
+      "label": "Toasted sesame seeds (optional garnish)",
+      "amount": { "value": 2, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "lime_or_lemon",
+      "label": "Lime or lemon wedge (optional finish)",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    }
+  ],
+
+  "ingredientGroups": [
+    {
+      "id": "group.noodles",
+      "label": "Noodles",
+      "items": ["noodles"]
+    },
+    {
+      "id": "group.veg",
+      "label": "Vegetables (Choose 4–6 cups total)",
+      "items": [
+        "broccoli",
+        "carrot",
+        "bell_pepper",
+        "snap_peas_or_green_beans",
+        "mushrooms",
+        "cabbage"
+      ]
+    },
+    {
+      "id": "group.sauce",
+      "label": "Sauce",
+      "items": [
+        "soy_sauce",
+        "vinegar.rice",
+        "sweetener",
+        "water_or_broth",
+        "cornstarch"
+      ]
+    },
+    {
+      "id": "group.finish",
+      "label": "Finish (Optional)",
+      "items": [
+        "sesame_oil",
+        "chili_flakes",
+        "scallions",
+        "sesame_seeds",
+        "lime_or_lemon"
+      ]
+    },
+    {
+      "id": "group.protein",
+      "label": "Protein (Optional)",
+      "items": ["protein_optional"]
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.noodles",
+      "title": "Cook noodles and set aside",
+      "instructions": [
+        "Bring a pot of water to a boil.",
+        "Cook noodles according to package directions until just tender (al dente).",
+        "Drain and rinse briefly if needed (especially for rice noodles) to prevent sticking.",
+        "Toss with a tiny drizzle of neutral oil if your noodles tend to clump."
+      ],
+      "timers": [{ "label": "Cook noodles", "minutes": 6 }],
+      "checks": [
+        "Noodles should be just tender; they will cook a little more in the pan."
+      ],
+      "activeMins": 4,
+      "handsOffMins": 4
+    },
+    {
+      "id": "step.sauce",
+      "title": "Mix sauce",
+      "instructions": [
+        "In a bowl, whisk soy sauce, rice vinegar, and water/broth.",
+        "Add sweetener if using.",
+        "If using cornstarch, whisk it in until fully dissolved (no lumps).",
+        "Set aside; re-whisk right before pouring (cornstarch settles)."
+      ],
+      "checks": [
+        "Sauce should be smooth; no visible cornstarch clumps if using it."
+      ],
+      "activeMins": 2
+    },
+    {
+      "id": "step.aromatics",
+      "title": "Heat pan and bloom aromatics",
+      "instructions": [
+        "Heat a large skillet or wok over medium-high heat until hot.",
+        "Add neutral oil.",
+        "Add garlic and ginger; stir constantly 15–25 seconds until fragrant (avoid browning)."
+      ],
+      "timers": [{ "label": "Bloom aromatics", "seconds": 20 }],
+      "checks": ["Aromatics should be fragrant, not browned."],
+      "activeMins": 2
+    },
+    {
+      "id": "step.veg",
+      "title": "Stir-fry vegetables",
+      "instructions": [
+        "Add dense vegetables first (broccoli, carrots). Stir-fry 2 minutes.",
+        "Add remaining vegetables (peppers, snap peas/beans, mushrooms, cabbage). Stir-fry 2–3 minutes until crisp-tender.",
+        "If your pan is overcrowded and vegetables are steaming, cook in two rounds for better texture."
+      ],
+      "timers": [
+        { "label": "Dense veg", "minutes": 2 },
+        { "label": "Remaining veg", "minutes": 3 }
+      ],
+      "checks": ["Vegetables should be bright and crisp-tender, not soft."],
+      "activeMins": 5
+    },
+    {
+      "id": "step.combine",
+      "title": "Add noodles and glaze with sauce",
+      "instructions": [
+        "Add cooked noodles to the pan and toss with vegetables.",
+        "Re-whisk sauce and pour around the edges of the pan.",
+        "Toss continuously for 60–90 seconds until sauce lightly thickens and coats noodles/veg.",
+        "If using cooked protein, add it now and toss to warm through."
+      ],
+      "timers": [{ "label": "Glaze", "seconds": 75 }],
+      "checks": [
+        "Sauce should coat noodles lightly. If too thick, add 1–2 tbsp water; if too thin, cook 30 seconds longer."
+      ],
+      "activeMins": 4
+    },
+    {
+      "id": "step.finish",
+      "title": "Finish and serve",
+      "instructions": [
+        "Turn off heat and drizzle toasted sesame oil (if using).",
+        "Taste and adjust: add a squeeze of citrus for brightness or a pinch of salt if needed.",
+        "Top with scallions, sesame seeds, and optional chili.",
+        "Serve immediately."
+      ],
+      "activeMins": 2
+    }
+  ],
+
+  "pairings": {
+    "serveWith": [
+      "recipes.asian_fusion.stir_fry_vegetables",
+      "dish.simple_miso_soup_optional",
+      "dish.cucumber_salad_optional"
+    ],
+    "proteinIdeas": [
+      "protein.chicken",
+      "protein.shrimp",
+      "protein.tofu",
+      "protein.beef",
+      "protein.eggs"
+    ],
+    "condiments": [
+      "condiment.chili_crisp",
+      "condiment.sriracha",
+      "condiment.sesame_chili_oil"
+    ]
+  },
+
+  "planner": {
+    "bestFor": ["weeknight", "pantry_noodles", "use_up_veg"],
+    "scaling": {
+      "notes": [
+        "For double batches, stir-fry vegetables in two rounds to keep them crisp.",
+        "Sauce scales linearly; keep cornstarch proportional if using."
+      ]
+    }
+  },
+
+  "storage": {
+    "refrigerator": {
+      "duration": "3 days",
+      "notes": [
+        "Noodles absorb sauce over time; refresh with a splash of water when reheating."
+      ]
+    },
+    "freezer": {
+      "duration": "not recommended",
+      "notes": ["Noodles and vegetables tend to soften and weep when thawed."]
+    },
+    "reheat": {
+      "skillet": "Medium-high, 3–5 minutes, tossing; add 1–2 tbsp water to loosen.",
+      "microwave": "Cover; 90 seconds, stir, then 60–90 seconds more with a splash of water."
+    }
+  },
+
+  "safety": {
+    "notes": [
+      "If cooking raw protein, cook to safe internal temperature before combining with noodles.",
+      "Keep pan hot and avoid overcrowding to prevent steaming."
+    ]
+  },
+
+  "variations": [
+    {
+      "id": "var.peanut_noodles",
+      "label": "Peanut Noodles",
+      "notes": "Whisk 2–3 tbsp peanut butter into sauce with extra water; finish with lime. Allergen: peanuts."
+    },
+    {
+      "id": "var.spicy_sesame",
+      "label": "Spicy Sesame",
+      "notes": "Add 1 tsp chili crisp and 1 tsp sesame oil; reduce sweetener or omit."
+    },
+    {
+      "id": "var.citrus_orange",
+      "label": "Orange-Citrus Noodles",
+      "notes": "Replace half the water with orange juice; finish with lime and a touch more vinegar."
+    }
+  ],
+
+  "notes": [
+    "Vegetable target: aim for 4–6 cups vegetables total.",
+    "If using spaghetti, cook just shy of al dente and toss immediately in the pan to absorb sauce.",
+    "Cornstarch is optional; skipping it yields a lighter, saucier noodle stir-fry."
+  ],
+
+  "methods": ["method.stir_fry", "method.boil", "method.glaze"],
+
+  "compat": {
+    "cuisineId": "cuisines.asian_fusion",
+    "dishId": "dish.noodle_stir_fry",
+    "search": {
+      "keywords": [
+        "noodle stir fry",
+        "lo mein style noodles",
+        "quick noodles and vegetables",
+        "soy ginger garlic noodles"
+      ],
+      "aliases": [
+        "stir-fried noodles",
+        "weeknight noodles",
+        "pantry noodle stir fry"
+      ]
+    },
+    "planner": {
+      "pairsWellWith": [
+        "dish.stir_fry_vegetables",
+        "dish.cucumber_salad_optional"
+      ],
+      "inventorySignals": [
+        "ingredient.soy_sauce",
+        "ingredient.ginger_fresh",
+        "ingredient.garlic",
+        "pantry.noodles"
+      ]
+    }
+  }
+}

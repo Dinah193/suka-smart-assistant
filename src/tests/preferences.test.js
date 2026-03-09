@@ -21,7 +21,12 @@ const events = [];
 const eventBusMock = {
   emit: vi.fn((envelope) => {
     if (!envelope || typeof envelope !== "object") throw new Error("Bad event");
-    if (!envelope.type || !envelope.ts || !envelope.source || envelope.data === undefined) {
+    if (
+      !envelope.type ||
+      !envelope.ts ||
+      !envelope.source ||
+      envelope.data === undefined
+    ) {
       throw new Error("Event missing required envelope fields");
     }
     events.push(envelope);
@@ -34,7 +39,7 @@ const eventBusMock = {
   },
 };
 
-vi.mock("../services/eventBus.js", () => ({ eventBus: eventBusMock }));
+vi.mock("../services/events/eventBus.js", () => ({ eventBus: eventBusMock }));
 
 // ---------------------------------------------------------------------------
 // Attempt to use real Preferences modules if they exist. Otherwise, provide
@@ -114,7 +119,8 @@ const FallbackApplyPreferences = {
    * NOTE: This function intentionally does not mutate the input entity.
    */
   apply(entity, domain, prefs) {
-    if (!entity || !domain) throw new Error("applyPreferences requires entity and domain");
+    if (!entity || !domain)
+      throw new Error("applyPreferences requires entity and domain");
     const p = prefs || FALLBACK_DEFAULTS;
     let adjusted = structuredClone(entity);
     const changes = [];
@@ -127,7 +133,10 @@ const FallbackApplyPreferences = {
         changes.push("tempF→tempC");
       }
       // Portion scaling
-      if (typeof p.cooking.portionSize === "number" && adjusted.ingredients?.length) {
+      if (
+        typeof p.cooking.portionSize === "number" &&
+        adjusted.ingredients?.length
+      ) {
         adjusted.ingredients = adjusted.ingredients.map((ing) =>
           typeof ing.qty === "number"
             ? { ...ing, qty: round2(ing.qty * p.cooking.portionSize) }
@@ -146,7 +155,8 @@ const FallbackApplyPreferences = {
     }
 
     if (domain === "cleaning") {
-      adjusted.aromaticsUsed = p.cleaning.sensitivity === "fragrance-free" ? [] : p.cleaning.aromatics;
+      adjusted.aromaticsUsed =
+        p.cleaning.sensitivity === "fragrance-free" ? [] : p.cleaning.aromatics;
       adjusted.waterTempC = adjusted.waterTempC ?? p.cleaning.waterTempC;
       changes.push("cleaning.aromatics/waterTemp");
     }
@@ -154,16 +164,22 @@ const FallbackApplyPreferences = {
     if (domain === "garden") {
       adjusted.zone = adjusted.zone || p.garden.zone;
       adjusted.defaultBed = adjusted.defaultBed || p.garden.defaultBed;
-      adjusted.wateringMinutes = adjusted.wateringMinutes ?? p.garden.wateringMinutes;
+      adjusted.wateringMinutes =
+        adjusted.wateringMinutes ?? p.garden.wateringMinutes;
       changes.push("garden.zone/bed/watering");
     }
 
     if (domain === "animal") {
-      if (typeof adjusted.doseMl === "number" && p.animal.dosageRounding === "nearest-0.5-ml") {
+      if (
+        typeof adjusted.doseMl === "number" &&
+        p.animal.dosageRounding === "nearest-0.5-ml"
+      ) {
         adjusted.doseMl = roundTo(adjusted.doseMl, 0.5);
         changes.push("animal.doseRound");
       }
-      adjusted.ppe = Array.from(new Set([...(adjusted.ppe || []), ...(p.animal.handlingPPE || [])]));
+      adjusted.ppe = Array.from(
+        new Set([...(adjusted.ppe || []), ...(p.animal.handlingPPE || [])])
+      );
       changes.push("animal.ppe");
     }
 
@@ -190,15 +206,21 @@ const FallbackApplyPreferences = {
 // Try real modules, else fallback
 try {
   // eslint-disable-next-line import/no-unresolved
-  PreferencesService = (await import("../services/preferences/PreferencesService.js")).default;
+  PreferencesService = (
+    await import("../services/preferences/PreferencesService.js")
+  ).default;
 } catch {
   PreferencesService = FallbackPreferencesService;
 }
 try {
   // eslint-disable-next-line import/no-unresolved
-  ({ applyPreferences } = await import("../services/preferences/applyPreferences.js"));
+  ({ applyPreferences } = await import(
+    "../services/preferences/applyPreferences.js"
+  ));
 } catch {
-  applyPreferences = FallbackApplyPreferences.apply.bind(FallbackApplyPreferences);
+  applyPreferences = FallbackApplyPreferences.apply.bind(
+    FallbackApplyPreferences
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -323,7 +345,10 @@ describe("Preferences: apply to domain entities", () => {
   });
 
   it("applies to cooking: converts tempF→tempC, scales portions, adds doneness/spice/sweetness", () => {
-    const prefs = PreferencesService.load({ units: "metric", cooking: { portionSize: 1.5, doneness: "medium-rare" } });
+    const prefs = PreferencesService.load({
+      units: "metric",
+      cooking: { portionSize: 1.5, doneness: "medium-rare" },
+    });
     const adjusted = applyPreferences(RECIPE_FIXTURE, "cooking", prefs);
 
     expect(adjusted.tempC).toBeCloseTo(204.44, 2); // 400F -> ~204.44C
@@ -337,7 +362,9 @@ describe("Preferences: apply to domain entities", () => {
   });
 
   it("applies to cleaning: respects fragrance-free sensitivity and default water temp", () => {
-    const prefs = PreferencesService.load({ cleaning: { sensitivity: "fragrance-free" } });
+    const prefs = PreferencesService.load({
+      cleaning: { sensitivity: "fragrance-free" },
+    });
     const adjusted = applyPreferences(CLEANING_FIXTURE, "cleaning", prefs);
     expect(adjusted.aromaticsUsed).toEqual([]); // fragrance-free disables aromatics
     expect(typeof adjusted.waterTempC).toBe("number");

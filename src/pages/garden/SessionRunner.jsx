@@ -1,6 +1,12 @@
 /* eslint-disable no-console */
 // src/pages/garden/SessionRunner.jsx
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 /* -----------------------------------------------------------------------------
@@ -10,18 +16,27 @@ const isBrowser = typeof window !== "undefined";
 
 let eventBus = { emit() {}, on() {}, off() {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch (_e) {}
 
-let automation = { emit: () => {}, on: () => {}, off: () => {}, rules: { get: () => [] } };
+let automation = {
+  emit: () => {},
+  on: () => {},
+  off: () => {},
+  rules: { get: () => [] },
+};
 try {
   const mod = require("@/services/automation/runtime");
   automation = (mod && (mod.automation || mod.default || mod)) || automation;
 } catch (_e) {}
 
 let pausePolicies = {
-  constants: { REASON_USER: "user", REASON_SAFETY: "safety", REASON_SABBATH: "sabbath" },
+  constants: {
+    REASON_USER: "user",
+    REASON_SAFETY: "safety",
+    REASON_SABBATH: "sabbath",
+  },
   shouldFreeze: () => false,
   canContinue: () => true,
   normalize: (p) => ({ ...p }),
@@ -34,9 +49,10 @@ try {
 let offsetParser = {
   parse: (s) => {
     if (!s) return 0;
-    const m = /(?:(\+)?PT)?(?:(\d+)H)?(?:(\d+)M)?/.exec(s) ||
-              /^(\+)?(\d+)\s*m(in)?$/.exec(s) ||
-              /^(\+)?(\d+)\s*h(ours?)?$/.exec(s);
+    const m =
+      /(?:(\+)?PT)?(?:(\d+)H)?(?:(\d+)M)?/.exec(s) ||
+      /^(\+)?(\d+)\s*m(in)?$/.exec(s) ||
+      /^(\+)?(\d+)\s*h(ours?)?$/.exec(s);
     if (!m) return 0;
     const nums = m.slice(2).map((x) => (x ? parseInt(x, 10) : 0));
     let minutes = 0;
@@ -51,7 +67,10 @@ try {
   offsetParser = (mod && (mod.default || mod)) || offsetParser;
 } catch (_e) {}
 
-let calendarSync = { addEvents: async () => ({ ok: true }), writeSession: async () => ({ ok: true }) };
+let calendarSync = {
+  addEvents: async () => ({ ok: true }),
+  writeSession: async () => ({ ok: true }),
+};
 try {
   const mod = require("@/services/calendar/calendarSync");
   calendarSync = (mod && (mod.default || mod)) || calendarSync;
@@ -71,13 +90,19 @@ let useSettingsStore = () => ({
 });
 try {
   const mod = require("@/stores/settingsStore");
-  useSettingsStore = (mod && (mod.default || mod.useSettingsStore)) || useSettingsStore;
+  useSettingsStore =
+    (mod && (mod.default || mod.useSettingsStore)) || useSettingsStore;
 } catch (_e) {}
 
-let useFavoriteSessions = () => ({ list: () => [], save: async () => ({ ok: true }), remove: async () => ({ ok: true }) });
+let useFavoriteSessions = () => ({
+  list: () => [],
+  save: async () => ({ ok: true }),
+  remove: async () => ({ ok: true }),
+});
 try {
   const mod = require("@/hooks/useFavoriteSessions");
-  useFavoriteSessions = (mod && (mod.default || mod.useFavoriteSessions)) || useFavoriteSessions;
+  useFavoriteSessions =
+    (mod && (mod.default || mod.useFavoriteSessions)) || useFavoriteSessions;
 } catch (_e) {}
 
 let useSchedules = () => ({ list: () => [], save: async () => ({ ok: true }) });
@@ -86,7 +111,8 @@ try {
   useSchedules = (mod && (mod.default || mod.useSchedules)) || useSchedules;
 } catch (_e) {}
 
-let GardenQueueManager = { // optional: can “enrich” steps or emit NBAs
+let GardenQueueManager = {
+  // optional: can “enrich” steps or emit NBAs
   suggestSteps: async (_opts) => [],
 };
 try {
@@ -108,12 +134,19 @@ const fallbackSchedKey = "garden:schedules";
 const localFavAPI = {
   list: () => {
     if (!isBrowser) return [];
-    try { return JSON.parse(localStorage.getItem(fallbackFavKey) || "[]"); } catch { return []; }
+    try {
+      return JSON.parse(localStorage.getItem(fallbackFavKey) || "[]");
+    } catch {
+      return [];
+    }
   },
   save: async (fav) => {
     if (!isBrowser) return { ok: false };
     const all = localFavAPI.list();
-    const next = [...all.filter((f) => f.id !== fav.id), { ...fav, updatedAt: Date.now() }];
+    const next = [
+      ...all.filter((f) => f.id !== fav.id),
+      { ...fav, updatedAt: Date.now() },
+    ];
     localStorage.setItem(fallbackFavKey, JSON.stringify(next));
     return { ok: true };
   },
@@ -127,12 +160,19 @@ const localFavAPI = {
 const localSchedAPI = {
   list: () => {
     if (!isBrowser) return [];
-    try { return JSON.parse(localStorage.getItem(fallbackSchedKey) || "[]"); } catch { return []; }
+    try {
+      return JSON.parse(localStorage.getItem(fallbackSchedKey) || "[]");
+    } catch {
+      return [];
+    }
   },
   save: async (s) => {
     if (!isBrowser) return { ok: false };
     const all = localSchedAPI.list();
-    const next = [...all.filter((x) => x.id !== s.id), { ...s, updatedAt: Date.now() }];
+    const next = [
+      ...all.filter((x) => x.id !== s.id),
+      { ...s, updatedAt: Date.now() },
+    ];
     localStorage.setItem(fallbackSchedKey, JSON.stringify(next));
     return { ok: true };
   },
@@ -150,11 +190,26 @@ const Banner = ({ title, subtitle, onExit, onPause, onResume, isPaused }) => (
       </div>
       <div className="flex gap-2">
         {!isPaused ? (
-          <button className="px-3 py-2 rounded-xl border bg-amber-50 hover:bg-amber-100" onClick={onPause}>Pause</button>
+          <button
+            className="px-3 py-2 rounded-xl border bg-amber-50 hover:bg-amber-100"
+            onClick={onPause}
+          >
+            Pause
+          </button>
         ) : (
-          <button className="px-3 py-2 rounded-xl border bg-emerald-50 hover:bg-emerald-100" onClick={onResume}>Resume</button>
+          <button
+            className="px-3 py-2 rounded-xl border bg-emerald-50 hover:bg-emerald-100"
+            onClick={onResume}
+          >
+            Resume
+          </button>
         )}
-        <button className="px-3 py-2 rounded-xl border bg-zinc-50 hover:bg-zinc-100" onClick={onExit}>Exit</button>
+        <button
+          className="px-3 py-2 rounded-xl border bg-zinc-50 hover:bg-zinc-100"
+          onClick={onExit}
+        >
+          Exit
+        </button>
       </div>
     </div>
   </div>
@@ -170,12 +225,20 @@ const Timeline = ({ steps = [], currentIndex = 0 }) => (
           key={s.id || i}
           className={[
             "p-3 rounded-xl border",
-            active ? "bg-blue-50 border-blue-300" : done ? "bg-green-50 border-green-300" : "bg-zinc-50 border-zinc-200",
+            active
+              ? "bg-blue-50 border-blue-300"
+              : done
+              ? "bg-green-50 border-green-300"
+              : "bg-zinc-50 border-zinc-200",
           ].join(" ")}
         >
-          <div className="font-medium">{i + 1}. {s.title || s.task || "Untitled Step"}</div>
+          <div className="font-medium">
+            {i + 1}. {s.title || s.task || "Untitled Step"}
+          </div>
           {s.hints ? <div className="text-sm opacity-75">{s.hints}</div> : null}
-          {s.duration ? <div className="text-xs opacity-60 mt-1">~{s.duration} min</div> : null}
+          {s.duration ? (
+            <div className="text-xs opacity-60 mt-1">~{s.duration} min</div>
+          ) : null}
         </div>
       );
     })}
@@ -188,10 +251,22 @@ const PauseModal = ({ open, reason, onClose, onContinue }) => {
     <div className="fixed inset-0 z-40 grid place-items-center bg-black/40">
       <div className="w-[min(560px,92vw)] rounded-2xl bg-white dark:bg-zinc-900 shadow-xl border border-zinc-200 dark:border-zinc-700 p-4">
         <div className="text-lg font-semibold mb-1">Session Paused</div>
-        <div className="text-sm opacity-80 mb-4">{reason || "Session is paused."}</div>
+        <div className="text-sm opacity-80 mb-4">
+          {reason || "Session is paused."}
+        </div>
         <div className="flex justify-end gap-2">
-          <button className="px-3 py-2 rounded-xl border bg-zinc-50" onClick={onClose}>Close</button>
-          <button className="px-3 py-2 rounded-xl border bg-emerald-50 hover:bg-emerald-100" onClick={onContinue}>Continue</button>
+          <button
+            className="px-3 py-2 rounded-xl border bg-zinc-50"
+            onClick={onClose}
+          >
+            Close
+          </button>
+          <button
+            className="px-3 py-2 rounded-xl border bg-emerald-50 hover:bg-emerald-100"
+            onClick={onContinue}
+          >
+            Continue
+          </button>
         </div>
       </div>
     </div>
@@ -215,34 +290,77 @@ export default function GardenSessionRunner() {
 
   // Resolve hooks or fallbacks for favorites/schedules
   const favHook = (() => {
-    try { const h = useFavoriteSessions(); if (h && typeof h.list === "function") return h; } catch {}
+    try {
+      const h = useFavoriteSessions();
+      if (h && typeof h.list === "function") return h;
+    } catch {}
     return localFavAPI;
   })();
   const schedHook = (() => {
-    try { const h = useSchedules(); if (h && typeof h.list === "function") return h; } catch {}
+    try {
+      const h = useSchedules();
+      if (h && typeof h.list === "function") return h;
+    } catch {}
     return localSchedAPI;
   })();
 
   // Router state may carry templateId, seed steps, or resume info
   const routeState = (location && location.state) || {};
-  const templateId = routeState.templateId || defaults?.gardenTemplateId || "transplant-bed-basic";
+  const templateId =
+    routeState.templateId ||
+    defaults?.gardenTemplateId ||
+    "transplant-bed-basic";
 
   // Session state
   const [sessionId] = useState(() => routeState.sessionId || `garden-${uid()}`);
   const [title, setTitle] = useState(routeState.title || "Garden Session");
-  const [subtitle, setSubtitle] = useState(routeState.subtitle || "Let’s tend your beds.");
+  const [subtitle, setSubtitle] = useState(
+    routeState.subtitle || "Let’s tend your beds."
+  );
   const [steps, setSteps] = useState(() => {
-    const seed = (routeState.steps || []).map((s, i) => ({ id: s.id || `st-${i}-${uid()}`, ...s }));
+    const seed = (routeState.steps || []).map((s, i) => ({
+      id: s.id || `st-${i}-${uid()}`,
+      ...s,
+    }));
     // Default quick “bed refresh” flow; keep snappy for momentum
-    return seed.length ? seed : [
-      { id: `st-${uid()}`, title: "Walk-through & notes", duration: 5, hints: "Scan beds, pests, moisture, harvestables" },
-      { id: `st-${uid()}`, title: "Weed & surface loosen", duration: 10, hints: "Hand weed, stir topsoil without deep till" },
-      { id: `st-${uid()}`, title: "Compost + amendments", duration: 7, hints: "Light top dress; match crop needs" },
-      { id: `st-${uid()}`, title: "Transplant / direct sow", duration: 8, hints: "Spacing, depth; firm and water in" },
-      { id: `st-${uid()}`, title: "Mulch + water", duration: 8, hints: "Mulch rings, deep soak; label rows" },
-    ];
+    return seed.length
+      ? seed
+      : [
+          {
+            id: `st-${uid()}`,
+            title: "Walk-through & notes",
+            duration: 5,
+            hints: "Scan beds, pests, moisture, harvestables",
+          },
+          {
+            id: `st-${uid()}`,
+            title: "Weed & surface loosen",
+            duration: 10,
+            hints: "Hand weed, stir topsoil without deep till",
+          },
+          {
+            id: `st-${uid()}`,
+            title: "Compost + amendments",
+            duration: 7,
+            hints: "Light top dress; match crop needs",
+          },
+          {
+            id: `st-${uid()}`,
+            title: "Transplant / direct sow",
+            duration: 8,
+            hints: "Spacing, depth; firm and water in",
+          },
+          {
+            id: `st-${uid()}`,
+            title: "Mulch + water",
+            duration: 8,
+            hints: "Mulch rings, deep soak; label rows",
+          },
+        ];
   });
-  const [idx, setIdx] = useState(() => Math.min(routeState.currentIndex || 0, Math.max(steps.length - 1, 0)));
+  const [idx, setIdx] = useState(() =>
+    Math.min(routeState.currentIndex || 0, Math.max(steps.length - 1, 0))
+  );
   const [paused, setPaused] = useState(false);
   const [pauseReason, setPauseReason] = useState("");
   const [startedAt] = useState(routeState.startedAt || nowISO());
@@ -257,17 +375,26 @@ export default function GardenSessionRunner() {
     (async () => {
       try {
         if (!(routeState.steps && routeState.steps.length)) {
-          const enrich = await GardenQueueManager.suggestSteps?.({ templateId, sessionId });
+          const enrich = await GardenQueueManager.suggestSteps?.({
+            templateId,
+            sessionId,
+          });
           if (Array.isArray(enrich) && enrich.length) {
             setSteps((prev) => {
               const map = new Map(prev.map((p) => [p.title, p]));
-              enrich.forEach((e) => { if (!map.has(e.title)) map.set(e.title, { id: `st-${uid()}`, ...e }); });
+              enrich.forEach((e) => {
+                if (!map.has(e.title))
+                  map.set(e.title, { id: `st-${uid()}`, ...e });
+              });
               return Array.from(map.values());
             });
           }
         }
       } catch (e) {
-        console.warn("GardenQueueManager.suggestSteps failed:", e?.message || e);
+        console.warn(
+          "GardenQueueManager.suggestSteps failed:",
+          e?.message || e
+        );
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -276,9 +403,16 @@ export default function GardenSessionRunner() {
   // Keyboard controls
   useEffect(() => {
     const onKey = (e) => {
-      if (e.code === "Space") { e.preventDefault(); paused ? onResume() : onPause(); }
-      else if (e.code === "ArrowRight") { e.preventDefault(); goNext(); }
-      else if (e.code === "ArrowLeft") { e.preventDefault(); goPrev(); }
+      if (e.code === "Space") {
+        e.preventDefault();
+        paused ? onResume() : onPause();
+      } else if (e.code === "ArrowRight") {
+        e.preventDefault();
+        goNext();
+      } else if (e.code === "ArrowLeft") {
+        e.preventDefault();
+        goPrev();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -292,13 +426,31 @@ export default function GardenSessionRunner() {
         const guardRes = await inventoryGuard.ensureOnHand?.({
           domain: "garden",
           sessionId,
-          items: ["Seeds/starts", "Compost", "Mulch", "Labels", "Gloves", "Hori-hori", "Water source"],
+          items: [
+            "Seeds/starts",
+            "Compost",
+            "Mulch",
+            "Labels",
+            "Gloves",
+            "Hori-hori",
+            "Water source",
+          ],
         });
         if (guardRes?.shortages?.length) {
           setShortages(guardRes.shortages);
-          eventBus.emit("inventory:signals", { domain: "garden", sessionId, shortages: guardRes.shortages });
+          eventBus.emit("inventory:signals", {
+            domain: "garden",
+            sessionId,
+            shortages: guardRes.shortages,
+          });
           // Optional: nudge InventoryMonitor/NBA
-          try { InventoryMonitor.emit?.("inventory:signals", { domain: "garden", sessionId, shortages: guardRes.shortages }); } catch {}
+          try {
+            InventoryMonitor.emit?.("inventory:signals", {
+              domain: "garden",
+              sessionId,
+              shortages: guardRes.shortages,
+            });
+          } catch {}
         }
       } catch (e) {
         console.warn("Inventory guard skipped:", e?.message || e);
@@ -310,11 +462,21 @@ export default function GardenSessionRunner() {
   // Sabbath / Quiet hours guard at mount
   useEffect(() => {
     try {
-      const shouldFreeze = pausePolicies.shouldFreeze?.({ domain: "garden", quietHours, sabbath, rhythms, now: new Date() });
+      const shouldFreeze = pausePolicies.shouldFreeze?.({
+        domain: "garden",
+        quietHours,
+        sabbath,
+        rhythms,
+        now: new Date(),
+      });
       if (shouldFreeze) {
         setPaused(true);
         setPauseReason("Paused by household guard (Sabbath/Quiet Hours).");
-        eventBus.emit("session:paused", { sessionId, domain: "garden", reason: pausePolicies.constants?.REASON_SABBATH || "guard" });
+        eventBus.emit("session:paused", {
+          sessionId,
+          domain: "garden",
+          reason: pausePolicies.constants?.REASON_SABBATH || "guard",
+        });
       }
     } catch {}
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -360,7 +522,8 @@ export default function GardenSessionRunner() {
   // Orchestration listeners
   useEffect(() => {
     const onStep = (payload) => {
-      if (payload?.sessionId !== sessionId || payload?.domain !== "garden") return;
+      if (payload?.sessionId !== sessionId || payload?.domain !== "garden")
+        return;
       if (payload.type === "next") goNext();
       if (payload.type === "prev") goPrev();
       if (payload.type === "pause") onPause(payload.reason);
@@ -380,41 +543,69 @@ export default function GardenSessionRunner() {
 
   const goNext = useCallback(() => {
     setIdx((i) => Math.min(i + 1, Math.max(steps.length - 1, 0)));
-    eventBus.emit("session:step:changed", { sessionId, domain: "garden", index: Math.min(idx + 1, steps.length - 1) });
+    eventBus.emit("session:step:changed", {
+      sessionId,
+      domain: "garden",
+      index: Math.min(idx + 1, steps.length - 1),
+    });
     // Garden-specific signals (optional): when leaving a step, emit “garden:action:completed”
     try {
       const done = steps[idx];
-      if (done?.title) eventBus.emit("garden:action:completed", { sessionId, step: done.title, at: nowISO() });
+      if (done?.title)
+        eventBus.emit("garden:action:completed", {
+          sessionId,
+          step: done.title,
+          at: nowISO(),
+        });
     } catch {}
   }, [idx, sessionId, steps]);
 
   const goPrev = useCallback(() => {
     setIdx((i) => Math.max(i - 1, 0));
-    eventBus.emit("session:step:changed", { sessionId, domain: "garden", index: Math.max(idx - 1, 0) });
+    eventBus.emit("session:step:changed", {
+      sessionId,
+      domain: "garden",
+      index: Math.max(idx - 1, 0),
+    });
   }, [idx, sessionId]);
 
-  const onPause = useCallback((reason = pausePolicies.constants?.REASON_USER || "user") => {
-    setPaused(true);
-    const message =
-      reason === pausePolicies.constants?.REASON_SAFETY
-        ? "Paused for safety."
-        : reason === pausePolicies.constants?.REASON_SABBATH
-        ? "Paused by household guard (Sabbath/Quiet Hours)."
-        : "Paused by user.";
-    setPauseReason(message);
-    eventBus.emit("session:paused", { sessionId, domain: "garden", reason });
-  }, [sessionId]);
+  const onPause = useCallback(
+    (reason = pausePolicies.constants?.REASON_USER || "user") => {
+      setPaused(true);
+      const message =
+        reason === pausePolicies.constants?.REASON_SAFETY
+          ? "Paused for safety."
+          : reason === pausePolicies.constants?.REASON_SABBATH
+          ? "Paused by household guard (Sabbath/Quiet Hours)."
+          : "Paused by user.";
+      setPauseReason(message);
+      eventBus.emit("session:paused", { sessionId, domain: "garden", reason });
+    },
+    [sessionId]
+  );
 
   const onResume = useCallback(() => {
-    const ok = pausePolicies.canContinue?.({ domain: "garden", quietHours, sabbath, now: new Date() });
-    if (!ok) { setPauseReason("Cannot resume yet due to household guard."); return; }
+    const ok = pausePolicies.canContinue?.({
+      domain: "garden",
+      quietHours,
+      sabbath,
+      now: new Date(),
+    });
+    if (!ok) {
+      setPauseReason("Cannot resume yet due to household guard.");
+      return;
+    }
     setPaused(false);
     setPauseReason("");
     eventBus.emit("session:resumed", { sessionId, domain: "garden" });
   }, [sessionId, quietHours, sabbath]);
 
   const onExit = useCallback(() => {
-    eventBus.emit("session:ended", { sessionId, domain: "garden", finishedAt: nowISO() });
+    eventBus.emit("session:ended", {
+      sessionId,
+      domain: "garden",
+      finishedAt: nowISO(),
+    });
     navigate("/garden", { replace: true });
   }, [navigate, sessionId]);
 
@@ -437,7 +628,15 @@ export default function GardenSessionRunner() {
     } else {
       alert("Could not save favorite.");
     }
-  }, [favHook, scheduleSuggestion, sessionId, startedAt, steps, templateId, title]);
+  }, [
+    favHook,
+    scheduleSuggestion,
+    sessionId,
+    startedAt,
+    steps,
+    templateId,
+    title,
+  ]);
 
   /* -------------------------------- Save: Schedule Template ------------------------------ */
   const saveScheduleTemplate = useCallback(async () => {
@@ -457,7 +656,8 @@ export default function GardenSessionRunner() {
     };
     setScheduleSuggestion(sched);
 
-    const res = await (schedHook.save?.(sched) || Promise.resolve({ ok: false }));
+    const res = await (schedHook.save?.(sched) ||
+      Promise.resolve({ ok: false }));
     if (res?.ok) {
       eventBus.emit("schedules:changed", { domain: "garden" });
       alert("Schedule template saved ✓");
@@ -474,7 +674,14 @@ export default function GardenSessionRunner() {
         meta: { sessionTemplateId: sched.id, source: "SessionRunner" },
       });
     } catch {}
-  }, [calendarSync, rhythms?.preferMorning, schedHook, steps, templateId, title]);
+  }, [
+    calendarSync,
+    rhythms?.preferMorning,
+    schedHook,
+    steps,
+    templateId,
+    title,
+  ]);
 
   /* --------------------------------- Render --------------------------------- */
   const currentStep = steps[idx] || {};
@@ -489,7 +696,9 @@ export default function GardenSessionRunner() {
       {/* Top bar */}
       <div className="mb-3 flex items-center justify-between">
         <div className="text-sm opacity-70">
-          <Link className="underline" to="/garden">Garden</Link>
+          <Link className="underline" to="/garden">
+            Garden
+          </Link>
           <span className="mx-1">/</span>
           <span>Session</span>
           {shortagesBadge}
@@ -499,7 +708,10 @@ export default function GardenSessionRunner() {
 
       {/* Banner */}
       <Banner
-        title={`${title} (${Math.max(0, Math.min(100, Math.round(((idx + 1) / (steps.length || 1)) * 100)))}%)`}
+        title={`${title} (${Math.max(
+          0,
+          Math.min(100, Math.round(((idx + 1) / (steps.length || 1)) * 100))
+        )}%)`}
         subtitle={subtitle}
         onExit={onExit}
         onPause={onPause}
@@ -509,13 +721,22 @@ export default function GardenSessionRunner() {
 
       {/* Actions */}
       <div className="mt-3 flex flex-wrap gap-2">
-        <button className="px-3 py-2 rounded-xl border bg-blue-50 hover:bg-blue-100" onClick={saveFavorite}>
+        <button
+          className="px-3 py-2 rounded-xl border bg-blue-50 hover:bg-blue-100"
+          onClick={saveFavorite}
+        >
           Save Favorite Session
         </button>
-        <button className="px-3 py-2 rounded-xl border bg-purple-50 hover:bg-purple-100" onClick={saveScheduleTemplate}>
+        <button
+          className="px-3 py-2 rounded-xl border bg-purple-50 hover:bg-purple-100"
+          onClick={saveScheduleTemplate}
+        >
           Save as Schedule Template
         </button>
-        <button className="px-3 py-2 rounded-xl border bg-zinc-50 hover:bg-zinc-100" onClick={() => navigate("/scheduler/settings")}>
+        <button
+          className="px-3 py-2 rounded-xl border bg-zinc-50 hover:bg-zinc-100"
+          onClick={() => navigate("/scheduler/settings")}
+        >
           Open Scheduler Settings
         </button>
       </div>
@@ -523,15 +744,29 @@ export default function GardenSessionRunner() {
       {/* Current step card */}
       <div className="mt-4 p-4 rounded-2xl border bg-white dark:bg-zinc-900">
         <div className="flex items-baseline justify-between">
-          <div className="text-lg font-semibold">{currentStep.title || "Step"}</div>
-          <div className="text-xs opacity-70">Step {idx + 1} of {steps.length}</div>
+          <div className="text-lg font-semibold">
+            {currentStep.title || "Step"}
+          </div>
+          <div className="text-xs opacity-70">
+            Step {idx + 1} of {steps.length}
+          </div>
         </div>
-        {currentStep.hints ? <div className="mt-1 text-sm opacity-80">{currentStep.hints}</div> : null}
+        {currentStep.hints ? (
+          <div className="mt-1 text-sm opacity-80">{currentStep.hints}</div>
+        ) : null}
         <div className="mt-3 flex gap-2">
-          <button className="px-3 py-2 rounded-xl border bg-zinc-50 hover:bg-zinc-100" onClick={goPrev} disabled={idx === 0}>
+          <button
+            className="px-3 py-2 rounded-xl border bg-zinc-50 hover:bg-zinc-100"
+            onClick={goPrev}
+            disabled={idx === 0}
+          >
             ← Back
           </button>
-          <button className="px-3 py-2 rounded-xl border bg-emerald-50 hover:bg-emerald-100" onClick={goNext} disabled={idx >= steps.length - 1}>
+          <button
+            className="px-3 py-2 rounded-xl border bg-emerald-50 hover:bg-emerald-100"
+            onClick={goNext}
+            disabled={idx >= steps.length - 1}
+          >
             Next →
           </button>
         </div>
@@ -543,11 +778,17 @@ export default function GardenSessionRunner() {
       </div>
 
       {/* Pause modal */}
-      <PauseModal open={paused} reason={pauseReason} onClose={() => setPauseReason("")} onContinue={onResume} />
+      <PauseModal
+        open={paused}
+        reason={pauseReason}
+        onClose={() => setPauseReason("")}
+        onContinue={onResume}
+      />
 
       {/* Footer / secondary info */}
       <div className="mt-6 text-xs opacity-60">
-        Template: <code>{templateId}</code> • Session ID: <code>{sessionId}</code> • Started:{" "}
+        Template: <code>{templateId}</code> • Session ID:{" "}
+        <code>{sessionId}</code> • Started:{" "}
         <time dateTime={startedAt}>{new Date(startedAt).toLocaleString()}</time>
       </div>
     </div>

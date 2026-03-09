@@ -1,0 +1,205 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "type": "recipe",
+    "id": "bakery.brownie_slab_bakery",
+    "slug": "brownie_slab_bakery",
+    "name": "Bakery Brownie Slab (Tray Bake + Portion Logic)",
+    "version": "1.0.0",
+    "status": "canonical",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-18T00:00:00.000Z",
+    "updatedAt": "2026-01-18T00:00:00.000Z",
+    "locale": "en-US",
+    "difficulty": "intermediate",
+    "tags": [
+      "bakery",
+      "brownies",
+      "tray-bake",
+      "slab",
+      "portioning",
+      "fudge",
+      "chocolate",
+      "bake-sale",
+      "freezer-friendly",
+      "make-ahead"
+    ],
+    "allergens": ["wheat", "eggs", "dairy"],
+    "description": "A bakery-scale brownie slab designed for a tray bake with clean cut-and-portion logic. Produces a fudgy brownie with set edges and a glossy top, using a chill-and-cut workflow for sharp squares. Includes commercial flour or fine fresh-milled flour guidance (choose one)."
+  },
+  "equipment": [
+    { "id": "oven", "label": "Oven" },
+    {
+      "id": "half_sheet_pan",
+      "label": "Half sheet pan (18x13 in) or 9x13 for smaller batch"
+    },
+    {
+      "id": "parchment_paper",
+      "label": "Parchment paper (required for lift-out)"
+    },
+    { "id": "mixing_bowl_large", "label": "Large mixing bowl" },
+    { "id": "whisk", "label": "Whisk" },
+    { "id": "rubber_spatula", "label": "Rubber spatula" },
+    { "id": "saucepan", "label": "Saucepan (for melting)" },
+    { "id": "kitchen_scale", "label": "Kitchen scale (recommended)" },
+    { "id": "measuring_cups", "label": "Measuring cups/spoons" },
+    { "id": "cooling_rack", "label": "Cooling rack" },
+    { "id": "chef_knife", "label": "Long sharp knife (for slicing)" }
+  ],
+  "ingredients": [
+    {
+      "id": "butter_unsalted",
+      "label": "Unsalted butter",
+      "amount": { "value": 340, "unit": "g" },
+      "notes": "About 1 1/2 cups (3 sticks)."
+    },
+    {
+      "id": "chocolate_dark",
+      "label": "Dark chocolate (60–70%), chopped",
+      "amount": { "value": 340, "unit": "g" },
+      "notes": "About 12 oz. Adds depth and fudginess."
+    },
+    {
+      "id": "cocoa_powder",
+      "label": "Cocoa powder",
+      "amount": { "value": 60, "unit": "g" },
+      "notes": "About 2/3 cup."
+    },
+    {
+      "id": "espresso_powder_optional",
+      "label": "Espresso powder (optional)",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1 tsp; enhances chocolate without tasting like coffee.",
+      "optional": true
+    },
+    {
+      "id": "sugar_granulated",
+      "label": "Granulated sugar",
+      "amount": { "value": 600, "unit": "g" },
+      "notes": "About 3 cups. Sugar contributes to glossy top."
+    },
+    {
+      "id": "brown_sugar_optional",
+      "label": "Light brown sugar (optional, chewier)",
+      "amount": { "value": 100, "unit": "g" },
+      "notes": "Optional; if using, reduce granulated sugar by same amount.",
+      "optional": true
+    },
+    {
+      "id": "eggs",
+      "label": "Large eggs",
+      "amount": { "value": 6, "unit": "each" },
+      "notes": "Room temperature preferred."
+    },
+    {
+      "id": "vanilla_extract",
+      "label": "Vanilla extract",
+      "amount": { "value": 15, "unit": "ml" },
+      "notes": "About 1 tbsp."
+    },
+    {
+      "id": "salt",
+      "label": "Kosher salt",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": "About 1 1/2 tsp."
+    },
+
+    {
+      "id": "flour_commercial_option",
+      "label": "Commercial flour option (use this OR the fresh-milled option): all-purpose flour",
+      "amount": { "value": 180, "unit": "g" },
+      "notes": "About 1 1/2 cups. Keep flour moderate for fudgy texture."
+    },
+    {
+      "id": "flour_freshmilled_option",
+      "label": "Fresh-milled flour option (use this OR the commercial option): fine-milled, sifted",
+      "amount": { "value": 180, "unit": "g" },
+      "notes": "Sift coarse bran for smooth crumb. Fresh-milled can taste nuttier; do not overmix after adding flour."
+    },
+
+    {
+      "id": "chocolate_chips_optional",
+      "label": "Chocolate chips or chunks (optional)",
+      "amount": { "value": 170, "unit": "g" },
+      "notes": "About 1 cup. Optional mix-in for bakery style.",
+      "optional": true
+    },
+    {
+      "id": "nuts_optional",
+      "label": "Chopped walnuts/pecans (optional)",
+      "amount": { "value": 120, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "flaky_salt_optional",
+      "label": "Flaky salt (optional topping)",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "Sprinkle lightly before baking.",
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_pan_oven",
+      "title": "Prep pan and oven (tray + lift logic)",
+      "body": "Heat oven to 350°F (175°C). Line a half sheet pan (18x13 in) with parchment, leaving overhang on the long sides for lifting. Lightly grease parchment."
+    },
+    {
+      "id": "step_02_choose_flour",
+      "title": "Choose your flour option",
+      "body": "Use either the commercial flour option OR the fresh-milled flour option (not both). For fresh-milled flour, sift coarse bran for a smoother brownie."
+    },
+    {
+      "id": "step_03_melt_chocolate_butter",
+      "title": "Melt butter + chocolate",
+      "body": "In a saucepan over low heat, melt butter and chopped chocolate together, stirring until smooth. Remove from heat and whisk in cocoa powder (and espresso powder if using). Let cool 5 minutes."
+    },
+    {
+      "id": "step_04_add_sugar",
+      "title": "Add sugar (glossy top logic)",
+      "body": "Whisk sugar (and optional brown sugar swap) into the warm chocolate mixture until glossy and well combined. This helps dissolve sugar for that shiny brownie crust."
+    },
+    {
+      "id": "step_05_add_eggs",
+      "title": "Add eggs and emulsify",
+      "body": "Add eggs one at a time, whisking vigorously after each until batter looks thicker and glossy. Whisk in vanilla and salt."
+    },
+    {
+      "id": "step_06_fold_in_flour",
+      "title": "Fold in flour (do not overmix)",
+      "body": "Add flour and fold with a spatula just until no dry flour remains. Overmixing develops gluten and makes brownies tough."
+    },
+    {
+      "id": "step_07_add_ins",
+      "title": "Add optional mix-ins",
+      "body": "Fold in chocolate chips and/or nuts if using. Sprinkle flaky salt on top if desired."
+    },
+    {
+      "id": "step_08_bake",
+      "title": "Bake",
+      "body": "Spread batter evenly in pan. Bake 18–26 minutes until edges are set and the center is just set (a tester should come out with moist crumbs, not wet batter). Overbaking dries slab brownies—start checking at 18 minutes."
+    },
+    {
+      "id": "step_09_cool_then_chill_for_cutting",
+      "title": "Cool, then chill for clean portioning",
+      "body": "Cool completely in the pan. For sharp, bakery-style cuts, refrigerate 1–2 hours (or 30–45 minutes in freezer) before slicing."
+    },
+    {
+      "id": "step_10_portion_grid",
+      "title": "Portion (cut/portion logic)",
+      "body": "Lift slab out using parchment overhang. For clean cuts, use a long knife warmed in hot water and wiped dry between slices. Portion options: 24 squares (6x4), 30 squares (6x5), or 48 bite-size (8x6). Trim edges for perfect presentation if desired."
+    }
+  ],
+  "notes": [
+    "Tray-bake logic: half sheet pan yields high throughput for bakery trays and events; parchment overhang enables lift-out.",
+    "Cut logic: chilling firms the slab and sets the crust, giving sharp, clean edges.",
+    "Fresh-milled flour: sift coarse bran and fold gently—fresh-milled can make brownies seem denser if overmixed.",
+    "Doneness cue: fudgy brownies finish as they cool; pull when center is just set."
+  ],
+  "storage": {
+    "roomTemp": "Airtight: up to 3 days.",
+    "refrigerator": "Airtight: up to 7 days (firmer texture; bring to room temp for softer bite).",
+    "freezer": "Freeze squares individually wrapped up to 2 months."
+  }
+}

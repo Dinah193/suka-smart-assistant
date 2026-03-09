@@ -1,0 +1,436 @@
+{
+  "$schema": "../../../schemas/ruleset.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+  "kind": "ruleset",
+  "meta": {
+    "id": "rulesets.shawarma.acid_fat_balance",
+    "type": "ruleset",
+    "label": "Shawarma Acid–Fat Balance",
+    "status": "canonical",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Catalog",
+      "notes": [
+        "Deterministic heuristics for balancing acid, fat, salt, and sweet in shawarma marinades and sauces.",
+        "Designed for SSA recipe adapters, cook setup guidance, and validation scoring (not nutrition)."
+      ]
+    }
+  },
+  "scope": {
+    "kind": "module",
+    "locales": ["en-US"]
+  },
+  "globals": {
+    "units": {
+      "volume": "ml",
+      "mass": "g",
+      "proteinMassDefault": { "value": 1000, "unit": "g" }
+    },
+    "targets": {
+      "marinade": {
+        "acidToOilRatio": {
+          "default": { "min": 0.45, "ideal": 0.6, "max": 0.9 },
+          "leanProtein": { "min": 0.35, "ideal": 0.5, "max": 0.75 },
+          "fattyProtein": { "min": 0.5, "ideal": 0.7, "max": 1.0 }
+        },
+        "saltPerKgProteinG": { "min": 6, "ideal": 9, "max": 12 },
+        "sweetPerBatchTsp": { "min": 1, "ideal": 1.5, "max": 2 }
+      },
+      "creamySauce": {
+        "acidToCreamyBaseRatio": { "min": 0.05, "ideal": 0.12, "max": 0.25 }
+      }
+    },
+    "tags": {
+      "marinade": ["marinade"],
+      "sauce": ["sauce"],
+      "creamy": [
+        "creamy",
+        "emulsion",
+        "aioli",
+        "toum_style",
+        "yogurt_based",
+        "tahini_based"
+      ],
+      "sweetHeat": ["sweet_heat", "drizzle"]
+    }
+  },
+  "rules": [
+    {
+      "id": "shawarma.balance.marinade.default_acid_to_fat_ratio",
+      "enabled": true,
+      "priority": 10,
+      "title": "Default acid-to-fat ratio for shawarma marinades",
+      "description": "Sets the default target ratio range for acid (lemon+vinegar) vs fat (oil/fat) in marinades.",
+      "tags": ["marinade", "balance", "acid", "fat"],
+      "source": "SSA Catalog",
+      "when": {
+        "op": "all",
+        "conditions": [{ "type": "hasTag", "value": "marinade" }]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.targets.marinade.acidToOilRatio.active",
+            "value": { "min": 0.45, "ideal": 0.6, "max": 0.9 }
+          },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.guidance",
+              "payload": {
+                "rulesetId": "rulesets.shawarma.acid_fat_balance",
+                "ruleId": "shawarma.balance.marinade.default_acid_to_fat_ratio",
+                "message": "Target a balanced marinade: for every 60 ml oil/fat, use ~30–45 ml combined acid (lemon + vinegar), then adjust by protein type.",
+                "severity": "info"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "shawarma.balance.marinade.lean_protein_reduce_acid_add_emulsifier",
+      "enabled": true,
+      "priority": 20,
+      "title": "Lean proteins: reduce acid, add yogurt or extra oil",
+      "description": "Lean proteins can turn dry/harsh with too much acid. Lower acid ratio and recommend emulsifier/fat.",
+      "tags": ["marinade", "balance", "acid", "fat", "lean"],
+      "source": "SSA Catalog",
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.inputs.protein",
+            "value": "chicken_breast"
+          },
+          {
+            "type": "eq",
+            "path": "$.inputs.protein",
+            "value": "turkey_breast"
+          },
+          { "type": "eq", "path": "$.inputs.protein", "value": "beef_lean" }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.targets.marinade.acidToOilRatio.active",
+            "value": { "min": 0.35, "ideal": 0.5, "max": 0.75 }
+          },
+          {
+            "type": "addTag",
+            "value": "balance.lean_protein_adjustment"
+          },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.guidance",
+              "payload": {
+                "rulesetId": "rulesets.shawarma.acid_fat_balance",
+                "ruleId": "shawarma.balance.marinade.lean_protein_reduce_acid_add_emulsifier",
+                "message": "Lean proteins handle less acid. Reduce acid ~20–30% and add yogurt (or extra oil) to soften acidity and improve tenderness/cling.",
+                "severity": "warning"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "shawarma.balance.marinade.fatty_protein_allow_brighter_acid",
+      "enabled": true,
+      "priority": 30,
+      "title": "Fattier cuts: allow brighter acidity (keep enough fat)",
+      "description": "Fattier cuts can take more acidity, but still need adequate fat/emulsion to avoid harshness.",
+      "tags": ["marinade", "balance", "acid", "fat", "fatty"],
+      "source": "SSA Catalog",
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.inputs.protein",
+            "value": "chicken_thigh"
+          },
+          { "type": "eq", "path": "$.inputs.protein", "value": "lamb" },
+          { "type": "eq", "path": "$.inputs.protein", "value": "beef_fatty" }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.targets.marinade.acidToOilRatio.active",
+            "value": { "min": 0.5, "ideal": 0.7, "max": 1.0 }
+          },
+          {
+            "type": "addTag",
+            "value": "balance.fatty_protein_adjustment"
+          },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.guidance",
+              "payload": {
+                "rulesetId": "rulesets.shawarma.acid_fat_balance",
+                "ruleId": "shawarma.balance.marinade.fatty_protein_allow_brighter_acid",
+                "message": "Fattier cuts can handle brighter acid. Keep a strong lemon note, but ensure enough oil/yogurt so the finish isn’t sharp.",
+                "severity": "info"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "shawarma.balance.taste.too_tangy_add_fat_first",
+      "enabled": true,
+      "priority": 40,
+      "title": "If too tangy: add fat/emulsion before adding sweet",
+      "description": "Guidance rule based on taste signal inputs (operator-driven).",
+      "tags": ["balance", "acid", "fat", "taste"],
+      "source": "SSA Catalog",
+      "when": {
+        "type": "intersects",
+        "path": "$.signals.taste",
+        "values": ["too_tangy", "too_sharp"]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "balance.adjust.add_fat_first" },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.guidance",
+              "payload": {
+                "rulesetId": "rulesets.shawarma.acid_fat_balance",
+                "ruleId": "shawarma.balance.taste.too_tangy_add_fat_first",
+                "message": "Too sharp? Add a little more fat/emulsifier (oil, yogurt, mayo, tahini) first, then recheck salt. Add sweet last.",
+                "severity": "info"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "shawarma.balance.marinade.salt_baseline_per_kg",
+      "enabled": true,
+      "priority": 50,
+      "title": "Marinade salt baseline per kg of protein",
+      "description": "Sets recommended salt targets for marinades based on protein mass.",
+      "tags": ["marinade", "salt", "targets"],
+      "source": "SSA Catalog",
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "hasTag", "value": "marinade" },
+          { "type": "exists", "path": "$.inputs.proteinMassG" }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.targets.marinade.saltPerKgProteinG",
+            "value": { "min": 6, "ideal": 9, "max": 12 }
+          },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.guidance",
+              "payload": {
+                "rulesetId": "rulesets.shawarma.acid_fat_balance",
+                "ruleId": "shawarma.balance.marinade.salt_baseline_per_kg",
+                "message": "Marinade salt target: ~9 g kosher salt per 1 kg protein (range 6–12 g). Use the low end if salting again right before cooking.",
+                "severity": "info"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "shawarma.balance.marinade.yogurt_overmarination_warning",
+      "enabled": true,
+      "priority": 60,
+      "title": "Yogurt marinades: avoid over-marination",
+      "description": "Warns when marination time is too long for yogurt-based marinades.",
+      "tags": ["marinade", "yogurt", "safety", "texture"],
+      "source": "SSA Catalog",
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "eq", "path": "$.inputs.containsYogurt", "value": true },
+          { "type": "gt", "path": "$.inputs.marinateHours", "value": 24 }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "addTag",
+            "value": "balance.warning.yogurt_overmarination"
+          },
+          { "type": "scoreAdjust", "scoreDelta": -0.25 },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.guidance",
+              "payload": {
+                "rulesetId": "rulesets.shawarma.acid_fat_balance",
+                "ruleId": "shawarma.balance.marinade.yogurt_overmarination_warning",
+                "message": "Yogurt marinades can soften texture if left too long. Prefer 6–12 hours (up to 24 hours max) for best bite.",
+                "severity": "warning"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "shawarma.balance.sauce.creamy_acid_limit_on_break",
+      "enabled": true,
+      "priority": 70,
+      "title": "Creamy sauces: if broken/thin, reduce acid and increase emulsifier",
+      "description": "When a creamy sauce breaks (thin/curdled), recommend balancing acid and increasing emulsifier/fat.",
+      "tags": ["sauce", "creamy", "emulsion", "acid", "fat"],
+      "source": "SSA Catalog",
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "hasTag", "value": "sauce" },
+          {
+            "type": "intersects",
+            "path": "$.signals.texture",
+            "values": ["broken", "curdled", "thin"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.targets.creamySauce.acidToCreamyBaseRatio",
+            "value": { "min": 0.05, "ideal": 0.12, "max": 0.25 }
+          },
+          { "type": "addTag", "value": "balance.creamy_sauce_emulsion_fix" },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.guidance",
+              "payload": {
+                "rulesetId": "rulesets.shawarma.acid_fat_balance",
+                "ruleId": "shawarma.balance.sauce.creamy_acid_limit_on_break",
+                "message": "If a creamy sauce breaks or turns thin, reduce acid and increase emulsifier (mayo, yogurt, tahini). Add acid slowly while whisking.",
+                "severity": "warning"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "shawarma.balance.sweet.supporting_not_primary",
+      "enabled": true,
+      "priority": 80,
+      "title": "Sweet should support balance (except sweet-heat drizzles)",
+      "description": "Sweetness should be used lightly to round acid and help browning; allow more only for sweet-heat drizzles.",
+      "tags": ["balance", "sweet", "marinade", "sauce"],
+      "source": "SSA Catalog",
+      "when": {
+        "op": "any",
+        "conditions": [
+          { "type": "hasTag", "value": "marinade" },
+          { "type": "hasTag", "value": "sauce" }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.targets.marinade.sweetPerBatchTsp",
+            "value": { "min": 1, "ideal": 1.5, "max": 2 }
+          },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.guidance",
+              "payload": {
+                "rulesetId": "rulesets.shawarma.acid_fat_balance",
+                "ruleId": "shawarma.balance.sweet.supporting_not_primary",
+                "message": "Use sweetness to balance acid and improve browning (typically 1–2 tsp per batch). Use more only for dedicated sweet-heat drizzles.",
+                "severity": "info"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "shawarma.balance.vegetables.thin_thick_bases_for_coating",
+      "enabled": true,
+      "priority": 90,
+      "title": "Vegetables: marinades should coat, not clump",
+      "description": "Guidance for using thick bases (especially yogurt) on vegetables for even coating and browning.",
+      "tags": ["vegetables", "marinade", "coating", "browning"],
+      "source": "SSA Catalog",
+      "when": {
+        "type": "eq",
+        "path": "$.inputs.target",
+        "value": "vegetables"
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "balance.veg_thin_for_coating" },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.guidance",
+              "payload": {
+                "rulesetId": "rulesets.shawarma.acid_fat_balance",
+                "ruleId": "shawarma.balance.vegetables.thin_thick_bases_for_coating",
+                "message": "For vegetables, thin thick bases (especially yogurt) with a splash of water/lemon so they coat evenly without clumping—better browning and even flavor.",
+                "severity": "info"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "shawarma.balance.browning.requires_fat_and_dry_surface",
+      "enabled": true,
+      "priority": 100,
+      "title": "Browning/char requires enough fat and a drier surface",
+      "description": "High-browning goals should trigger guidance to increase fat and reduce surface wetness for better searing.",
+      "tags": ["browning", "sear", "char", "technique"],
+      "source": "SSA Catalog",
+      "when": {
+        "type": "intersects",
+        "path": "$.signals.cookGoal",
+        "values": ["high_browning", "char", "sear"]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "balance.browning.surface_dryness" },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.guidance",
+              "payload": {
+                "rulesetId": "rulesets.shawarma.acid_fat_balance",
+                "ruleId": "shawarma.balance.browning.requires_fat_and_dry_surface",
+                "message": "For strong shawarma browning/char: include enough oil, avoid overly wet surfaces, pat off excess marinade, and cook hot.",
+                "severity": "info"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

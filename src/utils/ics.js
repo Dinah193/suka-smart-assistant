@@ -29,11 +29,12 @@ let eventBus = {
   on: () => () => {},
 };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
-const isBrowser = typeof window !== "undefined" && typeof document !== "undefined";
+const isBrowser =
+  typeof window !== "undefined" && typeof document !== "undefined";
 
 /* -------------------------------------------------------------------------- */
 /* Event helpers                                                              */
@@ -188,7 +189,9 @@ export function buildVEvent(input = {}) {
 
   const start = toDate(input.start);
   const end = toDate(input.end);
-  const durationMs = Number.isFinite(input.durationMs) ? input.durationMs : null;
+  const durationMs = Number.isFinite(input.durationMs)
+    ? input.durationMs
+    : null;
 
   if (!start) errors.push("Invalid or missing 'start' date.");
   if (!end && !durationMs && !allDay) {
@@ -209,7 +212,13 @@ export function buildVEvent(input = {}) {
 
   if (allDay) {
     // All-day DTEND is exclusive next day
-    const next = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate() + 1));
+    const next = new Date(
+      Date.UTC(
+        start.getUTCFullYear(),
+        start.getUTCMonth(),
+        start.getUTCDate() + 1
+      )
+    );
     dtEnd = fmtICSDate(next, { allDay: true });
   } else if (end) {
     dtEnd = fmtICSDate(end, { allDay: false, asUTC: useUTC && !tzid });
@@ -229,10 +238,12 @@ export function buildVEvent(input = {}) {
   }
 
   if (input.summary) out.push(line("SUMMARY", icsEscapeText(input.summary)));
-  if (input.description) out.push(line("DESCRIPTION", icsEscapeText(input.description)));
+  if (input.description)
+    out.push(line("DESCRIPTION", icsEscapeText(input.description)));
   if (input.location) out.push(line("LOCATION", icsEscapeText(input.location)));
   if (input.url) out.push(line("URL", String(input.url)));
-  if (input.status) out.push(line("STATUS", String(input.status).toUpperCase()));
+  if (input.status)
+    out.push(line("STATUS", String(input.status).toUpperCase()));
 
   // Categories
   if (Array.isArray(input.categories) && input.categories.length) {
@@ -243,7 +254,9 @@ export function buildVEvent(input = {}) {
 
   // Organizer
   if (input.organizer?.email) {
-    const cn = input.organizer.name ? { CN: icsEscapeText(input.organizer.name) } : undefined;
+    const cn = input.organizer.name
+      ? { CN: icsEscapeText(input.organizer.name) }
+      : undefined;
     out.push(line("ORGANIZER", `mailto:${String(input.organizer.email)}`, cn));
   }
 
@@ -278,13 +291,20 @@ export function buildVEvent(input = {}) {
 
   // VALARM
   if (input.alarm) {
-    const trigMin = Number.isFinite(input.alarm.triggerMinutes) ? input.alarm.triggerMinutes : 10;
+    const trigMin = Number.isFinite(input.alarm.triggerMinutes)
+      ? input.alarm.triggerMinutes
+      : 10;
     const action = (input.alarm.action || "DISPLAY").toUpperCase(); // DISPLAY|AUDIO
     out.push("BEGIN:VALARM");
     out.push(line("TRIGGER", `-PT${Math.max(0, Math.floor(trigMin))}M`));
     out.push(line("ACTION", action));
     if (action === "DISPLAY") {
-      out.push(line("DESCRIPTION", icsEscapeText(input.alarm.description || "Reminder")));
+      out.push(
+        line(
+          "DESCRIPTION",
+          icsEscapeText(input.alarm.description || "Reminder")
+        )
+      );
     }
     out.push("END:VALARM");
   }
@@ -304,14 +324,21 @@ export function buildVEvent(input = {}) {
  */
 export function buildVCalendar(vevents = [], options = {}) {
   if (!Array.isArray(vevents) || vevents.length === 0) {
-    emit("ics.error", { stage: "buildVCalendar.validate", reason: "no_vevents" });
+    emit("ics.error", {
+      stage: "buildVCalendar.validate",
+      reason: "no_vevents",
+    });
     return { ok: false, error: "No VEVENTs provided." };
   }
 
   const prodId = options.prodId || "-//Suka Smart Assistant//EN";
   const method = options.method || "PUBLISH";
-  const calName = options.calName ? icsEscapeText(options.calName) : "Suka Smart Assistant";
-  const tzBlock = options.timezoneVtimezoneBlock ? String(options.timezoneVtimezoneBlock) : "";
+  const calName = options.calName
+    ? icsEscapeText(options.calName)
+    : "Suka Smart Assistant";
+  const tzBlock = options.timezoneVtimezoneBlock
+    ? String(options.timezoneVtimezoneBlock)
+    : "";
 
   const lines = [
     "BEGIN:VCALENDAR",
@@ -368,7 +395,10 @@ export function downloadICS(icsString, filename = "suka-event.ics") {
     emit("ics.download.triggered", { filename });
     return { ok: true, url };
   } catch (err) {
-    emit("ics.error", { stage: "download", message: err?.message || String(err) });
+    emit("ics.error", {
+      stage: "download",
+      message: err?.message || String(err),
+    });
     return { ok: false, error: err?.message || "download_failed" };
   }
 }
@@ -390,8 +420,13 @@ export function eventFromSession(session = {}) {
   const domain = String(session.domain || "general");
   const categories = ["SSA", domain.charAt(0).toUpperCase() + domain.slice(1)];
   const alarm =
-    Number.isFinite(session.alarmMinutesBefore) && session.alarmMinutesBefore >= 0
-      ? { triggerMinutes: session.alarmMinutesBefore, action: "DISPLAY", description: session.title || "Reminder" }
+    Number.isFinite(session.alarmMinutesBefore) &&
+    session.alarmMinutesBefore >= 0
+      ? {
+          triggerMinutes: session.alarmMinutesBefore,
+          action: "DISPLAY",
+          description: session.title || "Reminder",
+        }
       : undefined;
 
   return buildVEvent({
@@ -447,12 +482,16 @@ function msToISODuration(ms) {
 /* -------------------------------------------------------------------------- */
 export function downloadICSForSession(session, filename) {
   const ev = eventFromSession(session);
-  if (!ev.ok) return { ok: false, error: ev.errors?.join("; ") || "build_event_failed" };
+  if (!ev.ok)
+    return { ok: false, error: ev.errors?.join("; ") || "build_event_failed" };
   const cal = buildVCalendar([ev.vevent], { calName: "Suka Sessions" });
-  if (!cal.ok) return { ok: false, error: cal.error || "build_calendar_failed" };
+  if (!cal.ok)
+    return { ok: false, error: cal.error || "build_calendar_failed" };
   const fn =
     filename ||
-    `suka-${String(session.domain || "session")}-${(session?.id || "event").toString().slice(0, 12)}.ics`;
+    `suka-${String(session.domain || "session")}-${(session?.id || "event")
+      .toString()
+      .slice(0, 12)}.ics`;
   return downloadICS(cal.ics, fn);
 }
 
@@ -468,7 +507,11 @@ export async function shareICS(icsString, filename = "suka-event.ics") {
     if (!navigator.canShare({ files: [file] })) {
       return { ok: false, error: "web_share_cannot_share_file" };
     }
-    await navigator.share({ files: [file], title: "Add to Calendar", text: "Suka Smart Assistant" });
+    await navigator.share({
+      files: [file],
+      title: "Add to Calendar",
+      text: "Suka Smart Assistant",
+    });
     emit("ics.share.shared", { filename });
     return { ok: true };
   } catch (err) {
@@ -480,7 +523,14 @@ export async function shareICS(icsString, filename = "suka-event.ics") {
 /* -------------------------------------------------------------------------- */
 /* Example extension: build recurring cleaning run (every week)               */
 /* -------------------------------------------------------------------------- */
-export function buildWeeklyRun({ start, weeks = 6, title = "Weekly Run", domain = "cleaning", tzid, useUTC }) {
+export function buildWeeklyRun({
+  start,
+  weeks = 6,
+  title = "Weekly Run",
+  domain = "cleaning",
+  tzid,
+  useUTC,
+}) {
   const ev = buildVEvent({
     start,
     durationMs: 60 * 60 * 1000,
@@ -489,12 +539,18 @@ export function buildWeeklyRun({ start, weeks = 6, title = "Weekly Run", domain 
     rrule: `FREQ=WEEKLY;COUNT=${Math.max(1, Math.floor(weeks))}`,
     tzid,
     useUTC,
-    alarm: { triggerMinutes: 10, action: "DISPLAY", description: "Upcoming cleaning run" },
+    alarm: {
+      triggerMinutes: 10,
+      action: "DISPLAY",
+      description: "Upcoming cleaning run",
+    },
   });
-  if (!ev.ok) return { ok: false, error: ev.errors?.join("; ") || "build_event_failed" };
+  if (!ev.ok)
+    return { ok: false, error: ev.errors?.join("; ") || "build_event_failed" };
 
   const cal = buildVCalendar([ev.vevent], { calName: "Suka – Weekly Runs" });
-  if (!cal.ok) return { ok: false, error: cal.error || "build_calendar_failed" };
+  if (!cal.ok)
+    return { ok: false, error: cal.error || "build_calendar_failed" };
   return { ok: true, ics: cal.ics };
 }
 

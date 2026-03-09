@@ -20,7 +20,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { emit } from "@/services/eventBus";
+import { emit } from "@/services/events/eventBus";
 import MovementIntensityCalculatorShim, {
   NODE_ID as MOVEMENT_NODE_ID,
 } from "./MovementIntensityCalculator.shim";
@@ -67,19 +67,12 @@ function inferGoalStatus(guidelineTarget, combinedEqMinutes) {
 export function buildMovementSessionFromTemplate(template, options = {}) {
   if (!template || typeof template !== "object") return null;
 
-  const {
-    templateId,
-    title,
-    durationMinutes,
-    intensityCategory,
-    source,
-  } = template;
+  const { templateId, title, durationMinutes, intensityCategory, source } =
+    template;
 
   const titlePrefix = options.titlePrefix || "";
 
-  const safeTitle = titlePrefix
-    ? `${titlePrefix.trim()} – ${title}`
-    : title;
+  const safeTitle = titlePrefix ? `${titlePrefix.trim()} – ${title}` : title;
 
   const durationSec = Math.max(5 * 60, (durationMinutes || 0) * 60);
 
@@ -97,7 +90,9 @@ export function buildMovementSessionFromTemplate(template, options = {}) {
       {
         id: `step_${templateId || "movement"}`,
         title: title,
-        desc: `Complete a ${durationMinutes || "20"}-minute ${intensityCategory} movement session (walk, indoor cardio, or similar). Use SSA timers or your own watch to stay on track.`,
+        desc: `Complete a ${
+          durationMinutes || "20"
+        }-minute ${intensityCategory} movement session (walk, indoor cardio, or similar). Use SSA timers or your own watch to stay on track.`,
         durationSec,
         blockers: [
           // Movement-specific blockers could be added here later
@@ -263,10 +258,7 @@ export function useMovementIntensityCalculator(options = {}) {
  * @param {object} [options]
  * @param {string} [options.titlePrefix] - Optional prefix for session titles.
  */
-export function useMovementSessionDrafts(
-  calculatorResult,
-  options = {}
-) {
+export function useMovementSessionDrafts(calculatorResult, options = {}) {
   const { titlePrefix } = options;
 
   const templates = useMemo(() => {
@@ -331,10 +323,8 @@ export function useMovementGoalSignals(calculatorResult) {
       calculatorResult.output;
 
     const guidelineTarget =
-      movementMinutesTargets.combinedGuidelineEquivalentMinutesPerWeek ||
-      0;
-    const deficit =
-      movementMinutesTargets.deficitToGuidelineMinutes || 0;
+      movementMinutesTargets.combinedGuidelineEquivalentMinutesPerWeek || 0;
+    const deficit = movementMinutesTargets.deficitToGuidelineMinutes || 0;
     const combinedEqMinutes = guidelineTarget - deficit;
 
     const status = inferGoalStatus(guidelineTarget, combinedEqMinutes);

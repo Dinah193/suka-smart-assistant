@@ -1,0 +1,924 @@
+{
+  "$schema": "../../../schemas/cuisine.profile.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-20T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.indian",
+    "type": "cuisine_profile",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Indian",
+    "shortName": "Indian",
+    "description": "A broad, spice-forward cuisine family spanning regional traditions across the Indian subcontinent. Built around layered aromatics, toasted whole spices, masala blends, legumes and vegetables, yogurt-based marinades, and starches like rice and flatbreads.",
+    "subtitle": "Masala-centric, aromatic, and highly adaptable across vegetarian and meat-based meals.",
+    "originRegions": ["South Asia", "Indian Subcontinent"],
+    "regions": ["North India", "South India", "West India", "East India"],
+    "primaryCountriesAndIslands": ["India"],
+    "tags": [
+      "cuisine.indian",
+      "profile.primary",
+      "spice.forward",
+      "aromatics.onion_garlic_ginger",
+      "batch.friendly",
+      "vegetarian.friendly"
+    ],
+    "icon": "cuisine_indian",
+    "colorHint": "warm_amber",
+    "heritageNotes": [
+      "This profile is a practical planner-oriented synthesis of common Indian cooking patterns rather than a single regional canon.",
+      "Regional subprofiles below help planners choose different flavor directions and staple sets."
+    ],
+    "version": "1.0.0",
+    "author": "ssa_catalog",
+    "createdAt": "2026-01-20T00:00:00.000Z",
+    "updatedAt": "2026-01-20T00:00:00.000Z",
+    "status": "canonical",
+    "source": {
+      "curation": "SSA canonical cuisine profile",
+      "maintainer": "ssa_catalog",
+      "license": "internal",
+      "attribution": "general culinary knowledge synthesis",
+      "kind": "curated",
+      "origin": "ssa",
+      "type": "cuisine_profile",
+      "notes": "Designed for planner defaults, pantry guidance, and substitution hints for SSA."
+    },
+    "family": {
+      "parent": "cuisines.south_asian",
+      "siblings": [
+        "cuisines.pakistani",
+        "cuisines.bangladeshi",
+        "cuisines.sri_lankan"
+      ],
+      "overlapsWith": [
+        {
+          "id": "cuisines.middle_eastern",
+          "reason": "Shared use of warm spices, kebab-style grilling, rice pairings, and yogurt-based sauces in some subregions."
+        },
+        {
+          "id": "cuisines.east_african",
+          "reason": "Historical spice trade overlap and shared masala-like blends in coastal contexts."
+        }
+      ]
+    },
+    "regionHints": [
+      "punjabi",
+      "mughlai",
+      "gujarati",
+      "bengali",
+      "tamil",
+      "kerala",
+      "hyderabadi"
+    ],
+    "countryHints": ["india"],
+    "subprofiles": [
+      {
+        "id": "cuisines.indian.north",
+        "name": "North Indian",
+        "signatureNotes": "Creamy tomato-onion gravies, tandoor-style roasting, garam masala finishes, wheat flatbreads."
+      },
+      {
+        "id": "cuisines.indian.south",
+        "name": "South Indian",
+        "signatureNotes": "Coconut, curry leaves, mustard seed tempering, tamarind and tangy sambar/rasam-style profiles."
+      },
+      {
+        "id": "cuisines.indian.west",
+        "name": "West Indian",
+        "signatureNotes": "Gujarati sweet-sour notes, peanut/sesame accents, coastal coconut and seafood traditions."
+      },
+      {
+        "id": "cuisines.indian.east",
+        "name": "East Indian",
+        "signatureNotes": "Mustard oil, mustard seed pastes, panch phoron, fish and greens, lighter broths."
+      }
+    ]
+  },
+
+  "tags": [
+    "cuisine.indian",
+    "region.south_asia",
+    "spice.high",
+    "aromatics.layered",
+    "planner.defaults"
+  ],
+
+  "notes": [
+    "Use this profile to generate meal plans that balance a spiced main + starch + quick vegetable/raita/pickle.",
+    "The flavor system emphasizes tempering (tadka), masala building, and bright acid finishes.",
+    "Ingredient IDs use SSA-style ids (e.g., ing.onion). If your ingredient catalog uses different ids, map them via aliases/resolver."
+  ],
+
+  "plannerDefaults": {
+    "mealRoles": [
+      "role.main",
+      "role.starch",
+      "role.veg_side",
+      "role.dal",
+      "role.condiment",
+      "role.fresh_side"
+    ],
+    "batchFriendly": true,
+    "freezerFriendly": true,
+    "defaultHeatLevel": "medium",
+    "defaultServingStyle": ["serving.family_style", "serving.stew_and_starch"],
+    "defaultStaples": [
+      "ing.onion",
+      "ing.garlic",
+      "ing.ginger",
+      "ing.tomato",
+      "ing.rice_basmati",
+      "ing.lentils_red",
+      "ing.chickpeas",
+      "ing.yogurt_plain"
+    ],
+    "inventorySignals": [
+      "signal.needs_onion",
+      "signal.needs_tomato",
+      "signal.needs_ginger_garlic",
+      "signal.needs_spice_blend"
+    ],
+    "makeAheadNotes": [
+      "Keep a ginger_garlic_paste batch for fast weeknight curries.",
+      "Pre-cook dal or chickpeas and freeze in 2-cup portions.",
+      "Make a basic onion_tomato_masala base and freeze for quick gravies."
+    ]
+  },
+
+  "flavorSystem": {
+    "signatureAromatics": [
+      "ing.onion",
+      "ing.garlic",
+      "ing.ginger",
+      "ing.green_chili",
+      "ing.curry_leaves"
+    ],
+    "signatureHerbs": ["ing.cilantro", "ing.mint"],
+    "signatureSpices": [
+      "spice.cumin",
+      "spice.coriander",
+      "spice.turmeric",
+      "spice.chili_powder",
+      "spice.garam_masala",
+      "spice.mustard_seed",
+      "spice.fenugreek",
+      "spice.cardamom",
+      "spice.clove",
+      "spice.cinnamon",
+      "spice.black_pepper"
+    ],
+    "signatureSeasoningBlends": [
+      "blend.garam_masala",
+      "blend.sambar_powder",
+      "blend.panch_phoron",
+      "blend.chaat_masala",
+      "blend.tandoori_masala"
+    ],
+    "signatureUmami": [
+      "ing.tomato_paste",
+      "ing.ghee",
+      "ing.yogurt_plain",
+      "ing.coconut_milk",
+      "ing.cashews"
+    ],
+    "signatureAcids": [
+      "ing.lemon",
+      "ing.lime",
+      "ing.tamarind",
+      "ing.amchur",
+      "ing.yogurt_plain",
+      "ing.vinegar"
+    ],
+    "signatureSweeteners": ["ing.jaggery", "ing.sugar"],
+    "heatDefaults": {
+      "default": "medium",
+      "options": ["none", "low", "medium", "high"]
+    },
+    "saltDefaults": {
+      "default": "medium",
+      "notes": "Salt early for onions/tomatoes; finish with a final taste after simmering."
+    },
+    "textureDefaults": [
+      "texture.creamy",
+      "texture.saucy",
+      "texture.stewy",
+      "texture.crisp_garnish"
+    ]
+  },
+
+  "pantryTiers": {
+    "tier0_minimum": {
+      "description": "Starter items to cook basic Indian-style spiced meals with minimal shopping.",
+      "items": [
+        "ing.onion",
+        "ing.garlic",
+        "ing.ginger",
+        "ing.tomato",
+        "ing.rice_basmati",
+        "spice.salt",
+        "spice.cumin",
+        "spice.turmeric",
+        "spice.chili_powder",
+        "spice.coriander",
+        "fat.neutral_oil"
+      ]
+    },
+    "tier1_core": {
+      "description": "Core pantry for most weeknight curries, dals, and rice dishes.",
+      "items": [
+        "blend.garam_masala",
+        "spice.mustard_seed",
+        "spice.black_pepper",
+        "spice.fenugreek",
+        "ing.lentils_red",
+        "ing.lentils_yellow_split",
+        "ing.chickpeas",
+        "ing.coconut_milk",
+        "ing.yogurt_plain",
+        "fat.ghee",
+        "ing.lemon",
+        "ing.cilantro"
+      ]
+    },
+    "tier2_traditional": {
+      "description": "Traditional items enabling deeper regional dishes and authentic finishing layers.",
+      "items": [
+        "ing.curry_leaves",
+        "blend.sambar_powder",
+        "blend.panch_phoron",
+        "blend.chaat_masala",
+        "ing.tamarind",
+        "ing.amchur",
+        "spice.cardamom",
+        "spice.clove",
+        "spice.cinnamon",
+        "spice.kashmiri_chili",
+        "ing.methi_leaves_dried",
+        "ing.mustard_oil",
+        "ing.besan",
+        "ing.urad_dal",
+        "ing.toor_dal"
+      ]
+    },
+    "tier3_specialty": {
+      "description": "Specialty items for restaurant-style texture, regional snacks, and advanced techniques.",
+      "items": [
+        "ing.asafoetida",
+        "ing.kewra_water",
+        "ing.rose_water",
+        "ing.saffron",
+        "ing.kasuri_methi",
+        "ing.cashews",
+        "ing.poppy_seeds",
+        "ing.coconut_fresh",
+        "ing.gond",
+        "ing.ragi_flour"
+      ]
+    }
+  },
+
+  "techniquesEmphasis": {
+    "primary": [
+      "method.tadka",
+      "method.saute_onion_base",
+      "method.bloom_spices",
+      "method.simmer_gravy",
+      "method.pressure_cook_dal"
+    ],
+    "common": [
+      "method.roast_spices",
+      "method.grind_masala",
+      "method.yogurt_marinate",
+      "method.grill_roast",
+      "method.steam_rice"
+    ],
+    "notes": [
+      "Tempering (tadka) is a key flavor delivery mechanism: hot fat + whole spices + aromatics poured over dal/veg.",
+      "Most gravies start with an onion-ginger-garlic-tomato base, then spices bloom in fat before liquid.",
+      "Finish with herbs/acid (lemon, amchur, tamarind) for lift."
+    ]
+  },
+
+  "dishArchetypes": [
+    {
+      "id": "arch.indian.dal",
+      "label": "Dal (lentil/legume stew)",
+      "description": "A simmered lentil dish often finished with tadka; served with rice or flatbread.",
+      "commonExamples": ["tadka dal", "masoor dal", "toor dal"],
+      "defaults": {
+        "starchOptions": ["ing.rice_basmati", "ing.roti", "ing.naan"],
+        "proteinOptions": [
+          "ing.lentils_red",
+          "ing.lentils_yellow_split",
+          "ing.chickpeas"
+        ],
+        "vegOptions": ["ing.spinach", "ing.tomato", "ing.cauliflower"],
+        "sauceOptions": ["sauce.tadka", "sauce.onion_tomato_masala"],
+        "garnishOptions": ["ing.cilantro", "ing.lemon"]
+      }
+    },
+    {
+      "id": "arch.indian.curry_gravy",
+      "label": "Curry with gravy",
+      "description": "Saucy main built from an onion-tomato masala base; can be veg or meat.",
+      "commonExamples": ["chicken curry", "paneer masala", "chana masala"],
+      "defaults": {
+        "starchOptions": ["ing.rice_basmati", "ing.roti", "ing.naan"],
+        "proteinOptions": ["ing.chicken_thigh", "ing.paneer", "ing.chickpeas"],
+        "vegOptions": ["ing.peas", "ing.potato", "ing.bell_pepper"],
+        "sauceOptions": [
+          "sauce.onion_tomato_masala",
+          "sauce.coconut_curry_base"
+        ],
+        "garnishOptions": ["ing.cilantro", "ing.lemon", "ing.yogurt_plain"]
+      }
+    },
+    {
+      "id": "arch.indian.dry_saute",
+      "label": "Dry sauté (sabzi)",
+      "description": "Vegetable-forward dish cooked with spices, often drier than curry; great weeknight side.",
+      "commonExamples": ["aloo gobi", "bhindi masala", "cabbage sabzi"],
+      "defaults": {
+        "vegOptions": [
+          "ing.cauliflower",
+          "ing.potato",
+          "ing.okra",
+          "ing.cabbage"
+        ],
+        "sideOptions": ["ing.raita", "ing.pickle_indian"],
+        "garnishOptions": ["ing.cilantro", "ing.lemon"]
+      }
+    },
+    {
+      "id": "arch.indian.rice_pilaf",
+      "label": "Spiced rice (pulao/biryani-style)",
+      "description": "Aromatic rice with whole spices; can be simple pulao or layered biryani patterns.",
+      "commonExamples": ["jeera rice", "vegetable pulao", "chicken biryani"],
+      "defaults": {
+        "riceOptions": ["ing.rice_basmati"],
+        "proteinOptions": ["ing.chicken_thigh", "ing.lamb", "ing.paneer"],
+        "vegOptions": ["ing.peas", "ing.carrot", "ing.onion"],
+        "garnishOptions": ["ing.cilantro", "ing.fried_onions", "ing.lemon"]
+      }
+    }
+  ],
+
+  "ingredientPreferences": {
+    "preferred": [
+      "ing.onion",
+      "ing.garlic",
+      "ing.ginger",
+      "ing.tomato",
+      "ing.cilantro",
+      "ing.green_chili",
+      "ing.yogurt_plain",
+      "ing.coconut_milk",
+      "ing.lentils_red",
+      "ing.chickpeas",
+      "ing.rice_basmati",
+      "fat.ghee",
+      "fat.neutral_oil"
+    ],
+    "optional_traditional": [
+      "ing.curry_leaves",
+      "ing.tamarind",
+      "ing.amchur",
+      "ing.kasuri_methi",
+      "ing.asafoetida",
+      "ing.mustard_oil",
+      "ing.besan"
+    ],
+    "avoid_or_limit": [
+      {
+        "id": "limit.sugar_high",
+        "label": "High sugar additions",
+        "reason": "Use sweeteners sparingly; sweetness is typically balance, not dominant, except in some regional dishes."
+      }
+    ]
+  },
+
+  "substitutionGuidance": {
+    "proteinSubstitutions": [
+      {
+        "for": "ing.chicken_thigh",
+        "options": [
+          "ing.chicken_breast",
+          "ing.goat",
+          "ing.lamb",
+          "ing.tofu_firm",
+          "ing.paneer"
+        ],
+        "notes": "Adjust cook time: breast cooks faster; goat/lamb may need longer simmering; tofu/paneer can be added near the end."
+      },
+      {
+        "for": "ing.paneer",
+        "options": [
+          "ing.tofu_firm",
+          "ing.halloumi",
+          "ing.chicken_thigh",
+          "ing.chickpeas"
+        ],
+        "notes": "To keep vegetarian, prefer tofu or chickpeas."
+      }
+    ],
+    "sideSubstitutions": [
+      {
+        "for": "ing.roti",
+        "options": ["ing.naan", "ing.paratha", "ing.rice_basmati"],
+        "notes": "If no flatbread, serve over rice or with a simple starch like potatoes."
+      }
+    ],
+    "thickenerSubstitutions": [
+      {
+        "for": "ing.cashews",
+        "options": [
+          "ing.sunflower_seeds",
+          "ing.coconut_milk",
+          "ing.yogurt_plain"
+        ],
+        "notes": "Cashews make creamy gravies; sunflower seeds blend similarly; coconut milk shifts flavor; yogurt must be tempered to prevent curdling."
+      },
+      {
+        "for": "ing.besan",
+        "options": ["ing.cornstarch", "ing.rice_flour"],
+        "notes": "Besan adds flavor; starches thicken more neutrally—use less and add gradually."
+      }
+    ],
+    "notes": [
+      "If you lack a masala blend, approximate with cumin + coriander + turmeric + chili + a pinch of cinnamon/clove/cardamom.",
+      "If curry leaves are unavailable, increase cilantro and use mustard seed + a small pinch of fenugreek for aroma."
+    ]
+  },
+
+  "mealTemplates": [
+    {
+      "id": "tmpl.indian.weeknight_dal_rice",
+      "label": "Weeknight Dal + Rice + Quick Salad",
+      "archetypeId": "arch.indian.dal",
+      "components": [
+        {
+          "role": "legume",
+          "ingredientIds": [
+            "ing.lentils_red",
+            "ing.lentils_yellow_split",
+            "ing.toor_dal"
+          ],
+          "chooseOne": true,
+          "notes": "Cook dal; finish with tadka if possible."
+        },
+        {
+          "role": "starch",
+          "ingredientIds": ["ing.rice_basmati"],
+          "chooseOne": true,
+          "notes": "Basmati rice or jeera rice."
+        },
+        {
+          "role": "side",
+          "ingredientIds": ["ing.cucumber", "ing.tomato", "ing.onion"],
+          "chooseOne": false,
+          "notes": "Simple chopped salad with lemon and salt."
+        },
+        {
+          "role": "sauce",
+          "ingredientIds": [
+            "ing.lemon",
+            "ing.yogurt_plain",
+            "ing.pickle_indian"
+          ],
+          "chooseOne": false,
+          "notes": "Add lemon wedges, raita, or pickle for contrast."
+        }
+      ],
+      "prepNotes": ["Make extra dal for lunch; it reheats well."]
+    },
+    {
+      "id": "tmpl.indian.curry_roti_raita",
+      "label": "Curry + Roti + Raita",
+      "archetypeId": "arch.indian.curry_gravy",
+      "components": [
+        {
+          "role": "protein",
+          "ingredientIds": [
+            "ing.chicken_thigh",
+            "ing.chickpeas",
+            "ing.paneer",
+            "ing.tofu_firm"
+          ],
+          "chooseOne": true,
+          "notes": "Choose one protein base."
+        },
+        {
+          "role": "starch",
+          "ingredientIds": ["ing.roti", "ing.naan", "ing.rice_basmati"],
+          "chooseOne": true,
+          "notes": "Roti is most typical for weeknights."
+        },
+        {
+          "role": "side",
+          "ingredientIds": [
+            "ing.yogurt_plain",
+            "ing.cucumber",
+            "ing.mint",
+            "ing.cilantro"
+          ],
+          "chooseOne": false,
+          "notes": "Raita cools heat and balances spices."
+        }
+      ],
+      "prepNotes": [
+        "Make a double batch of onion_tomato_masala base and freeze portions."
+      ]
+    }
+  ],
+
+  "safetyNotes": [
+    {
+      "id": "safety.indian.yogurt_tempering",
+      "label": "Prevent yogurt curdling",
+      "notes": [
+        "Lower heat before adding yogurt.",
+        "Temper yogurt with a spoonful of hot sauce before stirring in.",
+        "Use full-fat yogurt for better stability."
+      ]
+    },
+    {
+      "id": "safety.indian.spice_handling",
+      "label": "Whole spice handling",
+      "notes": [
+        "Whole spices can be removed before serving if desired.",
+        "Toast whole spices briefly; do not burn them or bitterness develops."
+      ]
+    }
+  ],
+
+  "searchHints": {
+    "keywords": [
+      "indian curry",
+      "dal",
+      "sabzi",
+      "tadka",
+      "masala",
+      "biryani",
+      "pulao",
+      "raita",
+      "chana",
+      "paneer"
+    ],
+    "commonAlternateNames": [
+      "bharatiya",
+      "desi",
+      "north indian",
+      "south indian",
+      "punjabi",
+      "tamil",
+      "kerala",
+      "hyderabadi"
+    ]
+  },
+
+  "pantry": {
+    "freshCore": [
+      "ing.onion",
+      "ing.garlic",
+      "ing.ginger",
+      "ing.tomato",
+      "ing.cilantro",
+      "ing.lemon"
+    ],
+    "proteinsCommon": [
+      "ing.chicken_thigh",
+      "ing.eggs",
+      "ing.paneer",
+      "ing.tofu_firm",
+      "ing.lentils_red",
+      "ing.chickpeas"
+    ],
+    "produceCommon": [
+      "ing.potato",
+      "ing.cauliflower",
+      "ing.spinach",
+      "ing.peas",
+      "ing.okra",
+      "ing.eggplant"
+    ],
+    "availabilityNotes": [
+      {
+        "ingredient": "ing.curry_leaves",
+        "fallbacks": ["ing.cilantro", "ing.mint"],
+        "note": "Curry leaves are distinctive; if unavailable, lean on mustard seed tempering and fresh herbs for aroma."
+      },
+      {
+        "ingredient": "ing.asafoetida",
+        "fallbacks": ["ing.garlic", "ing.onion"],
+        "note": "Asafoetida adds onion-garlic depth; omit or increase aromatics."
+      }
+    ]
+  },
+
+  "techniques": {
+    "coreMethods": [
+      "method.tadka",
+      "method.saute_onion_base",
+      "method.bloom_spices",
+      "method.simmer",
+      "method.steam_rice",
+      "method.yogurt_marinate"
+    ],
+    "hallmarkProcesses": [
+      {
+        "id": "process.indian.tadka",
+        "name": "Tadka (tempering)",
+        "steps": [
+          "step.heat_fat",
+          "step.add_whole_spices",
+          "step.add_aromatics",
+          "step.pour_over_dish"
+        ],
+        "notes": "Heat fat until shimmering, bloom whole spices briefly, add aromatics, then pour over dal or vegetables."
+      },
+      {
+        "id": "process.indian.onion_tomato_masala",
+        "name": "Onion-tomato masala base",
+        "steps": [
+          "step.brown_onions",
+          "step.add_ginger_garlic",
+          "step.add_spices",
+          "step.cook_tomatoes",
+          "step.reduce"
+        ],
+        "notes": "Cook onions until golden, bloom spices in fat, cook tomatoes down until thick and glossy."
+      }
+    ],
+    "equipmentAffinity": {
+      "preferred": [
+        "equip.pressure_cooker",
+        "equip.blender",
+        "equip.cast_iron_skillet",
+        "equip.rice_cooker_optional"
+      ],
+      "notes": "Pressure cooker speeds dal and tougher meats. Blender helps smooth gravies (e.g., butter-style sauces)."
+    }
+  },
+
+  "equipment": {
+    "recommended": [
+      "equip.heavy_pot",
+      "equip.skillet",
+      "equip.knife",
+      "equip.cutting_board",
+      "equip.whisk"
+    ],
+    "optionalButHelpful": [
+      "equip.pressure_cooker",
+      "equip.blender",
+      "equip.spice_grinder",
+      "equip.rice_cooker"
+    ],
+    "notes": [
+      "A small tempering pan (or small skillet) is useful for tadka.",
+      "A spice grinder makes fresh masala blends; otherwise use pre-ground."
+    ]
+  },
+
+  "dietAndAllergens": {
+    "commonAllergens": [
+      "allergen.milk",
+      "allergen.tree_nuts",
+      "allergen.wheat"
+    ],
+    "dietCompatibility": {
+      "vegetarian": {
+        "common": true,
+        "notes": "Many staples are vegetarian (dal, sabzi, rice dishes)."
+      },
+      "vegan": {
+        "common": true,
+        "notes": "Use oil instead of ghee; coconut/yogurt alternatives."
+      },
+      "gluten_free": {
+        "common": true,
+        "notes": "Rice and many curries are GF; check spice blends and serve with rice or GF flatbreads."
+      }
+    }
+  },
+
+  "signatureDishes": {
+    "core": [
+      {
+        "id": "dish.indian.tadka_dal",
+        "name": "Tadka Dal",
+        "subprofiles": ["cuisines.indian.north"],
+        "difficulty": "beginner",
+        "heatTypical": 2,
+        "notes": "Weeknight staple; dal finished with tempering."
+      },
+      {
+        "id": "dish.indian.chana_masala",
+        "name": "Chana Masala",
+        "subprofiles": ["cuisines.indian.north", "cuisines.indian.west"],
+        "difficulty": "intermediate",
+        "heatTypical": 2,
+        "notes": "Chickpea curry with onion-tomato base and warm spices."
+      },
+      {
+        "id": "dish.indian.aloo_gobi",
+        "name": "Aloo Gobi",
+        "subprofiles": ["cuisines.indian.north"],
+        "difficulty": "beginner",
+        "heatTypical": 1,
+        "notes": "Dry sauté of potato and cauliflower with turmeric and cumin."
+      },
+      {
+        "id": "dish.indian.chicken_curry",
+        "name": "Chicken Curry",
+        "subprofiles": ["cuisines.indian.north", "cuisines.indian.south"],
+        "difficulty": "intermediate",
+        "heatTypical": 2,
+        "notes": "Flexible curry pattern; coconut milk variant leans south/coastal."
+      },
+      {
+        "id": "dish.indian.jeera_rice",
+        "name": "Jeera Rice",
+        "subprofiles": ["cuisines.indian.north"],
+        "difficulty": "beginner",
+        "heatTypical": 0,
+        "notes": "Cumin-scented rice; pairs with most curries and dals."
+      }
+    ],
+    "dessertsAndDrinks": [
+      {
+        "id": "dish.indian.masalachai",
+        "name": "Masala Chai",
+        "subprofiles": ["cuisines.indian.north"],
+        "difficulty": "beginner",
+        "heatTypical": 0,
+        "notes": "Spiced tea with warming aromatics."
+      }
+    ]
+  },
+
+  "pairingRules": {
+    "typicalStarches": [
+      "ing.rice_basmati",
+      "ing.roti",
+      "ing.naan",
+      "ing.paratha"
+    ],
+    "typicalVegSides": [
+      "side.sabzi",
+      "side.kachumber_salad",
+      "side.pickle_indian",
+      "side.raita"
+    ],
+    "typicalCondiments": [
+      "condiment.achar",
+      "condiment.chutney_mint",
+      "condiment.chutney_tamarind"
+    ],
+    "typicalFlavorPairings": [
+      {
+        "with": "dish.indian.curry_gravy",
+        "pair": ["side.raita", "ing.rice_basmati", "side.kachumber_salad"],
+        "note": "Cool + fresh sides balance heat and richness."
+      },
+      {
+        "with": "dish.indian.dal",
+        "pair": [
+          "ing.rice_basmati",
+          "side.pickle_indian",
+          "condiment.chutney_mint"
+        ],
+        "note": "Dal likes acid/bright sides and a starch base."
+      }
+    ],
+    "antiPairings": [
+      {
+        "id": "antipair.indian.over_sweet",
+        "avoid": ["ing.sugar_high"],
+        "note": "Excess sweetness can flatten spice complexity; keep sweeteners as balance unless regional dish calls for it."
+      }
+    ]
+  },
+
+  "substitutions": {
+    "ingredientRules": [
+      {
+        "id": "sub.indian.ghee_to_oil",
+        "replace": ["fat.ghee"],
+        "with": ["fat.neutral_oil", "fat.coconut_oil"],
+        "notes": "Use neutral oil for vegan. Coconut oil shifts flavor toward coastal/south notes."
+      },
+      {
+        "id": "sub.indian.tamarind_to_lemon",
+        "whenMissing": ["ing.tamarind"],
+        "use": ["ing.lemon", "ing.amchur", "ing.vinegar"],
+        "notes": "Tamarind is distinct; lemon/amchur provide brightness; vinegar is a last-resort acid."
+      },
+      {
+        "id": "sub.indian.cashew_cream",
+        "whenMissing": ["ing.cashews"],
+        "use": ["ing.sunflower_seeds", "ing.coconut_milk", "ing.yogurt_plain"],
+        "notes": "Blend seeds with water for creamy base; coconut milk adds sweetness; yogurt adds tang."
+      }
+    ],
+    "methodRules": [
+      {
+        "id": "sub.indian.no_pressure_cooker",
+        "whenNoEquipment": ["equip.pressure_cooker"],
+        "adapt": "method.long_simmer",
+        "notes": "Cook dal and chickpeas by simmering longer; plan extra time and water."
+      }
+    ]
+  },
+
+  "planningHints": {
+    "batchFriendly": [
+      {
+        "id": "batch.indian.onion_tomato_masala",
+        "name": "Onion-tomato masala base",
+        "makes": "component.onion_tomato_masala_base",
+        "freezerFriendly": true,
+        "notes": "Cook down a large batch and freeze in 1–2 cup portions for quick curries."
+      },
+      {
+        "id": "batch.indian.ginger_garlic_paste",
+        "name": "Ginger-garlic paste",
+        "makes": "component.ginger_garlic_paste",
+        "freezerFriendly": true,
+        "notes": "Freeze in ice-cube trays for fast aromatics."
+      },
+      {
+        "id": "batch.indian.cooked_dal",
+        "name": "Cooked dal base",
+        "makes": "component.cooked_dal_base",
+        "freezerFriendly": true,
+        "notes": "Cook and freeze; finish each meal with fresh tadka and acid."
+      }
+    ],
+    "weeknightShortcuts": [
+      "Use canned chickpeas when time is short; simmer 10 minutes in masala to absorb flavor.",
+      "Keep a frozen masala base and add protein/veg + coconut milk/yogurt to finish.",
+      "Make jeera rice or plain basmati in a rice cooker while curry simmers."
+    ],
+    "seasonality": [
+      {
+        "season": "season.winter",
+        "focus": [
+          "ing.lentils_red",
+          "ing.cauliflower",
+          "ing.spinach",
+          "ing.potato"
+        ]
+      },
+      {
+        "season": "season.summer",
+        "focus": ["ing.cucumber", "ing.tomato", "ing.mint", "ing.lime"]
+      }
+    ]
+  },
+
+  "ui": {
+    "heroSuggestions": [
+      {
+        "title": "Start Here",
+        "items": [
+          "dish.indian.tadka_dal",
+          "dish.indian.jeera_rice",
+          "dish.indian.aloo_gobi"
+        ]
+      },
+      {
+        "title": "Batch & Remix",
+        "items": [
+          "batch.indian.onion_tomato_masala",
+          "batch.indian.cooked_dal",
+          "batch.indian.ginger_garlic_paste"
+        ]
+      }
+    ],
+    "searchBoostTerms": [
+      "dal",
+      "tadka",
+      "masala",
+      "curry",
+      "biryani",
+      "pulao",
+      "raita",
+      "sabzi",
+      "chana",
+      "paneer",
+      "tandoori"
+    ],
+    "iconHints": ["icon.spice", "icon.rice", "icon.pot", "icon.leaf"]
+  },
+
+  "compat": {
+    "recipeTagDefaults": ["cuisine.indian", "spice.forward"],
+    "defaultPlateTemplateIds": ["plate.stew_and_starch", "plate.family_style"],
+    "notes": [
+      "Planner: prefer pairing a saucy main with a starch and a cooling side (raita/salad).",
+      "If pantry lacks whole spices, the system may lean on blends (garam_masala) and ground spices."
+    ]
+  }
+}

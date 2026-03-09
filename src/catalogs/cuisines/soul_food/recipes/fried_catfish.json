@@ -1,0 +1,197 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+
+  "meta": {
+    "type": "recipe",
+    "id": "soul_food.fried_catfish.v1",
+    "name": "Soul Food Fried Catfish",
+    "cuisine": "soul_food",
+    "region": "US_South",
+    "version": "1.0.0",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-17",
+    "updatedAt": "2026-01-17",
+    "status": "canonical",
+    "source": {
+      "type": "compiled",
+      "notes": "Canonical SSA soul food baseline. Cornmeal-crusted fried catfish with a buttermilk soak and seasoned dredge."
+    },
+    "tags": [
+      "soul_food",
+      "fried_catfish",
+      "catfish",
+      "fish",
+      "fried",
+      "cornmeal_crust",
+      "comfort_food",
+      "southern"
+    ],
+    "allergens": ["fish", "milk", "wheat"],
+    "dietary": {
+      "halal": true,
+      "kosher_style": false,
+      "gluten_free": false,
+      "dairy_free": false
+    },
+    "summary": "Crispy cornmeal-crusted fried catfish with a tangy buttermilk soak and classic Southern seasoning.",
+    "difficulty": "easy",
+    "servings": {
+      "count": 6,
+      "unit": "servings"
+    },
+    "yield": "About 6 servings",
+    "timing": {
+      "prepMinutes": 15,
+      "inactiveMinutes": 20,
+      "cookMinutes": 15,
+      "totalMinutes": 50
+    },
+    "equipment": [
+      {
+        "id": "cast_iron_skillet_12in",
+        "label": "12-inch cast iron skillet (or heavy skillet)",
+        "required": true
+      },
+      {
+        "id": "deep_fry_thermometer",
+        "label": "Deep-fry / instant thermometer",
+        "required": true
+      },
+      { "id": "wire_rack", "label": "Wire rack", "required": true },
+      { "id": "sheet_pan", "label": "Sheet pan", "required": true },
+      { "id": "tongs", "label": "Tongs", "required": true },
+      { "id": "mixing_bowls", "label": "Mixing bowls", "required": true }
+    ],
+    "foodSafety": {
+      "minInternalTempF": 145,
+      "notes": [
+        "Fish is safe at 145°F internal temperature and should flake easily.",
+        "Avoid overcrowding the pan to maintain oil temperature and crisp crust."
+      ]
+    }
+  },
+
+  "ingredients": [
+    {
+      "id": "catfish_fillets",
+      "label": "Catfish fillets",
+      "amount": { "value": 2.5, "unit": "lb" }
+    },
+    {
+      "id": "buttermilk",
+      "label": "Buttermilk",
+      "amount": { "value": 1.5, "unit": "cup" }
+    },
+    {
+      "id": "hot_sauce",
+      "label": "Hot sauce",
+      "amount": { "value": 1, "unit": "tbsp" }
+    },
+    {
+      "id": "lemon_juice",
+      "label": "Lemon juice (optional, brightens fish)",
+      "amount": { "value": 1, "unit": "tbsp" }
+    },
+    {
+      "id": "kosher_salt_soak",
+      "label": "Kosher salt (for soak)",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "black_pepper_soak",
+      "label": "Black pepper (for soak)",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+
+    {
+      "id": "yellow_cornmeal",
+      "label": "Yellow cornmeal",
+      "amount": { "value": 1.5, "unit": "cup" }
+    },
+    {
+      "id": "all_purpose_flour",
+      "label": "All-purpose flour",
+      "amount": { "value": 0.5, "unit": "cup" }
+    },
+    {
+      "id": "paprika",
+      "label": "Paprika",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "garlic_powder",
+      "label": "Garlic powder",
+      "amount": { "value": 1.5, "unit": "tsp" }
+    },
+    {
+      "id": "onion_powder",
+      "label": "Onion powder",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "cayenne_pepper",
+      "label": "Cayenne pepper (optional)",
+      "amount": { "value": 0.25, "unit": "tsp" }
+    },
+    {
+      "id": "black_pepper_dredge",
+      "label": "Black pepper (for dredge)",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "kosher_salt_dredge",
+      "label": "Kosher salt (for dredge)",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+
+    {
+      "id": "neutral_oil",
+      "label": "Neutral frying oil (peanut, canola, vegetable)",
+      "amount": { "value": 4, "unit": "cup" }
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_prep_fish",
+      "title": "Prep catfish",
+      "body": "Pat catfish fillets dry. If very large, cut into serving-sized pieces."
+    },
+    {
+      "id": "step_02_soak",
+      "title": "Buttermilk soak",
+      "body": "In a bowl, mix buttermilk, hot sauce, lemon juice (optional), salt, and pepper. Add catfish and turn to coat. Let soak 15–30 minutes (refrigerate if holding longer)."
+    },
+    {
+      "id": "step_03_mix_dredge",
+      "title": "Mix cornmeal dredge",
+      "body": "In a wide bowl, combine cornmeal, flour, paprika, garlic powder, onion powder, cayenne (optional), salt, and pepper. Mix well."
+    },
+    {
+      "id": "step_04_heat_oil",
+      "title": "Heat oil",
+      "body": "Add oil to a skillet to reach about 1/2 inch depth. Heat to 350°F, using a thermometer to monitor."
+    },
+    {
+      "id": "step_05_dredge",
+      "title": "Dredge the fish",
+      "body": "Lift catfish from soak and let excess drip off. Press into cornmeal mixture on both sides until well coated."
+    },
+    {
+      "id": "step_06_fry",
+      "title": "Fry in batches",
+      "body": "Carefully place catfish in hot oil without overcrowding. Fry 3–5 minutes per side, until deep golden and crisp. Maintain oil around 340–360°F."
+    },
+    {
+      "id": "step_07_drain",
+      "title": "Drain on rack",
+      "body": "Transfer fried fish to a wire rack over a sheet pan (not paper towels) to stay crisp. Repeat with remaining batches."
+    },
+    {
+      "id": "step_08_serve",
+      "title": "Serve",
+      "body": "Serve hot with lemon wedges, hot sauce, and classic sides (cornbread, coleslaw, fries, or greens)."
+    }
+  ]
+}

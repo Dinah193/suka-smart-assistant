@@ -28,7 +28,7 @@ try {
   Events = eb.Events || {};
 } catch {
   try {
-    const eb = require("@/services/eventBus.js");
+    const eb = require("@/services/events/eventBus.js");
     eventBus = eb.default || eb.eventBus || eb;
     Events = eb.Events || {};
   } catch {
@@ -43,7 +43,9 @@ try {
 
 let featureFlags = {};
 try {
-  featureFlags = require("@/config/featureFlags").default || require("@/config/featureFlags");
+  featureFlags =
+    require("@/config/featureFlags").default ||
+    require("@/config/featureFlags");
 } catch {}
 
 /** Hub export helpers (optional, fail-silent) */
@@ -134,8 +136,10 @@ export async function upsertBlock(input) {
   const item = normalizeItem(input, nowIso);
 
   if (!item.title) throw new Error("calendar: title is required");
-  if (!isISO(item.start) || !isISO(item.end)) throw new Error("calendar: invalid start/end");
-  if (toMs(item.end) <= toMs(item.start)) throw new Error("calendar: end must be after start");
+  if (!isISO(item.start) || !isISO(item.end))
+    throw new Error("calendar: invalid start/end");
+  if (toMs(item.end) <= toMs(item.start))
+    throw new Error("calendar: end must be after start");
 
   // Guardrails
   enforceQuietHours(item);
@@ -143,7 +147,9 @@ export async function upsertBlock(input) {
 
   // Conflicts (informational; session may still proceed if allowed)
   const conflicts = findConflicts(item);
-  const hasHardConflict = conflicts.some((c) => isHardConflict(c.kind, item.kind));
+  const hasHardConflict = conflicts.some((c) =>
+    isHardConflict(c.kind, item.kind)
+  );
 
   if (hasHardConflict) {
     // Emit a soft error and throw
@@ -159,7 +165,10 @@ export async function upsertBlock(input) {
     conflicts,
     reason: input?.id ? "updated" : "created",
   };
-  emit(Events?.SCHEDULE_SAVED || "schedule/saved", payload, { sticky: false, source: "calendar" });
+  emit(Events?.SCHEDULE_SAVED || "schedule/saved", payload, {
+    sticky: false,
+    source: "calendar",
+  });
   emit("calendar/blockSaved", payload);
 
   await exportToHubIfEnabled({
@@ -181,7 +190,11 @@ export async function removeBlock(id) {
   _cache.delete(String(id));
   await deleteFromStorage(String(id));
 
-  emit(Events?.SCHEDULE_DELETED || "schedule/deleted", { id, item }, { source: "calendar" });
+  emit(
+    Events?.SCHEDULE_DELETED || "schedule/deleted",
+    { id, item },
+    { source: "calendar" }
+  );
   emit("calendar/blockRemoved", { id, item });
 
   await exportToHubIfEnabled({
@@ -195,7 +208,14 @@ export async function removeBlock(id) {
 }
 
 /** Create a temporary hold (e.g., user is planning; prevents auto-scheduling). */
-export async function createHold({ title = "Hold", start, end, domain, meta, source = "calendar" }) {
+export async function createHold({
+  title = "Hold",
+  start,
+  end,
+  domain,
+  meta,
+  source = "calendar",
+}) {
   return upsertBlock({
     kind: "hold",
     title,
@@ -218,7 +238,8 @@ export async function getBlocksInRange({ startISO, endISO, kinds }) {
   const s = toMs(startISO);
   const e = toMs(endISO);
   const arr = Array.from(_cache.values()).filter((it) => {
-    if (Array.isArray(kinds) && kinds.length && !kinds.includes(it.kind)) return false;
+    if (Array.isArray(kinds) && kinds.length && !kinds.includes(it.kind))
+      return false;
     return rangesOverlap(s, e, toMs(it.start), toMs(it.end));
   });
   return arr.sort((a, b) => toMs(a.start) - toMs(b.start));
@@ -247,7 +268,8 @@ export async function suggestSlots({
   domain,
 }) {
   guardInit();
-  if (!isISO(startISO) || !isISO(endISO)) throw new Error("calendar: invalid range");
+  if (!isISO(startISO) || !isISO(endISO))
+    throw new Error("calendar: invalid range");
   const s = floorTo(toMs(startISO), granularityMin);
   const e = toMs(endISO);
   const need = minDurationMin * 60_000;
@@ -262,7 +284,8 @@ export async function suggestSlots({
   const merged = [];
   for (const [a, b] of busy) {
     if (!merged.length || a > merged[merged.length - 1][1]) merged.push([a, b]);
-    else merged[merged.length - 1][1] = Math.max(merged[merged.length - 1][1], b);
+    else
+      merged[merged.length - 1][1] = Math.max(merged[merged.length - 1][1], b);
   }
 
   // Free windows
@@ -308,7 +331,14 @@ export async function suggestSlots({
 }
 
 /** Convenience: schedule a session if a slot is free (conflict-aware). */
-export async function scheduleSession({ title, domain, start, end, meta, source = "calendar" }) {
+export async function scheduleSession({
+  title,
+  domain,
+  start,
+  end,
+  meta,
+  source = "calendar",
+}) {
   return upsertBlock({
     kind: "session",
     title: title || defaultTitleFor(domain),
@@ -328,7 +358,10 @@ export async function cancelSession(id) {
 /* ---------------------------- Internal Helpers ----------------------------- */
 function emit(type, data, opts = {}) {
   if (!eventBus?.emit) return;
-  eventBus.emit(type, data, { source: opts.source || "calendar", sticky: !!opts.sticky });
+  eventBus.emit(type, data, {
+    source: opts.source || "calendar",
+    sticky: !!opts.sticky,
+  });
 }
 
 async function exportToHubIfEnabled(payload) {
@@ -349,13 +382,23 @@ function normalizeItem(input, nowIso) {
   const start = toISO(input?.start);
   const end = toISO(input?.end);
   const domain = input?.domain || input?.meta?.domain || undefined;
-  const tags = Array.isArray(input?.tags) ? dedupStrings(input.tags) : undefined;
+  const tags = Array.isArray(input?.tags)
+    ? dedupStrings(input.tags)
+    : undefined;
   const meta = isPojo(input?.meta) ? { ...input.meta } : undefined;
   const source = input?.source || "calendar";
 
   /** @type {CalendarItem} */
   const base = {
-    id, kind, title, start, end, domain, tags, meta, source,
+    id,
+    kind,
+    title,
+    start,
+    end,
+    domain,
+    tags,
+    meta,
+    source,
     createdAt: nowIso,
     updatedAt: nowIso,
   };
@@ -374,7 +417,8 @@ function asKind(v) {
 }
 
 function guardInit() {
-  if (!_initialized) throw new Error("householdCalendar: call init() before use");
+  if (!_initialized)
+    throw new Error("householdCalendar: call init() before use");
 }
 
 function findConflicts(item) {
@@ -439,10 +483,10 @@ function approximateSabbathWindow(ts) {
   // Find the most recent Friday 18:00
   const diffToFri = (5 - day + 7) % 7;
   const friBase = base + diffToFri * 24 * 60 * 60 * 1000;
-  const sabStart = new Date(friBase + (18 * 60 * 60 * 1000)).getTime();
+  const sabStart = new Date(friBase + 18 * 60 * 60 * 1000).getTime();
 
   // Ends Saturday 20:00
-  const sabEnd = sabStart + (26 * 60 * 60 * 1000); // +26h → Sat 20:00
+  const sabEnd = sabStart + 26 * 60 * 60 * 1000; // +26h → Sat 20:00
   return [sabStart, sabEnd];
 }
 
@@ -520,7 +564,10 @@ function dedupStrings(arr) {
   for (const s of arr) {
     const k = String(s).trim();
     if (!k) continue;
-    if (!seen.has(k)) { seen.add(k); out.push(k); }
+    if (!seen.has(k)) {
+      seen.add(k);
+      out.push(k);
+    }
   }
   return out;
 }
@@ -538,16 +585,21 @@ function ceilTo(ms, granMin) {
 function violatesWindow(startMs, endMs, q) {
   // q.start "HH:MM", q.end "HH:MM"; if start < end → nightly window
   // If end < start (e.g., 22:00..06:00), handle wrap.
-  const days = Array.isArray(q.days) && q.days.length ? q.days : [0,1,2,3,4,5,6];
+  const days =
+    Array.isArray(q.days) && q.days.length ? q.days : [0, 1, 2, 3, 4, 5, 6];
   // Iterate each day the range touches (max few days per call)
-  for (let d = dayStart(startMs); d <= dayStart(endMs); d += 24*60*60*1000) {
+  for (
+    let d = dayStart(startMs);
+    d <= dayStart(endMs);
+    d += 24 * 60 * 60 * 1000
+  ) {
     const dayIdx = new Date(d).getDay();
     if (!days.includes(dayIdx)) continue;
     const [sH, sM] = (q.start || "21:00").split(":").map(Number);
     const [eH, eM] = (q.end || "07:00").split(":").map(Number);
-    const qs = d + (sH*60 + sM) * 60_000;
-    let qe = d + (eH*60 + eM) * 60_000;
-    if (qe <= qs) qe += 24*60*60*1000; // wrap past midnight
+    const qs = d + (sH * 60 + sM) * 60_000;
+    let qe = d + (eH * 60 + eM) * 60_000;
+    if (qe <= qs) qe += 24 * 60 * 60 * 1000; // wrap past midnight
     if (rangesOverlap(startMs, endMs, qs, qe)) return true;
   }
   return false;

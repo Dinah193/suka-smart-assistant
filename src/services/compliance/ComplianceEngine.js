@@ -30,7 +30,7 @@
 
 import { COMPLIANCE_STATUS, buildComplianceMeta } from "./ComplianceContract";
 import { getHouseholdProfile } from "../household/HouseholdProfile";
-import { emitEvent } from "../eventBus";
+import { emitEvent } from "../events/eventBus";
 
 /* --------------------------------- Constants --------------------------------- */
 

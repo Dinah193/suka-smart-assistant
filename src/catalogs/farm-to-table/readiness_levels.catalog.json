@@ -1,0 +1,282 @@
+{
+  "$schema": "../../schemas/catalog.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-24T00:00:00.000Z",
+  "meta": {
+    "id": "farm_to_table.readiness_levels",
+    "type": "catalog",
+    "domain": "farm-to-table",
+    "locale": "en-US",
+    "name": "Farm-to-Table • Readiness Levels Catalog",
+    "label": "Readiness Levels",
+    "subtitle": "Deterministic readiness ladder for components (how close an item is to plate-ready). Used for planning, inventory UX, and effort estimation.",
+    "source": {
+      "kind": "catalog",
+      "name": "src/catalogs/farm-to-table/readiness_levels.catalog.json",
+      "notes": [
+        "These are not homestead levels. They describe the readiness state of a specific component/item.",
+        "Use tags like readiness.* on inventory items or derived from preservation/processing logs.",
+        "Planners can bias toward higher readiness on weeknights and lower readiness for batch/prep days."
+      ]
+    }
+  },
+  "scope": {
+    "kind": "module",
+    "module": "farm-to-table",
+    "locale": "en-US"
+  },
+  "defaults": {
+    "namespace": "readiness",
+    "statusDefault": "active",
+    "ui": {
+      "sortBy": "rank",
+      "groupBy": "group"
+    },
+    "plannerHints": {
+      "weeknightMinRecommended": "readiness.prepped",
+      "batchDayMinRecommended": "readiness.raw"
+    }
+  },
+  "items": [
+    {
+      "id": "readiness.raw",
+      "label": "Raw / Unprocessed",
+      "group": "Raw",
+      "rank": 0,
+      "status": "active",
+      "tags": [
+        "readiness.raw",
+        "effort.high",
+        "time.longer",
+        "planner.prep_required",
+        "inventory.state.raw"
+      ],
+      "notes": "Raw ingredients needing full prep and cooking (e.g., dry beans, whole produce, raw meat)."
+    },
+    {
+      "id": "readiness.cleaned",
+      "label": "Cleaned / Washed",
+      "group": "Prep",
+      "rank": 1,
+      "status": "active",
+      "tags": [
+        "readiness.cleaned",
+        "effort.medium_high",
+        "time.medium_long",
+        "planner.prep_required",
+        "inventory.state.cleaned"
+      ],
+      "notes": "Washed/cleaned but not cut or portioned (e.g., washed greens, scrubbed potatoes)."
+    },
+    {
+      "id": "readiness.trimmed",
+      "label": "Trimmed / Peeled",
+      "group": "Prep",
+      "rank": 2,
+      "status": "active",
+      "tags": [
+        "readiness.trimmed",
+        "effort.medium",
+        "time.medium",
+        "planner.prep_required",
+        "inventory.state.trimmed"
+      ],
+      "notes": "Trimmed/peeled/cleaned, still needs cutting or cooking."
+    },
+    {
+      "id": "readiness.portioned",
+      "label": "Portioned / Measured",
+      "group": "Prep",
+      "rank": 3,
+      "status": "active",
+      "tags": [
+        "readiness.portioned",
+        "effort.medium",
+        "time.medium",
+        "planner.prep_required",
+        "inventory.state.portioned"
+      ],
+      "notes": "Portioned into usable amounts (e.g., meat portioned, flour weighed, spice blend portioned)."
+    },
+    {
+      "id": "readiness.chopped",
+      "label": "Chopped / Cut",
+      "group": "Prep",
+      "rank": 4,
+      "status": "active",
+      "tags": [
+        "readiness.chopped",
+        "effort.low_medium",
+        "time.short_medium",
+        "planner.weeknight_friendly",
+        "inventory.state.chopped"
+      ],
+      "notes": "Cut into recipe-ready pieces (e.g., diced onions, sliced peppers). Cooking still needed."
+    },
+    {
+      "id": "readiness.soaked",
+      "label": "Soaked / Rehydrating",
+      "group": "Prep",
+      "rank": 5,
+      "status": "active",
+      "tags": [
+        "readiness.soaked",
+        "effort.low",
+        "time.hands_off",
+        "planner.requires_lead_time",
+        "inventory.state.soaked"
+      ],
+      "notes": "In a hands-off prep state (e.g., beans soaking, dried mushrooms rehydrating)."
+    },
+    {
+      "id": "readiness.marinated",
+      "label": "Marinated / Seasoned",
+      "group": "Prep",
+      "rank": 6,
+      "status": "active",
+      "tags": [
+        "readiness.marinated",
+        "effort.low",
+        "time.hands_off",
+        "planner.requires_lead_time",
+        "inventory.state.marinated"
+      ],
+      "notes": "Seasoned and ready to cook; flavor improves with time (e.g., marinated chicken, dry-brined roast)."
+    },
+    {
+      "id": "readiness.prepped",
+      "label": "Prepped (Cook-Ready)",
+      "group": "Cook-Ready",
+      "rank": 7,
+      "status": "active",
+      "tags": [
+        "readiness.prepped",
+        "effort.low",
+        "time.short",
+        "planner.weeknight_friendly",
+        "inventory.state.prepped"
+      ],
+      "notes": "Fully prepped and ready to cook immediately (mise en place complete)."
+    },
+    {
+      "id": "readiness.parcooked",
+      "label": "Par-Cooked",
+      "group": "Cook-Ready",
+      "rank": 8,
+      "status": "active",
+      "tags": [
+        "readiness.parcooked",
+        "effort.low",
+        "time.short",
+        "planner.weeknight_friendly",
+        "inventory.state.parcooked"
+      ],
+      "notes": "Partially cooked; finishes quickly (e.g., parboiled potatoes, par-cooked rice, blanched vegetables)."
+    },
+    {
+      "id": "readiness.cooked",
+      "label": "Cooked (Ready-to-Eat)",
+      "group": "Ready",
+      "rank": 9,
+      "status": "active",
+      "tags": [
+        "readiness.cooked",
+        "effort.minimal",
+        "time.reheat_only",
+        "planner.fast",
+        "inventory.state.cooked"
+      ],
+      "notes": "Fully cooked and edible as-is; may be reheated (e.g., cooked beans, shredded chicken, roasted vegetables)."
+    },
+    {
+      "id": "readiness.assembled",
+      "label": "Assembled (Serve Now)",
+      "group": "Ready",
+      "rank": 10,
+      "status": "active",
+      "tags": [
+        "readiness.assembled",
+        "effort.minimal",
+        "time.none",
+        "planner.instant",
+        "inventory.state.assembled"
+      ],
+      "notes": "Assembled and ready to serve (e.g., salad kit, sandwich kit, snack box)."
+    },
+    {
+      "id": "readiness.preserved_shelf_stable",
+      "label": "Preserved (Shelf-Stable)",
+      "group": "Preserved",
+      "rank": 11,
+      "status": "active",
+      "tags": [
+        "readiness.preserved",
+        "preserve.shelf_stable",
+        "effort.minimal",
+        "time.reheat_or_use",
+        "inventory.state.preserved",
+        "storage.pantry"
+      ],
+      "notes": "Shelf-stable preserved items (canned goods, jams, dried spices). Often ready-to-use."
+    },
+    {
+      "id": "readiness.preserved_frozen",
+      "label": "Preserved (Frozen)",
+      "group": "Preserved",
+      "rank": 12,
+      "status": "active",
+      "tags": [
+        "readiness.preserved",
+        "preserve.frozen",
+        "effort.minimal",
+        "time.thaw_or_reheat",
+        "inventory.state.frozen",
+        "storage.freezer"
+      ],
+      "notes": "Frozen prepped/cooked items; requires thaw/reheat as applicable."
+    },
+    {
+      "id": "readiness.fermenting_active",
+      "label": "Fermenting (Active)",
+      "group": "In-Process",
+      "rank": 13,
+      "status": "active",
+      "tags": [
+        "readiness.in_process",
+        "preserve.ferment",
+        "effort.low",
+        "time.hands_off",
+        "inventory.state.fermenting"
+      ],
+      "notes": "Currently fermenting; not ready until target day/condition (e.g., sauerkraut day 3 of 14)."
+    },
+    {
+      "id": "readiness.curating_aging",
+      "label": "Aging / Curing",
+      "group": "In-Process",
+      "rank": 14,
+      "status": "active",
+      "tags": [
+        "readiness.in_process",
+        "preserve.curing",
+        "effort.low",
+        "time.hands_off",
+        "inventory.state.aging"
+      ],
+      "notes": "In curing/aging stage (e.g., cured meats, cheese aging, vinegar mother)."
+    },
+    {
+      "id": "readiness.depleted",
+      "label": "Depleted / Not Available",
+      "group": "Not Available",
+      "rank": 99,
+      "status": "active",
+      "tags": [
+        "readiness.depleted",
+        "inventory.state.depleted",
+        "planner.unavailable"
+      ],
+      "notes": "Not currently available; use to drive restock and substitutions."
+    }
+  ]
+}

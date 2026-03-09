@@ -1,0 +1,439 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-16T00:00:00.000Z",
+
+  "meta": {
+    "id": "caribbean.brown_stew_fish",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Caribbean Brown Stew Fish",
+    "subtitle": "Jamaican-style browned fish in a savory sweet-brown gravy with peppers, onion, and thyme",
+    "source": {
+      "kind": "curated",
+      "author": "SSA Canonical Catalog",
+      "origin": "caribbean",
+      "attribution": "Modeled from common Jamaican brown stew fish patterns: citrus-seasoned fish, light fry for color, then simmered in a browned gravy with aromatics and thyme.",
+      "url": null
+    }
+  },
+
+  "classification": {
+    "cuisine": "caribbean",
+    "subprofiles": ["jamaican"],
+    "category": "main",
+    "mealArchetypes": ["stewed_protein_plus_sides", "pan_fry_then_simmer"],
+    "servingStyles": ["family_style", "plated_meals", "holiday_feasts"],
+    "plannerTags": [
+      "caribbean",
+      "jamaican",
+      "fish",
+      "stew",
+      "brown_stew",
+      "gravy",
+      "batch"
+    ]
+  },
+
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 1, "unit": "fillet" },
+    "notes": "Assumes medium fillets or steaks. Whole small fish also works with adjusted timing."
+  },
+
+  "time": {
+    "activeMins": 25,
+    "totalMins": 55,
+    "handsOffMins": 20
+  },
+
+  "difficulty": 2,
+
+  "nutritionHints": {
+    "proteinForward": true,
+    "glutenFreeByDefault": false,
+    "dairyFreeByDefault": true
+  },
+
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": false
+  },
+
+  "tasteProfile": {
+    "heatTypical": 2,
+    "heatScale": { "min": 0, "max": 5 },
+    "sweetness": 2,
+    "sourness": 1,
+    "saltiness": 2,
+    "umami": 2,
+    "signature": [
+      "browned_gravy",
+      "thyme",
+      "scallion",
+      "garlic",
+      "bell_pepper",
+      "scotch_bonnet_aroma"
+    ]
+  },
+
+  "equipment": {
+    "recommended": [
+      "large_skillet",
+      "tongs",
+      "fish_spatula",
+      "instant_read_thermometer",
+      "cutting_board",
+      "chef_knife"
+    ],
+    "minimum": ["large_skillet", "stovetop"],
+    "optional": ["lid", "splatter_screen"]
+  },
+
+  "dietFlags": ["dairy_free"],
+  "allergens": ["fish"],
+
+  "ingredients": [
+    {
+      "id": "white_fish_fillet",
+      "label": "Firm white fish (snapper, kingfish, tilapia, whiting) fillets or steaks",
+      "amount": { "value": 2.0, "unit": "lb" },
+      "role": "protein",
+      "notes": "Snapper/kingfish are classic; tilapia/whiting are common home options."
+    },
+    {
+      "id": "lime_juice",
+      "label": "Lime juice",
+      "amount": { "value": 3, "unit": "tbsp" },
+      "role": "acid",
+      "notes": "For seasoning and that Caribbean bright note."
+    },
+    {
+      "id": "salt",
+      "label": "Salt",
+      "amount": { "value": 1.5, "unit": "tsp" },
+      "role": "seasoning",
+      "notes": "Adjust to taste and fish thickness."
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper",
+      "amount": { "value": 1, "unit": "tsp" },
+      "role": "seasoning"
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic (minced)",
+      "amount": { "value": 4, "unit": "clove" },
+      "role": "aromatic"
+    },
+    {
+      "id": "ginger",
+      "label": "Ginger (grated)",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "role": "aromatic",
+      "optional": true,
+      "notes": "Optional but common."
+    },
+    {
+      "id": "scallion",
+      "label": "Scallions (chopped)",
+      "amount": { "value": 4, "unit": "stalk" },
+      "role": "aromatic"
+    },
+    {
+      "id": "thyme",
+      "label": "Thyme (fresh sprigs) or dried",
+      "amount": { "value": 6, "unit": "sprig" },
+      "role": "herb",
+      "notes": "If dried: 2 tsp."
+    },
+    {
+      "id": "onion",
+      "label": "Onion (sliced)",
+      "amount": { "value": 1, "unit": "medium" },
+      "role": "aromatic"
+    },
+    {
+      "id": "bell_pepper",
+      "label": "Bell pepper (sliced)",
+      "amount": { "value": 1, "unit": "medium" },
+      "role": "veg"
+    },
+    {
+      "id": "carrot",
+      "label": "Carrot (thin sliced)",
+      "amount": { "value": 1, "unit": "medium" },
+      "role": "veg",
+      "optional": true
+    },
+    {
+      "id": "tomato",
+      "label": "Tomato (sliced) or diced tomatoes",
+      "amount": { "value": 1, "unit": "medium" },
+      "role": "veg",
+      "notes": "Some homes use a little tomato; others skip. Diced tomatoes: 1/2 cup."
+    },
+    {
+      "id": "tomato_paste",
+      "label": "Tomato paste",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "role": "base",
+      "optional": true,
+      "notes": "Deepens color and gravy flavor."
+    },
+    {
+      "id": "brown_sugar",
+      "label": "Brown sugar",
+      "amount": { "value": 2, "unit": "tsp" },
+      "role": "sweetener",
+      "notes": "Classic brown-stew balance; start small."
+    },
+    {
+      "id": "browning_sauce",
+      "label": "Browning sauce",
+      "amount": { "value": 1, "unit": "tsp" },
+      "role": "color",
+      "optional": true,
+      "notes": "Optional. If you don't have it, rely on caramelized sugar/veg + light fry for color."
+    },
+    {
+      "id": "stock_or_water",
+      "label": "Fish stock, chicken stock, or water",
+      "amount": { "value": 1.5, "unit": "cup" },
+      "role": "liquid",
+      "notes": "Use stock if available; water works fine."
+    },
+    {
+      "id": "soy_sauce_or_tamari",
+      "label": "Soy sauce (or tamari)",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "role": "umami",
+      "optional": true,
+      "notes": "Optional. Adds savory depth. Use tamari for GF."
+    },
+    {
+      "id": "vinegar",
+      "label": "White vinegar or apple cider vinegar",
+      "amount": { "value": 1, "unit": "tsp" },
+      "role": "acid",
+      "optional": true,
+      "notes": "Optional: brightens the gravy."
+    },
+    {
+      "id": "scotch_bonnet",
+      "label": "Scotch bonnet (whole)",
+      "amount": { "value": 1, "unit": "each" },
+      "role": "heat",
+      "optional": true,
+      "notes": "Keep whole for aroma. Do not burst unless you want it hotter."
+    },
+    {
+      "id": "neutral_oil",
+      "label": "Neutral oil (for frying)",
+      "amount": { "value": 4, "unit": "tbsp" },
+      "role": "fat",
+      "notes": "Enough to shallow fry fish for browning."
+    },
+    {
+      "id": "flour_or_cornstarch",
+      "label": "Flour (or cornstarch) for light dredge",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "role": "coating",
+      "optional": true,
+      "notes": "Optional. Light dredge helps crisp and thickens gravy slightly. Use cornstarch for gluten-free."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "season_fish",
+      "title": "Season the fish",
+      "domain": "cooking",
+      "activeMins": 8,
+      "instructions": [
+        "Pat fish dry.",
+        "Season with lime juice, salt, black pepper, half the garlic, half the scallion, and thyme (rub gently).",
+        "Rest 10–15 minutes while you prep vegetables."
+      ],
+      "timers": [{ "label": "Rest", "mins": 12 }],
+      "inputs": {
+        "ingredients": [
+          "white_fish_fillet",
+          "lime_juice",
+          "salt",
+          "black_pepper",
+          "garlic",
+          "scallion",
+          "thyme"
+        ],
+        "equipment": ["mixing_bowl", "plate"]
+      }
+    },
+    {
+      "id": "brown_fish",
+      "title": "Brown the fish (light fry)",
+      "domain": "cooking",
+      "activeMins": 10,
+      "instructions": [
+        "Optional: lightly dredge fish in flour or cornstarch; shake off excess.",
+        "Heat oil in a large skillet over medium-high.",
+        "Fry fish in batches 2–3 minutes per side until lightly browned (not cooked through).",
+        "Remove to a plate. Reduce heat to medium."
+      ],
+      "inputs": {
+        "ingredients": ["neutral_oil", "flour_or_cornstarch"],
+        "equipment": [
+          "large_skillet",
+          "stovetop",
+          "fish_spatula",
+          "tongs",
+          "plate"
+        ]
+      }
+    },
+    {
+      "id": "build_gravy",
+      "title": "Build the brown stew gravy",
+      "domain": "cooking",
+      "activeMins": 8,
+      "instructions": [
+        "In the same skillet, pour off excess oil leaving ~1–2 tbsp.",
+        "Add onion, bell pepper, and optional carrot; saute 3–4 minutes until softened.",
+        "Stir in remaining garlic (and optional ginger). Cook 30 seconds.",
+        "Add brown sugar and stir 20–30 seconds to caramelize slightly (watch closely).",
+        "Stir in optional tomato paste for 30 seconds.",
+        "Add stock/water, optional soy sauce, and optional browning sauce. Bring to a simmer.",
+        "Add tomato and whole scotch bonnet (if using)."
+      ],
+      "inputs": {
+        "ingredients": [
+          "onion",
+          "bell_pepper",
+          "carrot",
+          "garlic",
+          "ginger",
+          "brown_sugar",
+          "tomato_paste",
+          "stock_or_water",
+          "soy_sauce_or_tamari",
+          "browning_sauce",
+          "tomato",
+          "scotch_bonnet"
+        ],
+        "equipment": ["large_skillet", "stovetop", "spoon"]
+      }
+    },
+    {
+      "id": "simmer_fish",
+      "title": "Simmer fish in the gravy",
+      "domain": "cooking",
+      "activeMins": 3,
+      "handsOffMins": 12,
+      "instructions": [
+        "Nestle browned fish into the simmering gravy (spoon gravy over top).",
+        "Cover loosely (or partially cover) and simmer 8–12 minutes depending on thickness, until fish flakes easily.",
+        "If gravy is too thin, simmer uncovered 2–3 minutes to reduce. If too thick, add a splash of water/stock."
+      ],
+      "timers": [{ "label": "Simmer fish", "mins": 10 }],
+      "inputs": {
+        "ingredients": ["white_fish_fillet"],
+        "equipment": ["large_skillet", "lid", "stovetop"]
+      }
+    },
+    {
+      "id": "finish_serve",
+      "title": "Finish and serve",
+      "domain": "cooking",
+      "activeMins": 2,
+      "instructions": [
+        "Taste gravy and adjust salt/pepper. Optional: add a tiny splash of vinegar for brightness.",
+        "Remove whole scotch bonnet before serving (unless you intentionally burst it).",
+        "Serve with rice and peas, boiled green bananas/yam, or fried plantains. Spoon gravy over everything."
+      ],
+      "inputs": {
+        "ingredients": ["vinegar"],
+        "equipment": ["spoon", "plate"]
+      }
+    }
+  ],
+
+  "pairings": {
+    "starches": [
+      "caribbean.rice_and_peas",
+      "rice",
+      "caribbean.fried_plantains",
+      "boiled_yam",
+      "green_banana"
+    ],
+    "vegSides": [
+      "caribbean.callaloo",
+      "cabbage_slaw",
+      "steamed_cabbage",
+      "salad"
+    ],
+    "condiments": ["pepper_sauce", "lime_juice"],
+    "drinks": ["caribbean.sorrel_drink", "caribbean.ginger_beer"]
+  },
+
+  "adaptations": [
+    {
+      "id": "caribbean.brown_stew_fish.gluten_free",
+      "label": "Gluten-Free",
+      "when": { "dietIncludesAny": ["gluten_free"] },
+      "adapt": {
+        "notes": "Skip flour dredge or use cornstarch. Use tamari instead of soy sauce."
+      }
+    },
+    {
+      "id": "caribbean.brown_stew_fish.low_heat",
+      "label": "Lower Heat Version",
+      "when": { "tasteMaxHeat": 1 },
+      "adapt": {
+        "reduceHeat": true,
+        "notes": "Skip scotch bonnet or keep it whole and remove early. Use sweet bell pepper for flavor."
+      }
+    },
+    {
+      "id": "caribbean.brown_stew_fish.whole_fish",
+      "label": "Whole Fish Option",
+      "when": { "hasIngredientAll": ["whole_fish"] },
+      "adapt": {
+        "method": "whole_fish_brown_stew",
+        "notes": "Score whole fish, season well, fry slightly longer per side for color, then simmer until done (often 12–18 minutes depending on size)."
+      }
+    }
+  ],
+
+  "storage": {
+    "fridge": {
+      "safeDays": 2,
+      "notes": "Fish is best within 1–2 days. Reheat gently to avoid overcooking."
+    },
+    "freezer": {
+      "safeMonths": 0,
+      "notes": "Not recommended—fish texture suffers after freezing in gravy."
+    },
+    "reheat": {
+      "methods": ["stovetop_gentle_simmer", "microwave_low_power"],
+      "notes": "Reheat gently. Add a splash of water/stock if gravy thickens."
+    }
+  },
+
+  "planner": {
+    "defaultSlot": "dinner",
+    "batchPlanHints": {
+      "goodForBatch": true,
+      "prepTasks": [
+        "Slice onion/pepper/carrot",
+        "Mince garlic/ginger",
+        "Season fish"
+      ],
+      "makeAhead": ["Prep vegetables", "Mix seasoning"],
+      "notes": "Best made same-day, but leftovers reheat well if warmed gently."
+    }
+  }
+}

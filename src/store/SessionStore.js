@@ -26,39 +26,72 @@
 
 (function () {
   /* ------------------------------- Safe Imports ------------------------------ */
-  var eventBus = { emit: function(){}, on: function(){}, off: function(){} };
+  var eventBus = {
+    emit: function () {},
+    on: function () {},
+    off: function () {},
+  };
   try {
-    var eb = require("@/services/eventBus");
+    var eb = require("@/services/events/eventBus");
     eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
   } catch (_e) {}
 
-  var automation = { on: function(){}, emit: function(){} };
-  try { automation = require("@/services/automation/runtime").automation || automation; } catch (_e) {}
+  var automation = { on: function () {}, emit: function () {} };
+  try {
+    automation =
+      require("@/services/automation/runtime").automation || automation;
+  } catch (_e) {}
 
   var execEngine = null;
-  try { execEngine = require("@/engines/session/sessionExecutionEngine"); } catch (_e) {}
+  try {
+    execEngine = require("@/engines/session/sessionExecutionEngine");
+  } catch (_e) {}
 
-  var pausePolicies = { canRunNow: function(){ return true; } };
-  try { pausePolicies = require("@/services/session/policies/pausePolicies"); } catch (_e) {}
+  var pausePolicies = {
+    canRunNow: function () {
+      return true;
+    },
+  };
+  try {
+    pausePolicies = require("@/services/session/policies/pausePolicies");
+  } catch (_e) {}
 
   // PPE, weather, withhold windows, etc. (optional)
   var scheduleHelpers = null;
-  try { scheduleHelpers = require("@/services/session/scheduleHelpers"); } catch (_e) {}
+  try {
+    scheduleHelpers = require("@/services/session/scheduleHelpers");
+  } catch (_e) {}
 
   // Useful shared parser (optional)
-  var offsetParser = { parse: function(){ return { ms: 0 }; } };
-  try { offsetParser = require("@/services/session/utils/offsetParser"); } catch (_e) {}
+  var offsetParser = {
+    parse: function () {
+      return { ms: 0 };
+    },
+  };
+  try {
+    offsetParser = require("@/services/session/utils/offsetParser");
+  } catch (_e) {}
 
   var Dexie = null;
-  try { Dexie = require("dexie"); } catch (_e) {}
+  try {
+    Dexie = require("dexie");
+  } catch (_e) {}
 
   var createZustand = null;
-  try { createZustand = require("zustand").create; } catch (_e) {}
+  try {
+    createZustand = require("zustand").create;
+  } catch (_e) {}
 
   var isBrowser = typeof window !== "undefined";
-  var now = function () { return Date.now(); };
-  var clamp = function (n, a, b) { return Math.max(a, Math.min(b, n)); };
-  var uid = function () { return Math.random().toString(36).slice(2, 10); };
+  var now = function () {
+    return Date.now();
+  };
+  var clamp = function (n, a, b) {
+    return Math.max(a, Math.min(b, n));
+  };
+  var uid = function () {
+    return Math.random().toString(36).slice(2, 10);
+  };
 
   /* ------------------------------ Persistence DB ---------------------------- */
   var db = null;
@@ -67,32 +100,44 @@
       db = new Dexie("SukaSessionsDB");
       db.version(1).stores({
         sessions: "++id, sessionId, domain, status, startedAt",
-        snapshots: "++id, sessionId, createdAt"
+        snapshots: "++id, sessionId, createdAt",
       });
     } catch (e) {
-      console.warn("[SessionStore] Dexie init failed, fallback to localStorage", e);
+      console.warn(
+        "[SessionStore] Dexie init failed, fallback to localStorage",
+        e
+      );
       db = null;
     }
   }
 
   var LS_KEYS = {
     current: "suka:session:current",
-    history: "suka:session:history"
+    history: "suka:session:history",
   };
 
   function lsGet(key, fallback) {
     if (!isBrowser) return fallback;
-    try { return JSON.parse(localStorage.getItem(key)) || fallback; }
-    catch (_e) { return fallback; }
+    try {
+      return JSON.parse(localStorage.getItem(key)) || fallback;
+    } catch (_e) {
+      return fallback;
+    }
   }
   function lsSet(key, value) {
     if (!isBrowser) return;
-    try { localStorage.setItem(key, JSON.stringify(value)); } catch (_e) {}
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch (_e) {}
   }
 
   /* --------------------------------- Helpers -------------------------------- */
   function domainFromPlan(plan) {
-    return (plan && plan.meta && plan.meta.domain) || (plan && plan.params && plan.params.domain) || "general";
+    return (
+      (plan && plan.meta && plan.meta.domain) ||
+      (plan && plan.params && plan.params.domain) ||
+      "general"
+    );
   }
 
   function requestFavorite(plan, opts) {
@@ -101,7 +146,9 @@
       domain,
       plan,
       options: Object.assign({ source: "SessionStore" }, opts || {}),
-      favoriteKey: plan?.meta?.defaultFavoriteKey || (domain + ":" + (plan.slug || plan.type || "plan"))
+      favoriteKey:
+        plan?.meta?.defaultFavoriteKey ||
+        domain + ":" + (plan.slug || plan.type || "plan"),
     };
     eventBus.emit(domain + ".plan.favorite.requested", payload);
     return payload;
@@ -112,9 +159,12 @@
     eventBus.emit("schedule.event.write.requested", {
       domain: domainFromPlan(plan),
       planId: plan.$id,
-      title: plan.schedule?.calendar?.title || plan.meta?.title || "Household Session",
+      title:
+        plan.schedule?.calendar?.title ||
+        plan.meta?.title ||
+        "Household Session",
       recurrence: plan.schedule?.recurrence || null,
-      startTimeLocal: plan.schedule?.startTimeLocal || null
+      startTimeLocal: plan.schedule?.startTimeLocal || null,
     });
   }
 
@@ -124,24 +174,31 @@
   }
 
   function nextStepIndex(steps, activeId) {
-    var idx = steps.findIndex(function (s) { return s.id === activeId; });
+    var idx = steps.findIndex(function (s) {
+      return s.id === activeId;
+    });
     if (idx < 0) return 0;
     return clamp(idx + 1, 0, steps.length - 1);
   }
 
   function makeDefaultItemRuntimeFromSteps(steps, plan, domain) {
-    var startBase = (plan?.schedule?.startTimeLocal ? plan.schedule.startTimeLocal : null);
+    var startBase = plan?.schedule?.startTimeLocal
+      ? plan.schedule.startTimeLocal
+      : null;
     var startBaseMs = 0;
     if (startBase && offsetParser && offsetParser.parse) {
       // Best-effort parse "HH:mm" into ms from midnight if parser supports it; fallback to 0
-      try { startBaseMs = offsetParser.parse(startBase).ms || 0; } catch (_e) {}
+      try {
+        startBaseMs = offsetParser.parse(startBase).ms || 0;
+      } catch (_e) {}
     }
 
     var items = {};
     var rolling = startBaseMs;
     steps.forEach(function (s, idx) {
       var dur = s.durationMs || 0;
-      var plannedStartMs = (typeof s.startOffset === "number" ? s.startOffset : rolling);
+      var plannedStartMs =
+        typeof s.startOffset === "number" ? s.startOffset : rolling;
       var plannedEndMs = plannedStartMs + dur;
       rolling = plannedEndMs + 0; // sequential by default (engines may later parallelize)
 
@@ -149,31 +206,32 @@
       var withholds = [];
       try {
         if (scheduleHelpers && scheduleHelpers.computeWithholds) {
-          withholds = scheduleHelpers.computeWithholds({ domain, plan, step: s }) || [];
+          withholds =
+            scheduleHelpers.computeWithholds({ domain, plan, step: s }) || [];
         }
       } catch (_e) {}
 
       items[s.id] = {
         stepId: s.id,
         idx,
-        status: "pending",        // pending | running | done | skipped | failed
-        assignedTo: null,         // e.g. "householder", "helper", "child-1"
+        status: "pending", // pending | running | done | skipped | failed
+        assignedTo: null, // e.g. "householder", "helper", "child-1"
         appliance: s.appliance || null,
         zone: s.zone || null,
         plannedStartMs,
         plannedEndMs,
-        slackMs: 0,               // computed by scheduler (0 default)
-        depsOf: [],               // ids that depend on this step
+        slackMs: 0, // computed by scheduler (0 default)
+        depsOf: [], // ids that depend on this step
         dependsOn: s.dependsOn || [], // ids this step depends on
-        withholds,                // [{ reason, fromMs, toMs }]
-        notes: ""
+        withholds, // [{ reason, fromMs, toMs }]
+        notes: "",
       };
     });
 
     return {
       version: 1,
       generatedAt: now(),
-      items
+      items,
     };
   }
 
@@ -189,8 +247,8 @@
     startedAt: null,
     pausedAt: null,
     elapsedMs: 0,
-    withhold: null,     // { reason, until } when pausePolicies suggests waiting
-    timers: {},         // stepId -> { startedAt, durationMs, remainingMs }
+    withhold: null, // { reason, until } when pausePolicies suggests waiting
+    timers: {}, // stepId -> { startedAt, durationMs, remainingMs }
 
     /**
      * itemRuntime — scheduler snapshot keyed by stepId
@@ -211,7 +269,7 @@
      */
     itemRuntime: { version: 1, generatedAt: 0, items: {} },
 
-    history: [] // capped array of { sessionId, domain, status, startedAt, endedAt, planMeta }
+    history: [], // capped array of { sessionId, domain, status, startedAt, endedAt, planMeta }
   };
 
   // Minimal store impl fallback if Zustand not present
@@ -220,25 +278,42 @@
     var subs = new Set();
     function set(partial) {
       var prev = state;
-      state = Object.assign({}, state, (typeof partial === "function" ? partial(prev) : partial));
-      subs.forEach(function (fn) { try { fn(state, prev); } catch (_e) {} });
+      state = Object.assign(
+        {},
+        state,
+        typeof partial === "function" ? partial(prev) : partial
+      );
+      subs.forEach(function (fn) {
+        try {
+          fn(state, prev);
+        } catch (_e) {}
+      });
     }
-    function get() { return state; }
-    function subscribe(fn) { subs.add(fn); return function () { subs.delete(fn); }; }
+    function get() {
+      return state;
+    }
+    function subscribe(fn) {
+      subs.add(fn);
+      return function () {
+        subs.delete(fn);
+      };
+    }
     return { getState: get, setState: set, subscribe: subscribe };
   }
 
   var _store = null;
   function baseCreate(set, get) {
     return Object.assign({}, DEFAULT_STATE, {
-
       /* ------------------------------ Lifecycle ------------------------------ */
       hydrate: async function () {
         if (db) {
           try {
             var latest = await db.sessions.orderBy("id").last();
             if (latest && latest.sessionId) {
-              var snap = await db.snapshots.where("sessionId").equals(latest.sessionId).last();
+              var snap = await db.snapshots
+                .where("sessionId")
+                .equals(latest.sessionId)
+                .last();
               if (snap && snap.data) {
                 set(Object.assign({}, snap.data, { ready: true }));
                 return;
@@ -255,7 +330,12 @@
       startWithPlan: async function (plan, options) {
         options = options || {};
         var domain = domainFromPlan(plan);
-        var sessionId = domain + ":" + (plan.$id || plan.slug || plan.type || uid()) + ":" + uid();
+        var sessionId =
+          domain +
+          ":" +
+          (plan.$id || plan.slug || plan.type || uid()) +
+          ":" +
+          uid();
         var steps = Array.isArray(plan.steps) ? plan.steps.slice() : [];
         var activeStepId = steps[0]?.id || null;
 
@@ -264,10 +344,17 @@
 
         var payload = {
           status: "running",
-          sessionId, domain, plan, steps, activeStepId,
-          startedAt: now(), pausedAt: null, elapsedMs: 0,
-          withhold: null, timers: Object.create(null),
-          itemRuntime
+          sessionId,
+          domain,
+          plan,
+          steps,
+          activeStepId,
+          startedAt: now(),
+          pausedAt: null,
+          elapsedMs: 0,
+          withhold: null,
+          timers: Object.create(null),
+          itemRuntime,
         };
 
         // schedule/withhold checks
@@ -282,25 +369,53 @@
 
         // Persist session shell
         if (db) {
-          try { await db.sessions.add({ sessionId, domain, status: payload.status, startedAt: payload.startedAt }); }
-          catch (e) { console.warn("[SessionStore] Dexie add session failed", e); }
+          try {
+            await db.sessions.add({
+              sessionId,
+              domain,
+              status: payload.status,
+              startedAt: payload.startedAt,
+            });
+          } catch (e) {
+            console.warn("[SessionStore] Dexie add session failed", e);
+          }
         } else {
           lsSet(LS_KEYS.current, get());
         }
 
         // Emit events
-        eventBus.emit("session.started", { sessionId, domain, planId: plan.$id, planTitle: plan?.meta?.title });
+        eventBus.emit("session.started", {
+          sessionId,
+          domain,
+          planId: plan.$id,
+          planTitle: plan?.meta?.title,
+        });
         eventBus.emit("session.scheduler.snapshot.updated", {
-          sessionId, version: itemRuntime.version, items: itemRuntime.items
+          sessionId,
+          version: itemRuntime.version,
+          items: itemRuntime.items,
         });
         requestCalendarWrite(plan);
-        eventBus.emit("prep.tasks.requested", { domain, planId: plan.$id, params: { domain } });
+        eventBus.emit("prep.tasks.requested", {
+          domain,
+          planId: plan.$id,
+          params: { domain },
+        });
 
-        if (options.autoFavorite) requestFavorite(plan, { reason: "autoFavorite:session.start" });
+        if (options.autoFavorite)
+          requestFavorite(plan, { reason: "autoFavorite:session.start" });
 
         if (execEngine && execEngine.attach) {
-          try { execEngine.attach({ sessionId, getState: get, setState: set, eventBus }); }
-          catch (e) { console.warn("[SessionStore] execEngine.attach failed", e); }
+          try {
+            execEngine.attach({
+              sessionId,
+              getState: get,
+              setState: set,
+              eventBus,
+            });
+          } catch (e) {
+            console.warn("[SessionStore] execEngine.attach failed", e);
+          }
         }
       },
 
@@ -308,60 +423,108 @@
       pause: function (reason) {
         var s = get();
         if (s.status !== "running") return;
-        set({ status: "paused", pausedAt: now(), withhold: reason ? { reason } : s.withhold });
-        eventBus.emit("session.paused", { sessionId: s.sessionId, domain: s.domain, reason: reason || "manual" });
+        set({
+          status: "paused",
+          pausedAt: now(),
+          withhold: reason ? { reason } : s.withhold,
+        });
+        eventBus.emit("session.paused", {
+          sessionId: s.sessionId,
+          domain: s.domain,
+          reason: reason || "manual",
+        });
         if (!db) lsSet(LS_KEYS.current, get());
       },
 
       resume: function () {
         var s = get();
         if (s.status !== "paused") return;
-        if (pausePolicies && !pausePolicies.canRunNow({ domain: s.domain, plan: s.plan })) {
+        if (
+          pausePolicies &&
+          !pausePolicies.canRunNow({ domain: s.domain, plan: s.plan })
+        ) {
           set({ withhold: { reason: "policy", until: null } });
-          eventBus.emit("planner.conflict.detected", { kind: "weather|withhold", domain: s.domain, sessionId: s.sessionId });
+          eventBus.emit("planner.conflict.detected", {
+            kind: "weather|withhold",
+            domain: s.domain,
+            sessionId: s.sessionId,
+          });
           return;
         }
         set({ status: "running", pausedAt: null, withhold: null });
-        eventBus.emit("session.resumed", { sessionId: s.sessionId, domain: s.domain });
+        eventBus.emit("session.resumed", {
+          sessionId: s.sessionId,
+          domain: s.domain,
+        });
         if (!db) lsSet(LS_KEYS.current, get());
       },
 
       end: async function (finalStatus, meta) {
         var s = get();
-        var status = finalStatus || (s.status === "paused" ? "canceled" : "completed");
+        var status =
+          finalStatus || (s.status === "paused" ? "canceled" : "completed");
         var endedAt = now();
-        var hist = capHistory([].concat(s.history || [], [{
-          sessionId: s.sessionId,
-          domain: s.domain,
-          status,
-          startedAt: s.startedAt,
-          endedAt,
-          planMeta: { title: s.plan?.meta?.title, slug: s.plan?.slug, type: s.plan?.type }
-        }]), 50);
+        var hist = capHistory(
+          [].concat(s.history || [], [
+            {
+              sessionId: s.sessionId,
+              domain: s.domain,
+              status,
+              startedAt: s.startedAt,
+              endedAt,
+              planMeta: {
+                title: s.plan?.meta?.title,
+                slug: s.plan?.slug,
+                type: s.plan?.type,
+              },
+            },
+          ]),
+          50
+        );
 
         set(Object.assign({}, DEFAULT_STATE, { ready: true, history: hist }));
 
         if (db) {
           try {
-            await db.sessions.where("sessionId").equals(s.sessionId).modify({ status });
-            await db.snapshots.add({ sessionId: s.sessionId, createdAt: endedAt, data: s });
-          } catch (e) { console.warn("[SessionStore] Dexie end session failed", e); }
+            await db.sessions
+              .where("sessionId")
+              .equals(s.sessionId)
+              .modify({ status });
+            await db.snapshots.add({
+              sessionId: s.sessionId,
+              createdAt: endedAt,
+              data: s,
+            });
+          } catch (e) {
+            console.warn("[SessionStore] Dexie end session failed", e);
+          }
         } else {
           lsSet(LS_KEYS.history, hist);
           lsSet(LS_KEYS.current, null);
         }
 
-        eventBus.emit("session.ended", { sessionId: s.sessionId, domain: s.domain, status, meta: meta || {} });
+        eventBus.emit("session.ended", {
+          sessionId: s.sessionId,
+          domain: s.domain,
+          status,
+          meta: meta || {},
+        });
       },
 
       /* --------------------------- Step Navigation --------------------------- */
       goToStep: function (stepId) {
         var s = get();
         if (!s.steps.length) return;
-        var step = s.steps.find(function (x) { return x.id === stepId; });
+        var step = s.steps.find(function (x) {
+          return x.id === stepId;
+        });
         if (!step) return;
         set({ activeStepId: stepId });
-        eventBus.emit("session.step.changed", { sessionId: s.sessionId, domain: s.domain, stepId });
+        eventBus.emit("session.step.changed", {
+          sessionId: s.sessionId,
+          domain: s.domain,
+          stepId,
+        });
         if (!db) lsSet(LS_KEYS.current, get());
       },
 
@@ -372,7 +535,11 @@
         var next = s.steps[idx] || s.steps[s.steps.length - 1];
         if (!next) return;
         set({ activeStepId: next.id });
-        eventBus.emit("session.step.changed", { sessionId: s.sessionId, domain: s.domain, stepId: next.id });
+        eventBus.emit("session.step.changed", {
+          sessionId: s.sessionId,
+          domain: s.domain,
+          stepId: next.id,
+        });
         if (!db) lsSet(LS_KEYS.current, get());
       },
 
@@ -383,18 +550,30 @@
         // Mark itemRuntime status → done
         var rt = s.itemRuntime || { version: 1, generatedAt: now(), items: {} };
         var item = rt.items[s.activeStepId] || null;
-        if (item) { item.status = "done"; item.notes = notes || item.notes || ""; }
+        if (item) {
+          item.status = "done";
+          item.notes = notes || item.notes || "";
+        }
         set({ itemRuntime: rt });
 
         eventBus.emit("session.step.completed", {
-          sessionId: s.sessionId, domain: s.domain, stepId: s.activeStepId, notes: notes || null
+          sessionId: s.sessionId,
+          domain: s.domain,
+          stepId: s.activeStepId,
+          notes: notes || null,
         });
-        eventBus.emit("session.itemRuntime.updated", { sessionId: s.sessionId, stepId: s.activeStepId, runtime: item });
+        eventBus.emit("session.itemRuntime.updated", {
+          sessionId: s.sessionId,
+          stepId: s.activeStepId,
+          runtime: item,
+        });
 
         var idx = nextStepIndex(s.steps, s.activeStepId);
-        var atEnd = (idx >= s.steps.length - 1);
+        var atEnd = idx >= s.steps.length - 1;
         if (atEnd) {
-          _store.getState().end("completed", { autoFrom: "completeActiveStep" });
+          _store
+            .getState()
+            .end("completed", { autoFrom: "completeActiveStep" });
         } else {
           _store.getState().nextStep();
         }
@@ -407,28 +586,59 @@
         // Mark itemRuntime status → failed
         var rt = s.itemRuntime || { version: 1, generatedAt: now(), items: {} };
         var item = rt.items[s.activeStepId] || null;
-        if (item) { item.status = "failed"; item.notes = (item.notes ? item.notes + " " : "") + (reason || ""); }
+        if (item) {
+          item.status = "failed";
+          item.notes = (item.notes ? item.notes + " " : "") + (reason || "");
+        }
         set({ itemRuntime: rt });
 
-        eventBus.emit("session.step.failed", { sessionId: s.sessionId, domain: s.domain, stepId: s.activeStepId, reason: reason || "unknown" });
-        eventBus.emit("session.itemRuntime.updated", { sessionId: s.sessionId, stepId: s.activeStepId, runtime: item });
+        eventBus.emit("session.step.failed", {
+          sessionId: s.sessionId,
+          domain: s.domain,
+          stepId: s.activeStepId,
+          reason: reason || "unknown",
+        });
+        eventBus.emit("session.itemRuntime.updated", {
+          sessionId: s.sessionId,
+          stepId: s.activeStepId,
+          runtime: item,
+        });
       },
 
       /* --------------------------------- Timers -------------------------------- */
       startTimerForStep: function (stepId, durationMs) {
         var s = get();
         var timers = Object.assign({}, s.timers);
-        timers[stepId] = { startedAt: now(), durationMs: durationMs || 0, remainingMs: durationMs || 0 };
+        timers[stepId] = {
+          startedAt: now(),
+          durationMs: durationMs || 0,
+          remainingMs: durationMs || 0,
+        };
 
         // Mark runtime status → running, set planned times if missing
         var rt = s.itemRuntime || { version: 1, generatedAt: now(), items: {} };
-        var it = rt.items[stepId] || (rt.items[stepId] = { stepId, status: "pending", plannedStartMs: 0, plannedEndMs: 0, dependsOn: [], depsOf: [], withholds: [] });
+        var it =
+          rt.items[stepId] ||
+          (rt.items[stepId] = {
+            stepId,
+            status: "pending",
+            plannedStartMs: 0,
+            plannedEndMs: 0,
+            dependsOn: [],
+            depsOf: [],
+            withholds: [],
+          });
         it.status = "running";
         if (!it.plannedStartMs) it.plannedStartMs = 0;
-        if (!it.plannedEndMs && durationMs) it.plannedEndMs = it.plannedStartMs + durationMs;
+        if (!it.plannedEndMs && durationMs)
+          it.plannedEndMs = it.plannedStartMs + durationMs;
 
         set({ timers, itemRuntime: rt });
-        eventBus.emit("session.itemRuntime.updated", { sessionId: s.sessionId, stepId, runtime: it });
+        eventBus.emit("session.itemRuntime.updated", {
+          sessionId: s.sessionId,
+          stepId,
+          runtime: it,
+        });
       },
 
       tick: function () {
@@ -444,15 +654,27 @@
           var rem = clamp(t.durationMs - passed, 0, t.durationMs);
           timers[k] = Object.assign({}, t, { remainingMs: rem });
           if (rem === 0) {
-            eventBus.emit("timer.completed", { sessionId: s.sessionId, domain: s.domain, stepId: k });
+            eventBus.emit("timer.completed", {
+              sessionId: s.sessionId,
+              domain: s.domain,
+              stepId: k,
+            });
 
             // Mark itemRuntime → done if timer drove completion
-            var rt = s.itemRuntime || { version: 1, generatedAt: now(), items: {} };
+            var rt = s.itemRuntime || {
+              version: 1,
+              generatedAt: now(),
+              items: {},
+            };
             var item = rt.items[k];
             if (item && item.status === "running") {
               item.status = "done";
               set({ itemRuntime: rt });
-              eventBus.emit("session.itemRuntime.updated", { sessionId: s.sessionId, stepId: k, runtime: item });
+              eventBus.emit("session.itemRuntime.updated", {
+                sessionId: s.sessionId,
+                stepId: k,
+                runtime: item,
+              });
             }
           }
         });
@@ -471,17 +693,25 @@
         // if opts.merge === true, merge into current
         if (opts && opts.merge && s.itemRuntime && s.itemRuntime.items) {
           var base = JSON.parse(JSON.stringify(s.itemRuntime));
-          base.version = (snapshot.version || base.version || 1);
+          base.version = snapshot.version || base.version || 1;
           base.generatedAt = snapshot.generatedAt || now();
           base.items = base.items || {};
           Object.keys(snapshot.items || {}).forEach(function (id) {
-            base.items[id] = Object.assign({}, base.items[id] || {}, snapshot.items[id]);
+            base.items[id] = Object.assign(
+              {},
+              base.items[id] || {},
+              snapshot.items[id]
+            );
           });
           merged = base;
         }
 
         set({ itemRuntime: merged });
-        eventBus.emit("session.scheduler.snapshot.updated", { sessionId: s.sessionId, version: merged.version, items: merged.items });
+        eventBus.emit("session.scheduler.snapshot.updated", {
+          sessionId: s.sessionId,
+          version: merged.version,
+          items: merged.items,
+        });
         if (!db) lsSet(LS_KEYS.current, get());
         return merged;
       },
@@ -493,12 +723,26 @@
       upsertItemRuntime: function (stepId, patch) {
         var s = get();
         var rt = s.itemRuntime || { version: 1, generatedAt: now(), items: {} };
-        var current = rt.items[stepId] || { stepId, status: "pending", dependsOn: [], depsOf: [], withholds: [], plannedStartMs: 0, plannedEndMs: 0, slackMs: 0, notes: "" };
+        var current = rt.items[stepId] || {
+          stepId,
+          status: "pending",
+          dependsOn: [],
+          depsOf: [],
+          withholds: [],
+          plannedStartMs: 0,
+          plannedEndMs: 0,
+          slackMs: 0,
+          notes: "",
+        };
         var next = Object.assign({}, current, patch || {});
         rt.items[stepId] = next;
         rt.generatedAt = now();
         set({ itemRuntime: rt });
-        eventBus.emit("session.itemRuntime.updated", { sessionId: s.sessionId, stepId, runtime: next });
+        eventBus.emit("session.itemRuntime.updated", {
+          sessionId: s.sessionId,
+          stepId,
+          runtime: next,
+        });
         if (!db) lsSet(LS_KEYS.current, get());
         return next;
       },
@@ -506,7 +750,12 @@
       /** Read-only accessor for a step's runtime entry */
       getItemRuntime: function (stepId) {
         var s = get();
-        return (s.itemRuntime && s.itemRuntime.items && s.itemRuntime.items[stepId]) || null;
+        return (
+          (s.itemRuntime &&
+            s.itemRuntime.items &&
+            s.itemRuntime.items[stepId]) ||
+          null
+        );
       },
 
       /** Clear runtime (used when re-planning a session mid-flight) */
@@ -514,14 +763,22 @@
         var s = get();
         var blank = { version: 1, generatedAt: now(), items: {} };
         set({ itemRuntime: blank });
-        eventBus.emit("session.scheduler.snapshot.updated", { sessionId: s.sessionId, version: blank.version, items: blank.items });
+        eventBus.emit("session.scheduler.snapshot.updated", {
+          sessionId: s.sessionId,
+          version: blank.version,
+          items: blank.items,
+        });
         if (!db) lsSet(LS_KEYS.current, get());
       },
 
       /** Export a JSON-safe snapshot for persistence or download */
       exportRuntimeSnapshot: function () {
         var s = get();
-        return JSON.parse(JSON.stringify(s.itemRuntime || { version: 1, generatedAt: now(), items: {} }));
+        return JSON.parse(
+          JSON.stringify(
+            s.itemRuntime || { version: 1, generatedAt: now(), items: {} }
+          )
+        );
       },
 
       /* ---------------------------- Favorites/Export -------------------------- */
@@ -535,8 +792,15 @@
       saveSnapshot: async function () {
         var s = get();
         if (db) {
-          try { await db.snapshots.add({ sessionId: s.sessionId, createdAt: now(), data: s }); }
-          catch (e) { console.warn("[SessionStore] Dexie snapshot failed", e); }
+          try {
+            await db.snapshots.add({
+              sessionId: s.sessionId,
+              createdAt: now(),
+              data: s,
+            });
+          } catch (e) {
+            console.warn("[SessionStore] Dexie snapshot failed", e);
+          }
         } else {
           lsSet(LS_KEYS.current, s);
         }
@@ -545,13 +809,15 @@
       loadHistory: function () {
         if (db) return db.sessions.orderBy("id").reverse().toArray();
         return Promise.resolve(lsGet(LS_KEYS.history, []));
-      }
+      },
     });
   }
 
   // Build the store (Zustand if available)
   if (createZustand) {
-    _store = createZustand(function (set, get) { return baseCreate(set, get); });
+    _store = createZustand(function (set, get) {
+      return baseCreate(set, get);
+    });
   } else {
     var simple = makeSimpleStore(DEFAULT_STATE);
     var api = baseCreate(simple.setState, simple.getState);
@@ -565,7 +831,10 @@
       try {
         var s = _store.getState();
         if (s.status !== "running") return;
-        if (pausePolicies && !pausePolicies.canRunNow({ domain: s.domain, plan: s.plan })) {
+        if (
+          pausePolicies &&
+          !pausePolicies.canRunNow({ domain: s.domain, plan: s.plan })
+        ) {
           _store.getState().pause("policy");
           return;
         }
@@ -581,16 +850,19 @@
       return {
         getState: _store.getState,
         setState: _store.setState,
-        subscribe: _store.subscribe
+        subscribe: _store.subscribe,
       };
     },
     getState: _store.getState,
     setState: _store.setState,
-    subscribe: _store.subscribe
+    subscribe: _store.subscribe,
   };
 
-  try { SessionStore.getState().hydrate?.(); } catch (_e) {}
+  try {
+    SessionStore.getState().hydrate?.();
+  } catch (_e) {}
 
-  if (typeof module !== "undefined" && module.exports) module.exports = SessionStore;
+  if (typeof module !== "undefined" && module.exports)
+    module.exports = SessionStore;
   else if (typeof window !== "undefined") window.SessionStore = SessionStore;
 })();

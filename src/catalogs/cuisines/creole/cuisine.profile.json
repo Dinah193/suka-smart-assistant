@@ -1,0 +1,179 @@
+{
+  "id": "creole",
+  "name": "Creole",
+  "region": "Louisiana / Gulf Coast",
+  "description": "Louisiana Creole cuisine blends French, Spanish, West African, Caribbean, and Indigenous influences. It favors aromatic vegetable bases, tomatoes in many stews/sauces, seafood-forward dishes, layered seasoning, and rice-centered meals. Compared to Cajun, Creole cooking is often more city-influenced, frequently uses tomatoes, and leans into refined sauces while still being hearty and bold.",
+  "flavorProfile": {
+    "primaryNotes": ["savory", "smoky", "herbal", "peppery", "umami"],
+    "secondaryNotes": ["tangy", "sweet", "toasty"],
+    "heatLevel": "medium",
+    "saltPreference": "medium",
+    "acidityPreference": "medium"
+  },
+  "signatureBases": [
+    {
+      "name": "Holy Trinity",
+      "items": ["onion", "bell pepper", "celery"],
+      "notes": "Core aromatic base for many Creole dishes; often softened in butter/oil before adding spices, stock, or tomatoes."
+    },
+    {
+      "name": "Trinity + Garlic",
+      "items": ["onion", "bell pepper", "celery", "garlic"],
+      "notes": "Common enhancement; garlic is frequently added after the trinity softens."
+    },
+    {
+      "name": "Creole Tomato Base",
+      "items": ["tomatoes", "tomato paste", "stock"],
+      "notes": "Many Creole stews and sauces build body with tomato paste and acidity with tomatoes."
+    }
+  ],
+  "signatureIngredients": {
+    "proteins": [
+      "shrimp",
+      "crab",
+      "crawfish",
+      "oysters",
+      "fish",
+      "chicken",
+      "smoked sausage",
+      "ham",
+      "turkey"
+    ],
+    "vegetables": [
+      "onion",
+      "bell pepper",
+      "celery",
+      "garlic",
+      "okra",
+      "tomato",
+      "green onions",
+      "parsley",
+      "collards (occasionally)",
+      "mushrooms (sometimes)"
+    ],
+    "starches": [
+      "rice",
+      "bread",
+      "grits (regional overlap)",
+      "potatoes (sides)"
+    ],
+    "fats": ["butter", "neutral oil", "bacon fat (sometimes)"],
+    "seasonings": [
+      "Creole seasoning",
+      "paprika",
+      "cayenne",
+      "black pepper",
+      "thyme",
+      "oregano",
+      "bay leaf",
+      "garlic powder (optional)",
+      "onion powder (optional)"
+    ],
+    "acidAndUmami": [
+      "lemon",
+      "vinegar (some dishes)",
+      "Worcestershire sauce",
+      "hot sauce"
+    ]
+  },
+  "techniques": [
+    {
+      "name": "Sweating aromatics",
+      "description": "Cook trinity in butter/oil until softened and fragrant; avoid browning for cleaner sauces."
+    },
+    {
+      "name": "Roux (light to medium)",
+      "description": "Creole roux often stays lighter than Cajun gumbo roux, supporting sauces and etouffees without heavy roast notes."
+    },
+    {
+      "name": "Tomato-building",
+      "description": "Use tomato paste briefly cooked in fat to deepen flavor, then add tomatoes/stock for sauces."
+    },
+    {
+      "name": "Seafood timing",
+      "description": "Add seafood near the end to avoid toughness; keep simmer gentle."
+    },
+    {
+      "name": "Rice-forward plating",
+      "description": "Many stews and sauces are served over rice; rice texture matters (separate grains, not mushy)."
+    }
+  ],
+  "spiceMatrix": {
+    "core": [
+      { "item": "paprika", "weight": 1.0 },
+      { "item": "thyme", "weight": 0.9 },
+      { "item": "oregano", "weight": 0.7 },
+      { "item": "black pepper", "weight": 0.8 },
+      { "item": "cayenne", "weight": 0.6 },
+      { "item": "bay leaf", "weight": 0.7 }
+    ],
+    "supporting": [
+      { "item": "garlic powder", "weight": 0.4 },
+      { "item": "onion powder", "weight": 0.4 },
+      { "item": "white pepper", "weight": 0.3 }
+    ],
+    "finishing": [
+      { "item": "green onions", "weight": 0.6 },
+      { "item": "parsley", "weight": 0.5 },
+      { "item": "lemon", "weight": 0.5 },
+      { "item": "hot sauce", "weight": 0.4 }
+    ]
+  },
+  "preferredPantry": {
+    "sauces": ["Worcestershire sauce", "hot sauce"],
+    "stocks": ["chicken stock", "seafood stock"],
+    "canned": ["diced tomatoes", "tomato paste"],
+    "dryGoods": ["long-grain rice", "all-purpose flour"],
+    "mixes": ["Creole seasoning (store-bought or house blend)"]
+  },
+  "commonDishes": [
+    "shrimp creole",
+    "creole gumbo",
+    "red beans and rice (overlap)",
+    "jambalaya (Creole-style with tomatoes)",
+    "seafood etouffee",
+    "grillades and grits (regional overlap)",
+    "stuffed peppers"
+  ],
+  "pairingSuggestions": {
+    "sides": [
+      "white rice",
+      "French bread",
+      "cornbread (overlap)",
+      "simple green salad",
+      "steamed greens"
+    ],
+    "condiments": ["hot sauce", "lemon wedges"],
+    "drinks": ["sweet tea", "sparkling water with lemon"]
+  },
+  "dietCompatibility": {
+    "glutenFree": {
+      "possible": true,
+      "notes": "Many dishes can be GF with a cornstarch slurry instead of roux, or GF flour blends; avoid wheat-based roux unless adapted."
+    },
+    "dairyFree": {
+      "possible": true,
+      "notes": "Use oil instead of butter where needed; many dishes are naturally dairy-free."
+    },
+    "lowCarb": {
+      "possible": true,
+      "notes": "Serve stews over cauliflower rice; reduce sugar/tomato additions if needed."
+    }
+  },
+  "kitchenCapabilityHints": {
+    "minimum": [
+      "stovetop",
+      "large pot or Dutch oven",
+      "knife",
+      "cutting board",
+      "spoon/ladle"
+    ],
+    "helpful": ["cast iron", "rice cooker", "thermometer", "strainer"]
+  },
+  "recipeDefaults": {
+    "defaultServingSize": 6,
+    "defaultHeatLevel": "medium",
+    "defaultRiceStyle": "long-grain",
+    "defaultAromaticBase": "holy_trinity_plus_garlic"
+  }
+}

@@ -1,0 +1,522 @@
+{
+  "$schema": "../../../schemas/ruleset.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "kind": "cuisine_ruleset",
+  "meta": {
+    "id": "cuisines.citrus_chili.ruleset",
+    "type": "cuisine_ruleset",
+    "label": "Citrus & Chili — Deterministic Ruleset",
+    "cuisineId": "cuisines.citrus_chili",
+    "status": "canonical",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical",
+      "notes": [
+        "Schema workaround: avoid integer literals in Condition.value / ActionSet.value when schema uses oneOf(number|integer).",
+        "Rules bias towards bright citrus acids + chili heat balance."
+      ]
+    }
+  },
+  "scope": {
+    "kind": "cuisine",
+    "cuisineId": "cuisines.citrus_chili",
+    "locales": ["en-US"]
+  },
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true,
+    "tokens": {
+      "stopWords": [
+        "and",
+        "or",
+        "with",
+        "fresh",
+        "to",
+        "taste",
+        "optional",
+        "plus",
+        "of",
+        "the"
+      ]
+    },
+    "ingredientAliases": {
+      "lime_juice": ["lime juice", "fresh lime juice", "juice of lime"],
+      "lemon_juice": ["lemon juice", "fresh lemon juice", "juice of lemon"],
+      "orange_juice": ["orange juice", "fresh orange juice"],
+      "citrus_zest": [
+        "zest",
+        "citrus zest",
+        "lime zest",
+        "lemon zest",
+        "orange zest"
+      ],
+      "chili_flakes": [
+        "red pepper flakes",
+        "crushed red pepper",
+        "chilli flakes"
+      ],
+      "fresh_chili": [
+        "fresh chili",
+        "fresh chilli",
+        "hot pepper",
+        "chile pepper"
+      ],
+      "jalapeno": ["jalapeño", "jalapeno pepper"],
+      "serrano": ["serrano pepper", "serrano chile"],
+      "habanero": ["habanero pepper", "habanero chile"],
+      "cayenne": ["cayenne pepper"],
+      "garlic": ["garlic clove", "minced garlic", "garlic paste"],
+      "olive_oil": ["extra virgin olive oil", "evoo"],
+      "chicken_thighs": ["chicken thighs", "boneless thighs", "bone-in thighs"],
+      "chicken_breast": ["chicken breasts", "boneless breast"],
+      "shrimp": ["prawns", "large shrimp"],
+      "white_fish": ["cod", "tilapia", "snapper", "mahi mahi"],
+      "honey": ["raw honey"],
+      "brown_sugar": ["dark brown sugar", "light brown sugar"],
+      "salt": ["sea salt", "kosher salt"],
+      "black_pepper": ["ground black pepper", "cracked pepper"]
+    },
+    "dishAliases": {
+      "citrus_chili_chicken": [
+        "citrus chili chicken",
+        "lime chili chicken",
+        "lemon chili chicken"
+      ],
+      "citrus_chili_shrimp": ["citrus chili shrimp", "chili lime shrimp"],
+      "chili_citrus_roasted_vegetables": [
+        "chili citrus roasted vegetables",
+        "spicy citrus vegetables"
+      ]
+    },
+    "equipmentAliases": {
+      "skillet": ["frying pan", "pan"],
+      "cast_iron_skillet": ["cast iron pan"],
+      "sheet_pan": ["baking sheet", "roasting pan"],
+      "citrus_juicer": ["juicer", "hand juicer", "reamer"],
+      "zester": ["microplane", "grater"],
+      "instant_read_thermometer": ["meat thermometer", "thermometer"]
+    },
+    "methodAliases": {
+      "quick_marinade": ["marinate briefly", "short marinade"],
+      "pan_sear": ["sear", "searing"],
+      "quick_saute": ["saute", "sauté", "quick saute"],
+      "roast": ["roasting", "oven roast"],
+      "grill": ["grilling", "chargrill"],
+      "broil": ["broiling"]
+    }
+  },
+  "globals": {
+    "heatScale": {
+      "min": 0,
+      "max": 5,
+      "default": 3,
+      "notes": "0–5 cuisine heat reference (display/UX). Rules use non-integer numbers for schema oneOf safety."
+    },
+    "acidProfile": {
+      "primary": ["lime_juice", "lemon_juice"],
+      "secondary": ["orange_juice", "vinegar"],
+      "zestPreferred": true
+    },
+    "balanceGuidelines": {
+      "defaultSweetBalance": "low",
+      "sweetBalanceOptions": ["honey", "brown_sugar"],
+      "fatCarriers": ["olive_oil", "butter", "avocado_oil"],
+      "saltFinishPreferred": true
+    },
+    "plannerDefaults": {
+      "recommendedServingStyles": ["plates", "bowls", "family_style"],
+      "weeknightBias": "high",
+      "leftoversBias": "medium",
+      "batchBias": "low"
+    }
+  },
+  "rules": [
+    {
+      "id": "citrus_chili.tag.cuisine",
+      "enabled": true,
+      "priority": 10,
+      "title": "Always tag Citrus & Chili cuisine context",
+      "description": "Ensures content is discoverable and scoped in planner results.",
+      "tags": ["tagging", "cuisine"],
+      "source": "SSA Canonical",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.classification.cuisine",
+            "value": "citrus_chili"
+          },
+          {
+            "type": "eq",
+            "path": "$.classification.cuisine",
+            "value": "Citrus & Chili"
+          },
+          { "type": "eq", "path": "$.cuisine", "value": "citrus_chili" },
+          { "type": "eq", "path": "$.cuisine", "value": "Citrus & Chili" }
+        ]
+      },
+      "then": {
+        "actions": [{ "type": "addTag", "value": "cuisine.citrus_chili" }]
+      }
+    },
+    {
+      "id": "citrus_chili.heat.default_if_missing",
+      "enabled": true,
+      "priority": 20,
+      "title": "Default heat level when missing",
+      "description": "If no heat indicator exists, set a default heat level for consistent adaptation behavior.",
+      "tags": ["heat", "defaults"],
+      "source": "SSA Canonical",
+      "stopOnMatch": false,
+      "when": {
+        "op": "not",
+        "conditions": [{ "type": "exists", "path": "$.tasteProfile.heatLevel" }]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.tasteProfile.heatLevel",
+            "value": 3.0001
+          }
+        ]
+      }
+    },
+    {
+      "id": "citrus_chili.heat.raise_for_hot_peppers",
+      "enabled": true,
+      "priority": 30,
+      "title": "Raise heat signals when hot peppers are present",
+      "description": "Detects common hot pepper IDs and upgrades heat tags + planner scoring.",
+      "tags": ["heat", "signals", "scoring"],
+      "source": "SSA Canonical",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "$.ingredients[*].id",
+        "values": ["habanero", "serrano", "jalapeno", "fresh_chili", "cayenne"]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "flavor.spicy" },
+          {
+            "type": "set",
+            "path": "$.tasteProfile.heatLevel",
+            "value": 4.0001
+          },
+          { "type": "scoreAdjust", "scoreDelta": 0.4 }
+        ]
+      }
+    },
+    {
+      "id": "citrus_chili.heat.lower_for_kids_or_mild_mode",
+      "enabled": true,
+      "priority": 35,
+      "title": "Lower heat when user prefers mild",
+      "description": "If user preference indicates mild heat, bias recipes away from high heat intensity.",
+      "tags": ["heat", "preferences"],
+      "source": "SSA Canonical",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.planner.userPrefs.heatPreference",
+            "value": "mild"
+          },
+          {
+            "type": "lte",
+            "path": "$.planner.userPrefs.heatLevel",
+            "value": 2.0001
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "heat.mild" },
+          {
+            "type": "set",
+            "path": "$.tasteProfile.heatLevel",
+            "value": 2.0001
+          },
+          { "type": "scoreAdjust", "scoreDelta": -0.35 }
+        ]
+      }
+    },
+    {
+      "id": "citrus_chili.acid.requirement.signal",
+      "enabled": true,
+      "priority": 40,
+      "title": "Require a citrus acid signal for cuisine alignment",
+      "description": "If the dish is labeled Citrus & Chili but lacks citrus acid, downscore and add a warning tag.",
+      "tags": ["acid", "quality", "validation"],
+      "source": "SSA Canonical",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "any",
+            "conditions": [
+              { "type": "hasTag", "value": "cuisine.citrus_chili" },
+              {
+                "type": "eq",
+                "path": "$.classification.cuisine",
+                "value": "citrus_chili"
+              }
+            ]
+          },
+          {
+            "op": "not",
+            "conditions": [
+              {
+                "type": "intersects",
+                "path": "$.ingredients[*].id",
+                "values": [
+                  "lime_juice",
+                  "lemon_juice",
+                  "orange_juice",
+                  "citrus_zest"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "quality.missing_citrus_acid" },
+          { "type": "scoreAdjust", "scoreDelta": -0.6 }
+        ]
+      }
+    },
+    {
+      "id": "citrus_chili.balance.sweet_needed_for_very_hot",
+      "enabled": true,
+      "priority": 45,
+      "title": "Suggest sweet balance for very hot dishes",
+      "description": "For high heat content, add a planner hint recommending a touch of honey/brown sugar.",
+      "tags": ["balance", "sweetness", "hints"],
+      "source": "SSA Canonical",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "gte",
+            "path": "$.tasteProfile.heatLevel",
+            "value": 4.0001
+          },
+          {
+            "type": "intersects",
+            "path": "$.ingredients[*].id",
+            "values": ["habanero", "cayenne", "fresh_chili"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.planner.hints.sweetBalance",
+            "value": {
+              "suggest": ["honey", "brown_sugar"],
+              "note": "A small amount can round sharp heat + citrus acidity."
+            }
+          },
+          { "type": "addTag", "value": "balance.sweet_optional" }
+        ]
+      }
+    },
+    {
+      "id": "citrus_chili.protein.preference.seafood_boost",
+      "enabled": true,
+      "priority": 55,
+      "title": "Boost seafood-forward citrus-chili dishes",
+      "description": "Seafood pairs strongly with citrus + chili; increase score if shrimp/fish is present.",
+      "tags": ["protein", "scoring"],
+      "source": "SSA Canonical",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "$.ingredients[*].id",
+        "values": ["shrimp", "white_fish"]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "protein.seafood" },
+          { "type": "scoreAdjust", "scoreDelta": 0.3 }
+        ]
+      }
+    },
+    {
+      "id": "citrus_chili.weeknight.quick_methods_boost",
+      "enabled": true,
+      "priority": 60,
+      "title": "Boost quick methods for weeknight planning",
+      "description": "If a recipe uses quick techniques, add weeknight tags and increase planning score.",
+      "tags": ["weeknight", "methods", "scoring"],
+      "source": "SSA Canonical",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "$.methods",
+        "values": ["pan_sear", "quick_saute", "quick_marinade"]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "weeknight.friendly" },
+          { "type": "scoreAdjust", "scoreDelta": 0.25 }
+        ]
+      }
+    },
+    {
+      "id": "citrus_chili.time.short_total_tag",
+      "enabled": true,
+      "priority": 65,
+      "title": "Tag recipes with short total time",
+      "description": "For total <= ~30 minutes, tag as fast and boost for weeknight selection. (Non-integer threshold to satisfy schema oneOf.)",
+      "tags": ["time", "weeknight"],
+      "source": "SSA Canonical",
+      "stopOnMatch": false,
+      "when": { "type": "lte", "path": "$.time.totalMins", "value": 30.0001 },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "time.fast" },
+          { "type": "scoreAdjust", "scoreDelta": 0.2 }
+        ]
+      }
+    },
+    {
+      "id": "citrus_chili.equipment.fallback.no_zester",
+      "enabled": true,
+      "priority": 70,
+      "title": "If no zester, swap zest to peel strips + mince",
+      "description": "Recipe adaptation hint for kitchens missing a zester/microplane.",
+      "tags": ["equipment", "adaptation"],
+      "source": "SSA Canonical",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.ingredients[*].id",
+            "values": ["citrus_zest"]
+          },
+          {
+            "op": "not",
+            "conditions": [
+              {
+                "type": "intersects",
+                "path": "$.planner.kitchen.capabilities.equipmentIds",
+                "values": ["zester"]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.planner.adaptations.zestFallback",
+            "value": {
+              "note": "Use a vegetable peeler to remove thin citrus peel strips, mince finely, and avoid the bitter white pith."
+            }
+          },
+          { "type": "addTag", "value": "equipment.substitute_zester" }
+        ]
+      }
+    },
+    {
+      "id": "citrus_chili.food_safety.shellfish_notice",
+      "enabled": true,
+      "priority": 80,
+      "title": "Add shellfish safety notice when shrimp present",
+      "description": "Adds an event + tag for allergen-aware planner flows.",
+      "tags": ["safety", "allergens"],
+      "source": "SSA Canonical",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "$.ingredients[*].id",
+        "values": ["shrimp"]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "allergen.shellfish" },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ssa.ruleset.notice",
+              "payload": {
+                "level": "info",
+                "topic": "allergens",
+                "message": "Shellfish present (shrimp). Ensure allergen separation and proper cooking."
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "citrus_chili.tag.profile_signature",
+      "enabled": true,
+      "priority": 90,
+      "title": "Tag signature flavor notes when citrus + chili + garlic present",
+      "description": "Marks dishes that strongly match the cuisine identity for better browsing and planner relevance.",
+      "tags": ["signature", "tagging"],
+      "source": "SSA Canonical",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.ingredients[*].id",
+            "values": [
+              "lime_juice",
+              "lemon_juice",
+              "orange_juice",
+              "citrus_zest"
+            ]
+          },
+          {
+            "type": "intersects",
+            "path": "$.ingredients[*].id",
+            "values": [
+              "fresh_chili",
+              "chili_flakes",
+              "cayenne",
+              "jalapeno",
+              "serrano",
+              "habanero"
+            ]
+          },
+          {
+            "type": "intersects",
+            "path": "$.ingredients[*].id",
+            "values": ["garlic"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "flavor.citrus_bright" },
+          { "type": "addTag", "value": "flavor.garlic_forward" },
+          { "type": "addTag", "value": "profile.signature" },
+          { "type": "scoreAdjust", "scoreDelta": 0.45 }
+        ]
+      }
+    }
+  ]
+}

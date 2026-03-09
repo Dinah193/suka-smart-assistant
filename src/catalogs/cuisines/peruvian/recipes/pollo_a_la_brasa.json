@@ -1,0 +1,473 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.peruvian.recipes.pollo_a_la_brasa",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Pollo a la Brasa (Peruvian Rotisserie-Style Chicken)",
+    "subtitle": "Oven or grill method with ají-forward, smoky-garlic marinade",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalogs",
+      "notes": [
+        "Designed for home ovens (wire rack + sheet pan) with optional grill and optional rotisserie notes.",
+        "Uses common Peruvian flavor markers: ají panca/ají amarillo (optional), cumin, garlic, soy + vinegar, lime."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "Peruvian",
+    "subprofiles": ["cuisines.peruvian"],
+    "category": "main",
+    "mealArchetypes": [
+      "meal_archetype.dinner",
+      "meal_archetype.protein_centered"
+    ],
+    "servingStyles": ["family_style", "platter"],
+    "plannerTags": [
+      "cuisine.peruvian",
+      "protein.chicken",
+      "technique.roast",
+      "style.aji_forward",
+      "style.garlic_forward",
+      "weeknight_possible",
+      "batch_friendly",
+      "leftovers_good"
+    ]
+  },
+
+  "summary": "Peruvian pollo a la brasa–style chicken: deeply seasoned, smoky-garlic marinade with ají (optional), roasted hot on a rack for crisp skin and juicy meat.",
+
+  "yield": {
+    "servings": 4,
+    "notes": "1 whole chicken (3.5–4.5 lb) serves 4; increase for larger birds."
+  },
+
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 105,
+    "totalMins": 130
+  },
+
+  "difficulty": 4,
+
+  "signals": {
+    "batchFriendly": true,
+    "leftoversFriendly": true,
+    "weeknightPossible": false,
+    "freezerFriendly": "Cooked chicken freezes well; sauce better fresh."
+  },
+
+  "tasteProfile": {
+    "primary": ["savory", "garlic", "smoky", "tangy"],
+    "heat": {
+      "typical": 2,
+      "range": [0, 4],
+      "note": "Heat depends on ají amount; keep mild by skipping spicy chiles and using ají amarillo paste sparingly."
+    },
+    "acid": ["lime", "vinegar"],
+    "aromatics": ["garlic", "cumin", "black pepper", "oregano"]
+  },
+
+  "equipment": {
+    "minimum": [
+      "equipment.oven",
+      "equipment.baking_sheet",
+      "equipment.wire_rack",
+      "equipment.mixing_bowl",
+      "equipment.measuring_spoons",
+      "equipment.tongs"
+    ],
+    "recommended": [
+      "equipment.instant_read_thermometer",
+      "equipment.kitchen_scale",
+      "equipment.basting_brush",
+      "equipment.blender"
+    ],
+    "optional": [
+      {
+        "id": "equipment.rotisserie",
+        "label": "Rotisserie attachment",
+        "notes": "Optional for truer pollo a la brasa style; oven rack method works well."
+      },
+      {
+        "id": "equipment.grill",
+        "label": "Outdoor grill",
+        "notes": "Optional finish for extra char and smoke."
+      }
+    ]
+  },
+
+  "dietFlags": ["diet.gluten_optional"],
+  "allergens": {
+    "mayContain": ["allergen.soy"],
+    "notes": [
+      "Contains soy if using soy sauce.",
+      "For gluten-free: use tamari or certified GF soy sauce."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "ingredient.chicken_whole",
+      "label": "Whole chicken",
+      "role": "protein",
+      "amount": { "value": 1, "unit": "whole (3.5–4.5 lb / 1.6–2.0 kg)" },
+      "notes": "Spatchcock for faster, more even cooking (recommended)."
+    },
+
+    {
+      "id": "ingredient.salt_kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Use 1 1/2 tsp if using fine table salt."
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper, freshly ground",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.cumin_ground",
+      "label": "Ground cumin",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.oregano_dried",
+      "label": "Dried oregano",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.paprika_smoked",
+      "label": "Smoked paprika",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Traditional versions may use panca for depth; smoked paprika helps mimic rotisserie smoke."
+    },
+
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic cloves, minced or grated",
+      "role": "aromatic",
+      "amount": { "value": 6, "unit": "cloves" }
+    },
+    {
+      "id": "ingredient.lime_juice",
+      "label": "Fresh lime juice",
+      "role": "acid",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.vinegar_red_wine",
+      "label": "Red wine vinegar",
+      "role": "acid",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "notes": "White vinegar also works; red wine vinegar is smoother."
+    },
+    {
+      "id": "ingredient.soy_sauce",
+      "label": "Soy sauce (or tamari)",
+      "role": "umami",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "notes": "Optional but strongly recommended for color and savoriness."
+    },
+    {
+      "id": "ingredient.oil_olive",
+      "label": "Olive oil (or neutral oil)",
+      "role": "fat",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+
+    {
+      "id": "ingredient.aji_panca_paste",
+      "label": "Ají panca paste",
+      "role": "peruvian_heat_depth",
+      "optional": true,
+      "amount": { "value": 1, "unit": "tbsp" },
+      "notes": "Adds deep, fruity, mildly spicy chile flavor."
+    },
+    {
+      "id": "ingredient.aji_amarillo_paste",
+      "label": "Ají amarillo paste",
+      "role": "peruvian_heat_bright",
+      "optional": true,
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": "Adds brighter heat; increase to 1 tbsp for spicier."
+    },
+
+    {
+      "id": "ingredient.mustard_dijon",
+      "label": "Dijon mustard",
+      "role": "binder",
+      "optional": true,
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": "Optional emulsifier; many home adaptations use it."
+    },
+
+    {
+      "id": "ingredient.baking_powder",
+      "label": "Baking powder",
+      "role": "skin_crisping",
+      "optional": true,
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": "Optional: boosts crisp skin; use aluminum-free if possible."
+    }
+  ],
+
+  "ingredientGroups": [
+    {
+      "id": "group.chicken",
+      "label": "Chicken",
+      "items": ["ingredient.chicken_whole"]
+    },
+    {
+      "id": "group.marinade",
+      "label": "Marinade",
+      "items": [
+        "ingredient.salt_kosher",
+        "ingredient.black_pepper",
+        "ingredient.cumin_ground",
+        "ingredient.oregano_dried",
+        "ingredient.paprika_smoked",
+        "ingredient.garlic",
+        "ingredient.lime_juice",
+        "ingredient.vinegar_red_wine",
+        "ingredient.soy_sauce",
+        "ingredient.oil_olive",
+        "ingredient.aji_panca_paste",
+        "ingredient.aji_amarillo_paste",
+        "ingredient.mustard_dijon",
+        "ingredient.baking_powder"
+      ]
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.001_prep_chicken",
+      "title": "Prep the chicken",
+      "instructions": [
+        "If possible, spatchcock the chicken (remove backbone, flatten). This speeds cooking and crisps the skin evenly.",
+        "Pat the chicken very dry with paper towels.",
+        "Optional (best results): lightly loosen skin over breasts and thighs with your fingers to help marinade reach the meat."
+      ],
+      "checks": [
+        "Chicken is dry on the surface (helps browning).",
+        "Spatchcocked chicken lies flat."
+      ]
+    },
+    {
+      "id": "step.002_mix_marinade",
+      "title": "Mix the Peruvian-style marinade",
+      "instructions": [
+        "In a bowl, combine salt, pepper, cumin, oregano, smoked paprika, garlic, lime juice, vinegar, soy sauce, and oil.",
+        "Optional Peruvian boosts: whisk in ají panca and/or ají amarillo paste.",
+        "Optional: add Dijon mustard to help emulsify.",
+        "Optional crisp-skin boost: whisk in baking powder (do not use baking soda)."
+      ],
+      "checks": [
+        "Marinade is a thick, brushable paste.",
+        "No dry spice clumps remain."
+      ]
+    },
+    {
+      "id": "step.003_marinade_rest",
+      "title": "Marinate (quick or overnight)",
+      "instructions": [
+        "Rub marinade all over chicken, including under loosened skin if you did that step.",
+        "For best flavor: refrigerate uncovered (or loosely covered) 8–24 hours on a rack over a tray.",
+        "For same-day: marinate at least 30 minutes; 2–4 hours is better."
+      ],
+      "timers": [
+        { "label": "Minimum marinate", "minutes": 30 },
+        { "label": "Ideal marinate (overnight)", "minutes": 720 }
+      ],
+      "checks": [
+        "Chicken is evenly coated.",
+        "If chilling overnight: chicken is on a rack for airflow."
+      ]
+    },
+    {
+      "id": "step.004_preheat_setup",
+      "title": "Preheat oven and set up roasting rack",
+      "instructions": [
+        "Preheat oven to 450°F (232°C). Place a rack in the upper-middle position.",
+        "Set a wire rack on a rimmed baking sheet (line sheet with foil for easy cleanup).",
+        "Place chicken skin-side up on the rack. Let it sit at room temperature 15–20 minutes while oven finishes heating."
+      ],
+      "temperature": {
+        "type": "oven",
+        "value": 450,
+        "unit": "F",
+        "notes": "232°C"
+      },
+      "timers": [{ "label": "Room temp rest", "minutes": 15 }],
+      "checks": [
+        "Oven fully preheated.",
+        "Chicken elevated on rack (airflow = crisp skin)."
+      ]
+    },
+    {
+      "id": "step.005_roast_high_then_finish",
+      "title": "Roast until deeply browned and cooked through",
+      "instructions": [
+        "Roast at 450°F (232°C) for 20 minutes to set the skin and start browning.",
+        "Reduce oven to 375°F (190°C) and continue roasting until done.",
+        "Target internal temperature: 160–165°F (71–74°C) in the thickest breast and 175–185°F (79–85°C) in the thigh.",
+        "If skin needs more color near the end, broil 1–3 minutes, watching closely."
+      ],
+      "temperature": {
+        "type": "oven",
+        "value": 375,
+        "unit": "F",
+        "notes": "190°C after initial high-heat stage"
+      },
+      "timers": [
+        { "label": "Initial high-heat roast", "minutes": 20 },
+        { "label": "Finish roast (estimate)", "minutes": 35 }
+      ],
+      "checks": [
+        "Skin is deeply golden-brown with some darker edges.",
+        "Juices run clear at thigh joint.",
+        "Breast hits 160–165°F (71–74°C)."
+      ]
+    },
+    {
+      "id": "step.006_rest_carve",
+      "title": "Rest, carve, and serve",
+      "instructions": [
+        "Rest chicken 10–15 minutes before carving (carryover heat finishes the cook).",
+        "Carve into quarters (or slice breast and separate thighs/drumsticks).",
+        "Serve with ají verde, fries, roasted potatoes, or a simple lime-onion salad."
+      ],
+      "timers": [{ "label": "Rest before carving", "minutes": 10 }],
+      "checks": [
+        "Rest completed (juices redistributed).",
+        "Carve cleanly; juices stay in the meat."
+      ]
+    }
+  ],
+
+  "pairings": {
+    "classicSides": [
+      "peruvian.aji_verde",
+      "peruvian.papas_fritas",
+      "peruvian.ensalada_criolla",
+      "peruvian.arroz_chaufa (chifa night)"
+    ],
+    "drinks": ["peruvian.chicha_morada", "sparkling_water_lime"]
+  },
+
+  "storage": {
+    "refrigerate": {
+      "notes": "Cool leftovers quickly; refrigerate within 2 hours.",
+      "duration": "3-4 days"
+    },
+    "freeze": {
+      "notes": "Freeze cooked chicken portions tightly wrapped; best within 2 months for quality.",
+      "duration": "2 months"
+    },
+    "reheat": {
+      "notes": "Reheat in 350°F oven until hot (or air fryer) to re-crisp skin; microwave softens skin."
+    }
+  },
+
+  "planner": {
+    "leftoverUses": [
+      "chicken bowls with lime and ají verde",
+      "tacos or wraps with onion + cilantro",
+      "stir-fry (chifa-ish) with rice and vegetables"
+    ],
+    "prepTasks": [
+      { "task": "Spatchcock chicken (optional)", "mins": 5 },
+      { "task": "Mix marinade", "mins": 5 },
+      { "task": "Marinate overnight (best)", "mins": 1 }
+    ]
+  },
+
+  "methods": [
+    "technique.roast",
+    "technique.marinade",
+    "technique.broil_optional"
+  ],
+
+  "compat": {
+    "cuisineId": "cuisines.peruvian",
+    "dishId": "peruvian.pollo_a_la_brasa",
+    "search": {
+      "aliases": [
+        "pollo a la brasa",
+        "peruvian rotisserie chicken",
+        "pollo asado peruano",
+        "pollo brasa"
+      ],
+      "keywords": [
+        "aji panca",
+        "aji amarillo",
+        "garlic",
+        "cumin",
+        "soy sauce",
+        "vinegar",
+        "lime",
+        "crispy skin"
+      ]
+    }
+  },
+
+  "notes": [
+    "No ají pastes? Use smoked paprika + a small pinch of cayenne (optional) and add more garlic + lime; it won’t be identical but still excellent.",
+    "Spatchcocking is the single biggest upgrade for home ovens: faster cook, more crisp skin, more even doneness."
+  ],
+
+  "variations": [
+    {
+      "id": "variation.air_fryer_pieces",
+      "label": "Air fryer chicken pieces",
+      "when": { "equipment": ["equipment.air_fryer"] },
+      "adapt": {
+        "notes": [
+          "Marinate as written, then cook thighs/drumsticks at 380°F for ~20–25 min, breasts ~16–20 min, flipping halfway.",
+          "Cook to internal temps listed; times vary by size."
+        ]
+      }
+    },
+    {
+      "id": "variation.grill_finish",
+      "label": "Grill finish for char",
+      "when": { "equipment": ["equipment.grill"] },
+      "adapt": {
+        "notes": [
+          "Roast until 150°F in breast, then finish over medium-high grill heat for char (skin-side down first), then rest."
+        ]
+      }
+    }
+  ],
+
+  "safety": {
+    "criticalTemps": {
+      "chickenBreast": {
+        "value": 165,
+        "unit": "F",
+        "notes": "74°C (USDA guideline)"
+      },
+      "chickenThighPreferred": {
+        "value": 180,
+        "unit": "F",
+        "notes": "82°C for best texture"
+      }
+    },
+    "notes": [
+      "Avoid cross-contamination: keep raw chicken separate; sanitize board/knife/hands.",
+      "If marinating overnight, keep refrigerated below 40°F (4°C)."
+    ]
+  }
+}

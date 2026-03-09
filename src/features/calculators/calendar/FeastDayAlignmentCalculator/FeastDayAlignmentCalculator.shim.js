@@ -12,7 +12,7 @@
  *   UI components, or automation/runtime layers.
  */
 
-import { emit } from "@/services/eventBus";
+import { emit } from "@/services/events/eventBus";
 
 /** @typedef {import("./FeastDayAlignmentCalculator.schema.json")} FeastSchemaType */
 /** @typedef {import("./FeastDayAlignmentCalculator.schema.json").input} FeastAlignmentInput */
@@ -94,7 +94,13 @@ const FEAST_TEMPLATES = [
     hebrewDay: 15,
     hebrewSpanDays: 7,
     requiresPrepSession: true,
-    prepSessionHints: ["cooking", "storehouse", "garden", "animals", "preservation"],
+    prepSessionHints: [
+      "cooking",
+      "storehouse",
+      "garden",
+      "animals",
+      "preservation",
+    ],
   },
   {
     code: "SHEMINI_ATZERET",
@@ -146,7 +152,10 @@ export async function runFeastDayAlignmentCalculator(input) {
     type: "calculator.invoked",
     ts,
     source: SHIM_SOURCE,
-    data: { calculatorId: "FeastDayAlignmentCalculator", inputSummary: summarizeInput(input) },
+    data: {
+      calculatorId: "FeastDayAlignmentCalculator",
+      inputSummary: summarizeInput(input),
+    },
   });
 
   const safeInput = normalizeInput(input);
@@ -187,10 +196,15 @@ function normalizeInput(raw) {
   }
 
   if (!Number.isInteger(raw.gregorianYear)) {
-    throw new Error("FeastDayAlignmentCalculator: gregorianYear must be an integer.");
+    throw new Error(
+      "FeastDayAlignmentCalculator: gregorianYear must be an integer."
+    );
   }
 
-  if (!Array.isArray(raw.baseMonthStartData) || raw.baseMonthStartData.length === 0) {
+  if (
+    !Array.isArray(raw.baseMonthStartData) ||
+    raw.baseMonthStartData.length === 0
+  ) {
     throw new Error(
       "FeastDayAlignmentCalculator: baseMonthStartData must be a non-empty array from HebrewMonthStartCalendar."
     );
@@ -205,7 +219,8 @@ function normalizeInput(raw) {
   // Attempt to derive hebrewYear if not provided
   const derivedHebrewYear =
     raw.hebrewYear ||
-    (raw.baseMonthStartData[0] && Number.isInteger(raw.baseMonthStartData[0].hebrewYear)
+    (raw.baseMonthStartData[0] &&
+    Number.isInteger(raw.baseMonthStartData[0].hebrewYear)
       ? raw.baseMonthStartData[0].hebrewYear
       : raw.gregorianYear);
 
@@ -234,7 +249,10 @@ function computeFeastAlignments(input) {
     timezone,
   } = input;
 
-  const monthStartByIndex = buildMonthStartIndex(baseMonthStartData, hebrewYear);
+  const monthStartByIndex = buildMonthStartIndex(
+    baseMonthStartData,
+    hebrewYear
+  );
 
   const templates = includeMinorFeasts
     ? FEAST_TEMPLATES.concat(MINOR_FEAST_TEMPLATES)
@@ -264,7 +282,10 @@ function computeFeastAlignments(input) {
       continue;
     }
 
-    const startDate = addDays(parseISODate(monthStart.gregorianStartDate), tpl.hebrewDay - 1);
+    const startDate = addDays(
+      parseISODate(monthStart.gregorianStartDate),
+      tpl.hebrewDay - 1
+    );
     const endDate = addDays(startDate, tpl.hebrewSpanDays - 1);
 
     results.push({
@@ -319,7 +340,9 @@ function buildNotes(tpl, monthStart, monthStartMethod, timezone) {
     `Aligned using method '${monthStartMethod}' from month ${monthStart.hebrewMonthIndex} day ${tpl.hebrewDay}.`
   );
   parts.push(`Hebrew year: ${monthStart.hebrewYear}.`);
-  parts.push(`Base month start date: ${monthStart.gregorianStartDate} (${timezone}).`);
+  parts.push(
+    `Base month start date: ${monthStart.gregorianStartDate} (${timezone}).`
+  );
 
   if (tpl.requiresPrepSession) {
     parts.push(

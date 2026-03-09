@@ -1,0 +1,304 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "meta": {
+    "id": "cuisines.nigerian.efo_riro",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Efo Riro",
+    "description": "Yoruba-style efo riro: rich spinach stew simmered in pepper-tomato base with palm oil, crayfish, and assorted proteins. Deep, savory, and perfect with swallow or rice.",
+    "tags": [
+      "cuisine.nigerian",
+      "yoruba",
+      "stew",
+      "greens",
+      "palm_oil",
+      "protein.flexible",
+      "weekend.cook",
+      "freezer.friendly"
+    ],
+    "source": {
+      "curation": "ssa",
+      "author": "Suka Smart Assistant",
+      "reference": "Traditional efo riro profile (pepper base + palm oil + greens) standardized for SSA catalog.",
+      "url": ""
+    }
+  },
+  "summary": "Classic Yoruba efo riro: spinach and/or ugu cooked in a pepper-tomato base with palm oil, crayfish, and optional assorted meats/fish for a rich, savory greens stew.",
+  "yields": {
+    "servings": 6,
+    "makes": "About 2.5 quarts (10 cups)"
+  },
+  "difficulty": "intermediate",
+  "time": {
+    "prepMinutes": 25,
+    "cookMinutes": 55,
+    "totalMinutes": 80
+  },
+  "diet": {
+    "suitableFor": ["gluten_free", "dairy_free"],
+    "notes": [
+      "Naturally gluten-free and dairy-free; confirm bouillon is GF if used."
+    ]
+  },
+  "allergens": ["fish", "shellfish"],
+  "safety": {
+    "notes": [
+      "If using dried fish/stockfish, rinse well and remove bones before serving.",
+      "Do not overcook greens; add near the end to preserve color and freshness."
+    ]
+  },
+  "ingredientGroups": [
+    {
+      "id": "group.greens",
+      "label": "Greens",
+      "ingredients": [
+        {
+          "id": "ingredient.spinach",
+          "label": "Spinach, chopped",
+          "amount": {
+            "value": 450,
+            "unit": "g"
+          },
+          "notes": [
+            "Classic in many home versions. For more traditional texture, use a mix of spinach + ugu."
+          ]
+        },
+        {
+          "id": "ingredient.ugu_optional",
+          "label": "Ugu (fluted pumpkin leaves), chopped (optional)",
+          "amount": {
+            "value": 200,
+            "unit": "g"
+          },
+          "notes": [
+            "Optional; if using tougher greens, blanch briefly and squeeze dry."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "group.pepper_base",
+      "label": "Pepper-tomato base",
+      "ingredients": [
+        {
+          "id": "ingredient.red_bell_pepper",
+          "label": "Red bell pepper",
+          "amount": {
+            "value": 300,
+            "unit": "g"
+          }
+        },
+        {
+          "id": "ingredient.tomatoes",
+          "label": "Tomatoes (fresh or canned)",
+          "amount": {
+            "value": 400,
+            "unit": "g"
+          },
+          "notes": ["If using canned, use crushed or diced."]
+        },
+        {
+          "id": "ingredient.onion_yellow",
+          "label": "Yellow onion",
+          "amount": {
+            "value": 220,
+            "unit": "g"
+          },
+          "notes": ["Use half in the blend and half sliced for frying."]
+        },
+        {
+          "id": "ingredient.scotch_bonnet",
+          "label": "Scotch bonnet/habanero",
+          "amount": {
+            "value": 10,
+            "unit": "g"
+          },
+          "notes": ["Adjust to heat preference."]
+        }
+      ]
+    },
+    {
+      "id": "group.oil_seasoning",
+      "label": "Oil and seasoning",
+      "ingredients": [
+        {
+          "id": "ingredient.palm_oil",
+          "label": "Red palm oil",
+          "amount": {
+            "value": 180,
+            "unit": "ml"
+          },
+          "notes": ["Add up to 240 ml for richer, party-style stew."]
+        },
+        {
+          "id": "ingredient.crayfish_ground",
+          "label": "Ground crayfish",
+          "amount": {
+            "value": 20,
+            "unit": "g"
+          }
+        },
+        {
+          "id": "ingredient.iru_locust_beans",
+          "label": "Iru (locust beans), optional",
+          "amount": {
+            "value": 15,
+            "unit": "g"
+          },
+          "notes": ["Optional; rinse briefly to mellow intensity."]
+        },
+        {
+          "id": "ingredient.salt",
+          "label": "Salt",
+          "amount": {
+            "value": 6,
+            "unit": "g"
+          },
+          "notes": ["Add to taste depending on stock/bouillon."]
+        },
+        {
+          "id": "ingredient.bouillon_powder",
+          "label": "Bouillon powder or cube (crumbled), optional",
+          "amount": {
+            "value": 4,
+            "unit": "g"
+          }
+        }
+      ]
+    },
+    {
+      "id": "group.proteins",
+      "label": "Proteins (optional but common)",
+      "ingredients": [
+        {
+          "id": "ingredient.beef_cooked",
+          "label": "Cooked beef (or goat), bite-size pieces",
+          "amount": {
+            "value": 350,
+            "unit": "g"
+          },
+          "notes": [
+            "Use leftover cooked beef/goat or simmer fresh until tender first."
+          ]
+        },
+        {
+          "id": "ingredient.smoked_fish",
+          "label": "Smoked fish, rinsed and deboned",
+          "amount": {
+            "value": 120,
+            "unit": "g"
+          },
+          "notes": ["Optional; adds smoky depth."]
+        },
+        {
+          "id": "ingredient.stockfish",
+          "label": "Stockfish, pre-soaked and rinsed",
+          "amount": {
+            "value": 115,
+            "unit": "g"
+          },
+          "notes": ["Optional; soak until pliable."]
+        }
+      ]
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "ingredient.stock_or_water",
+      "label": "Stock or water (as needed for consistency)",
+      "amount": {
+        "value": 500,
+        "unit": "ml"
+      },
+      "notes": ["Use meat stock for best flavor. Add gradually."]
+    }
+  ],
+  "methods": ["stew", "simmer", "blend"],
+  "compat": {
+    "equipmentRequired": [
+      "pot.dutch_oven",
+      "blender",
+      "knife.chef",
+      "cutting_board",
+      "spoon.wooden"
+    ],
+    "appliancesOptional": ["food_processor"],
+    "notes": ["A good blender makes a smooth pepper base quickly."]
+  },
+  "steps": [
+    {
+      "id": "step.blanch_greens",
+      "title": "Prep greens",
+      "body": "Wash greens well. If using tough greens (ugu), blanch 1–2 minutes, drain, and squeeze dry. Chop spinach and/or ugu and set aside."
+    },
+    {
+      "id": "step.blend_base",
+      "title": "Blend pepper-tomato base",
+      "body": "Blend red bell pepper, tomatoes, half the onion, and scotch bonnet until smooth (or slightly textured if preferred)."
+    },
+    {
+      "id": "step.reduce_base",
+      "title": "Cook down the pepper base",
+      "body": "Heat a pot over medium heat. Add the blended pepper base and cook uncovered, stirring occasionally, until reduced and the raw smell is gone, 12–18 minutes.",
+      "timers": [
+        {
+          "id": "timer.reduce_base",
+          "label": "Reduce pepper base",
+          "minutes": 15
+        }
+      ]
+    },
+    {
+      "id": "step.fry_in_oil",
+      "title": "Fry in palm oil for depth",
+      "body": "Add palm oil and the remaining sliced onion to the reduced base. Cook 6–10 minutes, stirring, until the oil turns a deeper orange-red and begins to separate slightly at the edges."
+    },
+    {
+      "id": "step.season_add_proteins",
+      "title": "Season and add proteins",
+      "body": "Stir in ground crayfish, iru (optional), salt, and bouillon (optional). Add cooked beef/goat and any fish/stockfish. Add a splash of stock/water as needed to keep a stew consistency. Simmer 8–12 minutes to marry flavors and heat proteins through."
+    },
+    {
+      "id": "step.add_greens",
+      "title": "Add greens and finish",
+      "body": "Stir in chopped greens in batches. Cook just until wilted and bright, 3–5 minutes. Taste and adjust seasoning and thickness."
+    },
+    {
+      "id": "step.serve",
+      "title": "Serve",
+      "body": "Serve hot with swallow (eba, pounded yam, amala, fufu) or rice. Cool quickly for storage; refrigerate up to 4 days or freeze up to 3 months."
+    }
+  ],
+  "notes": [
+    "Signature profile: efo riro is a palm-oil-rich pepper base with greens and crayfish/iru depth.",
+    "Oil separation: letting the base cook until the oil starts to separate slightly is key for authentic flavor.",
+    "Greens timing: add greens at the end to keep color and prevent bitterness.",
+    "Consistency: stew should be spoonable and not watery; reduce longer if needed."
+  ],
+  "variations": [
+    {
+      "id": "variation.party_rich",
+      "label": "Party-rich assorted meats",
+      "notes": [
+        "Increase palm oil to 240 ml and use a mix of beef, goat, shaki/tripe, and stockfish; simmer longer for deeper flavor."
+      ]
+    },
+    {
+      "id": "variation.spinach_only",
+      "label": "Spinach-only quick version",
+      "notes": [
+        "Use only spinach and omit stockfish; keep cook time shorter for a fresh, weeknight stew."
+      ]
+    },
+    {
+      "id": "variation.vegetarian",
+      "label": "Vegetarian efo riro",
+      "notes": [
+        "Omit meats/fish/crayfish. Use mushrooms for umami and add iru/ogiri optionally; season carefully and reduce base well."
+      ]
+    }
+  ]
+}

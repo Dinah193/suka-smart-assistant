@@ -27,25 +27,27 @@
  * - Touch UI, DOM, timers, or global mutable state
  */
 
-import { emit as emitEvent } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit as emitEvent } from "@/services/events/eventBus";
+import featureFlags from "@/config/featureFlags.json";
 
 import { getModeForIntent } from "@/reasoner/modes/map"; // (domain, intent) -> mode string
-import { runReasoner } from "@/reasoner/runtime/reasoner";
-import { checkBudget } from "@/reasoner/runtime/budget";
-import { canInvokeReasoner } from "@/reasoner/runtime/gating";
-import { applyConfidenceRules } from "@/reasoner/runtime/confidence";
-import { applyFreshnessRules } from "@/reasoner/runtime/freshness";
+import { runReasoner } from "@/reasoner";
+import { checkBudget } from "@/reasoner/budget";
+import { canInvokeReasoner } from "@/reasoner/gating";
+import { applyConfidenceRules } from "@/reasoner/confidence";
+import { applyFreshnessRules } from "@/reasoner/freshness";
 
 import { getDomainContext } from "@/db/selectors";
 import { getCached, setCached } from "@/reasoner/cache/memo";
 import { buildCacheKey } from "@/reasoner/cache/keys";
 
-import { validateModeOutput } from "@/reasoner/modes/validator";
-import { buildPromptForMode } from "@/reasoner/prompts/builder";
+// ✅ FIX: runtime reasoner assets live under src/agents/runtime/*
+import { validateModeOutput } from "@/agents/runtime/reasoner/modes/validator";
+import { buildPromptForMode } from "@/agents/runtime/reasoner/prompts/builder";
 
-import { HubPacketFormatter } from "@/hub/HubPacketFormatter";
-import { FamilyFundConnector } from "@/hub/FamilyFundConnector";
+// ✅ FIX: hub services live under src/services/hub/*
+import HubPacketFormatter from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 
 /**
  * @typedef {Object} ShimRequest
@@ -101,7 +103,10 @@ export async function invokeShim(req) {
     }
 
     if (!intent || typeof intent !== "string") {
-      return buildShimError("Missing intent in ShimRequest", null, { ts, domain });
+      return buildShimError("Missing intent in ShimRequest", null, {
+        ts,
+        domain,
+      });
     }
 
     const normalizedIntent = normalizeIntent(intent);
@@ -115,11 +120,15 @@ export async function invokeShim(req) {
       fallbackGardenHarvestMode(normalizedIntent);
 
     if (!mode) {
-      return buildShimError("Unable to resolve Reasoner mode for garden harvest shim", null, {
-        ts,
-        domain,
-        intent: normalizedIntent,
-      });
+      return buildShimError(
+        "Unable to resolve Reasoner mode for garden harvest shim",
+        null,
+        {
+          ts,
+          domain,
+          intent: normalizedIntent,
+        }
+      );
     }
 
     debug.push({ stage: "mode_resolved", mode, intent: normalizedIntent });
@@ -134,9 +143,17 @@ export async function invokeShim(req) {
     // --------------------------------------------------
     // 2) Gating + Budget checks
     // --------------------------------------------------
-    const gate = await canInvokeReasoner({ domain, intent: normalizedIntent, mode, runtime });
+    const gate = await canInvokeReasoner({
+      domain,
+      intent: normalizedIntent,
+      mode,
+      runtime,
+    });
     if (!gate?.allowed) {
-      warnings.push({ code: "gated", reason: gate?.reason || "blocked_by_policy" });
+      warnings.push({
+        code: "gated",
+        reason: gate?.reason || "blocked_by_policy",
+      });
 
       emitEvent({
         type: "reasoner.gated",
@@ -180,10 +197,16 @@ export async function invokeShim(req) {
     // 3) Dexie context + freshness rules
     // --------------------------------------------------
     const context = (await getDomainContext("garden")) || {};
-    debug.push({ stage: "context_loaded", contextKeys: Object.keys(context || {}) });
+    debug.push({
+      stage: "context_loaded",
+      contextKeys: Object.keys(context || {}),
+    });
 
-    const { input: freshInput, freshnessWarnings } =
-      (await applyFreshnessRules(mode, input, context)) || { input, freshnessWarnings: [] };
+    const { input: freshInput, freshnessWarnings } = (await applyFreshnessRules(
+      mode,
+      input,
+      context
+    )) || { input, freshnessWarnings: [] };
 
     if (freshnessWarnings?.length) {
       warnings.push(...freshnessWarnings);
@@ -206,7 +229,10 @@ export async function invokeShim(req) {
         data: { mode, cacheKey },
       });
 
-      const normalizedFromCache = normalizeHarvestEnvelope(cached, normalizedIntent);
+      const normalizedFromCache = normalizeHarvestEnvelope(
+        cached,
+        normalizedIntent
+      );
       return {
         ok: true,
         mode,
@@ -300,7 +326,10 @@ export async function invokeShim(req) {
     // --------------------------------------------------
     // 8) Normalize into legacy harvest envelope
     // --------------------------------------------------
-    const normalized = normalizeHarvestEnvelope(validation.normalized, normalizedIntent);
+    const normalized = normalizeHarvestEnvelope(
+      validation.normalized,
+      normalizedIntent
+    );
 
     // --------------------------------------------------
     // 9) Cache store (idempotent)
@@ -309,34 +338,79 @@ export async function invokeShim(req) {
       await setCached(cacheKey, normalized, { mode, ttlSec: runtime?.ttlSec });
       debug.push({ stage: "cache_stored" });
     } catch (e) {
-      warnings.push({ code: "cache_store_failed", message: String(e?.message || e) });
+      warnings.push({
+        code: "cache_store_failed",
+        message: String(e?.message || e),
+      });
       console.warn("[gardenHarvestShim] cache store failed", e);
     }
 
     // --------------------------------------------------
     // 10) Optional Hub export (if enabled)
     // --------------------------------------------------
+    const familyFundMode = !!featureFlags?.familyFundMode;
+
     if (familyFundMode && runtime?.exportToHub) {
       try {
-        const packet = HubPacketFormatter.formatGardenHarvest({
-          mode,
-          intent: normalizedIntent,
-          envelope: normalized,
-          context,
-        });
+        const formatter =
+          typeof HubPacketFormatter?.formatGardenHarvest === "function"
+            ? HubPacketFormatter.formatGardenHarvest
+            : typeof HubPacketFormatter?.format === "function"
+            ? HubPacketFormatter.format
+            : null;
 
-        await FamilyFundConnector.exportPacket(packet);
+        const packet = formatter
+          ? formatter({
+              kind: "gardenHarvest",
+              mode,
+              intent: normalizedIntent,
+              envelope: normalized,
+              context,
+              ts: new Date().toISOString(),
+              source: "agents/shims/gardenHarvest",
+            })
+          : {
+              kind: "gardenHarvest",
+              mode,
+              intent: normalizedIntent,
+              envelope: normalized,
+              context,
+              ts: new Date().toISOString(),
+              source: "agents/shims/gardenHarvest",
+            };
 
-        emitEvent({
-          type: "session.exported",
-          ts: new Date().toISOString(),
-          source: "agents/shims/gardenHarvest",
-          data: { mode, intent: normalizedIntent },
-        });
+        const sender =
+          typeof FamilyFundConnector?.exportPacket === "function"
+            ? FamilyFundConnector.exportPacket
+            : typeof FamilyFundConnector?.send === "function"
+            ? FamilyFundConnector.send
+            : typeof FamilyFundConnector?.dispatch === "function"
+            ? FamilyFundConnector.dispatch
+            : null;
 
-        debug.push({ stage: "hub_exported" });
+        if (sender) {
+          await sender(packet);
+
+          emitEvent({
+            type: "session.exported",
+            ts: new Date().toISOString(),
+            source: "agents/shims/gardenHarvest",
+            data: { mode, intent: normalizedIntent },
+          });
+
+          debug.push({ stage: "hub_exported" });
+        } else {
+          warnings.push({
+            code: "hub_export_skipped",
+            message:
+              "FamilyFundConnector has no exportPacket/send/dispatch method",
+          });
+        }
       } catch (e) {
-        warnings.push({ code: "hub_export_failed", message: String(e?.message || e) });
+        warnings.push({
+          code: "hub_export_failed",
+          message: String(e?.message || e),
+        });
         console.warn("[gardenHarvestShim] Hub export failed", e);
       }
     }
@@ -350,7 +424,11 @@ export async function invokeShim(req) {
     };
   } catch (err) {
     console.warn("[gardenHarvestShim] fatal error", err);
-    return buildShimError("gardenHarvestShim error", err, { ts, debug, warnings });
+    return buildShimError("gardenHarvestShim error", err, {
+      ts,
+      debug,
+      warnings,
+    });
   }
 }
 
@@ -372,8 +450,15 @@ export async function invokeShim(req) {
  */
 export async function handleHarvestCommand(command, payload = {}) {
   // Preserve old pattern where callers sometimes pass { command, payload }
-  let cmdStr = typeof command === "string" ? command : (command?.command || command?.type || "");
-  if (typeof command === "object" && command?.payload && !Object.keys(payload || {}).length) {
+  let cmdStr =
+    typeof command === "string"
+      ? command
+      : command?.command || command?.type || "";
+  if (
+    typeof command === "object" &&
+    command?.payload &&
+    !Object.keys(payload || {}).length
+  ) {
     payload = command.payload;
   }
 
@@ -404,7 +489,9 @@ export async function handleHarvestCommand(command, payload = {}) {
  * @returns {string}
  */
 function normalizeIntent(intent) {
-  const c = String(intent || "").toLowerCase().trim();
+  const c = String(intent || "")
+    .toLowerCase()
+    .trim();
 
   const map = {
     forecast: "predictHarvestWindows",
@@ -475,11 +562,19 @@ function normalizeHarvestEnvelope(raw, normalizedIntent) {
       ok: raw.ok !== false,
       timestamp: raw.timestamp || new Date().toISOString(),
       summary: raw.summary || defaultSummaryForIntent(normalizedIntent),
-      recommendations: Array.isArray(raw.recommendations) ? raw.recommendations : [],
-      calendarEvents: Array.isArray(raw.calendarEvents) ? raw.calendarEvents : [],
+      recommendations: Array.isArray(raw.recommendations)
+        ? raw.recommendations
+        : [],
+      calendarEvents: Array.isArray(raw.calendarEvents)
+        ? raw.calendarEvents
+        : [],
       gardenUpdates: Array.isArray(raw.gardenUpdates) ? raw.gardenUpdates : [],
-      storehouseUpdates: Array.isArray(raw.storehouseUpdates) ? raw.storehouseUpdates : [],
-      mealPlanningHooks: Array.isArray(raw.mealPlanningHooks) ? raw.mealPlanningHooks : [],
+      storehouseUpdates: Array.isArray(raw.storehouseUpdates)
+        ? raw.storehouseUpdates
+        : [],
+      mealPlanningHooks: Array.isArray(raw.mealPlanningHooks)
+        ? raw.mealPlanningHooks
+        : [],
       logs: Array.isArray(raw.logs) ? raw.logs : [],
     };
   }
@@ -494,7 +589,12 @@ function normalizeHarvestEnvelope(raw, normalizedIntent) {
     gardenUpdates: [],
     storehouseUpdates: [],
     mealPlanningHooks: [],
-    logs: [{ msg: "Non-object Reasoner output normalized by gardenHarvestShim", value: raw }],
+    logs: [
+      {
+        msg: "Non-object Reasoner output normalized by gardenHarvestShim",
+        value: raw,
+      },
+    ],
   };
 }
 

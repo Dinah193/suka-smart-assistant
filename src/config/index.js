@@ -35,7 +35,8 @@ import envModule from "./env.js";
 // ---------------------------------------------------------------------
 const hasStructuredClone =
   typeof structuredClone === "function" ||
-  (typeof globalThis !== "undefined" && typeof globalThis.structuredClone === "function");
+  (typeof globalThis !== "undefined" &&
+    typeof globalThis.structuredClone === "function");
 
 const toBool = (v) => {
   if (typeof v === "boolean") return v;
@@ -130,6 +131,55 @@ function applyRules(base, ctx = {}) {
 }
 
 // ---------------------------------------------------------------------
+// Named exports: API + Google keys (browser-safe)
+// ---------------------------------------------------------------------
+// Some modules import these directly from "@/config".
+function normalizeBaseUrl(v) {
+  if (v == null) return "";
+  const s = String(v).trim();
+  if (!s) return "";
+  if (s === "/") return "";
+  return s.replace(/\/+$/, "");
+}
+
+function normalizeKey(v) {
+  if (v == null) return "";
+  const s = String(v).trim();
+  return s;
+}
+
+const __envForNamed = readViteEnv();
+
+// Resolution order (first match wins):
+//  1) VITE_API_BASE_URL
+//  2) VITE_HUB_API_BASE
+//  3) VITE_BACKEND_URL
+//  4) VITE_SERVER_URL
+//  5) "" (same-origin)
+export const API_BASE_URL = normalizeBaseUrl(
+  __envForNamed.VITE_API_BASE_URL ??
+    __envForNamed.VITE_HUB_API_BASE ??
+    __envForNamed.VITE_BACKEND_URL ??
+    __envForNamed.VITE_SERVER_URL ??
+    ""
+);
+
+// Google keys (empty string by default; consumers should handle missing keys gracefully)
+export const GOOGLE_PLACES_API_KEY = normalizeKey(
+  __envForNamed.VITE_GOOGLE_PLACES_API_KEY ??
+    __envForNamed.VITE_GOOGLE_PLACES_KEY ??
+    __envForNamed.GOOGLE_PLACES_API_KEY ??
+    ""
+);
+
+export const GOOGLE_MAPS_API_KEY = normalizeKey(
+  __envForNamed.VITE_GOOGLE_MAPS_API_KEY ??
+    __envForNamed.VITE_GOOGLE_MAPS_KEY ??
+    __envForNamed.GOOGLE_MAPS_API_KEY ??
+    ""
+);
+
+// ---------------------------------------------------------------------
 // domain builders (env hints → domain config, with fallback to flags)
 // ---------------------------------------------------------------------
 function buildCleaning(env, flags) {
@@ -139,22 +189,36 @@ function buildCleaning(env, flags) {
     engines: {
       cleaningSessionEngine: !!ff.engines?.cleaningSessionEngine,
       declutterEngine: !!ff.engines?.declutterEngine,
-      zoneRoutineEngine: !!ff.engines?.zoneRoutineEngine
+      zoneRoutineEngine: !!ff.engines?.zoneRoutineEngine,
     },
     imports: {
-      fromPinterest: toBool(env.VITE_CLEANING_IMPORT_FROM_PINTEREST ?? ff.imports?.fromPinterest),
+      fromPinterest: toBool(
+        env.VITE_CLEANING_IMPORT_FROM_PINTEREST ?? ff.imports?.fromPinterest
+      ),
       fromCSV: toBool(env.VITE_CLEANING_IMPORT_FROM_CSV ?? ff.imports?.fromCSV),
-      fromVideo: toBool(env.VITE_CLEANING_IMPORT_FROM_VIDEO ?? ff.imports?.fromVideo ?? false)
+      fromVideo: toBool(
+        env.VITE_CLEANING_IMPORT_FROM_VIDEO ?? ff.imports?.fromVideo ?? false
+      ),
     },
     ui: {
-      showDashboardWidget: toBool(env.VITE_CLEANING_UI_SHOW_DASHBOARD_WIDGET ?? ff.ui?.showDashboardWidget),
-      showSessionPlanner: toBool(env.VITE_CLEANING_UI_SHOW_SESSION_PLANNER ?? ff.ui?.showSessionPlanner),
-      showTemplates: toBool(ff.ui?.showTemplates)
+      showDashboardWidget: toBool(
+        env.VITE_CLEANING_UI_SHOW_DASHBOARD_WIDGET ?? ff.ui?.showDashboardWidget
+      ),
+      showSessionPlanner: toBool(
+        env.VITE_CLEANING_UI_SHOW_SESSION_PLANNER ?? ff.ui?.showSessionPlanner
+      ),
+      showTemplates: toBool(ff.ui?.showTemplates),
     },
-    allowUserFavorites: toBool(env.VITE_CLEANING_ALLOW_USER_FAVORITES ?? ff.allowUserFavorites),
-    allowUserSchedules: toBool(env.VITE_CLEANING_ALLOW_USER_SCHEDULES ?? ff.allowUserSchedules),
+    allowUserFavorites: toBool(
+      env.VITE_CLEANING_ALLOW_USER_FAVORITES ?? ff.allowUserFavorites
+    ),
+    allowUserSchedules: toBool(
+      env.VITE_CLEANING_ALLOW_USER_SCHEDULES ?? ff.allowUserSchedules
+    ),
     sabbathAware: toBool(env.VITE_CLEANING_SABBATH_AWARE ?? ff.sabbathAware),
-    quietHoursAware: toBool(env.VITE_CLEANING_QUIET_HOURS_AWARE ?? ff.quietHoursAware)
+    quietHoursAware: toBool(
+      env.VITE_CLEANING_QUIET_HOURS_AWARE ?? ff.quietHoursAware
+    ),
   };
 }
 
@@ -165,28 +229,47 @@ function buildGarden(env, flags) {
     engines: {
       gardenPlanEngine: !!ff.engines?.gardenPlanEngine,
       gardenQueueEngine: !!ff.engines?.gardenQueueEngine,
-      careAndHarvestEngine: !!ff.engines?.careAndHarvestEngine
+      careAndHarvestEngine: !!ff.engines?.careAndHarvestEngine,
     },
     imports: {
-      fromSeedSites: toBool(env.VITE_GARDEN_IMPORT_FROM_SEED_SITES ?? ff.imports?.fromSeedSites),
-      fromBookmarklet: toBool(env.VITE_GARDEN_IMPORT_FROM_BOOKMARKLET ?? ff.imports?.fromBookmarklet),
+      fromSeedSites: toBool(
+        env.VITE_GARDEN_IMPORT_FROM_SEED_SITES ?? ff.imports?.fromSeedSites
+      ),
+      fromBookmarklet: toBool(
+        env.VITE_GARDEN_IMPORT_FROM_BOOKMARKLET ?? ff.imports?.fromBookmarklet
+      ),
       fromCSV: toBool(env.VITE_GARDEN_IMPORT_FROM_CSV ?? ff.imports?.fromCSV),
-      fromVideo: toBool(env.VITE_GARDEN_IMPORT_FROM_VIDEO ?? ff.imports?.fromVideo ?? false)
+      fromVideo: toBool(
+        env.VITE_GARDEN_IMPORT_FROM_VIDEO ?? ff.imports?.fromVideo ?? false
+      ),
     },
     ui: {
-      showDashboardWidget: toBool(env.VITE_GARDEN_UI_SHOW_DASHBOARD_WIDGET ?? ff.ui?.showDashboardWidget),
-      showSeasonalView: toBool(env.VITE_GARDEN_UI_SHOW_SEASONAL_VIEW ?? ff.ui?.showSeasonalView),
-      showCareAndHarvestTabs: toBool(env.VITE_GARDEN_UI_SHOW_CARE_HARVEST_TABS ?? ff.ui?.showCareAndHarvestTabs)
+      showDashboardWidget: toBool(
+        env.VITE_GARDEN_UI_SHOW_DASHBOARD_WIDGET ?? ff.ui?.showDashboardWidget
+      ),
+      showSeasonalView: toBool(
+        env.VITE_GARDEN_UI_SHOW_SEASONAL_VIEW ?? ff.ui?.showSeasonalView
+      ),
+      showCareAndHarvestTabs: toBool(
+        env.VITE_GARDEN_UI_SHOW_CARE_HARVEST_TABS ??
+          ff.ui?.showCareAndHarvestTabs
+      ),
     },
-    allowUserFavorites: toBool(env.VITE_GARDEN_ALLOW_USER_FAVORITES ?? ff.allowUserFavorites),
-    allowUserSchedules: toBool(env.VITE_GARDEN_ALLOW_USER_SCHEDULES ?? ff.allowUserSchedules),
+    allowUserFavorites: toBool(
+      env.VITE_GARDEN_ALLOW_USER_FAVORITES ?? ff.allowUserFavorites
+    ),
+    allowUserSchedules: toBool(
+      env.VITE_GARDEN_ALLOW_USER_SCHEDULES ?? ff.allowUserSchedules
+    ),
     collab: {
       enabled: toBool(env.VITE_GARDEN_COLLAB_ENABLED ?? ff.collab?.enabled),
-      coOpPlanning: toBool(env.VITE_GARDEN_COOP_PLANNING_ENABLED ?? ff.collab?.coOpPlanning),
-      shareablePlans: toBool(ff.collab?.shareablePlans)
+      coOpPlanning: toBool(
+        env.VITE_GARDEN_COOP_PLANNING_ENABLED ?? ff.collab?.coOpPlanning
+      ),
+      shareablePlans: toBool(ff.collab?.shareablePlans),
     },
     sabbathAware: true,
-    quietHoursAware: true
+    quietHoursAware: true,
   };
 }
 
@@ -196,29 +279,50 @@ function buildStorehouse(env, flags) {
     enabled: toBool(env.VITE_FEATURE_ENABLE_STOREHOUSE ?? ff.enabled),
     engines: {
       storehouseGoalEngine: !!ff.engines?.storehouseGoalEngine,
-      storehouseStockPlanner: !!ff.engines?.storehouseStockPlanner
+      storehouseStockPlanner: !!ff.engines?.storehouseStockPlanner,
     },
     imports: {
-      fromGrocerySections: toBool(env.VITE_STOREHOUSE_IMPORT_FROM_GROCERY_SECTIONS ?? ff.imports?.fromGrocerySections),
-      fromShoppingLists: toBool(env.VITE_STOREHOUSE_IMPORT_FROM_SHOPPING_LISTS ?? ff.imports?.fromShoppingLists),
-      fromMealPlans: toBool(env.VITE_STOREHOUSE_IMPORT_FROM_MEAL_PLANS ?? ff.imports?.fromMealPlans)
+      fromGrocerySections: toBool(
+        env.VITE_STOREHOUSE_IMPORT_FROM_GROCERY_SECTIONS ??
+          ff.imports?.fromGrocerySections
+      ),
+      fromShoppingLists: toBool(
+        env.VITE_STOREHOUSE_IMPORT_FROM_SHOPPING_LISTS ??
+          ff.imports?.fromShoppingLists
+      ),
+      fromMealPlans: toBool(
+        env.VITE_STOREHOUSE_IMPORT_FROM_MEAL_PLANS ?? ff.imports?.fromMealPlans
+      ),
     },
     ui: {
-      showGrocerySectionInspiration: toBool(env.VITE_STOREHOUSE_UI_SHOW_GROCERY_SECTION_INSPO ?? ff.ui?.showGrocerySectionInspiration),
-      showPantryTargets: toBool(env.VITE_STOREHOUSE_UI_SHOW_PANTRY_TARGETS ?? ff.ui?.showPantryTargets),
-      showRotationNeeds: toBool(env.VITE_STOREHOUSE_UI_SHOW_ROTATION_NEEDS ?? ff.ui?.showRotationNeeds)
+      showGrocerySectionInspiration: toBool(
+        env.VITE_STOREHOUSE_UI_SHOW_GROCERY_SECTION_INSPO ??
+          ff.ui?.showGrocerySectionInspiration
+      ),
+      showPantryTargets: toBool(
+        env.VITE_STOREHOUSE_UI_SHOW_PANTRY_TARGETS ?? ff.ui?.showPantryTargets
+      ),
+      showRotationNeeds: toBool(
+        env.VITE_STOREHOUSE_UI_SHOW_ROTATION_NEEDS ?? ff.ui?.showRotationNeeds
+      ),
     },
-    allowUserFavorites: toBool(env.VITE_STOREHOUSE_ALLOW_USER_FAVORITES ?? ff.allowUserFavorites),
-    allowUserSchedules: toBool(env.VITE_STOREHOUSE_ALLOW_USER_SCHEDULES ?? ff.allowUserSchedules),
+    allowUserFavorites: toBool(
+      env.VITE_STOREHOUSE_ALLOW_USER_FAVORITES ?? ff.allowUserFavorites
+    ),
+    allowUserSchedules: toBool(
+      env.VITE_STOREHOUSE_ALLOW_USER_SCHEDULES ?? ff.allowUserSchedules
+    ),
     coOp: {
       enabled: toBool(env.VITE_STOREHOUSE_COOP_ENABLED ?? ff.coOp?.enabled),
       linkedHouseholds: toBool(ff.coOp?.linkedHouseholds),
-      bulkBuyEvents: toBool(env.VITE_STOREHOUSE_BULK_BUY_EVENTS_ENABLED ?? ff.coOp?.bulkBuyEvents)
+      bulkBuyEvents: toBool(
+        env.VITE_STOREHOUSE_BULK_BUY_EVENTS_ENABLED ?? ff.coOp?.bulkBuyEvents
+      ),
     },
     reverseGeneration: {
       toGarden: toBool(ff.reverseGeneration?.toGarden ?? false),
-      toAnimals: toBool(ff.reverseGeneration?.toAnimals ?? false)
-    }
+      toAnimals: toBool(ff.reverseGeneration?.toAnimals ?? false),
+    },
   };
 }
 
@@ -228,29 +332,67 @@ function buildMeals(env, flags) {
     enabled: toBool(env.VITE_FEATURE_ENABLE_MEALS ?? ff.enabled),
     engines: {
       mealPlanEngine: !!ff.engines?.mealPlanEngine,
-      cookingSessionEngine: !!ff.engines?.cookingSessionEngine
+      cookingSessionEngine: !!ff.engines?.cookingSessionEngine,
     },
     imports: {
-      fromAllrecipes: toBool(env.VITE_MEALS_IMPORT_FROM_ALLRECIPES ?? ff.imports?.fromAllrecipes),
-      fromLoveAndLemons: toBool(env.VITE_MEALS_IMPORT_FROM_LOVEANDLEMONS ?? ff.imports?.fromLoveAndLemons),
-      fromTikTok: toBool(env.VITE_MEALS_IMPORT_FROM_TIKTOK ?? ff.imports?.fromTikTok),
-      fromYouTube: toBool(env.VITE_MEALS_IMPORT_FROM_YOUTUBE ?? ff.imports?.fromYouTube),
-      fromFacebook: toBool(env.VITE_MEALS_IMPORT_FROM_FACEBOOK ?? ff.imports?.fromFacebook),
-      fromPinterestBoards: toBool(env.VITE_MEALS_IMPORT_FROM_PINTEREST_BOARDS ?? ff.imports?.fromPinterestBoards)
+      fromAllrecipes: toBool(
+        env.VITE_MEALS_IMPORT_FROM_ALLRECIPES ?? ff.imports?.fromAllrecipes
+      ),
+      fromLoveAndLemons: toBool(
+        env.VITE_MEALS_IMPORT_FROM_LOVEANDLEMONS ??
+          ff.imports?.fromLoveAndLemons
+      ),
+      fromTikTok: toBool(
+        env.VITE_MEALS_IMPORT_FROM_TIKTOK ?? ff.imports?.fromTikTok
+      ),
+      fromYouTube: toBool(
+        env.VITE_MEALS_IMPORT_FROM_YOUTUBE ?? ff.imports?.fromYouTube
+      ),
+      fromFacebook: toBool(
+        env.VITE_MEALS_IMPORT_FROM_FACEBOOK ?? ff.imports?.fromFacebook
+      ),
+      fromPinterestBoards: toBool(
+        env.VITE_MEALS_IMPORT_FROM_PINTEREST_BOARDS ??
+          ff.imports?.fromPinterestBoards
+      ),
     },
     ui: {
-      showRecipeConsolidator: toBool(env.VITE_MEALS_UI_SHOW_RECIPE_CONSOLIDATOR ?? ff.ui?.showRecipeConsolidator),
-      showMealPlanner: toBool(env.VITE_MEALS_UI_SHOW_MEAL_PLANNER ?? ff.ui?.showMealPlanner),
-      showBatchCookingAccordion: toBool(env.VITE_MEALS_UI_SHOW_BATCH_COOKING ?? ff.ui?.showBatchCookingAccordion)
+      showRecipeConsolidator: toBool(
+        env.VITE_MEALS_UI_SHOW_RECIPE_CONSOLIDATOR ??
+          ff.ui?.showRecipeConsolidator
+      ),
+      showMealPlanner: toBool(
+        env.VITE_MEALS_UI_SHOW_MEAL_PLANNER ?? ff.ui?.showMealPlanner
+      ),
+      showBatchCookingAccordion: toBool(
+        env.VITE_MEALS_UI_SHOW_BATCH_COOKING ?? ff.ui?.showBatchCookingAccordion
+      ),
     },
-    allowUserFavorites: toBool(env.VITE_MEALS_ALLOW_USER_FAVORITES ?? ff.allowUserFavorites),
-    allowUserSchedules: toBool(env.VITE_MEALS_ALLOW_USER_SCHEDULES ?? ff.allowUserSchedules),
+    allowUserFavorites: toBool(
+      env.VITE_MEALS_ALLOW_USER_FAVORITES ?? ff.allowUserFavorites
+    ),
+    allowUserSchedules: toBool(
+      env.VITE_MEALS_ALLOW_USER_SCHEDULES ?? ff.allowUserSchedules
+    ),
     reverseGeneration: {
-      toAnimalPlanner: toBool(env.VITE_MEALS_REVERSE_TO_ANIMAL_PLANNER ?? ff.reverseGeneration?.toAnimalPlanner),
-      toStorehouse: toBool(env.VITE_MEALS_REVERSE_TO_STOREHOUSE ?? ff.reverseGeneration?.toStorehouse),
-      toShoppingList: toBool(env.VITE_MEALS_REVERSE_TO_SHOPPING_LIST ?? ff.reverseGeneration?.toShoppingList),
-      toPreservation: toBool(env.VITE_MEALS_REVERSE_TO_PRESERVATION ?? ff.reverseGeneration?.toPreservation ?? false)
-    }
+      toAnimalPlanner: toBool(
+        env.VITE_MEALS_REVERSE_TO_ANIMAL_PLANNER ??
+          ff.reverseGeneration?.toAnimalPlanner
+      ),
+      toStorehouse: toBool(
+        env.VITE_MEALS_REVERSE_TO_STOREHOUSE ??
+          ff.reverseGeneration?.toStorehouse
+      ),
+      toShoppingList: toBool(
+        env.VITE_MEALS_REVERSE_TO_SHOPPING_LIST ??
+          ff.reverseGeneration?.toShoppingList
+      ),
+      toPreservation: toBool(
+        env.VITE_MEALS_REVERSE_TO_PRESERVATION ??
+          ff.reverseGeneration?.toPreservation ??
+          false
+      ),
+    },
   };
 }
 
@@ -261,30 +403,63 @@ function buildAnimals(env, flags) {
     engines: {
       animalPlannerEngine: !!ff.engines?.animalPlannerEngine,
       animalCareEngine: !!ff.engines?.animalCareEngine,
-      butcherySessionEngine: !!ff.engines?.butcherySessionEngine
+      butcherySessionEngine: !!ff.engines?.butcherySessionEngine,
     },
     imports: {
-      fromRecipesReverse: toBool(env.VITE_ANIMALS_IMPORT_FROM_RECIPES_REVERSE ?? ff.imports?.fromRecipesReverse),
-      fromBreedLibraries: toBool(env.VITE_ANIMALS_IMPORT_FROM_BREED_LIBRARIES ?? ff.imports?.fromBreedLibraries),
-      fromLocalMarkets: toBool(env.VITE_ANIMALS_IMPORT_FROM_LOCAL_MARKETS ?? ff.imports?.fromLocalMarkets),
-      fromVideo: toBool(env.VITE_ANIMALS_IMPORT_FROM_VIDEO ?? ff.imports?.fromVideo ?? false)
+      fromRecipesReverse: toBool(
+        env.VITE_ANIMALS_IMPORT_FROM_RECIPES_REVERSE ??
+          ff.imports?.fromRecipesReverse
+      ),
+      fromBreedLibraries: toBool(
+        env.VITE_ANIMALS_IMPORT_FROM_BREED_LIBRARIES ??
+          ff.imports?.fromBreedLibraries
+      ),
+      fromLocalMarkets: toBool(
+        env.VITE_ANIMALS_IMPORT_FROM_LOCAL_MARKETS ??
+          ff.imports?.fromLocalMarkets
+      ),
+      fromVideo: toBool(
+        env.VITE_ANIMALS_IMPORT_FROM_VIDEO ?? ff.imports?.fromVideo ?? false
+      ),
     },
     ui: {
-      showDashboardWidget: toBool(env.VITE_ANIMALS_UI_SHOW_DASHBOARD_WIDGET ?? ff.ui?.showDashboardWidget),
-      showBreedSuggestions: toBool(env.VITE_ANIMALS_UI_SHOW_BREED_SUGGESTIONS ?? ff.ui?.showBreedSuggestions),
-      showAcquisitionPlanner: toBool(env.VITE_ANIMALS_UI_SHOW_ACQUISITION_PLANNER ?? ff.ui?.showAcquisitionPlanner),
-      showButcheryLog: toBool(env.VITE_ANIMALS_UI_SHOW_BUTCHERY_LOG ?? ff.ui?.showButcheryLog)
+      showDashboardWidget: toBool(
+        env.VITE_ANIMALS_UI_SHOW_DASHBOARD_WIDGET ?? ff.ui?.showDashboardWidget
+      ),
+      showBreedSuggestions: toBool(
+        env.VITE_ANIMALS_UI_SHOW_BREED_SUGGESTIONS ??
+          ff.ui?.showBreedSuggestions
+      ),
+      showAcquisitionPlanner: toBool(
+        env.VITE_ANIMALS_UI_SHOW_ACQUISITION_PLANNER ??
+          ff.ui?.showAcquisitionPlanner
+      ),
+      showButcheryLog: toBool(
+        env.VITE_ANIMALS_UI_SHOW_BUTCHERY_LOG ?? ff.ui?.showButcheryLog
+      ),
     },
-    allowUserFavorites: toBool(env.VITE_ANIMALS_ALLOW_USER_FAVORITES ?? ff.allowUserFavorites),
-    allowUserSchedules: toBool(env.VITE_ANIMALS_ALLOW_USER_SCHEDULES ?? ff.allowUserSchedules),
+    allowUserFavorites: toBool(
+      env.VITE_ANIMALS_ALLOW_USER_FAVORITES ?? ff.allowUserFavorites
+    ),
+    allowUserSchedules: toBool(
+      env.VITE_ANIMALS_ALLOW_USER_SCHEDULES ?? ff.allowUserSchedules
+    ),
     reverseDirection: {
-      generateAnimalPlanFromRecipes: toBool(env.VITE_ANIMALS_REVERSE_GENERATE_FROM_RECIPES ?? ff.reverseDirection?.generateAnimalPlanFromRecipes)
+      generateAnimalPlanFromRecipes: toBool(
+        env.VITE_ANIMALS_REVERSE_GENERATE_FROM_RECIPES ??
+          ff.reverseDirection?.generateAnimalPlanFromRecipes
+      ),
     },
     geoAwareBreeds: {
-      enabled: toBool(env.VITE_ANIMALS_GEO_AWARE_BREEDS_ENABLED ?? ff.geoAwareBreeds?.enabled),
-      defaultSource: env.VITE_ANIMALS_GEO_DEFAULT_SOURCE || ff.geoAwareBreeds?.defaultSource || "general-hardy-breeds",
-      fallback: ff.geoAwareBreeds?.fallback || "general-hardy-breeds"
-    }
+      enabled: toBool(
+        env.VITE_ANIMALS_GEO_AWARE_BREEDS_ENABLED ?? ff.geoAwareBreeds?.enabled
+      ),
+      defaultSource:
+        env.VITE_ANIMALS_GEO_DEFAULT_SOURCE ||
+        ff.geoAwareBreeds?.defaultSource ||
+        "general-hardy-breeds",
+      fallback: ff.geoAwareBreeds?.fallback || "general-hardy-breeds",
+    },
   };
 }
 
@@ -294,25 +469,54 @@ function buildPreservation(env, flags) {
     enabled: toBool(env.VITE_FEATURE_ENABLE_PRESERVATION ?? ff.enabled),
     engines: {
       preservationPlannerEngine: !!ff.engines?.preservationPlannerEngine,
-      preservationSessionEngine: !!ff.engines?.preservationSessionEngine
+      preservationSessionEngine: !!ff.engines?.preservationSessionEngine,
     },
     imports: {
-      fromMealPlans: toBool(env.VITE_PRESERVATION_IMPORT_FROM_MEAL_PLANS ?? ff.imports?.fromMealPlans),
-      fromStorehouseRotation: toBool(env.VITE_PRESERVATION_IMPORT_FROM_STOREHOUSE_ROTATION ?? ff.imports?.fromStorehouseRotation),
-      fromGardenHarvests: toBool(env.VITE_PRESERVATION_IMPORT_FROM_GARDEN_HARVESTS ?? ff.imports?.fromGardenHarvests),
-      fromVideo: toBool(env.VITE_PRESERVATION_IMPORT_FROM_VIDEO ?? ff.imports?.fromVideo ?? false)
+      fromMealPlans: toBool(
+        env.VITE_PRESERVATION_IMPORT_FROM_MEAL_PLANS ??
+          ff.imports?.fromMealPlans
+      ),
+      fromStorehouseRotation: toBool(
+        env.VITE_PRESERVATION_IMPORT_FROM_STOREHOUSE_ROTATION ??
+          ff.imports?.fromStorehouseRotation
+      ),
+      fromGardenHarvests: toBool(
+        env.VITE_PRESERVATION_IMPORT_FROM_GARDEN_HARVESTS ??
+          ff.imports?.fromGardenHarvests
+      ),
+      fromVideo: toBool(
+        env.VITE_PRESERVATION_IMPORT_FROM_VIDEO ??
+          ff.imports?.fromVideo ??
+          false
+      ),
     },
     ui: {
-      showDashboardWidget: toBool(env.VITE_PRESERVATION_UI_SHOW_DASHBOARD_WIDGET ?? ff.ui?.showDashboardWidget),
-      showMethodsTabs: toBool(env.VITE_PRESERVATION_UI_SHOW_METHODS_TABS ?? ff.ui?.showMethodsTabs),
-      showBatchSessions: toBool(env.VITE_PRESERVATION_UI_SHOW_BATCH_SESSIONS ?? ff.ui?.showBatchSessions)
+      showDashboardWidget: toBool(
+        env.VITE_PRESERVATION_UI_SHOW_DASHBOARD_WIDGET ??
+          ff.ui?.showDashboardWidget
+      ),
+      showMethodsTabs: toBool(
+        env.VITE_PRESERVATION_UI_SHOW_METHODS_TABS ?? ff.ui?.showMethodsTabs
+      ),
+      showBatchSessions: toBool(
+        env.VITE_PRESERVATION_UI_SHOW_BATCH_SESSIONS ?? ff.ui?.showBatchSessions
+      ),
     },
-    allowUserFavorites: toBool(env.VITE_PRESERVATION_ALLOW_USER_FAVORITES ?? ff.allowUserFavorites),
-    allowUserSchedules: toBool(env.VITE_PRESERVATION_ALLOW_USER_SCHEDULES ?? ff.allowUserSchedules),
+    allowUserFavorites: toBool(
+      env.VITE_PRESERVATION_ALLOW_USER_FAVORITES ?? ff.allowUserFavorites
+    ),
+    allowUserSchedules: toBool(
+      env.VITE_PRESERVATION_ALLOW_USER_SCHEDULES ?? ff.allowUserSchedules
+    ),
     reverseGeneration: {
-      toStorehouse: toBool(env.VITE_PRESERVATION_REVERSE_TO_STOREHOUSE ?? ff.reverseGeneration?.toStorehouse),
-      toMeals: toBool(env.VITE_PRESERVATION_REVERSE_TO_MEALS ?? ff.reverseGeneration?.toMeals)
-    }
+      toStorehouse: toBool(
+        env.VITE_PRESERVATION_REVERSE_TO_STOREHOUSE ??
+          ff.reverseGeneration?.toStorehouse
+      ),
+      toMeals: toBool(
+        env.VITE_PRESERVATION_REVERSE_TO_MEALS ?? ff.reverseGeneration?.toMeals
+      ),
+    },
   };
 }
 
@@ -321,29 +525,60 @@ function buildImport(env, flags) {
   return {
     enabled: toBool(env.VITE_IMPORT_ENABLED ?? ff.enabled),
     sources: {
-      bookmarklet: toBool(env.VITE_IMPORT_SOURCE_BOOKMARKLET ?? ff.sources?.bookmarklet),
-      fileUpload: toBool(env.VITE_IMPORT_SOURCE_FILE_UPLOAD ?? ff.sources?.fileUpload),
-      linkedAccounts: toBool(env.VITE_IMPORT_SOURCE_LINKED_ACCOUNTS ?? ff.sources?.linkedAccounts),
-      scanCompareTrust: toBool(env.VITE_IMPORT_SOURCE_SCAN_COMPARE_TRUST ?? ff.sources?.scanCompareTrust),
-      pinterestToPlanner: toBool(env.VITE_IMPORT_SOURCE_PINTEREST_TO_PLANNER ?? ff.sources?.pinterestToPlanner),
-      gardenSeedPlan: toBool(env.VITE_IMPORT_SOURCE_GARDEN_SEED_PLAN ?? ff.sources?.gardenSeedPlan),
-      cleaningPlan: toBool(env.VITE_IMPORT_SOURCE_CLEANING_PLAN ?? ff.sources?.cleaningPlan),
-      storehouseStock: toBool(env.VITE_IMPORT_SOURCE_STOREHOUSE_STOCK ?? ff.sources?.storehouseStock),
-      animalPlanReverse: toBool(env.VITE_IMPORT_SOURCE_ANIMAL_PLAN_REVERSE ?? ff.sources?.animalPlanReverse),
-      preservationPlan: toBool(env.VITE_IMPORT_SOURCE_PRESERVATION_PLAN ?? ff.sources?.preservationPlan ?? false),
-      videoHowTo: toBool(env.VITE_IMPORT_SOURCE_VIDEO_HOWTO ?? ff.sources?.videoHowTo ?? false)
+      bookmarklet: toBool(
+        env.VITE_IMPORT_SOURCE_BOOKMARKLET ?? ff.sources?.bookmarklet
+      ),
+      fileUpload: toBool(
+        env.VITE_IMPORT_SOURCE_FILE_UPLOAD ?? ff.sources?.fileUpload
+      ),
+      linkedAccounts: toBool(
+        env.VITE_IMPORT_SOURCE_LINKED_ACCOUNTS ?? ff.sources?.linkedAccounts
+      ),
+      scanCompareTrust: toBool(
+        env.VITE_IMPORT_SOURCE_SCAN_COMPARE_TRUST ??
+          ff.sources?.scanCompareTrust
+      ),
+      pinterestToPlanner: toBool(
+        env.VITE_IMPORT_SOURCE_PINTEREST_TO_PLANNER ??
+          ff.sources?.pinterestToPlanner
+      ),
+      gardenSeedPlan: toBool(
+        env.VITE_IMPORT_SOURCE_GARDEN_SEED_PLAN ?? ff.sources?.gardenSeedPlan
+      ),
+      cleaningPlan: toBool(
+        env.VITE_IMPORT_SOURCE_CLEANING_PLAN ?? ff.sources?.cleaningPlan
+      ),
+      storehouseStock: toBool(
+        env.VITE_IMPORT_SOURCE_STOREHOUSE_STOCK ?? ff.sources?.storehouseStock
+      ),
+      animalPlanReverse: toBool(
+        env.VITE_IMPORT_SOURCE_ANIMAL_PLAN_REVERSE ??
+          ff.sources?.animalPlanReverse
+      ),
+      preservationPlan: toBool(
+        env.VITE_IMPORT_SOURCE_PRESERVATION_PLAN ??
+          ff.sources?.preservationPlan ??
+          false
+      ),
+      videoHowTo: toBool(
+        env.VITE_IMPORT_SOURCE_VIDEO_HOWTO ?? ff.sources?.videoHowTo ?? false
+      ),
     },
     ui: {
       showImportLanding: !!ff.ui?.showImportLanding,
       showImportPreview: !!ff.ui?.showImportPreview,
-      showImportSettings: !!ff.ui?.showImportSettings
+      showImportSettings: !!ff.ui?.showImportSettings,
     },
     sessions: {
-      allowUserFavorites: toBool(env.VITE_IMPORT_ALLOW_USER_FAVORITES ?? ff.sessions?.allowUserFavorites),
-      allowUserSchedules: toBool(env.VITE_IMPORT_ALLOW_USER_SCHEDULES ?? ff.sessions?.allowUserSchedules)
+      allowUserFavorites: toBool(
+        env.VITE_IMPORT_ALLOW_USER_FAVORITES ?? ff.sessions?.allowUserFavorites
+      ),
+      allowUserSchedules: toBool(
+        env.VITE_IMPORT_ALLOW_USER_SCHEDULES ?? ff.sessions?.allowUserSchedules
+      ),
     },
     sharedBus: toBool(env.VITE_IMPORT_SHARED_BUS_ENABLED ?? true),
-    domChannel: env.VITE_IMPORT_DOM_CHANNEL || "window.__suka?.eventBus"
+    domChannel: env.VITE_IMPORT_DOM_CHANNEL || "window.__suka?.eventBus",
   };
 }
 
@@ -353,7 +588,9 @@ function buildImport(env, flags) {
 export function getConfig(context = {}) {
   const viteEnv = readViteEnv();
   const MODE =
-    (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.MODE) ||
+    (typeof import.meta !== "undefined" &&
+      import.meta.env &&
+      import.meta.env.MODE) ||
     viteEnv.MODE ||
     process.env.NODE_ENV ||
     "development";
@@ -366,48 +603,80 @@ export function getConfig(context = {}) {
     context: {
       tier: context.tier || viteEnv.VITE_APP_TIER || "ssa",
       role: context.role || "user",
-      deviceProfile: context.deviceProfile || "browser"
-    }
+      deviceProfile: context.deviceProfile || "browser",
+    },
   });
 
   const d = flagged.defaults || {};
 
   // high-level toggles (env can override JSON)
   const toggles = {
-    "import-all-domains": toBool(viteEnv.VITE_TOGGLE_IMPORT_ALL_DOMAINS ?? d.toggles?.["import-all-domains"] ?? true),
-    familyFundMode: toBool(viteEnv.VITE_TOGGLE_FAMILY_FUND_MODE ?? d.toggles?.familyFundMode ?? d.familyFundMode ?? false),
-    analytics: toBool(viteEnv.VITE_TOGGLE_ANALYTICS ?? d.toggles?.analytics ?? true),
-    commerce: toBool(viteEnv.VITE_TOGGLE_COMMERCE ?? d.toggles?.commerce ?? false),
-    verboseEvents: toBool(viteEnv.VITE_VERBOSE_EVENTS ?? d.toggles?.verboseEvents ?? d.verboseEvents ?? false)
+    "import-all-domains": toBool(
+      viteEnv.VITE_TOGGLE_IMPORT_ALL_DOMAINS ??
+        d.toggles?.["import-all-domains"] ??
+        true
+    ),
+    familyFundMode: toBool(
+      viteEnv.VITE_TOGGLE_FAMILY_FUND_MODE ??
+        d.toggles?.familyFundMode ??
+        d.familyFundMode ??
+        false
+    ),
+    analytics: toBool(
+      viteEnv.VITE_TOGGLE_ANALYTICS ?? d.toggles?.analytics ?? true
+    ),
+    commerce: toBool(
+      viteEnv.VITE_TOGGLE_COMMERCE ?? d.toggles?.commerce ?? false
+    ),
+    verboseEvents: toBool(
+      viteEnv.VITE_VERBOSE_EVENTS ??
+        d.toggles?.verboseEvents ??
+        d.verboseEvents ??
+        false
+    ),
   };
 
   // global user ownership
-  const allowUserFavorites = toBool(viteEnv.VITE_ALLOW_USER_FAVORITES ?? d.allowUserFavorites);
-  const allowUserSchedules = toBool(viteEnv.VITE_ALLOW_USER_SCHEDULES ?? d.allowUserSchedules);
+  const allowUserFavorites = toBool(
+    viteEnv.VITE_ALLOW_USER_FAVORITES ?? d.allowUserFavorites
+  );
+  const allowUserSchedules = toBool(
+    viteEnv.VITE_ALLOW_USER_SCHEDULES ?? d.allowUserSchedules
+  );
 
   // runtime / orchestration
   const runtimeHints = {
     events: Array.isArray(d.runtimeHints?.events) ? d.runtimeHints.events : [],
-    domains: Array.isArray(d.runtimeHints?.domains) ? d.runtimeHints.domains : [],
+    domains: Array.isArray(d.runtimeHints?.domains)
+      ? d.runtimeHints.domains
+      : [],
     sharedBus: d.runtimeHints?.sharedBus ?? true,
     domChannel: d.runtimeHints?.domChannel || "window.__suka?.eventBus",
     payloadShape: d.runtimeHints?.payloadShape || {
       type: "string",
       ts: "ISO-8601",
       source: "string",
-      data: "object"
-    }
+      data: "object",
+    },
   };
 
   // guards
   const sabbathGuard = {
-    enabled: toBool(viteEnv.VITE_SABBATH_GUARD_ENABLED ?? d.sabbathGuard?.enabled),
-    startHint: viteEnv.VITE_SABBATH_GUARD_START_HINT || d.sabbathGuard?.startHint || "Fri 18:00",
-    endHint: viteEnv.VITE_SABBATH_GUARD_END_HINT || d.sabbathGuard?.endHint || "Sat 21:00"
+    enabled: toBool(
+      viteEnv.VITE_SABBATH_GUARD_ENABLED ?? d.sabbathGuard?.enabled
+    ),
+    startHint:
+      viteEnv.VITE_SABBATH_GUARD_START_HINT ||
+      d.sabbathGuard?.startHint ||
+      "Fri 18:00",
+    endHint:
+      viteEnv.VITE_SABBATH_GUARD_END_HINT ||
+      d.sabbathGuard?.endHint ||
+      "Sat 21:00",
   };
   const quietHours = [
     Number(viteEnv.VITE_QUIET_HOURS_START ?? d.quietHours?.[0] ?? 22),
-    Number(viteEnv.VITE_QUIET_HOURS_END ?? d.quietHours?.[1] ?? 7)
+    Number(viteEnv.VITE_QUIET_HOURS_END ?? d.quietHours?.[1] ?? 7),
   ];
 
   // build domain views
@@ -424,8 +693,12 @@ export function getConfig(context = {}) {
     enabled: toggles.familyFundMode || d.familyFundMode || false,
     apiBase: viteEnv.VITE_HUB_API_BASE || "",
     token: viteEnv.VITE_HUB_API_TOKEN || "",
-    queueIfOffline: toBool(viteEnv.VITE_HUB_QUEUE_IF_OFFLINE ?? d.hubExport?.queueIfOffline ?? true),
-    formatPackets: toBool(viteEnv.VITE_HUB_FORMAT_PACKETS ?? d.hubExport?.enabled ?? true)
+    queueIfOffline: toBool(
+      viteEnv.VITE_HUB_QUEUE_IF_OFFLINE ?? d.hubExport?.queueIfOffline ?? true
+    ),
+    formatPackets: toBool(
+      viteEnv.VITE_HUB_FORMAT_PACKETS ?? d.hubExport?.enabled ?? true
+    ),
   };
 
   return {
@@ -449,7 +722,7 @@ export function getConfig(context = {}) {
       meals,
       animals,
       preservation,
-      import: imports
+      import: imports,
     },
     gating: d.gating || {},
     rollouts: d.rollouts || {},
@@ -472,8 +745,53 @@ export function getConfig(context = {}) {
       if (!this.toggles) return fallback;
       if (typeof this.toggles[name] === "undefined") return fallback;
       return !!this.toggles[name];
-    }
+    },
   };
+}
+
+// ---------------------------------------------------------------------
+// NEW: getFeatureFlag()
+// ---------------------------------------------------------------------
+// Home (and other UI) sometimes wants a tiny boolean accessor without holding
+// a full config object. This matches your import style:
+//   import { getFeatureFlag } from "@/config";
+//
+// Supports:
+// - Toggle names:      getFeatureFlag("familyFundMode")
+// - Toggle map keys:   getFeatureFlag("import-all-domains")
+// - Dotted paths:      getFeatureFlag("domains.meals.enabled")
+// - Dotted paths:      getFeatureFlag("gating.allowLLM")
+// Fallback is returned if not found.
+function readPath(obj, path) {
+  if (!obj || !path) return undefined;
+  const parts = String(path).split(".").filter(Boolean);
+  let cur = obj;
+  for (const p of parts) {
+    cur = cur?.[p];
+    if (cur === undefined) return undefined;
+  }
+  return cur;
+}
+
+export function getFeatureFlag(name, fallback = false, context = undefined) {
+  const cfg = getConfig(context || {});
+  if (!name) return fallback;
+
+  // 1) direct toggle lookup
+  if (cfg.toggles && Object.prototype.hasOwnProperty.call(cfg.toggles, name)) {
+    return !!cfg.toggles[name];
+  }
+
+  // 2) common alias: "familyFundMode" etc.
+  if (Object.prototype.hasOwnProperty.call(cfg, name)) {
+    const v = cfg[name];
+    return typeof v === "boolean" ? v : toBool(v);
+  }
+
+  // 3) dotted path lookup
+  const v = readPath(cfg, name);
+  if (typeof v === "undefined") return fallback;
+  return typeof v === "boolean" ? v : toBool(v);
 }
 
 // ---------------------------------------------------------------------
@@ -486,8 +804,8 @@ function computeFeatureFlags() {
     familyFundMode: !!cfg.familyFundMode,
     verboseEvents: !!cfg.verboseEvents,
     mode: cfg.mode,
-    raw: rawFlags,       // original JSON
-    resolved: cfg.flags  // flags after overlays + rules
+    raw: rawFlags, // original JSON
+    resolved: cfg.flags, // flags after overlays + rules
   };
 }
 
@@ -496,5 +814,9 @@ export const featureFlags = computeFeatureFlags();
 
 // default export for full access
 export default {
-  getConfig
+  getConfig,
+  getFeatureFlag,
+  API_BASE_URL,
+  GOOGLE_PLACES_API_KEY,
+  GOOGLE_MAPS_API_KEY,
 };

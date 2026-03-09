@@ -21,8 +21,8 @@
 // -----------------------------------------------------------------------------
 
 import React, { useMemo, useState, useCallback } from "react";
-import { familyFundMode } from "@/services/featureFlags";
-import { emitEvent } from "@/services/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
+import { emitEvent } from "@/services/events/eventBus";
 
 /**
  * @typedef {Object} ScripturalYearConfig
@@ -72,14 +72,17 @@ function computeYearStats(config) {
     // Avoid letting users accidentally enter 0 or negative month lengths.
     const filtered = customMonths.filter((d) => Number.isFinite(d) && d > 0);
     const sum = filtered.reduce((acc, d) => acc + d, 0);
-    scripturalYearDays = filtered.length ? sum : safeMonthCount * safeAvgMonthLength;
+    scripturalYearDays = filtered.length
+      ? sum
+      : safeMonthCount * safeAvgMonthLength;
   } else {
     scripturalYearDays = safeMonthCount * safeAvgMonthLength;
   }
 
   const gregorianYearDays = isLeapYear(anchorYear) ? 366 : 365;
   const diffPerYear = scripturalYearDays - gregorianYearDays;
-  const projectedDrift = diffPerYear * (Number.isFinite(driftYears) ? driftYears : 7);
+  const projectedDrift =
+    diffPerYear * (Number.isFinite(driftYears) ? driftYears : 7);
 
   return {
     scripturalYearDays,
@@ -121,7 +124,10 @@ function requestNextSession(domainHints) {
   } catch (err) {
     // Fails gracefully if eventBus is not wired yet.
     // eslint-disable-next-line no-console
-    console.error("[ScripturalYearLength] Failed to emit session.requestNext", err);
+    console.error(
+      "[ScripturalYearLength] Failed to emit session.requestNext",
+      err
+    );
   }
 }
 
@@ -155,7 +161,8 @@ function ScripturalYearLengthCalculatorPage() {
         monthCount: Number(monthCount) || 12,
         avgMonthLength: Number(avgMonthLength) || 29.53,
         mode,
-        customMonths: mode === "custom" ? customMonths.slice(0, monthCount) : [],
+        customMonths:
+          mode === "custom" ? customMonths.slice(0, monthCount) : [],
         driftYears: Number(driftYears) || 7,
       }),
     [
@@ -174,7 +181,11 @@ function ScripturalYearLengthCalculatorPage() {
   }, []);
 
   const driftDirection =
-    stats.diffPerYear > 0 ? "longer" : stats.diffPerYear < 0 ? "shorter" : "aligned";
+    stats.diffPerYear > 0
+      ? "longer"
+      : stats.diffPerYear < 0
+      ? "shorter"
+      : "aligned";
 
   return (
     <div className="min-h-screen w-full bg-slate-950 text-slate-50 flex flex-col">
@@ -186,9 +197,9 @@ function ScripturalYearLengthCalculatorPage() {
               Scriptural Year Length Calculator
             </h1>
             <p className="text-sm text-slate-400 max-w-2xl">
-              Estimate the length of a scriptural (lunar/observed) year, compare it
-              to the Gregorian year, and see how drift accumulates over time for
-              feast days, storehouse planning, and garden cycles.
+              Estimate the length of a scriptural (lunar/observed) year, compare
+              it to the Gregorian year, and see how drift accumulates over time
+              for feast days, storehouse planning, and garden cycles.
             </p>
           </div>
 
@@ -220,8 +231,8 @@ function ScripturalYearLengthCalculatorPage() {
             <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-300" />
             <span className="font-semibold">Family Fund Mode is ON.</span>
             <span className="text-amber-200/80">
-              Scriptural year outputs can be exported via the Hub when used inside
-              a planning session.
+              Scriptural year outputs can be exported via the Hub when used
+              inside a planning session.
             </span>
           </div>
         </div>
@@ -272,7 +283,9 @@ function ScripturalYearLengthCalculatorPage() {
                     id="monthCount"
                     className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-50 outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400"
                     value={monthCount}
-                    onChange={(e) => setMonthCount(parseInt(e.target.value, 10))}
+                    onChange={(e) =>
+                      setMonthCount(parseInt(e.target.value, 10))
+                    }
                   >
                     <option value={12}>12 months (non-leap)</option>
                     <option value={13}>13 months (intercalated leap)</option>
@@ -357,8 +370,8 @@ function ScripturalYearLengthCalculatorPage() {
                     </p>
                     <p>
                       A common pattern is alternating 30 / 29 day months to stay
-                      near 29.5 days on average. This calculator lets you tune the
-                      average for your own observation rules.
+                      near 29.5 days on average. This calculator lets you tune
+                      the average for your own observation rules.
                     </p>
                     <p>
                       Use the <span className="text-emerald-300">Custom</span>{" "}
@@ -369,9 +382,10 @@ function ScripturalYearLengthCalculatorPage() {
               ) : (
                 <div className="space-y-3">
                   <p className="text-[11px] text-slate-400">
-                    Enter the observed day counts for each scriptural month. Only
-                    the first <span className="font-semibold">{monthCount}</span>{" "}
-                    months will be used.
+                    Enter the observed day counts for each scriptural month.
+                    Only the first{" "}
+                    <span className="font-semibold">{monthCount}</span> months
+                    will be used.
                   </p>
                   <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
                     {Array.from({ length: monthCount }).map((_, index) => (
@@ -430,7 +444,9 @@ function ScripturalYearLengthCalculatorPage() {
                   </p>
                   <ul className="list-disc list-inside space-y-1">
                     <li>Feast days can slide through the seasons.</li>
-                    <li>Planting windows may slowly move on the civil calendar.</li>
+                    <li>
+                      Planting windows may slowly move on the civil calendar.
+                    </li>
                     <li>Storehouse targets may need adjustments each cycle.</li>
                   </ul>
                   <p>
@@ -536,8 +552,8 @@ function ScripturalYearLengthCalculatorPage() {
                   <span>
                     <span className="font-semibold">Storehouse planning:</span>{" "}
                     use the year length and drift projection to set how many
-                    cycles of grain, oil, and preserved foods you want ready before
-                    key feast days.
+                    cycles of grain, oil, and preserved foods you want ready
+                    before key feast days.
                   </span>
                 </li>
                 <li className="flex gap-2">
@@ -551,20 +567,23 @@ function ScripturalYearLengthCalculatorPage() {
                 <li className="flex gap-2">
                   <span className="mt-[3px] inline-block h-1.5 w-1.5 rounded-full bg-fuchsia-400" />
                   <span>
-                    <span className="font-semibold">Feast & sabbath calendar:</span>{" "}
-                    line up appointed times with your chosen year rules and decide
-                    when to intercalate an extra month to keep seasons aligned.
+                    <span className="font-semibold">
+                      Feast & sabbath calendar:
+                    </span>{" "}
+                    line up appointed times with your chosen year rules and
+                    decide when to intercalate an extra month to keep seasons
+                    aligned.
                   </span>
                 </li>
                 {familyFundMode && (
                   <li className="flex gap-2">
                     <span className="mt-[3px] inline-block h-1.5 w-1.5 rounded-full bg-amber-400" />
                     <span>
-                      <span className="font-semibold">Family Fund Hub:</span> when
-                      you launch a storehouse or garden session from this page,
-                      completion analytics can be exported to the Hub to show how
-                      your household plans time, food, and resources over each
-                      scriptural cycle.
+                      <span className="font-semibold">Family Fund Hub:</span>{" "}
+                      when you launch a storehouse or garden session from this
+                      page, completion analytics can be exported to the Hub to
+                      show how your household plans time, food, and resources
+                      over each scriptural cycle.
                     </span>
                   </li>
                 )}

@@ -51,7 +51,7 @@ git commit -m "chore(cleaning): scratch .todo + session scaffolding"
   ☐ Live completion %, streaks, rewards, export log.
 
 4) Files/Areas to touch (agents + services)
-- src/agents/cleaningAgent.js (NEW)
+- src/agents/cleaningShim.js (NEW)
   ☐ buildCleaningPlan(zones, constraints, prefs) → steps with durations, tools, micro-drills.
   ☐ computeSuppliesDelta(steps, inventory) → consume / missing / homemadeSuggestions.
   ☐ proposeScheduleAvoidingFeasts(plan, hebrewCalendar) → safe times + fallbacks.

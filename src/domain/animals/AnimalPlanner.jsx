@@ -30,11 +30,11 @@
 // imports → intelligence → planner (THIS) → session engine → automation → (optional) hub export
 //
 // ASSUMPTIONS (soft):
-// - src/services/eventBus.js
+// - src/services/events/eventBus.js
 // - src/config/featureFlags.json
-// - src/services/HubPacketFormatter.js → formatAnimalPlanForHub
-// - src/services/FamilyFundConnector.js
-// - src/services/import/ImportIntelligenceService.js → getRecentImports(...)
+// - src/services/hub/HubPacketFormatter.js → formatAnimalPlanForHub
+// - src/services/hub/FamilyFundConnector.js
+// - src/services/imports/ImportIntelligenceService.js → getRecentImports(...)
 // - src/services/animals/AnimalSuggestionService.js → suggestAnimalsFromIntelligence(...)
 // - src/services/animals/AnimalPlanStore.js → saveAnimalPlan / loadLatestAnimalPlan
 //
@@ -46,12 +46,12 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 
-import eventBus from "../../services/eventBus";
-import featureFlags from "../../config/featureFlags.json";
-import { formatAnimalPlanForHub } from "../../services/HubPacketFormatter";
-import FamilyFundConnector from "../../services/FamilyFundConnector";
+import eventBus from "../../services/events/eventBus";
+import featureFlags from "@/config/featureFlags.json";
+import { formatAnimalPlanForHub } from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 
-import { getRecentImports } from "../../services/import/ImportIntelligenceService";
+import { getRecentImports } from "../../services/imports/ImportIntelligenceService";
 import { suggestAnimalsFromIntelligence } from "../../services/animals/AnimalSuggestionService";
 import {
   saveAnimalPlan,
@@ -109,9 +109,15 @@ function AnimalPlanner() {
     // listen to new imports (animal/butchery)
     const offImport = eventBus?.on?.("import.parsed", handleImportParsed);
     // listen to garden/forage → might create new animal-feed tasks
-    const offGarden = eventBus?.on?.("garden.harvest.logged", handleGardenHarvest);
+    const offGarden = eventBus?.on?.(
+      "garden.harvest.logged",
+      handleGardenHarvest
+    );
     // listen to storehouse.low → suggest "butcher surplus" or "reduce feed"
-    const offStorehouseLow = eventBus?.on?.("storehouse.low", handleStorehouseLow);
+    const offStorehouseLow = eventBus?.on?.(
+      "storehouse.low",
+      handleStorehouseLow
+    );
 
     return () => {
       alive = false;
@@ -330,7 +336,9 @@ function AnimalPlanner() {
             List
           </button>
           <button
-            className={viewMode === "butchery" ? "btn-primary" : "btn-secondary"}
+            className={
+              viewMode === "butchery" ? "btn-primary" : "btn-secondary"
+            }
             onClick={() => setViewMode("butchery")}
           >
             Butchery
@@ -361,17 +369,26 @@ function AnimalPlanner() {
     if (!suggestions.length) return null;
     return (
       <div className="ssa-animal-suggestions mb-4">
-        <h3 className="font-semibold mb-2">Suggestions (imports, garden-forage, storehouse)</h3>
+        <h3 className="font-semibold mb-2">
+          Suggestions (imports, garden-forage, storehouse)
+        </h3>
         <div className="flex flex-wrap gap-2">
           {suggestions.map((s) => (
-            <div key={s.id || s.title || s.species} className="card p-2 rounded border bg-white">
+            <div
+              key={s.id || s.title || s.species}
+              className="card p-2 rounded border bg-white"
+            >
               <div className="font-medium">{s.species || s.title}</div>
               {s.tags && s.tags.length ? (
-                <div className="text-xs text-gray-500 mb-1">{s.tags.join(" • ")}</div>
+                <div className="text-xs text-gray-500 mb-1">
+                  {s.tags.join(" • ")}
+                </div>
               ) : null}
               <button
                 className="btn-xs btn-primary"
-                onClick={() => handleAddFromSuggestion(s, s.pen || "Unassigned")}
+                onClick={() =>
+                  handleAddFromSuggestion(s, s.pen || "Unassigned")
+                }
               >
                 Add
               </button>
@@ -389,7 +406,11 @@ function AnimalPlanner() {
         <h3 className="font-semibold mb-2">Favorite Animal Plans</h3>
         <div className="flex gap-2 flex-wrap">
           {favorites.map((f) => (
-            <button key={f.id} className="btn-secondary btn-sm" onClick={() => handleApplyFavorite(f)}>
+            <button
+              key={f.id}
+              className="btn-secondary btn-sm"
+              onClick={() => handleApplyFavorite(f)}
+            >
               {f.label}
             </button>
           ))}
@@ -426,14 +447,18 @@ function AnimalPlanner() {
                         {a.species}
                         {a.breed ? " – " + a.breed : ""}
                       </div>
-                      <div className="text-xs text-gray-500">Qty: {a.qty || 1}</div>
+                      <div className="text-xs text-gray-500">
+                        Qty: {a.qty || 1}
+                      </div>
                       <div className="text-xs text-gray-400">
                         Butcher:{" "}
                         <input
                           type="date"
                           className="text-xs border rounded"
                           value={a.butcherAt?.slice(0, 10) || ""}
-                          onChange={(e) => handleButcherDateChange(a.id, e.target.value)}
+                          onChange={(e) =>
+                            handleButcherDateChange(a.id, e.target.value)
+                          }
                         />
                       </div>
                     </div>
@@ -449,10 +474,16 @@ function AnimalPlanner() {
                           </option>
                         ))}
                       </select>
-                      <button className="btn-xs" onClick={() => handleLogAcquisition(a)}>
+                      <button
+                        className="btn-xs"
+                        onClick={() => handleLogAcquisition(a)}
+                      >
                         Log acquired
                       </button>
-                      <button className="btn-xs" onClick={() => handleSendButcherRequest(a)}>
+                      <button
+                        className="btn-xs"
+                        onClick={() => handleSendButcherRequest(a)}
+                      >
                         Send to butcher
                       </button>
                     </div>
@@ -472,7 +503,10 @@ function AnimalPlanner() {
     return (
       <div className="flex flex-col gap-2">
         {animals.map((a) => (
-          <div key={a.id} className="border rounded p-2 flex items-center justify-between">
+          <div
+            key={a.id}
+            className="border rounded p-2 flex items-center justify-between"
+          >
             <div>
               <div className="font-medium">
                 {a.species}
@@ -509,10 +543,16 @@ function AnimalPlanner() {
                 value={a.butcherAt?.slice(0, 10) || ""}
                 onChange={(e) => handleButcherDateChange(a.id, e.target.value)}
               />
-              <button className="btn-xs" onClick={() => handleLogAcquisition(a)}>
+              <button
+                className="btn-xs"
+                onClick={() => handleLogAcquisition(a)}
+              >
                 Acquired
               </button>
-              <button className="btn-xs" onClick={() => handleSendButcherRequest(a)}>
+              <button
+                className="btn-xs"
+                onClick={() => handleSendButcherRequest(a)}
+              >
                 Butcher
               </button>
             </div>
@@ -527,29 +567,40 @@ function AnimalPlanner() {
       <div className="border rounded p-3 bg-white/50">
         <h3 className="font-semibold mb-2">Butchery schedule</h3>
         <p className="text-xs text-gray-600 mb-2">
-          This shows animals with butchery dates. AnimalSessionEngine will pick these up and create
-          butchery sessions that can use your yield curves (beef_brangus.json, sheep_katahdin.json,
-          duck_muscovy.json, etc.) and update inventory/storehouse.
+          This shows animals with butchery dates. AnimalSessionEngine will pick
+          these up and create butchery sessions that can use your yield curves
+          (beef_brangus.json, sheep_katahdin.json, duck_muscovy.json, etc.) and
+          update inventory/storehouse.
         </p>
         {butcheryList.length ? (
           <div className="flex flex-col gap-2">
             {butcheryList.map((a) => (
-              <div key={a.id} className="border rounded p-2 bg-white flex items-center justify-between">
+              <div
+                key={a.id}
+                className="border rounded p-2 bg-white flex items-center justify-between"
+              >
                 <div>
                   <div className="font-medium">
                     {a.species}
                     {a.breed ? " – " + a.breed : ""}
                   </div>
-                  <div className="text-xs text-gray-500">Butcher: {a.butcherAt.slice(0, 10)}</div>
+                  <div className="text-xs text-gray-500">
+                    Butcher: {a.butcherAt.slice(0, 10)}
+                  </div>
                 </div>
-                <button className="btn-xs" onClick={() => handleSendButcherRequest(a)}>
+                <button
+                  className="btn-xs"
+                  onClick={() => handleSendButcherRequest(a)}
+                >
                   Send to butcher
                 </button>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-xs text-gray-500">No animals scheduled for butchery.</p>
+          <p className="text-xs text-gray-500">
+            No animals scheduled for butchery.
+          </p>
         )}
       </div>
     );
@@ -640,7 +691,10 @@ function safeSuggestAnimalsFromIntelligence(intel, opts) {
     const res = suggestAnimalsFromIntelligence(intel, opts);
     return Array.isArray(res) ? res : [];
   } catch (e) {
-    console.warn("[AnimalPlanner] safeSuggestAnimalsFromIntelligence failed", e);
+    console.warn(
+      "[AnimalPlanner] safeSuggestAnimalsFromIntelligence failed",
+      e
+    );
     return [];
   }
 }
@@ -683,7 +737,11 @@ function buildDefaultCare(species = "") {
     { type: "feed", every: "1d" },
     { type: "water", every: "1d" },
   ];
-  if (lower.includes("chicken") || lower.includes("turkey") || lower.includes("duck")) {
+  if (
+    lower.includes("chicken") ||
+    lower.includes("turkey") ||
+    lower.includes("duck")
+  ) {
     base.push({ type: "clean-coop", every: "7d" });
   }
   if (lower.includes("goat") || lower.includes("sheep")) {

@@ -23,7 +23,7 @@
 //    call exportToHubIfEnabled(...) and fail silently if Hub is unavailable.
 //
 // ASSUMPTIONS
-// - We have a shared eventBus at "@/services/eventBus"
+// - We have a shared eventBus at "@/services/events/eventBus"
 // - Sessions announce themselves with one of:
 //     "session.scheduled"   → { session: {...} }
 //     "session.started"     → { session: {...} }
@@ -51,9 +51,9 @@
   const now = () => Date.now();
 
   // ----------------------------- defensive imports ---------------------------
-  let eventBus = { on(){}, off(){}, emit(){} };
+  let eventBus = { on() {}, off() {}, emit() {} };
   try {
-    const eb = require("@/services/eventBus");
+    const eb = require("@/services/events/eventBus");
     eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
   } catch (_e) {}
 
@@ -81,7 +81,8 @@
   // optional: automation runtime (to auto-delay conflicting sessions)
   let automation = null;
   try {
-    automation = (require("@/services/automation/runtime") || {}).automation || null;
+    automation =
+      (require("@/services/automation/runtime") || {}).automation || null;
   } catch (_e) {}
 
   // ----------------------------- utils ---------------------------------------
@@ -92,7 +93,9 @@
       source: MODULE_SOURCE,
       data: data || {},
     };
-    try { eventBus.emit(type, payload); } catch (_e) {}
+    try {
+      eventBus.emit(type, payload);
+    } catch (_e) {}
     // let automation hear about session conflicts too
     try {
       if (automation && typeof automation.emitEvent === "function") {
@@ -108,7 +111,10 @@
       const packet = HubPacketFormatter
         ? HubPacketFormatter.format("sessionConflict", payload)
         : { kind: "sessionConflict", payload };
-      if (FamilyFundConnector && typeof FamilyFundConnector.send === "function") {
+      if (
+        FamilyFundConnector &&
+        typeof FamilyFundConnector.send === "function"
+      ) {
         FamilyFundConnector.send(packet);
       }
     } catch (_err) {
@@ -135,11 +141,11 @@
 
   // domains that are more likely to rival for equipment/time
   const HIGH_CONTENTION_DOMAINS = new Set([
-    "cooking",          // oven, stove, freezer, mixer, dehydrator
-    "preservation",     // dehydrator, smoker, canner
-    "cleaning",         // water, washer/dryer, power
-    "animals",          // equipment + outdoor time windows
-    "garden",           // hose, outdoor quiet/wet windows
+    "cooking", // oven, stove, freezer, mixer, dehydrator
+    "preservation", // dehydrator, smoker, canner
+    "cleaning", // water, washer/dryer, power
+    "animals", // equipment + outdoor time windows
+    "garden", // hose, outdoor quiet/wet windows
   ]);
 
   // canonical equipment keys we know about; new ones will be accepted but not auto-grouped
@@ -223,12 +229,22 @@
     if (!scheduleHelpers) return guards;
     try {
       if (scheduleHelpers.isSabbath && scheduleHelpers.isSabbath(ts)) {
-        guards.push({ kind: "sabbath", until: scheduleHelpers.nextUnquiet ? scheduleHelpers.nextUnquiet(ts) : null });
+        guards.push({
+          kind: "sabbath",
+          until: scheduleHelpers.nextUnquiet
+            ? scheduleHelpers.nextUnquiet(ts)
+            : null,
+        });
       }
     } catch (_e) {}
     try {
       if (scheduleHelpers.inQuietHours && scheduleHelpers.inQuietHours(ts)) {
-        guards.push({ kind: "quiet-hours", until: scheduleHelpers.nextUnquiet ? scheduleHelpers.nextUnquiet(ts) : null });
+        guards.push({
+          kind: "quiet-hours",
+          until: scheduleHelpers.nextUnquiet
+            ? scheduleHelpers.nextUnquiet(ts)
+            : null,
+        });
       }
     } catch (_e) {}
     try {
@@ -248,7 +264,8 @@
     const conflicts = [];
 
     const cStart = toMs(candidate.startsAt);
-    const cEnd = toMs(candidate.endsAt) || (cStart ? cStart + 30 * 60 * 1000 : 0); // default 30 min
+    const cEnd =
+      toMs(candidate.endsAt) || (cStart ? cStart + 30 * 60 * 1000 : 0); // default 30 min
     const cEq = normalizeEquip(candidate.equipment);
 
     // guard-aware: if Sabbath/quiet → we mark as conflict with guard
@@ -272,7 +289,9 @@
       if (rangesOverlap(cStart, cEnd, sStart, sEnd, 60 * 1000)) {
         // equipment overlap too?
         const eqOverlap = equipmentOverlap(cEq, normalizeEquip(sess.equipment));
-        const isHighContention = HIGH_CONTENTION_DOMAINS.has(candidate.domain) || HIGH_CONTENTION_DOMAINS.has(sess.domain);
+        const isHighContention =
+          HIGH_CONTENTION_DOMAINS.has(candidate.domain) ||
+          HIGH_CONTENTION_DOMAINS.has(sess.domain);
         conflicts.push({
           kind: eqOverlap.length ? "time+equipment" : "time",
           withSessionId: sess.id,
@@ -330,17 +349,23 @@
       newStart = maxUntil;
     }
 
-    const duration = (toMs(candidate.endsAt) || (curStart + 30 * 60 * 1000)) - curStart;
+    const duration =
+      (toMs(candidate.endsAt) || curStart + 30 * 60 * 1000) - curStart;
     const newEnd = newStart + duration;
 
     // emit a request to automation to update the schedule
     automation.emitEvent?.("automation.schedule.request", {
       id: candidate.scheduleId || candidate.id,
       title: candidate.title || "Delayed Session",
-      templateId: candidate.templateId || `session.${candidate.domain || "general"}.generate`,
+      templateId:
+        candidate.templateId ||
+        `session.${candidate.domain || "general"}.generate`,
       rule: { at: new Date(newStart).toISOString().slice(11, 16) }, // "HH:MM"
       ctx: { ...candidate, startsAt: newStart, endsAt: newEnd },
-      meta: { domain: candidate.domain || "general", reason: "conflict-auto-delay" },
+      meta: {
+        domain: candidate.domain || "general",
+        reason: "conflict-auto-delay",
+      },
     });
 
     return {
@@ -361,7 +386,10 @@
 
     if (!session.id) {
       // no id → we can't track it
-      console.warn("[SessionConflictRules] session without id ignored:", session);
+      console.warn(
+        "[SessionConflictRules] session without id ignored:",
+        session
+      );
       return;
     }
 
@@ -371,7 +399,11 @@
       domain: session.domain || "general",
       title: session.title || "Session",
       startsAt: toMs(session.startsAt) || now(),
-      endsAt: toMs(session.endsAt) || (toMs(session.startsAt) ? toMs(session.startsAt) + 30 * 60 * 1000 : now() + 30 * 60 * 1000),
+      endsAt:
+        toMs(session.endsAt) ||
+        (toMs(session.startsAt)
+          ? toMs(session.startsAt) + 30 * 60 * 1000
+          : now() + 30 * 60 * 1000),
       equipment: normalizeEquip(session.equipment),
       resources: session.resources || {},
       meta: session.meta || {},

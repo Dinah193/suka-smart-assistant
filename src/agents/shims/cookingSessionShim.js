@@ -1,6 +1,6 @@
 // src/agents/shims/cookingSessionShim.js
 // -----------------------------------------------------------------------------
-// CookingSessionShim
+// cookingSessionShim
 // -----------------------------------------------------------------------------
 
 /* eslint-disable no-console */
@@ -15,7 +15,7 @@ import * as SessionRunnerModule from "@/services/session/SessionRunner.js";
 import featureFlags from "@/config/featureFlags.json";
 import * as hubExportModule from "@/services/hub/exportToHubIfEnabled.js";
 
-const SHIM_SOURCE = "CookingSessionShim";
+const SHIM_SOURCE = "cookingSessionShim";
 const isBrowser = typeof window !== "undefined";
 
 /* -------------------------------------------------------------------------- */
@@ -46,7 +46,7 @@ if (
       if (import.meta.env.DEV) {
         console.info(
           `[${SHIM_SOURCE}] tapped eventBus.emit("mealplan.draft.requested")`,
-          payload
+          payload,
         );
       }
       try {
@@ -99,7 +99,7 @@ async function getCookingEngine() {
 
       if (!engine) {
         console.warn(
-          `[${SHIM_SOURCE}] CookingSessionEngine missing expected exports`
+          `[${SHIM_SOURCE}] CookingSessionEngine missing expected exports`,
         );
       }
 
@@ -197,7 +197,7 @@ async function handleMealplanDraftRequested(envelope) {
       } catch {
         return envelope;
       }
-    })()
+    })(),
   );
 
   const engine = await getCookingEngine();
@@ -205,7 +205,7 @@ async function handleMealplanDraftRequested(envelope) {
     softToast(
       "error",
       "Cooking engine unavailable",
-      "Unable to generate a cooking session right now."
+      "Unable to generate a cooking session right now.",
     );
     return;
   }
@@ -248,7 +248,7 @@ async function handleMealplanDraftRequested(envelope) {
         window: norm.window,
         ts: new Date().toISOString(),
       },
-      { source: SHIM_SOURCE }
+      { source: SHIM_SOURCE },
     );
 
     eventBus.emit(
@@ -257,7 +257,7 @@ async function handleMealplanDraftRequested(envelope) {
         session,
         ts: new Date().toISOString(),
       },
-      { source: SHIM_SOURCE }
+      { source: SHIM_SOURCE },
     );
 
     if (import.meta.env.DEV) {
@@ -271,12 +271,13 @@ async function handleMealplanDraftRequested(envelope) {
   } catch (err) {
     console.warn(
       `[${SHIM_SOURCE}] failed to build session from meal plan:`,
-      err
+      err,
     );
     softToast(
       "error",
       "Couldn’t generate cooking session",
-      err?.message || "Something went wrong while building the cooking session."
+      err?.message ||
+        "Something went wrong while building the cooking session.",
     );
   }
 }
@@ -321,7 +322,7 @@ async function handleCookingRequestNow(envelope) {
       softToast(
         "info",
         "No cooking session ready",
-        "Create a Cooking Session from your Meal Plan first, then tap Now again."
+        "Create a Cooking Session from your Meal Plan first, then tap Now again.",
       );
       return;
     }
@@ -345,7 +346,7 @@ async function handleCookingRequestNow(envelope) {
       softToast(
         "error",
         "Session runner unavailable",
-        "The Session Runner module is not ready, so this cooking session can’t be started yet."
+        "The Session Runner module is not ready, so this cooking session can’t be started yet.",
       );
       return;
     }
@@ -373,7 +374,7 @@ async function handleCookingRequestNow(envelope) {
           sessionId,
           ts: new Date().toISOString(),
         },
-        { source: SHIM_SOURCE }
+        { source: SHIM_SOURCE },
       );
     } else {
       console.warn(`[${SHIM_SOURCE}] Runner.run not available`);
@@ -384,7 +385,7 @@ async function handleCookingRequestNow(envelope) {
       "error",
       "Unable to start session",
       err?.message ||
-        "Something went wrong while starting your cooking session."
+        "Something went wrong while starting your cooking session.",
     );
   }
 }
@@ -435,10 +436,74 @@ async function handleSessionTerminalEvent(envelope, status) {
         sessionId: session.id,
         ts: new Date().toISOString(),
       },
-      { source: SHIM_SOURCE }
+      { source: SHIM_SOURCE },
     );
   } catch (err) {
     console.warn(`[${SHIM_SOURCE}] Hub export failed:`, err);
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* ✅ Missing export expected by HouseholdOrchestrator                         */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * HouseholdOrchestrator expects a named export `invokecookingSessionShim`.
+ *
+ * This is a thin adapter:
+ * - If the event asks to "requestNow", call handleCookingRequestNow(envelope)
+ * - If the event is a mealplan draft request (or includes a mealPlan), call draft handler
+ * - Otherwise, no-op (returns an ok response object)
+ *
+ * @param {any} envelope
+ * @returns {Promise<{ ok: boolean, handled: boolean, reason: string }>}
+ */
+export async function invokecookingSessionShim(envelope) {
+  try {
+    const env = envelope?.data ? envelope : { data: envelope || {} };
+    const type =
+      String(
+        envelope?.type || envelope?.event || envelope?.name || "",
+      ).trim() ||
+      String(
+        env?.data?.type || env?.data?.event || env?.data?.name || "",
+      ).trim();
+
+    const data = env?.data || {};
+
+    // Heuristics: decide what to do based on envelope/type/payload shape.
+    const looksLikeDraft =
+      type === "mealplan.draft.requested" ||
+      !!data.mealPlan ||
+      !!data.plan ||
+      Array.isArray(data.meals);
+
+    const looksLikeRequestNow =
+      type === "cooking/session/requestNow" ||
+      type === "cooking.session.requestNow" ||
+      type === "session.requestNow" ||
+      type === "cooking.requestNow" ||
+      data.requestNow === true;
+
+    if (looksLikeDraft) {
+      await handleMealplanDraftRequested(
+        envelope?.type
+          ? envelope
+          : { ...env, type: "mealplan.draft.requested" },
+      );
+      return { ok: true, handled: true, reason: "handled-draft-request" };
+    }
+
+    if (looksLikeRequestNow) {
+      await handleCookingRequestNow(envelope?.type ? envelope : env);
+      return { ok: true, handled: true, reason: "handled-request-now" };
+    }
+
+    // Nothing to do, but keep it safe.
+    return { ok: true, handled: false, reason: "noop" };
+  } catch (err) {
+    console.warn(`[${SHIM_SOURCE}] invokecookingSessionShim error:`, err);
+    return { ok: false, handled: false, reason: String(err) };
   }
 }
 
@@ -456,7 +521,7 @@ function softToast(variant, title, message) {
         message,
         ts: new Date().toISOString(),
       },
-      { source: SHIM_SOURCE }
+      { source: SHIM_SOURCE },
     );
   } catch (err) {
     if (isBrowser) {
@@ -485,7 +550,7 @@ async function autoResumeCookingSessionIfNeeded() {
     const latest = running.sort(
       (a, b) =>
         new Date(b.updatedAt || b.createdAt || 0) -
-        new Date(a.updatedAt || a.createdAt || 0)
+        new Date(a.updatedAt || a.createdAt || 0),
     )[0];
 
     const Runner = await getSessionRunner();
@@ -510,18 +575,18 @@ async function autoResumeCookingSessionIfNeeded() {
 /* Bootstrap                                                                  */
 /* -------------------------------------------------------------------------- */
 
-export function bootstrapCookingSessionShim() {
-  if (bootstrapCookingSessionShim._bootstrapped) return;
-  bootstrapCookingSessionShim._bootstrapped = true;
+export function bootstrapcookingSessionShim() {
+  if (bootstrapcookingSessionShim._bootstrapped) return;
+  bootstrapcookingSessionShim._bootstrapped = true;
 
   // Keep these for non-mealplan events
   eventBus.on("cooking/session/requestNow", handleCookingRequestNow);
 
   eventBus.on("session.completed", (env) =>
-    handleSessionTerminalEvent(env, "completed")
+    handleSessionTerminalEvent(env, "completed"),
   );
   eventBus.on("session.aborted", (env) =>
-    handleSessionTerminalEvent(env, "aborted")
+    handleSessionTerminalEvent(env, "aborted"),
   );
 
   if (isBrowser) {

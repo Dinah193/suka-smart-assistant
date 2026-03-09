@@ -60,7 +60,7 @@ vi.mock("@/config", () => ({
 }));
 
 // Mock Hub formatter + connector
-vi.mock("@/services/HubPacketFormatter", () => ({
+vi.mock("@/services/hub/HubPacketFormatter", () => ({
   default: {
     format: vi.fn((payload) => ({
       ...payload,
@@ -69,7 +69,7 @@ vi.mock("@/services/HubPacketFormatter", () => ({
   },
 }));
 
-vi.mock("@/services/FamilyFundConnector", () => ({
+vi.mock("@/services/hub/FamilyFundConnector", () => ({
   default: {
     send: vi.fn(async () => ({ ok: true })),
   },
@@ -109,8 +109,10 @@ describe("automationRuntime", () => {
     });
 
     // reset hub mocks
-    const HubPacketFormatter = require("@/services/HubPacketFormatter").default;
-    const FamilyFundConnector = require("@/services/FamilyFundConnector").default;
+    const HubPacketFormatter =
+      require("@/services/hub/HubPacketFormatter").default;
+    const FamilyFundConnector =
+      require("@/services/hub/FamilyFundConnector").default;
     HubPacketFormatter.format.mockClear();
     FamilyFundConnector.send.mockClear();
   });
@@ -159,11 +161,16 @@ describe("automationRuntime", () => {
     const emit = window.__suka.eventBus.emit;
     expect(emit).toHaveBeenCalled();
 
-    const call = emit.mock.calls.find((c) => c[0] === "cleaning.session.generate.requested");
+    const call = emit.mock.calls.find(
+      (c) => c[0] === "cleaning.session.generate.requested"
+    );
     expect(call).toBeTruthy();
 
     const [, payload] = call;
-    expect(payload).toHaveProperty("type", "cleaning.session.generate.requested");
+    expect(payload).toHaveProperty(
+      "type",
+      "cleaning.session.generate.requested"
+    );
     expect(payload).toHaveProperty("ts");
     expect(payload).toHaveProperty("source", "automationRuntime");
     expect(payload.data).toMatchObject({
@@ -196,7 +203,7 @@ describe("automationRuntime", () => {
     // @ts-expect-error test env
     const emit = window.__suka.eventBus.emit;
     const call = emit.mock.calls.find(
-      (c) => c[0] === "storehouse.stockPlan.generate.requested",
+      (c) => c[0] === "storehouse.stockPlan.generate.requested"
     );
     expect(call).toBeTruthy();
 
@@ -232,12 +239,15 @@ describe("automationRuntime", () => {
     // @ts-expect-error test env
     const emit = window.__suka.eventBus.emit;
     const call = emit.mock.calls.find(
-      (c) => c[0] === "preservation.session.generate.requested",
+      (c) => c[0] === "preservation.session.generate.requested"
     );
     expect(call).toBeTruthy();
 
     const [, payload] = call;
-    expect(payload).toHaveProperty("type", "preservation.session.generate.requested");
+    expect(payload).toHaveProperty(
+      "type",
+      "preservation.session.generate.requested"
+    );
     expect(payload.data.harvest.crop).toBe("tomatoes");
   });
 
@@ -284,8 +294,10 @@ describe("automationRuntime", () => {
 
     await automationRuntime.handleEvent(evt);
 
-    const HubPacketFormatter = require("@/services/HubPacketFormatter").default;
-    const FamilyFundConnector = require("@/services/FamilyFundConnector").default;
+    const HubPacketFormatter =
+      require("@/services/hub/HubPacketFormatter").default;
+    const FamilyFundConnector =
+      require("@/services/hub/FamilyFundConnector").default;
 
     expect(HubPacketFormatter.format).not.toHaveBeenCalled();
     expect(FamilyFundConnector.send).not.toHaveBeenCalled();
@@ -317,8 +329,10 @@ describe("automationRuntime", () => {
 
     await automationRuntime.handleEvent(evt);
 
-    const HubPacketFormatter = require("@/services/HubPacketFormatter").default;
-    const FamilyFundConnector = require("@/services/FamilyFundConnector").default;
+    const HubPacketFormatter =
+      require("@/services/hub/HubPacketFormatter").default;
+    const FamilyFundConnector =
+      require("@/services/hub/FamilyFundConnector").default;
 
     expect(HubPacketFormatter.format).toHaveBeenCalled();
     expect(FamilyFundConnector.send).toHaveBeenCalled();
@@ -332,7 +346,8 @@ describe("automationRuntime", () => {
       },
     });
 
-    const FamilyFundConnector = require("@/services/FamilyFundConnector").default;
+    const FamilyFundConnector =
+      require("@/services/hub/FamilyFundConnector").default;
     FamilyFundConnector.send.mockImplementationOnce(async () => {
       throw new Error("hub down");
     });
@@ -343,7 +358,7 @@ describe("automationRuntime", () => {
         ts: new Date().toISOString(),
         source: "test",
         data: { foo: "bar" },
-      }),
+      })
     ).resolves.not.toThrow();
   });
 
@@ -380,11 +395,14 @@ describe("automationRuntime", () => {
     // @ts-expect-error test env
     const emit = window.__suka.eventBus.emit;
     const call = emit.mock.calls.find(
-      (c) => c[0] === "storehouse.stockPlan.generate.requested",
+      (c) => c[0] === "storehouse.stockPlan.generate.requested"
     );
 
     const [, payload] = call;
-    expect(payload).toHaveProperty("type", "storehouse.stockPlan.generate.requested");
+    expect(payload).toHaveProperty(
+      "type",
+      "storehouse.stockPlan.generate.requested"
+    );
     expect(payload).toHaveProperty("ts");
     expect(payload).toHaveProperty("source", "automationRuntime");
     expect(payload.data).toMatchObject({

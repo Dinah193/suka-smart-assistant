@@ -56,8 +56,8 @@ async function getEventBus() {
   const candidates = [
     "@/services/events/eventBus",
     "@/services/events/eventBus.js",
-    "@/services/eventBus",
-    "@/services/eventBus.js",
+    "@/services/events/eventBus",
+    "@/services/events/eventBus.js",
   ];
   for (const p of candidates) {
     const mod = await safeImport(p);

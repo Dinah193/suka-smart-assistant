@@ -38,10 +38,10 @@
 // - Event-driven: emits { type, ts, source, data } with ISO timestamp
 //
 // ASSUMPTIONS (soft)
-// - src/services/eventBus.js
+// - src/services/events/eventBus.js
 // - src/config/featureFlags.json
-// - src/services/HubPacketFormatter.js → formatInventoryRuleForHub
-// - src/services/FamilyFundConnector.js
+// - src/services/hub/HubPacketFormatter.js → formatInventoryRuleForHub
+// - src/services/hub/FamilyFundConnector.js
 // - src/services/inventory/InventoryRuleStore.js → load/save rules (optional)
 // - src/services/inventory/InventoryService.js → create/find items (optional)
 // - src/data/yieldCurves/substitutions/*.json may exist elsewhere; we expose a hook
@@ -61,11 +61,10 @@
 //
 // -----------------------------------------------------------------------------
 
-
-import eventBus from "../../services/eventBus";
-import featureFlags from "../../config/featureFlags.json";
-import { formatInventoryRuleForHub } from "../../services/HubPacketFormatter";
-import FamilyFundConnector from "../../services/FamilyFundConnector";
+import eventBus from "../../services/events/eventBus";
+import featureFlags from "@/config/featureFlags.json";
+import { formatInventoryRuleForHub } from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 
 let InventoryRuleStore = null;
 let InventoryService = null;
@@ -101,7 +100,10 @@ const InventoryRules = {
       try {
         _rules = await InventoryRuleStore.getAll();
       } catch (e) {
-        console.warn("[InventoryRules] loadRules failed — falling back to empty", e);
+        console.warn(
+          "[InventoryRules] loadRules failed — falling back to empty",
+          e
+        );
         _rules = [];
       }
     } else {
@@ -144,7 +146,10 @@ const InventoryRules = {
 
     // upsert into mem
     const idx = _rules.findIndex(
-      (r) => r.fromKey === normalized.fromKey && r.domain === normalized.domain && r.source === normalized.source
+      (r) =>
+        r.fromKey === normalized.fromKey &&
+        r.domain === normalized.domain &&
+        r.source === normalized.source
     );
     if (idx >= 0) {
       _rules[idx] = normalized;
@@ -248,8 +253,7 @@ const InventoryRules = {
     // 2. try domain-only rule
     const byDomain = _rules.find(
       (r) =>
-        r.fromKey === normName &&
-        (r.domain === domain || r.domain === "any")
+        r.fromKey === normName && (r.domain === domain || r.domain === "any")
     );
     if (byDomain) {
       return makeMappingResult(ingredient, byDomain);
@@ -258,8 +262,7 @@ const InventoryRules = {
     // 3. try source-only rule
     const bySource = _rules.find(
       (r) =>
-        r.fromKey === normName &&
-        (r.source === source || r.source === "any")
+        r.fromKey === normName && (r.source === source || r.source === "any")
     );
     if (bySource) {
       return makeMappingResult(ingredient, bySource);
@@ -426,7 +429,10 @@ async function createInventoryItemIfPossible(item) {
   }
 
   // fallback to store
-  if (InventoryRuleStore && typeof InventoryRuleStore.upsertInventoryItem === "function") {
+  if (
+    InventoryRuleStore &&
+    typeof InventoryRuleStore.upsertInventoryItem === "function"
+  ) {
     try {
       await InventoryRuleStore.upsertInventoryItem(payload);
       const evt = emitEvent("inventory.updated", {
@@ -444,7 +450,10 @@ async function createInventoryItemIfPossible(item) {
       await exportToHubIfEnabled(evt);
       return;
     } catch (e) {
-      console.warn("[InventoryRules] InventoryRuleStore.upsertInventoryItem failed", e);
+      console.warn(
+        "[InventoryRules] InventoryRuleStore.upsertInventoryItem failed",
+        e
+      );
     }
   }
   // if neither exists, we just emit and move on

@@ -39,7 +39,7 @@ const isBrowser = typeof window !== "undefined";
 let eventBus = { emit() {}, on() {}, off() {} };
 try {
   // eslint-disable-next-line global-require
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch (_e) {
   // ok – we'll still use window events as a fallback
@@ -97,8 +97,8 @@ const DEFAULT_IMPORT_PREFS = {
   reverseMeta: {
     shareTarget: "family-fund-hub",
     includeShare: true,
-    format: "json"
-  }
+    format: "json",
+  },
 };
 
 // -----------------------------------------------------------------------------
@@ -108,7 +108,9 @@ function loadImportPrefs() {
   if (!isBrowser) return { ...DEFAULT_IMPORT_PREFS };
   try {
     const raw = window.localStorage.getItem("suka.import.settings.v1");
-    return raw ? { ...DEFAULT_IMPORT_PREFS, ...JSON.parse(raw) } : { ...DEFAULT_IMPORT_PREFS };
+    return raw
+      ? { ...DEFAULT_IMPORT_PREFS, ...JSON.parse(raw) }
+      : { ...DEFAULT_IMPORT_PREFS };
   } catch (_e) {
     return { ...DEFAULT_IMPORT_PREFS };
   }
@@ -122,7 +124,7 @@ function emitSSA(type, data = {}, source = "scraperService") {
     type,
     ts: new Date().toISOString(),
     source,
-    data
+    data,
   };
 
   // app-level bus (preferred)
@@ -187,7 +189,7 @@ export const scraperService = {
       inferDomain = true,
       saveAsFavorite = prefs.autoSaveFavorite,
       schedule = prefs.autoSchedule ? prefs.autoScheduleRule : false,
-      reverseMeta = prefs.reverseMeta
+      reverseMeta = prefs.reverseMeta,
     } = opts;
 
     let rawResult;
@@ -205,7 +207,7 @@ export const scraperService = {
       rawResult = {
         title: "Untitled import",
         __importType: "recipe",
-        source: { kind: sourceType }
+        source: { kind: sourceType },
       };
     }
 
@@ -220,15 +222,21 @@ export const scraperService = {
 
     // schedule can be "once+5min" or an object
     if (schedule) {
-      rawResult.schedule = typeof schedule === "object" ? schedule : buildSchedule(schedule, rawResult);
+      rawResult.schedule =
+        typeof schedule === "object"
+          ? schedule
+          : buildSchedule(schedule, rawResult);
     }
 
     // 4) VALIDATE & NORMALIZE --------------------------------------------------
     // validate to your central validator first – it will auto-inject missing pieces
     let validated = { valid: true, normalized: rawResult, errors: [] };
-    if (schemaValidator && typeof schemaValidator.validateImport === "function") {
+    if (
+      schemaValidator &&
+      typeof schemaValidator.validateImport === "function"
+    ) {
       validated = schemaValidator.validateImport(rawResult, {
-        defaultSaveAsFavorite: prefs.autoSaveFavorite
+        defaultSaveAsFavorite: prefs.autoSaveFavorite,
       });
     }
     let normalized = validated.normalized || rawResult;
@@ -246,19 +254,19 @@ export const scraperService = {
         saveAsFavorite: normalized.saveAsFavorite,
         schedule: normalized.schedule || null,
         session: normalized.session || null,
-        label: normalized.title
+        label: normalized.title,
       });
 
       emitSSA("import.queue.enqueue", {
         sourceType,
-        item: normalized
+        item: normalized,
       });
     } catch (_e) {
       // if queue not ready, we still emit for late listeners
       emitSSA("import.queue.enqueue", {
         sourceType,
         item: normalized,
-        queued: false
+        queued: false,
       });
     }
 
@@ -280,8 +288,8 @@ export const scraperService = {
         session: normalized.session || {
           domain: normalized.__importType || normalized.type,
           action: "run-imported",
-          payload: normalized
-        }
+          payload: normalized,
+        },
       });
     }
 
@@ -306,7 +314,7 @@ export const scraperService = {
       exportToHubIfEnabled({
         kind: "imported-household-data",
         source: "scraperService",
-        payload: normalized
+        payload: normalized,
       });
     }
 
@@ -321,7 +329,7 @@ export const scraperService = {
     const item = await this.scrape(opts);
     emitSSA("import.preview.reverse", { item, reversed: item });
     return item;
-  }
+  },
 };
 
 // -----------------------------------------------------------------------------
@@ -332,14 +340,42 @@ function inferImportType(raw, sourceType) {
 
   // explicit source hints from SSA project
   if (sourceType === "pinterest") return "mealPlan";
-  if (sourceType === "garden" || sourceType === "seed" || sourceType === "garden-site") return "gardenPlan";
-  if (sourceType === "cleaning" || text.includes("cleaning") || text.includes("declutter")) return "cleaningPlan";
-  if (sourceType === "storehouse" || text.includes("storehouse") || text.includes("pantry goal"))
+  if (
+    sourceType === "garden" ||
+    sourceType === "seed" ||
+    sourceType === "garden-site"
+  )
+    return "gardenPlan";
+  if (
+    sourceType === "cleaning" ||
+    text.includes("cleaning") ||
+    text.includes("declutter")
+  )
+    return "cleaningPlan";
+  if (
+    sourceType === "storehouse" ||
+    text.includes("storehouse") ||
+    text.includes("pantry goal")
+  )
     return "storehouseGoal";
-  if (sourceType === "storehouse-stock" || text.includes("grocery section") || text.includes("restock"))
+  if (
+    sourceType === "storehouse-stock" ||
+    text.includes("grocery section") ||
+    text.includes("restock")
+  )
     return "storehouseStock";
-  if (sourceType === "animal" || text.includes("animal plan") || text.includes("livestock")) return "animalPlan";
-  if (sourceType === "video" || text.includes("youtube.com") || text.includes("youtu.be")) return "video";
+  if (
+    sourceType === "animal" ||
+    text.includes("animal plan") ||
+    text.includes("livestock")
+  )
+    return "animalPlan";
+  if (
+    sourceType === "video" ||
+    text.includes("youtube.com") ||
+    text.includes("youtu.be")
+  )
+    return "video";
 
   // preservation / homestead
   if (
@@ -351,21 +387,45 @@ function inferImportType(raw, sourceType) {
     return "preservationPlan";
 
   // garden / care / harvest
-  if (text.includes("garden care") || text.includes("pruning") || text.includes("watering")) return "gardenCare";
-  if (text.includes("harvest") || text.includes("when to pick")) return "harvestPlan";
+  if (
+    text.includes("garden care") ||
+    text.includes("pruning") ||
+    text.includes("watering")
+  )
+    return "gardenCare";
+  if (text.includes("harvest") || text.includes("when to pick"))
+    return "harvestPlan";
 
   // animal acquisition / butchery
-  if (text.includes("animal acquisition") || text.includes("buy goats") || text.includes("buy sheep"))
+  if (
+    text.includes("animal acquisition") ||
+    text.includes("buy goats") ||
+    text.includes("buy sheep")
+  )
     return "animalAcquisition";
-  if (text.includes("butchery") || text.includes("slaughter") || text.includes("cut sheet"))
+  if (
+    text.includes("butchery") ||
+    text.includes("slaughter") ||
+    text.includes("cut sheet")
+  )
     return "butcherySession";
 
   // scan-ish
-  if (text.includes("receipt") || text.includes("circular") || text.includes("scan") || text.includes("pdf"))
+  if (
+    text.includes("receipt") ||
+    text.includes("circular") ||
+    text.includes("scan") ||
+    text.includes("pdf")
+  )
     return "inventoryUpdate";
 
   // meal planning
-  if (text.includes("meal plan") || text.includes("weekly menu") || text.includes("batch cook")) return "mealPlan";
+  if (
+    text.includes("meal plan") ||
+    text.includes("weekly menu") ||
+    text.includes("batch cook")
+  )
+    return "mealPlan";
 
   // recipe fallback
   if (text.includes("recipe") || text.includes("ingredients")) return "recipe";
@@ -383,10 +443,13 @@ function scrapeFromHTML(html, url, sourceType) {
   }
 
   const title =
-    (doc && (doc.querySelector("title")?.textContent || doc.querySelector('meta[property="og:title"]')?.content)) ||
+    (doc &&
+      (doc.querySelector("title")?.textContent ||
+        doc.querySelector('meta[property="og:title"]')?.content)) ||
     "Imported Page";
 
-  const ogDesc = doc?.querySelector('meta[property="og:description"]')?.content || null;
+  const ogDesc =
+    doc?.querySelector('meta[property="og:description"]')?.content || null;
   const list = doc
     ? Array.from(doc.querySelectorAll("li, .ingredient, .ingredients li"))
         .map((el) => el.textContent.trim())
@@ -400,23 +463,27 @@ function scrapeFromHTML(html, url, sourceType) {
     url,
     source: {
       kind: sourceType || "html",
-      url
+      url,
     },
     meta: {
       htmlLength: html.length,
       description: ogDesc,
-      scrapedAt: Date.now()
-    }
+      scrapedAt: Date.now(),
+    },
   };
 
   const lowerHtml = html.toLowerCase();
 
   // cleaning blog → cleaningPlan
-  if (sourceType === "cleaning" || lowerHtml.includes("cleaning") || lowerHtml.includes("declutter")) {
+  if (
+    sourceType === "cleaning" ||
+    lowerHtml.includes("cleaning") ||
+    lowerHtml.includes("declutter")
+  ) {
     return {
       ...base,
       __importType: "cleaningPlan",
-      tasks: list.map((t) => ({ title: t, area: guessCleaningArea(t) }))
+      tasks: list.map((t) => ({ title: t, area: guessCleaningArea(t) })),
     };
   }
 
@@ -433,23 +500,31 @@ function scrapeFromHTML(html, url, sourceType) {
       ...base,
       __importType: "gardenPlan",
       seeds: list.map((name) => ({ name })),
-      coop: true
+      coop: true,
     };
   }
 
   // harvest / garden care
-  if (lowerHtml.includes("harvest") || lowerHtml.includes("when to pick") || lowerHtml.includes("succession")) {
+  if (
+    lowerHtml.includes("harvest") ||
+    lowerHtml.includes("when to pick") ||
+    lowerHtml.includes("succession")
+  ) {
     return {
       ...base,
       __importType: "harvestPlan",
-      harvestTasks: list.map((t) => ({ title: t }))
+      harvestTasks: list.map((t) => ({ title: t })),
     };
   }
-  if (lowerHtml.includes("prune") || lowerHtml.includes("watering schedule") || lowerHtml.includes("mulch")) {
+  if (
+    lowerHtml.includes("prune") ||
+    lowerHtml.includes("watering schedule") ||
+    lowerHtml.includes("mulch")
+  ) {
     return {
       ...base,
       __importType: "gardenCare",
-      careTasks: list.map((t) => ({ title: t }))
+      careTasks: list.map((t) => ({ title: t })),
     };
   }
 
@@ -463,32 +538,44 @@ function scrapeFromHTML(html, url, sourceType) {
     return {
       ...base,
       __importType: "preservationPlan",
-      steps: list.map((t) => ({ title: t }))
+      steps: list.map((t) => ({ title: t })),
     };
   }
 
   // storehouse / pantry / grocery sections
-  if (lowerHtml.includes("storehouse") || lowerHtml.includes("pantry") || lowerHtml.includes("grocery")) {
+  if (
+    lowerHtml.includes("storehouse") ||
+    lowerHtml.includes("pantry") ||
+    lowerHtml.includes("grocery")
+  ) {
     return {
       ...base,
       __importType: "storehouseStock",
-      sections: groupToGrocerySections(list)
+      sections: groupToGrocerySections(list),
     };
   }
 
   // animal / butchery
-  if (lowerHtml.includes("butchery") || lowerHtml.includes("slaughter") || lowerHtml.includes("cut sheet")) {
+  if (
+    lowerHtml.includes("butchery") ||
+    lowerHtml.includes("slaughter") ||
+    lowerHtml.includes("cut sheet")
+  ) {
     return {
       ...base,
       __importType: "butcherySession",
-      steps: list
+      steps: list,
     };
   }
-  if (lowerHtml.includes("goat") || lowerHtml.includes("sheep") || lowerHtml.includes("chicken")) {
+  if (
+    lowerHtml.includes("goat") ||
+    lowerHtml.includes("sheep") ||
+    lowerHtml.includes("chicken")
+  ) {
     return {
       ...base,
       __importType: "animalAcquisition",
-      animals: list.map((t) => ({ name: t }))
+      animals: list.map((t) => ({ name: t })),
     };
   }
 
@@ -496,7 +583,7 @@ function scrapeFromHTML(html, url, sourceType) {
   return {
     ...base,
     ingredients: list,
-    steps: []
+    steps: [],
   };
 }
 
@@ -513,7 +600,7 @@ async function scrapeFromURL(url, sourceType) {
       source: { kind: sourceType || "url", url },
       meta: { scrapedAt: Date.now(), fromServer: true },
       ingredients: [],
-      steps: []
+      steps: [],
     };
   }
 
@@ -530,10 +617,10 @@ async function scrapeFromURL(url, sourceType) {
       source: { kind: sourceType || "url", url },
       meta: {
         scrapedAt: Date.now(),
-        error: err?.message || "fetch-failed"
+        error: err?.message || "fetch-failed",
       },
       ingredients: [],
-      steps: []
+      steps: [],
     };
   }
 }
@@ -546,23 +633,30 @@ function buildSchedule(rule, item) {
     return {
       id: `scrape-${item.id || "x"}-once5`,
       frequency: "once",
-      runAt: Date.now() + 5 * 60 * 1000
+      runAt: Date.now() + 5 * 60 * 1000,
     };
   }
   if (rule === "daily@9") {
     const now = new Date();
-    const runAt = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 0, 0).getTime();
+    const runAt = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      9,
+      0,
+      0
+    ).getTime();
     return {
       id: `scrape-${item.id || "x"}-daily9`,
       frequency: "daily",
-      runAt
+      runAt,
     };
   }
   // default → 2 minutes
   return {
     id: `scrape-${item.id || "x"}-once`,
     frequency: "once",
-    runAt: Date.now() + 2 * 60 * 1000
+    runAt: Date.now() + 2 * 60 * 1000,
   };
 }
 
@@ -571,8 +665,18 @@ function buildSchedule(rule, item) {
 // -----------------------------------------------------------------------------
 function guessCleaningArea(text) {
   const lower = text.toLowerCase();
-  if (lower.includes("kitchen") || lower.includes("fridge") || lower.includes("stove")) return "kitchen";
-  if (lower.includes("bath") || lower.includes("toilet") || lower.includes("shower")) return "bathroom";
+  if (
+    lower.includes("kitchen") ||
+    lower.includes("fridge") ||
+    lower.includes("stove")
+  )
+    return "kitchen";
+  if (
+    lower.includes("bath") ||
+    lower.includes("toilet") ||
+    lower.includes("shower")
+  )
+    return "bathroom";
   if (lower.includes("laundry")) return "laundry";
   if (lower.includes("porch") || lower.includes("yard")) return "outdoor";
   return "general";
@@ -585,11 +689,16 @@ function groupToGrocerySections(items) {
     dairy: [],
     dryGoods: [],
     cleaning: [],
-    other: []
+    other: [],
   };
   items.forEach((it) => {
     const lower = it.toLowerCase();
-    if (lower.includes("lettuce") || lower.includes("tomato") || lower.includes("onion") || lower.includes("apple")) {
+    if (
+      lower.includes("lettuce") ||
+      lower.includes("tomato") ||
+      lower.includes("onion") ||
+      lower.includes("apple")
+    ) {
       result.produce.push(it);
     } else if (
       lower.includes("beef") ||
@@ -599,11 +708,25 @@ function groupToGrocerySections(items) {
       lower.includes("fish")
     ) {
       result.meats.push(it);
-    } else if (lower.includes("milk") || lower.includes("cheese") || lower.includes("yogurt") || lower.includes("butter")) {
+    } else if (
+      lower.includes("milk") ||
+      lower.includes("cheese") ||
+      lower.includes("yogurt") ||
+      lower.includes("butter")
+    ) {
       result.dairy.push(it);
-    } else if (lower.includes("soap") || lower.includes("bleach") || lower.includes("detergent")) {
+    } else if (
+      lower.includes("soap") ||
+      lower.includes("bleach") ||
+      lower.includes("detergent")
+    ) {
       result.cleaning.push(it);
-    } else if (lower.includes("rice") || lower.includes("flour") || lower.includes("beans") || lower.includes("pasta")) {
+    } else if (
+      lower.includes("rice") ||
+      lower.includes("flour") ||
+      lower.includes("beans") ||
+      lower.includes("pasta")
+    ) {
       result.dryGoods.push(it);
     } else {
       result.other.push(it);
@@ -611,3 +734,8 @@ function groupToGrocerySections(items) {
   });
   return result;
 }
+
+// ✅ Add a default export so imports like:
+//   import scraperService from "../../services/scraperService.js";
+// work without changing existing named exports.
+export default scraperService;

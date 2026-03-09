@@ -147,9 +147,11 @@ function isExcluded(p) {
  * This prevents Vite’s browser build from choking on `node:*` imports.
  */
 async function getNodeDeps() {
-  const pathMod = await import(/* @vite-ignore */ "node:path");
-  const fsMod = await import(/* @vite-ignore */ "node:fs/promises");
-  const urlMod = await import(/* @vite-ignore */ "node:url");
+  // Indirect dynamic import keeps browser bundlers from trying to resolve node:*.
+  const dynamicImport = new Function("s", "return import(s)");
+  const pathMod = await dynamicImport("node:path");
+  const fsMod = await dynamicImport("node:fs/promises");
+  const urlMod = await dynamicImport("node:url");
   // Some environments default-export, some don’t
   const path = pathMod.default ?? pathMod;
   const fs = fsMod.default ?? fsMod;

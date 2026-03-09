@@ -11,7 +11,7 @@
  *   - Hair / body nutrition, etc.
  * - Bridges:
  *   - View layer (React components under src/features/calculators/**)
- *   - Logic layer (shim modules under src/services/calculators/shims/**)
+ *   - Logic layer (shim modules under src/features/calculators/health/**)
  *   - Planning Graph + SessionRunner (via `supportsSessions`, `toSessionSteps`)
  *
  * Why:
@@ -89,7 +89,7 @@ const REGISTRY = {
       safeDynamicImport(
         () =>
           import(
-            "@/features/calculators/BMI/BMICalculator.view.jsx"
+            "@/features/calculators/health/BMICalculator/BMICalculator.view.jsx"
             /* webpackChunkName: "calc-bmi-view" */
           ),
         "BMICalculatorView"
@@ -98,10 +98,10 @@ const REGISTRY = {
       safeDynamicImport(
         () =>
           import(
-            "@/services/calculators/shims/bmiCalculatorShim.js"
+            "@/features/calculators/health/BMICalculator/BMICalculator.shim.js"
             /* webpackChunkName: "calc-bmi-shim" */
           ),
-        "bmiCalculatorShim"
+        "BMICalculatorShim"
       ),
   },
 
@@ -127,7 +127,7 @@ const REGISTRY = {
       safeDynamicImport(
         () =>
           import(
-            "@/features/calculators/MacroCalculator/MacroCalculator.view.jsx"
+            "@/features/calculators/health/MacroCalculator/MacroCalculator.view.jsx"
             /* webpackChunkName: "calc-macro-view" */
           ),
         "MacroCalculatorView"
@@ -136,7 +136,7 @@ const REGISTRY = {
       safeDynamicImport(
         () =>
           import(
-            "@/services/calculators/shims/macroCalculatorShim.js"
+            "@/features/calculators/health/MacroCalculator/MacroCalculator.shim.js"
             /* webpackChunkName: "calc-macro-shim" */
           ),
         "macroCalculatorShim"
@@ -166,7 +166,7 @@ const REGISTRY = {
       safeDynamicImport(
         () =>
           import(
-            "@/features/calculators/MicronutrientCalculator/MicronutrientCalculator.view.jsx"
+            "@/features/calculators/health/MicronutrientCalculator/MicronutrientCalculator.view.jsx"
             /* webpackChunkName: "calc-micro-view" */
           ),
         "MicronutrientCalculatorView"
@@ -175,7 +175,7 @@ const REGISTRY = {
       safeDynamicImport(
         () =>
           import(
-            "@/services/calculators/shims/micronutrientCalculatorShim.js"
+            "@/features/calculators/health/MicronutrientCalculator/MicronutrientCalculator.shim.js"
             /* webpackChunkName: "calc-micro-shim" */
           ),
         "micronutrientCalculatorShim"
@@ -204,7 +204,7 @@ const REGISTRY = {
       safeDynamicImport(
         () =>
           import(
-            "@/features/calculators/HairNutrition/HairNutritionCalculator.view.jsx"
+            "@/features/calculators/health/HairNutritionCalculator/HairNutritionCalculator.view.jsx"
             /* webpackChunkName: "calc-hair-view" */
           ),
         "HairNutritionCalculatorView"
@@ -213,7 +213,7 @@ const REGISTRY = {
       safeDynamicImport(
         () =>
           import(
-            "@/services/calculators/shims/hairNutritionCalculatorShim.js"
+            "@/features/calculators/health/HairNutritionCalculator/HairNutritionCalculator.shim.js"
             /* webpackChunkName: "calc-hair-shim" */
           ),
         "hairNutritionCalculatorShim"
@@ -231,14 +231,7 @@ const REGISTRY = {
       "Takes whole-animal weights and yields, then maps them to cuts and storehouse meals.",
     domains: ["animals", "storehouse", "meals", "planning"],
     category: "storehouse",
-    tags: [
-      "meat",
-      "butchery",
-      "yield",
-      "storehouse",
-      "meal planning",
-      "cuts",
-    ],
+    tags: ["meat", "butchery", "yield", "storehouse", "meal planning", "cuts"],
     feedsInto: [
       "planningGraph.storehouseGoals",
       "planningGraph.mealPlan",
@@ -261,7 +254,7 @@ const REGISTRY = {
       safeDynamicImport(
         () =>
           import(
-            "@/services/calculators/shims/meatBreakdownCalculatorShim.js"
+            "@/features/calculators/storehouseMeals/MeatBreakdownCalculator/MeatBreakdownCalculator.shim.js"
             /* webpackChunkName: "calc-meatbreakdown-shim" */
           ),
         "meatBreakdownCalculatorShim"
@@ -296,7 +289,7 @@ const REGISTRY = {
       safeDynamicImport(
         () =>
           import(
-            "@/features/calculators/garden/SeedViabilityCalculator/SeedViabilityCalculator.view.jsx"
+            "@/features/calculators/gardenAnimal/SeedViabilityCalculator/SeedViabilityCalculator.view.jsx"
             /* webpackChunkName: "calc-seedviability-view" */
           ),
         "SeedViabilityCalculatorView"
@@ -305,7 +298,7 @@ const REGISTRY = {
       safeDynamicImport(
         () =>
           import(
-            "@/services/calculators/shims/seedViabilityCalculatorShim.js"
+            "@/features/calculators/gardenAnimal/SeedViabilityCalculator/SeedViabilityCalculator.shim.js"
             /* webpackChunkName: "calc-seedviability-shim" */
           ),
         "seedViabilityCalculatorShim"
@@ -334,19 +327,19 @@ const REGISTRY = {
       safeDynamicImport(
         () =>
           import(
-            "@/features/calculators/animals/FeedYieldCalculator/FeedYieldCalculator.view.jsx"
+            "@/features/calculators/gardenAnimal/AnimalFeedCalculator/AnimalFeedCalculator.view.jsx"
             /* webpackChunkName: "calc-feedyield-view" */
           ),
-        "FeedYieldCalculatorView"
+        "AnimalFeedCalculatorView"
       ),
     loadShim: () =>
       safeDynamicImport(
         () =>
           import(
-            "@/services/calculators/shims/feedYieldCalculatorShim.js"
+            "@/features/calculators/gardenAnimal/AnimalFeedCalculator/AnimalFeedCalculator.shim.js"
             /* webpackChunkName: "calc-feedyield-shim" */
           ),
-        "feedYieldCalculatorShim"
+        "AnimalFeedCalculatorShim"
       ),
   },
 };
@@ -401,7 +394,9 @@ export function listCalculatorsForSessionDomain(sessionDomain) {
   const all = Object.values(REGISTRY);
   return all.filter((entry) => {
     if (sessionDomain === "cooking") {
-      return entry.domains.includes("meals") || entry.domains.includes("health");
+      return (
+        entry.domains.includes("meals") || entry.domains.includes("health")
+      );
     }
     if (sessionDomain === "storehouse") {
       return entry.domains.includes("storehouse");
@@ -418,7 +413,10 @@ export function listCalculatorsForSessionDomain(sessionDomain) {
     }
     if (sessionDomain === "preservation") {
       // Future: pH / salt / brine / canning-time calculators.
-      return entry.domains.includes("preservation") || entry.domains.includes("storehouse");
+      return (
+        entry.domains.includes("preservation") ||
+        entry.domains.includes("storehouse")
+      );
     }
     return false;
   });

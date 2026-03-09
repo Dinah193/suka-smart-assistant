@@ -27,9 +27,12 @@
  * - Includes a best-effort legacy migration from a hypothetical old 'runs' table, if present.
  */
 
-let eventBus = { emit: (...a) => console.debug("[db:migration:add-plays:eventBus.emit]", ...a), on: () => () => {} };
+let eventBus = {
+  emit: (...a) => console.debug("[db:migration:add-plays:eventBus.emit]", ...a),
+  on: () => () => {},
+};
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -41,8 +44,8 @@ try {
 let HubPacketFormatter = null;
 let FamilyFundConnector = null;
 try {
-  HubPacketFormatter = require("@/hub/HubPacketFormatter");
-  FamilyFundConnector = require("@/hub/FamilyFundConnector");
+  HubPacketFormatter = require("@/services/hub/HubPacketFormatter");
+  FamilyFundConnector = require("@/services/hub/FamilyFundConnector");
 } catch {}
 
 const nowISO = () => new Date().toISOString();
@@ -59,11 +62,14 @@ async function exportToHubIfEnabled(summary) {
     if (!featureFlags?.familyFundMode) return;
     if (!HubPacketFormatter || !FamilyFundConnector) return;
     const packet =
-      (HubPacketFormatter.formatDbMigration && HubPacketFormatter.formatDbMigration(summary)) ||
-      (HubPacketFormatter.format && HubPacketFormatter.format({ kind: "db.migration", ...summary })) ||
+      (HubPacketFormatter.formatDbMigration &&
+        HubPacketFormatter.formatDbMigration(summary)) ||
+      (HubPacketFormatter.format &&
+        HubPacketFormatter.format({ kind: "db.migration", ...summary })) ||
       null;
     if (!packet) return;
-    await (FamilyFundConnector.send?.(packet) || FamilyFundConnector.post?.(packet));
+    await (FamilyFundConnector.send?.(packet) ||
+      FamilyFundConnector.post?.(packet));
   } catch {
     // fail silently by design
   }
@@ -120,16 +126,28 @@ function registerAddPlaysMigration(db, opts = {}) {
           for (const r of all) {
             // Map legacy fields conservatively; unknowns are left undefined.
             const rec = {
-              id: r.id || `hist_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}`,
+              id:
+                r.id ||
+                `hist_${Date.now().toString(36)}_${Math.random()
+                  .toString(36)
+                  .slice(2)}`,
               sessionId: String(r.sessionId || r.runId || r.sid || "unknown"),
               domain: String(r.domain || "cooking").toLowerCase(),
               startedAt: r.startedAt || r.startAt || r.createdAt || startedAt,
               endedAt: r.endedAt || r.endAt || r.updatedAt || startedAt,
               durationMs: Number.isFinite(r.durationMs)
                 ? Math.max(0, r.durationMs)
-                : Math.max(0, new Date(r.endedAt || startedAt) - new Date(r.startedAt || startedAt)),
-              outcome: String(r.outcome || r.status || "completed").toLowerCase(),
-              stepsCompleted: Number.isInteger(r.stepsCompleted) ? r.stepsCompleted : undefined,
+                : Math.max(
+                    0,
+                    new Date(r.endedAt || startedAt) -
+                      new Date(r.startedAt || startedAt)
+                  ),
+              outcome: String(
+                r.outcome || r.status || "completed"
+              ).toLowerCase(),
+              stepsCompleted: Number.isInteger(r.stepsCompleted)
+                ? r.stepsCompleted
+                : undefined,
               notes: r.notes || undefined,
               meta: r.meta || {},
               createdAt: nowISO(),
@@ -138,7 +156,9 @@ function registerAddPlaysMigration(db, opts = {}) {
             migratedCount++;
           }
         } catch (err) {
-          emit("db.migration.legacy.copy.error", { message: err?.message || String(err) });
+          emit("db.migration.legacy.copy.error", {
+            message: err?.message || String(err),
+          });
         }
       }
 

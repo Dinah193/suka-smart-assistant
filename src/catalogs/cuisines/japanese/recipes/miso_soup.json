@@ -1,0 +1,358 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:05:00Z",
+  "meta": {
+    "id": "cuisines.japanese.recipes.miso_soup",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Miso Soup",
+    "subtitle": "Classic dashi + miso broth with tofu and wakame",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa-core",
+      "notes": [
+        "Canonical SSA catalog recipe.",
+        "Uses miso added off-heat to preserve aroma and avoid curdling/bitterness."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "japanese",
+    "category": "soup",
+    "mealArchetypes": ["bowls", "snacks", "breakfast"],
+    "servingStyles": ["bowls", "family_style"],
+    "plannerTags": [
+      "cuisine.japanese",
+      "dish.miso_soup",
+      "course.soup",
+      "weeknight.friendly",
+      "fast",
+      "comfort",
+      "umami.forward",
+      "vegetarian.optional"
+    ]
+  },
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 1, "unit": "bowl" },
+    "notes": "Serves 4 small bowls as a side soup."
+  },
+  "time": {
+    "activeMins": 10,
+    "handsOffMins": 5,
+    "totalMins": 15
+  },
+  "difficulty": "beginner",
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": false,
+    "notes": "Best fresh; refrigerate up to 2 days. Avoid boiling after miso is added."
+  },
+  "tasteProfile": {
+    "sweet": 0,
+    "salty": 2,
+    "umami": 4,
+    "acid": 0,
+    "heat": 0,
+    "balanceNotes": "Adjust miso amount to taste; dashi provides the base umami."
+  },
+  "equipment": {
+    "minimum": [
+      "saucepan",
+      "measuring_cups",
+      "knife",
+      "cutting_board",
+      "ladle"
+    ],
+    "recommended": ["fine_mesh_strainer", "small_bowl", "whisk_or_chopsticks"]
+  },
+  "dietFlags": [],
+  "allergens": {
+    "mayContain": ["soy", "fish", "gluten"],
+    "commonTriggers": ["miso", "dashi_fish_optional", "soy_sauce_optional"],
+    "notes": [
+      "For vegetarian/vegan: use kombu + dried shiitake dashi (or instant vegan dashi).",
+      "For gluten-free: verify miso and dashi are gluten-free (some contain barley/wheat)."
+    ]
+  },
+  "ingredients": [
+    {
+      "id": "water",
+      "label": "Water",
+      "role": "base",
+      "amount": { "value": 960, "unit": "ml" },
+      "notes": "About 4 cups."
+    },
+
+    {
+      "id": "dashi",
+      "label": "Dashi stock (prepared)",
+      "role": "base",
+      "amount": { "value": 960, "unit": "ml" },
+      "optional": true,
+      "notes": "Use this instead of water if you already have dashi. If using water, make quick dashi below."
+    },
+    {
+      "id": "dashi_powder",
+      "label": "Instant dashi powder/granules",
+      "role": "umami",
+      "amount": { "value": 2, "unit": "tsp" },
+      "optional": true,
+      "notes": "Follow package strength; optional if using prepared dashi."
+    },
+    {
+      "id": "kombu",
+      "label": "Kombu (dried kelp)",
+      "role": "umami",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true,
+      "notes": "For a simple kombu-forward dashi; remove before simmering hard."
+    },
+    {
+      "id": "bonito_flakes",
+      "label": "Katsuobushi (bonito flakes)",
+      "role": "umami",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true,
+      "notes": "Optional if making quick dashi (kombu + bonito). Strain after steeping."
+    },
+
+    {
+      "id": "miso_paste",
+      "label": "Miso paste (white/shiro or awase blend)",
+      "role": "seasoning",
+      "amount": { "value": 45, "unit": "g" },
+      "notes": "About 3 Tbsp. Adjust to taste; different misos vary in saltiness."
+    },
+
+    {
+      "id": "silken_or_soft_tofu",
+      "label": "Tofu, cubed (silken or soft)",
+      "role": "protein",
+      "amount": { "value": 200, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "wakame_dried",
+      "label": "Dried wakame",
+      "role": "garnish",
+      "amount": { "value": 5, "unit": "g" },
+      "optional": true,
+      "notes": "About 1–2 Tbsp dried. Rehydrates quickly."
+    },
+    {
+      "id": "green_onion",
+      "label": "Green onion, thinly sliced",
+      "role": "garnish",
+      "amount": { "value": 2, "unit": "each" },
+      "optional": true
+    },
+
+    {
+      "id": "shiitake_mushrooms",
+      "label": "Shiitake mushrooms, sliced",
+      "role": "veg",
+      "amount": { "value": 80, "unit": "g" },
+      "optional": true,
+      "notes": "Optional add-in for heartier soup."
+    },
+    {
+      "id": "daikon",
+      "label": "Daikon, thin matchsticks or half-moons",
+      "role": "veg",
+      "amount": { "value": 100, "unit": "g" },
+      "optional": true,
+      "notes": "Optional add-in; simmer until just tender before adding miso."
+    },
+    {
+      "id": "soy_sauce",
+      "label": "Soy sauce",
+      "role": "seasoning",
+      "amount": { "value": 5, "unit": "ml" },
+      "optional": true,
+      "notes": "Optional: a small splash to deepen savoriness if your dashi is mild."
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_build_broth",
+      "title": "Build the broth (dashi)",
+      "activeMins": 3,
+      "handsOffMins": 5,
+      "instructions": [
+        "If using prepared dashi: pour into a saucepan and warm gently until steaming (do not boil hard).",
+        "If using water + instant dashi: bring water to a bare simmer and dissolve dashi granules; keep at a gentle simmer.",
+        "If making quick kombu + bonito dashi: warm water with kombu until steaming (before boiling). Remove kombu, then add bonito flakes, simmer 30 seconds, turn off heat, steep 2–3 minutes, then strain."
+      ],
+      "timers": [{ "label": "Bonito steep (optional)", "minutes": 3 }],
+      "checks": ["Broth is hot and aromatic, not aggressively boiling"]
+    },
+    {
+      "id": "step_02_cook_optional_addins",
+      "title": "Cook optional vegetables (if using)",
+      "activeMins": 3,
+      "handsOffMins": 3,
+      "instructions": [
+        "If adding shiitake or daikon, simmer them in the broth until just tender.",
+        "Keep the heat gentle to preserve clarity and avoid reducing too much."
+      ],
+      "timers": [{ "label": "Simmer add-ins", "minutes": 3 }],
+      "checks": ["Vegetables are just tender"]
+    },
+    {
+      "id": "step_03_add_tofu_wakame",
+      "title": "Add tofu and wakame",
+      "activeMins": 2,
+      "handsOffMins": 1,
+      "instructions": [
+        "Add cubed tofu and gently warm through (avoid vigorous boiling so tofu stays intact).",
+        "Add dried wakame and let it rehydrate for 30–60 seconds."
+      ],
+      "timers": [{ "label": "Wakame rehydrate", "seconds": 45 }],
+      "checks": ["Tofu is warmed", "Wakame has expanded"]
+    },
+    {
+      "id": "step_04_dissolve_miso_off_heat",
+      "title": "Dissolve miso off-heat (do not boil)",
+      "activeMins": 2,
+      "handsOffMins": 0,
+      "instructions": [
+        "Turn heat to low or off so the broth is hot but not boiling.",
+        "In a small bowl (or ladle), whisk a scoop of hot broth into the miso paste to dissolve it smoothly.",
+        "Stir the dissolved miso back into the pot. Taste and adjust: add a bit more miso or a small splash of soy sauce if needed.",
+        "Keep the soup below a simmer after miso is added."
+      ],
+      "checks": ["Miso is fully dissolved", "Soup is not boiling"]
+    },
+    {
+      "id": "step_05_serve",
+      "title": "Serve",
+      "activeMins": 1,
+      "handsOffMins": 0,
+      "instructions": [
+        "Ladle into bowls and top with sliced green onion.",
+        "Serve immediately as a side with rice, noodles, or a main dish."
+      ],
+      "checks": ["Garnish added", "Served hot"]
+    }
+  ],
+  "pairings": {
+    "serveWith": [
+      { "id": "steamed_rice", "label": "Steamed rice" },
+      { "id": "onigiri", "label": "Onigiri (rice balls)" },
+      { "id": "tempura", "label": "Tempura" },
+      { "id": "teriyaki", "label": "Teriyaki chicken or salmon" },
+      { "id": "pickles", "label": "Japanese pickles (tsukemono)" }
+    ],
+    "notes": "Miso soup is a classic supporting bowl for many Japanese meals."
+  },
+  "storage": {
+    "refrigerator": {
+      "duration": "2 days",
+      "notes": "Reheat gently; do not boil. Add fresh scallions at serving."
+    },
+    "freezer": {
+      "duration": "Not recommended",
+      "notes": "Texture of tofu and wakame changes; miso aroma dulls."
+    },
+    "reheat": {
+      "methods": ["Stovetop on low until steaming (do not boil)"],
+      "notes": "If the soup reaches a boil, flavor can become harsh and aroma diminishes."
+    }
+  },
+  "planner": {
+    "mealRole": "side_soup",
+    "weeknightNotes": "Use instant dashi and pre-cut tofu to make this a 10–15 minute soup.",
+    "shoppingSignals": ["miso_paste", "dashi_powder", "tofu", "wakame_dried"]
+  },
+  "keywords": [
+    "miso soup",
+    "miso shiru",
+    "dashi",
+    "tofu",
+    "wakame",
+    "japanese soup"
+  ],
+  "tags": [
+    "cuisine.japanese",
+    "dish.miso_soup",
+    "course.soup",
+    "umami.forward",
+    "weeknight.friendly",
+    "fast"
+  ],
+  "notes": [
+    "Miso varies widely: start with less, then add more to taste.",
+    "Never boil miso soup after adding miso—keep it steaming-hot only.",
+    "For a richer bowl: add clams, thin sliced cabbage, or a spoon of sesame paste (non-traditional but tasty)."
+  ],
+  "variations": [
+    {
+      "id": "var_vegan_kombu_shiitake",
+      "label": "Vegan kombu + shiitake dashi",
+      "when": { "diet": "vegan" },
+      "adapt": {
+        "notes": [
+          "Use kombu + dried shiitake to build the broth (soak dried shiitake in warm water 10–20 minutes, then heat gently).",
+          "Choose miso without bonito/fish additives."
+        ]
+      }
+    },
+    {
+      "id": "var_red_miso_hearty",
+      "label": "Red miso (aka miso) hearty style",
+      "when": { "preference": "stronger_miso" },
+      "adapt": {
+        "notes": [
+          "Use red miso for deeper flavor; reduce quantity slightly at first (it can be saltier).",
+          "Add daikon and mushrooms for a more robust bowl."
+        ]
+      }
+    }
+  ],
+  "summary": "Classic Japanese miso soup with hot dashi broth, tofu, wakame, and scallions. Miso is dissolved off-heat to preserve aroma and avoid harshness.",
+  "safety": {
+    "foodSafety": [
+      "Refrigerate leftovers promptly within 2 hours.",
+      "Reheat to steaming-hot; avoid prolonged boiling."
+    ],
+    "allergenNotes": [
+      "Contains soy (miso, tofu).",
+      "May contain fish (dashi) and gluten depending on ingredients."
+    ]
+  },
+  "ingredientGroups": [
+    {
+      "id": "grp_broth",
+      "label": "Broth",
+      "items": ["water", "dashi", "dashi_powder", "kombu", "bonito_flakes"]
+    },
+    {
+      "id": "grp_miso",
+      "label": "Miso",
+      "items": ["miso_paste", "soy_sauce"]
+    },
+    {
+      "id": "grp_addins",
+      "label": "Add-ins",
+      "items": [
+        "silken_or_soft_tofu",
+        "wakame_dried",
+        "shiitake_mushrooms",
+        "daikon",
+        "green_onion"
+      ]
+    }
+  ],
+  "methods": ["simmer", "dashi_broth", "miso_off_heat"],
+  "compat": {
+    "cuisineId": "cuisines.japanese",
+    "dishId": "cuisines.japanese.dishes.miso_soup",
+    "aliases": ["miso shiru", "tofu miso soup", "wakame miso soup"],
+    "searchBoost": ["miso", "dashi", "tofu", "wakame", "japanese soup"]
+  }
+}

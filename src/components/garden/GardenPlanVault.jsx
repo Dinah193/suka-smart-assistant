@@ -43,7 +43,7 @@ import "@/styles/household.css";
 
 let eventBus = { emit: () => {}, on: () => () => {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {
   console.warn("[GardenPlanVault] eventBus not available, falling back noop.");
@@ -63,7 +63,7 @@ try {
 
 let featureFlags = { familyFundMode: false };
 try {
-  const ff = require("@/services/featureFlags");
+  const ff = require("@/config/featureFlags");
   featureFlags = ff?.default || ff?.featureFlags || featureFlags;
 } catch {
   console.warn("[GardenPlanVault] featureFlags not available, defaulting.");

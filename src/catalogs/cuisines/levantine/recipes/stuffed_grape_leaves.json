@@ -1,0 +1,450 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-20T00:00:00.000Z",
+
+  "meta": {
+    "id": "recipes.levantine.stuffed_grape_leaves",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Stuffed Grape Leaves (Warak Enab / Dolma)",
+    "description": "Classic Levantine stuffed grape leaves with a bright lemon finish. Includes a traditional vegetarian rice-herb filling plus an optional meat-and-rice variation.",
+    "tags": [
+      "cuisine.levantine",
+      "dolma",
+      "warak_enab",
+      "grape_leaves",
+      "vegetarian",
+      "vegan_optional",
+      "mealprep.friendly",
+      "special_occasion"
+    ]
+  },
+
+  "summary": "Levantine stuffed grape leaves (warak enab) are rolled bundles of seasoned rice and herbs simmered gently with lemon. The keys are: rinse/brine-manage jarred leaves, roll snug but not tight (rice expands), pack rolls tightly in the pot so they don’t unravel, and simmer low until the rice is tender. Served warm or room temperature, often with extra lemon and olive oil.",
+
+  "yields": {
+    "servings": 8,
+    "makes": "About 45–60 rolls (varies by leaf size)"
+  },
+
+  "timing": {
+    "activeMins": 60,
+    "totalMins": 150,
+    "notes": "Rolling takes the most time. Total includes simmering and resting."
+  },
+
+  "diet": {
+    "tags": [
+      "vegetarian",
+      "vegan_optional",
+      "dairy_free",
+      "nut_free",
+      "gluten_free"
+    ],
+    "notes": "Vegetarian/vegan version is vegan as written. Optional meat variation is not vegan/vegetarian."
+  },
+
+  "methods": ["parboil_optional", "roll", "simmer", "steam_rest"],
+
+  "compat": {
+    "kitchenCapabilitiesAnyOf": ["stovetop"],
+    "notes": "A wide, heavy-bottom pot with a tight lid works best."
+  },
+
+  "allergens": [],
+
+  "safety": {
+    "foodSafetyNotes": [
+      "Keep simmer gentle; a hard boil can burst grape leaves and make filling spill.",
+      "Cool leftovers quickly and refrigerate within 2 hours.",
+      "Reheat gently with a splash of water/stock, or serve chilled/room temperature if preferred."
+    ]
+  },
+
+  "ingredientGroups": [
+    {
+      "id": "group.leaves",
+      "label": "Grape leaves + pot lining",
+      "ingredientIds": [
+        "ing.grape_leaves_jarred",
+        "ing.pot_liner_potato_or_tomato",
+        "ing.olive_oil",
+        "ing.lemon_slices_optional"
+      ]
+    },
+    {
+      "id": "group.filling_veg",
+      "label": "Vegetarian rice-herb filling",
+      "ingredientIds": [
+        "ing.rice_short_or_medium_grain",
+        "ing.onion_yellow",
+        "ing.parsley_flat_leaf",
+        "ing.dill_fresh_or_dried_optional",
+        "ing.mint_fresh_or_dried_optional",
+        "ing.tomato_diced_optional",
+        "ing.lemon_juice",
+        "ing.olive_oil_filling",
+        "ing.salt_kosher",
+        "ing.black_pepper",
+        "ing.allspice_ground_optional",
+        "ing.cinnamon_ground_optional"
+      ]
+    },
+    {
+      "id": "group.cooking_liquid",
+      "label": "Cooking liquid",
+      "ingredientIds": [
+        "ing.water_or_stock",
+        "ing.lemon_juice_cook",
+        "ing.olive_oil_cook",
+        "ing.salt_cook_optional"
+      ]
+    },
+    {
+      "id": "group.meat_optional",
+      "label": "Optional meat variation (adds richness)",
+      "ingredientIds": [
+        "ing.ground_beef_or_lamb_optional",
+        "ing.rice_short_or_medium_grain_meat_optional",
+        "ing.allspice_ground_meat_optional",
+        "ing.cinnamon_ground_meat_optional",
+        "ing.salt_meat_optional",
+        "ing.black_pepper_meat_optional"
+      ]
+    },
+    {
+      "id": "group.serving_optional",
+      "label": "To serve (optional)",
+      "ingredientIds": [
+        "ing.lemon_wedges",
+        "ing.yogurt_optional",
+        "ing.olive_oil_drizzle_optional",
+        "ing.cucumber_tomato_salad_optional"
+      ]
+    }
+  ],
+
+  "ingredients": [
+    {
+      "id": "ing.grape_leaves_jarred",
+      "label": "Jarred grape leaves",
+      "amount": { "value": 700, "unit": "g" },
+      "notes": "1 large jar (weight varies). Rinse well to remove excess brine."
+    },
+    {
+      "id": "ing.pot_liner_potato_or_tomato",
+      "label": "Pot liner: sliced potato or tomato",
+      "amount": { "value": 250, "unit": "g" },
+      "notes": "Prevents scorching and adds flavor; also helps anchor rolls."
+    },
+    {
+      "id": "ing.olive_oil",
+      "label": "Olive oil (for pot + finishing)",
+      "amount": { "value": 45, "unit": "ml" },
+      "notes": "About 3 Tbsp (some goes in pot, some for finishing)."
+    },
+    {
+      "id": "ing.lemon_slices_optional",
+      "label": "Lemon, thinly sliced (optional)",
+      "amount": { "value": 1, "unit": "count" },
+      "notes": "Optional; layer in pot for extra aroma."
+    },
+
+    {
+      "id": "ing.rice_short_or_medium_grain",
+      "label": "Short- or medium-grain rice",
+      "amount": { "value": 350, "unit": "g" },
+      "notes": "Rinse until water runs mostly clear; do not par-cook for the vegetarian filling."
+    },
+    {
+      "id": "ing.onion_yellow",
+      "label": "Yellow onion, very finely diced",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "About 1 large onion."
+    },
+    {
+      "id": "ing.parsley_flat_leaf",
+      "label": "Flat-leaf parsley, finely chopped",
+      "amount": { "value": 60, "unit": "g" },
+      "notes": "Packed; includes tender stems."
+    },
+    {
+      "id": "ing.dill_fresh_or_dried_optional",
+      "label": "Dill (fresh chopped or dried) (optional)",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": "If dried, use about 1–2 tsp."
+    },
+    {
+      "id": "ing.mint_fresh_or_dried_optional",
+      "label": "Mint (fresh chopped or dried) (optional)",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "If dried, use about 1 tsp."
+    },
+    {
+      "id": "ing.tomato_diced_optional",
+      "label": "Tomato, finely diced (optional)",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "Adds moisture and brightness."
+    },
+    {
+      "id": "ing.lemon_juice",
+      "label": "Fresh lemon juice (for filling)",
+      "amount": { "value": 45, "unit": "ml" },
+      "notes": "About 3 Tbsp."
+    },
+    {
+      "id": "ing.olive_oil_filling",
+      "label": "Olive oil (for filling)",
+      "amount": { "value": 60, "unit": "ml" },
+      "notes": "About 1/4 cup; classic filling is generous with olive oil."
+    },
+    {
+      "id": "ing.salt_kosher",
+      "label": "Kosher salt (for filling)",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": "Start here; jarred leaves can be salty."
+    },
+    {
+      "id": "ing.black_pepper",
+      "label": "Ground black pepper (for filling)",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1 tsp."
+    },
+    {
+      "id": "ing.allspice_ground_optional",
+      "label": "Ground allspice (optional)",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "About 1/2 tsp."
+    },
+    {
+      "id": "ing.cinnamon_ground_optional",
+      "label": "Ground cinnamon (optional)",
+      "amount": { "value": 0.5, "unit": "g" },
+      "notes": "About 1/4 tsp."
+    },
+
+    {
+      "id": "ing.water_or_stock",
+      "label": "Water or vegetable stock (cooking liquid)",
+      "amount": { "value": 900, "unit": "ml" },
+      "notes": "Start here; add more if needed during simmering."
+    },
+    {
+      "id": "ing.lemon_juice_cook",
+      "label": "Fresh lemon juice (cooking liquid)",
+      "amount": { "value": 60, "unit": "ml" },
+      "notes": "About 1/4 cup."
+    },
+    {
+      "id": "ing.olive_oil_cook",
+      "label": "Olive oil (cooking liquid)",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "About 2 Tbsp."
+    },
+    {
+      "id": "ing.salt_cook_optional",
+      "label": "Salt (optional, cooking liquid)",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "Optional; taste the brine level after rinsing leaves before adding."
+    },
+
+    {
+      "id": "ing.ground_beef_or_lamb_optional",
+      "label": "Ground beef or lamb (optional meat variation)",
+      "amount": { "value": 450, "unit": "g" },
+      "notes": "Optional. If using meat filling, reduce veggie filling batch or make separate rolls."
+    },
+    {
+      "id": "ing.rice_short_or_medium_grain_meat_optional",
+      "label": "Rice (optional meat variation)",
+      "amount": { "value": 150, "unit": "g" },
+      "notes": "Rinsed; mixed with raw ground meat."
+    },
+    {
+      "id": "ing.allspice_ground_meat_optional",
+      "label": "Ground allspice (optional meat variation)",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1 tsp."
+    },
+    {
+      "id": "ing.cinnamon_ground_meat_optional",
+      "label": "Ground cinnamon (optional meat variation)",
+      "amount": { "value": 0.5, "unit": "g" },
+      "notes": "About 1/4 tsp."
+    },
+    {
+      "id": "ing.salt_meat_optional",
+      "label": "Salt (optional meat variation)",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "About 1 tsp."
+    },
+    {
+      "id": "ing.black_pepper_meat_optional",
+      "label": "Black pepper (optional meat variation)",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "About 1/2 tsp."
+    },
+
+    {
+      "id": "ing.lemon_wedges",
+      "label": "Lemon wedges (optional)",
+      "amount": { "value": 2, "unit": "count" },
+      "notes": "For serving."
+    },
+    {
+      "id": "ing.yogurt_optional",
+      "label": "Plain yogurt (optional)",
+      "amount": { "value": 240, "unit": "g" },
+      "notes": "Optional dip/topping."
+    },
+    {
+      "id": "ing.olive_oil_drizzle_optional",
+      "label": "Olive oil, for drizzling (optional)",
+      "amount": { "value": 15, "unit": "ml" }
+    },
+    {
+      "id": "ing.cucumber_tomato_salad_optional",
+      "label": "Cucumber-tomato salad (optional)",
+      "amount": { "value": 350, "unit": "g" }
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.prepare_leaves",
+      "title": "Prepare the grape leaves",
+      "instructions": [
+        "Separate grape leaves carefully and rinse under cool water to remove brine.",
+        "If leaves taste very salty, soak in a bowl of cool water for 10 minutes, then drain.",
+        "Sort by size: use medium/large leaves for rolling; reserve torn or small leaves to line the pot."
+      ],
+      "timers": [
+        {
+          "id": "timer.soak_leaves_optional",
+          "label": "Optional soak (if salty)",
+          "minutes": 10
+        }
+      ]
+    },
+    {
+      "id": "step.make_filling_veg",
+      "title": "Make the vegetarian rice-herb filling",
+      "instructions": [
+        "In a large bowl, combine rinsed rice, finely diced onion, parsley, dill (optional), mint (optional), diced tomato (optional), lemon juice, olive oil, salt, black pepper, allspice (optional), and cinnamon (optional).",
+        "Mix thoroughly. The filling should be glossy and aromatic; it will be raw—do not cook it now."
+      ]
+    },
+    {
+      "id": "step.optional_meat_filling",
+      "title": "Optional: Make the meat-and-rice filling",
+      "instructions": [
+        "In a separate bowl (if using), combine ground meat, rinsed rice, allspice, cinnamon, salt, and black pepper.",
+        "Mix gently until uniform. Keep refrigerated until you roll."
+      ]
+    },
+    {
+      "id": "step.line_pot",
+      "title": "Line the pot (prevents sticking)",
+      "instructions": [
+        "Choose a wide pot with a tight lid.",
+        "Layer sliced potato or tomato on the bottom, then add a layer of torn/small grape leaves on top.",
+        "Optional: add a few lemon slices."
+      ]
+    },
+    {
+      "id": "step.roll",
+      "title": "Roll the grape leaves",
+      "instructions": [
+        "Work with one leaf at a time. Place leaf shiny-side down (veins up) on a board with the stem end toward you.",
+        "If there is a thick stem, trim it flush with the leaf.",
+        "Place about 1–2 tsp filling near the stem end (less for small leaves).",
+        "Fold the bottom over the filling, fold in both sides, then roll upward into a snug cigar.",
+        "Do not roll too tight—rice expands as it cooks."
+      ]
+    },
+    {
+      "id": "step.pack_pot",
+      "title": "Pack tightly in the pot",
+      "instructions": [
+        "Arrange rolls seam-side down in tight concentric circles.",
+        "Make layers as needed, keeping them packed snugly so they don’t unravel.",
+        "Drizzle a little olive oil over each layer if desired."
+      ]
+    },
+    {
+      "id": "step.add_liquid_weight",
+      "title": "Add lemony cooking liquid and weight",
+      "instructions": [
+        "Whisk together water/stock, lemon juice, olive oil, and optional salt.",
+        "Pour into the pot until it just reaches the top layer (or slightly below). Avoid flooding too high over the rolls.",
+        "Place a heatproof plate (or inverted lid insert) on top of the rolls to keep them submerged and prevent floating/unrolling."
+      ]
+    },
+    {
+      "id": "step.simmer",
+      "title": "Simmer gently until tender",
+      "instructions": [
+        "Bring the pot to a gentle simmer over medium heat (watch closely).",
+        "Once simmering, reduce heat to low, cover tightly, and cook 55–75 minutes.",
+        "Check a roll at 55 minutes: rice should be tender. Add a splash of water if the pot looks dry during cooking."
+      ],
+      "timers": [
+        { "id": "timer.simmer", "label": "Gentle simmer", "minutes": 65 }
+      ]
+    },
+    {
+      "id": "step.rest",
+      "title": "Rest and absorb",
+      "instructions": [
+        "Turn off heat and let the pot rest (covered) 10–15 minutes to finish steaming and absorb flavors.",
+        "Remove the plate. Let cool slightly before serving."
+      ],
+      "timers": [{ "id": "timer.rest", "label": "Rest/steam", "minutes": 12 }]
+    },
+    {
+      "id": "step.serve",
+      "title": "Serve",
+      "instructions": [
+        "Serve warm or at room temperature with lemon wedges.",
+        "Optional: drizzle with olive oil and serve with yogurt and a cucumber-tomato salad.",
+        "Leftovers keep 3–4 days refrigerated; reheat gently with a splash of water or enjoy chilled."
+      ]
+    }
+  ],
+
+  "notes": [
+    "Salt control: Jarred leaves vary widely. Always rinse well and only add extra salt if needed after tasting a small piece of leaf.",
+    "Rolling size: Aim for consistent roll size so they cook evenly.",
+    "Prevent burning: Keep heat low once simmering; if the pot dries out, add hot water a little at a time along the edge.",
+    "Serving style: Many households serve these at room temp with extra lemon; others prefer warm with yogurt."
+  ],
+
+  "variations": [
+    {
+      "id": "var.extra_lemon",
+      "label": "Extra lemony",
+      "changes": [
+        "Increase cooking liquid lemon juice to 90 ml (about 6 Tbsp).",
+        "Add more lemon slices between layers."
+      ]
+    },
+    {
+      "id": "var.meat_only",
+      "label": "Meat-and-rice only batch",
+      "changes": [
+        "Use the optional meat filling for all rolls.",
+        "Simmer gently; test earlier (around 50–60 minutes), since meat filling can cook through while rice finishes."
+      ]
+    },
+    {
+      "id": "var.tomato_forward",
+      "label": "Tomato-forward",
+      "changes": [
+        "Include diced tomato in the filling and line the pot with tomato slices instead of potato.",
+        "Use vegetable stock instead of water for cooking liquid."
+      ]
+    }
+  ]
+}

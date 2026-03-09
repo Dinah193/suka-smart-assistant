@@ -1,3 +1,4 @@
+// C:\Users\larho\suka-smart-assistant\src\agents\context\freshness.js
 /**
  * @file src/agents/context/freshness.js
  *
@@ -30,8 +31,8 @@
  * ```
  */
 
-import { emit } from "../../services/events/eventBus";
-import * as featureFlagsModule from "../../config/featureFlags";
+import { emit } from "@/services/events/eventBus";
+import * as featureFlagsModule from "@/config/featureFlags";
 
 /* -------------------------------------------------------------------------- */
 /*  Types                                                                     */
@@ -135,11 +136,6 @@ const KIND_DEFAULTS = {
 /**
  * Evaluate freshness for a single dataset descriptor.
  *
- * - Applies kind-specific defaults.
- * - Combines with any per-descriptor overrides.
- * - Looks at `lastUpdatedAt` to determine age.
- * - Considers global feature flags (e.g., familyFundMode) to bias strategy.
- *
  * @param {DatasetDescriptor} descriptor
  * @param {Date} [nowDate]
  * @returns {Promise<FreshnessDecision>}
@@ -185,7 +181,6 @@ export async function evaluateMultipleDatasets(descriptors, nowDate) {
       decisions.push(decision);
     } catch (err) {
       safeEmitFreshnessError("evaluateMultiple", err, d);
-      // Even on error, push a conservative decision so callers can degrade gracefully.
       const normalized = normalizeDescriptor(d);
       decisions.push({
         state: "unknown",
@@ -203,16 +198,28 @@ export async function evaluateMultipleDatasets(descriptors, nowDate) {
   return decisions;
 }
 
+/**
+ * BUILD FIX: HouseholdOrchestrator expects `applyFreshnessRules`.
+ * This is a thin alias over evaluateMultipleDatasets/evaluateDatasetFreshness.
+ *
+ * If passed an array -> returns array decisions.
+ * If passed a single descriptor -> returns a single decision.
+ *
+ * @param {DatasetDescriptor | DatasetDescriptor[]} descriptorOrList
+ * @param {Date} [nowDate]
+ * @returns {Promise<FreshnessDecision | FreshnessDecision[]>}
+ */
+export async function applyFreshnessRules(descriptorOrList, nowDate) {
+  if (Array.isArray(descriptorOrList)) {
+    return evaluateMultipleDatasets(descriptorOrList, nowDate);
+  }
+  return evaluateDatasetFreshness(descriptorOrList, nowDate);
+}
+
 /* -------------------------------------------------------------------------- */
 /*  Core policy logic                                                         */
 /* -------------------------------------------------------------------------- */
 
-/**
- * Normalize descriptor, fill defaults for missing fields.
- *
- * @param {DatasetDescriptor} raw
- * @returns {DatasetDescriptor}
- */
 function normalizeDescriptor(raw) {
   const kind = raw?.kind || "settings";
   const defaults = KIND_DEFAULTS[kind] || KIND_DEFAULTS.settings;
@@ -236,13 +243,6 @@ function normalizeDescriptor(raw) {
   };
 }
 
-/**
- * Compute age of data in ms given lastUpdatedAt ISO.
- *
- * @param {string|null|undefined} lastUpdatedAt
- * @param {number} nowMs
- * @returns {number}
- */
 function computeAgeMs(lastUpdatedAt, nowMs) {
   if (!lastUpdatedAt) return Number.POSITIVE_INFINITY;
   const t = Date.parse(lastUpdatedAt);
@@ -251,12 +251,6 @@ function computeAgeMs(lastUpdatedAt, nowMs) {
   return age < 0 ? 0 : age;
 }
 
-/**
- * Get effective TTLs for a descriptor. Ensures hardTtlMs >= ttlMs.
- *
- * @param {DatasetDescriptor} descriptor
- * @returns {{ ttlMs: number, hardTtlMs: number }}
- */
 function getEffectiveTtls(descriptor) {
   const ttlMs =
     typeof descriptor.ttlMs === "number" && descriptor.ttlMs > 0
@@ -273,14 +267,6 @@ function getEffectiveTtls(descriptor) {
   return { ttlMs, hardTtlMs };
 }
 
-/**
- * Classify age into freshness state given TTLs.
- *
- * @param {number} ageMs
- * @param {number} ttlMs
- * @param {number} hardTtlMs
- * @returns {FreshnessState}
- */
 function classifyAge(ageMs, ttlMs, hardTtlMs) {
   if (!Number.isFinite(ageMs)) return "unknown";
   if (ageMs <= ttlMs) return "fresh";
@@ -288,22 +274,6 @@ function classifyAge(ageMs, ttlMs, hardTtlMs) {
   return "hard-stale";
 }
 
-/**
- * Combine base state + feature flags into a final decision.
- *
- * - familyFundMode → be a bit more conservative for critical datasets.
- * - For non-critical datasets, we prefer background refresh when soft-stale.
- *
- * @param {{
- *   state: FreshnessState,
- *   descriptor: DatasetDescriptor,
- *   ageMs: number,
- *   ttlMs: number,
- *   hardTtlMs: number,
- *   flags: Record<string, any>
- * }} input
- * @returns {FreshnessDecision}
- */
 function applyFeatureFlagBias(input) {
   const { state, descriptor, ageMs, ttlMs, hardTtlMs, flags } = input;
 
@@ -339,7 +309,6 @@ function applyFeatureFlagBias(input) {
       break;
     case "unknown":
     default:
-      // Unknown freshness → conservative: refresh for critical datasets.
       if (descriptor.critical || familyFund) {
         shouldRefresh = true;
         strategy = "blocking";
@@ -352,8 +321,6 @@ function applyFeatureFlagBias(input) {
       break;
   }
 
-  // Additional domain-specific nuance:
-  // - For weather used in garden/preservation sessions: lean more aggressive.
   if (
     descriptor.kind === "weather" &&
     (descriptor.domain === "garden" || descriptor.domain === "preservation")
@@ -365,8 +332,6 @@ function applyFeatureFlagBias(input) {
     }
   }
 
-  // - For sessions: if source is "dexie" and age is very small (< 10s),
-  //   allow using as-is even if TTL is technically exceeded (e.g. clock skew).
   if (
     descriptor.kind === "sessions" &&
     state !== "fresh" &&
@@ -394,11 +359,6 @@ function applyFeatureFlagBias(input) {
 /*  Feature flags snapshot helper                                             */
 /* -------------------------------------------------------------------------- */
 
-/**
- * Try to get a snapshot of feature flags in a defensive way.
- *
- * @returns {Promise<Record<string, any>>}
- */
 async function safeGetFeatureFlagsSnapshot() {
   try {
     if (typeof featureFlagsModule.snapshotFlags === "function") {
@@ -432,11 +392,6 @@ async function safeGetFeatureFlagsSnapshot() {
 /*  Telemetry                                                                 */
 /* -------------------------------------------------------------------------- */
 
-/**
- * Emit a telemetry event when freshness is evaluated.
- *
- * @param {FreshnessDecision} decision
- */
 function safeEmitFreshnessEvaluated(decision) {
   try {
     if (typeof emit !== "function") return;
@@ -460,13 +415,6 @@ function safeEmitFreshnessEvaluated(decision) {
   }
 }
 
-/**
- * Emit a telemetry event when freshness evaluation fails.
- *
- * @param {string} scope
- * @param {any} err
- * @param {DatasetDescriptor} [descriptor]
- */
 function safeEmitFreshnessError(scope, err, descriptor) {
   try {
     if (typeof emit !== "function") return;
@@ -484,3 +432,9 @@ function safeEmitFreshnessError(scope, err, descriptor) {
     // swallow
   }
 }
+
+export default {
+  evaluateDatasetFreshness,
+  evaluateMultipleDatasets,
+  applyFreshnessRules,
+};

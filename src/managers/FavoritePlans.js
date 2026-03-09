@@ -3,39 +3,57 @@
 /* eslint-disable no-console */
 (function () {
   /* --------------------------------- Flags --------------------------------- */
-  const __DEV__ = typeof process !== "undefined" && process.env && process.env.NODE_ENV !== "production";
+  const __DEV__ =
+    typeof process !== "undefined" &&
+    process.env &&
+    process.env.NODE_ENV !== "production";
 
   /* ------------------------------ Safe Imports ------------------------------ */
-  let eventBus = { on(){}, off(){}, emit(){} };
+  let eventBus = { on() {}, off() {}, emit() {} };
   try {
-    const eb = require("@/services/eventBus");
+    const eb = require("@/services/events/eventBus");
     eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
   } catch (_e) {}
 
   let automation = null;
   try {
     const rt = require("@/services/automation/runtime");
-    automation = (rt && (rt.default || rt.automation || rt.automation?.automation)) || null;
+    automation =
+      (rt && (rt.default || rt.automation || rt.automation?.automation)) ||
+      null;
   } catch (_e) {}
 
   // PlanStorageRouter (preferred path)
   let createPlanStorageRouter = null;
   try {
     const psr = require("@/managers/storage/PlanStorageRouter");
-    createPlanStorageRouter = psr?.createPlanStorageRouter || psr?.default?.createPlanStorageRouter || null;
+    createPlanStorageRouter =
+      psr?.createPlanStorageRouter ||
+      psr?.default?.createPlanStorageRouter ||
+      null;
   } catch (_e) {}
 
   // Optional Dexie cache
   let Dexie = null;
-  try { Dexie = require("dexie"); Dexie = Dexie && (Dexie.default || Dexie); } catch (_e) {}
+  try {
+    Dexie = require("dexie");
+    Dexie = Dexie && (Dexie.default || Dexie);
+  } catch (_e) {}
 
   // Optional JSON schema contracts (non-blocking)
   let ajvCompile = null;
   try {
-    const Ajv = require("ajv"); const addFormats = require("ajv-formats");
+    const Ajv = require("ajv");
+    const addFormats = require("ajv-formats");
     const ajv = new (Ajv.default || Ajv)({ allErrors: true, strict: false });
     (addFormats.default || addFormats)(ajv);
-    const tryImport = (p) => { try { return require(p); } catch { return null; } };
+    const tryImport = (p) => {
+      try {
+        return require(p);
+      } catch {
+        return null;
+      }
+    };
     const schemas = {
       garden: tryImport("@/data/contracts/gardenplan.contract.json"),
       cleaning: tryImport("@/data/contracts/cleanplan.contract.json"),
@@ -44,32 +62,66 @@
     };
     ajvCompile = (domain) => {
       const s = schemas[domain];
-      return s ? (ajv.getSchema(s.$id) || ajv.compile(s)) : null;
+      return s ? ajv.getSchema(s.$id) || ajv.compile(s) : null;
     };
   } catch (_e) {}
 
   // Optional calendar sync used by orchestration
   let calendarSync = null;
-  try { calendarSync = require("@/services/calendar/calendarSync"); } catch (_e) {}
+  try {
+    calendarSync = require("@/services/calendar/calendarSync");
+  } catch (_e) {}
 
   /* ----------------------------- Small Utilities ---------------------------- */
   const isBrowser = typeof window !== "undefined";
   const now = () => Date.now();
   const safeUUID = () => {
-    try { return (typeof crypto !== "undefined" && crypto.randomUUID) ? crypto.randomUUID() : null; } catch { return null; }
+    try {
+      return typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : null;
+    } catch {
+      return null;
+    }
   };
-  const uid = () => safeUUID() || ("p_" + Math.random().toString(36).slice(2) + "_" + now());
+  const uid = () =>
+    safeUUID() || "p_" + Math.random().toString(36).slice(2) + "_" + now();
 
-  const clampStr = (s, max=160) => (s || "").toString().slice(0, max);
-  const deepClone = (o) => { try { return structuredClone(o); } catch { return JSON.parse(JSON.stringify(o || null)); } };
+  const clampStr = (s, max = 160) => (s || "").toString().slice(0, max);
+  const deepClone = (o) => {
+    try {
+      return structuredClone(o);
+    } catch {
+      return JSON.parse(JSON.stringify(o || null));
+    }
+  };
 
   const safeJSON = {
-    parse: (s, f=null) => { try { return JSON.parse(s); } catch { return typeof f === "function" ? f() : (f ?? null); } },
-    stringify: (v) => { try { return JSON.stringify(v); } catch { return "null"; } }
+    parse: (s, f = null) => {
+      try {
+        return JSON.parse(s);
+      } catch {
+        return typeof f === "function" ? f() : f ?? null;
+      }
+    },
+    stringify: (v) => {
+      try {
+        return JSON.stringify(v);
+      } catch {
+        return "null";
+      }
+    },
   };
 
-  const DEFAULT_DOMAIN_ORDER = ["meals","cleaning","garden","animals","inventory","health"];
-  const LSK = (userId) => `suka:favorites:v2:${userId||"anon"}`; // local cache key
+  const DEFAULT_DOMAIN_ORDER = [
+    "meals",
+    "cleaning",
+    "garden",
+    "animals",
+    "inventory",
+    "health",
+  ];
+  const LSK = (userId) => `suka:favorites:v2:${userId || "anon"}`; // local cache key
 
   const EMPTY_STATE = {
     version: 2,
@@ -82,7 +134,10 @@
 
   const validatorsByDomain = Object.create(null);
   const validateAgainstContract = (domain, planBody) => {
-    const compiler = ajvCompile ? (validatorsByDomain[domain] || (validatorsByDomain[domain] = ajvCompile(domain))) : null;
+    const compiler = ajvCompile
+      ? validatorsByDomain[domain] ||
+        (validatorsByDomain[domain] = ajvCompile(domain))
+      : null;
     if (!compiler) return { ok: true, errors: [] };
     const valid = compiler(planBody || {});
     return { ok: !!valid, errors: compiler.errors || [] };
@@ -152,7 +207,11 @@
     const updatedAt = now();
 
     return {
-      id, domain, title, summary, tags,
+      id,
+      domain,
+      title,
+      summary,
+      tags,
       planBody: raw.planBody || {},
       session,
       createdAt,
@@ -161,16 +220,26 @@
         createdBy: raw.meta?.createdBy || raw.userId || "unknown",
         visibility: raw.meta?.visibility || "private",
         source: raw.meta?.source || "user",
-        version: (raw.meta?.version || 1)
+        version: raw.meta?.version || 1,
       },
-      scope: raw.scope || `user:${raw.meta?.createdBy || raw.userId || "unknown"}`
+      scope:
+        raw.scope || `user:${raw.meta?.createdBy || raw.userId || "unknown"}`,
     };
   };
 
   /* ----------------------------- Events helpers ----------------------------- */
-  const emit = (type, payload) => { try { eventBus.emit(type, payload); } catch {} };
-  const pulse = (kind, extra = {}) => { try { automation?.emit?.("nba.signal", { kind, ts: now(), ...extra }); } catch {} };
-  const fireFavoritesChanged = (domain, userId) => emit("favorites.changed", { domain: domain || null, userId, ts: now() });
+  const emit = (type, payload) => {
+    try {
+      eventBus.emit(type, payload);
+    } catch {}
+  };
+  const pulse = (kind, extra = {}) => {
+    try {
+      automation?.emit?.("nba.signal", { kind, ts: now(), ...extra });
+    } catch {}
+  };
+  const fireFavoritesChanged = (domain, userId) =>
+    emit("favorites.changed", { domain: domain || null, userId, ts: now() });
 
   /* ---------------------------------- API ----------------------------------- */
   const FavoritePlans = {
@@ -187,19 +256,47 @@
     async saveUserPlan(raw) {
       const userId = raw.userId || raw.meta?.createdBy || "anon";
       const d = raw.domain || "meals";
-      const plan = normalizePlan({ ...raw, domain: d, meta: { ...(raw.meta||{}), source: "user", createdBy: userId }});
+      const plan = normalizePlan({
+        ...raw,
+        domain: d,
+        meta: { ...(raw.meta || {}), source: "user", createdBy: userId },
+      });
 
       // contract validation (non-blocking)
       const validation = validateAgainstContract(d, plan.planBody);
-      if (!validation.ok && __DEV__) console.warn(`[FavoritePlans] ${d} plan schema warnings`, validation.errors);
+      if (!validation.ok && __DEV__)
+        console.warn(
+          `[FavoritePlans] ${d} plan schema warnings`,
+          validation.errors
+        );
 
       // Try router first
       const router = await getRouter(userId);
       if (router && router.savePlan) {
-        const saved = await router.savePlan(plan, { scope: "user", userId, overwrite: false });
-        emit("plan.saved", { domain: d, planId: saved?.id || plan.id, userId, plan: saved || plan, ts: now() });
-        pulse("plan.saved", { domain: d, userId, planId: saved?.id || plan.id });
-        try { await calendarSync?.writePlanSessions?.({ userId, domain: d, plan: saved || plan }); } catch {}
+        const saved = await router.savePlan(plan, {
+          scope: "user",
+          userId,
+          overwrite: false,
+        });
+        emit("plan.saved", {
+          domain: d,
+          planId: saved?.id || plan.id,
+          userId,
+          plan: saved || plan,
+          ts: now(),
+        });
+        pulse("plan.saved", {
+          domain: d,
+          userId,
+          planId: saved?.id || plan.id,
+        });
+        try {
+          await calendarSync?.writePlanSessions?.({
+            userId,
+            domain: d,
+            plan: saved || plan,
+          });
+        } catch {}
         fireFavoritesChanged(d, userId);
         return saved || plan;
       }
@@ -207,11 +304,22 @@
       // Fallback to cache
       const st = await cacheLoad(userId);
       st.userPlans[d] = st.userPlans[d] || [];
-      const idx = st.userPlans[d].findIndex(p => p.id === plan.id);
-      if (idx >= 0) st.userPlans[d][idx] = { ...st.userPlans[d][idx], ...plan, updatedAt: now() };
+      const idx = st.userPlans[d].findIndex((p) => p.id === plan.id);
+      if (idx >= 0)
+        st.userPlans[d][idx] = {
+          ...st.userPlans[d][idx],
+          ...plan,
+          updatedAt: now(),
+        };
       else st.userPlans[d].unshift(plan);
       await cacheSave(userId, st);
-      emit("plan.saved", { domain: d, planId: plan.id, userId, plan, ts: now() });
+      emit("plan.saved", {
+        domain: d,
+        planId: plan.id,
+        userId,
+        plan,
+        ts: now(),
+      });
       pulse("plan.saved", { domain: d, userId, planId: plan.id });
       fireFavoritesChanged(d, userId);
       return plan;
@@ -223,34 +331,64 @@
       if (router?.getPlan && router?.savePlan) {
         const base = await router.getPlan(planId, { scope: "global" });
         if (!base) return null;
-        const cloned = await router.savePlan({
-          ...base,
-          id: undefined,
-          title: (base.title || "Plan") + " (My Copy)",
-          domain: base.domain || d,
-          meta: { ...(base.meta||{}), source: "user", createdBy: userId, version: (base.meta?.version || 1) + 1 },
-        }, { scope: "user", userId, favorite: !!favorite });
-        try { router.afterSaveOrchestrate?.(cloned); } catch {}
-        if (favorite) await this.favorite({ userId, domain: cloned.domain || d, planId: cloned.id });
+        const cloned = await router.savePlan(
+          {
+            ...base,
+            id: undefined,
+            title: (base.title || "Plan") + " (My Copy)",
+            domain: base.domain || d,
+            meta: {
+              ...(base.meta || {}),
+              source: "user",
+              createdBy: userId,
+              version: (base.meta?.version || 1) + 1,
+            },
+          },
+          { scope: "user", userId, favorite: !!favorite }
+        );
+        try {
+          router.afterSaveOrchestrate?.(cloned);
+        } catch {}
+        if (favorite)
+          await this.favorite({
+            userId,
+            domain: cloned.domain || d,
+            planId: cloned.id,
+          });
         return cloned;
       }
 
       // Fallback to cache-only (copy from cached featured list)
       const st = await cacheLoad(userId);
-      const base = (st.featured[d] || []).find(p => p.id === planId);
+      const base = (st.featured[d] || []).find((p) => p.id === planId);
       if (!base) return null;
       const plan = normalizePlan({
         ...base,
         id: uid(),
-        userId, domain: base.domain || d,
+        userId,
+        domain: base.domain || d,
         title: (base.title || "Plan") + " (My Copy)",
-        meta: { ...(base.meta||{}), source: "user", createdBy: userId, version: (base.meta?.version || 1) + 1 }
+        meta: {
+          ...(base.meta || {}),
+          source: "user",
+          createdBy: userId,
+          version: (base.meta?.version || 1) + 1,
+        },
       });
       st.userPlans[d] = st.userPlans[d] || [];
       st.userPlans[d].unshift(plan);
-      if (favorite) { st.favorites[d] = st.favorites[d] || {}; st.favorites[d][plan.id] = true; }
+      if (favorite) {
+        st.favorites[d] = st.favorites[d] || {};
+        st.favorites[d][plan.id] = true;
+      }
       await cacheSave(userId, st);
-      emit("plan.saved", { domain: d, planId: plan.id, userId, plan, ts: now() });
+      emit("plan.saved", {
+        domain: d,
+        planId: plan.id,
+        userId,
+        plan,
+        ts: now(),
+      });
       pulse("plan.saved", { domain: d, userId, planId: plan.id });
       fireFavoritesChanged(d, userId);
       return plan;
@@ -338,8 +476,11 @@
       }
       // fallback cache
       const st = await cacheLoad(userId);
-      return (st.userPlans[d] || []).find(p => p.id === planId) ||
-             (st.featured[d] || []).find(p => p.id === planId) || null;
+      return (
+        (st.userPlans[d] || []).find((p) => p.id === planId) ||
+        (st.featured[d] || []).find((p) => p.id === planId) ||
+        null
+      );
     },
 
     async removeUserPlan({ userId, domain, planId }) {
@@ -348,7 +489,9 @@
       if (router?.deletePlan) {
         await router.deletePlan(planId, { scope: "user", userId });
         // Also clear favorite mapping if any
-        try { await this.unfavorite({ userId, domain: d, planId }); } catch {}
+        try {
+          await this.unfavorite({ userId, domain: d, planId });
+        } catch {}
         emit("plan.removed", { userId, domain: d, planId, ts: now() });
         pulse("plan.removed", { userId, domain: d, planId });
         fireFavoritesChanged(d, userId);
@@ -356,7 +499,7 @@
       }
       // cache fallback
       const st = await cacheLoad(userId);
-      st.userPlans[d] = (st.userPlans[d] || []).filter(p => p.id !== planId);
+      st.userPlans[d] = (st.userPlans[d] || []).filter((p) => p.id !== planId);
       if (st.favorites[d]) delete st.favorites[d][planId];
       await cacheSave(userId, st);
       emit("plan.removed", { userId, domain: d, planId, ts: now() });
@@ -372,27 +515,48 @@
         // Write-through: fetch, patch, save
         const base = await this.get({ userId, domain: d, planId });
         if (!base) return false;
-        const uniq = Array.from(new Set([...(base.tags||[]), ...tags.map(String)]));
+        const uniq = Array.from(
+          new Set([...(base.tags || []), ...tags.map(String)])
+        );
         const patched = { ...base, tags: uniq, updatedAt: now() };
-        await router.savePlan(patched, { scope: "user", userId, overwrite: true });
-        emit("plan.tags.updated", { userId, domain: d, planId, tags: uniq, ts: now() });
+        await router.savePlan(patched, {
+          scope: "user",
+          userId,
+          overwrite: true,
+        });
+        emit("plan.tags.updated", {
+          userId,
+          domain: d,
+          planId,
+          tags: uniq,
+          ts: now(),
+        });
         fireFavoritesChanged(d, userId);
         return true;
       }
       // cache fallback
       const st = await cacheLoad(userId);
       const update = (arr) => {
-        const idx = (arr||[]).findIndex(p => p.id === planId);
+        const idx = (arr || []).findIndex((p) => p.id === planId);
         if (idx >= 0) {
-          const uniq = Array.from(new Set([...(arr[idx].tags||[]), ...tags.map(String)]));
+          const uniq = Array.from(
+            new Set([...(arr[idx].tags || []), ...tags.map(String)])
+          );
           arr[idx] = { ...arr[idx], tags: uniq, updatedAt: now() };
           return true;
-        } return false;
+        }
+        return false;
       };
       const ok = update(st.userPlans[d]) || update(st.featured[d]);
       if (ok) {
         await cacheSave(userId, st);
-        emit("plan.tags.updated", { userId, domain: d, planId, tags, ts: now() });
+        emit("plan.tags.updated", {
+          userId,
+          domain: d,
+          planId,
+          tags,
+          ts: now(),
+        });
         fireFavoritesChanged(d, userId);
       }
       return ok;
@@ -420,22 +584,36 @@
             keys = keys.concat(gKeys);
           }
           const vals = await router.adapter.bulkGet(keys);
-          const pool = (vals || []).filter(Boolean).map(v => ({
+          const pool = (vals || []).filter(Boolean).map((v) => ({
             ...v,
             isFavorite: false, // fill later
           }));
           // favorites map
-          const favMap = ((await router.adapter.get(keyForFavorites(userId))) || { byId: {} }).byId || {};
+          const favMap =
+            (
+              (await router.adapter.get(keyForFavorites(userId))) || {
+                byId: {},
+              }
+            ).byId || {};
           for (const p of pool) p.isFavorite = !!favMap[p.id];
 
-          const filtered = pool.filter(p => {
-            const tagOk = tagSet.size ? (p.tags || []).some(t => tagSet.has(String(t))) : true;
-            const textOk = q ? ((p.title||"").toLowerCase().includes(q) || (p.summary||"").toLowerCase().includes(q)) : true;
+          const filtered = pool.filter((p) => {
+            const tagOk = tagSet.size
+              ? (p.tags || []).some((t) => tagSet.has(String(t)))
+              : true;
+            const textOk = q
+              ? (p.title || "").toLowerCase().includes(q) ||
+                (p.summary || "").toLowerCase().includes(q)
+              : true;
             return tagOk && textOk && (!domain || p.domain === domain);
           });
           allItems.push(...filtered);
         }
-        allItems.sort((a,b) => (Number(b.isFavorite) - Number(a.isFavorite)) || ((b.updatedAt||0) - (a.updatedAt||0)));
+        allItems.sort(
+          (a, b) =>
+            Number(b.isFavorite) - Number(a.isFavorite) ||
+            (b.updatedAt || 0) - (a.updatedAt || 0)
+        );
         return allItems;
       }
 
@@ -444,40 +622,65 @@
       const res = [];
       for (const d of domains) {
         const pool = [];
-        if (only === "all" || only === "mine") pool.push(...(st.userPlans[d] || []));
-        if (only === "all" || only === "featured") pool.push(...(st.featured[d] || []));
-        const filtered = pool.filter(p => {
-          const tagOk = tagSet.size ? (p.tags || []).some(t => tagSet.has(String(t))) : true;
-          const textOk = q ? ((p.title||"").toLowerCase().includes(q) || (p.summary||"").toLowerCase().includes(q)) : true;
-          return tagOk && textOk;
-        }).map(p => ({
-          ...p,
-          isFavorite: !!(st.favorites[d] && st.favorites[d][p.id]),
-        }));
+        if (only === "all" || only === "mine")
+          pool.push(...(st.userPlans[d] || []));
+        if (only === "all" || only === "featured")
+          pool.push(...(st.featured[d] || []));
+        const filtered = pool
+          .filter((p) => {
+            const tagOk = tagSet.size
+              ? (p.tags || []).some((t) => tagSet.has(String(t)))
+              : true;
+            const textOk = q
+              ? (p.title || "").toLowerCase().includes(q) ||
+                (p.summary || "").toLowerCase().includes(q)
+              : true;
+            return tagOk && textOk;
+          })
+          .map((p) => ({
+            ...p,
+            isFavorite: !!(st.favorites[d] && st.favorites[d][p.id]),
+          }));
         res.push(...filtered);
       }
-      res.sort((a,b) => (Number(b.isFavorite) - Number(a.isFavorite)) || ((b.updatedAt||0) - (a.updatedAt||0)));
+      res.sort(
+        (a, b) =>
+          Number(b.isFavorite) - Number(a.isFavorite) ||
+          (b.updatedAt || 0) - (a.updatedAt || 0)
+      );
       return res;
     },
 
     async listFavorites({ userId, domain }) {
       const d = domain || "meals";
       const router = await getRouter(userId);
-      if (router?.adapter?.get && router?.adapter?.keys && router?.adapter?.bulkGet) {
-        const fav = ((await router.adapter.get(keyForFavorites(userId))) || { byId: {} }).byId || {};
+      if (
+        router?.adapter?.get &&
+        router?.adapter?.keys &&
+        router?.adapter?.bulkGet
+      ) {
+        const fav =
+          ((await router.adapter.get(keyForFavorites(userId))) || { byId: {} })
+            .byId || {};
         const ids = new Set(Object.keys(fav));
         // We have plan IDs, but not their scope; fetch both user & global pools, then filter by id.
         const keys = []
           .concat(await router.adapter.keys(keyPrefixUserPlans(userId, d)))
           .concat(await router.adapter.keys(keyPrefixGlobalPlans(d)));
         const vals = await router.adapter.bulkGet(keys);
-        return (vals || []).filter(p => p && ids.has(p.id)).map(p => ({ ...p, isFavorite: true }));
+        return (vals || [])
+          .filter((p) => p && ids.has(p.id))
+          .map((p) => ({ ...p, isFavorite: true }));
       }
       // cache fallback
       const st = await cacheLoad(userId);
-      const ids = new Set(Object.keys(st.favorites[d] || {}).filter(k => st.favorites[d][k]));
+      const ids = new Set(
+        Object.keys(st.favorites[d] || {}).filter((k) => st.favorites[d][k])
+      );
       const pool = [...(st.userPlans[d] || []), ...(st.featured[d] || [])];
-      return pool.filter(p => ids.has(p.id)).map(p => ({ ...p, isFavorite: true }));
+      return pool
+        .filter((p) => ids.has(p.id))
+        .map((p) => ({ ...p, isFavorite: true }));
     },
 
     /* --------------------------- Seed/Import/Export ------------------------- */
@@ -486,9 +689,13 @@
       const st = await cacheLoad(userId);
       const d = domain || "meals";
       st.featured[d] = st.featured[d] || [];
-      const byId = new Map(st.featured[d].map(p => [p.id, p]));
+      const byId = new Map(st.featured[d].map((p) => [p.id, p]));
       for (const p of plans) {
-        const np = normalizePlan({ ...p, domain: d, meta: { ...(p.meta||{}), source:"featured", visibility:"public" } });
+        const np = normalizePlan({
+          ...p,
+          domain: d,
+          meta: { ...(p.meta || {}), source: "featured", visibility: "public" },
+        });
         byId.set(np.id, { ...byId.get(np.id), ...np });
       }
       st.featured[d] = Array.from(byId.values());
@@ -499,16 +706,34 @@
 
     async exportAll({ userId }) {
       const router = await getRouter(userId);
-      if (router?.adapter?.keys && router?.adapter?.bulkGet && router?.adapter?.get) {
+      if (
+        router?.adapter?.keys &&
+        router?.adapter?.bulkGet &&
+        router?.adapter?.get
+      ) {
         const uKeys = await router.adapter.keys(keyPrefixUserPlans(userId));
         const gKeys = await router.adapter.keys(keyPrefixGlobalPlans());
-        const plans = (await router.adapter.bulkGet(uKeys.concat(gKeys))).filter(Boolean);
-        const favorites = (await router.adapter.get(keyForFavorites(userId))) || { byId: {} };
-        return { kind: "suka.favorites.export", version: 3, exportedAt: now(), data: { plans, favorites } };
+        const plans = (
+          await router.adapter.bulkGet(uKeys.concat(gKeys))
+        ).filter(Boolean);
+        const favorites = (await router.adapter.get(
+          keyForFavorites(userId)
+        )) || { byId: {} };
+        return {
+          kind: "suka.favorites.export",
+          version: 3,
+          exportedAt: now(),
+          data: { plans, favorites },
+        };
       }
       // cache fallback
       const st = await cacheLoad(userId);
-      return { kind: "suka.favorites.export", version: st.version, exportedAt: now(), data: st };
+      return {
+        kind: "suka.favorites.export",
+        version: st.version,
+        exportedAt: now(),
+        data: st,
+      };
     },
 
     async importAll({ userId, blob, mergeMode = "merge" /* or "replace" */ }) {
@@ -519,9 +744,18 @@
       if (router?.adapter?.bulkSet && router?.adapter?.set) {
         // If payload contains raw plans array + favorites
         if (Array.isArray(data.plans)) {
-          const entries = data.plans.map(p => ({
-            key: (p.scope && String(p.scope).startsWith("global")) ? keyForGlobalPlan(p.id) : keyForUserPlan(userId, p.id),
-            value: { ...p, meta: { ...(p.meta||{}), createdBy: p.meta?.createdBy || userId } }
+          const entries = data.plans.map((p) => ({
+            key:
+              p.scope && String(p.scope).startsWith("global")
+                ? keyForGlobalPlan(p.id)
+                : keyForUserPlan(userId, p.id),
+            value: {
+              ...p,
+              meta: {
+                ...(p.meta || {}),
+                createdBy: p.meta?.createdBy || userId,
+              },
+            },
           }));
           if (mergeMode === "replace") {
             // optional: could purge user scope first; skipping destructive ops for safety
@@ -531,16 +765,20 @@
           // Legacy blob: recompose entries from userPlans + featured
           const entries = [];
           for (const d of Object.keys(data.userPlans || {})) {
-            for (const p of (data.userPlans[d] || [])) entries.push({ key: keyForUserPlan(userId, p.id), value: p });
+            for (const p of data.userPlans[d] || [])
+              entries.push({ key: keyForUserPlan(userId, p.id), value: p });
           }
           for (const d of Object.keys(data.featured || {})) {
-            for (const p of (data.featured[d] || [])) entries.push({ key: keyForGlobalPlan(p.id), value: p });
+            for (const p of data.featured[d] || [])
+              entries.push({ key: keyForGlobalPlan(p.id), value: p });
           }
           if (entries.length) await router.adapter.bulkSet(entries);
         }
         if (data.favorites) {
-          const existing = (await router.adapter.get(keyForFavorites(userId))) || { byId: {} };
-          const byId = (mergeMode === "replace") ? {} : { ...existing.byId };
+          const existing = (await router.adapter.get(
+            keyForFavorites(userId)
+          )) || { byId: {} };
+          const byId = mergeMode === "replace" ? {} : { ...existing.byId };
           Object.assign(byId, data.favorites.byId || {});
           await router.adapter.set(keyForFavorites(userId), { byId });
         }
@@ -553,30 +791,41 @@
       // cache fallback (legacy)
       const st = await cacheLoad(userId);
       const incoming = data;
-      const out = (mergeMode === "replace") ? deepClone(incoming) : deepClone(st);
+      const out = mergeMode === "replace" ? deepClone(incoming) : deepClone(st);
 
       const mergeArr = (dst = [], src = []) => {
-        const byId = new Map(dst.map(p => [p.id, p]));
-        src.forEach(p => byId.set(p.id, { ...byId.get(p.id), ...p }));
+        const byId = new Map(dst.map((p) => [p.id, p]));
+        src.forEach((p) => byId.set(p.id, { ...byId.get(p.id), ...p }));
         return Array.from(byId.values());
       };
 
       if (incoming.featured) {
         for (const d of Object.keys(incoming.featured || {})) {
-          out.featured[d] = mergeArr(out.featured[d] || [], incoming.featured[d] || []);
+          out.featured[d] = mergeArr(
+            out.featured[d] || [],
+            incoming.featured[d] || []
+          );
         }
       }
       if (incoming.userPlans) {
         for (const d of Object.keys(incoming.userPlans || {})) {
-          out.userPlans[d] = mergeArr(out.userPlans[d] || [], incoming.userPlans[d] || []);
+          out.userPlans[d] = mergeArr(
+            out.userPlans[d] || [],
+            incoming.userPlans[d] || []
+          );
         }
       }
       if (incoming.favorites) {
         for (const d of Object.keys(incoming.favorites || {})) {
-          out.favorites[d] = { ...(out.favorites[d] || {}), ...(incoming.favorites[d] || {}) };
+          out.favorites[d] = {
+            ...(out.favorites[d] || {}),
+            ...(incoming.favorites[d] || {}),
+          };
         }
       }
-      out.tags = Array.from(new Map((out.tags||[]).map(t => [t.id||t.label, t])).values());
+      out.tags = Array.from(
+        new Map((out.tags || []).map((t) => [t.id || t.label, t])).values()
+      );
       await cacheSave(userId, out);
       fireFavoritesChanged(null, userId);
       emit("import.finished", { userId, at: now() });
@@ -593,23 +842,45 @@
         favoriteCount: favs.length,
         myPlanCount: mine.length,
         updatedAt: now(),
-        top: favs.slice(0, 6).map(p => ({ id: p.id, title: p.title, domain: p.domain }))
+        top: favs
+          .slice(0, 6)
+          .map((p) => ({ id: p.id, title: p.title, domain: p.domain })),
       };
     },
 
     /* -------------------------- Global orchestration ------------------------ */
     attachGlobalListeners() {
       try {
-        eventBus.on?.("inventory.shortage.detected", async ({ domain, items, userId }) => {
-          const plans = await FavoritePlans.listFavorites({ userId, domain });
-          if ((plans||[]).length) {
-            emit("nba.nudge.created", { kind: "inventory.shortage.for.favorite", userId, domain, items, planCount: plans.length, ts: now() });
+        eventBus.on?.(
+          "inventory.shortage.detected",
+          async ({ domain, items, userId }) => {
+            const plans = await FavoritePlans.listFavorites({ userId, domain });
+            if ((plans || []).length) {
+              emit("nba.nudge.created", {
+                kind: "inventory.shortage.for.favorite",
+                userId,
+                domain,
+                items,
+                planCount: plans.length,
+                ts: now(),
+              });
+            }
           }
-        });
-        eventBus.on?.("planner.conflict.detected", async ({ kind, userId, domain }) => {
-          const snap = await FavoritePlans.snapshot({ userId, domain });
-          emit("nba.nudge.created", { kind: "planner.conflict.favorite.context", userId, domain, conflict: kind, snapshot: snap, ts: now() });
-        });
+        );
+        eventBus.on?.(
+          "planner.conflict.detected",
+          async ({ kind, userId, domain }) => {
+            const snap = await FavoritePlans.snapshot({ userId, domain });
+            emit("nba.nudge.created", {
+              kind: "planner.conflict.favorite.context",
+              userId,
+              domain,
+              conflict: kind,
+              snapshot: snap,
+              ts: now(),
+            });
+          }
+        );
       } catch {}
     },
   };
@@ -622,6 +893,9 @@
     module.exports.default = FavoritePlans;
     module.exports.favoritePlans = favoritePlans;
   } catch (_e) {
-    try { exports.default = FavoritePlans; exports.favoritePlans = favoritePlans; } catch {}
+    try {
+      exports.default = FavoritePlans;
+      exports.favoritePlans = favoritePlans;
+    } catch {}
   }
 })();

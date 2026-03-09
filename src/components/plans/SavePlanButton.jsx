@@ -9,9 +9,9 @@ try {
   useFavoritePlans = mod?.default || null;
 } catch (_e) {}
 
-let eventBus = { on(){}, off(){}, emit(){} };
+let eventBus = { on() {}, off() {}, emit() {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch (_e) {}
 
@@ -112,7 +112,8 @@ export default function SavePlanButton({
   useEffect(() => {
     let alive = true;
     (async () => {
-      if (routerRef.current || !PlanStorageFactory) return setRouterReady(!!routerRef.current);
+      if (routerRef.current || !PlanStorageFactory)
+        return setRouterReady(!!routerRef.current);
       try {
         const router = await PlanStorageFactory({ userId });
         routerRef.current = router;
@@ -122,7 +123,9 @@ export default function SavePlanButton({
         if (alive) setRouterReady(!!routerRef.current);
       }
     })();
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [userId]);
 
   const getRouter = () => routerRef.current;
@@ -154,12 +157,18 @@ export default function SavePlanButton({
     (async () => {
       if (hasHook || !routerReady || !plan?.id) return;
       try {
-        const favs = await getRouter().listFavorites({ userId, domain, limit: 1000 });
+        const favs = await getRouter().listFavorites({
+          userId,
+          domain,
+          limit: 1000,
+        });
         const found = !!(favs || []).find((p) => p.id === plan.id);
         if (alive) setFallbackFavorite(found);
       } catch (_e) {}
     })();
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [hasHook, routerReady, userId, domain, plan?.id]);
 
   // Close menu on outside click
@@ -168,7 +177,8 @@ export default function SavePlanButton({
     const onDoc = (e) => {
       const pop = document.getElementById(getMenuId());
       if (!btnRef.current || !pop) return;
-      if (!pop.contains(e.target) && !btnRef.current.contains(e.target)) setMenuOpen(false);
+      if (!pop.contains(e.target) && !btnRef.current.contains(e.target))
+        setMenuOpen(false);
     };
     document.addEventListener("mousedown", onDoc);
     return () => document.removeEventListener("mousedown", onDoc);
@@ -177,7 +187,9 @@ export default function SavePlanButton({
   const getMenuId = () => `saveplan-menu-${plan?.id || "new"}`;
 
   const label = isMine ? "Edit & Save" : "Save to My Plans";
-  const title = isMine ? "Open editor to update your plan" : "Open editor to create your own copy";
+  const title = isMine
+    ? "Open editor to update your plan"
+    : "Open editor to create your own copy";
 
   // ------------------------------- Styles -----------------------------------
   const styleBase =
@@ -194,7 +206,11 @@ export default function SavePlanButton({
     " " +
     pad +
     " " +
-    (variant === "outline" ? styleOutline : variant === "ghost" ? styleGhost : styleSolid);
+    (variant === "outline"
+      ? styleOutline
+      : variant === "ghost"
+      ? styleGhost
+      : styleSolid);
 
   // ----------------------------- Helpers (save) -----------------------------
   async function saveWithHookOrRouter(nextPlan, { favorite = false } = {}) {
@@ -216,7 +232,7 @@ export default function SavePlanButton({
       return router.savePlan(
         {
           ...(nextPlan || plan),
-          domain: (nextPlan?.domain || plan?.domain || domain),
+          domain: nextPlan?.domain || plan?.domain || domain,
           meta: {
             ...((nextPlan || plan)?.meta || {}),
             source: "user",
@@ -234,14 +250,22 @@ export default function SavePlanButton({
         title: base?.title || "Untitled Plan",
         meta: { ...(base?.meta || {}), source: "user", createdBy: userId },
       };
-      const saved = await router.savePlan(cloned, { scope: "user", userId, overwrite: false, favorite });
-      try { router.afterSaveOrchestrate?.(saved); } catch (_e) {}
+      const saved = await router.savePlan(cloned, {
+        scope: "user",
+        userId,
+        overwrite: false,
+        favorite,
+      });
+      try {
+        router.afterSaveOrchestrate?.(saved);
+      } catch (_e) {}
       return saved;
     }
   }
 
   async function toggleFavoriteWithHookOrRouter(planId, dom) {
-    if (hasHook && hookToggleFavorite) return hookToggleFavorite({ planId, domain: dom });
+    if (hasHook && hookToggleFavorite)
+      return hookToggleFavorite({ planId, domain: dom });
     const router = getRouter();
     if (!router) throw new Error("Storage not ready");
     const res = await router.toggleFavorite({ planId, userId, domain: dom });
@@ -272,7 +296,9 @@ export default function SavePlanButton({
           }
         : plan;
 
-      const saved = await saveWithHookOrRouter(nextPlan, { favorite: !!options.favorite });
+      const saved = await saveWithHookOrRouter(nextPlan, {
+        favorite: !!options.favorite,
+      });
 
       // Orchestration & analytics pulses
       try {
@@ -297,7 +323,9 @@ export default function SavePlanButton({
       eventBus.emit?.("toast.show", {
         level: "success",
         title: isMine ? "Plan saved" : "Saved to My Plans",
-        message: options.favorite ? "Plan saved and added to favorites." : "Your changes are preserved.",
+        message: options.favorite
+          ? "Plan saved and added to favorites."
+          : "Your changes are preserved.",
         ts: Date.now(),
       });
 
@@ -328,7 +356,10 @@ export default function SavePlanButton({
       const updated = await getWithHookOrRouter(plan.id, plan.domain || domain);
       eventBus.emit?.("toast.show", {
         level: "success",
-        title: (updated?.isFavorite || isFavorite) ? "Added to favorites" : "Removed from favorites",
+        title:
+          updated?.isFavorite || isFavorite
+            ? "Added to favorites"
+            : "Removed from favorites",
         message: plan.title || "Plan",
         ts: Date.now(),
       });
@@ -378,7 +409,9 @@ export default function SavePlanButton({
                 ? "border-transparent text-blue-700"
                 : "border-blue-600 text-white") +
               " border-l px-2 rounded-r-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 " +
-              (variant === "solid" ? "focus-visible:ring-blue-500" : "focus-visible:ring-blue-500")
+              (variant === "solid"
+                ? "focus-visible:ring-blue-500"
+                : "focus-visible:ring-blue-500")
             }
             aria-haspopup="menu"
             aria-expanded={menuOpen}
@@ -411,7 +444,9 @@ export default function SavePlanButton({
             >
               {isMine ? "Open Editor" : "Open Editor (Save to My Plans)"}
               <div className="text-xs text-gray-500">
-                {isMine ? "Edit details, tags, steps & save" : "Create a private copy, tweak, then save"}
+                {isMine
+                  ? "Edit details, tags, steps & save"
+                  : "Create a private copy, tweak, then save"}
               </div>
             </button>
 
@@ -426,7 +461,9 @@ export default function SavePlanButton({
                 disabled={busy || !storageReady}
               >
                 Quick Save to My Plans
-                <div className="text-xs text-gray-500">Clone now without opening the editor</div>
+                <div className="text-xs text-gray-500">
+                  Clone now without opening the editor
+                </div>
               </button>
             )}
             <button
@@ -436,7 +473,9 @@ export default function SavePlanButton({
               disabled={busy || !storageReady}
             >
               Quick Save & Favorite
-              <div className="text-xs text-gray-500">Save and add to Favorites for quick access</div>
+              <div className="text-xs text-gray-500">
+                Save and add to Favorites for quick access
+              </div>
             </button>
             {isMine && (
               <button
@@ -446,7 +485,9 @@ export default function SavePlanButton({
                 disabled={busy || !storageReady}
               >
                 Quick Save Changes
-                <div className="text-xs text-gray-500">Save your current plan immediately</div>
+                <div className="text-xs text-gray-500">
+                  Save your current plan immediately
+                </div>
               </button>
             )}
           </div>
@@ -472,7 +513,11 @@ export default function SavePlanButton({
         >
           <IconHeart
             filled={isFavorite}
-            className={(compact ? "h-4 w-4" : "h-5 w-5") + " " + (isFavorite ? "fill-rose-600" : "fill-gray-500")}
+            className={
+              (compact ? "h-4 w-4" : "h-5 w-5") +
+              " " +
+              (isFavorite ? "fill-rose-600" : "fill-gray-500")
+            }
           />
         </button>
       )}

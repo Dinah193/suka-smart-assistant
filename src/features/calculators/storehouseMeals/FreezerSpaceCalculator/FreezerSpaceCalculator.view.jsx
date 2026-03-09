@@ -16,7 +16,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from "react";
-import { emit } from "@/services/eventBus";
+import { emit } from "@/services/events/eventBus";
 import { runFreezerSpaceCalculation } from "./FreezerSpaceCalculator.shim";
 
 const VIEW_SOURCE = "features/FreezerSpaceCalculator.view";
@@ -136,7 +136,7 @@ const FreezerSpaceCalculatorView = () => {
           field === "capacityLiters" || field === "reservePct"
             ? Number(value) || 0
             : value,
-      }),
+      })
     );
   };
 
@@ -155,7 +155,7 @@ const FreezerSpaceCalculatorView = () => {
           field === "volumeLiters" || field === "quantity"
             ? Number(value) || 0
             : value,
-      }),
+      })
     );
   };
 
@@ -204,7 +204,7 @@ const FreezerSpaceCalculatorView = () => {
         setLoading(false);
       }
     },
-    [freezers, items, householdId, reservePctGlobal],
+    [freezers, items, householdId, reservePctGlobal]
   );
 
   /**
@@ -271,13 +271,16 @@ const FreezerSpaceCalculatorView = () => {
                 <input
                   type="number"
                   value={reservePctGlobal}
-                  onChange={(e) => setReservePctGlobal(Number(e.target.value) || 0)}
+                  onChange={(e) =>
+                    setReservePctGlobal(Number(e.target.value) || 0)
+                  }
                   className="mt-1 w-24 rounded-md border border-slate-200 bg-white px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/60"
                   min={0}
                   max={40}
                 />
                 <p className="mt-1 text-[11px] text-slate-500">
-                  Portion of capacity to keep free for airflow &amp; flexibility.
+                  Portion of capacity to keep free for airflow &amp;
+                  flexibility.
                 </p>
               </div>
             </div>
@@ -286,9 +289,7 @@ const FreezerSpaceCalculatorView = () => {
           {/* Freezers block */}
           <div className="rounded-xl border border-slate-200 bg-white/80 p-4 shadow-sm">
             <div className="flex items-center justify-between gap-2">
-              <h2 className="text-sm font-semibold text-slate-800">
-                Freezers
-              </h2>
+              <h2 className="text-sm font-semibold text-slate-800">Freezers</h2>
               <button
                 type="button"
                 onClick={handleAddFreezer}
@@ -298,7 +299,8 @@ const FreezerSpaceCalculatorView = () => {
               </button>
             </div>
             <p className="mt-1 text-[11px] text-slate-500">
-              Include all chest / upright / fridge freezers you use for long-term storage.
+              Include all chest / upright / fridge freezers you use for
+              long-term storage.
             </p>
 
             <div className="mt-3 space-y-3">
@@ -334,7 +336,7 @@ const FreezerSpaceCalculatorView = () => {
                             handleFreezerChange(
                               index,
                               "capacityLiters",
-                              e.target.value,
+                              e.target.value
                             )
                           }
                           className="mt-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/60"
@@ -349,7 +351,11 @@ const FreezerSpaceCalculatorView = () => {
                           type="number"
                           value={f.reservePct ?? ""}
                           onChange={(e) =>
-                            handleFreezerChange(index, "reservePct", e.target.value)
+                            handleFreezerChange(
+                              index,
+                              "reservePct",
+                              e.target.value
+                            )
                           }
                           className="mt-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/60"
                           min={0}
@@ -424,7 +430,11 @@ const FreezerSpaceCalculatorView = () => {
                           type="number"
                           value={item.volumeLiters ?? ""}
                           onChange={(e) =>
-                            handleItemChange(index, "volumeLiters", e.target.value)
+                            handleItemChange(
+                              index,
+                              "volumeLiters",
+                              e.target.value
+                            )
                           }
                           className="mt-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/60"
                           min={0}
@@ -455,7 +465,7 @@ const FreezerSpaceCalculatorView = () => {
                             handleItemChange(
                               index,
                               "preferredFreezerId",
-                              e.target.value || null,
+                              e.target.value || null
                             )
                           }
                           className="mt-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/60"
@@ -497,11 +507,7 @@ const FreezerSpaceCalculatorView = () => {
               </button>
             </div>
 
-            {error && (
-              <p className="mt-2 text-xs text-rose-600">
-                {error}
-              </p>
-            )}
+            {error && <p className="mt-2 text-xs text-rose-600">{error}</p>}
           </div>
         </section>
 
@@ -694,39 +700,37 @@ const FreezerSpaceCalculatorView = () => {
                         No zone layout generated for this freezer.
                       </p>
                     )}
-                    {Array.isArray(layout.zones) &&
-                      layout.zones.length > 0 && (
-                        <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                          {layout.zones.map((z) => (
-                            <div
-                              key={z.zoneId}
-                              className="rounded-md border border-slate-200 bg-white/80 p-2"
-                            >
-                              <p className="text-[11px] font-semibold text-slate-800">
-                                {z.label || z.zoneId}
+                    {Array.isArray(layout.zones) && layout.zones.length > 0 && (
+                      <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                        {layout.zones.map((z) => (
+                          <div
+                            key={z.zoneId}
+                            className="rounded-md border border-slate-200 bg-white/80 p-2"
+                          >
+                            <p className="text-[11px] font-semibold text-slate-800">
+                              {z.label || z.zoneId}
+                            </p>
+                            {Array.isArray(z.items) && z.items.length > 0 ? (
+                              <ul className="mt-1 space-y-0.5">
+                                {z.items.map((it) => (
+                                  <li
+                                    key={it.itemId}
+                                    className="text-[11px] text-slate-700"
+                                  >
+                                    {it.label || it.itemId} — {it.quantity} ×{" "}
+                                    {it.volumeLiters.toFixed(1)} L
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="mt-1 text-[11px] text-slate-500">
+                                No items assigned to this zone.
                               </p>
-                              {Array.isArray(z.items) &&
-                              z.items.length > 0 ? (
-                                <ul className="mt-1 space-y-0.5">
-                                  {z.items.map((it) => (
-                                    <li
-                                      key={it.itemId}
-                                      className="text-[11px] text-slate-700"
-                                    >
-                                      {it.label || it.itemId} — {it.quantity} ×{" "}
-                                      {it.volumeLiters.toFixed(1)} L
-                                    </li>
-                                  ))}
-                                </ul>
-                              ) : (
-                                <p className="mt-1 text-[11px] text-slate-500">
-                                  No items assigned to this zone.
-                                </p>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

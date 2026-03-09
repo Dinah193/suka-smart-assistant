@@ -1,0 +1,190 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "type": "recipe",
+    "id": "desserts.chocolate_fudge_brownies",
+    "slug": "chocolate_fudge_brownies",
+    "name": "Chocolate Fudge Brownies (Dense Baseline)",
+    "version": "1.0.0",
+    "status": "canonical",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-18T00:00:00.000Z",
+    "updatedAt": "2026-01-18T00:00:00.000Z",
+    "locale": "en-US",
+    "difficulty": "beginner",
+    "tags": [
+      "dessert",
+      "brownies",
+      "chocolate",
+      "fudge",
+      "dense",
+      "baseline",
+      "baking",
+      "pan-bake",
+      "freezer-friendly"
+    ],
+    "allergens": ["wheat", "eggs", "dairy"],
+    "description": "A dense, fudgy brownie baseline with classic shiny top potential (from proper sugar dissolution and mixing). Includes both standard all-purpose flour and fresh-milled flour guidance (choose one). Edge/center tuning can be layered later."
+  },
+  "equipment": [
+    { "id": "oven", "label": "Oven" },
+    { "id": "baking_pan_9x13", "label": "9x13-inch baking pan" },
+    { "id": "parchment_paper", "label": "Parchment paper" },
+    { "id": "mixing_bowl_large", "label": "Large mixing bowl" },
+    { "id": "mixing_bowl_medium", "label": "Medium mixing bowl" },
+    { "id": "whisk", "label": "Whisk" },
+    { "id": "rubber_spatula", "label": "Rubber spatula" },
+    { "id": "saucepan", "label": "Small saucepan" },
+    { "id": "measuring_cups", "label": "Measuring cups/spoons" },
+    { "id": "kitchen_scale", "label": "Kitchen scale (recommended)" },
+    { "id": "cooling_rack", "label": "Cooling rack" }
+  ],
+  "ingredients": [
+    {
+      "id": "butter_unsalted",
+      "label": "Unsalted butter",
+      "amount": { "value": 227, "unit": "g" },
+      "notes": "Melted; about 1 cup / 2 sticks."
+    },
+    {
+      "id": "cocoa_powder_dutch_or_natural",
+      "label": "Cocoa powder (natural or Dutch-process)",
+      "amount": { "value": 75, "unit": "g" },
+      "notes": "Dutch-process gives deeper chocolate; natural is brighter."
+    },
+    {
+      "id": "espresso_powder_optional",
+      "label": "Espresso powder (optional)",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "Enhances chocolate; about 1 tsp.",
+      "optional": true
+    },
+    {
+      "id": "sugar_granulated",
+      "label": "Granulated sugar",
+      "amount": { "value": 400, "unit": "g" },
+      "notes": "About 2 cups. Helps form shiny top when dissolved well."
+    },
+    {
+      "id": "brown_sugar_light_optional",
+      "label": "Light brown sugar (optional)",
+      "amount": { "value": 50, "unit": "g" },
+      "notes": "Optional; adds chew and moisture. If using, reduce granulated sugar by the same amount.",
+      "optional": true
+    },
+    {
+      "id": "eggs_large",
+      "label": "Large eggs",
+      "amount": { "value": 4, "unit": "each" },
+      "notes": "Room temperature helps emulsify and thicken."
+    },
+    {
+      "id": "vanilla_extract",
+      "label": "Vanilla extract",
+      "amount": { "value": 10, "unit": "ml" },
+      "notes": "About 2 tsp."
+    },
+    {
+      "id": "salt_kosher",
+      "label": "Kosher salt",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "About 1 tsp. If using fine table salt, reduce slightly."
+    },
+
+    {
+      "id": "flour_ap_option",
+      "label": "All-purpose flour (Option A — use this OR the fresh-milled option)",
+      "amount": { "value": 130, "unit": "g" },
+      "notes": "About 1 cup if spooned/leveled; weigh for best results."
+    },
+    {
+      "id": "flour_freshmilled_option",
+      "label": "Fresh-milled flour, fine-milled (Option B — use this OR the AP option)",
+      "amount": { "value": 130, "unit": "g" },
+      "notes": "Fresh-milled can absorb more and may be slightly coarser; sift out largest bran if desired for a smoother fudgy crumb."
+    },
+
+    {
+      "id": "chocolate_chips_or_chunks",
+      "label": "Semi-sweet chocolate chips or chunks",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "Fold-in for pockets of melty chocolate; optional but recommended."
+    },
+    {
+      "id": "walnuts_optional",
+      "label": "Chopped walnuts or pecans (optional)",
+      "amount": { "value": 120, "unit": "g" },
+      "notes": "Optional; toast for more flavor.",
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_prep_pan_oven",
+      "title": "Prep pan and oven",
+      "body": "Heat oven to 350°F (175°C). Line a 9x13-inch pan with parchment, leaving overhang on the long sides for lifting. Lightly grease parchment."
+    },
+    {
+      "id": "step_02_choose_flour",
+      "title": "Choose your flour option",
+      "body": "Use either the all-purpose flour ingredient OR the fresh-milled flour ingredient (not both). Fresh-milled flour can be slightly coarser; sifting out the largest bran can help keep the brownie texture smooth and fudgy."
+    },
+    {
+      "id": "step_03_melt_butter_bloom_cocoa",
+      "title": "Melt butter and bloom cocoa",
+      "body": "In a small saucepan over low heat, melt butter. Remove from heat and whisk in cocoa powder (and espresso powder if using) until smooth. This blooms the cocoa for deeper chocolate flavor."
+    },
+    {
+      "id": "step_04_dissolve_sugar",
+      "title": "Add sugar and warm briefly",
+      "body": "Whisk granulated sugar (and brown sugar if using) into the warm cocoa-butter mixture. Return to low heat for 30–60 seconds, stirring constantly, just until the mixture looks glossy and the sugar begins to dissolve (do not boil). Remove from heat and let cool 5 minutes."
+    },
+    {
+      "id": "step_05_whisk_in_eggs",
+      "title": "Whisk in eggs for thick batter",
+      "body": "Transfer mixture to a large bowl (or use the bowl if off-heat safe). Whisk in eggs one at a time until fully incorporated and batter thickens. Whisk in vanilla and salt. Batter should look shiny and slightly elastic."
+    },
+    {
+      "id": "step_06_fold_in_flour",
+      "title": "Fold in flour (minimal mixing)",
+      "body": "Add your chosen flour and fold with a spatula until just combined—no dry streaks. Avoid overmixing to keep brownies dense and fudgy."
+    },
+    {
+      "id": "step_07_add_mixins",
+      "title": "Fold in chocolate (and nuts if using)",
+      "body": "Fold in chocolate chips/chunks and nuts (if using) just until evenly distributed."
+    },
+    {
+      "id": "step_08_pan_and_level",
+      "title": "Pan and level",
+      "body": "Scrape batter into prepared pan and smooth the top. Tap the pan gently on the counter to release large air bubbles."
+    },
+    {
+      "id": "step_09_bake",
+      "title": "Bake",
+      "body": "Bake 24–30 minutes. Start checking at 22 minutes: brownies are done when the edges are set and the center is set but still moist. A toothpick in the center should come out with thick, fudgy crumbs (not wet batter)."
+    },
+    {
+      "id": "step_10_cool_fully",
+      "title": "Cool fully for clean cuts",
+      "body": "Cool in the pan on a rack at least 60 minutes (90 minutes for very clean cuts). Lift out using parchment overhang and slice with a sharp knife. Wipe the blade between cuts for neat squares."
+    },
+    {
+      "id": "step_11_store_freeze",
+      "title": "Store or freeze",
+      "body": "Store airtight at room temperature 3–4 days or refrigerate up to 7 days (texture firms when cold). Freeze cut squares airtight up to 2 months. Thaw at room temperature."
+    }
+  ],
+  "notes": [
+    "Dense baseline logic: minimal flour + cocoa bloom + warm sugar dissolution + thorough egg whisking creates a thick batter and supports a shiny top.",
+    "For extra-fudgy texture: underbake slightly and cool completely before cutting.",
+    "For firmer slices (stacking/transport): chill brownies 30–60 minutes before cutting.",
+    "Fresh-milled flour: if the grind is coarse, sifting out the largest bran helps avoid a gritty texture."
+  ],
+  "storage": {
+    "roomTemp": "Airtight: 3–4 days.",
+    "refrigerator": "Airtight: up to 7 days (firmer texture).",
+    "freezer": "Cut squares, airtight: up to 2 months."
+  }
+}

@@ -29,7 +29,7 @@ try {
 
 let eventBus = { emit: () => {}, on: () => () => {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -62,9 +62,16 @@ function isoNow() {
 
 function uuid(prefix = "step") {
   try {
-    return globalThis?.crypto?.randomUUID?.() || `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    return (
+      globalThis?.crypto?.randomUUID?.() ||
+      `${prefix}_${Date.now().toString(36)}_${Math.random()
+        .toString(36)
+        .slice(2, 8)}`
+    );
   } catch {
-    return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    return `${prefix}_${Date.now().toString(36)}_${Math.random()
+      .toString(36)
+      .slice(2, 8)}`;
   }
 }
 
@@ -80,12 +87,20 @@ function emit(type, data) {
  * Optional Hub export (silent fail). Only called for mutating operations.
  */
 async function exportToHubIfEnabled(payload) {
-  if (!featureFlags?.familyFundMode || !HubPacketFormatter || !FamilyFundConnector) return;
+  if (
+    !featureFlags?.familyFundMode ||
+    !HubPacketFormatter ||
+    !FamilyFundConnector
+  )
+    return;
   try {
     const packet = HubPacketFormatter.formatStepChange?.(payload) || payload;
     await FamilyFundConnector.send?.(packet);
   } catch (err) {
-    console.warn("[StepsRepo] Hub export failed (silent):", err?.message || err);
+    console.warn(
+      "[StepsRepo] Hub export failed (silent):",
+      err?.message || err
+    );
   }
 }
 
@@ -94,7 +109,9 @@ async function exportToHubIfEnabled(payload) {
  */
 function ensureDB() {
   if (!db || typeof db !== "object" || !db.steps) {
-    throw new Error("Dexie 'db.steps' table not available. Ensure '@/db' exports a Dexie with a 'steps' table.");
+    throw new Error(
+      "Dexie 'db.steps' table not available. Ensure '@/db' exports a Dexie with a 'steps' table."
+    );
   }
 }
 
@@ -105,7 +122,8 @@ function ensureDB() {
  *  - status: draft | queued | ready | in_progress | paused | completed | skipped | canceled | failed
  */
 function normalizeStep(input = {}) {
-  if (!input || typeof input !== "object") return { ok: false, error: "Invalid step payload." };
+  if (!input || typeof input !== "object")
+    return { ok: false, error: "Invalid step payload." };
 
   const now = isoNow();
   const allowedStatuses = new Set([
@@ -126,7 +144,10 @@ function normalizeStep(input = {}) {
     domain: String(input.domain || "").trim() || "general",
 
     // Ordering within session
-    position: typeof input.position === "number" ? input.position : Number(input.position) || 0,
+    position:
+      typeof input.position === "number"
+        ? input.position
+        : Number(input.position) || 0,
 
     title: String(input.title || "").trim() || "Untitled Step",
     description: String(input.description || "").trim() || "",
@@ -137,28 +158,36 @@ function normalizeStep(input = {}) {
       // expected durations in seconds (or ms if you prefer—keep consistent app-wide)
       durationSec: Number(input?.planned?.durationSec) || 0,
       earliestStart: input?.planned?.earliestStart || null, // ISO
-      latestFinish: input?.planned?.latestFinish || null,   // ISO
+      latestFinish: input?.planned?.latestFinish || null, // ISO
     },
 
     actual: {
       startedAt: input?.actual?.startedAt || null, // ISO
-      endedAt: input?.actual?.endedAt || null,     // ISO
+      endedAt: input?.actual?.endedAt || null, // ISO
       durationSec: Number(input?.actual?.durationSec) || 0,
       pauseCount: Number(input?.actual?.pauseCount) || 0,
     },
 
     // Dependencies & effects
-    prerequisites: Array.isArray(input.prerequisites) ? input.prerequisites : [], // [stepId]
-    inventoryEffects: Array.isArray(input.inventoryEffects) ? input.inventoryEffects : [], // [{ itemId, delta, reason }]
+    prerequisites: Array.isArray(input.prerequisites)
+      ? input.prerequisites
+      : [], // [stepId]
+    inventoryEffects: Array.isArray(input.inventoryEffects)
+      ? input.inventoryEffects
+      : [], // [{ itemId, delta, reason }]
     equipment: Array.isArray(input.equipment) ? input.equipment : [], // ["sheet-pan", "6qt-pot"]
 
     // Cooking/cleaning specifics (extensible)
     parameters: {
       temperature: input?.parameters?.temperature ?? null, // e.g., 375F / 190C or "medium-high"
-      doneness: input?.parameters?.doneness ?? null,       // user pref snapshot (e.g., "medium-rare", "streak-free glass")
-      aromatics: Array.isArray(input?.parameters?.aromatics) ? input.parameters.aromatics : [], // ["lemon", "eucalyptus"]
-      targetVisuals: Array.isArray(input?.parameters?.targetVisuals) ? input.parameters.targetVisuals : [], // ["golden-brown", "streak-free"]
-      moisture: input?.parameters?.moisture ?? null,       // garden/animals/cleaning step control
+      doneness: input?.parameters?.doneness ?? null, // user pref snapshot (e.g., "medium-rare", "streak-free glass")
+      aromatics: Array.isArray(input?.parameters?.aromatics)
+        ? input.parameters.aromatics
+        : [], // ["lemon", "eucalyptus"]
+      targetVisuals: Array.isArray(input?.parameters?.targetVisuals)
+        ? input.parameters.targetVisuals
+        : [], // ["golden-brown", "streak-free"]
+      moisture: input?.parameters?.moisture ?? null, // garden/animals/cleaning step control
     },
 
     // Hints / media
@@ -178,7 +207,10 @@ function normalizeStep(input = {}) {
     updatedAt: now,
     householdId: input.householdId || null,
     origin: input.origin || null, // engine, import url, user action, etc.
-    metadata: input.metadata && typeof input.metadata === "object" ? input.metadata : {},
+    metadata:
+      input.metadata && typeof input.metadata === "object"
+        ? input.metadata
+        : {},
   };
 
   if (!record.sessionId) {
@@ -223,7 +255,8 @@ const StepsRepo = {
    */
   async bulkCreate(list = []) {
     ensureDB();
-    if (!Array.isArray(list) || list.length === 0) return { ok: false, error: "Nothing to create." };
+    if (!Array.isArray(list) || list.length === 0)
+      return { ok: false, error: "Nothing to create." };
     const ready = [];
     for (const s of list) {
       const res = normalizeStep(s);
@@ -233,10 +266,17 @@ const StepsRepo = {
 
     try {
       const ids = await db.steps.bulkPut(ready);
-      const payload = { action: "bulkCreate", count: ready.length, steps: ready.map(s => s.id) };
+      const payload = {
+        action: "bulkCreate",
+        count: ready.length,
+        steps: ready.map((s) => s.id),
+      };
       emit("step.bulk_created", payload);
       await exportToHubIfEnabled(payload);
-      return { ok: true, data: Array.isArray(ids) ? ids : ready.map(s => s.id) };
+      return {
+        ok: true,
+        data: Array.isArray(ids) ? ids : ready.map((s) => s.id),
+      };
     } catch (err) {
       console.error("[StepsRepo.bulkCreate] failed:", err);
       return { ok: false, error: err?.message || String(err) };
@@ -269,7 +309,7 @@ const StepsRepo = {
       domain = null,
       status = null,
       from = null, // createdAt lower bound
-      to = null,   // createdAt upper bound
+      to = null, // createdAt upper bound
       limit = 200,
       offset = 0,
       sortBy = "position", // sensible within session
@@ -280,27 +320,32 @@ const StepsRepo = {
       let coll = db.steps.toCollection();
 
       if (sessionId) {
-        coll = coll.and(s => s.sessionId === sessionId);
+        coll = coll.and((s) => s.sessionId === sessionId);
       }
       if (domain) {
-        coll = coll.and(s => s.domain === domain);
+        coll = coll.and((s) => s.domain === domain);
       }
       if (status) {
         const set = Array.isArray(status) ? new Set(status) : new Set([status]);
-        coll = coll.and(s => set.has(s.status));
+        coll = coll.and((s) => set.has(s.status));
       }
       if (from) {
-        coll = coll.and(s => (s.createdAt || "") >= from);
+        coll = coll.and((s) => (s.createdAt || "") >= from);
       }
       if (to) {
-        coll = coll.and(s => (s.createdAt || "") < to);
+        coll = coll.and((s) => (s.createdAt || "") < to);
       }
 
       const dir = sortDir === "asc" ? 1 : -1;
-      const arr = await coll.sortBy(sortBy).then(a => (dir === 1 ? a : a.reverse()));
+      const arr = await coll
+        .sortBy(sortBy)
+        .then((a) => (dir === 1 ? a : a.reverse()));
       const slice = arr.slice(offset, offset + limit);
 
-      return { ok: true, data: { total: arr.length, items: slice, offset, limit } };
+      return {
+        ok: true,
+        data: { total: arr.length, items: slice, offset, limit },
+      };
     } catch (err) {
       console.error("[StepsRepo.list] failed:", err);
       return { ok: false, error: err?.message || String(err) };
@@ -320,7 +365,8 @@ const StepsRepo = {
    */
   async update(id, next) {
     ensureDB();
-    if (!id || !next || typeof next !== "object") return { ok: false, error: "Invalid update payload." };
+    if (!id || !next || typeof next !== "object")
+      return { ok: false, error: "Invalid update payload." };
 
     const current = await db.steps.get(id);
     if (!current) return { ok: false, error: "Not found." };
@@ -346,7 +392,8 @@ const StepsRepo = {
    */
   async patch(id, partial = {}) {
     ensureDB();
-    if (!id || typeof partial !== "object") return { ok: false, error: "Invalid patch payload." };
+    if (!id || typeof partial !== "object")
+      return { ok: false, error: "Invalid patch payload." };
 
     try {
       const current = await db.steps.get(id);
@@ -354,7 +401,11 @@ const StepsRepo = {
 
       const merged = { ...current, ...partial, id, updatedAt: isoNow() };
       await db.steps.put(merged);
-      const payload = { action: "patch", step: merged, fields: Object.keys(partial) };
+      const payload = {
+        action: "patch",
+        step: merged,
+        fields: Object.keys(partial),
+      };
       emit("step.patched", payload);
       await exportToHubIfEnabled(payload);
       return { ok: true, data: merged };
@@ -402,7 +453,8 @@ const StepsRepo = {
    */
   async bulkRemove(ids = []) {
     ensureDB();
-    if (!Array.isArray(ids) || !ids.length) return { ok: false, error: "Nothing to remove." };
+    if (!Array.isArray(ids) || !ids.length)
+      return { ok: false, error: "Nothing to remove." };
     try {
       await db.steps.bulkDelete(ids);
       const payload = { action: "bulkDelete", ids };
@@ -479,7 +531,10 @@ const StepsRepo = {
   },
 
   async start(id, startedAtISO = isoNow()) {
-    const res = await this.patch(id, { status: "in_progress", actual: { ...(await this._getActual(id)), startedAt: startedAtISO } });
+    const res = await this.patch(id, {
+      status: "in_progress",
+      actual: { ...(await this._getActual(id)), startedAt: startedAtISO },
+    });
     if (res.ok) {
       const payload = { action: "status.started", id, startedAt: startedAtISO };
       emit("step.started", payload);
@@ -490,7 +545,10 @@ const StepsRepo = {
 
   async pause(id) {
     const actual = await this._getActual(id);
-    const res = await this.patch(id, { status: "paused", actual: { ...actual, pauseCount: (actual?.pauseCount || 0) + 1 } });
+    const res = await this.patch(id, {
+      status: "paused",
+      actual: { ...actual, pauseCount: (actual?.pauseCount || 0) + 1 },
+    });
     if (res.ok) {
       const payload = { action: "status.paused", id };
       emit("step.paused", payload);
@@ -511,7 +569,11 @@ const StepsRepo = {
 
   async complete(id, endedAtISO = isoNow()) {
     const actual = await this._getActual(id);
-    const duration = computeDurationSec(actual?.startedAt, endedAtISO, actual?.durationSec);
+    const duration = computeDurationSec(
+      actual?.startedAt,
+      endedAtISO,
+      actual?.durationSec
+    );
     const res = await this.patch(id, {
       status: "completed",
       actual: { ...actual, endedAt: endedAtISO, durationSec: duration },
@@ -525,7 +587,10 @@ const StepsRepo = {
   },
 
   async skip(id, reason = null) {
-    const res = await this.patch(id, { status: "skipped", metadata: { ...(await this._getMeta(id)), skipReason: reason } });
+    const res = await this.patch(id, {
+      status: "skipped",
+      metadata: { ...(await this._getMeta(id)), skipReason: reason },
+    });
     if (res.ok) {
       const payload = { action: "status.skipped", id, reason };
       emit("step.skipped", payload);
@@ -535,7 +600,10 @@ const StepsRepo = {
   },
 
   async cancel(id, reason = null) {
-    const res = await this.patch(id, { status: "canceled", metadata: { ...(await this._getMeta(id)), cancelReason: reason } });
+    const res = await this.patch(id, {
+      status: "canceled",
+      metadata: { ...(await this._getMeta(id)), cancelReason: reason },
+    });
     if (res.ok) {
       const payload = { action: "status.canceled", id, reason };
       emit("step.canceled", payload);
@@ -545,7 +613,10 @@ const StepsRepo = {
   },
 
   async fail(id, reason = null) {
-    const res = await this.patch(id, { status: "failed", metadata: { ...(await this._getMeta(id)), failReason: reason } });
+    const res = await this.patch(id, {
+      status: "failed",
+      metadata: { ...(await this._getMeta(id)), failReason: reason },
+    });
     if (res.ok) {
       const payload = { action: "status.failed", id, reason };
       emit("step.failed", payload);
@@ -558,7 +629,10 @@ const StepsRepo = {
    * Timer / schedule helpers
    * ------------------------------------------------------------------------ */
 
-  async attachTimer(id, { countdownSec = 0, alertAt = null, recurringChimeSec = 0 } = {}) {
+  async attachTimer(
+    id,
+    { countdownSec = 0, alertAt = null, recurringChimeSec = 0 } = {}
+  ) {
     const step = await this.getById(id);
     if (!step.ok) return step;
     const current = step.data;
@@ -578,7 +652,10 @@ const StepsRepo = {
     return res;
   },
 
-  async rescheduleWindow(id, { earliestStart = null, latestFinish = null } = {}) {
+  async rescheduleWindow(
+    id,
+    { earliestStart = null, latestFinish = null } = {}
+  ) {
     const step = await this.getById(id);
     if (!step.ok) return step;
     const curPlanned = step.data?.planned || {};
@@ -590,7 +667,11 @@ const StepsRepo = {
       },
     });
     if (res.ok) {
-      const payload = { action: "reschedule.window", id, planned: res.data.planned };
+      const payload = {
+        action: "reschedule.window",
+        id,
+        planned: res.data.planned,
+      };
       emit("step.rescheduled", payload);
       exportToHubIfEnabled(payload);
     }
@@ -604,10 +685,16 @@ const StepsRepo = {
   async setParameters(id, parameters = {}) {
     const step = await this.getById(id);
     if (!step.ok) return step;
-    const next = { parameters: { ...(step.data.parameters || {}), ...parameters } };
+    const next = {
+      parameters: { ...(step.data.parameters || {}), ...parameters },
+    };
     const res = await this.patch(id, next);
     if (res.ok) {
-      const payload = { action: "parameters.set", id, parameters: res.data.parameters };
+      const payload = {
+        action: "parameters.set",
+        id,
+        parameters: res.data.parameters,
+      };
       emit("step.parameters_set", payload);
       exportToHubIfEnabled(payload);
     }
@@ -615,7 +702,8 @@ const StepsRepo = {
   },
 
   async addHints(id, hints = []) {
-    if (!Array.isArray(hints) || !hints.length) return { ok: false, error: "No hints to add." };
+    if (!Array.isArray(hints) || !hints.length)
+      return { ok: false, error: "No hints to add." };
     const step = await this.getById(id);
     if (!step.ok) return step;
     const merged = Array.from(new Set([...(step.data.hints || []), ...hints]));
@@ -629,13 +717,18 @@ const StepsRepo = {
   },
 
   async recordInventoryEffects(id, effects = []) {
-    if (!Array.isArray(effects) || !effects.length) return { ok: false, error: "No effects." };
+    if (!Array.isArray(effects) || !effects.length)
+      return { ok: false, error: "No effects." };
     const step = await this.getById(id);
     if (!step.ok) return step;
-    const merged = [ ...(step.data.inventoryEffects || []), ...effects ];
+    const merged = [...(step.data.inventoryEffects || []), ...effects];
     const res = await this.patch(id, { inventoryEffects: merged });
     if (res.ok) {
-      const payload = { action: "inventory.effects_recorded", id, count: effects.length };
+      const payload = {
+        action: "inventory.effects_recorded",
+        id,
+        count: effects.length,
+      };
       emit("step.inventory_effects_recorded", payload);
       exportToHubIfEnabled(payload);
     }

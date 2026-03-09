@@ -47,7 +47,7 @@ import React, { useMemo, useState } from "react";
 /* ------------------------------- Optional deps -------------------------------- */
 let eventBus = { emit: () => {}, on: () => {}, off: () => {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch (_e) {}
 
@@ -91,26 +91,36 @@ const tone = {
 };
 
 const typeTone = (t) =>
-  t === "safety" ? tone.red :
-  t === "price" ? tone.blue :
-  t === "ingredients" ? tone.orange :
-  t === "nutrition" ? tone.green :
-  t === "images" ? tone.gray :
-  t === "coupon" ? tone.violet :
-  tone.gray;
+  t === "safety"
+    ? tone.red
+    : t === "price"
+    ? tone.blue
+    : t === "ingredients"
+    ? tone.orange
+    : t === "nutrition"
+    ? tone.green
+    : t === "images"
+    ? tone.gray
+    : t === "coupon"
+    ? tone.violet
+    : tone.gray;
 
 const chip = (key, label, cls) => (
-  <span key={key} className={`inline-block text-[11px] px-1.5 py-0.5 rounded-md border ${cls} mr-1 mb-1`}>
+  <span
+    key={key}
+    className={`inline-block text-[11px] px-1.5 py-0.5 rounded-md border ${cls} mr-1 mb-1`}
+  >
     {label}
   </span>
 );
 
 const byWeightThenFreshness = (a, b) => {
-  const wa = clamp01(a.weight), wb = clamp01(b.weight);
+  const wa = clamp01(a.weight),
+    wb = clamp01(b.weight);
   if (wa !== wb) return wb - wa;
   // fresher first
-  const fa = (a.fetchedISO ? -new Date(a.fetchedISO).getTime() : 0);
-  const fb = (b.fetchedISO ? -new Date(b.fetchedISO).getTime() : 0);
+  const fa = a.fetchedISO ? -new Date(a.fetchedISO).getTime() : 0;
+  const fb = b.fetchedISO ? -new Date(b.fetchedISO).getTime() : 0;
   return fa - fb;
 };
 
@@ -134,10 +144,13 @@ function ProviderRow({ s, compact = false, onOpen, onRefresh }) {
   const wPct = Math.round(clamp01(s.weight) * 100);
   const staleDays = daysAgo(s.fetchedISO);
   const staleTone =
-    staleDays == null ? tone.gray :
-    staleDays <= 3 ? tone.green :
-    staleDays <= 14 ? tone.orange :
-    tone.red;
+    staleDays == null
+      ? tone.gray
+      : staleDays <= 3
+      ? tone.green
+      : staleDays <= 14
+      ? tone.orange
+      : tone.red;
 
   return (
     <div className="flex items-start gap-3 py-2 border-t first:border-t-0">
@@ -176,12 +189,24 @@ function ProviderRow({ s, compact = false, onOpen, onRefresh }) {
             {Array.isArray(s.contribution)
               ? s.contribution.map((c) => chip(`c-${c}`, c, typeTone(c)))
               : null}
-            {s.credibility != null ? chip("cred", `Cred ${credPct}%`, tone.green) : null}
-            {s.weight != null ? chip("wt", `Weight ${wPct}%`, tone.violet) : null}
-            {s.sampleCount != null ? chip("n", `${s.sampleCount} samples`, tone.blue) : null}
-            {s.conflicts && s.conflicts.length ? chip("conf", `${s.conflicts.length} conflicts`, tone.red) : null}
-            <span className={`inline-block text-[11px] px-1.5 py-0.5 rounded-md border ${staleTone}`}>
-              {s.fetchedISO ? `Fetched ${staleDays === 0 ? "today" : `${staleDays}d ago`}` : "Fetched n/a"}
+            {s.credibility != null
+              ? chip("cred", `Cred ${credPct}%`, tone.green)
+              : null}
+            {s.weight != null
+              ? chip("wt", `Weight ${wPct}%`, tone.violet)
+              : null}
+            {s.sampleCount != null
+              ? chip("n", `${s.sampleCount} samples`, tone.blue)
+              : null}
+            {s.conflicts && s.conflicts.length
+              ? chip("conf", `${s.conflicts.length} conflicts`, tone.red)
+              : null}
+            <span
+              className={`inline-block text-[11px] px-1.5 py-0.5 rounded-md border ${staleTone}`}
+            >
+              {s.fetchedISO
+                ? `Fetched ${staleDays === 0 ? "today" : `${staleDays}d ago`}`
+                : "Fetched n/a"}
             </span>
             {s.updatedISO ? (
               <span className="inline-block text-[11px] px-1.5 py-0.5 rounded-md border border-gray-300 text-gray-700">
@@ -194,7 +219,12 @@ function ProviderRow({ s, compact = false, onOpen, onRefresh }) {
                 href={s.url}
                 target="_blank"
                 rel="noreferrer"
-                onClick={() => analytics.track("provenance_source_open", { id: s.id, url: s.url })}
+                onClick={() =>
+                  analytics.track("provenance_source_open", {
+                    id: s.id,
+                    url: s.url,
+                  })
+                }
               >
                 Open
               </a>
@@ -237,17 +267,27 @@ export default function SourceAttribution({
 
   // Overall confidence (weighted credibility)
   const summary = useMemo(() => {
-    if (!ranked.length) return { overall: null, topKinds: [], conflicts: 0, freshPct: null };
+    if (!ranked.length)
+      return { overall: null, topKinds: [], conflicts: 0, freshPct: null };
     const sumW = ranked.reduce((a, s) => a + (s.weight || 0), 0) || 1;
-    const overall = ranked.reduce((a, s) => a + (s.credibility || 0) * (s.weight || 0), 0) / sumW;
+    const overall =
+      ranked.reduce((a, s) => a + (s.credibility || 0) * (s.weight || 0), 0) /
+      sumW;
     const freq = {};
-    ranked.forEach((s) => (s.type ? (freq[s.type] = (freq[s.type] || 0) + 1) : null));
+    ranked.forEach((s) =>
+      s.type ? (freq[s.type] = (freq[s.type] || 0) + 1) : null
+    );
     const topKinds = Object.entries(freq)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 3)
       .map(([k]) => k);
-    const conflicts = ranked.reduce((a, s) => a + (Array.isArray(s.conflicts) ? s.conflicts.length : 0), 0);
-    const fresh = ranked.filter((s) => (daysAgo(s.fetchedISO) ?? 999) <= 7).length;
+    const conflicts = ranked.reduce(
+      (a, s) => a + (Array.isArray(s.conflicts) ? s.conflicts.length : 0),
+      0
+    );
+    const fresh = ranked.filter(
+      (s) => (daysAgo(s.fetchedISO) ?? 999) <= 7
+    ).length;
     const freshPct = Math.round((fresh / ranked.length) * 100);
     return { overall, topKinds, conflicts, freshPct };
   }, [ranked]);
@@ -260,14 +300,24 @@ export default function SourceAttribution({
 
   /* ----------------------------------- actions ----------------------------------- */
   const openProvenanceDrawer = () => {
-    eventBus.emit("provenance:open", { subject, sources: ranked, source: "SourceAttribution" });
+    eventBus.emit("provenance:open", {
+      subject,
+      sources: ranked,
+      source: "SourceAttribution",
+    });
     analytics.track("provenance_open", { count: ranked.length });
   };
 
   const refreshAll = () => {
-    eventBus.emit("provenance:refresh", { subject, source: "SourceAttribution" });
+    eventBus.emit("provenance:refresh", {
+      subject,
+      source: "SourceAttribution",
+    });
     analytics.track("provenance_refresh", { count: ranked.length });
-    eventBus.emit("ui:toast", { type: "success", message: "Refreshing all sources…" });
+    eventBus.emit("ui:toast", {
+      type: "success",
+      message: "Refreshing all sources…",
+    });
   };
 
   const copyProvenance = async () => {
@@ -275,10 +325,16 @@ export default function SourceAttribution({
     try {
       const payload = JSON.stringify({ subject, sources: ranked }, null, 2);
       await navigator.clipboard.writeText(payload);
-      eventBus.emit("ui:toast", { type: "success", message: "Provenance copied." });
+      eventBus.emit("ui:toast", {
+        type: "success",
+        message: "Provenance copied.",
+      });
       analytics.track("provenance_copied", { count: ranked.length });
     } catch (_e) {
-      eventBus.emit("ui:toast", { type: "info", message: "Copy not available in this context." });
+      eventBus.emit("ui:toast", {
+        type: "info",
+        message: "Copy not available in this context.",
+      });
     } finally {
       setCopyBusy(false);
     }
@@ -300,11 +356,19 @@ export default function SourceAttribution({
     try {
       if (favSessions?.add) await favSessions.add(session);
       else eventBus.emit("favorites:session:add", session);
-      analytics.track("provenance_verification_session_saved", { count: ranked.length });
-      eventBus.emit("ui:toast", { type: "success", message: "Verification session saved." });
+      analytics.track("provenance_verification_session_saved", {
+        count: ranked.length,
+      });
+      eventBus.emit("ui:toast", {
+        type: "success",
+        message: "Verification session saved.",
+      });
     } catch (e) {
       console.error(e);
-      eventBus.emit("ui:toast", { type: "error", message: "Could not save session." });
+      eventBus.emit("ui:toast", {
+        type: "error",
+        message: "Could not save session.",
+      });
     }
   };
 
@@ -325,10 +389,16 @@ export default function SourceAttribution({
         eventBus.emit("favorites:schedule:add", schedule);
       }
       analytics.track("provenance_refresh_schedule_saved", {});
-      eventBus.emit("ui:toast", { type: "success", message: "We’ll remind you to refresh weekly." });
+      eventBus.emit("ui:toast", {
+        type: "success",
+        message: "We’ll remind you to refresh weekly.",
+      });
     } catch (e) {
       console.error(e);
-      eventBus.emit("ui:toast", { type: "error", message: "Could not save schedule." });
+      eventBus.emit("ui:toast", {
+        type: "error",
+        message: "Could not save schedule.",
+      });
     }
   };
 
@@ -347,25 +417,49 @@ export default function SourceAttribution({
         <div className="min-w-0">
           <div className="font-semibold truncate">{title}</div>
           {labelForSubject ? (
-            <div className="text-xs text-gray-600 truncate">{labelForSubject}</div>
+            <div className="text-xs text-gray-600 truncate">
+              {labelForSubject}
+            </div>
           ) : null}
 
           {/* Summary row */}
           <div className="mt-1 flex flex-wrap items-center gap-2">
             {summary.overall != null ? (
-              <span className={`text-[11px] px-1.5 py-0.5 rounded-md border ${summary.overall >= 0.8 ? tone.green : summary.overall >= 0.6 ? tone.orange : tone.gray}`}>
+              <span
+                className={`text-[11px] px-1.5 py-0.5 rounded-md border ${
+                  summary.overall >= 0.8
+                    ? tone.green
+                    : summary.overall >= 0.6
+                    ? tone.orange
+                    : tone.gray
+                }`}
+              >
                 Overall confidence {Math.round(summary.overall * 100)}%
               </span>
             ) : (
-              <span className={`text-[11px] px-1.5 py-0.5 rounded-md border ${tone.gray}`}>Confidence n/a</span>
+              <span
+                className={`text-[11px] px-1.5 py-0.5 rounded-md border ${tone.gray}`}
+              >
+                Confidence n/a
+              </span>
             )}
             {summary.freshPct != null ? (
-              <span className={`text-[11px] px-1.5 py-0.5 rounded-md border ${summary.freshPct >= 70 ? tone.green : summary.freshPct >= 40 ? tone.orange : tone.red}`}>
+              <span
+                className={`text-[11px] px-1.5 py-0.5 rounded-md border ${
+                  summary.freshPct >= 70
+                    ? tone.green
+                    : summary.freshPct >= 40
+                    ? tone.orange
+                    : tone.red
+                }`}
+              >
                 {summary.freshPct}% fetched ≤ 7d
               </span>
             ) : null}
             {summary.conflicts ? (
-              <span className={`text-[11px] px-1.5 py-0.5 rounded-md border ${tone.red}`}>
+              <span
+                className={`text-[11px] px-1.5 py-0.5 rounded-md border ${tone.red}`}
+              >
                 {summary.conflicts} conflicts
               </span>
             ) : null}
@@ -434,26 +528,37 @@ export default function SourceAttribution({
                   s={s}
                   compact={dense}
                   onOpen={() => {
-                    eventBus.emit("provenance:source:open", { id: s.id, subject, source: "SourceAttribution" });
+                    eventBus.emit("provenance:source:open", {
+                      id: s.id,
+                      subject,
+                      source: "SourceAttribution",
+                    });
                     analytics.track("provenance_source_details", { id: s.id });
                   }}
                   onRefresh={() => {
-                    eventBus.emit("provenance:source:refresh", { id: s.id, subject, source: "SourceAttribution" });
+                    eventBus.emit("provenance:source:refresh", {
+                      id: s.id,
+                      subject,
+                      source: "SourceAttribution",
+                    });
                     analytics.track("provenance_source_refresh", { id: s.id });
                   }}
                 />
               ))}
             </div>
           ) : (
-            <div className="text-xs text-gray-600 italic">No sources attached yet.</div>
+            <div className="text-xs text-gray-600 italic">
+              No sources attached yet.
+            </div>
           )}
         </div>
       )}
 
       {/* Footnote */}
       <div className="mt-2 text-[11px] text-gray-500">
-        We combine multiple providers and weight them by reliability, freshness, and relevance. You can inspect,
-        refresh, and schedule provenance checks. Favorite sessions/schedules are yours—not just system defaults.
+        We combine multiple providers and weight them by reliability, freshness,
+        and relevance. You can inspect, refresh, and schedule provenance checks.
+        Favorite sessions/schedules are yours—not just system defaults.
       </div>
     </div>
   );

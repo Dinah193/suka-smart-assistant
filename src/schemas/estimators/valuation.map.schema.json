@@ -1,0 +1,893 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://suka-smart-assistant.local/schemas/estimators/valuation.map.schema.json",
+  "title": "SSA • Estimators • Valuation Map Schema",
+  "description": "Schema for SSA deterministic food value maps that normalize economic value across units, portions, forms (raw/prepared/preserved), and sources (garden/purchased/retail). This is the bridge between FoodSecurityEstimator and CostDeltaEstimator and must remain explainable, versioned, and consistent across SSA.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "$id",
+    "schemaVersion",
+    "updatedAt",
+    "meta",
+    "normalization",
+    "currency",
+    "unitSystems",
+    "bases",
+    "multipliers",
+    "lossAssumptions",
+    "maps"
+  ],
+
+  "properties": {
+    "$schema": { "type": "string", "minLength": 1 },
+    "$id": { "type": "string", "minLength": 1 },
+
+    "schemaVersion": {
+      "type": "string",
+      "description": "Schema document version (not the data file version).",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+    },
+
+    "updatedAt": { "type": "string", "format": "date-time" },
+
+    "meta": { "$ref": "#/$defs/Meta" },
+
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+
+    "normalization": { "$ref": "#/$defs/Normalization" },
+
+    "currency": {
+      "description": "ISO 4217 currency code used for all values.",
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 3,
+      "default": "USD"
+    },
+
+    "unitSystems": {
+      "description": "Supported unit systems and canonical units used by valuation.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mass", "volume", "count", "portion"],
+      "properties": {
+        "mass": { "$ref": "#/$defs/UnitSystemMass" },
+        "volume": { "$ref": "#/$defs/UnitSystemVolume" },
+        "count": { "$ref": "#/$defs/UnitSystemCount" },
+        "portion": { "$ref": "#/$defs/UnitSystemPortion" }
+      }
+    },
+
+    "bases": { "$ref": "#/$defs/BaseValues" },
+
+    "multipliers": { "$ref": "#/$defs/Multipliers" },
+
+    "lossAssumptions": { "$ref": "#/$defs/LossAssumptions" },
+
+    "maps": { "$ref": "#/$defs/Maps" },
+
+    "index": {
+      "description": "Optional precomputed indexes for runtime. Kept permissive for forward compatibility.",
+      "type": "object",
+      "additionalProperties": true,
+      "default": {}
+    }
+  },
+
+  "$defs": {
+    "Id": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 200,
+      "pattern": "^[a-z0-9_\\.\\-]+$"
+    },
+
+    "Tag": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 80,
+      "pattern": "^[a-z0-9_\\.\\-]+$"
+    },
+
+    "SafeKey": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160,
+      "pattern": "^[^\\u0000-\\u001F]+$"
+    },
+
+    "Locale": { "type": "string", "minLength": 2, "maxLength": 35 },
+
+    "MoneyAmount": {
+      "description": "Monetary amount in a single currency.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["currency", "value"],
+      "properties": {
+        "currency": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 3
+        },
+        "value": { "type": "number", "minimum": 0 }
+      }
+    },
+
+    "Meta": {
+      "description": "Document metadata for transparency and provenance.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "domain", "label", "status", "source"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "type": { "type": "string", "const": "schema" },
+        "domain": { "type": "string", "const": "estimators" },
+        "label": { "type": "string", "minLength": 1 },
+        "status": {
+          "type": "string",
+          "enum": ["canonical", "draft", "experimental", "deprecated"]
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "name"],
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": ["catalog", "user", "import", "generated"]
+            },
+            "name": { "type": "string", "minLength": 1 },
+            "notes": {
+              "type": "array",
+              "items": { "type": "string" },
+              "default": []
+            }
+          }
+        }
+      }
+    },
+
+    "Normalization": {
+      "description": "Normalization rules used by deterministic resolvers (IDs, alias folding, whitespace).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "idPattern",
+        "idCase",
+        "aliasCaseFold",
+        "keywordCaseFold",
+        "trimWhitespace",
+        "collapseSpaces"
+      ],
+      "properties": {
+        "idPattern": {
+          "type": "string",
+          "minLength": 1,
+          "default": "^[a-z0-9_\\.\\-]+$"
+        },
+        "idCase": {
+          "type": "string",
+          "enum": ["lower", "none"],
+          "default": "lower"
+        },
+        "aliasCaseFold": { "type": "boolean", "default": true },
+        "keywordCaseFold": { "type": "boolean", "default": true },
+        "trimWhitespace": { "type": "boolean", "default": true },
+        "collapseSpaces": { "type": "boolean", "default": true }
+      }
+    },
+
+    "UnitSystemMass": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["canonical", "supported"],
+      "properties": {
+        "canonical": {
+          "type": "string",
+          "enum": ["g", "kg", "lb"],
+          "default": "lb"
+        },
+        "supported": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "enum": ["g", "kg", "oz", "lb"] },
+          "default": ["lb", "oz", "g", "kg"]
+        }
+      }
+    },
+
+    "UnitSystemVolume": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["canonical", "supported"],
+      "properties": {
+        "canonical": {
+          "type": "string",
+          "enum": ["ml", "l", "cup", "qt"],
+          "default": "qt"
+        },
+        "supported": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "ml",
+              "l",
+              "tsp",
+              "tbsp",
+              "fl_oz",
+              "cup",
+              "pt",
+              "qt",
+              "gal"
+            ]
+          },
+          "default": [
+            "cup",
+            "qt",
+            "pt",
+            "fl_oz",
+            "tbsp",
+            "tsp",
+            "ml",
+            "l",
+            "gal"
+          ]
+        }
+      }
+    },
+
+    "UnitSystemCount": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["canonical", "supported"],
+      "properties": {
+        "canonical": { "type": "string", "enum": ["each"], "default": "each" },
+        "supported": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "enum": ["each", "dozen"] },
+          "default": ["each", "dozen"]
+        }
+      }
+    },
+
+    "UnitSystemPortion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["canonical", "supported", "portionDefinitions"],
+      "properties": {
+        "canonical": {
+          "type": "string",
+          "enum": ["portion"],
+          "default": "portion"
+        },
+        "supported": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "enum": ["portion"] },
+          "default": ["portion"]
+        },
+        "portionDefinitions": {
+          "description": "Named portion archetypes used by valuation, convertible by engine via grams/ml or count as available.",
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/PortionDefinition" }
+        }
+      }
+    },
+
+    "PortionDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "basis", "amount"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "label": { "type": "string", "minLength": 1 },
+        "basis": {
+          "description": "What the portion is measured in (mass/volume/count).",
+          "type": "string",
+          "enum": ["mass", "volume", "count"]
+        },
+        "amount": {
+          "description": "Numeric amount in the basis unit.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["value", "unit"],
+          "properties": {
+            "value": { "type": "number", "minimum": 0.0001 },
+            "unit": { "type": "string", "minLength": 1 }
+          }
+        },
+        "tags": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Tag" },
+          "default": []
+        },
+        "notes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        }
+      }
+    },
+
+    "BaseValues": {
+      "description": "Baseline value anchors. Engines can default to these when a specific mapping is missing.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "defaultUnitValue",
+        "defaultPortionValue",
+        "componentDefaultValue"
+      ],
+      "properties": {
+        "defaultUnitValue": {
+          "description": "Fallback value per canonical unit (by unit system) when no specific map entry exists.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mass", "volume", "count"],
+          "properties": {
+            "mass": { "$ref": "#/$defs/MoneyAmount" },
+            "volume": { "$ref": "#/$defs/MoneyAmount" },
+            "count": { "$ref": "#/$defs/MoneyAmount" }
+          }
+        },
+        "defaultPortionValue": {
+          "description": "Fallback value per generic portion when no portion-specific entry exists.",
+          "$ref": "#/$defs/MoneyAmount"
+        },
+        "componentDefaultValue": {
+          "description": "Fallback valuation for derived components when explicit component map is absent (per portion).",
+          "$ref": "#/$defs/MoneyAmount"
+        }
+      }
+    },
+
+    "Multipliers": {
+      "description": "Deterministic multipliers for form/source/prep state and derived components.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["forms", "sources", "components", "retailEquivalency"],
+      "properties": {
+        "forms": {
+          "description": "Raw vs prepared vs preserved multipliers.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["raw", "prepared", "preserved", "ready_to_eat"],
+          "properties": {
+            "raw": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10,
+              "default": 1
+            },
+            "prepared": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10,
+              "default": 1.35
+            },
+            "preserved": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10,
+              "default": 1.6
+            },
+            "ready_to_eat": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10,
+              "default": 1.45
+            }
+          }
+        },
+
+        "sources": {
+          "description": "Garden vs purchased vs retail source multipliers (equivalency).",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["garden", "purchased", "retail", "animal_yield"],
+          "properties": {
+            "garden": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10,
+              "default": 0.85
+            },
+            "purchased": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10,
+              "default": 1
+            },
+            "retail": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10,
+              "default": 1.1
+            },
+            "animal_yield": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10,
+              "default": 0.9
+            }
+          }
+        },
+
+        "components": {
+          "description": "Component-level valuation multipliers for prepared bases like stock, sauces, doughs.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "stock",
+            "sauce",
+            "dough",
+            "spice_blend",
+            "marinade",
+            "broth_concentrate"
+          ],
+          "properties": {
+            "stock": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10,
+              "default": 1.2
+            },
+            "sauce": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10,
+              "default": 1.4
+            },
+            "dough": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10,
+              "default": 1.25
+            },
+            "spice_blend": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10,
+              "default": 1.15
+            },
+            "marinade": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10,
+              "default": 1.1
+            },
+            "broth_concentrate": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10,
+              "default": 1.55
+            }
+          }
+        },
+
+        "retailEquivalency": {
+          "description": "Multipliers representing retail replacement equivalency for homemade versions (e.g., homemade stock replaces boxed stock).",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["homemadeToRetail", "farmToRetail"],
+          "properties": {
+            "homemadeToRetail": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10,
+              "default": 1.1
+            },
+            "farmToRetail": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10,
+              "default": 1.05
+            }
+          }
+        }
+      }
+    },
+
+    "LossAssumptions": {
+      "description": "Loss/shrinkage assumptions applied during valuation (trim, cooking loss, spoilage, processing).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["defaults", "byClass", "byMethod"],
+      "properties": {
+        "defaults": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["prepLossPct", "cookLossPct", "spoilagePct"],
+          "properties": {
+            "prepLossPct": {
+              "description": "Default prep loss fraction (0.10 = 10%).",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.95,
+              "default": 0.08
+            },
+            "cookLossPct": {
+              "description": "Default cook loss fraction (moisture/fat loss).",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.95,
+              "default": 0.12
+            },
+            "spoilagePct": {
+              "description": "Default spoilage fraction applied when no dates/shelf-life are known.",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.95,
+              "default": 0.05
+            }
+          }
+        },
+
+        "byClass": {
+          "description": "Optional overrides by food class tags (e.g., class.protein, class.produce).",
+          "type": "array",
+          "items": { "$ref": "#/$defs/LossOverride" },
+          "default": []
+        },
+
+        "byMethod": {
+          "description": "Optional overrides by method tags (e.g., method.smoke, method.dehydrate).",
+          "type": "array",
+          "items": { "$ref": "#/$defs/LossOverride" },
+          "default": []
+        }
+      }
+    },
+
+    "LossOverride": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "matchTagsAny", "loss"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "matchTagsAny": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/Tag" }
+        },
+        "loss": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "prepLossPct": { "type": "number", "minimum": 0, "maximum": 0.95 },
+            "cookLossPct": { "type": "number", "minimum": 0, "maximum": 0.95 },
+            "spoilagePct": { "type": "number", "minimum": 0, "maximum": 0.95 }
+          }
+        },
+        "notes": { "type": "string" }
+      }
+    },
+
+    "Maps": {
+      "description": "The actual valuation maps: units, portions, components, and optional equivalencies.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "unitValues",
+        "portionValues",
+        "componentValues",
+        "equivalencies"
+      ],
+      "properties": {
+        "unitValues": {
+          "description": "Unit-level value entries (per unit).",
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/UnitValueEntry" }
+        },
+
+        "portionValues": {
+          "description": "Portion-level value entries (per portion definition).",
+          "type": "array",
+          "items": { "$ref": "#/$defs/PortionValueEntry" },
+          "default": []
+        },
+
+        "componentValues": {
+          "description": "Component-level valuation for derived items like stock, sauces, doughs (typically per portion or per qt).",
+          "type": "array",
+          "items": { "$ref": "#/$defs/ComponentValueEntry" },
+          "default": []
+        },
+
+        "equivalencies": {
+          "description": "Garden vs purchased vs retail equivalency rules and mappings.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/EquivalencyRule" },
+          "default": []
+        }
+      }
+    },
+
+    "Form": {
+      "description": "Food form/state used for multipliers.",
+      "type": "string",
+      "enum": ["raw", "prepared", "preserved", "ready_to_eat"]
+    },
+
+    "SourceKind": {
+      "description": "Source category used for multipliers.",
+      "type": "string",
+      "enum": ["garden", "purchased", "retail", "animal_yield"]
+    },
+
+    "UnitRef": {
+      "description": "Reference to a unit in unitSystems supported lists (string to remain flexible).",
+      "type": "string",
+      "minLength": 1
+    },
+
+    "UnitValueEntry": {
+      "description": "Value per unit for a component/ingredient class or specific item ID/tag set.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "basis", "unit", "value", "match"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "label": { "type": "string", "minLength": 1 },
+
+        "basis": {
+          "description": "Which unit system this value applies to.",
+          "type": "string",
+          "enum": ["mass", "volume", "count"]
+        },
+
+        "unit": { "$ref": "#/$defs/UnitRef" },
+
+        "value": { "$ref": "#/$defs/MoneyAmount" },
+
+        "match": { "$ref": "#/$defs/MatchBlock" },
+
+        "form": { "$ref": "#/$defs/Form" },
+        "sourceKind": { "$ref": "#/$defs/SourceKind" },
+
+        "multiplierOverrides": {
+          "description": "Optional overrides to global multipliers for this entry.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "formMultiplier": { "type": "number", "minimum": 0, "maximum": 10 },
+            "sourceMultiplier": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10
+            }
+          },
+          "default": {}
+        },
+
+        "notes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        }
+      }
+    },
+
+    "PortionValueEntry": {
+      "description": "Value per named portion archetype (e.g., 'protein_portion', 'veg_portion').",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "portionId", "value", "match"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "label": { "type": "string", "minLength": 1 },
+
+        "portionId": { "$ref": "#/$defs/Id" },
+
+        "value": { "$ref": "#/$defs/MoneyAmount" },
+
+        "match": { "$ref": "#/$defs/MatchBlock" },
+
+        "form": { "$ref": "#/$defs/Form" },
+        "sourceKind": { "$ref": "#/$defs/SourceKind" },
+
+        "notes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        }
+      }
+    },
+
+    "ComponentKind": {
+      "description": "Derived component kinds to support deterministic valuation (stock, sauce, dough, etc.).",
+      "type": "string",
+      "enum": [
+        "stock",
+        "broth",
+        "sauce",
+        "dough",
+        "batter",
+        "spice_blend",
+        "marinade",
+        "starter",
+        "culture",
+        "paste",
+        "concentrate"
+      ]
+    },
+
+    "ComponentValueEntry": {
+      "description": "Valuation rules for derived components (bridges meal costs, preservation, and garden/animal yields).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "label",
+        "componentKind",
+        "basis",
+        "unit",
+        "value",
+        "match"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "label": { "type": "string", "minLength": 1 },
+
+        "componentKind": { "$ref": "#/$defs/ComponentKind" },
+
+        "basis": {
+          "type": "string",
+          "enum": ["mass", "volume", "count", "portion"]
+        },
+
+        "unit": { "$ref": "#/$defs/UnitRef" },
+
+        "value": { "$ref": "#/$defs/MoneyAmount" },
+
+        "match": { "$ref": "#/$defs/MatchBlock" },
+
+        "form": { "$ref": "#/$defs/Form" },
+        "sourceKind": { "$ref": "#/$defs/SourceKind" },
+
+        "applyComponentMultiplier": {
+          "description": "If true, the componentKind multiplier is applied (e.g., sauce multiplier).",
+          "type": "boolean",
+          "default": true
+        },
+
+        "notes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        }
+      }
+    },
+
+    "MatchBlock": {
+      "description": "Deterministic match logic used by engines to decide whether a valuation entry applies.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode"],
+      "properties": {
+        "mode": {
+          "description": "How this match is interpreted.",
+          "type": "string",
+          "enum": [
+            "byId",
+            "byTagsAny",
+            "byTagsAll",
+            "byRegexLabel",
+            "byArchetype"
+          ]
+        },
+
+        "id": {
+          "description": "Match an exact SSA ID (ingredient/component/etc.) when mode=byId.",
+          "$ref": "#/$defs/Id"
+        },
+
+        "tags": {
+          "description": "Tags used for tag matching modes.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/Tag" },
+          "default": []
+        },
+
+        "regex": {
+          "description": "Regex against item label/name when mode=byRegexLabel.",
+          "type": "string"
+        },
+
+        "archetypeId": {
+          "description": "Optional archetype ID match (planner archetypes).",
+          "$ref": "#/$defs/Id"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "mode": { "const": "byId" } },
+            "required": ["mode"]
+          },
+          "then": { "required": ["id"] }
+        },
+        {
+          "if": {
+            "properties": { "mode": { "enum": ["byTagsAny", "byTagsAll"] } },
+            "required": ["mode"]
+          },
+          "then": {
+            "required": ["tags"],
+            "properties": { "tags": { "minItems": 1 } }
+          }
+        },
+        {
+          "if": {
+            "properties": { "mode": { "const": "byRegexLabel" } },
+            "required": ["mode"]
+          },
+          "then": { "required": ["regex"] }
+        },
+        {
+          "if": {
+            "properties": { "mode": { "const": "byArchetype" } },
+            "required": ["mode"]
+          },
+          "then": { "required": ["archetypeId"] }
+        }
+      ]
+    },
+
+    "EquivalencyRule": {
+      "description": "Rules that translate one source/form representation into a retail-equivalent value.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "when", "then"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "label": { "type": "string", "minLength": 1 },
+
+        "when": {
+          "description": "Deterministic applicability conditions (simple tag-based and/or form/source matches).",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["match"],
+          "properties": {
+            "match": { "$ref": "#/$defs/MatchBlock" },
+            "form": { "$ref": "#/$defs/Form" },
+            "sourceKind": { "$ref": "#/$defs/SourceKind" }
+          }
+        },
+
+        "then": {
+          "description": "How to compute equivalent value.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["toSourceKind", "multiplier"],
+          "properties": {
+            "toSourceKind": { "$ref": "#/$defs/SourceKind" },
+            "multiplier": {
+              "description": "Multiplier applied when converting to the target equivalency basis.",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10
+            },
+            "notes": { "type": "string" }
+          }
+        },
+
+        "tags": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Tag" },
+          "default": []
+        }
+      }
+    }
+  }
+}

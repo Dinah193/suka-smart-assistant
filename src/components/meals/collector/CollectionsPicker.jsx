@@ -1,5 +1,11 @@
 // C:\Users\larho\suka-smart-assistant\src\components\meals\collector\CollectionsPicker.jsx
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 /**
  * CollectionsPicker.jsx — cross-module boards/collections selector
@@ -35,21 +41,36 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 /* -------------------------------- Mini UI primitives -------------------------------- */
 const cx = (...a) => a.filter(Boolean).join(" ");
-const Button = ({ variant = "solid", size = "md", className, children, ...props }) => {
-  const v = {
-    solid: "bg-zinc-900 text-white hover:opacity-90 disabled:opacity-50",
-    outline: "border hover:bg-zinc-50",
-    ghost: "hover:bg-zinc-100",
-    subtle: "bg-zinc-100 text-zinc-900 hover:bg-zinc-200",
-  }[variant] || "bg-zinc-900 text-white";
-  const s = { sm: "h-8 px-2 text-sm", md: "h-10 px-3 text-sm", xs: "h-7 px-2 text-xs" }[size] || "h-10 px-3";
+const Button = ({
+  variant = "solid",
+  size = "md",
+  className,
+  children,
+  ...props
+}) => {
+  const v =
+    {
+      solid: "bg-zinc-900 text-white hover:opacity-90 disabled:opacity-50",
+      outline: "border hover:bg-zinc-50",
+      ghost: "hover:bg-zinc-100",
+      subtle: "bg-zinc-100 text-zinc-900 hover:bg-zinc-200",
+    }[variant] || "bg-zinc-900 text-white";
+  const s =
+    { sm: "h-8 px-2 text-sm", md: "h-10 px-3 text-sm", xs: "h-7 px-2 text-xs" }[
+      size
+    ] || "h-10 px-3";
   return (
-    <button className={cx("rounded-xl transition-colors", v, s, className)} {...props}>
+    <button
+      className={cx("rounded-xl transition-colors", v, s, className)}
+      {...props}
+    >
       {children}
     </button>
   );
 };
-const Input = (props) => <input className="h-9 w-full rounded-xl border px-3 text-sm" {...props} />;
+const Input = (props) => (
+  <input className="h-9 w-full rounded-xl border px-3 text-sm" {...props} />
+);
 const Badge = ({ children, tone = "zinc" }) => (
   <span
     className={cx(
@@ -67,40 +88,77 @@ const Badge = ({ children, tone = "zinc" }) => (
 /* -------------------------------- Soft integrations -------------------------------- */
 // eventBus (new path then legacy)
 let eventBus = { on: () => {}, off: () => {}, emit: () => {} };
-try { eventBus = require("@/services/events/eventBus"); } catch { try { eventBus = require("@/services/eventBus").eventBus || eventBus; } catch {} }
+try {
+  eventBus = require("@/services/events/eventBus");
+} catch {
+  try {
+    eventBus = require("@/services/events/eventBus").eventBus || eventBus;
+  } catch {}
+}
 
 // Preferences (Sabbath)
 let PreferencesStore = {};
-try { PreferencesStore = require("@/store/PreferencesStore"); } catch {}
+try {
+  PreferencesStore = require("@/store/PreferencesStore");
+} catch {}
 
 // Stores (all optional, each expected to provide list + create)
-let BoardsStore = {};       // inspiration boards / generic boards
-let RecipeStore = {};       // meal bundles/collections
-let ShoppingStore = {};     // shopping lists/collections
-let GardenStore = {};       // garden collections
+let BoardsStore = {}; // inspiration boards / generic boards
+let RecipeStore = {}; // meal bundles/collections
+let ShoppingStore = {}; // shopping lists/collections
+let GardenStore = {}; // garden collections
 let PreservationStore = {}; // preservation collections
-let AnimalsStore = {};      // animals groups
-let ProjectsStore = {};     // household projects/folders
-try { BoardsStore = require("@/store/BoardsStore"); } catch {}
-try { RecipeStore = require("@/store/RecipeStore"); } catch {}
-try { ShoppingStore = require("@/store/ShoppingStore"); } catch {}
-try { GardenStore = require("@/store/GardenStore"); } catch {}
-try { PreservationStore = require("@/store/PreservationStore"); } catch {}
-try { AnimalsStore = require("@/store/AnimalsStore"); } catch {}
-try { ProjectsStore = require("@/store/ProjectsStore"); } catch {}
+let AnimalsStore = {}; // animals groups
+let ProjectsStore = {}; // household projects/folders
+try {
+  BoardsStore = require("@/store/BoardsStore");
+} catch {}
+try {
+  RecipeStore = require("@/store/RecipeStore");
+} catch {}
+try {
+  ShoppingStore = require("@/store/ShoppingStore");
+} catch {}
+try {
+  GardenStore = require("@/store/GardenStore");
+} catch {}
+try {
+  PreservationStore = require("@/store/PreservationStore");
+} catch {}
+try {
+  AnimalsStore = require("@/store/AnimalsStore");
+} catch {}
+try {
+  ProjectsStore = require("@/store/ProjectsStore");
+} catch {}
 
 /* --------------------------------- Helpers --------------------------------- */
 const isoNow = () => new Date().toISOString();
 const asArray = (x) => (Array.isArray(x) ? x : x ? [x] : []);
 const idOf = (x) => (typeof x === "string" ? x : x?.id);
-const normalizeValue = (value) => asArray(value).map((v) => (typeof v === "string" ? { id: v } : v || {}));
+const normalizeValue = (value) =>
+  asArray(value).map((v) => (typeof v === "string" ? { id: v } : v || {}));
 const sabbathBlocked = () => {
   try {
     const p = PreferencesStore?.getPreferences?.() || {};
-    return !!(p?.torahProfile?.sabbath?.isActive && p?.torahProfile?.sabbath?.handsOffCooking === true);
-  } catch { return false; }
+    return !!(
+      p?.torahProfile?.sabbath?.isActive &&
+      p?.torahProfile?.sabbath?.handsOffCooking === true
+    );
+  } catch {
+    return false;
+  }
 };
-const colorSwatches = ["#0ea5e9", "#10b981", "#8b5cf6", "#f59e0b", "#ef4444", "#14b8a6", "#3b82f6", "#a3a3a3"];
+const colorSwatches = [
+  "#0ea5e9",
+  "#10b981",
+  "#8b5cf6",
+  "#f59e0b",
+  "#ef4444",
+  "#14b8a6",
+  "#3b82f6",
+  "#a3a3a3",
+];
 
 /* -------- Modules we support in the picker (labels & loaders/creators) -------- */
 const MODULES = [
@@ -109,10 +167,18 @@ const MODULES = [
     label: "Inspiration • Boards",
     icon: "📌",
     loader: async () => {
-      try { return (await BoardsStore.list?.()) || []; } catch { return []; }
+      try {
+        return (await BoardsStore.list?.()) || [];
+      } catch {
+        return [];
+      }
     },
     creator: async (payload) => {
-      try { return await BoardsStore.create?.(payload); } catch { return null; }
+      try {
+        return await BoardsStore.create?.(payload);
+      } catch {
+        return null;
+      }
     },
   },
   {
@@ -120,10 +186,18 @@ const MODULES = [
     label: "Meals • Bundles",
     icon: "🍽️",
     loader: async () => {
-      try { return (await RecipeStore.listCollections?.()) || []; } catch { return []; }
+      try {
+        return (await RecipeStore.listCollections?.()) || [];
+      } catch {
+        return [];
+      }
     },
     creator: async (payload) => {
-      try { return await RecipeStore.createCollection?.(payload); } catch { return null; }
+      try {
+        return await RecipeStore.createCollection?.(payload);
+      } catch {
+        return null;
+      }
     },
   },
   {
@@ -131,10 +205,18 @@ const MODULES = [
     label: "Shopping • Lists",
     icon: "🛒",
     loader: async () => {
-      try { return (await ShoppingStore.listLists?.()) || []; } catch { return []; }
+      try {
+        return (await ShoppingStore.listLists?.()) || [];
+      } catch {
+        return [];
+      }
     },
     creator: async (payload) => {
-      try { return await ShoppingStore.createList?.(payload); } catch { return null; }
+      try {
+        return await ShoppingStore.createList?.(payload);
+      } catch {
+        return null;
+      }
     },
   },
   {
@@ -142,10 +224,18 @@ const MODULES = [
     label: "Garden • Collections",
     icon: "🌱",
     loader: async () => {
-      try { return (await GardenStore.listCollections?.()) || []; } catch { return []; }
+      try {
+        return (await GardenStore.listCollections?.()) || [];
+      } catch {
+        return [];
+      }
     },
     creator: async (payload) => {
-      try { return await GardenStore.createCollection?.(payload); } catch { return null; }
+      try {
+        return await GardenStore.createCollection?.(payload);
+      } catch {
+        return null;
+      }
     },
   },
   {
@@ -153,10 +243,18 @@ const MODULES = [
     label: "Animals • Groups",
     icon: "🐓",
     loader: async () => {
-      try { return (await AnimalsStore.listCollections?.()) || []; } catch { return []; }
+      try {
+        return (await AnimalsStore.listCollections?.()) || [];
+      } catch {
+        return [];
+      }
     },
     creator: async (payload) => {
-      try { return await AnimalsStore.createCollection?.(payload); } catch { return null; }
+      try {
+        return await AnimalsStore.createCollection?.(payload);
+      } catch {
+        return null;
+      }
     },
   },
   {
@@ -164,10 +262,18 @@ const MODULES = [
     label: "Preservation • Collections",
     icon: "🥫",
     loader: async () => {
-      try { return (await PreservationStore.listCollections?.()) || []; } catch { return []; }
+      try {
+        return (await PreservationStore.listCollections?.()) || [];
+      } catch {
+        return [];
+      }
     },
     creator: async (payload) => {
-      try { return await PreservationStore.createCollection?.(payload); } catch { return null; }
+      try {
+        return await PreservationStore.createCollection?.(payload);
+      } catch {
+        return null;
+      }
     },
   },
   {
@@ -175,10 +281,18 @@ const MODULES = [
     label: "Household • Projects",
     icon: "🧰",
     loader: async () => {
-      try { return (await ProjectsStore.listCollections?.()) || []; } catch { return []; }
+      try {
+        return (await ProjectsStore.listCollections?.()) || [];
+      } catch {
+        return [];
+      }
     },
     creator: async (payload) => {
-      try { return await ProjectsStore.createCollection?.(payload); } catch { return null; }
+      try {
+        return await ProjectsStore.createCollection?.(payload);
+      } catch {
+        return null;
+      }
     },
   },
 ];
@@ -190,7 +304,9 @@ function Row({ item, active, checked, onToggle, onHover }) {
       type="button"
       className={cx(
         "group flex w-full items-center justify-between rounded-xl border p-2 text-left",
-        active ? "border-zinc-900 bg-zinc-50" : "border-zinc-200 hover:bg-zinc-50"
+        active
+          ? "border-zinc-900 bg-zinc-50"
+          : "border-zinc-200 hover:bg-zinc-50"
       )}
       onMouseEnter={onHover}
       onClick={onToggle}
@@ -204,13 +320,28 @@ function Row({ item, active, checked, onToggle, onHover }) {
           {item.icon || "•"}
         </div>
         <div className="min-w-0">
-          <div className="truncate text-sm font-medium">{item.title || item.name}</div>
-          {item.path ? <div className="truncate text-[11px] text-zinc-500">{item.path}</div> : null}
+          <div className="truncate text-sm font-medium">
+            {item.title || item.name}
+          </div>
+          {item.path ? (
+            <div className="truncate text-[11px] text-zinc-500">
+              {item.path}
+            </div>
+          ) : null}
         </div>
       </div>
       <div className="flex items-center gap-2">
-        {item.privacy ? <Badge tone={item.privacy === "private" ? "amber" : "green"}>{item.privacy}</Badge> : null}
-        <input type="checkbox" className="checkbox checkbox-sm" readOnly checked={!!checked} />
+        {item.privacy ? (
+          <Badge tone={item.privacy === "private" ? "amber" : "green"}>
+            {item.privacy}
+          </Badge>
+        ) : null}
+        <input
+          type="checkbox"
+          className="checkbox checkbox-sm"
+          readOnly
+          checked={!!checked}
+        />
       </div>
     </button>
   );
@@ -230,7 +361,9 @@ export default function CollectionsPicker({
   const initial = normalizeValue(value);
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
-  const [selected, setSelected] = useState(new Map(initial.map((x) => [x.id, x])));
+  const [selected, setSelected] = useState(
+    new Map(initial.map((x) => [x.id, x]))
+  );
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState(null);
 
@@ -281,19 +414,32 @@ export default function CollectionsPicker({
   // Recents (best-effort)
   useEffect(() => {
     try {
-      const raw = JSON.parse(localStorage.getItem("suka.collections.recents") || "[]");
+      const raw = JSON.parse(
+        localStorage.getItem("suka.collections.recents") || "[]"
+      );
       setRecents(Array.isArray(raw) ? raw : []);
     } catch {}
   }, []);
 
-  const commitRecents = useCallback((item) => {
-    try {
-      const entry = { id: item.id, title: item.title || item.name, module: item.module || moduleKey, at: isoNow() };
-      const next = [entry, ...recents.filter((r) => r.id !== entry.id)].slice(0, 12);
-      setRecents(next);
-      localStorage.setItem("suka.collections.recents", JSON.stringify(next));
-    } catch {}
-  }, [recents, moduleKey]);
+  const commitRecents = useCallback(
+    (item) => {
+      try {
+        const entry = {
+          id: item.id,
+          title: item.title || item.name,
+          module: item.module || moduleKey,
+          at: isoNow(),
+        };
+        const next = [entry, ...recents.filter((r) => r.id !== entry.id)].slice(
+          0,
+          12
+        );
+        setRecents(next);
+        localStorage.setItem("suka.collections.recents", JSON.stringify(next));
+      } catch {}
+    },
+    [recents, moduleKey]
+  );
 
   /* -------- filtered rows & flatten list for keyboard nav -------- */
   const rowsByModule = useMemo(() => {
@@ -303,7 +449,11 @@ export default function CollectionsPicker({
       const all = collections[m.key] || [];
       const filtered = !q
         ? all
-        : all.filter((c) => `${c.title || c.name || ""} ${c.path || ""}`.toLowerCase().includes(q));
+        : all.filter((c) =>
+            `${c.title || c.name || ""} ${c.path || ""}`
+              .toLowerCase()
+              .includes(q)
+          );
       res[m.key] = filtered.map((c) => ({
         ...c,
         module: m.key,
@@ -319,14 +469,16 @@ export default function CollectionsPicker({
     const out = [];
     for (const m of modules) {
       const arr = rowsByModule[m.key] || [];
-      if (arr.length) out.push({ _header: true, key: m.key, label: m.label, icon: m.icon });
+      if (arr.length)
+        out.push({ _header: true, key: m.key, label: m.label, icon: m.icon });
       for (const c of arr) out.push({ ...c });
     }
     return out;
   }, [rowsByModule, modules]);
 
   useEffect(() => {
-    if (activeIndex >= flat.length) setActiveIndex(Math.max(0, flat.length - 1));
+    if (activeIndex >= flat.length)
+      setActiveIndex(Math.max(0, flat.length - 1));
   }, [flat.length, activeIndex]);
 
   /* -------- actions -------- */
@@ -354,23 +506,48 @@ export default function CollectionsPicker({
   const create = async (payload) => {
     if (!canCreate) return;
     if (sabbathBlocked()) {
-      setToast({ kind: "warning", text: "Sabbath hands-off is active. Creating new collections is paused." });
+      setToast({
+        kind: "warning",
+        text: "Sabbath hands-off is active. Creating new collections is paused.",
+      });
       return;
     }
     const mod = MODULES.find((m) => m.key === moduleKey);
     if (!mod?.creator) return;
     setBusy(true);
     try {
-      const color = payload.color || colorSwatches[Math.floor(Math.random() * colorSwatches.length)];
-      const body = { title: payload.title, color, icon: payload.icon || mod.icon, privacy: payload.privacy || "private" };
+      const color =
+        payload.color ||
+        colorSwatches[Math.floor(Math.random() * colorSwatches.length)];
+      const body = {
+        title: payload.title,
+        color,
+        icon: payload.icon || mod.icon,
+        privacy: payload.privacy || "private",
+      };
       const created = await mod.creator(body);
       if (created?.id) {
-        setCollections((prev) => ({ ...prev, [moduleKey]: [created, ...(prev[moduleKey] || [])] }));
-        const enriched = { ...created, module: moduleKey, color: created.color || color, icon: created.icon || mod.icon };
+        setCollections((prev) => ({
+          ...prev,
+          [moduleKey]: [created, ...(prev[moduleKey] || [])],
+        }));
+        const enriched = {
+          ...created,
+          module: moduleKey,
+          color: created.color || color,
+          icon: created.icon || mod.icon,
+        };
         toggle(enriched);
         commitChange();
-        setToast({ kind: "success", text: `Created “${created.title || created.name}”.` });
-        eventBus.emit?.("collection.created", { at: isoNow(), module: moduleKey, id: created.id });
+        setToast({
+          kind: "success",
+          text: `Created “${created.title || created.name}”.`,
+        });
+        eventBus.emit?.("collection.created", {
+          at: isoNow(),
+          module: moduleKey,
+          id: created.id,
+        });
       } else {
         setToast({ kind: "error", text: "Could not create collection." });
       }
@@ -383,8 +560,10 @@ export default function CollectionsPicker({
   useEffect(() => {
     const onKey = (e) => {
       if (!listRef.current) return;
-      if (["ArrowDown", "ArrowUp", "Enter", "Escape"].includes(e.key)) e.preventDefault();
-      if (e.key === "ArrowDown") setActiveIndex((i) => Math.min(i + 1, flat.length - 1));
+      if (["ArrowDown", "ArrowUp", "Enter", "Escape"].includes(e.key))
+        e.preventDefault();
+      if (e.key === "ArrowDown")
+        setActiveIndex((i) => Math.min(i + 1, flat.length - 1));
       if (e.key === "ArrowUp") setActiveIndex((i) => Math.max(i - 1, 0));
       if (e.key === "Enter") {
         const item = flat[activeIndex];
@@ -413,8 +592,12 @@ export default function CollectionsPicker({
         <div className="flex items-center gap-2">
           <div className="h-5 w-5 rounded bg-zinc-900" />
           <div className="text-sm font-semibold">Collections</div>
-          <Badge tone="blue">{modules.length} module{modules.length > 1 ? "s" : ""}</Badge>
-          {anySelected ? <Badge tone="green">{selected.size} selected</Badge> : null}
+          <Badge tone="blue">
+            {modules.length} module{modules.length > 1 ? "s" : ""}
+          </Badge>
+          {anySelected ? (
+            <Badge tone="green">{selected.size} selected</Badge>
+          ) : null}
         </div>
         <div className="flex items-center gap-2">
           <select
@@ -430,7 +613,12 @@ export default function CollectionsPicker({
               </option>
             ))}
           </select>
-          <Button size="sm" variant="outline" onClick={commitChange} disabled={!anySelected}>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={commitChange}
+            disabled={!anySelected}
+          >
             Apply
           </Button>
         </div>
@@ -460,11 +648,18 @@ export default function CollectionsPicker({
                 className="rounded-lg border px-2 py-1 text-xs hover:bg-zinc-50"
                 onClick={() => {
                   const mod = MODULES.find((m) => m.key === r.module);
-                  toggle({ id: r.id, title: r.title, module: r.module, icon: mod?.icon });
+                  toggle({
+                    id: r.id,
+                    title: r.title,
+                    module: r.module,
+                    icon: mod?.icon,
+                  });
                 }}
               >
                 {r.title}
-                <span className="ml-1 text-[10px] text-zinc-500">· {r.module}</span>
+                <span className="ml-1 text-[10px] text-zinc-500">
+                  · {r.module}
+                </span>
               </button>
             ))}
           </div>
@@ -474,11 +669,16 @@ export default function CollectionsPicker({
       {/* List */}
       <div ref={listRef} className="grid grid-cols-1 gap-2">
         {busy ? (
-          <div className="rounded-xl border p-6 text-center text-sm text-zinc-600">Loading…</div>
+          <div className="rounded-xl border p-6 text-center text-sm text-zinc-600">
+            Loading…
+          </div>
         ) : flat.length ? (
           flat.map((item, idx) =>
             item._header ? (
-              <div key={`h-${item.key}`} className="mt-2 flex items-center gap-2 text-[11px] font-semibold uppercase text-zinc-500">
+              <div
+                key={`h-${item.key}`}
+                className="mt-2 flex items-center gap-2 text-[11px] font-semibold uppercase text-zinc-500"
+              >
                 <span>{item.icon}</span>
                 <span>{item.label}</span>
               </div>
@@ -506,11 +706,21 @@ export default function CollectionsPicker({
           <div className="text-sm font-medium">Create new</div>
           <div className="grid gap-2 sm:grid-cols-2">
             <Input
-              placeholder={`New ${modules.find((m) => m.key === moduleKey)?.label.split("•")[1]?.trim() || "collection"} name…`}
+              placeholder={`New ${
+                modules
+                  .find((m) => m.key === moduleKey)
+                  ?.label.split("•")[1]
+                  ?.trim() || "collection"
+              } name…`}
               value={draftTitle}
               onChange={(e) => setDraftTitle(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && draftTitle.trim()) create({ title: draftTitle.trim(), color: draftColor, privacy: draftPrivacy });
+                if (e.key === "Enter" && draftTitle.trim())
+                  create({
+                    title: draftTitle.trim(),
+                    color: draftColor,
+                    privacy: draftPrivacy,
+                  });
               }}
             />
             <div className="flex items-center gap-2">
@@ -544,14 +754,22 @@ export default function CollectionsPicker({
                 size="sm"
                 variant="solid"
                 disabled={!draftTitle.trim() || busy || sabbathBlocked()}
-                onClick={() => create({ title: draftTitle.trim(), color: draftColor, privacy: draftPrivacy })}
+                onClick={() =>
+                  create({
+                    title: draftTitle.trim(),
+                    color: draftColor,
+                    privacy: draftPrivacy,
+                  })
+                }
               >
                 {busy ? "Creating…" : "Create"}
               </Button>
             </div>
           </div>
           {sabbathBlocked() ? (
-            <div className="text-[11px] text-amber-700">Sabbath hands-off: creation is paused.</div>
+            <div className="text-[11px] text-amber-700">
+              Sabbath hands-off: creation is paused.
+            </div>
           ) : null}
         </div>
       ) : null}
@@ -561,7 +779,12 @@ export default function CollectionsPicker({
         <div>↑/↓ to move · Enter to select · Esc to blur</div>
         <button
           className="underline"
-          onClick={() => eventBus.emit?.("ui.open", { panel: "BoardsManager", tab: moduleKey })}
+          onClick={() =>
+            eventBus.emit?.("ui.open", {
+              panel: "BoardsManager",
+              tab: moduleKey,
+            })
+          }
         >
           Open manager
         </button>
@@ -579,7 +802,10 @@ export default function CollectionsPicker({
           )}
         >
           <div className="text-sm">{toast.text}</div>
-          <button className="mt-2 rounded-lg border border-white/20 px-2 py-1 text-xs hover:bg-white/10" onClick={() => setToast(null)}>
+          <button
+            className="mt-2 rounded-lg border border-white/20 px-2 py-1 text-xs hover:bg-white/10"
+            onClick={() => setToast(null)}
+          >
             Dismiss
           </button>
         </div>
@@ -594,7 +820,10 @@ export default function CollectionsPicker({
   if (window.__COLLECTIONS_PICKER_TEST__) return;
   window.__COLLECTIONS_PICKER_TEST__ = true;
 
-  const ok = (c, m) => (c ? console.log("[CollectionsPicker TEST PASS]", m) : console.error("[CollectionsPicker TEST FAIL]", m));
+  const ok = (c, m) =>
+    c
+      ? console.log("[CollectionsPicker TEST PASS]", m)
+      : console.error("[CollectionsPicker TEST FAIL]", m);
   ok(Array.isArray(MODULES) && MODULES.length >= 3, "Modules registry present");
   ok(typeof sabbathBlocked === "function", "Sabbath guard available");
 })();

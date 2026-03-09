@@ -30,9 +30,10 @@
 
 import eventBus from "../events/eventBus";
 // ✅ fixed: featureFlags live at src/config/featureFlags.json
-import featureFlags from "../../config/featureFlags.json";
-import HubPacketFormatter from "../hub/HubPacketFormatter";
-import FamilyFundConnector from "../hub/FamilyFundConnector";
+import featureFlags from "@/config/featureFlags.json";
+// ✅ fixed: hub modules live at src/services/hub/*
+import HubPacketFormatter from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 
 // NOTE: adjust this import if your Dexie instance lives elsewhere
 import db from "../db";
@@ -157,14 +158,43 @@ async function exportToHubIfEnabled(session) {
     if (!featureFlags || !featureFlags.familyFundMode) return;
     if (!HubPacketFormatter || !FamilyFundConnector) return;
 
+    // Prefer modern formatter names if present, but keep backward compatibility.
     const formatter =
-      typeof HubPacketFormatter.formatSession === "function"
+      typeof HubPacketFormatter.fromSessionSummary === "function"
+        ? HubPacketFormatter.fromSessionSummary
+        : typeof HubPacketFormatter.fromSessionResult === "function"
+        ? HubPacketFormatter.fromSessionResult
+        : typeof HubPacketFormatter.formatSession === "function"
         ? HubPacketFormatter.formatSession
-        : HubPacketFormatter.format;
+        : typeof HubPacketFormatter.format === "function"
+        ? HubPacketFormatter.format
+        : null;
+
+    // Minimal, hub-safe payload (avoid dumping full objects if formatter expects compact)
+    const payload = {
+      kind: "sessionGenerated",
+      domain: "cooking",
+      sessionId: session?.id || null,
+      title: session?.title || null,
+      createdAt: session?.createdAt || nowIso(),
+      householdId: session?.householdId || null,
+      windowStart: session?.windowStart || null,
+      windowEnd: session?.windowEnd || null,
+      steps: Array.isArray(session?.steps)
+        ? session.steps.map((s) => ({
+            id: s?.id,
+            title: s?.title,
+            durationSec: s?.durationSec,
+            blockers: Array.isArray(s?.blockers) ? s.blockers : [],
+          }))
+        : [],
+      meta: session?.guards ? { guards: session.guards } : {},
+      source: "CookingSessionEngine",
+    };
 
     const packet = formatter
-      ? formatter("cooking", session)
-      : { domain: "cooking", session };
+      ? formatter(payload) // formatter decides final packet shape
+      : payload;
 
     const sender =
       typeof FamilyFundConnector.send === "function"

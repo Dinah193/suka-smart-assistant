@@ -26,7 +26,11 @@ const Btn = ({ variant = "solid", size = "md", className, ...props }) => {
     ghost: "hover:bg-zinc-100",
     subtle: "bg-zinc-100 hover:bg-zinc-200",
   }[variant];
-  const s = { sm: "h-8 px-2 text-sm", md: "h-10 px-3 text-sm", icon: "h-9 w-9 p-0" }[size];
+  const s = {
+    sm: "h-8 px-2 text-sm",
+    md: "h-10 px-3 text-sm",
+    icon: "h-9 w-9 p-0",
+  }[size];
   return <button className={cx("rounded-xl", v, s, className)} {...props} />;
 };
 const Tag = ({ children, tone = "zinc" }) => (
@@ -37,11 +41,14 @@ const Tag = ({ children, tone = "zinc" }) => (
     {children}
   </span>
 );
-const Field = (props) => <input className="h-9 rounded-xl border px-2 text-sm" {...props} />;
+const Field = (props) => (
+  <input className="h-9 rounded-xl border px-2 text-sm" {...props} />
+);
 
 function StatusBadge({ need = 0, have = 0, unit = "" }) {
-  const n = Number(need || 0), h = Number(have || 0);
-  const status = n <= 0 ? "have" : (h > 0 && h < n ? "short" : "need");
+  const n = Number(need || 0),
+    h = Number(have || 0);
+  const status = n <= 0 ? "have" : h > 0 && h < n ? "short" : "need";
   const cls =
     status === "have"
       ? "bg-emerald-100 text-emerald-800 border-emerald-200"
@@ -54,7 +61,13 @@ function StatusBadge({ need = 0, have = 0, unit = "" }) {
       : status === "short"
       ? `Short ${(n - h).toFixed(0)}${unit ? ` ${unit}` : ""}`
       : `Need ${n.toFixed(0)}${unit ? ` ${unit}` : ""}`;
-  return <span className={`inline-flex items-center px-2 py-0.5 text-[11px] rounded-full border ${cls}`}>{label}</span>;
+  return (
+    <span
+      className={`inline-flex items-center px-2 py-0.5 text-[11px] rounded-full border ${cls}`}
+    >
+      {label}
+    </span>
+  );
 }
 
 /* -------------------------- Soft imports (defensive) -------------------------- */
@@ -65,25 +78,38 @@ try {
 } catch {}
 
 let PreferencesStore = {};
-try { PreferencesStore = require("@/store/PreferencesStore"); } catch {}
+try {
+  PreferencesStore = require("@/store/PreferencesStore");
+} catch {}
 
 let MealPlanStore = {};
-try { MealPlanStore = require("@/store/MealPlanStore"); } catch {}
+try {
+  MealPlanStore = require("@/store/MealPlanStore");
+} catch {}
 
 let InventoryStore = {};
-try { InventoryStore = require("@/store/InventoryStore"); } catch {}
+try {
+  InventoryStore = require("@/store/InventoryStore");
+} catch {}
 
 let InventoryMonitor = null;
-try { InventoryMonitor = require("@/managers/InventoryMonitor").default || null; } catch {}
+try {
+  InventoryMonitor = require("@/managers/InventoryMonitor").default || null;
+} catch {}
 
 let BatchStore = {};
-try { BatchStore = require("@/store/BatchStore"); } catch {}
+try {
+  BatchStore = require("@/store/BatchStore");
+} catch {}
 
 let GrocerStore = {};
-try { GrocerStore = require("@/store/GrocerStore"); } catch {}
+try {
+  GrocerStore = require("@/store/GrocerStore");
+} catch {}
 
 let fmt = {
-  range: (s, e) => `${new Date(s).toLocaleDateString()} – ${new Date(e).toLocaleDateString()}`,
+  range: (s, e) =>
+    `${new Date(s).toLocaleDateString()} – ${new Date(e).toLocaleDateString()}`,
 };
 try {
   const f = require("@/utils/format");
@@ -102,9 +128,18 @@ const PERIODS = [
   { key: "quarter", label: "Quarter (True Calendar)", spec: "quarter" },
   { key: "custom", label: "Custom", spec: "custom" },
 ];
-function lastDayOfMonth(y, m) { return new Date(y, m + 1, 0); }
-function quarterStart(date) { const m = date.getMonth(); const q = Math.floor(m / 3) * 3; return new Date(date.getFullYear(), q, 1); }
-function quarterEnd(date) { const s = quarterStart(date); return new Date(s.getFullYear(), s.getMonth() + 3, 0); }
+function lastDayOfMonth(y, m) {
+  return new Date(y, m + 1, 0);
+}
+function quarterStart(date) {
+  const m = date.getMonth();
+  const q = Math.floor(m / 3) * 3;
+  return new Date(date.getFullYear(), q, 1);
+}
+function quarterEnd(date) {
+  const s = quarterStart(date);
+  return new Date(s.getFullYear(), s.getMonth() + 3, 0);
+}
 function enumerateDates(anchor, spec, custom) {
   if (spec === "custom") return (custom || []).slice().sort((a, b) => a - b);
   if (spec === "month-full") {
@@ -113,11 +148,13 @@ function enumerateDates(anchor, spec, custom) {
     const start = startOfWeek(first, { weekStartsOn: 0 });
     const endPad = addDays(last, (6 - last.getDay() + 7) % 7);
     const out = [];
-    for (let x = new Date(start); x <= endPad; x = addDays(x, 1)) out.push(new Date(x));
+    for (let x = new Date(start); x <= endPad; x = addDays(x, 1))
+      out.push(new Date(x));
     return out;
   }
   if (spec === "quarter") {
-    const s = quarterStart(anchor), e = quarterEnd(anchor);
+    const s = quarterStart(anchor),
+      e = quarterEnd(anchor);
     const out = [];
     for (let x = new Date(s); x <= e; x = addDays(x, 1)) out.push(new Date(x));
     return out;
@@ -136,10 +173,21 @@ const sabbathGuard = (prefs) => {
   return !(active && handsOff);
 };
 function getMealsInRange(range) {
-  try { return arrayify(MealPlanStore?.getMealsInRange?.(range.start, range.end)); } catch { return []; }
+  try {
+    return arrayify(MealPlanStore?.getMealsInRange?.(range.start, range.end));
+  } catch {
+    return [];
+  }
 }
 function getBatchesInRange(range) {
-  try { return arrayify(BatchStore?.getPlannedInRange?.(range.start, range.end) || BatchStore?.getPlanned?.()); } catch { return []; }
+  try {
+    return arrayify(
+      BatchStore?.getPlannedInRange?.(range.start, range.end) ||
+        BatchStore?.getPlanned?.()
+    );
+  } catch {
+    return [];
+  }
 }
 function pantrySnapshot() {
   try {
@@ -148,11 +196,14 @@ function pantrySnapshot() {
       qty: Number(i.qty ?? 0),
       unit: i.unit || "",
     }));
-  } catch { return []; }
+  } catch {
+    return [];
+  }
 }
 function guessAisle(name = "") {
   const n = name.toLowerCase();
-  if (/(apple|banana|berry|lettuce|tomato|onion|garlic|carrot)/.test(n)) return "Produce";
+  if (/(apple|banana|berry|lettuce|tomato|onion|garlic|carrot)/.test(n))
+    return "Produce";
   if (/(milk|cheese|yogurt|butter|egg)/.test(n)) return "Dairy";
   if (/(chicken|beef|turkey|pork|steak)/.test(n)) return "Meat";
   if (/(flour|rice|pasta|beans|oats)/.test(n)) return "Dry Goods";
@@ -175,10 +226,23 @@ function normalizeIngredient(x = {}) {
     price: typeof x.price === "number" ? x.price : null,
   };
 }
-function buildFromMealsAndBatches({ meals = [], batches = [], includeHousehold = true, collapse = true }) {
+function buildFromMealsAndBatches({
+  meals = [],
+  batches = [],
+  includeHousehold = true,
+  collapse = true,
+}) {
   const items = [];
-  meals.forEach((m) => arrayify(m.ingredients).forEach((ing) => items.push(normalizeIngredient(ing))));
-  batches.forEach((b) => arrayify(b.ingredients).forEach((ing) => items.push(normalizeIngredient({ ...ing }))));
+  meals.forEach((m) =>
+    arrayify(m.ingredients).forEach((ing) =>
+      items.push(normalizeIngredient(ing))
+    )
+  );
+  batches.forEach((b) =>
+    arrayify(b.ingredients).forEach((ing) =>
+      items.push(normalizeIngredient({ ...ing }))
+    )
+  );
 
   const src = includeHousehold ? items : items.filter((i) => !i.household);
   if (!collapse) return src;
@@ -201,10 +265,18 @@ function applyPantry(list, pantry) {
   });
 }
 function planogramOrder(storeId) {
-  try { return arrayify(GrocerStore?.getAisleOrder?.(storeId)); } catch { return []; }
+  try {
+    return arrayify(GrocerStore?.getAisleOrder?.(storeId));
+  } catch {
+    return [];
+  }
 }
 function priceFor(storeId, itemName) {
-  try { return GrocerStore?.estimatePrice?.(storeId, itemName) ?? null; } catch { return null; }
+  try {
+    return GrocerStore?.estimatePrice?.(storeId, itemName) ?? null;
+  } catch {
+    return null;
+  }
 }
 function groupByAisle(list, orderOverride = []) {
   const aisles = {};
@@ -212,21 +284,37 @@ function groupByAisle(list, orderOverride = []) {
     aisles[i.aisle] = aisles[i.aisle] || [];
     aisles[i.aisle].push(i);
   });
-  const defaultOrder = ["Produce", "Meat", "Seafood", "Dairy", "Bakery", "Frozen", "Dry Goods", "Beverages", "Household", "Other"];
+  const defaultOrder = [
+    "Produce",
+    "Meat",
+    "Seafood",
+    "Dairy",
+    "Bakery",
+    "Frozen",
+    "Dry Goods",
+    "Beverages",
+    "Household",
+    "Other",
+  ];
   const order = orderOverride.length ? orderOverride : defaultOrder;
-  const sorted = Object.keys(aisles).sort((a, b) => order.indexOf(a) - order.indexOf(b));
+  const sorted = Object.keys(aisles).sort(
+    (a, b) => order.indexOf(a) - order.indexOf(b)
+  );
   return { aisles, order: sorted };
 }
 function suggestSubs(item) {
   const n = item.name.toLowerCase();
   if (/yogurt/.test(n)) return ["Skyr (plain)", "Greek yogurt (low-fat)"];
   if (/spinach/.test(n)) return ["Kale", "Arugula"];
-  if (/chicken breast/.test(n)) return ["Turkey breast", "Chicken thighs (trimmed)"];
+  if (/chicken breast/.test(n))
+    return ["Turkey breast", "Chicken thighs (trimmed)"];
   if (/rice/.test(n)) return ["Quinoa", "Cauliflower rice"];
   return [];
 }
 const keyFor = (storeId, range) =>
-  `suka:grocery:${storeId}:${new Date(range.start).toDateString()}_${new Date(range.end).toDateString()}`;
+  `suka:grocery:${storeId}:${new Date(range.start).toDateString()}_${new Date(
+    range.end
+  ).toDateString()}`;
 
 /* -------------------------- Component -------------------------- */
 export default function GroceryListPanel({
@@ -237,7 +325,11 @@ export default function GroceryListPanel({
 }) {
   // Prefs & guards
   const [prefs, setPrefs] = useState(() => {
-    try { return PreferencesStore?.getPreferences?.() || {}; } catch { return {}; }
+    try {
+      return PreferencesStore?.getPreferences?.() || {};
+    } catch {
+      return {};
+    }
   });
   // Sabbath override: null = follow prefs; true = enforce guard; false = disable guard
   const [sabbathOverrideOn, setSabbathOverrideOn] = useState(null);
@@ -250,12 +342,16 @@ export default function GroceryListPanel({
   // Period & range
   const today = new Date();
   const [periodKey, setPeriodKey] = useState("week");
-  const spec = useMemo(() => PERIODS.find((p) => p.key === periodKey)?.spec, [periodKey]);
+  const spec = useMemo(
+    () => PERIODS.find((p) => p.key === periodKey)?.spec,
+    [periodKey]
+  );
   const [customStart, setCustomStart] = useState("");
   const [customEnd, setCustomEnd] = useState("");
   const customDates = useMemo(() => {
     if (spec !== "custom" || !customStart || !customEnd) return [];
-    const s = new Date(customStart), e = new Date(customEnd);
+    const s = new Date(customStart),
+      e = new Date(customEnd);
     if (isNaN(s) || isNaN(e) || s > e) return [];
     const out = [];
     for (let d = new Date(s); d <= e; d = addDays(d, 1)) out.push(new Date(d));
@@ -275,10 +371,16 @@ export default function GroceryListPanel({
   const [storeId, setStoreId] = useState(defaultStoreId);
   const storeOptions = useMemo(() => {
     try {
-      const xs = arrayify(GrocerStore?.getStores?.() || [{ id: "any", name: "Any store" }]);
+      const xs = arrayify(
+        GrocerStore?.getStores?.() || [{ id: "any", name: "Any store" }]
+      );
       return xs.map((s) => ({ id: s.id, name: s.name || s.title || "Store" }));
     } catch {
-      return [{ id: "any", name: "Any store" }, { id: "aldi", name: "Aldi" }, { id: "costco", name: "Costco" }];
+      return [
+        { id: "any", name: "Any store" },
+        { id: "aldi", name: "Aldi" },
+        { id: "costco", name: "Costco" },
+      ];
     }
   }, []);
 
@@ -318,18 +420,33 @@ export default function GroceryListPanel({
     items = applyPantry(items, pantrySnapshot());
     items = items.map((i) => {
       const price = priceFor(storeId, i.name);
-      return { ...i, storeId: i.storeId || (storeId !== "any" ? storeId : null), price: i.price ?? price };
+      return {
+        ...i,
+        storeId: i.storeId || (storeId !== "any" ? storeId : null),
+        price: i.price ?? price,
+      };
     });
     setList(items);
     setChecked(new Set());
-    eventBus.emit("grocerylist.generated", { at: nowIso(), items, range: resolvedRange, storeId });
+    eventBus.emit("grocerylist.generated", {
+      at: nowIso(),
+      items,
+      range: resolvedRange,
+      storeId,
+    });
     onGenerated?.({ items, range: resolvedRange, storeId });
   }, [resolvedRange, storeId, include, collapseDuplicates, onGenerated]);
-  useEffect(() => { rebuild(); }, [rebuild]);
+  useEffect(() => {
+    rebuild();
+  }, [rebuild]);
 
   // React to external changes
   useEffect(() => {
-    const syncPrefs = () => { try { setPrefs(PreferencesStore?.getPreferences?.() || {}); } catch {} };
+    const syncPrefs = () => {
+      try {
+        setPrefs(PreferencesStore?.getPreferences?.() || {});
+      } catch {}
+    };
     const rerun = () => rebuild();
     const handlers = [
       ["preferences.changed", syncPrefs],
@@ -345,13 +462,19 @@ export default function GroceryListPanel({
   useEffect(() => {
     const k = keyFor(storeId, resolvedRange);
     try {
-      localStorage.setItem(k, JSON.stringify({ items: list, notes, checked: [...checked] }));
+      localStorage.setItem(
+        k,
+        JSON.stringify({ items: list, notes, checked: [...checked] })
+      );
     } catch {}
   }, [list, notes, checked, storeId, resolvedRange.start, resolvedRange.end]);
 
   // Derivations
   const planogram = useMemo(() => planogramOrder(storeId), [storeId]);
-  const { aisles, order } = useMemo(() => groupByAisle(list, planogram), [list, planogram]);
+  const { aisles, order } = useMemo(
+    () => groupByAisle(list, planogram),
+    [list, planogram]
+  );
 
   const visibleItems = useMemo(() => {
     if (includeHave) return list;
@@ -360,9 +483,14 @@ export default function GroceryListPanel({
 
   const totals = useMemo(() => {
     const lines = visibleItems.length;
-    const needUnits = visibleItems.reduce((acc, i) => acc + (i.need ?? i.qty ?? 0), 0);
+    const needUnits = visibleItems.reduce(
+      (acc, i) => acc + (i.need ?? i.qty ?? 0),
+      0
+    );
     const est = visibleItems.reduce(
-      (acc, i) => acc + (typeof i.price === "number" ? i.price * (i.need || i.qty || 0) : 0),
+      (acc, i) =>
+        acc +
+        (typeof i.price === "number" ? i.price * (i.need || i.qty || 0) : 0),
       0
     );
     return { lines, needUnits, est: est > 0 ? est : null };
@@ -382,7 +510,8 @@ export default function GroceryListPanel({
       )
     );
   };
-  const changeUnit = (id, unit) => setList((xs) => xs.map((i) => (i.id === id ? { ...i, unit } : i)));
+  const changeUnit = (id, unit) =>
+    setList((xs) => xs.map((i) => (i.id === id ? { ...i, unit } : i)));
   const toggleCheck = (id) =>
     setChecked((prev) => {
       const n = new Set(prev);
@@ -396,19 +525,34 @@ export default function GroceryListPanel({
     const next = list.filter((i) => i.id !== id);
     setList(next);
     setUndoStack((s) => [...s, { type: "remove", prev }]);
-    setToast({ type: "success", msg: "Removed line.", actionLabel: "Undo", onAction: () => undo() });
+    setToast({
+      type: "success",
+      msg: "Removed line.",
+      actionLabel: "Undo",
+      onAction: () => undo(),
+    });
   };
 
   // Mark purchased (set need=0 for checked)
   const markPurchased = () => {
-    if (!checked.size) return setToast({ type: "info", msg: "Select items to mark purchased." });
+    if (!checked.size)
+      return setToast({ type: "info", msg: "Select items to mark purchased." });
     const prev = list;
     const next = list.map((i) => (checked.has(i.id) ? { ...i, need: 0 } : i));
     setList(next);
     setUndoStack((s) => [...s, { type: "mark", prev }]);
     setChecked(new Set());
-    setToast({ type: "success", msg: "Marked purchased.", actionLabel: "Undo", onAction: () => undo() });
-    eventBus.emit("shopping.purchased", { at: nowIso(), items: next.filter((i) => i.need === 0), storeId });
+    setToast({
+      type: "success",
+      msg: "Marked purchased.",
+      actionLabel: "Undo",
+      onAction: () => undo(),
+    });
+    eventBus.emit("shopping.purchased", {
+      at: nowIso(),
+      items: next.filter((i) => i.need === 0),
+      storeId,
+    });
   };
 
   // Move to pantry (increase inventory and set need=0)
@@ -425,7 +569,11 @@ export default function GroceryListPanel({
           (x) => (x.name || "").toLowerCase() === item.name.toLowerCase()
         );
         const nextQty = (current?.qty || 0) + qty;
-        InventoryStore.upsert({ name: item.name, qty: nextQty, unit: item.unit || current?.unit || "" });
+        InventoryStore.upsert({
+          name: item.name,
+          qty: nextQty,
+          unit: item.unit || current?.unit || "",
+        });
         ok = true;
       } else if (InventoryStore?.add) {
         InventoryStore.add({ name: item.name, qty, unit: item.unit || "" });
@@ -446,7 +594,11 @@ export default function GroceryListPanel({
       unit: item.unit || "",
     });
 
-    setList((xs) => xs.map((i) => (i.id === item.id ? { ...i, have: (i.have || 0) + qty, need: 0 } : i)));
+    setList((xs) =>
+      xs.map((i) =>
+        i.id === item.id ? { ...i, have: (i.have || 0) + qty, need: 0 } : i
+      )
+    );
     setToast({ type: "success", msg: "Moved to pantry." });
   };
 
@@ -459,18 +611,35 @@ export default function GroceryListPanel({
   };
 
   const generateList = () => {
-    if (sabbathBlocked) return setToast({ type: "warning", msg: "Sabbath hands-off is active. Generation is paused." });
+    if (sabbathBlocked)
+      return setToast({
+        type: "warning",
+        msg: "Sabbath hands-off is active. Generation is paused.",
+      });
     rebuild();
-    setToast({ type: "success", msg: `List ready for ${fmt.range(resolvedRange.start, resolvedRange.end)}.` });
+    setToast({
+      type: "success",
+      msg: `List ready for ${fmt.range(
+        resolvedRange.start,
+        resolvedRange.end
+      )}.`,
+    });
   };
 
   // Send to shopper (existing in your system)
   const sendToShopper = () => {
     const items = visibleItems;
-    if (!items.length) return setToast({ type: "info", msg: "Your list is empty." });
+    if (!items.length)
+      return setToast({ type: "info", msg: "Your list is empty." });
     eventBus.emit("sharing.open", {
       panel: "FamilySharing",
-      payload: { purpose: "shopping", storeId, range: resolvedRange, items, budget: budget || null },
+      payload: {
+        purpose: "shopping",
+        storeId,
+        range: resolvedRange,
+        items,
+        budget: budget || null,
+      },
     });
     setToast({ type: "success", msg: "Sent to shopper." });
   };
@@ -478,15 +647,25 @@ export default function GroceryListPanel({
   // Send to Mobile (SMS / Email / Web Share)
   const formatListText = (items) => {
     const lines = items.map(
-      (i) => `• ${i.name} — ${i.need ?? i.qty} ${i.unit || ""}${notes[i.id] ? ` (${notes[i.id]})` : ""}`
+      (i) =>
+        `• ${i.name} — ${i.need ?? i.qty} ${i.unit || ""}${
+          notes[i.id] ? ` (${notes[i.id]})` : ""
+        }`
     );
     const storeName = storeOptions.find((s) => s.id === storeId)?.name || "Any";
-    return [`Grocery List — ${fmt.range(resolvedRange.start, resolvedRange.end)}`, `Store: ${storeName}`, "", ...lines].join("\n");
+    return [
+      `Grocery List — ${fmt.range(resolvedRange.start, resolvedRange.end)}`,
+      `Store: ${storeName}`,
+      "",
+      ...lines,
+    ].join("\n");
   };
   const sendToMobileSMS = () => {
     const msg = encodeURIComponent(formatListText(visibleItems));
     if (navigator.share) {
-      navigator.share({ title: "Grocery List", text: decodeURIComponent(msg) }).catch(() => {});
+      navigator
+        .share({ title: "Grocery List", text: decodeURIComponent(msg) })
+        .catch(() => {});
       setToast({ type: "success", msg: "Shared via system sheet." });
       return;
     }
@@ -495,7 +674,9 @@ export default function GroceryListPanel({
     setToast({ type: "success", msg: "Opened SMS with your list." });
   };
   const sendToMobileEmail = () => {
-    const subject = encodeURIComponent(`Grocery List (${fmt.range(resolvedRange.start, resolvedRange.end)})`);
+    const subject = encodeURIComponent(
+      `Grocery List (${fmt.range(resolvedRange.start, resolvedRange.end)})`
+    );
     const body = encodeURIComponent(formatListText(visibleItems));
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
     setToast({ type: "success", msg: "Opened email with your list." });
@@ -504,11 +685,15 @@ export default function GroceryListPanel({
   // Export to PDF (jsPDF if available; fallback to print)
   const exportPDF = async () => {
     const items = visibleItems;
-    if (!items.length) return setToast({ type: "info", msg: "Nothing to export." });
-    let jsPDF = null, autoTable = null;
+    if (!items.length)
+      return setToast({ type: "info", msg: "Nothing to export." });
+    let jsPDF = null,
+      autoTable = null;
     try {
       jsPDF = require("jspdf").jsPDF || require("jspdf");
-      try { autoTable = require("jspdf-autotable"); } catch {}
+      try {
+        autoTable = require("jspdf-autotable");
+      } catch {}
     } catch {}
     if (!jsPDF) {
       const html = `
@@ -525,14 +710,32 @@ export default function GroceryListPanel({
             </style>
           </head>
           <body>
-            <h1>Grocery List — ${fmt.range(resolvedRange.start, resolvedRange.end)}</h1>
-            <div class="muted">Store: ${storeOptions.find(s=>s.id===storeId)?.name||"Any"}</div>
-            ${order.map((aisle) => {
-              const rows = (aisles[aisle] || []).filter((i)=>visibleItems.includes(i));
-              if (!rows.length) return "";
-              const trows = rows.map((r)=>`<tr><td>${r.name}</td><td>${r.need ?? r.qty} ${r.unit||""}</td><td>${r.have||0}</td><td>${notes[r.id]||""}</td></tr>`).join("");
-              return `<h2>${aisle}</h2><table><thead><tr><th>Item</th><th>Need</th><th>Have</th><th>Notes</th></tr></thead><tbody>${trows}</tbody></table>`;
-            }).join("")}
+            <h1>Grocery List — ${fmt.range(
+              resolvedRange.start,
+              resolvedRange.end
+            )}</h1>
+            <div class="muted">Store: ${
+              storeOptions.find((s) => s.id === storeId)?.name || "Any"
+            }</div>
+            ${order
+              .map((aisle) => {
+                const rows = (aisles[aisle] || []).filter((i) =>
+                  visibleItems.includes(i)
+                );
+                if (!rows.length) return "";
+                const trows = rows
+                  .map(
+                    (r) =>
+                      `<tr><td>${r.name}</td><td>${r.need ?? r.qty} ${
+                        r.unit || ""
+                      }</td><td>${r.have || 0}</td><td>${
+                        notes[r.id] || ""
+                      }</td></tr>`
+                  )
+                  .join("");
+                return `<h2>${aisle}</h2><table><thead><tr><th>Item</th><th>Need</th><th>Have</th><th>Notes</th></tr></thead><tbody>${trows}</tbody></table>`;
+              })
+              .join("")}
           </body>
         </html>`;
       const w = window.open("", "print");
@@ -543,25 +746,46 @@ export default function GroceryListPanel({
         w.focus();
         w.print();
       }
-      setToast({ type: "success", msg: "Opened printer dialog (PDF fallback)." });
+      setToast({
+        type: "success",
+        msg: "Opened printer dialog (PDF fallback).",
+      });
       return;
     }
     const doc = new jsPDF({ unit: "pt", format: "letter" });
-    const title = `Grocery List — ${fmt.range(resolvedRange.start, resolvedRange.end)}`;
-    doc.setFontSize(14); doc.text(title, 40, 40);
-    doc.setFontSize(10); doc.text(`Store: ${storeOptions.find(s=>s.id===storeId)?.name||"Any"}`, 40, 58);
+    const title = `Grocery List — ${fmt.range(
+      resolvedRange.start,
+      resolvedRange.end
+    )}`;
+    doc.setFontSize(14);
+    doc.text(title, 40, 40);
+    doc.setFontSize(10);
+    doc.text(
+      `Store: ${storeOptions.find((s) => s.id === storeId)?.name || "Any"}`,
+      40,
+      58
+    );
 
     let y = 80;
     for (const aisle of order) {
-      const rows = (aisles[aisle] || []).filter((i) => visibleItems.includes(i));
+      const rows = (aisles[aisle] || []).filter((i) =>
+        visibleItems.includes(i)
+      );
       if (!rows.length) continue;
-      doc.setFontSize(12); doc.text(aisle, 40, y); y += 12;
+      doc.setFontSize(12);
+      doc.text(aisle, 40, y);
+      y += 12;
 
       if (autoTable) {
         autoTable.default?.(doc, {
           startY: y,
           head: [["Item", "Need", "Have", "Notes"]],
-          body: rows.map((r) => [r.name, `${r.need ?? r.qty} ${r.unit || ""}`, `${r.have || 0}`, `${notes[r.id] || ""}`]),
+          body: rows.map((r) => [
+            r.name,
+            `${r.need ?? r.qty} ${r.unit || ""}`,
+            `${r.have || 0}`,
+            `${notes[r.id] || ""}`,
+          ]),
           styles: { fontSize: 9 },
           margin: { left: 40, right: 40 },
           theme: "grid",
@@ -571,44 +795,64 @@ export default function GroceryListPanel({
         rows.forEach((r) => {
           doc.setFontSize(10);
           doc.text(
-            `• ${r.name} — ${r.need ?? r.qty} ${r.unit || ""} (have ${r.have || 0}) ${notes[r.id] ? `— ${notes[r.id]}` : ""}`,
+            `• ${r.name} — ${r.need ?? r.qty} ${r.unit || ""} (have ${
+              r.have || 0
+            }) ${notes[r.id] ? `— ${notes[r.id]}` : ""}`,
             50,
             y
           );
           y += 14;
-          if (y > 720) { doc.addPage(); y = 40; }
+          if (y > 720) {
+            doc.addPage();
+            y = 40;
+          }
         });
         y += 12;
       }
     }
-    const ts = new Date().toISOString().slice(0,10);
+    const ts = new Date().toISOString().slice(0, 10);
     doc.save(`grocery-list-${ts}.pdf`);
     setToast({ type: "success", msg: "Exported PDF." });
   };
 
   const openSubstitutions = (item) => {
     const subs = suggestSubs(item);
-    if (!subs.length) return setToast({ type: "info", msg: "No suggestions available." });
-    const pick = typeof window !== "undefined"
-      ? window.prompt(`Substitute for "${item.name}":\n- ${subs.join("\n- ")}\n\nType your choice:`)
-      : "";
+    if (!subs.length)
+      return setToast({ type: "info", msg: "No suggestions available." });
+    const pick =
+      typeof window !== "undefined"
+        ? window.prompt(
+            `Substitute for "${item.name}":\n- ${subs.join(
+              "\n- "
+            )}\n\nType your choice:`
+          )
+        : "";
     if (pick) {
-      setList((xs) => xs.map((i) => (i.id === item.id ? { ...i, name: pick } : i)));
-      setToast({ type: "success", msg: `Replaced "${item.name}" → "${pick}".` });
+      setList((xs) =>
+        xs.map((i) => (i.id === item.id ? { ...i, name: pick } : i))
+      );
+      setToast({
+        type: "success",
+        msg: `Replaced "${item.name}" → "${pick}".`,
+      });
     }
   };
 
   const jumpPrev = () => {
     const spec = PERIODS.find((p) => p.key === periodKey)?.spec;
-    if (spec === "month-full") setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() - 1, 1));
-    else if (spec === "quarter") setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() - 3, 1));
+    if (spec === "month-full")
+      setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() - 1, 1));
+    else if (spec === "quarter")
+      setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() - 3, 1));
     else if (typeof spec === "number") setAnchor(addDays(anchor, -spec));
     else setAnchor(addDays(anchor, -7));
   };
   const jumpNext = () => {
     const spec = PERIODS.find((p) => p.key === periodKey)?.spec;
-    if (spec === "month-full") setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() + 1, 1));
-    else if (spec === "quarter") setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() + 3, 1));
+    if (spec === "month-full")
+      setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() + 1, 1));
+    else if (spec === "quarter")
+      setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() + 3, 1));
     else if (typeof spec === "number") setAnchor(addDays(anchor, spec));
     else setAnchor(addDays(anchor, 7));
   };
@@ -626,7 +870,10 @@ export default function GroceryListPanel({
       >
         <div className="text-sm">{toast.msg}</div>
         {toast.actionLabel && toast.onAction ? (
-          <button className="mt-2 rounded-lg border border-white/20 px-2 py-1 text-xs hover:bg-white/10" onClick={toast.onAction}>
+          <button
+            className="mt-2 rounded-lg border border-white/20 px-2 py-1 text-xs hover:bg-white/10"
+            onClick={toast.onAction}
+          >
             {toast.actionLabel}
           </button>
         ) : null}
@@ -642,67 +889,146 @@ export default function GroceryListPanel({
       <header className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <h2 className="text-lg font-semibold">Grocery List</h2>
-          <Tag tone="zinc">{fmt.range(resolvedRange.start, resolvedRange.end)}</Tag>
+          <Tag tone="zinc">
+            {fmt.range(resolvedRange.start, resolvedRange.end)}
+          </Tag>
           {!sabbathBlocked ? null : <Tag tone="violet">Sabbath: hands-off</Tag>}
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-1">
-            <Btn variant="ghost" size="icon" onClick={jumpPrev} aria-label="Previous period">←</Btn>
-            <Btn variant="ghost" size="icon" onClick={jumpNext} aria-label="Next period">→</Btn>
+            <Btn
+              variant="ghost"
+              size="icon"
+              onClick={jumpPrev}
+              aria-label="Previous period"
+            >
+              ←
+            </Btn>
+            <Btn
+              variant="ghost"
+              size="icon"
+              onClick={jumpNext}
+              aria-label="Next period"
+            >
+              →
+            </Btn>
           </div>
-          <select className="rounded-xl border px-2 py-2 text-sm" value={periodKey} onChange={(e) => setPeriodKey(e.target.value)}>
-            {PERIODS.map((p) => (<option key={p.key} value={p.key}>{p.label}</option>))}
+          <select
+            className="rounded-xl border px-2 py-2 text-sm"
+            value={periodKey}
+            onChange={(e) => setPeriodKey(e.target.value)}
+          >
+            {PERIODS.map((p) => (
+              <option key={p.key} value={p.key}>
+                {p.label}
+              </option>
+            ))}
           </select>
 
           {periodKey === "custom" && (
             <div className="flex items-center gap-2">
-              <Field type="date" value={customStart} onChange={(e) => setCustomStart(e.target.value)} />
+              <Field
+                type="date"
+                value={customStart}
+                onChange={(e) => setCustomStart(e.target.value)}
+              />
               <span className="text-sm text-zinc-500">to</span>
-              <Field type="date" value={customEnd} onChange={(e) => setCustomEnd(e.target.value)} />
+              <Field
+                type="date"
+                value={customEnd}
+                onChange={(e) => setCustomEnd(e.target.value)}
+              />
             </div>
           )}
 
-          <select className="rounded-xl border px-2 py-2 text-sm" value={storeId} onChange={(e) => setStoreId(e.target.value)}>
-            {storeOptions.map((o) => (<option key={o.id} value={o.id}>{o.name}</option>))}
+          <select
+            className="rounded-xl border px-2 py-2 text-sm"
+            value={storeId}
+            onChange={(e) => setStoreId(e.target.value)}
+          >
+            {storeOptions.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.name}
+              </option>
+            ))}
           </select>
 
-          <Btn variant="outline" onClick={generateList}>Generate</Btn>
-          <Btn variant="solid" onClick={sendToShopper} disabled={!list.length}>Send to shopper</Btn>
-          <Btn variant="outline" onClick={sendToMobileSMS} disabled={!list.length}>SMS</Btn>
-          <Btn variant="outline" onClick={sendToMobileEmail} disabled={!list.length}>Email</Btn>
-          <Btn variant="outline" onClick={exportPDF} disabled={!list.length}>PDF</Btn>
+          <Btn variant="outline" onClick={generateList}>
+            Generate
+          </Btn>
+          <Btn variant="solid" onClick={sendToShopper} disabled={!list.length}>
+            Send to shopper
+          </Btn>
+          <Btn
+            variant="outline"
+            onClick={sendToMobileSMS}
+            disabled={!list.length}
+          >
+            SMS
+          </Btn>
+          <Btn
+            variant="outline"
+            onClick={sendToMobileEmail}
+            disabled={!list.length}
+          >
+            Email
+          </Btn>
+          <Btn variant="outline" onClick={exportPDF} disabled={!list.length}>
+            PDF
+          </Btn>
         </div>
       </header>
 
       {/* Controls */}
       <div className="flex flex-wrap items-center gap-3 text-xs">
         <label className="flex items-center gap-1">
-          <input type="checkbox" checked={includeHave} onChange={(e)=>setIncludeHave(e.target.checked)} />
+          <input
+            type="checkbox"
+            checked={includeHave}
+            onChange={(e) => setIncludeHave(e.target.checked)}
+          />
           Include “have”
         </label>
 
         <label className="flex items-center gap-1">
-          <input type="checkbox" checked={collapseDuplicates} onChange={(e)=>setCollapseDuplicates(e.target.checked)} />
+          <input
+            type="checkbox"
+            checked={collapseDuplicates}
+            onChange={(e) => setCollapseDuplicates(e.target.checked)}
+          />
           Collapse duplicates
         </label>
 
         <label className="flex items-center gap-1">
           <input
             type="checkbox"
-            checked={sabbathOverrideOn === null ? sabbathGuard(prefs) : sabbathOverrideOn}
-            onChange={(e)=>setSabbathOverrideOn(e.target.checked)}
+            checked={
+              sabbathOverrideOn === null
+                ? sabbathGuard(prefs)
+                : sabbathOverrideOn
+            }
+            onChange={(e) => setSabbathOverrideOn(e.target.checked)}
           />
           Sabbath guard
         </label>
 
         <label className="flex items-center gap-1">
-          <input type="checkbox" checked={!!include.household} onChange={() => {}} readOnly />
+          <input
+            type="checkbox"
+            checked={!!include.household}
+            onChange={() => {}}
+            readOnly
+          />
           Include household
         </label>
 
         <div className="ml-auto flex items-center gap-2">
           <span className="text-zinc-500">Budget</span>
-          <Field placeholder="$…" value={budget} onChange={(e) => setBudget(e.target.value)} />
+          <Field
+            placeholder="$…"
+            value={budget}
+            onChange={(e) => setBudget(e.target.value)}
+          />
         </div>
       </div>
 
@@ -711,10 +1037,16 @@ export default function GroceryListPanel({
         <div className="rounded-2xl border border-dashed p-6 text-center">
           <div className="mb-1 text-lg font-semibold">No items yet</div>
           <p className="mx-auto max-w-md text-sm text-zinc-600">
-            Generate from your meal plan and sessions for this period. We’ll group by aisle and subtract what you already have.
+            Generate from your meal plan and sessions for this period. We’ll
+            group by aisle and subtract what you already have.
           </p>
           <div className="mt-3">
-            <Btn variant="outline" onClick={() => eventBus.emit("ui.open", { id: "MealPlanner" })}>Open Meal Planner</Btn>
+            <Btn
+              variant="outline"
+              onClick={() => eventBus.emit("ui.open", { id: "MealPlanner" })}
+            >
+              Open Meal Planner
+            </Btn>
           </div>
         </div>
       ) : (
@@ -723,20 +1055,48 @@ export default function GroceryListPanel({
           <div className="flex flex-wrap items-center justify-between rounded-2xl border bg-zinc-50 p-3 text-sm">
             <div className="mb-2 sm:mb-0">
               <span className="font-semibold">{totals.lines}</span> lines •{" "}
-              <span className="font-semibold">{totals.needUnits}</span> total needed
-              {typeof totals.est === "number" ? <> • Est <span className="font-semibold">${totals.est.toFixed(2)}</span></> : null}
-              {budget ? <> • Budget <span className="font-semibold">{budget}</span></> : null}
+              <span className="font-semibold">{totals.needUnits}</span> total
+              needed
+              {typeof totals.est === "number" ? (
+                <>
+                  {" "}
+                  • Est{" "}
+                  <span className="font-semibold">
+                    ${totals.est.toFixed(2)}
+                  </span>
+                </>
+              ) : null}
+              {budget ? (
+                <>
+                  {" "}
+                  • Budget <span className="font-semibold">{budget}</span>
+                </>
+              ) : null}
             </div>
             <div className="flex items-center gap-2">
-              <Btn variant="outline" onClick={markPurchased} disabled={!list.some((i) => checked.has(i.id))}>Mark purchased</Btn>
-              <Btn variant="outline" onClick={undo} disabled={!undoStack.length}>Undo</Btn>
+              <Btn
+                variant="outline"
+                onClick={markPurchased}
+                disabled={!list.some((i) => checked.has(i.id))}
+              >
+                Mark purchased
+              </Btn>
+              <Btn
+                variant="outline"
+                onClick={undo}
+                disabled={!undoStack.length}
+              >
+                Undo
+              </Btn>
             </div>
           </div>
 
           {/* Aisle groups */}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
             {order.map((aisle) => {
-              const items = (aisles[aisle] || []).filter((i) => visibleItems.includes(i));
+              const items = (aisles[aisle] || []).filter((i) =>
+                visibleItems.includes(i)
+              );
               if (!items.length) return null;
               return (
                 <div key={aisle} className="lg:col-span-6">
@@ -745,7 +1105,13 @@ export default function GroceryListPanel({
                       <div className="text-sm font-semibold">{aisle}</div>
                       <button
                         className="text-xs underline"
-                        onClick={() => eventBus.emit("ui.open", { id: "AisleEditor", aisle, storeId })}
+                        onClick={() =>
+                          eventBus.emit("ui.open", {
+                            id: "AisleEditor",
+                            aisle,
+                            storeId,
+                          })
+                        }
                       >
                         Edit aisle
                       </button>
@@ -755,29 +1121,65 @@ export default function GroceryListPanel({
                         const isChecked = checked.has(i.id);
                         const subs = suggestSubs(i);
                         return (
-                          <li key={i.id} className={cx("rounded-2xl border p-3 text-xs", isChecked && "opacity-60")}>
+                          <li
+                            key={i.id}
+                            className={cx(
+                              "rounded-2xl border p-3 text-xs",
+                              isChecked && "opacity-60"
+                            )}
+                          >
                             <div className="flex items-start justify-between gap-2">
                               <label className="flex items-center gap-2">
-                                <input type="checkbox" checked={isChecked} onChange={() => toggleCheck(i.id)} />
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={() => toggleCheck(i.id)}
+                                />
                                 <span className="font-medium">{i.name}</span>
-                                <StatusBadge need={i.need ?? i.qty ?? 0} have={i.have ?? 0} unit={i.unit || ""} />
+                                <StatusBadge
+                                  need={i.need ?? i.qty ?? 0}
+                                  have={i.have ?? 0}
+                                  unit={i.unit || ""}
+                                />
                                 {typeof i.price === "number" && (
                                   <span className="rounded border border-zinc-300 bg-white px-2 py-0.5 text-[10px] text-zinc-700">
                                     ${i.price.toFixed(2)}/{i.unit || "ea"}
                                   </span>
                                 )}
                               </label>
-                              <div className="shrink-0 text-zinc-500">{i.unit}</div>
+                              <div className="shrink-0 text-zinc-500">
+                                {i.unit}
+                              </div>
                             </div>
 
                             <div className="mt-2 flex flex-wrap items-center gap-2">
                               <div className="flex items-center gap-1">
-                                <Btn variant="outline" size="sm" onClick={() => stepQty(i.id, -1)}>-</Btn>
-                                <div className="w-10 text-center">{i.need ?? i.qty}</div>
-                                <Btn variant="outline" size="sm" onClick={() => stepQty(i.id, +1)}>+</Btn>
+                                <Btn
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => stepQty(i.id, -1)}
+                                >
+                                  -
+                                </Btn>
+                                <div className="w-10 text-center">
+                                  {i.need ?? i.qty}
+                                </div>
+                                <Btn
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => stepQty(i.id, +1)}
+                                >
+                                  +
+                                </Btn>
                               </div>
 
-                              <select className="rounded-xl border px-2 py-1" value={i.unit} onChange={(e) => changeUnit(i.id, e.target.value)}>
+                              <select
+                                className="rounded-xl border px-2 py-1"
+                                value={i.unit}
+                                onChange={(e) =>
+                                  changeUnit(i.id, e.target.value)
+                                }
+                              >
                                 <option value="">unit</option>
                                 <option value="g">g</option>
                                 <option value="kg">kg</option>
@@ -790,7 +1192,10 @@ export default function GroceryListPanel({
                               </select>
 
                               {subs.length > 0 && (
-                                <button className="rounded-xl border px-2 py-1 text-xs hover:bg-zinc-50" onClick={() => openSubstitutions(i)}>
+                                <button
+                                  className="rounded-xl border px-2 py-1 text-xs hover:bg-zinc-50"
+                                  onClick={() => openSubstitutions(i)}
+                                >
                                   Substitute
                                 </button>
                               )}
@@ -816,7 +1221,12 @@ export default function GroceryListPanel({
                                 <Field
                                   placeholder="brand, size…"
                                   value={notes[i.id] || ""}
-                                  onChange={(e) => setNotes((n) => ({ ...n, [i.id]: e.target.value }))}
+                                  onChange={(e) =>
+                                    setNotes((n) => ({
+                                      ...n,
+                                      [i.id]: e.target.value,
+                                    }))
+                                  }
                                 />
                               </div>
                             </div>
@@ -833,13 +1243,22 @@ export default function GroceryListPanel({
           {/* NBA */}
           <div className="flex flex-wrap items-center justify-between rounded-2xl border bg-zinc-50 p-3">
             <div className="text-sm">
-              <span className="font-semibold">Next Best Action:</span> Share or export your list.
+              <span className="font-semibold">Next Best Action:</span> Share or
+              export your list.
             </div>
             <div className="flex items-center gap-2">
-              <Btn variant="outline" onClick={sendToShopper}>Send to shopper</Btn>
-              <Btn variant="outline" onClick={sendToMobileSMS}>SMS</Btn>
-              <Btn variant="outline" onClick={sendToMobileEmail}>Email</Btn>
-              <Btn variant="outline" onClick={exportPDF}>PDF</Btn>
+              <Btn variant="outline" onClick={sendToShopper}>
+                Send to shopper
+              </Btn>
+              <Btn variant="outline" onClick={sendToMobileSMS}>
+                SMS
+              </Btn>
+              <Btn variant="outline" onClick={sendToMobileEmail}>
+                Email
+              </Btn>
+              <Btn variant="outline" onClick={exportPDF}>
+                PDF
+              </Btn>
             </div>
           </div>
         </>
@@ -855,7 +1274,10 @@ export default function GroceryListPanel({
   if (typeof window === "undefined" || window.__GROCERY_PANEL_TESTS__) return;
   window.__GROCERY_PANEL_TESTS__ = true;
 
-  const expect = (cond, msg) => (cond ? console.log("[GroceryPanel PASS]", msg) : console.error("[GroceryPanel FAIL]", msg));
+  const expect = (cond, msg) =>
+    cond
+      ? console.log("[GroceryPanel PASS]", msg)
+      : console.error("[GroceryPanel FAIL]", msg);
   const week = enumerateDates(new Date(2025, 0, 14), 7).length;
   expect(week === 7, "Week enumerates 7 days");
   const juneFull = enumerateDates(new Date(2025, 5, 10), "month-full").length;
@@ -863,10 +1285,25 @@ export default function GroceryListPanel({
   const q1 = enumerateDates(new Date(2025, 0, 15), "quarter").length;
   expect(q1 === 90, "Quarter enumerates correctly");
 
-  const demoMeals = [{ ingredients: [{ name: "Chicken breast", qty: 2, unit: "pcs" }, { name: "Greek yogurt", qty: 1, unit: "cup" }] }];
-  const list = buildFromMealsAndBatches({ meals: demoMeals, batches: [], includeHousehold: true, collapse: true });
+  const demoMeals = [
+    {
+      ingredients: [
+        { name: "Chicken breast", qty: 2, unit: "pcs" },
+        { name: "Greek yogurt", qty: 1, unit: "cup" },
+      ],
+    },
+  ];
+  const list = buildFromMealsAndBatches({
+    meals: demoMeals,
+    batches: [],
+    includeHousehold: true,
+    collapse: true,
+  });
   expect(list.length >= 2, "Build list produces items");
   const pantry = [{ key: "chicken breast", qty: 1 }];
   const applied = applyPantry(list, pantry);
-  expect((applied.find((i) => /chicken/.test(i.name.toLowerCase()))?.need ?? 0) >= 1, "Pantry subtraction works");
+  expect(
+    (applied.find((i) => /chicken/.test(i.name.toLowerCase()))?.need ?? 0) >= 1,
+    "Pantry subtraction works"
+  );
 })();

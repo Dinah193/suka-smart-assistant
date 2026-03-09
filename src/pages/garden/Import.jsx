@@ -134,7 +134,7 @@ try {
 } catch {
   try {
     // eslint-disable-next-line global-require
-    featureFlags = require("../../config/featureFlags.json")?.default ?? {};
+    featureFlags = require("@/config/featureFlags.json")?.default ?? {};
   } catch {
     featureFlags = {};
   }

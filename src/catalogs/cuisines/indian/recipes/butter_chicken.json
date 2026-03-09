@@ -1,0 +1,532 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-20T00:00:00.000Z",
+
+  "meta": {
+    "id": "recipes.cuisines.indian.butter_chicken",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Butter Chicken (Murgh Makhani)",
+    "subtitle": "Charred yogurt-marinated chicken in a silky tomato-butter sauce",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA canonical cuisines/indian/recipes/butter_chicken.json",
+      "notes": [
+        "Canonical butter chicken baseline with deterministic adaptation hooks (oven/broiler/grill/stovetop char).",
+        "Sauce is smooth and balanced: tomato + butter + cream, finished with fenugreek (kasuri methi).",
+        "Includes yogurt curdle guard + optional dairy-free variants."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.indian",
+    "category": "main",
+    "mealArchetypes": ["meal.main.curry"],
+    "servingStyles": ["family_style", "stew_and_starch"],
+    "plannerTags": [
+      "cuisine.indian",
+      "dish.butter_chicken",
+      "role.curry_or_dal",
+      "weeknight.friendly",
+      "batch.friendly",
+      "leftovers.good",
+      "spice.forward",
+      "creamy",
+      "restaurant.style"
+    ]
+  },
+
+  "summary": "Butter Chicken (Murgh Makhani) made the SSA way: yogurt-marinated, charred chicken folded into a silky tomato-butter sauce with cream and kasuri methi. Balanced, mildly spiced, and perfect with basmati rice or naan.",
+
+  "keywords": [
+    "butter chicken",
+    "murgh makhani",
+    "makhani",
+    "tomato cream curry",
+    "tandoori style",
+    "kasuri methi"
+  ],
+
+  "tags": [
+    "cuisine.indian",
+    "dish.butter_chicken",
+    "method.yogurt_marinate",
+    "method.bloom_spices",
+    "method.onion_tomato_masala",
+    "weeknight.friendly",
+    "leftovers.good",
+    "batch.friendly"
+  ],
+
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 1.25, "unit": "cups" },
+    "notes": "Serves 6 with rice/naan; serves 8 with multiple sides."
+  },
+
+  "time": {
+    "activeMins": 35,
+    "handsOffMins": 65,
+    "totalMins": 100
+  },
+
+  "difficulty": 4,
+
+  "equipment": {
+    "minimum": [
+      "equip.heavy_pot_or_dutch_oven",
+      "equip.knife",
+      "equip.cutting_board",
+      "equip.stove_burner"
+    ],
+    "recommended": [
+      "equip.blender",
+      "equip.fine_mesh_strainer",
+      "equip.sheet_pan",
+      "equip.broiler_or_hot_oven",
+      "equip.instant_read_thermometer"
+    ],
+    "optional": [
+      {
+        "id": "equip.grill",
+        "label": "Grill",
+        "required": false,
+        "notes": "Great for char. Use in place of oven/broiler."
+      },
+      {
+        "id": "equip.air_fryer",
+        "label": "Air fryer",
+        "required": false,
+        "notes": "Fast char option; cook in batches."
+      }
+    ]
+  },
+
+  "signals": {
+    "batchFriendly": true,
+    "leftoversGood": true,
+    "freezerFriendly": "yes (freeze sauce + chicken; finish with kasuri methi after reheating)",
+    "weeknightPossible": true
+  },
+
+  "tasteProfile": {
+    "heat": 1,
+    "aroma": ["buttery", "toasted_spices", "smoky_char", "tomato", "fenugreek"],
+    "balance": ["rich", "bright_tomato", "creamy", "light_finish_acid_optional"]
+  },
+
+  "dietFlags": [],
+
+  "allergens": {
+    "contains": ["allergen.dairy"],
+    "mayContain": [],
+    "notes": [
+      "Contains dairy: yogurt, butter, cream (unless using dairy-free variation).",
+      "Nut-free by default (many restaurant versions use cashew); optional cashew is listed as a variation."
+    ]
+  },
+
+  "ingredientGroups": [
+    {
+      "id": "grp.marinade",
+      "label": "Chicken + Marinade",
+      "items": [
+        "ing.chicken_thigh_boneless_skinless",
+        "ing.yogurt_plain",
+        "ing.lemon",
+        "ing.garlic",
+        "ing.ginger",
+        "spice.kashmiri_chili",
+        "spice.cumin",
+        "spice.coriander",
+        "spice.turmeric",
+        "ing.salt_kosher"
+      ]
+    },
+    {
+      "id": "grp.sauce_base",
+      "label": "Makhani Sauce Base",
+      "items": [
+        "ing.butter",
+        "ing.oil_neutral",
+        "ing.onion",
+        "ing.tomato_crushed"
+      ]
+    },
+    {
+      "id": "grp.sauce_spices",
+      "label": "Sauce Spices + Finish",
+      "items": ["spice.garam_masala", "ing.kasuri_methi", "ing.cream"]
+    }
+  ],
+
+  "ingredients": [
+    {
+      "id": "ing.chicken_thigh_boneless_skinless",
+      "label": "Boneless, skinless chicken thighs",
+      "role": "role.protein",
+      "amount": { "value": 2.0, "unit": "lb" },
+      "notes": [
+        "Thighs stay juicy under high heat.",
+        "You can use chicken breast; reduce cook time and avoid overcooking."
+      ]
+    },
+    {
+      "id": "ing.yogurt_plain",
+      "label": "Plain yogurt (full-fat preferred)",
+      "role": "role.marinade",
+      "amount": { "value": 0.75, "unit": "cup" },
+      "notes": [
+        "Full-fat yogurt is more stable and less likely to curdle.",
+        "For dairy-free: use coconut yogurt (unsweetened)."
+      ]
+    },
+    {
+      "id": "ing.lemon",
+      "label": "Lemon juice",
+      "role": "role.acid",
+      "amount": { "value": 1.0, "unit": "tbsp" },
+      "notes": "In the marinade; optional extra squeeze at the end for brightness."
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic, minced",
+      "role": "role.aromatic",
+      "amount": { "value": 6, "unit": "cloves" }
+    },
+    {
+      "id": "ing.ginger",
+      "label": "Fresh ginger, grated",
+      "role": "role.aromatic",
+      "amount": { "value": 1.5, "unit": "tbsp" }
+    },
+    {
+      "id": "spice.kashmiri_chili",
+      "label": "Kashmiri chili powder",
+      "role": "role.spice",
+      "amount": { "value": 2.0, "unit": "tsp" },
+      "notes": "Color + mild warmth. Substitute mild chili powder + a pinch of paprika."
+    },
+    {
+      "id": "spice.cumin",
+      "label": "Ground cumin",
+      "role": "role.spice",
+      "amount": { "value": 1.5, "unit": "tsp" }
+    },
+    {
+      "id": "spice.coriander",
+      "label": "Ground coriander",
+      "role": "role.spice",
+      "amount": { "value": 1.5, "unit": "tsp" }
+    },
+    {
+      "id": "spice.turmeric",
+      "label": "Ground turmeric",
+      "role": "role.spice",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "ing.salt_kosher",
+      "label": "Kosher salt",
+      "role": "role.seasoning",
+      "amount": { "value": 2.25, "unit": "tsp" },
+      "notes": "Use 1.5 tsp in the marinade; reserve the rest for sauce adjustment."
+    },
+
+    {
+      "id": "ing.oil_neutral",
+      "label": "Neutral oil",
+      "role": "role.fat",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "notes": "For searing/char; avocado/grapeseed/canola."
+    },
+    {
+      "id": "ing.butter",
+      "label": "Unsalted butter",
+      "role": "role.fat",
+      "amount": { "value": 4, "unit": "tbsp" },
+      "notes": "Classic makhani richness. Add in stages to control separation."
+    },
+    {
+      "id": "ing.onion",
+      "label": "Yellow onion, finely chopped",
+      "role": "role.aromatic",
+      "amount": { "value": 1, "unit": "medium" }
+    },
+    {
+      "id": "ing.tomato_crushed",
+      "label": "Crushed tomatoes",
+      "role": "role.masalabase",
+      "amount": { "value": 28, "unit": "oz" },
+      "notes": "Or blend ripe tomatoes for a fresher version."
+    },
+    {
+      "id": "spice.garam_masala",
+      "label": "Garam masala",
+      "role": "role.finish_spice",
+      "amount": { "value": 1.5, "unit": "tsp" },
+      "notes": "Add at the end for aroma."
+    },
+    {
+      "id": "ing.kasuri_methi",
+      "label": "Kasuri methi (dried fenugreek leaves)",
+      "role": "role.finish",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Crush between fingers before adding. Signature butter chicken aroma."
+    },
+    {
+      "id": "ing.cream",
+      "label": "Heavy cream",
+      "role": "role.finish",
+      "amount": { "value": 0.75, "unit": "cup" },
+      "notes": [
+        "For lighter: use half-and-half (sauce may be thinner).",
+        "For dairy-free: use coconut cream; taste and adjust acid/salt."
+      ]
+    }
+  ],
+
+  "methods": [
+    "method.yogurt_marinate",
+    "method.bloom_spices",
+    "method.onion_tomato_masala",
+    "method.char",
+    "method.simmer"
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_marinate",
+      "title": "Marinate the chicken",
+      "instructions": [
+        "In a bowl, mix yogurt, lemon juice, garlic, ginger, Kashmiri chili, cumin, coriander, turmeric, and 1.5 tsp of the salt.",
+        "Add chicken and coat thoroughly.",
+        "Marinate 20–30 minutes (or up to overnight, covered, refrigerated)."
+      ],
+      "activeMins": 8,
+      "handsOffMins": 20,
+      "timers": [{ "label": "Marinate", "minutes": 25 }],
+      "checks": [
+        "Use full-fat yogurt for stability.",
+        "If marinating overnight, keep salt as listed (helps flavor); do not exceed 24 hours."
+      ]
+    },
+    {
+      "id": "step_02_char_chicken",
+      "title": "Char the chicken (broiler/oven/grill/air fryer)",
+      "instructions": [
+        "Heat broiler to high OR oven to 500°F (260°C). Line a sheet pan with foil.",
+        "Spread chicken in a single layer; drizzle with 1 tbsp oil if it looks dry.",
+        "Broil 8–12 minutes, flipping once, until browned/charred at edges and cooked through (165°F / 74°C).",
+        "Alternative: Grill over high heat 3–4 minutes per side; or air fry at 400°F for 10–14 minutes, shaking halfway."
+      ],
+      "activeMins": 10,
+      "handsOffMins": 10,
+      "timers": [{ "label": "Char chicken", "minutes": 10 }],
+      "temperature": {
+        "type": "internal",
+        "value": 74,
+        "unit": "C",
+        "notes": "Chicken safe at 165°F / 74°C."
+      },
+      "checks": [
+        "You want browned edges for smoky flavor.",
+        "Do not overcook breast meat—pull at 160°F and rest to carryover to 165°F."
+      ]
+    },
+    {
+      "id": "step_03_build_sauce_base",
+      "title": "Build the makhani sauce base",
+      "instructions": [
+        "Heat a heavy pot over medium heat. Add 1 tbsp butter + remaining 1 tbsp oil.",
+        "Add onion and cook 6–8 minutes until soft and lightly golden.",
+        "Add crushed tomatoes. Simmer 12–18 minutes, stirring occasionally, until the sauce darkens and thickens."
+      ],
+      "activeMins": 10,
+      "handsOffMins": 15,
+      "timers": [{ "label": "Reduce tomatoes", "minutes": 15 }],
+      "checks": [
+        "Cook down tomatoes to remove raw flavor.",
+        "If splattering, reduce heat and partially cover."
+      ]
+    },
+    {
+      "id": "step_04_blend_sauce",
+      "title": "Blend (and optionally strain) for a silky sauce",
+      "instructions": [
+        "Turn off heat and cool 3–5 minutes.",
+        "Blend sauce until very smooth (blender or immersion blender).",
+        "Optional: strain through a fine mesh strainer for restaurant-smooth texture."
+      ],
+      "activeMins": 8,
+      "handsOffMins": 4,
+      "timers": [{ "label": "Cool before blending", "minutes": 4 }],
+      "checks": [
+        "Do not blend boiling hot liquid in a sealed blender—vent lid and start low.",
+        "Straining is optional but gives the signature silky finish."
+      ]
+    },
+    {
+      "id": "step_05_finish_sauce",
+      "title": "Finish the sauce with butter, cream, and kasuri methi",
+      "instructions": [
+        "Return smooth sauce to the pot over low heat.",
+        "Stir in remaining butter (3 tbsp) until melted.",
+        "Add cream and stir gently; keep heat low to avoid splitting.",
+        "Add garam masala and crushed kasuri methi; simmer 3–5 minutes.",
+        "Taste and adjust salt (use remaining salt as needed). Optional: tiny squeeze of lemon for brightness."
+      ],
+      "activeMins": 8,
+      "handsOffMins": 4,
+      "timers": [{ "label": "Gentle simmer to marry flavors", "minutes": 4 }],
+      "checks": [
+        "Keep heat low after adding cream.",
+        "Kasuri methi is powerful—start with 2 tsp, adjust to taste."
+      ]
+    },
+    {
+      "id": "step_06_combine_and_serve",
+      "title": "Combine chicken and serve",
+      "instructions": [
+        "Add charred chicken (and any resting juices) to the sauce.",
+        "Simmer 5–8 minutes on low until chicken is warmed through and coated.",
+        "Serve with basmati rice or naan. Optional garnish: cilantro and a drizzle of cream."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 5,
+      "timers": [{ "label": "Warm chicken in sauce", "minutes": 6 }],
+      "checks": [
+        "Avoid boiling—gentle heat keeps the sauce silky.",
+        "If sauce thickens too much, thin with a splash of water."
+      ]
+    }
+  ],
+
+  "pairings": {
+    "starches": [
+      "dish.indian.basmati_rice",
+      "dish.indian.jeera_rice",
+      "dish.indian.naan",
+      "dish.indian.roti"
+    ],
+    "coolingSides": ["dish.indian.raita", "dish.indian.cucumber_salad"],
+    "condiments": ["dish.indian.mango_pickle", "dish.indian.mint_chutney"]
+  },
+
+  "storage": {
+    "refrigerator": {
+      "durationDays": 4,
+      "notes": [
+        "Cool quickly; store covered.",
+        "Reheat gently on low; avoid boiling to prevent sauce splitting."
+      ]
+    },
+    "freezer": {
+      "durationMonths": 2,
+      "notes": [
+        "Freeze in portions. Thaw overnight in fridge.",
+        "Reheat gently; add a small splash of cream after reheating if needed."
+      ]
+    }
+  },
+
+  "planner": {
+    "roles": {
+      "main": "role.curry_or_dal",
+      "starch": "role.rice_or_flatbread",
+      "coolingSide": "role.raita_or_salad",
+      "condiment": "role.pickle_or_chutney"
+    },
+    "weeknightNotes": [
+      "Use broiler or air fryer for fast char.",
+      "Sauce can be made ahead; chicken can be batch-charred and frozen."
+    ],
+    "batchNotes": [
+      "Sauce freezes well; kasuri methi is best added after reheating for maximum aroma.",
+      "Double batch the sauce base for future quick curries."
+    ]
+  },
+
+  "safety": {
+    "notes": [
+      "Cook chicken to 165°F / 74°C.",
+      "Avoid boiling after adding cream/yogurt-based elements (prevents splitting/curdling).",
+      "Cool leftovers within 2 hours; reheat until steaming hot."
+    ]
+  },
+
+  "variations": [
+    {
+      "id": "var.cashew_restaurant",
+      "label": "Restaurant-style cashew richness (optional)",
+      "when": { "preference": "extra_silky" },
+      "adapt": {
+        "add": [
+          {
+            "id": "ing.cashews",
+            "amount": { "value": 0.33, "unit": "cup" },
+            "notes": "Soak 10 minutes in hot water; blend into sauce."
+          }
+        ],
+        "notes": [
+          "Blend soaked cashews into the sauce before straining for extra body.",
+          "Adjust salt and add a touch more acid to balance."
+        ]
+      }
+    },
+    {
+      "id": "var_dairy_free",
+      "label": "Dairy-free butter chicken",
+      "when": { "diet": "dairy_free" },
+      "adapt": {
+        "swap": [
+          {
+            "from": "ing.yogurt_plain",
+            "to": "ing.coconut_yogurt_unsweetened"
+          },
+          { "from": "ing.butter", "to": "ing.vegan_butter" },
+          { "from": "ing.cream", "to": "ing.coconut_cream" }
+        ],
+        "notes": [
+          "Use unsweetened coconut yogurt and coconut cream.",
+          "Finish with extra lemon to brighten and counter coconut sweetness."
+        ]
+      }
+    },
+    {
+      "id": "var_spicier",
+      "label": "Spicier butter chicken",
+      "when": { "preference": "hotter" },
+      "adapt": {
+        "notes": [
+          "Add 1/2–1 tsp hot chili powder or a small minced serrano to the sauce base.",
+          "Keep Kashmiri for color; add heat separately."
+        ]
+      }
+    }
+  ],
+
+  "compat": {
+    "cuisineId": "cuisines.indian",
+    "dishId": "dish.indian.butter_chicken",
+    "aliases": ["murgh makhani", "makhani chicken", "butter chicken curry"],
+    "index": {
+      "primaryTokens": ["butter", "chicken", "makhani", "tomato", "cream"],
+      "secondaryTokens": [
+        "kasuri methi",
+        "garam masala",
+        "kashmiri chili",
+        "tandoori"
+      ]
+    }
+  },
+
+  "audit": {
+    "curatedBy": "SSA",
+    "curationTier": "canonical",
+    "lastReviewedAt": "2026-01-20T00:00:00.000Z"
+  }
+}

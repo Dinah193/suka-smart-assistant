@@ -26,36 +26,54 @@
 
 let eventBus = { emit: function () {} };
 try {
-  const eb = require("@/services/eventBus");
-  eventBus = eb && (eb.default || eb.eventBus || eb) || eventBus;
+  const eb = require("@/services/events/eventBus");
+  eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch (_) {}
 
 let featureFlags = { familyFundMode: false };
 try {
   const ff = require("@/config/featureFlags");
-  featureFlags = ff && (ff.default || ff) || featureFlags;
+  featureFlags = (ff && (ff.default || ff)) || featureFlags;
 } catch (_) {}
 
 // Optional subsystems (defensive requires)
 let SessionStore = null; // listUpcomingInWindow, queuePrepTask, placeReservation
-try { SessionStore = require("@/engines/scheduling/SessionStore"); } catch (_) { try { SessionStore = require("@/engines/scheduling/sessionStore"); } catch (_) {} }
+try {
+  SessionStore = require("@/engines/scheduling/SessionStore");
+} catch (_) {
+  try {
+    SessionStore = require("@/engines/scheduling/sessionStore");
+  } catch (_) {}
+}
 
 let Inventory = null; // checkAvailability(items[]), reserve(items[], opts)
-try { Inventory = require("@/domain/inventory/InventoryService"); } catch (_) {}
+try {
+  Inventory = require("@/domain/inventory/InventoryService");
+} catch (_) {}
 
 let Storehouse = null; // hasEquipment(equipment[])
-try { Storehouse = require("@/domain/storehouse/StorehouseService"); } catch (_) {}
+try {
+  Storehouse = require("@/domain/storehouse/StorehouseService");
+} catch (_) {}
 
 let constraintsPolicy = null; // isAllowed(session, ctx) or filterSessions
-try { constraintsPolicy = require("@/engines/scheduling/policies/constraints"); } catch (_) {}
+try {
+  constraintsPolicy = require("@/engines/scheduling/policies/constraints");
+} catch (_) {}
 
 let buffersPolicy = null; // getRecommendedBuffer(domain, kind)
-try { buffersPolicy = require("@/engines/scheduling/policies/buffers"); } catch (_) {}
+try {
+  buffersPolicy = require("@/engines/scheduling/policies/buffers");
+} catch (_) {}
 
 let HubPacketFormatter = null;
-try { HubPacketFormatter = require("@/services/hub/HubPacketFormatter"); } catch (_) {}
+try {
+  HubPacketFormatter = require("@/services/hub/HubPacketFormatter");
+} catch (_) {}
 let FamilyFundConnector = null;
-try { FamilyFundConnector = require("@/services/hub/FamilyFundConnector"); } catch (_) {}
+try {
+  FamilyFundConnector = require("@/services/hub/FamilyFundConnector");
+} catch (_) {}
 
 module.exports = {
   /**
@@ -71,8 +89,17 @@ module.exports = {
   async run(args) {
     const cfg = normalizeArgs(args);
     if (!cfg) {
-      emit("planning.readiness.sweep.completed", { ok: false, reason: "invalid-args" });
-      return { ok: false, inspected: 0, blockers: 0, prepsQueued: 0, reservations: 0 };
+      emit("planning.readiness.sweep.completed", {
+        ok: false,
+        reason: "invalid-args",
+      });
+      return {
+        ok: false,
+        inspected: 0,
+        blockers: 0,
+        prepsQueued: 0,
+        reservations: 0,
+      };
     }
 
     const now = new Date();
@@ -81,17 +108,31 @@ module.exports = {
 
     const store = resolveSessionStore();
     if (!store || typeof store.listUpcomingInWindow !== "function") {
-      emit("planning.readiness.sweep.completed", { ok: false, reason: "missing-session-store" });
-      return { ok: false, inspected: 0, blockers: 0, prepsQueued: 0, reservations: 0 };
+      emit("planning.readiness.sweep.completed", {
+        ok: false,
+        reason: "missing-session-store",
+      });
+      return {
+        ok: false,
+        inspected: 0,
+        blockers: 0,
+        prepsQueued: 0,
+        reservations: 0,
+      };
     }
 
     emit("planning.readiness.sweep.started", {
       windowStartISO: windowStart.toISOString(),
       windowEndISO: windowEnd.toISOString(),
-      marksMinutes: cfg.marksMinutes
+      marksMinutes: cfg.marksMinutes,
     });
 
-    const upcoming = await safeCall(store.listUpcomingInWindow, store, windowStart, windowEnd);
+    const upcoming = await safeCall(
+      store.listUpcomingInWindow,
+      store,
+      windowStart,
+      windowEnd
+    );
     const sessions = Array.isArray(upcoming) ? upcoming : [];
 
     let inspected = 0;
@@ -102,12 +143,17 @@ module.exports = {
     // Iterate sessions and evaluate readiness at current T-x
     for (let i = 0; i < sessions.length; i++) {
       const s = sessions[i];
-      const startT = toTime(s.plannedStartISO || s.suggestedStartISO || s.deadlineISO);
+      const startT = toTime(
+        s.plannedStartISO || s.suggestedStartISO || s.deadlineISO
+      );
       if (!isFinite(startT)) continue;
 
       inspected++;
 
-      const minsToStart = Math.max(0, Math.round((startT - now.getTime()) / 60000));
+      const minsToStart = Math.max(
+        0,
+        Math.round((startT - now.getTime()) / 60000)
+      );
       const nextMark = lowestMarkAtOrAbove(minsToStart, cfg.marksMinutes);
       if (nextMark == null) continue; // not at a mark window
 
@@ -117,13 +163,13 @@ module.exports = {
         windowEndISO: windowEnd.toISOString(),
         minsToStart: minsToStart,
         markMinutes: nextMark,
-        timezone: cfg.timezone
+        timezone: cfg.timezone,
       };
 
       emit("planning.readiness.mark.checked", {
         sessionId: s.id || s.sessionId,
         markMinutes: nextMark,
-        minsToStart: minsToStart
+        minsToStart: minsToStart,
       });
 
       // 1) Constraint sanity (e.g., quiet hours flips, sabbath)
@@ -133,7 +179,7 @@ module.exports = {
         emit("planning.readiness.blocker.detected", {
           sessionId: s.id || s.sessionId,
           kind: "constraints",
-          detail: "disallowed-by-constraints"
+          detail: "disallowed-by-constraints",
         });
         // Do not attempt other checks; session should be rescheduled by scheduler
         continue;
@@ -143,11 +189,17 @@ module.exports = {
       const equipmentOk = await hasEquipment(s);
       if (!equipmentOk) {
         blockers++;
-        const queued = await maybeQueuePrep(store, s, "equipment", cfg.autoQueuePrep, {
-          title: "Locate required equipment",
-          description: buildEquipPrepDescription(s),
-          dueISO: minusMinutesISO(s.plannedStartISO, Math.min(30, nextMark))
-        });
+        const queued = await maybeQueuePrep(
+          store,
+          s,
+          "equipment",
+          cfg.autoQueuePrep,
+          {
+            title: "Locate required equipment",
+            description: buildEquipPrepDescription(s),
+            dueISO: minusMinutesISO(s.plannedStartISO, Math.min(30, nextMark)),
+          }
+        );
         prepsQueued += queued ? 1 : 0;
         emitReadyOrBlock(equipmentOk, s, "equipment", queued);
         continue;
@@ -158,21 +210,35 @@ module.exports = {
       if (!invCheck.ok) {
         blockers++;
         // Optionally queue a prep shopping task
-        const queued = await maybeQueuePrep(store, s, "inventory", cfg.autoQueuePrep, {
-          title: "Pick up missing items",
-          description: buildInventoryPrepDescription(invCheck),
-          dueISO: minusMinutesISO(s.plannedStartISO, Math.min(120, Math.max(30, nextMark)))
-        });
+        const queued = await maybeQueuePrep(
+          store,
+          s,
+          "inventory",
+          cfg.autoQueuePrep,
+          {
+            title: "Pick up missing items",
+            description: buildInventoryPrepDescription(invCheck),
+            dueISO: minusMinutesISO(
+              s.plannedStartISO,
+              Math.min(120, Math.max(30, nextMark))
+            ),
+          }
+        );
         prepsQueued += queued ? 1 : 0;
         emitReadyOrBlock(false, s, "inventory", queued);
         continue;
-      } else if (cfg.autoReserveInventory && invCheck.tight && Inventory && typeof Inventory.reserve === "function") {
+      } else if (
+        cfg.autoReserveInventory &&
+        invCheck.tight &&
+        Inventory &&
+        typeof Inventory.reserve === "function"
+      ) {
         // Soft-reserve to avoid race if close to start
         try {
           const res = await Inventory.reserve(invCheck.itemsNeeded || [], {
             sessionId: s.id || s.sessionId,
             soft: true,
-            expiresAtISO: minusMinutesISO(s.plannedStartISO, 5) // release close to start if unconsumed
+            expiresAtISO: minusMinutesISO(s.plannedStartISO, 5), // release close to start if unconsumed
           });
           if (res) reservations++;
         } catch (_) {}
@@ -182,11 +248,17 @@ module.exports = {
       const timeOk = await hasBuffer(s, ctx);
       if (!timeOk) {
         blockers++;
-        const queued = await maybeQueuePrep(store, s, "time", cfg.autoQueuePrep, {
-          title: "Clear time buffer",
-          description: "Free up buffer before the session to avoid rushing.",
-          dueISO: minusMinutesISO(s.plannedStartISO, Math.min(30, nextMark))
-        });
+        const queued = await maybeQueuePrep(
+          store,
+          s,
+          "time",
+          cfg.autoQueuePrep,
+          {
+            title: "Clear time buffer",
+            description: "Free up buffer before the session to avoid rushing.",
+            dueISO: minusMinutesISO(s.plannedStartISO, Math.min(30, nextMark)),
+          }
+        );
         prepsQueued += queued ? 1 : 0;
         emitReadyOrBlock(false, s, "time", queued);
         continue;
@@ -196,11 +268,18 @@ module.exports = {
       const depsOk = await depsSatisfied(s, store);
       if (!depsOk) {
         blockers++;
-        const queued = await maybeQueuePrep(store, s, "dependency", cfg.autoQueuePrep, {
-          title: "Complete prerequisites",
-          description: "Finish required prerequisite task(s) before session start.",
-          dueISO: minusMinutesISO(s.plannedStartISO, Math.min(60, nextMark))
-        });
+        const queued = await maybeQueuePrep(
+          store,
+          s,
+          "dependency",
+          cfg.autoQueuePrep,
+          {
+            title: "Complete prerequisites",
+            description:
+              "Finish required prerequisite task(s) before session start.",
+            dueISO: minusMinutesISO(s.plannedStartISO, Math.min(60, nextMark)),
+          }
+        );
         prepsQueued += queued ? 1 : 0;
         emitReadyOrBlock(false, s, "dependency", queued);
         continue;
@@ -209,7 +288,7 @@ module.exports = {
       // All checks passed at this mark
       emit("planning.readiness.ok", {
         sessionId: s.id || s.sessionId,
-        markMinutes: nextMark
+        markMinutes: nextMark,
       });
     }
 
@@ -219,7 +298,7 @@ module.exports = {
       prepsQueued: prepsQueued,
       reservations: reservations,
       windowStartISO: windowStart.toISOString(),
-      windowEndISO: windowEnd.toISOString()
+      windowEndISO: windowEnd.toISOString(),
     };
 
     emit("planning.readiness.sweep.completed", { ok: true, summary: summary });
@@ -230,33 +309,62 @@ module.exports = {
         type: "planning.readiness.sweep.completed",
         ts: new Date().toISOString(),
         source: "runtime.jobs.readinessSweep",
-        data: summary
+        data: summary,
       });
     }
 
-    return { ok: true, inspected: inspected, blockers: blockers, prepsQueued: prepsQueued, reservations: reservations };
-  }
+    return {
+      ok: true,
+      inspected: inspected,
+      blockers: blockers,
+      prepsQueued: prepsQueued,
+      reservations: reservations,
+    };
+  },
 };
 
 // ------------------------------ checks and helpers ------------------------------
 
 function normalizeArgs(args) {
-  const scanWindowMinutes = Number((args && args.scanWindowMinutes) != null ? args.scanWindowMinutes : 360);
-  let marks = Array.isArray(args && args.marksMinutes) ? args.marksMinutes.slice() : [240, 120, 60, 30, 10];
-  marks = marks.filter(function (n) { return isFinite(n) && n > 0; }).sort(function (a, b) { return b - a; }); // desc for T-x logic
-  const autoQueuePrep = !!((args && args.autoQueuePrep) != null ? args.autoQueuePrep : true);
-  const autoReserveInventory = !!((args && args.autoReserveInventory) != null ? args.autoReserveInventory : true);
+  const scanWindowMinutes = Number(
+    (args && args.scanWindowMinutes) != null ? args.scanWindowMinutes : 360
+  );
+  let marks = Array.isArray(args && args.marksMinutes)
+    ? args.marksMinutes.slice()
+    : [240, 120, 60, 30, 10];
+  marks = marks
+    .filter(function (n) {
+      return isFinite(n) && n > 0;
+    })
+    .sort(function (a, b) {
+      return b - a;
+    }); // desc for T-x logic
+  const autoQueuePrep = !!((args && args.autoQueuePrep) != null
+    ? args.autoQueuePrep
+    : true);
+  const autoReserveInventory = !!((args && args.autoReserveInventory) != null
+    ? args.autoReserveInventory
+    : true);
   const timezone = (args && args.timezone) || "America/Chicago";
   if (!isFinite(scanWindowMinutes) || scanWindowMinutes <= 0) return null;
   if (!marks.length) return null;
-  return { scanWindowMinutes: scanWindowMinutes, marksMinutes: marks, autoQueuePrep: autoQueuePrep, autoReserveInventory: autoReserveInventory, timezone: timezone };
+  return {
+    scanWindowMinutes: scanWindowMinutes,
+    marksMinutes: marks,
+    autoQueuePrep: autoQueuePrep,
+    autoReserveInventory: autoReserveInventory,
+    timezone: timezone,
+  };
 }
 
 function resolveSessionStore() {
   if (!SessionStore) return null;
-  if (typeof SessionStore.listUpcomingInWindow === "function") return SessionStore;
-  if (SessionStore && typeof SessionStore.getInstance === "function") return SessionStore.getInstance();
-  if (SessionStore && typeof SessionStore.default === "object") return SessionStore.default;
+  if (typeof SessionStore.listUpcomingInWindow === "function")
+    return SessionStore;
+  if (SessionStore && typeof SessionStore.getInstance === "function")
+    return SessionStore.getInstance();
+  if (SessionStore && typeof SessionStore.default === "object")
+    return SessionStore.default;
   return SessionStore;
 }
 
@@ -266,7 +374,10 @@ function lowestMarkAtOrAbove(minsToStart, marksDesc) {
   const tolerance = 2;
   for (let i = 0; i < marksDesc.length; i++) {
     const m = marksDesc[i];
-    if (Math.abs(minsToStart - m) <= tolerance || minsToStart < m && (m - minsToStart) <= tolerance) {
+    if (
+      Math.abs(minsToStart - m) <= tolerance ||
+      (minsToStart < m && m - minsToStart <= tolerance)
+    ) {
       return m;
     }
   }
@@ -321,8 +432,15 @@ async function checkInventory(session) {
 
 async function hasBuffer(session, ctx) {
   try {
-    if (!buffersPolicy || typeof buffersPolicy.getRecommendedBuffer !== "function") return true;
-    const rec = buffersPolicy.getRecommendedBuffer(session.domain || "general", session.meta && session.meta.kind);
+    if (
+      !buffersPolicy ||
+      typeof buffersPolicy.getRecommendedBuffer !== "function"
+    )
+      return true;
+    const rec = buffersPolicy.getRecommendedBuffer(
+      session.domain || "general",
+      session.meta && session.meta.kind
+    );
     const beforeMs = Number((rec && rec.beforeMs) || 0);
     const afterMs = Number((rec && rec.afterMs) || 0);
     // If we are within T-x that is smaller than required pre-buffer, flag not ready
@@ -334,7 +452,9 @@ async function hasBuffer(session, ctx) {
 
 async function depsSatisfied(session, store) {
   try {
-    const deps = Array.isArray(session.dependencies) ? session.dependencies : [];
+    const deps = Array.isArray(session.dependencies)
+      ? session.dependencies
+      : [];
     if (!deps.length) return true;
     if (!store || typeof store.areCompleted !== "function") return true; // cannot verify, assume ok
     return !!(await store.areCompleted(deps));
@@ -354,7 +474,7 @@ async function maybeQueuePrep(store, session, kind, enabled, prep) {
       description: prep.description,
       dueISO: prep.dueISO,
       priority: "high",
-      soft: true
+      soft: true,
     };
     const ok = await store.queuePrepTask(payload);
     if (ok) {
@@ -362,7 +482,7 @@ async function maybeQueuePrep(store, session, kind, enabled, prep) {
         sessionId: payload.sessionId,
         kind: kind,
         title: payload.title,
-        dueISO: payload.dueISO
+        dueISO: payload.dueISO,
       });
     }
     return !!ok;
@@ -373,12 +493,15 @@ async function maybeQueuePrep(store, session, kind, enabled, prep) {
 
 function emitReadyOrBlock(ok, session, kind, queued) {
   if (ok) {
-    emit("planning.readiness.ok", { sessionId: session.id || session.sessionId, kind: kind });
+    emit("planning.readiness.ok", {
+      sessionId: session.id || session.sessionId,
+      kind: kind,
+    });
   } else {
     emit("planning.readiness.blocker.detected", {
       sessionId: session.id || session.sessionId,
       kind: kind,
-      prepQueued: !!queued
+      prepQueued: !!queued,
     });
   }
 }
@@ -386,7 +509,11 @@ function emitReadyOrBlock(ok, session, kind, queued) {
 function extractInventoryItems(session) {
   // Supports multiple domains. Expect recipe-like lines under session.ingredients or session.materials.
   const items = [];
-  const list = Array.isArray(session.ingredients) ? session.ingredients : (Array.isArray(session.materials) ? session.materials : []);
+  const list = Array.isArray(session.ingredients)
+    ? session.ingredients
+    : Array.isArray(session.materials)
+    ? session.materials
+    : [];
   for (let i = 0; i < list.length; i++) {
     const it = list[i] || {};
     // normalize { sku?, name, qty, unit }
@@ -402,13 +529,19 @@ function extractInventoryItems(session) {
 }
 
 function buildInventoryPrepDescription(invCheck) {
-  const names = (invCheck.itemsNeeded || []).map(function (m) { return (m.name || m.sku || "item") + " x" + (m.qty || "?"); });
-  return names.length ? "Missing: " + names.join(", ") : "Missing inventory items.";
+  const names = (invCheck.itemsNeeded || []).map(function (m) {
+    return (m.name || m.sku || "item") + " x" + (m.qty || "?");
+  });
+  return names.length
+    ? "Missing: " + names.join(", ")
+    : "Missing inventory items.";
 }
 
 function buildEquipPrepDescription(session) {
   const eq = Array.isArray(session.equipment) ? session.equipment : [];
-  return eq.length ? "Ensure available: " + eq.join(", ") : "Locate required equipment.";
+  return eq.length
+    ? "Ensure available: " + eq.join(", ")
+    : "Locate required equipment.";
 }
 
 function minusMinutesISO(iso, minutes) {
@@ -437,7 +570,12 @@ async function safeCall(fn, ctx) {
 
 function emit(type, data) {
   try {
-    eventBus.emit({ type: type, ts: new Date().toISOString(), source: "runtime.jobs.readinessSweep", data: data });
+    eventBus.emit({
+      type: type,
+      ts: new Date().toISOString(),
+      source: "runtime.jobs.readinessSweep",
+      data: data,
+    });
   } catch (_) {}
 }
 
@@ -445,7 +583,9 @@ async function exportToHubIfEnabled(payload) {
   if (!featureFlags || !featureFlags.familyFundMode) return;
   if (!HubPacketFormatter || !FamilyFundConnector) return;
   try {
-    const packet = await (HubPacketFormatter.format ? HubPacketFormatter.format(payload) : payload);
+    const packet = await (HubPacketFormatter.format
+      ? HubPacketFormatter.format(payload)
+      : payload);
     if (FamilyFundConnector && typeof FamilyFundConnector.send === "function") {
       await FamilyFundConnector.send(packet);
     }

@@ -1,4 +1,3 @@
-
 // FILE: src/pages/household/meals.jsx
 import React, { useMemo, useState } from "react";
 import DashboardSection from "@/components/layout/DashboardSection";
@@ -10,6 +9,7 @@ import FeastDayMealSuggestions from "@/components/cuisine/FeastDayMealSuggestion
 import CuisineExplainPanel from "@/components/cuisine/CuisineExplainPanel";
 import { resolveCuisineMeals } from "@/services/cuisine/CuisineResolver";
 import { getFeatureFlag } from "@/config";
+import HouseholdMealsCuisine from "@/pages/household/HouseholdMealsCuisine";
 
 // SSA style: household steward defaults
 const DEFAULT_HOUSEHOLD_ID = "default";
@@ -26,7 +26,7 @@ function next7Dates() {
   return out;
 }
 
-export default function HouseholdMealsCuisinePage() {
+export default function () {
   const [prefsOpen, setPrefsOpen] = useState(false);
   const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -75,6 +75,9 @@ export default function HouseholdMealsCuisinePage() {
 
   return (
     <div className="p-4 space-y-4">
+      {/* Included component (kept non-breaking by rendering above the existing UI) */}
+      <HouseholdMealsCuisine />
+
       <DashboardSection title="Meals • Cuisine (AAI)">
         <div className="grid lg:grid-cols-3 gap-4">
           <div className="lg:col-span-1 space-y-4">
@@ -85,9 +88,12 @@ export default function HouseholdMealsCuisinePage() {
             />
 
             <div className="card">
-              <div className="text-sm font-semibold">Deterministic weekly dinner suggestions</div>
+              <div className="text-sm font-semibold">
+                Deterministic weekly dinner suggestions
+              </div>
               <div className="text-xs text-[hsl(var(--text-subtle))] mt-1">
-                Uses fixed rhythm + rotation state (cooldowns, protein/technique/spice variety).
+                Uses fixed rhythm + rotation state (cooldowns,
+                protein/technique/spice variety).
               </div>
 
               <div className="mt-3 flex items-center gap-2">
@@ -97,14 +103,25 @@ export default function HouseholdMealsCuisinePage() {
                   checked={tryNew}
                   onChange={(e) => setTryNew(e.target.checked)}
                 />
-                <label htmlFor="tryNew" className="text-sm">Try something new (underused dishes)</label>
+                <label htmlFor="tryNew" className="text-sm">
+                  Try something new (underused dishes)
+                </label>
               </div>
 
               <div className="mt-3 flex gap-2">
-                <button type="button" className="btn btn--primary btn--sm" onClick={generate} disabled={loading}>
+                <button
+                  type="button"
+                  className="btn btn--primary btn--sm"
+                  onClick={generate}
+                  disabled={loading}
+                >
                   {loading ? "Generating…" : "Generate 7-day plan"}
                 </button>
-                <button type="button" className="btn btn--ghost btn--sm" onClick={() => setPrefsOpen(true)}>
+                <button
+                  type="button"
+                  className="btn btn--ghost btn--sm"
+                  onClick={() => setPrefsOpen(true)}
+                >
                   Preferences
                 </button>
               </div>
@@ -116,7 +133,8 @@ export default function HouseholdMealsCuisinePage() {
               ) : null}
             </div>
 
-            {getFeatureFlag("cuisineProfiles.enableCuisineExplainability") !== false ? (
+            {getFeatureFlag("cuisineProfiles.enableCuisineExplainability") !==
+            false ? (
               <CuisineExplainPanel selection={selected} />
             ) : null}
           </div>
@@ -133,13 +151,16 @@ export default function HouseholdMealsCuisinePage() {
                   <button
                     key={r.date || idx}
                     type="button"
-                    className={`text-left border rounded-lg p-3 bg-white/60 hover:bg-white ${idx === selectedExplainIdx ? "ring-2 ring-black/10" : ""}`}
+                    className={`text-left border rounded-lg p-3 bg-white/60 hover:bg-white ${
+                      idx === selectedExplainIdx ? "ring-2 ring-black/10" : ""
+                    }`}
                     onClick={() => setSelectedExplainIdx(idx)}
                   >
                     <div className="text-xs text-gray-600">{r.date}</div>
                     <div className="font-semibold">{r.dishName || "—"}</div>
                     <div className="text-xs text-gray-600 mt-1">
-                      Protein: {r?.dish?.primaryProtein || "—"} • Technique: {(r?.dish?.techniques || [])[0] || "—"}
+                      Protein: {r?.dish?.primaryProtein || "—"} • Technique:{" "}
+                      {(r?.dish?.techniques || [])[0] || "—"}
                     </div>
                   </button>
                 ))}
@@ -155,8 +176,12 @@ export default function HouseholdMealsCuisinePage() {
             <SpiceFlavorMatrixView cuisineKey={CUISINE_KEY} />
             <TechniqueOverlapView cuisineKey={CUISINE_KEY} />
 
-            {getFeatureFlag("cuisineProfiles.enableFeastDayMealSuggestions") !== false ? (
-              <FeastDayMealSuggestions householdId={DEFAULT_HOUSEHOLD_ID} cuisineKey={CUISINE_KEY} />
+            {getFeatureFlag("cuisineProfiles.enableFeastDayMealSuggestions") !==
+            false ? (
+              <FeastDayMealSuggestions
+                householdId={DEFAULT_HOUSEHOLD_ID}
+                cuisineKey={CUISINE_KEY}
+              />
             ) : null}
           </div>
         </div>

@@ -20,14 +20,17 @@ const VERSION = 2;
 const LS_KEY = "suka.storehousePlanner.v" + VERSION;
 
 /* --------------------------------- utils ---------------------------------- */
-const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+const uid = () =>
+  `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 const norm = (s) => String(s ?? "").trim();
 const isObj = (x) => x && typeof x === "object";
 const toDateISO = (d) => {
   try {
     const x = typeof d === "string" ? new Date(d) : d;
     if (!(x instanceof Date) || Number.isNaN(x.getTime())) return undefined;
-    return new Date(x.getTime() - x.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+    return new Date(x.getTime() - x.getTimezoneOffset() * 60000)
+      .toISOString()
+      .slice(0, 10);
   } catch {
     return undefined;
   }
@@ -35,7 +38,8 @@ const toDateISO = (d) => {
 
 function arraysShallowEqual(a, b) {
   if (a === b) return true;
-  if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+  if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length)
+    return false;
   for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
   return true;
 }
@@ -54,7 +58,16 @@ function mapNeedIn(n) {
   const source = n.source ? norm(n.source) : undefined; // "plan", "recipe", "manual"
   const aisle = n.aisle ? norm(n.aisle) : undefined;
   return {
-    id, name, qty, unit, category, priority, tags, neededBy, source, aisle,
+    id,
+    name,
+    qty,
+    unit,
+    category,
+    priority,
+    tags,
+    neededBy,
+    source,
+    aisle,
     linkedRecipeId: n.linkedRecipeId ? norm(n.linkedRecipeId) : undefined,
     notes: n.notes ? norm(n.notes) : undefined,
   };
@@ -72,11 +85,24 @@ function mapTaskIn(t) {
   const durationMin = t.durationMin != null ? Number(t.durationMin) : undefined;
   const vesselSize = t.vesselSize ? norm(t.vesselSize) : undefined; // 'pint' | 'quart' | 'halfPint'
   const batchCount = t.batchCount != null ? Number(t.batchCount) : 1;
-  const status = ["planned", "prepped", "done", "skipped"].includes(t.status) ? t.status : "planned";
-  const linkedInventoryIds = Array.isArray(t.linkedInventoryIds) ? t.linkedInventoryIds.map(norm) : [];
+  const status = ["planned", "prepped", "done", "skipped"].includes(t.status)
+    ? t.status
+    : "planned";
+  const linkedInventoryIds = Array.isArray(t.linkedInventoryIds)
+    ? t.linkedInventoryIds.map(norm)
+    : [];
   return {
-    id, produce, method, quantity, unit, dueDate, durationMin, vesselSize,
-    batchCount, status, linkedInventoryIds,
+    id,
+    produce,
+    method,
+    quantity,
+    unit,
+    dueDate,
+    durationMin,
+    vesselSize,
+    batchCount,
+    status,
+    linkedInventoryIds,
     notes: t.notes ? norm(t.notes) : undefined,
   };
 }
@@ -109,16 +135,22 @@ export const useStorehousePlannerStore = create(
 
       /* ------------------------ BC setters --------------------- */
       setStorehouseNeeds: (next) => {
-        const value = typeof next === "function" ? next(get().storehouseNeeds) : next;
-        const safe = Array.isArray(value) ? value.map(mapNeedIn).filter(Boolean) : [];
+        const value =
+          typeof next === "function" ? next(get().storehouseNeeds) : next;
+        const safe = Array.isArray(value)
+          ? value.map(mapNeedIn).filter(Boolean)
+          : [];
         const prev = get().storehouseNeeds;
         if (arraysShallowEqual(prev, safe)) return;
         set({ storehouseNeeds: safe });
       },
 
       setPreservationQueue: (next) => {
-        const value = typeof next === "function" ? next(get().preservationQueue) : next;
-        const safe = Array.isArray(value) ? value.map(mapTaskIn).filter(Boolean) : [];
+        const value =
+          typeof next === "function" ? next(get().preservationQueue) : next;
+        const safe = Array.isArray(value)
+          ? value.map(mapTaskIn).filter(Boolean)
+          : [];
         const prev = get().preservationQueue;
         if (arraysShallowEqual(prev, safe)) return;
         set({ preservationQueue: safe });
@@ -130,7 +162,14 @@ export const useStorehousePlannerStore = create(
         if (!mapped) return;
         const prev = get().storehouseNeeds;
         // de-dupe by name + unit (and optional category)
-        if (prev.some((x) => x.name.toLowerCase() === mapped.name.toLowerCase() && (x.unit || "") === (mapped.unit || "") && (x.category || "") === (mapped.category || ""))) {
+        if (
+          prev.some(
+            (x) =>
+              x.name.toLowerCase() === mapped.name.toLowerCase() &&
+              (x.unit || "") === (mapped.unit || "") &&
+              (x.category || "") === (mapped.category || "")
+          )
+        ) {
           return;
         }
         set({ storehouseNeeds: [...prev, mapped] });
@@ -138,7 +177,10 @@ export const useStorehousePlannerStore = create(
 
       removeNeed: (predicate) => {
         const prev = get().storehouseNeeds;
-        const next = typeof predicate === "function" ? prev.filter((x) => !predicate(x)) : [];
+        const next =
+          typeof predicate === "function"
+            ? prev.filter((x) => !predicate(x))
+            : [];
         if (arraysShallowEqual(prev, next)) return;
         set({ storehouseNeeds: next });
       },
@@ -156,7 +198,10 @@ export const useStorehousePlannerStore = create(
 
       removePreservationTask: (predicate) => {
         const prev = get().preservationQueue;
-        const next = typeof predicate === "function" ? prev.filter((x) => !predicate(x)) : [];
+        const next =
+          typeof predicate === "function"
+            ? prev.filter((x) => !predicate(x))
+            : [];
         if (arraysShallowEqual(prev, next)) return;
         set({ preservationQueue: next });
       },
@@ -179,7 +224,9 @@ export const useStorehousePlannerStore = create(
           ])
         );
         for (const it of incoming) {
-          const key = `${it.name.toLowerCase()}|${it.unit || ""}|${it.category || ""}`;
+          const key = `${it.name.toLowerCase()}|${it.unit || ""}|${
+            it.category || ""
+          }`;
           if (index.has(key)) {
             const cur = index.get(key);
             index.set(key, {
@@ -188,7 +235,9 @@ export const useStorehousePlannerStore = create(
                 cur.qty != null || it.qty != null
                   ? Number(cur.qty || 0) + Number(it.qty || 0)
                   : undefined,
-              tags: Array.from(new Set([...(cur.tags || []), ...(it.tags || [])])),
+              tags: Array.from(
+                new Set([...(cur.tags || []), ...(it.tags || [])])
+              ),
               priority: Math.min(cur.priority ?? 3, it.priority ?? 3),
               neededBy: cur.neededBy || it.neededBy,
               notes: cur.notes || it.notes,
@@ -205,7 +254,10 @@ export const useStorehousePlannerStore = create(
         const incoming = tasks.map(mapTaskIn).filter(Boolean);
         if (!incoming.length) return;
         const prev = get().preservationQueue;
-        const keyFor = (t) => `${t.produce.toLowerCase()}|${t.method}|${t.vesselSize || ""}|${t.dueDate || ""}`;
+        const keyFor = (t) =>
+          `${t.produce.toLowerCase()}|${t.method}|${t.vesselSize || ""}|${
+            t.dueDate || ""
+          }`;
         const map = new Map(prev.map((t) => [keyFor(t), t]));
         for (const t of incoming) {
           const k = keyFor(t);
@@ -217,10 +269,21 @@ export const useStorehousePlannerStore = create(
                 cur.quantity != null || t.quantity != null
                   ? Number(cur.quantity || 0) + Number(t.quantity || 0)
                   : undefined,
-              batchCount: Math.max(Number(cur.batchCount || 1), Number(t.batchCount || 1)),
-              durationMin: Math.max(Number(cur.durationMin || 0), Number(t.durationMin || 0)),
+              batchCount: Math.max(
+                Number(cur.batchCount || 1),
+                Number(t.batchCount || 1)
+              ),
+              durationMin: Math.max(
+                Number(cur.durationMin || 0),
+                Number(t.durationMin || 0)
+              ),
               status: cur.status === "done" ? "done" : t.status,
-              linkedInventoryIds: Array.from(new Set([...(cur.linkedInventoryIds || []), ...(t.linkedInventoryIds || [])])),
+              linkedInventoryIds: Array.from(
+                new Set([
+                  ...(cur.linkedInventoryIds || []),
+                  ...(t.linkedInventoryIds || []),
+                ])
+              ),
               notes: cur.notes || t.notes,
             });
           } else {
@@ -234,8 +297,12 @@ export const useStorehousePlannerStore = create(
       importJson: (json) => {
         try {
           const obj = typeof json === "string" ? JSON.parse(json) : json;
-          const needs = Array.isArray(obj?.storehouseNeeds) ? obj.storehouseNeeds : [];
-          const tasks = Array.isArray(obj?.preservationQueue) ? obj.preservationQueue : [];
+          const needs = Array.isArray(obj?.storehouseNeeds)
+            ? obj.storehouseNeeds
+            : [];
+          const tasks = Array.isArray(obj?.preservationQueue)
+            ? obj.preservationQueue
+            : [];
           const beforeN = get().storehouseNeeds.length;
           const beforeT = get().preservationQueue.length;
           get().upsertNeeds(needs);
@@ -270,13 +337,18 @@ export const useStorehousePlannerStore = create(
 
         for (const n of needs) {
           needsCount++;
-          if (n.category) byCategory[n.category] = (byCategory[n.category] || 0) + 1;
+          if (n.category)
+            byCategory[n.category] = (byCategory[n.category] || 0) + 1;
           if (n.aisle) byAisle[n.aisle] = (byAisle[n.aisle] || 0) + 1;
           const p = n.priority ?? 3;
           byPriority[p] = (byPriority[p] || 0) + 1;
         }
 
-        const workloadMin = tasks.reduce((sum, t) => sum + Number(t.durationMin || 0) * Number(t.batchCount || 1), 0);
+        const workloadMin = tasks.reduce(
+          (sum, t) =>
+            sum + Number(t.durationMin || 0) * Number(t.batchCount || 1),
+          0
+        );
         const tasksByStatus = tasks.reduce((acc, t) => {
           acc[t.status] = (acc[t.status] || 0) + 1;
           return acc;
@@ -337,18 +409,27 @@ export const useStorehousePlannerStore = create(
       /** Generate a weekend preservation plan respecting capacity & observance. */
       generateWeekendPlan: async () => {
         const settings = await getSettings();
-        const cannerType = settings?.get("preservation.cannerType", "pressure") || "pressure";
-        const capacity = settings?.get("preservation.capacity", { pint: 8, quart: 7, halfPint: 10 }) || { pint: 8, quart: 7, halfPint: 10 };
-        const sabbathAware = !!(settings?.get("observance.sabbathAware", true));
+        const cannerType =
+          settings?.get("preservation.cannerType", "pressure") || "pressure";
+        const capacity = settings?.get("preservation.capacity", {
+          pint: 8,
+          quart: 7,
+          halfPint: 10,
+        }) || { pint: 8, quart: 7, halfPint: 10 };
+        const sabbathAware = !!settings?.get("observance.sabbathAware", true);
 
-        // Choose target day: Sunday unless sabbathAware=false → Saturday if user prefers
+        // Choose target day: Sunday default
         const today = new Date();
         const dow = today.getDay();
-        const satDelta = (6 - dow + 7) % 7;
         const sunDelta = (0 - dow + 7) % 7;
-        const saturdayISO = toDateISO(new Date(today.getFullYear(), today.getMonth(), today.getDate() + satDelta));
-        const sundayISO = toDateISO(new Date(today.getFullYear(), today.getMonth(), today.getDate() + sunDelta));
-        const targetISO = sabbathAware ? sundayISO : sundayISO; // keep Sunday default; Sabbath work would be before sunset (handled elsewhere)
+        const sundayISO = toDateISO(
+          new Date(
+            today.getFullYear(),
+            today.getMonth(),
+            today.getDate() + sunDelta
+          )
+        );
+        const targetISO = sabbathAware ? sundayISO : sundayISO;
 
         // Pull suggestions & fold into a plan with batch sizing
         const suggestions = await get().suggestFromInventory();
@@ -358,7 +439,10 @@ export const useStorehousePlannerStore = create(
         suggestions.forEach((s) => {
           const cap = capacity[s.vesselSize || "pint"] || 8;
           const unitsPerBatch = cap; // jars per batch ~ capacity
-          const batches = Math.max(1, Math.ceil(Number(s.quantity || 0) / unitsPerBatch));
+          const batches = Math.max(
+            1,
+            Math.ceil(Number(s.quantity || 0) / unitsPerBatch)
+          );
           planned.push(
             mapTaskIn({
               ...s,
@@ -418,8 +502,12 @@ export const useStorehousePlannerStore = create(
       migrate: (persisted, ver) => {
         if (!persisted) return persisted;
         if (ver < 2) {
-          const nn = Array.isArray(persisted.storehouseNeeds) ? persisted.storehouseNeeds : [];
-          const pq = Array.isArray(persisted.preservationQueue) ? persisted.preservationQueue : [];
+          const nn = Array.isArray(persisted.storehouseNeeds)
+            ? persisted.storehouseNeeds
+            : [];
+          const pq = Array.isArray(persisted.preservationQueue)
+            ? persisted.preservationQueue
+            : [];
           persisted.storehouseNeeds = nn.map(mapNeedIn).filter(Boolean);
           persisted.preservationQueue = pq.map(mapTaskIn).filter(Boolean);
         }
@@ -470,3 +558,61 @@ export const useStorehousePlannerActions = () =>
     }),
     shallow
   );
+
+/* -------------------------------------------------------------------------- */
+/* Compatibility exports (used by preservation templates)                      */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * addLotRecord
+ * Generic hook for templates to record a completed/pending preservation lot.
+ * Internally we store these as preservationQueue entries.
+ */
+export function addLotRecord(lot = {}) {
+  const s = useStorehousePlannerStore.getState();
+  const method = lot.method || lot.methodKey || lot.type || "preservation";
+  return s.addPreservationTask({ ...lot, method });
+}
+
+/** Record curing/smoking lots */
+export function addCureLot(lot = {}) {
+  return addLotRecord({ ...lot, method: lot.method || "curing" });
+}
+
+/** Record dehydrating lots */
+export function addDehydratedLot(lot = {}) {
+  return addLotRecord({ ...lot, method: lot.method || "dehydrating" });
+}
+
+/** Record frozen items (can be a single lot or an array of items) */
+export function addFrozenItems(items = [], meta = {}) {
+  const list = Array.isArray(items) ? items : [items];
+  const ids = [];
+  list.forEach((it) => {
+    ids.push(
+      addLotRecord({
+        ...meta,
+        ...it,
+        method: it.method || meta.method || "freezing",
+      })
+    );
+  });
+  return ids;
+}
+
+/* -------------------------------------------------------------------------- */
+/* ✅ Named export required by src/ai/context/index.js                         */
+/* -------------------------------------------------------------------------- */
+
+export const StorehousePlannerStore = {
+  useStorehousePlannerStore,
+  useStorehouseNeeds,
+  usePreservationQueue,
+  useStorehousePlannerActions,
+
+  // template helpers
+  addLotRecord,
+  addCureLot,
+  addDehydratedLot,
+  addFrozenItems,
+};

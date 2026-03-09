@@ -1,0 +1,470 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "meta": {
+    "id": "recipes.tex_mex.refried_beans",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Refried Beans (Tex-Mex)",
+    "subtitle": "Creamy, savory beans for tacos, burritos, nachos, bowls, and sides.",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Tex-Mex",
+      "notes": [
+        "Designed to work from scratch (dried beans) or quick (canned).",
+        "Includes lard/neutral oil + onion/garlic + cumin/chili for classic Tex-Mex flavor."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "tex_mex",
+    "category": "side",
+    "mealArchetypes": ["archetype.side", "archetype.legume", "archetype.base"],
+    "servingStyles": ["family_style", "bowls", "plates", "street_food"],
+    "plannerTags": [
+      "cuisine.tex_mex",
+      "side.beans",
+      "legume.base",
+      "batch.friendly",
+      "freezer.friendly",
+      "weeknight.helper"
+    ],
+    "subprofiles": [
+      "texmex.beans_rice",
+      "texmex.smoky_chipotle",
+      "texmex.cumin_garlic"
+    ]
+  },
+  "yield": {
+    "servings": 8,
+    "servingSize": { "value": 0.5, "unit": "cup" },
+    "notes": "Makes about 4 cups refried beans."
+  },
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 120,
+    "totalMins": 140
+  },
+  "difficulty": "beginner",
+  "summary": "Creamy refried beans with onion, garlic, cumin, and chili. Make from dried pinto beans for best flavor or use canned for a fast weeknight version.",
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": true,
+    "proteinRich": true
+  },
+  "tasteProfile": {
+    "salt": 2,
+    "acid": 0,
+    "sweet": 0,
+    "heat": 1,
+    "umami": 2,
+    "notes": ["creamy", "savory", "cumin_garlic", "toasty_chili"]
+  },
+  "equipment": {
+    "minimum": [
+      "equipment.pot",
+      "equipment.skillet_or_saucepan",
+      "equipment.wooden_spoon",
+      "equipment.measuring_spoons"
+    ],
+    "recommended": [
+      "equipment.immersion_blender",
+      "equipment.pot_lid",
+      "equipment.colander",
+      "equipment.masher"
+    ],
+    "optional": [
+      {
+        "id": "equipment.pressure_cooker",
+        "label": "Pressure cooker / Instant Pot",
+        "required": false,
+        "notes": "Speeds up cooking dried beans significantly."
+      }
+    ]
+  },
+  "dietFlags": ["diet.vegetarian_optional", "diet.vegan_optional"],
+  "allergens": [],
+  "ingredientGroups": [
+    {
+      "id": "group.beans",
+      "label": "Beans",
+      "items": ["ingredient.pinto_beans_dried", "ingredient.pinto_beans_canned"]
+    },
+    {
+      "id": "group.aromatics_fat",
+      "label": "Aromatics + fat",
+      "items": [
+        "ingredient.onion",
+        "ingredient.garlic",
+        "ingredient.lard",
+        "ingredient.neutral_oil"
+      ]
+    },
+    {
+      "id": "group.seasoning",
+      "label": "Seasoning",
+      "items": [
+        "ingredient.cumin",
+        "ingredient.chili_powder",
+        "ingredient.oregano_dried",
+        "ingredient.salt_kosher",
+        "ingredient.black_pepper"
+      ]
+    },
+    {
+      "id": "group.finish",
+      "label": "Finish (optional)",
+      "items": [
+        "ingredient.lime",
+        "ingredient.chipotle_in_adobo",
+        "ingredient.adobo_sauce",
+        "ingredient.cheddar",
+        "ingredient.cotija"
+      ]
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "ingredient.pinto_beans_dried",
+      "label": "Dried pinto beans",
+      "role": "legume",
+      "amount": { "value": 1, "unit": "lb" },
+      "notes": "About 2 cups dried. For quick version, see canned option below."
+    },
+    {
+      "id": "ingredient.water",
+      "label": "Water",
+      "role": "liquid",
+      "amount": { "value": 8, "unit": "cup" },
+      "notes": "For boiling beans; may need more depending on pot and simmer time."
+    },
+    {
+      "id": "ingredient.salt_kosher",
+      "label": "Kosher salt (for cooking + final seasoning)",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Start with 1 tsp during simmer, then adjust at the end."
+    },
+    {
+      "id": "ingredient.onion",
+      "label": "Onion, finely diced",
+      "role": "aromatic",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "notes": "About 1/2 medium onion."
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 2, "unit": "clove" }
+    },
+    {
+      "id": "ingredient.lard",
+      "label": "Lard (traditional) OR neutral oil",
+      "role": "fat",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "notes": "Use lard for classic flavor; use neutral oil for vegetarian/vegan."
+    },
+    {
+      "id": "ingredient.neutral_oil",
+      "label": "Neutral oil (if not using lard)",
+      "role": "fat",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.cumin",
+      "label": "Ground cumin",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.chili_powder",
+      "label": "Chili powder",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": "Adjust to taste; keep mild for family-friendly beans."
+    },
+    {
+      "id": "ingredient.oregano_dried",
+      "label": "Dried oregano",
+      "role": "herb",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 0.25, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.bean_cooking_liquid",
+      "label": "Reserved bean cooking liquid (or broth)",
+      "role": "liquid",
+      "amount": { "value": 1.5, "unit": "cup" },
+      "notes": "Use more as needed to reach your preferred creaminess."
+    },
+
+    {
+      "id": "ingredient.pinto_beans_canned",
+      "label": "Canned pinto beans (quick option)",
+      "role": "legume",
+      "amount": { "value": 2, "unit": "can" },
+      "optional": true,
+      "notes": "15 oz cans. If using canned, reduce total time and use water/broth to thin."
+    },
+    {
+      "id": "ingredient.lime",
+      "label": "Lime juice (optional)",
+      "role": "finish",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": "Adds brightness; optional for a more traditional, savory-only profile."
+    },
+    {
+      "id": "ingredient.adobo_sauce",
+      "label": "Adobo sauce (optional, smoky heat)",
+      "role": "finish",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.chipotle_in_adobo",
+      "label": "Chipotle pepper in adobo, minced (optional)",
+      "role": "finish",
+      "amount": { "value": 0.5, "unit": "each" },
+      "optional": true,
+      "notes": "For smoky-spicy beans; keep optional so base stays broadly useful."
+    },
+    {
+      "id": "ingredient.cheddar",
+      "label": "Shredded cheddar (optional topping)",
+      "role": "garnish",
+      "amount": { "value": 0.25, "unit": "cup" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.cotija",
+      "label": "Crumbled cotija (optional topping)",
+      "role": "garnish",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.sort_rinse",
+      "title": "Sort and rinse the beans",
+      "activeMins": 5,
+      "instructions": [
+        "Spread dried pinto beans on a tray and pick out any stones or damaged beans.",
+        "Rinse beans under cool water until the water runs mostly clear."
+      ],
+      "checks": ["Beans rinsed; debris removed"]
+    },
+    {
+      "id": "step.cook_beans",
+      "title": "Cook beans until tender",
+      "activeMins": 5,
+      "handsOffMins": 110,
+      "instructions": [
+        "Add beans and water to a pot. Bring to a boil, then reduce to a steady simmer.",
+        "Add 1 tsp salt. Partially cover and simmer until beans are very tender (about 90–120 minutes), adding water if needed.",
+        "When tender, reserve 2 cups of cooking liquid, then drain beans (or keep them in a small amount of liquid if you prefer)."
+      ],
+      "timers": [
+        { "label": "Initial simmer check", "minutes": 60 },
+        { "label": "Tenderness check", "minutes": 90 }
+      ],
+      "checks": [
+        "Beans mash easily between fingers",
+        "Reserved cooking liquid set aside"
+      ]
+    },
+    {
+      "id": "step.saute_aromatics",
+      "title": "Sauté onion and garlic in fat",
+      "activeMins": 7,
+      "instructions": [
+        "Heat lard (or neutral oil) in a skillet or saucepan over medium heat.",
+        "Add diced onion and cook until soft and lightly golden, 4–6 minutes.",
+        "Add garlic and cook 30–60 seconds until fragrant (don’t brown the garlic)."
+      ],
+      "timers": [{ "label": "Sauté onion", "minutes": 5 }],
+      "checks": ["Onion softened; garlic fragrant, not browned"]
+    },
+    {
+      "id": "step.toast_spices",
+      "title": "Toast spices briefly",
+      "activeMins": 2,
+      "instructions": [
+        "Stir in cumin, chili powder (optional), oregano (optional), and black pepper (optional).",
+        "Cook 20–30 seconds to bloom spices."
+      ],
+      "timers": [{ "label": "Bloom spices", "seconds": 30 }],
+      "checks": ["Spices fragrant; not scorched"]
+    },
+    {
+      "id": "step.mash_and_thin",
+      "title": "Add beans, mash, and adjust texture",
+      "activeMins": 8,
+      "instructions": [
+        "Add cooked beans to the pan. Stir to coat in the onion-garlic-spice mixture.",
+        "Mash with a masher until mostly smooth (leave some texture if you like).",
+        "Add reserved bean liquid a splash at a time until creamy and spreadable (typically 1–1 1/2 cups).",
+        "Simmer 2–4 minutes, stirring, until thickened to your preference."
+      ],
+      "timers": [{ "label": "Simmer to thicken", "minutes": 3 }],
+      "checks": ["Texture creamy and spreadable", "Beans not dry or gluey"]
+    },
+    {
+      "id": "step.season_finish",
+      "title": "Season and finish",
+      "activeMins": 3,
+      "instructions": [
+        "Taste and adjust salt (add remaining 1 tsp gradually as needed).",
+        "Optional: add lime juice for brightness, or a little adobo/chipotle for smoky heat.",
+        "Serve warm as a side or as a filling/spread for Tex-Mex meals."
+      ],
+      "checks": ["Salt level correct", "Optional finishes balanced"]
+    },
+    {
+      "id": "step.quick_canned_option",
+      "title": "Quick canned-bean option (skip dried-bean cooking)",
+      "activeMins": 10,
+      "instructions": [
+        "If using canned beans: sauté onion/garlic in fat as above, toast spices, then add 2 cans drained pinto beans.",
+        "Add 3/4 cup water or broth, mash, and simmer 3–5 minutes until creamy.",
+        "Season to taste (salt is often lower/higher depending on brand—add gradually)."
+      ],
+      "checks": [
+        "Canned version creamy and hot",
+        "Salt adjusted for canned beans"
+      ]
+    }
+  ],
+  "methods": [
+    "method.simmer",
+    "method.saute",
+    "method.mash",
+    "method.taste_adjust"
+  ],
+  "pairings": {
+    "bestWith": [
+      "recipes.tex_mex.tacos",
+      "recipes.tex_mex.enchiladas",
+      "recipes.tex_mex.fajitas",
+      "recipes.tex_mex.chipotle_sauce"
+    ],
+    "alsoGreatWith": [
+      "rice",
+      "nachos",
+      "quesadillas",
+      "burrito_bowls",
+      "breakfast_tacos"
+    ]
+  },
+  "storage": {
+    "fridge": {
+      "duration": "4-5 days",
+      "notes": [
+        "Store in an airtight container.",
+        "Reheat with a splash of water or broth to restore creaminess."
+      ]
+    },
+    "freezer": {
+      "duration": "2-3 months",
+      "notes": [
+        "Cool completely before freezing.",
+        "Freeze in flat bags or portion containers; thaw overnight in fridge and reheat with added liquid."
+      ]
+    }
+  },
+  "safety": {
+    "notes": [
+      "Cool beans quickly (spread in a shallow container) before refrigerating.",
+      "Reheat to steaming hot; avoid leaving at room temp longer than 2 hours."
+    ]
+  },
+  "planner": {
+    "batchPrep": [
+      "Cook a full pound of beans and portion into 1-cup containers for quick taco nights.",
+      "Use as a base component for burritos, bowls, and nachos throughout the week."
+    ],
+    "scaling": {
+      "notes": [
+        "Double batch: use a wider pan for mashing to avoid scorching; add liquid gradually.",
+        "For ultra-smooth restaurant-style beans: use an immersion blender after mashing."
+      ]
+    }
+  },
+  "variations": [
+    {
+      "id": "variation.black_beans",
+      "label": "Black bean refried beans",
+      "when": { "ingredient": "black_beans" },
+      "adapt": {
+        "notes": [
+          "Swap pinto beans for black beans; keep cumin, add a pinch of coriander if desired.",
+          "Finish with lime for a brighter profile."
+        ]
+      }
+    },
+    {
+      "id": "variation.smoky_chipotle",
+      "label": "Smoky chipotle refried beans",
+      "when": { "preference": "smoky" },
+      "adapt": {
+        "notes": [
+          "Add 1 tsp adobo sauce and 1/2 to 1 chipotle pepper minced during final seasoning.",
+          "Balance heat with a tiny pinch of honey if needed."
+        ]
+      }
+    },
+    {
+      "id": "variation.vegan",
+      "label": "Vegan refried beans",
+      "when": { "diet": "vegan" },
+      "adapt": {
+        "notes": [
+          "Use neutral oil instead of lard.",
+          "Skip cheese toppings; garnish with cilantro/onion or a dairy-free crema."
+        ]
+      }
+    }
+  ],
+  "compat": {
+    "cuisineId": "cuisines.tex_mex",
+    "recipeTagDefaults": ["cuisine.tex_mex", "side.beans", "legume.base"],
+    "ingredientIds": [
+      "ingredient.pinto_beans_dried",
+      "ingredient.onion",
+      "ingredient.garlic",
+      "ingredient.cumin",
+      "ingredient.salt_kosher"
+    ],
+    "methodIds": ["method.simmer", "method.saute", "method.mash"],
+    "equipmentIds": [
+      "equipment.pot",
+      "equipment.skillet_or_saucepan",
+      "equipment.masher"
+    ],
+    "search": {
+      "keywords": [
+        "refried beans",
+        "frijoles refritos",
+        "tex mex beans",
+        "burrito beans",
+        "taco beans"
+      ],
+      "aliases": ["frijoles", "refritos", "mashed beans"]
+    }
+  }
+}

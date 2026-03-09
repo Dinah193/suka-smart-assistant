@@ -1,0 +1,537 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.french_country.recipes.ratatouille",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "French Country Ratatouille",
+    "subtitle": "Provençal-style summer vegetable stew (rustic, not the spiral confit).",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa.cuisines.french_country",
+      "notes": [
+        "Canonical SSA recipe: rustic stovetop ratatouille with step timers and checks.",
+        "Designed to be batch-friendly, leftovers-friendly, and freezer-friendly."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.french_country",
+    "category": "side",
+    "mealArchetypes": ["archetype.one_pot", "archetype.veg_forward"],
+    "servingStyles": ["family_style", "one_pot", "plated_meals"],
+    "plannerTags": [
+      "cuisine.french_country",
+      "dish.ratatouille",
+      "veg.forward",
+      "method.simmer",
+      "method.saute",
+      "batch.friendly",
+      "freezer.friendly",
+      "leftovers.friendly",
+      "summer",
+      "garden.friendly"
+    ]
+  },
+
+  "summary": "A classic rustic ratatouille: eggplant, zucchini, peppers, and tomatoes simmered with olive oil, garlic, and herbs until silky and aromatic. Great hot, warm, or cold.",
+
+  "yield": {
+    "servings": 6,
+    "notes": "Serves 6 as a side; 3–4 as a main with bread, eggs, or grains."
+  },
+
+  "time": {
+    "activeMins": 30,
+    "handsOffMins": 45,
+    "totalMins": 75
+  },
+
+  "difficulty": "beginner",
+
+  "signals": {
+    "batchFriendly": true,
+    "leftoversGood": true,
+    "freezerFriendly": "good",
+    "weeknightPossible": true,
+    "notes": [
+      "Flavor improves after resting 15–30 minutes.",
+      "If vegetables are very watery, simmer uncovered longer to concentrate."
+    ]
+  },
+
+  "tasteProfile": {
+    "saltiness": 2,
+    "sourness": 2,
+    "sweetness": 2,
+    "umami": 2,
+    "heat": 0,
+    "herbaceous": 3,
+    "richness": 2,
+    "notes": [
+      "Bright tomato + olive oil richness with gentle garlic/herb backbone.",
+      "Optional anchovy adds savory depth without tasting fishy."
+    ]
+  },
+
+  "equipment": {
+    "recommended": [
+      "equipment.wide_saute_pan",
+      "equipment.dutch_oven",
+      "equipment.knife",
+      "equipment.cutting_board",
+      "equipment.wooden_spoon"
+    ],
+    "minimum": ["equipment.large_pot_heavy_bottom", "equipment.stove"],
+    "optional": [
+      {
+        "id": "equipment.sheet_pan",
+        "label": "Sheet pan",
+        "required": false,
+        "notes": "Optional: roast eggplant/zucchini first for deeper flavor and less watery stew."
+      }
+    ]
+  },
+
+  "dietFlags": ["diet.vegan", "diet.vegetarian", "diet.gluten_free"],
+  "allergens": {
+    "common": [],
+    "notes": [
+      "If using anchovy (optional), contains fish.",
+      "If using Parmesan garnish (optional), contains dairy."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "ingredient.eggplant",
+      "label": "Eggplant, cut into 3/4-inch cubes",
+      "role": "vegetable",
+      "amount": { "value": 1, "unit": "lb" },
+      "notes": [
+        "If eggplant is very large/seedy, peel alternating strips and discard spongy seed core."
+      ]
+    },
+    {
+      "id": "ingredient.kosher_salt",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 2.5, "unit": "tsp" },
+      "notes": [
+        "Used in stages; adjust at end depending on tomato acidity and salt level."
+      ]
+    },
+    {
+      "id": "ingredient.zucchini",
+      "label": "Zucchini, cut into 3/4-inch half-moons",
+      "role": "vegetable",
+      "amount": { "value": 2, "unit": "each" }
+    },
+    {
+      "id": "ingredient.summer_squash",
+      "label": "Yellow summer squash, cut into 3/4-inch half-moons",
+      "role": "vegetable",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": ["Optional; replace with another zucchini if unavailable."]
+    },
+    {
+      "id": "ingredient.bell_pepper_red",
+      "label": "Red bell pepper, diced",
+      "role": "vegetable",
+      "amount": { "value": 1, "unit": "each" }
+    },
+    {
+      "id": "ingredient.bell_pepper_yellow",
+      "label": "Yellow or orange bell pepper, diced",
+      "role": "vegetable",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.onion_yellow",
+      "label": "Yellow onion, diced",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "each" }
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 5, "unit": "cloves" }
+    },
+    {
+      "id": "ingredient.olive_oil",
+      "label": "Olive oil",
+      "role": "fat",
+      "amount": { "value": 4, "unit": "tbsp" },
+      "notes": [
+        "Ratatouille is an olive-oil dish; don't be shy, but adjust to preference."
+      ]
+    },
+    {
+      "id": "ingredient.tomatoes",
+      "label": "Ripe tomatoes, diced (or 1 can crushed tomatoes)",
+      "role": "base",
+      "amount": { "value": 4, "unit": "each" },
+      "notes": [
+        "If using canned: 1 (28 oz) can crushed tomatoes works well.",
+        "If tomatoes are bland, add a pinch of sugar or extra herbs."
+      ]
+    },
+    {
+      "id": "ingredient.tomato_paste",
+      "label": "Tomato paste",
+      "role": "umami",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true,
+      "notes": [
+        "Optional but helpful for deeper tomato flavor if tomatoes are watery."
+      ]
+    },
+    {
+      "id": "ingredient.thyme",
+      "label": "Fresh thyme leaves (or dried thyme)",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": ["If fresh sprigs: use 4–6 sprigs and remove stems later."]
+    },
+    {
+      "id": "ingredient.bay_leaf",
+      "label": "Bay leaf",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.herbes_de_provence",
+      "label": "Herbes de Provence",
+      "role": "herb_blend",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": [
+        "Optional; use instead of (or in addition to) thyme for a classic Provençal profile."
+      ]
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.vinegar_red_wine",
+      "label": "Red wine vinegar (or balsamic) for finishing",
+      "role": "acid",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": [
+        "Optional: add only if the stew tastes flat; tomatoes may provide enough acidity."
+      ]
+    },
+    {
+      "id": "ingredient.anchovy",
+      "label": "Anchovy fillet, minced (optional umami booster)",
+      "role": "umami",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": [
+        "Melts into the dish and adds depth; omit for vegan/vegetarian."
+      ]
+    },
+    {
+      "id": "ingredient.basil",
+      "label": "Fresh basil, torn or sliced",
+      "role": "herb_finish",
+      "amount": { "value": 8, "unit": "leaves" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.parsley",
+      "label": "Fresh parsley, chopped",
+      "role": "garnish",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.parmesan",
+      "label": "Parmesan, grated (optional garnish)",
+      "role": "garnish",
+      "amount": { "value": 0.25, "unit": "cup" },
+      "optional": true
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_salt_eggplant_optional",
+      "title": "Optional: salt eggplant to reduce bitterness and moisture",
+      "activeMins": 5,
+      "handsOffMins": 20,
+      "instructions": [
+        "Toss eggplant cubes with 1 tsp of the salt and let sit 20 minutes in a colander.",
+        "Pat dry with towels to remove released moisture."
+      ],
+      "timers": [{ "label": "Eggplant rest", "minutes": 20 }],
+      "checks": [
+        "Eggplant looks slightly collapsed and has released moisture.",
+        "Eggplant is patted reasonably dry before sautéing."
+      ]
+    },
+    {
+      "id": "step_02_saute_eggplant",
+      "title": "Sauté eggplant until lightly browned",
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "instructions": [
+        "Heat 2 tbsp olive oil in a wide pan or Dutch oven over medium-high.",
+        "Add eggplant in a single layer if possible (work in batches if needed).",
+        "Cook 6–8 minutes, stirring occasionally, until lightly browned and starting to soften.",
+        "Transfer eggplant to a bowl."
+      ],
+      "timers": [{ "label": "Eggplant sauté", "minutes": 8 }],
+      "checks": [
+        "Eggplant has some golden-brown edges (not pale/steamed).",
+        "Eggplant is partially softened but not fully collapsed."
+      ]
+    },
+    {
+      "id": "step_03_saute_zucchini_squash",
+      "title": "Sauté zucchini/squash to keep texture",
+      "activeMins": 8,
+      "handsOffMins": 0,
+      "instructions": [
+        "Add 1 tbsp olive oil to the pan.",
+        "Sauté zucchini (and optional yellow squash) for 4–6 minutes until just starting to brown.",
+        "Transfer to the bowl with eggplant."
+      ],
+      "timers": [{ "label": "Zucchini sauté", "minutes": 6 }],
+      "checks": ["Zucchini is lightly browned but still holds shape."]
+    },
+    {
+      "id": "step_04_saute_peppers_onion",
+      "title": "Cook onion and peppers until sweet and softened",
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "instructions": [
+        "Add remaining 1 tbsp olive oil to the pan.",
+        "Add onion with a pinch of salt; cook 3 minutes.",
+        "Add diced peppers and cook 6–8 minutes until softened and glossy.",
+        "If using anchovy, add it now and stir 30 seconds until it dissolves."
+      ],
+      "timers": [{ "label": "Onion/pepper sauté", "minutes": 9 }],
+      "checks": [
+        "Onion is translucent and sweet-smelling.",
+        "Peppers are softened, not crunchy."
+      ]
+    },
+    {
+      "id": "step_05_garlic_tomato_bloom",
+      "title": "Bloom garlic and concentrate tomato base",
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "instructions": [
+        "Add garlic and stir 30 seconds until fragrant.",
+        "Add diced tomatoes (or crushed tomatoes).",
+        "If using tomato paste, stir it in now.",
+        "Add thyme, optional herbes de Provence, and optional bay leaf."
+      ],
+      "timers": [{ "label": "Garlic bloom", "minutes": 1 }],
+      "checks": [
+        "Garlic is fragrant (not browned/burnt).",
+        "Tomatoes are bubbling gently."
+      ]
+    },
+    {
+      "id": "step_06_simmer_and_meld",
+      "title": "Simmer to meld flavors and reach desired texture",
+      "activeMins": 3,
+      "handsOffMins": 35,
+      "instructions": [
+        "Return eggplant and zucchini/squash to the pot.",
+        "Stir to combine and bring to a gentle simmer.",
+        "Partially cover and simmer 25–40 minutes, stirring occasionally, until vegetables are tender and sauce is glossy.",
+        "If it gets watery, simmer uncovered for the last 10 minutes."
+      ],
+      "timers": [
+        { "label": "Simmer (check at 25 min)", "minutes": 25 },
+        { "label": "Simmer (optional extra)", "minutes": 10 }
+      ],
+      "checks": [
+        "Vegetables are tender but not mushy (unless you prefer very soft).",
+        "Sauce looks glossy and slightly reduced."
+      ]
+    },
+    {
+      "id": "step_07_finish_season",
+      "title": "Season and finish with herbs",
+      "activeMins": 5,
+      "handsOffMins": 0,
+      "instructions": [
+        "Remove bay leaf and any woody herb stems (if used).",
+        "Taste and adjust salt and pepper.",
+        "If the flavor tastes flat, add 1 tsp red wine vinegar (optional).",
+        "Fold in basil and/or parsley just before serving."
+      ],
+      "checks": [
+        "Seasoning is balanced (tomato acidity supported by salt).",
+        "Fresh herbs smell bright and not cooked out."
+      ]
+    },
+    {
+      "id": "step_08_rest_and_serve",
+      "title": "Rest briefly and serve",
+      "activeMins": 1,
+      "handsOffMins": 15,
+      "instructions": [
+        "Let ratatouille rest 10–15 minutes (flavors deepen as it cools slightly).",
+        "Serve warm or at room temperature with crusty bread, over rice, with eggs, or as a side to roast chicken or fish.",
+        "Optional: top with Parmesan if not vegan."
+      ],
+      "timers": [{ "label": "Rest", "minutes": 15 }],
+      "checks": ["Dish has thickened slightly after resting."]
+    }
+  ],
+
+  "methods": ["method.saute", "method.simmer", "method.reduce"],
+
+  "pairings": {
+    "mains": [
+      "dishes.french_country.roast_chicken",
+      "dishes.french_country.grilled_fish",
+      "dishes.french_country.omelet"
+    ],
+    "sides": [
+      "dishes.french_country.crusty_bread",
+      "dishes.french_country.rice_pilaf",
+      "dishes.french_country.green_salad_vinaigrette"
+    ],
+    "notes": [
+      "Excellent alongside roast chicken or served with a fried egg and bread for a simple meal.",
+      "Leftovers are great as a pasta sauce base."
+    ]
+  },
+
+  "storage": {
+    "refrigerate": {
+      "maxDays": 5,
+      "notes": [
+        "Cool and store airtight. Flavors improve by day 2.",
+        "Serve cold as a salad-like side or reheat gently."
+      ]
+    },
+    "freeze": {
+      "maxMonths": 3,
+      "notes": [
+        "Freeze in portions. Texture softens after freezing (still delicious).",
+        "Use thawed ratatouille in soups, shakshuka-style eggs, or pasta sauce."
+      ]
+    },
+    "reheat": {
+      "notes": [
+        "Reheat gently over low heat; add a drizzle of olive oil if it tastes dull."
+      ]
+    }
+  },
+
+  "safety": {
+    "core": [
+      "Cook vegetables to a gentle simmer; avoid scorching by stirring occasionally.",
+      "Cool leftovers promptly and refrigerate within 2 hours."
+    ]
+  },
+
+  "notes": [
+    "Rustic ratatouille is intentionally soft and saucy—if you want firmer vegetables, reduce simmer time and sauté vegetables a bit more aggressively.",
+    "If tomatoes are out of season, canned crushed tomatoes often taste better than bland fresh ones.",
+    "Optional shortcut: roast eggplant and zucchini at 425°F for ~20 minutes (tossed with oil/salt), then simmer with the tomato-pepper base."
+  ],
+
+  "variations": [
+    {
+      "id": "variation.roasted_veg",
+      "label": "Roasted-vegetable ratatouille (less watery, deeper flavor)",
+      "when": { "hasEquipment": ["equipment.oven", "equipment.sheet_pan"] },
+      "adapt": {
+        "notes": [
+          "Roast eggplant and zucchini at 425°F for 18–22 minutes, then simmer in tomato base 15–20 minutes."
+        ]
+      }
+    },
+    {
+      "id": "variation.low_fodmap_adjacent",
+      "label": "Gentler garlic/onion version",
+      "when": { "preferences": ["low_fodmap"] },
+      "adapt": {
+        "notes": [
+          "Use garlic-infused oil and reduce onion, or replace onion with the green tops of scallions (if tolerated)."
+        ]
+      }
+    },
+    {
+      "id": "variation.main_dish",
+      "label": "Make it a main dish",
+      "when": { "preferences": ["more_protein"] },
+      "adapt": {
+        "notes": [
+          "Serve with eggs (poached or fried), chickpeas stirred in, or alongside sausage/roast chicken."
+        ]
+      }
+    }
+  ],
+
+  "planner": {
+    "leftovers": {
+      "remixIdeas": [
+        "Ratatouille shakshuka (simmer and crack in eggs)",
+        "Pasta sauce base (reduce slightly, add basil and Parmesan)",
+        "Ratatouille toast (bread + goat cheese optional)"
+      ]
+    },
+    "shopping": {
+      "pantryFirst": [
+        "ingredient.olive_oil",
+        "ingredient.kosher_salt",
+        "ingredient.black_pepper"
+      ],
+      "niceToHave": [
+        "ingredient.herbes_de_provence",
+        "ingredient.basil",
+        "ingredient.parsley"
+      ]
+    }
+  },
+
+  "compat": {
+    "cuisineId": "cuisines.french_country",
+    "dishId": "dishes.french_country.ratatouille",
+    "search": {
+      "aliases": [
+        "ratatouille",
+        "provencal vegetable stew",
+        "provençal vegetable stew",
+        "eggplant zucchini tomato stew"
+      ],
+      "keywords": [
+        "summer vegetables",
+        "garden harvest",
+        "olive oil",
+        "tomatoes",
+        "zucchini",
+        "eggplant",
+        "peppers"
+      ]
+    },
+    "normalization": {
+      "recommendedIdCase": "lower",
+      "ingredientIdStyle": "ingredient.*",
+      "methodIdStyle": "method.*",
+      "equipmentIdStyle": "equipment.*"
+    }
+  }
+}

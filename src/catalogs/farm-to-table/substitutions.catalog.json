@@ -1,0 +1,844 @@
+{
+  "$schema": "../../schemas/catalog.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-24T00:00:00.000Z",
+  "meta": {
+    "id": "farm_to_table.substitutions",
+    "type": "catalog",
+    "domain": "farm-to-table",
+    "locale": "en-US",
+    "name": "Farm-to-Table • Substitutions Catalog",
+    "label": "Substitutions",
+    "subtitle": "Deterministic substitution sets used by planners and adapters (components ↔ components). Designed to be combined with component roles + readiness levels.",
+    "source": {
+      "kind": "catalog",
+      "name": "src/catalogs/farm-to-table/substitutions.catalog.json",
+      "notes": [
+        "Entries are forward-compatible (catalog.schema.json allows additionalProperties).",
+        "Use refs.sourceId as the canonical component id you are substituting for; candidates are component ids.",
+        "Engines can filter candidates by user diet/allergens, kitchen capabilities, and inventory readiness.",
+        "ratioHints are informational; do not enforce unless an engine chooses to."
+      ]
+    }
+  },
+  "scope": {
+    "kind": "module",
+    "module": "farm-to-table",
+    "locale": "en-US"
+  },
+  "defaults": {
+    "namespace": "substitution",
+    "statusDefault": "active",
+    "ui": {
+      "sortBy": "rank",
+      "groupBy": "group"
+    },
+    "engineHints": {
+      "matchOrder": [
+        "sameRole",
+        "sameAllergenProfile",
+        "similarCuisine",
+        "similarReadiness",
+        "inventoryAvailable"
+      ],
+      "scoreWeights": {
+        "sameRole": 30,
+        "sameAllergenProfile": 25,
+        "similarCuisine": 10,
+        "similarReadiness": 10,
+        "inventoryAvailable": 25
+      }
+    }
+  },
+  "items": [
+    {
+      "id": "substitution.allium.onion",
+      "label": "Onion substitutions",
+      "group": "Aromatics • Allium",
+      "rank": 10,
+      "status": "active",
+      "tags": [
+        "substitution",
+        "role.aromatic",
+        "role.allium",
+        "ingredient.onion",
+        "category.aromatic"
+      ],
+      "refs": {
+        "sourceId": "component.aromatic.onion",
+        "sourceLabel": "Onion",
+        "sourceRoles": ["role.aromatic"],
+        "targets": [
+          {
+            "id": "component.aromatic.shallot",
+            "label": "Shallot",
+            "priority": 90,
+            "tags": ["allium", "milder", "sauce.friendly"],
+            "ratioHint": "1:1 by volume, slightly sweeter"
+          },
+          {
+            "id": "component.aromatic.leek",
+            "label": "Leek (white/light green)",
+            "priority": 80,
+            "tags": ["allium", "mild", "soup.friendly"],
+            "ratioHint": "1:1 by volume (slice and rinse well)"
+          },
+          {
+            "id": "component.aromatic.scallion",
+            "label": "Scallion",
+            "priority": 75,
+            "tags": ["allium", "fresh", "finishing"],
+            "ratioHint": "Use 2–3 scallions per 1 medium onion (varies)"
+          },
+          {
+            "id": "component.aromatic.red_onion",
+            "label": "Red onion",
+            "priority": 70,
+            "tags": ["allium", "sharp", "raw.friendly"],
+            "ratioHint": "1:1; soak briefly if too sharp"
+          },
+          {
+            "id": "component.aromatic.yellow_onion",
+            "label": "Yellow onion",
+            "priority": 70,
+            "tags": ["allium", "standard"],
+            "ratioHint": "1:1"
+          },
+          {
+            "id": "component.aromatic.white_onion",
+            "label": "White onion",
+            "priority": 65,
+            "tags": ["allium", "sharp"],
+            "ratioHint": "1:1"
+          },
+          {
+            "id": "component.pantry.onion_powder",
+            "label": "Onion powder",
+            "priority": 40,
+            "tags": ["shelf_stable", "dry_spice"],
+            "ratioHint": "1 tbsp onion powder ≈ 1 medium onion (adjust to taste)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "substitution.allium.garlic",
+      "label": "Garlic substitutions",
+      "group": "Aromatics • Allium",
+      "rank": 11,
+      "status": "active",
+      "tags": [
+        "substitution",
+        "role.aromatic",
+        "role.allium",
+        "ingredient.garlic",
+        "category.aromatic"
+      ],
+      "refs": {
+        "sourceId": "component.aromatic.garlic",
+        "sourceLabel": "Garlic",
+        "sourceRoles": ["role.aromatic"],
+        "targets": [
+          {
+            "id": "component.aromatic.garlic_paste",
+            "label": "Garlic paste",
+            "priority": 90,
+            "tags": ["prepared", "weeknight.friendly"],
+            "ratioHint": "1 tsp paste ≈ 1 clove (brand dependent)"
+          },
+          {
+            "id": "component.aromatic.garlic_confit",
+            "label": "Garlic confit",
+            "priority": 85,
+            "tags": ["prepared", "rich", "spread.friendly"],
+            "ratioHint": "1–2 confit cloves ≈ 1 raw clove (milder)"
+          },
+          {
+            "id": "component.aromatic.scallion",
+            "label": "Scallion (white part)",
+            "priority": 60,
+            "tags": ["mild", "fresh"],
+            "ratioHint": "Use 2–3 tbsp minced white scallion per clove (milder)"
+          },
+          {
+            "id": "component.pantry.garlic_powder",
+            "label": "Garlic powder",
+            "priority": 50,
+            "tags": ["shelf_stable", "dry_spice"],
+            "ratioHint": "1/8 tsp garlic powder ≈ 1 clove (adjust)"
+          },
+          {
+            "id": "component.pantry.granulated_garlic",
+            "label": "Granulated garlic",
+            "priority": 50,
+            "tags": ["shelf_stable", "dry_spice"],
+            "ratioHint": "1/4 tsp granulated garlic ≈ 1 clove (adjust)"
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "substitution.fat.butter",
+      "label": "Butter substitutions",
+      "group": "Fats",
+      "rank": 20,
+      "status": "active",
+      "tags": ["substitution", "role.fat", "ingredient.butter", "category.fat"],
+      "refs": {
+        "sourceId": "component.fat.butter",
+        "sourceLabel": "Butter",
+        "sourceRoles": ["role.fat"],
+        "targets": [
+          {
+            "id": "component.fat.ghee",
+            "label": "Ghee / Clarified butter",
+            "priority": 95,
+            "tags": ["high_heat", "dairy"],
+            "ratioHint": "1:1"
+          },
+          {
+            "id": "component.fat.olive_oil",
+            "label": "Olive oil",
+            "priority": 80,
+            "tags": ["oil", "savory"],
+            "ratioHint": "Use ~3/4 as much oil as butter in baking; 1:1 in sauté"
+          },
+          {
+            "id": "component.fat.avocado_oil",
+            "label": "Avocado oil",
+            "priority": 75,
+            "tags": ["oil", "neutral", "high_heat"],
+            "ratioHint": "Use ~3/4 as much oil as butter in baking"
+          },
+          {
+            "id": "component.fat.coconut_oil",
+            "label": "Coconut oil",
+            "priority": 70,
+            "tags": ["oil", "baking", "flavor.coconut"],
+            "ratioHint": "1:1 when solid; may add coconut note"
+          },
+          {
+            "id": "component.fat.beef_tallow",
+            "label": "Beef tallow",
+            "priority": 65,
+            "tags": ["animal_fat", "savory", "high_heat"],
+            "ratioHint": "1:1 in savory; baking may taste beefy"
+          }
+        ]
+      }
+    },
+    {
+      "id": "substitution.fat.neutral_oil",
+      "label": "Neutral oil substitutions",
+      "group": "Fats",
+      "rank": 21,
+      "status": "active",
+      "tags": ["substitution", "role.fat", "category.fat", "oil.neutral"],
+      "refs": {
+        "sourceId": "component.fat.neutral_oil",
+        "sourceLabel": "Neutral oil",
+        "sourceRoles": ["role.fat"],
+        "targets": [
+          {
+            "id": "component.fat.avocado_oil",
+            "label": "Avocado oil",
+            "priority": 95,
+            "tags": ["neutral", "high_heat"],
+            "ratioHint": "1:1"
+          },
+          {
+            "id": "component.fat.grapeseed_oil",
+            "label": "Grapeseed oil",
+            "priority": 90,
+            "tags": ["neutral", "high_heat"],
+            "ratioHint": "1:1"
+          },
+          {
+            "id": "component.fat.canola_oil",
+            "label": "Canola oil",
+            "priority": 80,
+            "tags": ["neutral"],
+            "ratioHint": "1:1"
+          },
+          {
+            "id": "component.fat.sunflower_oil",
+            "label": "Sunflower oil",
+            "priority": 80,
+            "tags": ["neutral"],
+            "ratioHint": "1:1"
+          },
+          {
+            "id": "component.fat.peanut_oil",
+            "label": "Peanut oil",
+            "priority": 70,
+            "tags": ["neutral", "high_heat", "allergen.peanut"],
+            "ratioHint": "1:1"
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "substitution.dairy.milk_whole",
+      "label": "Whole milk substitutions",
+      "group": "Dairy & Dairy-Alternatives",
+      "rank": 30,
+      "status": "active",
+      "tags": [
+        "substitution",
+        "role.base",
+        "ingredient.milk",
+        "category.dairy"
+      ],
+      "refs": {
+        "sourceId": "component.dairy.milk_whole",
+        "sourceLabel": "Whole milk",
+        "sourceRoles": ["role.base"],
+        "targets": [
+          {
+            "id": "component.dairy.milk_2pct",
+            "label": "2% milk",
+            "priority": 90,
+            "tags": ["dairy"],
+            "ratioHint": "1:1; slightly leaner"
+          },
+          {
+            "id": "component.dairy.half_and_half",
+            "label": "Half-and-half",
+            "priority": 80,
+            "tags": ["dairy", "richer"],
+            "ratioHint": "1:1; may thin with water for sauces"
+          },
+          {
+            "id": "component.dairy.evaporated_milk",
+            "label": "Evaporated milk",
+            "priority": 75,
+            "tags": ["dairy", "shelf_stable"],
+            "ratioHint": "Use 1:1 or dilute 1:1 with water for lighter milk"
+          },
+          {
+            "id": "component.dairy.yogurt_plain",
+            "label": "Plain yogurt (thinned)",
+            "priority": 60,
+            "tags": ["dairy", "tangy"],
+            "ratioHint": "Thin with water to milk consistency (good in baking)"
+          },
+          {
+            "id": "component.alt_milk.oat",
+            "label": "Oat milk",
+            "priority": 55,
+            "tags": ["dairy_free", "mild", "baking"],
+            "ratioHint": "1:1; choose unsweetened for savory"
+          },
+          {
+            "id": "component.alt_milk.soy",
+            "label": "Soy milk",
+            "priority": 55,
+            "tags": ["dairy_free", "protein", "baking"],
+            "ratioHint": "1:1; choose unsweetened for savory"
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "substitution.thickener.all_purpose_flour",
+      "label": "All-purpose flour substitutions (thickening)",
+      "group": "Thickeners",
+      "rank": 40,
+      "status": "active",
+      "tags": [
+        "substitution",
+        "role.thickener",
+        "ingredient.flour",
+        "category.thickener"
+      ],
+      "refs": {
+        "sourceId": "component.baking.flour_all_purpose",
+        "sourceLabel": "All-purpose flour",
+        "sourceRoles": ["role.thickener", "role.structure"],
+        "targets": [
+          {
+            "id": "component.thickener.cornstarch",
+            "label": "Cornstarch",
+            "priority": 95,
+            "tags": ["gluten_free", "starch"],
+            "ratioHint": "Use ~1/2 as much cornstarch as flour for thickening"
+          },
+          {
+            "id": "component.thickener.arrowroot",
+            "label": "Arrowroot starch",
+            "priority": 85,
+            "tags": ["gluten_free", "starch", "freeze_thaw_stable"],
+            "ratioHint": "Use ~1/2 as much as flour; avoid prolonged boiling"
+          },
+          {
+            "id": "component.thickener.tapioca_starch",
+            "label": "Tapioca starch",
+            "priority": 80,
+            "tags": ["gluten_free", "starch"],
+            "ratioHint": "Use ~1/2 as much as flour; can get glossy"
+          },
+          {
+            "id": "component.thickener.potato_starch",
+            "label": "Potato starch",
+            "priority": 75,
+            "tags": ["gluten_free", "starch"],
+            "ratioHint": "Use ~1/2 as much as flour"
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "substitution.sweetener.granulated_sugar",
+      "label": "Granulated sugar substitutions",
+      "group": "Sweeteners",
+      "rank": 50,
+      "status": "active",
+      "tags": [
+        "substitution",
+        "role.sweetener",
+        "ingredient.sugar",
+        "category.sweetener"
+      ],
+      "refs": {
+        "sourceId": "component.sweetener.sugar_granulated",
+        "sourceLabel": "Granulated sugar",
+        "sourceRoles": ["role.sweetener"],
+        "targets": [
+          {
+            "id": "component.sweetener.light_brown_sugar",
+            "label": "Light brown sugar",
+            "priority": 90,
+            "tags": ["molasses_note", "baking"],
+            "ratioHint": "1:1 packed; adds moisture and caramel note"
+          },
+          {
+            "id": "component.sweetener.dark_brown_sugar",
+            "label": "Dark brown sugar",
+            "priority": 85,
+            "tags": ["molasses_note", "baking"],
+            "ratioHint": "1:1 packed; stronger molasses"
+          },
+          {
+            "id": "component.sweetener.honey",
+            "label": "Honey",
+            "priority": 70,
+            "tags": ["liquid", "floral"],
+            "ratioHint": "Use ~3/4 cup honey per 1 cup sugar; reduce other liquids"
+          },
+          {
+            "id": "component.sweetener.maple_syrup",
+            "label": "Maple syrup",
+            "priority": 65,
+            "tags": ["liquid", "maple"],
+            "ratioHint": "Use ~3/4 cup per 1 cup sugar; reduce other liquids"
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "substitution.acid.lemon_juice",
+      "label": "Lemon juice substitutions",
+      "group": "Acids",
+      "rank": 60,
+      "status": "active",
+      "tags": [
+        "substitution",
+        "role.acid",
+        "ingredient.lemon",
+        "category.acid"
+      ],
+      "refs": {
+        "sourceId": "component.acid.lemon_juice",
+        "sourceLabel": "Lemon juice",
+        "sourceRoles": ["role.acid"],
+        "targets": [
+          {
+            "id": "component.acid.lime_juice",
+            "label": "Lime juice",
+            "priority": 95,
+            "tags": ["citrus", "bright"],
+            "ratioHint": "1:1"
+          },
+          {
+            "id": "component.acid.vinegar_white",
+            "label": "White vinegar",
+            "priority": 75,
+            "tags": ["vinegar", "sharp"],
+            "ratioHint": "Use ~1/2 as much; dilute with water if needed"
+          },
+          {
+            "id": "component.acid.vinegar_apple_cider",
+            "label": "Apple cider vinegar",
+            "priority": 80,
+            "tags": ["vinegar", "fruity"],
+            "ratioHint": "Use ~1/2 as much; adjust to taste"
+          },
+          {
+            "id": "component.acid.vinegar_red_wine",
+            "label": "Red wine vinegar",
+            "priority": 70,
+            "tags": ["vinegar", "robust"],
+            "ratioHint": "Use ~1/2 as much; adjust"
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "substitution.heat.chili_powder",
+      "label": "Chili powder substitutions",
+      "group": "Heat & Spice",
+      "rank": 70,
+      "status": "active",
+      "tags": ["substitution", "role.heat", "role.spice", "category.heat"],
+      "refs": {
+        "sourceId": "component.spice.chili_powder",
+        "sourceLabel": "Chili powder (blend)",
+        "sourceRoles": ["role.spice", "role.heat"],
+        "targets": [
+          {
+            "id": "component.spice.cayenne",
+            "label": "Cayenne",
+            "priority": 70,
+            "tags": ["hot", "pure_heat"],
+            "ratioHint": "Start with 1/8–1/4 tsp per 1 tbsp chili powder + add cumin/paprika"
+          },
+          {
+            "id": "component.spice.smoked_paprika",
+            "label": "Smoked paprika",
+            "priority": 65,
+            "tags": ["smoky", "mild"],
+            "ratioHint": "1:1 for color/smoke; add cumin/garlic for chili profile"
+          },
+          {
+            "id": "component.spice.paprika",
+            "label": "Paprika",
+            "priority": 60,
+            "tags": ["mild"],
+            "ratioHint": "1:1 for color; add cumin/oregano for chili profile"
+          },
+          {
+            "id": "component.spice.berbere",
+            "label": "Berbere",
+            "priority": 55,
+            "tags": ["hot", "complex"],
+            "ratioHint": "Use less; more intense and aromatic"
+          },
+          {
+            "id": "component.spice.harissa",
+            "label": "Harissa (powder/paste)",
+            "priority": 50,
+            "tags": ["north_african", "chili"],
+            "ratioHint": "Use to taste; paste adds moisture"
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "substitution.herb.parsley",
+      "label": "Parsley substitutions",
+      "group": "Herbs",
+      "rank": 80,
+      "status": "active",
+      "tags": ["substitution", "role.herb", "category.herb"],
+      "refs": {
+        "sourceId": "component.herb.parsley",
+        "sourceLabel": "Parsley",
+        "sourceRoles": ["role.herb"],
+        "targets": [
+          {
+            "id": "component.herb.cilantro",
+            "label": "Cilantro",
+            "priority": 80,
+            "tags": ["fresh", "citrusy"],
+            "ratioHint": "1:1; changes flavor profile"
+          },
+          {
+            "id": "component.herb.chives",
+            "label": "Chives",
+            "priority": 70,
+            "tags": ["mild_allium"],
+            "ratioHint": "1:1 (volume)"
+          },
+          {
+            "id": "component.herb.basil",
+            "label": "Basil",
+            "priority": 60,
+            "tags": ["sweet_herb"],
+            "ratioHint": "1:1; different direction"
+          },
+          {
+            "id": "component.herb.dill",
+            "label": "Dill",
+            "priority": 50,
+            "tags": ["anise_note"],
+            "ratioHint": "Use less; stronger"
+          },
+          {
+            "id": "component.pantry.parsley_dried",
+            "label": "Dried parsley",
+            "priority": 40,
+            "tags": ["shelf_stable"],
+            "ratioHint": "Use ~1/3 as much dried as fresh"
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "substitution.protein.chicken_breast",
+      "label": "Chicken breast substitutions",
+      "group": "Proteins",
+      "rank": 100,
+      "status": "active",
+      "tags": ["substitution", "role.protein", "protein.poultry"],
+      "refs": {
+        "sourceId": "component.protein.chicken_breast",
+        "sourceLabel": "Chicken breast",
+        "sourceRoles": ["role.protein"],
+        "targets": [
+          {
+            "id": "component.protein.chicken_thigh",
+            "label": "Chicken thighs",
+            "priority": 95,
+            "tags": ["juicy", "forgiving"],
+            "ratioHint": "1:1 by weight; cook longer if bone-in"
+          },
+          {
+            "id": "component.protein.turkey_breast",
+            "label": "Turkey breast",
+            "priority": 75,
+            "tags": ["lean"],
+            "ratioHint": "1:1; watch dryness"
+          },
+          {
+            "id": "component.protein.pork_tenderloin",
+            "label": "Pork tenderloin",
+            "priority": 70,
+            "tags": ["lean", "fast_cook"],
+            "ratioHint": "1:1; adjust seasoning"
+          },
+          {
+            "id": "component.protein.tofu_firm",
+            "label": "Firm tofu",
+            "priority": 60,
+            "tags": ["plant_protein", "dairy_free"],
+            "ratioHint": "1:1 by volume; press first for better texture"
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "substitution.starch.rice_white_longgrain",
+      "label": "Long-grain white rice substitutions",
+      "group": "Starches",
+      "rank": 110,
+      "status": "active",
+      "tags": ["substitution", "role.starch", "starch.rice"],
+      "refs": {
+        "sourceId": "component.starch.rice_white_longgrain",
+        "sourceLabel": "Long-grain white rice",
+        "sourceRoles": ["role.starch"],
+        "targets": [
+          {
+            "id": "component.starch.rice_jasmine",
+            "label": "Jasmine rice",
+            "priority": 90,
+            "tags": ["aromatic"],
+            "ratioHint": "1:1; slightly stickier"
+          },
+          {
+            "id": "component.starch.rice_basmati",
+            "label": "Basmati rice",
+            "priority": 90,
+            "tags": ["aromatic"],
+            "ratioHint": "1:1; drier, more separate grains"
+          },
+          {
+            "id": "component.starch.rice_parboiled",
+            "label": "Parboiled rice",
+            "priority": 75,
+            "tags": ["forgiving"],
+            "ratioHint": "1:1; adjust water slightly"
+          },
+          {
+            "id": "component.starch.quinoa",
+            "label": "Quinoa",
+            "priority": 60,
+            "tags": ["higher_protein", "gluten_free"],
+            "ratioHint": "1:1 by volume; rinse well; different texture"
+          },
+          {
+            "id": "component.starch.cauliflower_rice",
+            "label": "Cauliflower rice",
+            "priority": 40,
+            "tags": ["low_carb", "vegetable"],
+            "ratioHint": "1:1 by volume; cook briefly"
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "substitution.veg.bell_pepper",
+      "label": "Bell pepper substitutions",
+      "group": "Vegetables",
+      "rank": 120,
+      "status": "active",
+      "tags": ["substitution", "role.vegetable", "vegetable.pepper"],
+      "refs": {
+        "sourceId": "component.vegetable.bell_pepper",
+        "sourceLabel": "Bell pepper",
+        "sourceRoles": ["role.vegetable"],
+        "targets": [
+          {
+            "id": "component.vegetable.poblano",
+            "label": "Poblano",
+            "priority": 80,
+            "tags": ["mild_heat"],
+            "ratioHint": "1:1; slightly smoky/earthy"
+          },
+          {
+            "id": "component.vegetable.jalapeno",
+            "label": "Jalapeño (de-seeded for mild)",
+            "priority": 60,
+            "tags": ["heat"],
+            "ratioHint": "Use less; adds heat"
+          },
+          {
+            "id": "component.vegetable.zucchini",
+            "label": "Zucchini",
+            "priority": 55,
+            "tags": ["mild", "water_content_high"],
+            "ratioHint": "1:1 by volume; different flavor"
+          },
+          {
+            "id": "component.vegetable.celery",
+            "label": "Celery",
+            "priority": 50,
+            "tags": ["aromatic_veg"],
+            "ratioHint": "1:1 by volume; more herbal"
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "substitution.egg.whole_egg",
+      "label": "Whole egg substitutions (binding)",
+      "group": "Baking & Binding",
+      "rank": 130,
+      "status": "active",
+      "tags": ["substitution", "role.binder", "ingredient.egg", "baking"],
+      "refs": {
+        "sourceId": "component.baking.egg_whole",
+        "sourceLabel": "Whole egg",
+        "sourceRoles": ["role.binder", "role.emulsifier"],
+        "targets": [
+          {
+            "id": "component.baking.flax_egg",
+            "label": "Flax egg (ground flax + water)",
+            "priority": 85,
+            "tags": ["plant_based", "binder"],
+            "ratioHint": "1 flax egg per 1 egg (best for muffins/pancakes)"
+          },
+          {
+            "id": "component.baking.chia_egg",
+            "label": "Chia egg (chia + water)",
+            "priority": 80,
+            "tags": ["plant_based", "binder"],
+            "ratioHint": "1 chia egg per 1 egg"
+          },
+          {
+            "id": "component.baking.applesauce_unsweetened",
+            "label": "Unsweetened applesauce",
+            "priority": 60,
+            "tags": ["plant_based", "moisture"],
+            "ratioHint": "1/4 cup applesauce per 1 egg (for cakes/muffins)"
+          },
+          {
+            "id": "component.baking.yogurt_plain",
+            "label": "Plain yogurt",
+            "priority": 55,
+            "tags": ["dairy", "moisture"],
+            "ratioHint": "1/4 cup yogurt per 1 egg (varies by recipe)"
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "substitution.salt.kosher_salt",
+      "label": "Kosher salt substitutions",
+      "group": "Seasoning",
+      "rank": 140,
+      "status": "active",
+      "tags": ["substitution", "role.seasoning", "ingredient.salt"],
+      "refs": {
+        "sourceId": "component.seasoning.salt_kosher",
+        "sourceLabel": "Kosher salt",
+        "sourceRoles": ["role.seasoning"],
+        "targets": [
+          {
+            "id": "component.seasoning.salt_sea_fine",
+            "label": "Fine sea salt",
+            "priority": 90,
+            "tags": ["salt"],
+            "ratioHint": "Use less by volume (finer grains); best to salt by weight"
+          },
+          {
+            "id": "component.seasoning.salt_table",
+            "label": "Table salt",
+            "priority": 80,
+            "tags": ["salt", "iodized_optional"],
+            "ratioHint": "Use ~1/2–3/4 as much by volume vs kosher (varies); best to salt by weight"
+          },
+          {
+            "id": "component.seasoning.salt_flake",
+            "label": "Flake salt",
+            "priority": 60,
+            "tags": ["finishing"],
+            "ratioHint": "Use for finishing; not a 1:1 for cooking"
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "substitution.baking.baking_powder",
+      "label": "Baking powder substitutions (leavening)",
+      "group": "Baking • Leavening",
+      "rank": 150,
+      "status": "active",
+      "tags": ["substitution", "role.leavening", "baking.leavening"],
+      "refs": {
+        "sourceId": "component.baking.baking_powder",
+        "sourceLabel": "Baking powder",
+        "sourceRoles": ["role.leavening"],
+        "targets": [
+          {
+            "id": "component.baking.baking_soda_plus_acid",
+            "label": "Baking soda + acid (DIY baking powder)",
+            "priority": 90,
+            "tags": ["leavening", "diy"],
+            "ratioHint": "Per 1 tsp baking powder: 1/4 tsp baking soda + 1/2 tsp cream of tartar (approx.)"
+          },
+          {
+            "id": "component.baking.self_rising_flour",
+            "label": "Self-rising flour",
+            "priority": 70,
+            "tags": ["contains_salt", "leavened_flour"],
+            "ratioHint": "Swap flour + reduce/add leavening accordingly (recipe-dependent)"
+          }
+        ]
+      }
+    }
+  ]
+}

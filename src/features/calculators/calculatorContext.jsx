@@ -29,11 +29,11 @@ import React, {
   useCallback,
   useContext,
   useMemo,
-  useReducer
+  useReducer,
 } from "react";
 import { CALCULATOR_TYPES, getCalculatorConfig } from "./calculatorTypes";
 // Prefer relative import to avoid alias coupling; adjust if you standardize "@/services".
-import eventBus from "../../services/eventBus";
+import eventBus from "../../services/events/eventBus";
 
 /**
  * @typedef {"idle" | "loading" | "success" | "error"} CalculatorStatus
@@ -73,8 +73,8 @@ import eventBus from "../../services/eventBus";
  * @property {(calculatorId: string) => CalculatorStateEntry | undefined} getCalculatorState
  */
 
-const CalculatorContext = createContext /** @type {CalculatorContextValue | undefined} */ (
-  undefined
+const CalculatorContext = createContext(
+  /** @type {CalculatorContextValue | undefined} */ undefined
 );
 
 // ---------------------------------------------------------------------------
@@ -84,7 +84,7 @@ const CalculatorContext = createContext /** @type {CalculatorContextValue | unde
 /** @type {CalculatorContextState} */
 const INITIAL_STATE = {
   calculators: {},
-  activeCalculatorId: null
+  activeCalculatorId: null,
 };
 
 const ACTIONS = {
@@ -92,7 +92,7 @@ const ACTIONS = {
   UPDATE_RESULT: "UPDATE_RESULT",
   SET_STATUS: "SET_STATUS",
   RESET_ONE: "RESET_ONE",
-  RESET_ALL: "RESET_ALL"
+  RESET_ALL: "RESET_ALL",
 };
 
 /**
@@ -133,32 +133,32 @@ function calculatorReducer(state, action) {
       const { calculatorId } = action.payload;
       return {
         ...state,
-        activeCalculatorId: calculatorId
+        activeCalculatorId: calculatorId,
       };
     }
 
     case ACTIONS.UPDATE_RESULT: {
-      const { calculatorId, value, meta, nodeId, status, ts } =
-        action.payload;
+      const { calculatorId, value, meta, nodeId, status, ts } = action.payload;
       const prev = state.calculators[calculatorId];
 
       /** @type {CalculatorStateEntry} */
       const updatedEntry = {
         id: calculatorId,
-        nodeId: nodeId || prev?.nodeId || getCalculatorConfig(calculatorId)?.nodeId,
+        nodeId:
+          nodeId || prev?.nodeId || getCalculatorConfig(calculatorId)?.nodeId,
         status: status || "success",
         value,
         meta,
         error: null,
-        lastUpdated: ts
+        lastUpdated: ts,
       };
 
       return {
         ...state,
         calculators: {
           ...state.calculators,
-          [calculatorId]: updatedEntry
-        }
+          [calculatorId]: updatedEntry,
+        },
       };
     }
 
@@ -171,7 +171,7 @@ function calculatorReducer(state, action) {
         value: null,
         meta: null,
         error: null,
-        lastUpdated: null
+        lastUpdated: null,
       };
 
       return {
@@ -182,9 +182,9 @@ function calculatorReducer(state, action) {
             ...prev,
             status,
             error: error ?? null,
-            lastUpdated: ts
-          }
-        }
+            lastUpdated: ts,
+          },
+        },
       };
     }
 
@@ -201,14 +201,14 @@ function calculatorReducer(state, action) {
         activeCalculatorId:
           state.activeCalculatorId === calculatorId
             ? null
-            : state.activeCalculatorId
+            : state.activeCalculatorId,
       };
     }
 
     case ACTIONS.RESET_ALL: {
       return {
         calculators: {},
-        activeCalculatorId: null
+        activeCalculatorId: null,
       };
     }
 
@@ -243,7 +243,7 @@ export function CalculatorProvider({ children }) {
     if (!calculatorId || typeof calculatorId !== "string") return;
     dispatch({
       type: ACTIONS.SET_ACTIVE,
-      payload: { calculatorId }
+      payload: { calculatorId },
     });
   }, []);
 
@@ -261,7 +261,7 @@ export function CalculatorProvider({ children }) {
           type,
           ts: new Date().toISOString(),
           source: "CalculatorContext",
-          data
+          data,
         });
       }
     } catch (err) {
@@ -299,8 +299,8 @@ export function CalculatorProvider({ children }) {
           meta,
           nodeId,
           status: status || "success",
-          ts
-        }
+          ts,
+        },
       });
 
       // Infer a numeric score if possible
@@ -320,7 +320,7 @@ export function CalculatorProvider({ children }) {
           score,
           value,
           meta,
-          lastUpdated: ts
+          lastUpdated: ts,
         });
       }
     },
@@ -345,8 +345,8 @@ export function CalculatorProvider({ children }) {
           calculatorId,
           status,
           error,
-          ts
-        }
+          ts,
+        },
       });
     },
     []
@@ -361,7 +361,7 @@ export function CalculatorProvider({ children }) {
     if (!calculatorId || typeof calculatorId !== "string") return;
     dispatch({
       type: ACTIONS.RESET_ONE,
-      payload: { calculatorId }
+      payload: { calculatorId },
     });
   }, []);
 
@@ -394,7 +394,7 @@ export function CalculatorProvider({ children }) {
       setCalculatorStatus,
       resetCalculator,
       resetAllCalculators,
-      getCalculatorState
+      getCalculatorState,
     }),
     [
       state,
@@ -403,7 +403,7 @@ export function CalculatorProvider({ children }) {
       setCalculatorStatus,
       resetCalculator,
       resetAllCalculators,
-      getCalculatorState
+      getCalculatorState,
     ]
   );
 
@@ -452,7 +452,7 @@ export function useCalculator(calculatorId) {
     setActiveCalculator,
     updateCalculatorResult,
     setCalculatorStatus,
-    resetCalculator
+    resetCalculator,
   } = useCalculatorContext();
 
   const config = getCalculatorConfig(calculatorId);
@@ -470,7 +470,7 @@ export function useCalculator(calculatorId) {
         calculatorId,
         value,
         meta,
-        status
+        status,
       });
     },
     [calculatorId, updateCalculatorResult]
@@ -495,6 +495,6 @@ export function useCalculator(calculatorId) {
     setActive,
     updateResult,
     setStatus,
-    reset
+    reset,
   };
 }

@@ -1,0 +1,387 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-13",
+  "meta": {
+    "id": "recipe.west_african.pepper_soup",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "cuisineId": "cuisine.west_african",
+    "dishId": "dish.pepper_soup",
+    "label": "Pepper Soup",
+    "altLabels": ["Nigerian Pepper Soup", "West African Pepper Soup"],
+    "source": "catalog",
+    "author": "SSA Canonical Catalog",
+    "regionHints": ["Nigeria", "West Africa"],
+    "tags": [
+      "west_african",
+      "nigerian",
+      "soup",
+      "one_pot",
+      "spicy",
+      "brothy",
+      "weeknight_friendly",
+      "comfort_food",
+      "family_style"
+    ]
+  },
+  "summary": {
+    "oneLine": "A fragrant, spicy broth-based soup built on aromatics and warm spices; commonly made with goat, fish, or chicken.",
+    "notes": [
+      "Pepper soup spice blends vary by household (uda, ehuru, calabash nutmeg, grains of selim). This SSA baseline supports either a dedicated spice blend or a simplified pantry version.",
+      "This is a broth soup (not a stew). Keep it light and aromatic, not thick."
+    ]
+  },
+  "yields": {
+    "servings": 6,
+    "servingSizeNote": "Soup bowls (brothy)."
+  },
+  "time": {
+    "totalMinutes": 75,
+    "activeMinutes": 20,
+    "restMinutes": 5
+  },
+  "difficulty": "beginner",
+  "servingStyles": ["one_pot", "family_style", "breakfast"],
+  "plannerHints": {
+    "batchFriendly": true,
+    "leftoversFriendly": true,
+    "weeknightBias": "high",
+    "mealArchetypeId": "archetype_stew_with_starch"
+  },
+  "nutrition": {
+    "isEstimate": true,
+    "notes": [
+      "Nutrition depends heavily on protein choice (goat/fish/chicken) and oil use (often minimal)."
+    ]
+  },
+  "allergens": {
+    "mayContain": ["allergen_fish_optional"],
+    "commonTriggers": ["fish_generic"],
+    "notes": [
+      "Choose fish version only if fish allergen is not active.",
+      "Some spice blends may contain allergens depending on sourcing—apply household ingredient preferences."
+    ]
+  },
+  "equipment": {
+    "required": [
+      { "id": "pot_lidded", "label": "Soup pot with lid", "qty": 1 },
+      { "id": "stove_burner", "label": "Stovetop burner", "qty": 1 },
+      { "id": "knife_chef", "label": "Chef’s knife", "qty": 1 },
+      { "id": "cutting_board", "label": "Cutting board", "qty": 1 },
+      { "id": "spoon_wooden", "label": "Wooden spoon", "qty": 1 },
+      { "id": "measuring_spoons", "label": "Measuring spoons", "qty": 1 }
+    ],
+    "optional": [
+      {
+        "id": "strainer",
+        "label": "Strainer (optional for a clearer broth)",
+        "qty": 1
+      },
+      {
+        "id": "mortar_pestle_optional",
+        "label": "Mortar & pestle (spice crushing)",
+        "qty": 1
+      }
+    ]
+  },
+  "ingredients": [
+    {
+      "id": "goat",
+      "label": "Goat meat (preferred traditional option)",
+      "qty": 2,
+      "unit": "lb",
+      "role": "protein",
+      "optional": true,
+      "notes": [
+        "Goat pepper soup is classic. If using goat, simmer longer for tenderness."
+      ]
+    },
+    {
+      "id": "chicken_generic",
+      "label": "Chicken pieces (alternative)",
+      "qty": 2.5,
+      "unit": "lb",
+      "role": "protein",
+      "optional": true,
+      "notes": ["Faster cook time than goat."]
+    },
+    {
+      "id": "fish_generic",
+      "label": "Fish (alternative)",
+      "qty": 2,
+      "unit": "lb",
+      "role": "protein",
+      "optional": true,
+      "notes": [
+        "Add fish near the end to avoid overcooking; apply fish allergen rules."
+      ]
+    },
+
+    {
+      "id": "onion_yellow",
+      "label": "Yellow onion",
+      "qty": 1,
+      "unit": "count",
+      "role": "aromatic"
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic",
+      "qty": 3,
+      "unit": "clove",
+      "role": "aromatic",
+      "optional": true
+    },
+    {
+      "id": "ginger",
+      "label": "Fresh ginger",
+      "qty": 1,
+      "unit": "tbsp",
+      "role": "aromatic",
+      "optional": true
+    },
+    {
+      "id": "pepper_hot_scotch_bonnet_optional",
+      "label": "Scotch bonnet (or habanero)",
+      "qty": 1,
+      "unit": "count",
+      "role": "heat",
+      "optional": true,
+      "notes": ["Adjust to taste; traditional pepper soup can be hot."]
+    },
+
+    {
+      "id": "spice_pepper_soup_spice_optional",
+      "label": "Pepper soup spice blend",
+      "qty": 2,
+      "unit": "tbsp",
+      "role": "spice",
+      "optional": true,
+      "notes": [
+        "If you have a dedicated pepper soup spice blend, use it. Otherwise use the simplified spice set below."
+      ]
+    },
+    {
+      "id": "spice_thyme_dried",
+      "label": "Dried thyme (simplified option)",
+      "qty": 1,
+      "unit": "tsp",
+      "role": "spice",
+      "optional": true
+    },
+    {
+      "id": "spice_bay_leaf",
+      "label": "Bay leaf (simplified option)",
+      "qty": 2,
+      "unit": "count",
+      "role": "spice",
+      "optional": true
+    },
+    {
+      "id": "pepper_black",
+      "label": "Black pepper",
+      "qty": 1,
+      "unit": "tsp",
+      "role": "spice",
+      "notes": ["Pepper soup should be peppery; adjust to taste."]
+    },
+    {
+      "id": "spice_nutmeg_ground_optional",
+      "label": "Ground nutmeg (optional)",
+      "qty": 0.25,
+      "unit": "tsp",
+      "role": "spice",
+      "optional": true,
+      "notes": ["Optional warming note if you lack pepper soup spice blend."]
+    },
+    {
+      "id": "seasoning_stock_cube_optional",
+      "label": "Stock cube / seasoning cube",
+      "qty": 1,
+      "unit": "count",
+      "role": "umami",
+      "optional": true
+    },
+    {
+      "id": "salt",
+      "label": "Salt",
+      "qty": 1.5,
+      "unit": "tsp",
+      "role": "seasoning",
+      "notes": ["Start lower if using seasoning cube; adjust at end."]
+    },
+
+    {
+      "id": "water",
+      "label": "Water",
+      "qty": 10,
+      "unit": "cup",
+      "role": "liquid",
+      "notes": ["Broth soup: keep generous liquid."]
+    },
+
+    {
+      "id": "leafy_greens_uziza_optional",
+      "label": "Uziza leaf (optional)",
+      "qty": 1,
+      "unit": "tbsp",
+      "role": "herb",
+      "optional": true,
+      "notes": [
+        "Optional traditional aromatic leaf; add near end if available."
+      ]
+    },
+    {
+      "id": "leafy_greens_basil_optional",
+      "label": "Fresh basil (optional)",
+      "qty": 0.25,
+      "unit": "cup",
+      "role": "herb",
+      "optional": true,
+      "notes": ["Common accessible substitute for aromatic finishing herbs."]
+    }
+  ],
+  "techniques": ["prep_mise_en_place", "simmer", "season_to_taste", "rest"],
+  "steps": [
+    {
+      "id": "step.choose_protein",
+      "title": "Choose protein path",
+      "body": "Choose ONE primary protein: goat (classic), chicken (faster), or fish (add late). This baseline supports all three; cook times differ.",
+      "timeMinutes": 2,
+      "timers": [],
+      "hazards": []
+    },
+    {
+      "id": "step.build_broth_base",
+      "title": "Build the broth base",
+      "body": "Add water to pot. Add chopped onion, garlic/ginger (optional), black pepper, thyme/bay leaf (optional), seasoning cube (optional), and salt (start conservative). Bring to a gentle boil.",
+      "timeMinutes": 10,
+      "timers": [{ "label": "Bring to boil", "seconds": 600 }],
+      "hazards": []
+    },
+    {
+      "id": "step.cook_meat_if_using",
+      "title": "Simmer goat or chicken until tender (skip if fish-only)",
+      "body": "If using goat or chicken: add meat to pot and simmer until tender (goat 45–60 min; chicken 20–30 min). Skim foam as needed. If using pepper soup spice blend, add half now.",
+      "timeMinutes": 55,
+      "timers": [
+        { "label": "Simmer goat", "seconds": 3000 },
+        { "label": "Simmer chicken", "seconds": 1500 }
+      ],
+      "hazards": [],
+      "checks": ["Meat tender to bite", "Broth aromatic and peppery"]
+    },
+    {
+      "id": "step.add_heat_and_spice",
+      "title": "Add heat and finish spices",
+      "body": "Add hot pepper (optional) whole or lightly crushed for controlled heat. Add remaining pepper soup spice blend (or optional nutmeg). Simmer 8–10 minutes to infuse. Taste and adjust salt/pepper.",
+      "timeMinutes": 10,
+      "timers": [{ "label": "Infuse spices", "seconds": 600 }],
+      "hazards": [
+        {
+          "type": "pepper",
+          "message": "Hot pepper can intensify while simmering—start small, taste, and adjust."
+        }
+      ]
+    },
+    {
+      "id": "step.add_fish_if_using",
+      "title": "Add fish near the end (if using fish)",
+      "body": "If using fish: add fish pieces during the last 6–10 minutes so they cook through without breaking apart. Keep the simmer gentle. Taste and adjust seasoning.",
+      "timeMinutes": 10,
+      "timers": [{ "label": "Cook fish gently", "seconds": 480 }],
+      "hazards": []
+    },
+    {
+      "id": "step.finish_with_herbs_rest",
+      "title": "Finish with herbs and rest",
+      "body": "Turn off heat. Add uziza leaf (optional) or basil (optional). Cover and rest 5 minutes. Serve hot.",
+      "timeMinutes": 5,
+      "timers": [{ "label": "Rest", "seconds": 300 }],
+      "hazards": []
+    }
+  ],
+  "serving": {
+    "suggestions": [
+      "Serve as a brothy soup on its own, or with a small side of rice/yam depending on household preference.",
+      "Commonly enjoyed hot and spicy; provide extra pepper on the side if desired."
+    ],
+    "garnishes": ["lime_optional", "pepper_sauce_optional"],
+    "storage": {
+      "refrigeratorDays": 4,
+      "freezerDays": 60,
+      "reheatNotes": [
+        "Reheat gently. If fish was used, reheat carefully to avoid breaking it up.",
+        "Spice intensity can increase overnight; adjust with water/broth when reheating if needed."
+      ]
+    }
+  },
+  "adaptation": {
+    "donenessTargets": {
+      "broth": "clear_aromatic_peppery",
+      "meat": "tender_not_dry",
+      "heatLevel": "medium_to_hot_traditional"
+    },
+    "substitutions": [
+      {
+        "whenMissing": ["spice_pepper_soup_spice_optional"],
+        "useInstead": [
+          "pepper_black",
+          "spice_thyme_dried",
+          "spice_bay_leaf",
+          "spice_nutmeg_ground_optional"
+        ],
+        "notes": "This simplified set gives a decent baseline; dedicated pepper soup spice blend is more authentic."
+      },
+      {
+        "whenMissing": ["pepper_hot_scotch_bonnet_optional"],
+        "useInstead": ["pepper_hot_habanero", "pepper_red_flakes"],
+        "notes": "Use available hot pepper; start small and adjust."
+      }
+    ],
+    "equipmentFallbacks": [
+      {
+        "whenMissing": ["strainer"],
+        "doInstead": "Skim foam during simmer for a cleaner broth; straining is optional."
+      }
+    ],
+    "allergenConsiderations": [
+      {
+        "ifAllergenActive": "fish",
+        "avoid": ["fish_generic"],
+        "notes": "Choose goat or chicken version when fish allergen is active."
+      }
+    ]
+  },
+  "qa": {
+    "validators": {
+      "requiresCatalogIngredientIds": true,
+      "requiresTechniqueIds": true,
+      "requiresEquipmentIds": true
+    },
+    "knownGood": [
+      "Pepper soup should be brothy, aromatic, and pepper-forward (not thick).",
+      "Gentle simmer yields clear flavor and tender meat.",
+      "Fish (if used) must be added near the end to prevent overcooking and breakage."
+    ],
+    "commonIssues": [
+      {
+        "problem": "Soup tastes flat",
+        "likelyCause": "Under-seasoned broth or insufficient spice infusion time",
+        "fix": "Adjust salt carefully; add more black pepper/spice blend; simmer 10 minutes longer."
+      },
+      {
+        "problem": "Too spicy",
+        "likelyCause": "Too much hot pepper or simmered too long with pepper",
+        "fix": "Remove whole pepper; dilute with water/broth; balance with a squeeze of lime."
+      },
+      {
+        "problem": "Meat tough (goat/beef cuts)",
+        "likelyCause": "Not simmered long enough or heat too high causing tightening",
+        "fix": "Simmer longer at gentle heat; cover pot; use tender cuts next time."
+      }
+    ]
+  }
+}

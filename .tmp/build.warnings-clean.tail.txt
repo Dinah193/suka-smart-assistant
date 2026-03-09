@@ -1,0 +1,7 @@
+
+> suka-smart-assistant@1.0.0 build
+> vite build
+
+[36mvite v6.3.5 [32mbuilding for production...[36m[39m
+transforming...
+[32m✓[39m 6541 modules transformed.

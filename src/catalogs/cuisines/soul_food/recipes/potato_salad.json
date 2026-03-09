@@ -1,0 +1,218 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "type": "recipe",
+    "id": "cuisines.soul_food.potato_salad",
+    "slug": "potato_salad",
+    "name": "Soul Food Potato Salad (Classic Creamy)",
+    "version": "1.0.0",
+    "status": "canonical",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-18T00:00:00.000Z",
+    "updatedAt": "2026-01-18T00:00:00.000Z",
+    "locale": "en-US",
+    "difficulty": "beginner",
+    "tags": [
+      "cuisine:soul-food",
+      "side",
+      "potato-salad",
+      "bbq",
+      "cookout",
+      "picnic",
+      "make-ahead",
+      "family",
+      "crowd"
+    ],
+    "allergens": ["eggs", "mustard"],
+    "description": "A classic Soul Food-style potato salad: creamy, tangy, lightly sweet, with eggs, celery, and relish. Built for cookouts and make-ahead serving, with clear potato cooking cues so the salad holds texture without turning gummy."
+  },
+  "equipment": [
+    { "id": "pot_large", "label": "Large pot" },
+    { "id": "colander", "label": "Colander" },
+    { "id": "mixing_bowl_large", "label": "Large mixing bowl" },
+    { "id": "knife", "label": "Knife" },
+    { "id": "cutting_board", "label": "Cutting board" },
+    { "id": "spatula", "label": "Spatula" },
+    { "id": "measuring_spoons", "label": "Measuring spoons" }
+  ],
+  "ingredients": [
+    {
+      "id": "potatoes_yukon_or_russet",
+      "label": "Potatoes (Yukon Gold or russet)",
+      "amount": { "value": 1400, "unit": "g" },
+      "notes": "About 3 lb. Yukon holds shape; russet is softer/creamier."
+    },
+    {
+      "id": "salt_for_boiling",
+      "label": "Salt (for boiling water)",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": "About 2 tsp, plus more to taste."
+    },
+    {
+      "id": "eggs_hard_boiled",
+      "label": "Large eggs, hard-boiled",
+      "amount": { "value": 6, "unit": "each" },
+      "notes": "5 chopped into salad; 1 reserved for garnish (optional)."
+    },
+    {
+      "id": "mayonnaise",
+      "label": "Mayonnaise",
+      "amount": { "value": 240, "unit": "g" },
+      "notes": "About 1 cup. Add more as needed for creaminess."
+    },
+    {
+      "id": "mustard_yellow",
+      "label": "Yellow mustard",
+      "amount": { "value": 30, "unit": "g" },
+      "notes": "About 2 tbsp."
+    },
+    {
+      "id": "mustard_dijon_optional",
+      "label": "Dijon mustard (optional, extra tang)",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": "About 2 tsp.",
+      "optional": true
+    },
+    {
+      "id": "relish_sweet",
+      "label": "Sweet pickle relish",
+      "amount": { "value": 80, "unit": "g" },
+      "notes": "About 1/3 cup."
+    },
+    {
+      "id": "pickle_juice_optional",
+      "label": "Pickle juice (optional, thin/tangy)",
+      "amount": { "value": 15, "unit": "ml" },
+      "notes": "1 tbsp, adjust to taste.",
+      "optional": true
+    },
+    {
+      "id": "vinegar_apple_cider_optional",
+      "label": "Apple cider vinegar (optional, brighten)",
+      "amount": { "value": 10, "unit": "ml" },
+      "notes": "2 tsp, optional.",
+      "optional": true
+    },
+    {
+      "id": "celery",
+      "label": "Celery, finely diced",
+      "amount": { "value": 120, "unit": "g" },
+      "notes": "About 1 cup (2–3 ribs)."
+    },
+    {
+      "id": "onion",
+      "label": "Onion, finely diced",
+      "amount": { "value": 80, "unit": "g" },
+      "notes": "About 1/2 cup. Use yellow onion or sweet onion."
+    },
+    {
+      "id": "green_onion_optional",
+      "label": "Green onions, sliced (optional)",
+      "amount": { "value": 30, "unit": "g" },
+      "notes": "About 1/2 cup sliced.",
+      "optional": true
+    },
+    {
+      "id": "paprika",
+      "label": "Paprika (plus more for garnish)",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1 tsp."
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1 tsp, to taste."
+    },
+    {
+      "id": "salt_final",
+      "label": "Salt (final seasoning, to taste)",
+      "amount": { "value": 4, "unit": "g" },
+      "notes": "Start with ~3/4 tsp and adjust."
+    },
+    {
+      "id": "sugar_optional",
+      "label": "Sugar (optional, if you want it slightly sweeter)",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": "About 2 tsp.",
+      "optional": true
+    },
+    {
+      "id": "celery_seed_optional",
+      "label": "Celery seed (optional, classic note)",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "About 1/2 tsp.",
+      "optional": true
+    },
+    {
+      "id": "hot_sauce_optional",
+      "label": "Hot sauce (optional)",
+      "amount": { "value": 5, "unit": "ml" },
+      "notes": "About 1 tsp, to taste.",
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_prep_potatoes",
+      "title": "Prep potatoes",
+      "body": "Peel potatoes (optional; many Soul Food versions are peeled) and cut into 2.5 cm (1-inch) chunks for even cooking. Rinse briefly to remove surface starch."
+    },
+    {
+      "id": "step_02_boiled_potatoes",
+      "title": "Boil potatoes (texture control)",
+      "body": "Place potatoes in a large pot and cover with cold water by ~2.5 cm (1 inch). Salt the water. Bring to a boil, then reduce to a steady simmer. Cook 10–15 minutes until a fork slides in easily but pieces are not falling apart."
+    },
+    {
+      "id": "step_03_drain_and_steam_dry",
+      "title": "Drain and steam-dry (prevents watery salad)",
+      "body": "Drain potatoes well. Return to the warm pot off-heat for 1–2 minutes to steam-dry, shaking gently. This helps dressing cling and keeps salad from getting watery."
+    },
+    {
+      "id": "step_04_cool_partial",
+      "title": "Cool slightly",
+      "body": "Let potatoes cool 10–15 minutes until warm (not hot). Warm potatoes absorb flavor; too hot can break down the mayo."
+    },
+    {
+      "id": "step_05_make_dressing",
+      "title": "Make dressing",
+      "body": "In a large bowl, mix mayonnaise, yellow mustard, optional Dijon, relish, paprika, pepper, and a portion of salt. Add optional pickle juice/vinegar/hot sauce if using."
+    },
+    {
+      "id": "step_06_add_mixins",
+      "title": "Add eggs and vegetables",
+      "body": "Chop 5 hard-boiled eggs and add to dressing along with celery, onion, and optional green onions. Mix to combine."
+    },
+    {
+      "id": "step_07_fold_potatoes",
+      "title": "Fold in potatoes (keep chunks)",
+      "body": "Add warm potatoes to bowl and fold gently until coated. If you like it creamier, mash a small portion of potatoes against the bowl and fold back in (optional)."
+    },
+    {
+      "id": "step_08_taste_adjust",
+      "title": "Taste and adjust",
+      "body": "Adjust salt, pepper, mustard, relish, and optional sugar to balance tang/sweet. Add a spoonful more mayo if needed for creaminess."
+    },
+    {
+      "id": "step_09_chill",
+      "title": "Chill (make-ahead logic)",
+      "body": "Cover and refrigerate at least 2 hours (best: overnight). Flavor improves as it rests."
+    },
+    {
+      "id": "step_10_garnish_serve",
+      "title": "Garnish and serve",
+      "body": "Before serving, top with paprika and sliced reserved egg (optional). Serve cold or cool."
+    }
+  ],
+  "notes": [
+    "Potato texture logic: cut evenly, simmer (not hard boil), and stop cooking when fork-tender but intact.",
+    "Steam-drying is a key step: it prevents watery potato salad and improves dressing cling.",
+    "Make-ahead: best after chilling 4–12 hours; refresh with a spoon of mayo if it tightens in the fridge.",
+    "Food safety: keep below 40°F (4°C). Do not leave out more than 2 hours (1 hour if very hot outdoors)."
+  ],
+  "storage": {
+    "refrigerator": "Airtight: up to 4 days.",
+    "freezer": "Not recommended (mayo-based salads separate)."
+  }
+}

@@ -34,7 +34,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import MacroCalculatorShim, { computeMacroPlan } from "./MacroCalculator.shim";
-import { emit as emitEvent } from "@/services/eventBus";
+import { emit as emitEvent } from "@/services/events/eventBus";
 
 /**
  * @typedef {import("./MacroCalculator.shim").MacroCalculatorResult} MacroCalculatorResult
@@ -58,21 +58,21 @@ export const MACRO_DEFAULT_INPUT = {
   protein: {
     mode: "gPerKg",
     gPerKg: 1.8,
-    minGPerDay: 80
+    minGPerDay: 80,
   },
   fat: {
     mode: "percentOfCalories",
     percent: 30,
-    minGPerDay: 40
+    minGPerDay: 40,
   },
   carbs: {
     mode: "remainder",
     percent: null,
-    minGPerDay: 75
+    minGPerDay: 75,
   },
   rounding: {
     macroGrams: 5,
-    calories: 10
+    calories: 10,
   },
   mealsPerDay: 3,
   snacksPerDay: 1,
@@ -80,15 +80,15 @@ export const MACRO_DEFAULT_INPUT = {
   healthFlags: {
     diabetesOrPreDiabetes: false,
     kidneyIssues: false,
-    pregnantOrBreastfeeding: false
+    pregnantOrBreastfeeding: false,
   },
   ssaIntegration: {
     allowAutoLinkToMealPlanner: true,
     allowAutoLinkToGroceryPlanner: true,
     allowAutoLinkToAnimalPlanner: true,
     preferredUnitSystem: "imperial",
-    autosaveProfile: true
-  }
+    autosaveProfile: true,
+  },
 };
 
 /* -------------------------------------------------------------------------- */
@@ -106,7 +106,7 @@ function emitMacroEvent(type, data) {
       type,
       ts: new Date().toISOString(),
       source: "features/calculators/health/MacroCalculator.hooks",
-      data
+      data,
     });
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -124,7 +124,7 @@ function buildShimOptions(opts) {
   return {
     tdee: typeof safe.tdee === "number" ? safe.tdee : null,
     bmr: typeof safe.bmr === "number" ? safe.bmr : null,
-    profileIdSeed: safe.profileIdSeed || null
+    profileIdSeed: safe.profileIdSeed || null,
   };
 }
 
@@ -162,7 +162,7 @@ export function useMacroCalculator(params = {}) {
     initialInput = MACRO_DEFAULT_INPUT,
     initialAutoRecalc = true,
     shimOptions: shimOptionsRaw,
-    uiSource = "MacroCalculator"
+    uiSource = "MacroCalculator",
   } = params;
 
   const shimOptions = useMemo(
@@ -222,7 +222,7 @@ export function useMacroCalculator(params = {}) {
       }
       return {
         ...(prev || {}),
-        outputGranularity: Array.from(set)
+        outputGranularity: Array.from(set),
       };
     });
     setIsDirty(true);
@@ -248,8 +248,8 @@ export function useMacroCalculator(params = {}) {
           macroPlan: res.output,
           uiContext: {
             autoRecalc: false,
-            source: uiSource
-          }
+            source: uiSource,
+          },
         });
       }
     },
@@ -268,8 +268,8 @@ export function useMacroCalculator(params = {}) {
       macroPlan: res.output,
       uiContext: {
         autoRecalc: true,
-        source: uiSource
-      }
+        source: uiSource,
+      },
     });
   }, [autoRecalc, form, shimOptions, uiSource]);
 
@@ -287,8 +287,8 @@ export function useMacroCalculator(params = {}) {
       macroPlan: result.output,
       uiContext: {
         nowClicked: true,
-        source: uiSource
-      }
+        source: uiSource,
+      },
     });
   }, [result, uiSource]);
 
@@ -305,7 +305,7 @@ export function useMacroCalculator(params = {}) {
     updateField,
     updateNestedField,
     toggleGranularity,
-    resetForm
+    resetForm,
   };
 }
 
@@ -343,7 +343,7 @@ export function useMacroTargetsOnly(input, options = {}) {
 const MacroCalculatorHooks = {
   useMacroCalculator,
   useMacroTargetsOnly,
-  MACRO_DEFAULT_INPUT
+  MACRO_DEFAULT_INPUT,
 };
 
 export default MacroCalculatorHooks;

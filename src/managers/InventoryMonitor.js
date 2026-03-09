@@ -37,11 +37,22 @@
 
 const isBrowser = typeof window !== "undefined";
 const now = () => new Date();
-const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+const addDays = (d, n) => {
+  const x = new Date(d);
+  x.setDate(x.getDate() + n);
+  return x;
+};
 const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
-const safeNumber = (n, fb = 0) => { const v = Number(n); return Number.isFinite(v) ? v : fb; };
-const toKey = (it) => `${(it?.sku || "").toString()}|${(it?.name || "").toLowerCase()}|${it?.store || ""}`;
-const idKey = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+const safeNumber = (n, fb = 0) => {
+  const v = Number(n);
+  return Number.isFinite(v) ? v : fb;
+};
+const toKey = (it) =>
+  `${(it?.sku || "").toString()}|${(it?.name || "").toLowerCase()}|${
+    it?.store || ""
+  }`;
+const idKey = () =>
+  Math.random().toString(36).slice(2) + Date.now().toString(36);
 
 const DEFAULTS = {
   horizonDays: 7,
@@ -54,15 +65,35 @@ const DEFAULTS = {
   includeHave: true,
   collapseDuplicates: true,
   buildRestockPlan: true,
-  restockWindowStart: "17:30",     // calendar hint for shopping after work
-  autoFavorite: false,             // can be set by callers/UI
+  restockWindowStart: "17:30", // calendar hint for shopping after work
+  autoFavorite: false, // can be set by callers/UI
 };
 
 const BADGES = {
-  short:   { label: "Short",   color: "bg-red-600 text-white",     icon: "AlertTriangle",     priority: 4 },
-  low:     { label: "Low",     color: "bg-amber-500 text-black",   icon: "BatteryCharging",   priority: 3 },
-  have:    { label: "Have",    color: "bg-emerald-600 text-white", icon: "Check",             priority: 2 },
-  surplus: { label: "Surplus", color: "bg-sky-600 text-white",     icon: "Package",           priority: 1 },
+  short: {
+    label: "Short",
+    color: "bg-red-600 text-white",
+    icon: "AlertTriangle",
+    priority: 4,
+  },
+  low: {
+    label: "Low",
+    color: "bg-amber-500 text-black",
+    icon: "BatteryCharging",
+    priority: 3,
+  },
+  have: {
+    label: "Have",
+    color: "bg-emerald-600 text-white",
+    icon: "Check",
+    priority: 2,
+  },
+  surplus: {
+    label: "Surplus",
+    color: "bg-sky-600 text-white",
+    icon: "Package",
+    priority: 1,
+  },
 };
 const badgeFor = (s) => BADGES[s] || BADGES.have;
 
@@ -75,14 +106,17 @@ async function lazy(path) {
     const val = mod?.default ?? mod;
     _cache.set(path, val);
     return val;
-  } catch { _cache.set(path, null); return null; }
+  } catch {
+    _cache.set(path, null);
+    return null;
+  }
 }
 
 // Event bus
-let eventBus = (isBrowser ? (window.__suka_eventBus__ || {}) : {});
+let eventBus = isBrowser ? window.__suka_eventBus__ || {} : {};
 if (!eventBus.emit || !eventBus.on || !eventBus.off) {
-  eventBus = { emit(){}, on(){}, off(){} };
-  lazy("@/services/eventBus").then((eb) => {
+  eventBus = { emit() {}, on() {}, off() {} };
+  lazy("@/services/events/eventBus").then((eb) => {
     const bus = eb?.eventBus || eb || eventBus;
     if (isBrowser) window.__suka_eventBus__ = bus;
     eventBus = bus;
@@ -90,8 +124,10 @@ if (!eventBus.emit || !eventBus.on || !eventBus.off) {
 }
 
 // Tier sync
-let tierSync = { publish(){} };
-lazy("@/services/sync/tierSync").then((m) => { tierSync = m?.default || m || tierSync; });
+let tierSync = { publish() {} };
+lazy("@/services/sync/tierSync").then((m) => {
+  tierSync = m?.default || m || tierSync;
+});
 
 // Optional deps
 let inventoryApi = null;
@@ -104,75 +140,156 @@ let scheduleHelpers = null;
 let SettingsStore = null;
 
 Promise.all([
-  lazy("@/services/inventory/api").then((m)=>{ inventoryApi = m?.default || m || null; }),
-  lazy("@/services/planning/demandForecast").then((m)=>{ demandApi = m?.default || m || null; }),
-  lazy("@/services/suppliers/api").then((m)=>{ suppliersApi = m?.default || m || null; }),
-  lazy("@/services/garden/api").then((m)=>{ gardenApi = m?.default || m || null; }),
-  lazy("@/services/animals/api").then((m)=>{ animalApi = m?.default || m || null; }),
-  lazy("@/engines/linkers/IngredientLinker").then((m)=>{ IngredientLinker = m?.default || m || null; }),
-  lazy("@/engines/scheduling/scheduleHelpers").then((m)=>{ scheduleHelpers = m?.default || m || null; }),
-  lazy("@/store/SettingsStore").then((m)=>{ SettingsStore = m?.default || m || null; }),
+  lazy("@/services/inventory/api").then((m) => {
+    inventoryApi = m?.default || m || null;
+  }),
+  lazy("@/services/planning/demandForecast").then((m) => {
+    demandApi = m?.default || m || null;
+  }),
+  lazy("@/services/suppliers/api").then((m) => {
+    suppliersApi = m?.default || m || null;
+  }),
+  lazy("@/services/garden/api").then((m) => {
+    gardenApi = m?.default || m || null;
+  }),
+  lazy("@/services/animals/api").then((m) => {
+    animalApi = m?.default || m || null;
+  }),
+  lazy("@/engines/linkers/IngredientLinker").then((m) => {
+    IngredientLinker = m?.default || m || null;
+  }),
+  lazy("@/engines/scheduling/scheduleHelpers").then((m) => {
+    scheduleHelpers = m?.default || m || null;
+  }),
+  lazy("@/store/SettingsStore").then((m) => {
+    SettingsStore = m?.default || m || null;
+  }),
 ]);
 
 /* -------------------------------- helpers ----------------------------------- */
-function withinHorizon(date, start, end) { return !!date && (new Date(date) >= start && new Date(date) <= end); }
+function withinHorizon(date, start, end) {
+  return !!date && new Date(date) >= start && new Date(date) <= end;
+}
 
 function estimateDailyUse(item) {
   const fromApi = safeNumber(item?.usage?.dailyAvg, NaN);
   if (!Number.isNaN(fromApi) && fromApi > 0) return fromApi;
-  const isPerishable = !!item?.tags?.some(t => /produce|dairy|meat|fresh/i.test(t));
+  const isPerishable = !!item?.tags?.some((t) =>
+    /produce|dairy|meat|fresh/i.test(t)
+  );
   const base = isPerishable ? 0.5 : 0.1;
   return Math.max(base, DEFAULTS.minDailyFloor);
 }
 function reorderPoint(item, cfg) {
   if (item?.reorderPoint != null) return safeNumber(item.reorderPoint, 0);
-  return Math.ceil(estimateDailyUse(item) * (cfg?.bufferDays ?? DEFAULTS.bufferDays));
+  return Math.ceil(
+    estimateDailyUse(item) * (cfg?.bufferDays ?? DEFAULTS.bufferDays)
+  );
 }
-function surplusPoint(item, cfg) { return Math.ceil(reorderPoint(item, cfg) * (cfg?.surplusFactor ?? DEFAULTS.surplusFactor)); }
+function surplusPoint(item, cfg) {
+  return Math.ceil(
+    reorderPoint(item, cfg) * (cfg?.surplusFactor ?? DEFAULTS.surplusFactor)
+  );
+}
 
-function safeEmit(evt, payload) { try { eventBus?.emit?.(evt, payload); } catch(e){ console.warn("[InventoryMonitor] emit fail", evt, e); } }
-function safeTierSync(type, payload) { try { tierSync?.publish?.(type, payload); } catch {} }
+function safeEmit(evt, payload) {
+  try {
+    eventBus?.emit?.(evt, payload);
+  } catch (e) {
+    console.warn("[InventoryMonitor] emit fail", evt, e);
+  }
+}
+function safeTierSync(type, payload) {
+  try {
+    tierSync?.publish?.(type, payload);
+  } catch {}
+}
 
 function getSettingsSnapshot() {
   try {
     if (!SettingsStore) return {};
     const get = SettingsStore.get || SettingsStore?.default?.get;
-    const s = get ? {
-      sabbathAware: !!get("observance.sabbathAware", true),
-      sabbathRule: get("observance.sabbathDayRule", "hebrew_day7"),
-      quietRespect: !!get("notifications.quietHours.respectObservance", true),
-      defaultDestination: get("favorites.defaultDestination", "local"),
-      restockWindowStart: get("sessions.itemRuntimePanel.compact", false) ? "18:00" : DEFAULTS.restockWindowStart,
-      defaultScheduleName: get("scheduler.defaultScheduleName", "Household"),
-    } : {};
+    const s = get
+      ? {
+          sabbathAware: !!get("observance.sabbathAware", true),
+          sabbathRule: get("observance.sabbathDayRule", "hebrew_day7"),
+          quietRespect: !!get(
+            "notifications.quietHours.respectObservance",
+            true
+          ),
+          defaultDestination: get("favorites.defaultDestination", "local"),
+          restockWindowStart: get("sessions.itemRuntimePanel.compact", false)
+            ? "18:00"
+            : DEFAULTS.restockWindowStart,
+          defaultScheduleName: get(
+            "scheduler.defaultScheduleName",
+            "Household"
+          ),
+        }
+      : {};
     return s;
-  } catch { return {}; }
+  } catch {
+    return {};
+  }
 }
 
 /* --------------------------- external lookups -------------------------------- */
 function projectedDemand(item, start, end) {
   if (!demandApi?.project) return 0;
   try {
-    const v = demandApi.project({ sku: item?.sku, name: item?.name, start, end, unit: item?.unit });
+    const v = demandApi.project({
+      sku: item?.sku,
+      name: item?.name,
+      start,
+      end,
+      unit: item?.unit,
+    });
     return safeNumber(v, 0);
-  } catch (e) { console.warn("[InventoryMonitor] demandApi.project failed:", e); return 0; }
+  } catch (e) {
+    console.warn("[InventoryMonitor] demandApi.project failed:", e);
+    return 0;
+  }
 }
 function supplierLeadTimeDays(item) {
   if (!suppliersApi?.leadTimeDays) return 0;
-  try { return clamp(safeNumber(suppliersApi.leadTimeDays({ sku: item?.sku, name: item?.name, supplierId: item?.supplierId }), 0), 0, 60); }
-  catch { return 0; }
+  try {
+    return clamp(
+      safeNumber(
+        suppliersApi.leadTimeDays({
+          sku: item?.sku,
+          name: item?.name,
+          supplierId: item?.supplierId,
+        }),
+        0
+      ),
+      0,
+      60
+    );
+  } catch {
+    return 0;
+  }
 }
 function minOrderQty(item) {
   if (!suppliersApi?.minOrderQty) return 0;
-  try { return safeNumber(suppliersApi.minOrderQty({ sku: item?.sku }), 0); } catch { return 0; }
+  try {
+    return safeNumber(suppliersApi.minOrderQty({ sku: item?.sku }), 0);
+  } catch {
+    return 0;
+  }
 }
 function fallbackFarmQty(item, start, end) {
-  let g = 0, a = 0;
+  let g = 0,
+    a = 0;
   try {
     if (gardenApi?.searchCrops) {
-      const crops = gardenApi.searchCrops({ query: item?.name || item?.category || "" }) || [];
+      const crops =
+        gardenApi.searchCrops({ query: item?.name || item?.category || "" }) ||
+        [];
       for (const c of crops) {
-        if (Array.isArray(c?.harvestDates) && c.harvestDates.some(d => withinHorizon(d, start, end))) {
+        if (
+          Array.isArray(c?.harvestDates) &&
+          c.harvestDates.some((d) => withinHorizon(d, start, end))
+        ) {
           g += safeNumber(c?.expectedQty, 0);
         }
       }
@@ -195,7 +312,11 @@ async function suggestSubs(item, ctx) {
   try {
     const linked = await IngredientLinker.linkIngredient(
       { name: item?.name, qty: 1, unit: item?.unit || null },
-      { store: ctx?.store, sabbathGuard: ctx?.sabbathGuard, pantryGuard: ctx?.pantryGuard }
+      {
+        store: ctx?.store,
+        sabbathGuard: ctx?.sabbathGuard,
+        pantryGuard: ctx?.pantryGuard,
+      }
     );
     const pool = [linked.primary, ...(linked.candidates || [])].filter(Boolean);
     const out = [];
@@ -211,7 +332,9 @@ async function suggestSubs(item, ctx) {
       if (out.length >= 3) break;
     }
     return out;
-  } catch { return []; }
+  } catch {
+    return [];
+  }
 }
 function prepReminders(item, ctx, start) {
   if (!scheduleHelpers) return [];
@@ -219,19 +342,31 @@ function prepReminders(item, ctx, start) {
     const hints = [];
     if (/meat|lamb|beef|chicken|fish|poultry/i.test(item?.name || "")) {
       const when = addDays(start, 0);
-      const defrost  = scheduleHelpers?.defrostReminder?.(item, when);
+      const defrost = scheduleHelpers?.defrostReminder?.(item, when);
       const marinate = scheduleHelpers?.marinateReminder?.(item, when);
-      const preheat  = scheduleHelpers?.preheatReminder?.(item, when);
-      if (defrost)  hints.push(defrost);
+      const preheat = scheduleHelpers?.preheatReminder?.(item, when);
+      if (defrost) hints.push(defrost);
       if (marinate) hints.push(marinate);
-      if (preheat)  hints.push(preheat);
+      if (preheat) hints.push(preheat);
     }
-    return hints.map(h => ({ ...h, disabled: !!ctx?.sabbathGuard }));
-  } catch { return []; }
+    return hints.map((h) => ({ ...h, disabled: !!ctx?.sabbathGuard }));
+  } catch {
+    return [];
+  }
 }
 
 /* -------------------------------- rationale --------------------------------- */
-function buildRationale({ qty, demand, farmFallback, buffer, surplus, projected, lead, moq, dailyUse }) {
+function buildRationale({
+  qty,
+  demand,
+  farmFallback,
+  buffer,
+  surplus,
+  projected,
+  lead,
+  moq,
+  dailyUse,
+}) {
   const bits = [];
   bits.push(`on-hand:${qty}`);
   if (demand > 0) bits.push(`demand:${demand}/${dailyUse.toFixed(2)}/d`);
@@ -247,17 +382,17 @@ function buildRationale({ qty, demand, farmFallback, buffer, surplus, projected,
 /* -------------------------------- core logic -------------------------------- */
 async function computeStatus(item, cfg) {
   const start = now();
-  const end   = addDays(start, cfg?.horizonDays ?? DEFAULTS.horizonDays);
+  const end = addDays(start, cfg?.horizonDays ?? DEFAULTS.horizonDays);
 
-  const qty      = safeNumber(item?.qty, 0);
-  const unit     = item?.unit || item?.units || null;
+  const qty = safeNumber(item?.qty, 0);
+  const unit = item?.unit || item?.units || null;
   const dailyUse = estimateDailyUse(item);
-  const buffer   = reorderPoint(item, cfg);
-  const surplus  = surplusPoint(item, cfg);
+  const buffer = reorderPoint(item, cfg);
+  const surplus = surplusPoint(item, cfg);
 
-  const demand       = projectedDemand(item, start, end);
+  const demand = projectedDemand(item, start, end);
   const farmFallback = fallbackFarmQty(item, start, end);
-  const projected    = qty - demand + farmFallback;
+  const projected = qty - demand + farmFallback;
 
   let status = "have";
   if (projected < 0) status = "short";
@@ -265,11 +400,14 @@ async function computeStatus(item, cfg) {
   else if (qty >= surplus) status = "surplus";
 
   const badge = badgeFor(status);
-  const lead  = supplierLeadTimeDays(item);
-  const moq   = minOrderQty(item);
+  const lead = supplierLeadTimeDays(item);
+  const moq = minOrderQty(item);
 
   // qty needed to reach buffer + demand coverage (respect MOQ & lead time)
-  const needed = Math.max(0, buffer + demand - qty + Math.ceil(dailyUse * lead));
+  const needed = Math.max(
+    0,
+    buffer + demand - qty + Math.ceil(dailyUse * lead)
+  );
   const recommendedOrderQty = Math.max(moq, needed);
 
   const actions = [];
@@ -295,7 +433,13 @@ async function computeStatus(item, cfg) {
       });
     }
     const subs = await suggestSubs(item, cfg);
-    if (subs.length) actions.push({ type: "substitute", label: "See substitutions", disabled: false, data: subs });
+    if (subs.length)
+      actions.push({
+        type: "substitute",
+        label: "See substitutions",
+        disabled: false,
+        data: subs,
+      });
   }
 
   // Always allow "Add to Inventory" once you actually have the item (post-purchase)
@@ -311,14 +455,19 @@ async function computeStatus(item, cfg) {
       qty: Math.max(1, Math.ceil(recommendedOrderQty || 1)),
       store: cfg?.store || item?.store || "Default",
       idempotencyKey: null,
-    }
+    },
   });
 
   actions.push(...prepReminders(item, cfg, start));
 
   let aisleHint = item?.aisle || item?.meta?.aisle || null;
   if (!aisleHint && IngredientLinker?.mapAisleHint) {
-    try { aisleHint = IngredientLinker.mapAisleHint(item?.tags || [], item?.name || ""); } catch {}
+    try {
+      aisleHint = IngredientLinker.mapAisleHint(
+        item?.tags || [],
+        item?.name || ""
+      );
+    } catch {}
   }
 
   const payload = {
@@ -330,9 +479,33 @@ async function computeStatus(item, cfg) {
     store: cfg?.store || item?.store || "Default",
     status,
     badge,
-    rationale: buildRationale({ qty, demand, farmFallback, buffer, surplus, projected, lead, moq, dailyUse }),
-    window: { start: start.toISOString(), end: end.toISOString(), days: (cfg?.horizonDays ?? DEFAULTS.horizonDays) },
-    numbers: { qty, demand, buffer, surplus, projected, dailyUse, leadTimeDays: lead, moq, recommendedOrderQty: Math.ceil(recommendedOrderQty) },
+    rationale: buildRationale({
+      qty,
+      demand,
+      farmFallback,
+      buffer,
+      surplus,
+      projected,
+      lead,
+      moq,
+      dailyUse,
+    }),
+    window: {
+      start: start.toISOString(),
+      end: end.toISOString(),
+      days: cfg?.horizonDays ?? DEFAULTS.horizonDays,
+    },
+    numbers: {
+      qty,
+      demand,
+      buffer,
+      surplus,
+      projected,
+      dailyUse,
+      leadTimeDays: lead,
+      moq,
+      recommendedOrderQty: Math.ceil(recommendedOrderQty),
+    },
     actions,
     meta: { aisle: aisleHint, pantryGuard: !!cfg?.pantryGuard },
   };
@@ -343,7 +516,9 @@ async function computeStatus(item, cfg) {
 
 /* -------------------------- restock plan builder ---------------------------- */
 function buildRestockPlan(signals, cfg) {
-  const items = signals.filter(s => s.status === "short" || s.status === "low");
+  const items = signals.filter(
+    (s) => s.status === "short" || s.status === "low"
+  );
   if (!items.length) return null;
 
   // group by store → aisle
@@ -356,13 +531,21 @@ function buildRestockPlan(signals, cfg) {
 
   const steps = [];
   for (const [store, list] of byStore.entries()) {
-    list.sort((a, b) => (a?.meta?.aisle || "").localeCompare(b?.meta?.aisle || "") || (a.name || "").localeCompare(b.name || ""));
+    list.sort(
+      (a, b) =>
+        (a?.meta?.aisle || "").localeCompare(b?.meta?.aisle || "") ||
+        (a.name || "").localeCompare(b.name || "")
+    );
     for (const it of list) {
       // Each step includes a *post-purchase* Add-to-Inventory action contract
       steps.push({
         id: `buy-${it.sku || it.id}`,
         title: `Buy ${it.name}`,
-        description: `${it.meta?.aisle ? `Aisle: ${it.meta.aisle}. ` : ""}Suggested qty: ${it.numbers?.recommendedOrderQty || 1}${it.unit ? " " + it.unit : ""}.`,
+        description: `${
+          it.meta?.aisle ? `Aisle: ${it.meta.aisle}. ` : ""
+        }Suggested qty: ${it.numbers?.recommendedOrderQty || 1}${
+          it.unit ? " " + it.unit : ""
+        }.`,
         kind: "purchase",
         store,
         aisle: it.meta?.aisle || null,
@@ -379,9 +562,9 @@ function buildRestockPlan(signals, cfg) {
               qty: it.numbers?.recommendedOrderQty || 1,
               store,
               idempotencyKey: null,
-            }
-          }
-        ]
+            },
+          },
+        ],
       });
     }
   }
@@ -392,20 +575,22 @@ function buildRestockPlan(signals, cfg) {
   const startTimeLocal = cfg?.restockWindowStart || DEFAULTS.restockWindowStart;
 
   const plan = {
-    "$id": planId,
-    "$schema": "urn:suka:contracts:workplan",
+    $id: planId,
+    $schema: "urn:suka:contracts:workplan",
     type: "restock",
     slug: "restock:shopping-list",
     meta: {
       title: "Restock — Shopping List",
-      subtitle: `${items.length} items · ${Array.from(byStore.keys()).join(", ")}`,
+      subtitle: `${items.length} items · ${Array.from(byStore.keys()).join(
+        ", "
+      )}`,
       domain: "general",
       version: "1.1.0",
       favoriteable: true,
       exportable: true,
       defaultFavoriteKey: "general:restock",
       icon: "shopping-cart",
-      tags: ["restock", "shopping", "inventory"]
+      tags: ["restock", "shopping", "inventory"],
     },
     params: { domain: "general", generatedAt: today.toISOString() },
     schedule: {
@@ -416,9 +601,9 @@ function buildRestockPlan(signals, cfg) {
       favoriteableSchedule: {
         suggestedName: "My Restock Evening",
         suggestedDomain: "general",
-      }
+      },
     },
-    steps
+    steps,
   };
 
   // calendar hint
@@ -427,7 +612,7 @@ function buildRestockPlan(signals, cfg) {
     planId: plan.$id,
     title: plan.schedule.calendar.title || plan.meta.title,
     recurrence: plan.schedule.recurrence,
-    startTimeLocal: plan.schedule.startTimeLocal
+    startTimeLocal: plan.schedule.startTimeLocal,
   });
 
   // also allow saving a schedule template (user-owned)
@@ -435,14 +620,15 @@ function buildRestockPlan(signals, cfg) {
     source: "InventoryMonitor",
     planId: plan.$id,
     template: {
-      name: plan.schedule?.favoriteableSchedule?.suggestedName || "Restock Evening",
+      name:
+        plan.schedule?.favoriteableSchedule?.suggestedName || "Restock Evening",
       domain: "general",
       schedule: {
         startTimeLocal,
-        recurrence: null
+        recurrence: null,
       },
       favoriteKey: "user:schedule:restock",
-    }
+    },
   });
 
   return plan;
@@ -475,26 +661,34 @@ function seenOrRemember(key) {
  */
 async function applyAddToInventory(payload = {}) {
   if (!inventoryApi) return { ok: false, reason: "no-inventory-api" };
-  const key = payload.idempotencyKey || `add:${payload.sku || payload.name}:${payload.qty}:${payload.store}`;
+  const key =
+    payload.idempotencyKey ||
+    `add:${payload.sku || payload.name}:${payload.qty}:${payload.store}`;
   if (seenOrRemember(key)) return { ok: true, reason: "duplicate-ignored" };
 
   try {
-    const upsert = inventoryApi.upsert || inventoryApi.add || inventoryApi.adjust || null;
+    const upsert =
+      inventoryApi.upsert || inventoryApi.add || inventoryApi.adjust || null;
     if (!upsert) return { ok: false, reason: "no-upsert-method" };
 
-    const res = await Promise.resolve(upsert({
-      sku: payload.sku || null,
-      name: payload.name || "",
-      unit: payload.unit || null,
-      qty: safeNumber(payload.qty, 0),
-      store: payload.store || "Default",
-      location: payload.location || null,
-      notes: payload.notes || null,
-      source: payload.source || "action",
-    }));
+    const res = await Promise.resolve(
+      upsert({
+        sku: payload.sku || null,
+        name: payload.name || "",
+        unit: payload.unit || null,
+        qty: safeNumber(payload.qty, 0),
+        store: payload.store || "Default",
+        location: payload.location || null,
+        notes: payload.notes || null,
+        source: payload.source || "action",
+      })
+    );
 
     // Fan out: let the rest of the system refresh
-    safeEmit("inventory:changed", { reason: "add-to-inventory", item: { sku: payload.sku, name: payload.name, qty: payload.qty } });
+    safeEmit("inventory:changed", {
+      reason: "add-to-inventory",
+      item: { sku: payload.sku, name: payload.name, qty: payload.qty },
+    });
     safeTierSync("inventory.changed", { store: payload.store || "Default" });
 
     return { ok: true, data: res };
@@ -538,11 +732,15 @@ export function registerActionConsumers() {
       name: line.name || "",
       unit: line.unit || null,
       qty: line.qty || line.quantity || 0,
-      store: (evt?.store || line.store || "Default"),
+      store: evt?.store || line.store || "Default",
       location: null,
       notes: `Receipt ${evt?.receiptId || evt?.orderId || ""}`.trim(),
       source: "restock.purchase.completed",
-      idempotencyKey: line.idempotencyKey || `${evt?.receiptId || evt?.orderId}:${line.sku || line.name}:${line.qty || line.quantity}`,
+      idempotencyKey:
+        line.idempotencyKey ||
+        `${evt?.receiptId || evt?.orderId}:${line.sku || line.name}:${
+          line.qty || line.quantity
+        }`,
     });
   };
 
@@ -558,20 +756,26 @@ export function registerActionConsumers() {
       store: it.store || "Default",
       notes: "Scanner accepted",
       source: "scanner.item.accepted",
-      idempotencyKey: it.idempotencyKey || `scan:${it.sku || it.name}:${it.qty || 1}`,
+      idempotencyKey:
+        it.idempotencyKey || `scan:${it.sku || it.name}:${it.qty || 1}`,
     });
   };
 
   try {
-    eventBus.on?.("inventory.action.addToInventory", onAddDirect);         handlers.push(["inventory.action.addToInventory", onAddDirect]);
-    eventBus.on?.("restock.purchase.completed", onPurchaseCompleted);      handlers.push(["restock.purchase.completed", onPurchaseCompleted]);
-    eventBus.on?.("scanner.item.accepted", onScannerAccepted);             handlers.push(["scanner.item.accepted", onScannerAccepted]);
+    eventBus.on?.("inventory.action.addToInventory", onAddDirect);
+    handlers.push(["inventory.action.addToInventory", onAddDirect]);
+    eventBus.on?.("restock.purchase.completed", onPurchaseCompleted);
+    handlers.push(["restock.purchase.completed", onPurchaseCompleted]);
+    eventBus.on?.("scanner.item.accepted", onScannerAccepted);
+    handlers.push(["scanner.item.accepted", onScannerAccepted]);
   } catch (e) {
     console.warn("[InventoryMonitor] registerActionConsumers failed:", e);
   }
 
   return () => {
-    try { for (const [evt, fn] of handlers) eventBus.off?.(evt, fn); } catch {}
+    try {
+      for (const [evt, fn] of handlers) eventBus.off?.(evt, fn);
+    } catch {}
   };
 }
 
@@ -586,14 +790,19 @@ export async function analyzeInventory(options = {}) {
   const cfg = {
     ...DEFAULTS,
     sabbathGuard: !!(settings.sabbathAware && settings.quietRespect),
-    restockWindowStart: settings.restockWindowStart || DEFAULTS.restockWindowStart,
-    ...options
+    restockWindowStart:
+      settings.restockWindowStart || DEFAULTS.restockWindowStart,
+    ...options,
   };
 
   let items = Array.isArray(cfg.items) ? cfg.items : [];
   if (!items.length && inventoryApi?.list) {
-    try { items = inventoryApi.list({ store: cfg.store }) || []; }
-    catch (e) { console.warn("[InventoryMonitor] inventoryApi.list failed:", e); items = []; }
+    try {
+      items = inventoryApi.list({ store: cfg.store }) || [];
+    } catch (e) {
+      console.warn("[InventoryMonitor] inventoryApi.list failed:", e);
+      items = [];
+    }
   }
 
   if (cfg.collapseDuplicates) {
@@ -601,7 +810,11 @@ export async function analyzeInventory(options = {}) {
     for (const it of items) {
       const k = toKey(it);
       const prev = map.get(k);
-      if (prev) map.set(k, { ...it, qty: safeNumber(it?.qty, 0) + safeNumber(prev?.qty, 0) });
+      if (prev)
+        map.set(k, {
+          ...it,
+          qty: safeNumber(it?.qty, 0) + safeNumber(prev?.qty, 0),
+        });
       else map.set(k, it);
     }
     items = [...map.values()];
@@ -628,7 +841,7 @@ export async function analyzeInventory(options = {}) {
 
   const sev = { short: 4, low: 3, surplus: 2, have: 1 };
   results.sort((a, b) => {
-    const d = (sev[b.status] - sev[a.status]);
+    const d = sev[b.status] - sev[a.status];
     if (d !== 0) return d;
     const ax = (a?.meta?.aisle || "").localeCompare(b?.meta?.aisle || "");
     if (ax !== 0) return ax;
@@ -638,25 +851,38 @@ export async function analyzeInventory(options = {}) {
   // summary & signals
   const summary = {
     count: results.length,
-    short: results.filter(r => r.status === "short").length,
-    low: results.filter(r => r.status === "low").length,
-    surplus: results.filter(r => r.status === "surplus").length,
-    have: results.filter(r => r.status === "have").length,
+    short: results.filter((r) => r.status === "short").length,
+    low: results.filter((r) => r.status === "low").length,
+    surplus: results.filter((r) => r.status === "surplus").length,
+    have: results.filter((r) => r.status === "have").length,
     store: cfg.store,
     horizonDays: cfg.horizonDays,
   };
 
   safeEmit("inventory:signals", summary);
-  safeTierSync("inventory.signals", { store: cfg.store, horizonDays: cfg.horizonDays, results: results.slice(0, 200) });
+  safeTierSync("inventory.signals", {
+    store: cfg.store,
+    horizonDays: cfg.horizonDays,
+    results: results.slice(0, 200),
+  });
 
   // emit shortages list for upstream guards (compat)
   const missing = results
-    .filter(r => r.status === "short" || r.status === "low")
-    .map(r => ({
-      sku: r.sku, name: r.name, qtyToOrder: r.numbers?.recommendedOrderQty || 1, unit: r.unit || null, store: r.store
+    .filter((r) => r.status === "short" || r.status === "low")
+    .map((r) => ({
+      sku: r.sku,
+      name: r.name,
+      qtyToOrder: r.numbers?.recommendedOrderQty || 1,
+      unit: r.unit || null,
+      store: r.store,
     }));
   if (missing.length) {
-    safeEmit("inventory.shortage.detected", { domain: "general", missing, store: cfg.store, horizonDays: cfg.horizonDays });
+    safeEmit("inventory.shortage.detected", {
+      domain: "general",
+      missing,
+      store: cfg.store,
+      horizonDays: cfg.horizonDays,
+    });
   }
 
   // Build & optionally emit a favorite-able restock plan
@@ -669,8 +895,11 @@ export async function analyzeInventory(options = {}) {
         const favoritePayload = {
           domain: "general",
           plan,
-          options: { source: "InventoryMonitor", destination: getSettingsSnapshot().defaultDestination || "local" },
-          favoriteKey: plan.meta.defaultFavoriteKey || "general:restock"
+          options: {
+            source: "InventoryMonitor",
+            destination: getSettingsSnapshot().defaultDestination || "local",
+          },
+          favoriteKey: plan.meta.defaultFavoriteKey || "general:restock",
         };
         safeEmit("general.plan.favorite.requested", favoritePayload);
       }
@@ -685,15 +914,23 @@ export async function analyzeInventory(options = {}) {
  * If signals not provided, it will analyze using defaults.
  */
 export async function buildRestockPlanFromCurrent(options = {}) {
-  const signals = Array.isArray(options.signals) ? options.signals : await analyzeInventory({ ...options, buildRestockPlan: false });
-  const plan = buildRestockPlan(signals, { restockWindowStart: options.restockWindowStart || getSettingsSnapshot().restockWindowStart });
+  const signals = Array.isArray(options.signals)
+    ? options.signals
+    : await analyzeInventory({ ...options, buildRestockPlan: false });
+  const plan = buildRestockPlan(signals, {
+    restockWindowStart:
+      options.restockWindowStart || getSettingsSnapshot().restockWindowStart,
+  });
   if (!plan) return null;
   if (options.autoFavorite) {
     safeEmit("general.plan.favorite.requested", {
       domain: "general",
       plan,
-      options: { source: "InventoryMonitor.buildRestockPlanFromCurrent", destination: getSettingsSnapshot().defaultDestination || "local" },
-      favoriteKey: plan.meta.defaultFavoriteKey || "general:restock"
+      options: {
+        source: "InventoryMonitor.buildRestockPlanFromCurrent",
+        destination: getSettingsSnapshot().defaultDestination || "local",
+      },
+      favoriteKey: plan.meta.defaultFavoriteKey || "general:restock",
     });
   }
   return plan;
@@ -715,11 +952,19 @@ export function registerLiveRecompute(debounceMs = 400) {
   const run = () => {
     clearTimeout(timer);
     timer = setTimeout(() => {
-      analyzeInventory().catch(e => console.warn("[InventoryMonitor] live recompute failed:", e));
+      analyzeInventory().catch((e) =>
+        console.warn("[InventoryMonitor] live recompute failed:", e)
+      );
     }, debounceMs);
   };
-  try { for (const t of triggers) eventBus.on?.(t, run); } catch {}
-  return () => { try { for (const t of triggers) eventBus.off?.(t, run); } catch {} };
+  try {
+    for (const t of triggers) eventBus.on?.(t, run);
+  } catch {}
+  return () => {
+    try {
+      for (const t of triggers) eventBus.off?.(t, run);
+    } catch {}
+  };
 }
 
 /* -------------------------------- testing hooks ----------------------------- */
@@ -735,7 +980,7 @@ export const _internals = {
   badgeFor,
   buildRestockPlan,
   applyAddToInventory,
-  seenOrRemember
+  seenOrRemember,
 };
 
 /* -------------------------------- default export ---------------------------- */

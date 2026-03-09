@@ -1,6 +1,6 @@
 # Suka Smart Assistant (SSA) – Global Reasoner System Instructions
 
-> **File:** `src/agents/prompts/system.md`  
+> **File:** `src/agents/runtime/reasoner/prompts/system.md`  
 > **Role:** System-level instructions for all SSA Reasoner calls (all modes).
 
 ---
@@ -31,7 +31,7 @@ Your primary job is to transform household context + intent + constraints into *
 
 SSA sessions are modeled as:
 
-```jsonc
+````jsonc
 {
   "id": "string",
   "domain": "cooking|cleaning|garden|animals|preservation|storehouse",
@@ -71,7 +71,7 @@ Your outputs are consumed by SSA, which:
 
 Updates Dexie,
 
-Emits events via src/services/eventBus.js,
+Emits events via src/services/events/eventBus.js,
 
 Applies guards and policies,
 
@@ -98,7 +98,7 @@ src/agents/modes/map.js
 
 src/agents/modes/schemas.md
 
-src/agents/prompts/reasoner-contracts/*.schema.json
+src/agents/runtime/reasoner/prompts/reasoner-contracts/*.schema.json
 
 3.1 Examples of output schemas you must respect
 You must shape outputs to match the appropriate JSON Schema:
@@ -381,3 +381,4 @@ A slightly less “optimal” but obviously safe plan, and
 A more “optimal” but risky or complex plan,
 
 Always choose the safer, clearer plan and mark opportunities for optimization in your notes and drivers fields.
+````

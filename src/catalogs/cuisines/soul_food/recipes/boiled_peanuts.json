@@ -1,0 +1,71 @@
+{
+  "id": "soul_food_boiled_peanuts",
+  "name": "Boiled Peanuts (Southern-Style)",
+  "servings": 10,
+  "ingredients": [
+    {
+      "item": "raw peanuts in shell",
+      "amount": 5,
+      "unit": "lb",
+      "prep": "green/raw; not roasted"
+    },
+    {
+      "item": "water",
+      "amount": 16,
+      "unit": "cups",
+      "prep": "or enough to fully cover peanuts by 2–3 inches"
+    },
+    {
+      "item": "kosher salt",
+      "amount": 0.5,
+      "unit": "cup",
+      "prep": "plus more to taste (salt level varies by preference)"
+    },
+
+    {
+      "item": "Cajun seasoning",
+      "amount": 2,
+      "unit": "tbsp",
+      "prep": "optional for spicy boiled peanuts"
+    },
+    {
+      "item": "cayenne pepper",
+      "amount": 0.5,
+      "unit": "tsp",
+      "prep": "optional; increase for more heat"
+    },
+    { "item": "garlic powder", "amount": 1, "unit": "tsp", "prep": "optional" },
+    { "item": "onion powder", "amount": 1, "unit": "tsp", "prep": "optional" },
+    { "item": "bay leaves", "amount": 2, "unit": "each", "prep": "optional" }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "text": "Rinse peanuts: Rinse raw peanuts thoroughly in cool water to remove dirt. Discard any damaged shells."
+    },
+    {
+      "order": 2,
+      "text": "Start the boil: Place peanuts in a large stockpot. Add water to cover by 2–3 inches. Add salt and any optional seasonings (Cajun seasoning, cayenne, garlic/onion powder, bay leaves)."
+    },
+    {
+      "order": 3,
+      "text": "Boil then simmer: Bring to a boil, then reduce heat to a steady simmer. Peanuts will float—stir occasionally and add water as needed to keep them covered."
+    },
+    {
+      "order": 4,
+      "text": "Cook until tender: Simmer until peanuts are soft and the shells feel pliable. This can take 2–4+ hours depending on peanut freshness. Taste a peanut periodically; it should be fully tender and salty throughout."
+    },
+    {
+      "order": 5,
+      "text": "Adjust seasoning: If you want them saltier, add a little more salt and simmer 15–20 minutes, then re-taste."
+    },
+    {
+      "order": 6,
+      "text": "Soak for more flavor: Turn off heat and let peanuts soak in the brine 30–60 minutes (or longer) to absorb more salt and seasoning."
+    },
+    {
+      "order": 7,
+      "text": "Serve and store: Serve warm with some brine. Refrigerate leftovers in a bit of brine for best texture; reheat gently."
+    }
+  ]
+}

@@ -85,8 +85,7 @@ const defaultState = {
       local: { enabled: true }, // IndexedDB/Dexie
       device: {
         enabled:
-          typeof window !== "undefined" &&
-          "showSaveFilePicker" in window, // File System Access API
+          typeof window !== "undefined" && "showSaveFilePicker" in window, // File System Access API
       },
       googleDrive: {
         enabled: false,
@@ -114,7 +113,14 @@ const defaultState = {
   sessions: {
     itemRuntimePanel: {
       show: true,
-      columns: ["idx", "title", "status", "plannedStart", "plannedEnd", "slack"],
+      columns: [
+        "idx",
+        "title",
+        "status",
+        "plannedStart",
+        "plannedEnd",
+        "slack",
+      ],
       compact: false,
     },
     autoPauseOnWithhold: true,
@@ -176,6 +182,22 @@ function migrateFromLegacy() {
   return null;
 }
 
+function mergeDeep(target, patch) {
+  if (Array.isArray(target) || Array.isArray(patch)) return patch;
+  if (
+    typeof target !== "object" ||
+    typeof patch !== "object" ||
+    !target ||
+    !patch
+  )
+    return patch;
+  const out = { ...target };
+  for (const [k, v] of Object.entries(patch)) {
+    out[k] = mergeDeep(target[k], v);
+  }
+  return out;
+}
+
 function load() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -208,7 +230,9 @@ let eventBus = { on() {}, off() {}, emit() {} };
 (async () => {
   try {
     // Prefer ESM import if available
-    const eb = await import(/* @vite-ignore */ "@/services/eventBus").catch(() => null);
+    const eb = await import(
+      /* @vite-ignore */ "@/services/events/eventBus"
+    ).catch(() => null);
     if (eb) eventBus = eb.default || eb.eventBus || eb;
   } catch {}
   try {
@@ -226,7 +250,8 @@ function attachEventBusListeners() {
     if (!eventBus?.on) return;
     const handler = (payload) => {
       // Normalize payload: { domain, plan, destination, path }
-      const dest = payload?.destination || state.favorites.defaultDestination || "local";
+      const dest =
+        payload?.destination || state.favorites.defaultDestination || "local";
       const entry = {
         id:
           payload?.plan?.$id ||
@@ -321,7 +346,9 @@ function setDeep(root, path, value) {
   for (let i = 0; i < parts.length - 1; i++) {
     const key = parts[i];
     const prevChild = (curPrev && curPrev[key]) ?? {};
-    const nextChild = Array.isArray(prevChild) ? prevChild.slice() : { ...prevChild };
+    const nextChild = Array.isArray(prevChild)
+      ? prevChild.slice()
+      : { ...prevChild };
     curNext[key] = nextChild;
     curPrev = prevChild;
     curNext = nextChild;
@@ -342,7 +369,9 @@ function deleteDeep(root, path) {
   for (let i = 0; i < parts.length - 1; i++) {
     const key = parts[i];
     const prevChild = (curPrev && curPrev[key]) ?? {};
-    const nextChild = Array.isArray(prevChild) ? prevChild.slice() : { ...prevChild };
+    const nextChild = Array.isArray(prevChild)
+      ? prevChild.slice()
+      : { ...prevChild };
     curNext[key] = nextChild;
     curPrev = prevChild;
     curNext = nextChild;
@@ -353,17 +382,6 @@ function deleteDeep(root, path) {
     else delete curNext[leafKey];
   }
   return nextRoot;
-}
-
-function mergeDeep(target, patch) {
-  if (Array.isArray(target) || Array.isArray(patch)) return patch;
-  if (typeof target !== "object" || typeof patch !== "object" || !target || !patch)
-    return patch;
-  const out = { ...target };
-  for (const [k, v] of Object.entries(patch)) {
-    out[k] = mergeDeep(target[k], v);
-  }
-  return out;
 }
 
 /* ------------------------- public API ------------------------- */
@@ -392,7 +410,10 @@ export function set(path, valueOrUpdater, { broadcast = true } = {}) {
   save(state);
   notify(state);
   if (broadcast)
-    bc?.postMessage?.({ type: "settings:patch", patch: setAtRoot(path, nextValue) });
+    bc?.postMessage?.({
+      type: "settings:patch",
+      patch: setAtRoot(path, nextValue),
+    });
 }
 
 /** Shallow update at the root (merge). */
@@ -512,10 +533,7 @@ export function _state() {
 /* ----------------------- Favorites helpers (new) ----------------------- */
 
 /** Programmatically record a favorite save (used by Save modal or event bus) */
-export function recordFavorite(
-  entry,
-  { destinationOverride = null } = {}
-) {
+export function recordFavorite(entry, { destinationOverride = null } = {}) {
   const dest =
     destinationOverride ||
     entry?.destination ||
@@ -619,7 +637,7 @@ function setAtRoot(path, value) {
 }
 
 /* For convenience in modules that prefer a default export */
-export default {
+const SettingsStoreDefault = {
   subscribe,
   get,
   set,
@@ -640,3 +658,10 @@ export default {
   _state,
   useSettings,
 };
+
+export default SettingsStoreDefault;
+
+/* -------------------------------------------------------------------------- */
+/* ✅ Named export required by src/ai/context/index.js                         */
+/* -------------------------------------------------------------------------- */
+export const SettingsStore = SettingsStoreDefault;

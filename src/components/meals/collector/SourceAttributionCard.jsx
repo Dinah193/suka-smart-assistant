@@ -11,14 +11,21 @@ const softRequire = (id) => {
   try {
     const req = typeof require === "function" ? require : (0, eval)("require");
     return req ? req(id) : null;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 };
 const alias = (p) => "@" + "/" + p; // discourage bundlers from static-resolving "@/..."
 
 let Icons = softRequire("lucide-react") || {};
-const mkIcon = (name) => (props) => (
-  <span aria-hidden className={props?.className || "inline-block w-4 h-4"} data-icon={name}/>
-);
+const mkIcon = (name) => (props) =>
+  (
+    <span
+      aria-hidden
+      className={props?.className || "inline-block w-4 h-4"}
+      data-icon={name}
+    />
+  );
 const {
   Link2 = mkIcon("Link2"),
   Globe = mkIcon("Globe"),
@@ -42,7 +49,7 @@ const {
 
 let eventBus = { emit: () => {}, on: () => {}, off: () => {} };
 try {
-  const mod = softRequire(alias("services/eventBus"));
+  const mod = softRequire(alias("services/events/eventBus"));
   if (mod?.eventBus) eventBus = mod.eventBus;
 } catch {}
 
@@ -65,20 +72,31 @@ const fmtDate = (d) => {
   try {
     // accept ISO or Date
     const dt = typeof d === "string" ? new Date(d) : d;
-    return dt.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
-  } catch { return String(d); }
+    return dt.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  } catch {
+    return String(d);
+  }
 };
 
 const getDomain = (url = "") => {
-  try { return new URL(url).hostname.replace(/^www\./, ""); }
-  catch { return ""; }
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return "";
+  }
 };
 
 const faviconFor = (url = "") => {
   const domain = getDomain(url);
   if (!domain) return null;
   // Lightweight public favicon service
-  return `https://www.google.com/s2/favicons?sz=64&domain=${encodeURIComponent(domain)}`;
+  return `https://www.google.com/s2/favicons?sz=64&domain=${encodeURIComponent(
+    domain
+  )}`;
 };
 
 const clamp01 = (x) => Math.max(0, Math.min(1, Number.isFinite(x) ? x : 0));
@@ -110,11 +128,14 @@ const TRUST_KEY = "suka_trusted_domains";
 const loadTrusted = () => {
   try {
     return new Set(JSON.parse(localStorage.getItem(TRUST_KEY) || "[]"));
-  } catch { return new Set(); }
+  } catch {
+    return new Set();
+  }
 };
 const saveTrusted = (set) => {
-  try { localStorage.setItem(TRUST_KEY, JSON.stringify(Array.from(set))); }
-  catch {}
+  try {
+    localStorage.setItem(TRUST_KEY, JSON.stringify(Array.from(set)));
+  } catch {}
 };
 
 /* ---------------------------------- Card ----------------------------------- */
@@ -162,17 +183,23 @@ export default function SourceAttributionCard({
   const [trustedSet, setTrustedSet] = useState(loadTrusted());
   const isTrusted = trustedSet.has(domain);
 
-  useEffect(() => { setTrustedSet(loadTrusted()); }, []);
+  useEffect(() => {
+    setTrustedSet(loadTrusted());
+  }, []);
   useEffect(() => {
     onTrustChange?.(domain, isTrusted);
   }, [domain, isTrusted, onTrustChange]);
 
   const toggleTrust = () => {
     const next = new Set(trustedSet);
-    if (isTrusted) next.delete(domain); else next.add(domain);
+    if (isTrusted) next.delete(domain);
+    else next.add(domain);
     setTrustedSet(next);
     saveTrusted(next);
-    eventBus.emit("collector.source.trust.toggled", { domain, trusted: !isTrusted });
+    eventBus.emit("collector.source.trust.toggled", {
+      domain,
+      trusted: !isTrusted,
+    });
   };
 
   const openSource = () => {
@@ -189,19 +216,29 @@ export default function SourceAttributionCard({
     eventBus.emit("collector.source.report.requested", { url, domain });
     if (automation?.runTemplate) {
       try {
-        await automation.runTemplate("collector.source.reportIssue", { url, domain, title, author, publishedAt });
+        await automation.runTemplate("collector.source.reportIssue", {
+          url,
+          domain,
+          title,
+          author,
+          publishedAt,
+        });
       } catch {}
     }
   };
 
   const mapIngredients = () => {
     if (!ingredients?.length) return;
-    eventBus.emit("meals.ingredients.mapping.open", { rows: ingredients.map(raw => ({ raw })) });
+    eventBus.emit("meals.ingredients.mapping.open", {
+      rows: ingredients.map((raw) => ({ raw })),
+    });
   };
 
   const copyCitation = async () => {
     try {
-      await navigator.clipboard?.writeText(mdCitation({ title, url, author, publishedAt }));
+      await navigator.clipboard?.writeText(
+        mdCitation({ title, url, author, publishedAt })
+      );
       eventBus.emit("collector.source.citation.copied", { url });
     } catch {}
   };
@@ -218,7 +255,11 @@ export default function SourceAttributionCard({
   const cap = (s = "") => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
   return (
-    <div className={`rounded-xl border shadow-sm bg-white ${compact ? "p-3" : "p-4"} w-full max-w-[720px]`}>
+    <div
+      className={`rounded-xl border shadow-sm bg-white ${
+        compact ? "p-3" : "p-4"
+      } w-full max-w-[720px]`}
+    >
       {/* Header */}
       <div className="flex items-start gap-3">
         <div className="w-9 h-9 rounded-lg overflow-hidden flex items-center justify-center border bg-white">
@@ -230,7 +271,10 @@ export default function SourceAttributionCard({
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <button onClick={openSource} className="text-sm font-semibold truncate hover:underline">
+            <button
+              onClick={openSource}
+              className="text-sm font-semibold truncate hover:underline"
+            >
               {title || domain || "Source"}
             </button>
             {domain ? (
@@ -258,7 +302,8 @@ export default function SourceAttributionCard({
             )}
             {scrapedAt && (
               <span className="inline-flex items-center gap-1 text-gray-500">
-                <FileClock className="w-3.5 h-3.5" /> Collected {fmtDate(scrapedAt)}
+                <FileClock className="w-3.5 h-3.5" /> Collected{" "}
+                {fmtDate(scrapedAt)}
               </span>
             )}
           </div>
@@ -281,12 +326,17 @@ export default function SourceAttributionCard({
       <div className="mt-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-1 flex-wrap">
           {tags.slice(0, 4).map((t) => (
-            <span key={t} className="text-[11px] px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+            <span
+              key={t}
+              className="text-[11px] px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100"
+            >
               {cap(t)}
             </span>
           ))}
           {tags.length > 4 && (
-            <span className="text-[11px] px-2 py-0.5 rounded-full bg-gray-50 text-gray-600 border">+{tags.length - 4}</span>
+            <span className="text-[11px] px-2 py-0.5 rounded-full bg-gray-50 text-gray-600 border">
+              +{tags.length - 4}
+            </span>
           )}
           {license && (
             <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center gap-1">
@@ -296,11 +346,16 @@ export default function SourceAttributionCard({
         </div>
         <div className="min-w-[160px]">
           <div className="flex items-center justify-between text-[11px] text-gray-500 mb-0.5">
-            <span className="inline-flex items-center gap-1"><Percent className="w-3.5 h-3.5" /> Confidence</span>
+            <span className="inline-flex items-center gap-1">
+              <Percent className="w-3.5 h-3.5" /> Confidence
+            </span>
             <span>{meterPct}%</span>
           </div>
           <div className="h-1.5 bg-gray-100 rounded">
-            <div className={`h-full rounded ${meterClass}`} style={meterBarStyle} />
+            <div
+              className={`h-full rounded ${meterClass}`}
+              style={meterBarStyle}
+            />
           </div>
         </div>
       </div>
@@ -356,7 +411,7 @@ export default function SourceAttributionCard({
         {/* Inline SendTo */}
         {SendToMenu ? (
           <SendToMenu
-            mode={"recipes"}                 // or "ingredients" depending on your page context
+            mode={"recipes"} // or "ingredients" depending on your page context
             selected={[{ id: url, title, raw: title, name: title }]}
             buttonClassName="text-xs px-2.5 py-1.5"
             label="Send to…"
@@ -364,7 +419,12 @@ export default function SourceAttributionCard({
           />
         ) : (
           <button
-            onClick={() => eventBus.emit("sendto.open", { from: "source-card", selection: [{ id: url, title }] })}
+            onClick={() =>
+              eventBus.emit("sendto.open", {
+                from: "source-card",
+                selection: [{ id: url, title }],
+              })
+            }
             className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border bg-white hover:bg-gray-50 text-xs"
             title="Send to…"
           >

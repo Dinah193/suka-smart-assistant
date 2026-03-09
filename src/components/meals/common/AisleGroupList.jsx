@@ -1,15 +1,27 @@
 // src/components/meals/common/AisleGroupList.jsx
-import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
 
 /* ------------------------------- Defensive deps ------------------------------- */
 let Icons = {};
-try { Icons = require("lucide-react"); } catch {}
+try {
+  Icons = require("lucide-react");
+} catch {}
 
 let eventBus = null;
-try { eventBus = require("@/services/eventBus").eventBus || null; } catch {}
+try {
+  eventBus = require("@/services/events/eventBus").eventBus || null;
+} catch {}
 
 let automation = null;
-try { automation = require("@/services/automation/runtime").automation || null; } catch {}
+try {
+  automation = require("@/services/automation/runtime").automation || null;
+} catch {}
 
 let useInventoryStore = () => null;
 try {
@@ -17,24 +29,43 @@ try {
   useInventoryStore = mod.useInventoryStore || useInventoryStore;
 } catch {}
 
-let toast = { success: console.log, info: console.log, error: console.error, warn: console.warn };
-try { toast = require("react-toastify").toast || toast; } catch {}
+let toast = {
+  success: console.log,
+  info: console.log,
+  error: console.error,
+  warn: console.warn,
+};
+try {
+  toast = require("react-toastify").toast || toast;
+} catch {}
 
 /* --------------------------------- Utilities --------------------------------- */
 const cx = (...xs) => xs.filter(Boolean).join(" ");
-const clamp = (n, a = 0, b = Infinity) => Math.max(a, Math.min(b, Number.isFinite(+n) ? +n : a));
-const groupBy = (arr, keyFn) => (arr || []).reduce((acc, x) => ((acc[keyFn(x)] ||= []).push(x), acc), {});
+const clamp = (n, a = 0, b = Infinity) =>
+  Math.max(a, Math.min(b, Number.isFinite(+n) ? +n : a));
+const groupBy = (arr, keyFn) =>
+  (arr || []).reduce((acc, x) => ((acc[keyFn(x)] ||= []).push(x), acc), {});
 const money = (v) =>
   typeof v === "number" && !Number.isNaN(v)
-    ? v.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 2 })
+    ? v.toLocaleString(undefined, {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 2,
+      })
     : null;
 
 const STATE_KEY = (scope = "default") => `aisleGroup.collapsed.v1.${scope}`;
 const loadCollapsed = (scope) => {
-  try { return JSON.parse(localStorage.getItem(STATE_KEY(scope)) || "{}"); } catch { return {}; }
+  try {
+    return JSON.parse(localStorage.getItem(STATE_KEY(scope)) || "{}");
+  } catch {
+    return {};
+  }
 };
 const saveCollapsed = (scope, obj) => {
-  try { localStorage.setItem(STATE_KEY(scope), JSON.stringify(obj || {})); } catch {}
+  try {
+    localStorage.setItem(STATE_KEY(scope), JSON.stringify(obj || {}));
+  } catch {}
 };
 
 const STATE_COLORS = {
@@ -70,7 +101,10 @@ const Pill = ({ tone = "default", children, title }) => {
   return (
     <span
       title={title}
-      className={cx("inline-flex items-center px-2 py-0.5 rounded-md text-[11px] border", map[tone] || map.default)}
+      className={cx(
+        "inline-flex items-center px-2 py-0.5 rounded-md text-[11px] border",
+        map[tone] || map.default
+      )}
     >
       {children}
     </span>
@@ -88,10 +122,19 @@ const AisleHeader = ({ title, count, collapsed, onToggle }) => {
     >
       <div className="flex items-center gap-2">
         <ShoppingBasket className="w-4 h-4 opacity-80" />
-        <span className="text-xs font-semibold tracking-wide uppercase">{title || "Other"}</span>
-        <span className="text-[10px] text-gray-500">{count} item{count === 1 ? "" : "s"}</span>
+        <span className="text-xs font-semibold tracking-wide uppercase">
+          {title || "Other"}
+        </span>
+        <span className="text-[10px] text-gray-500">
+          {count} item{count === 1 ? "" : "s"}
+        </span>
       </div>
-      <ChevronDown className={cx("w-4 h-4 transition-transform", collapsed && "rotate-180")} />
+      <ChevronDown
+        className={cx(
+          "w-4 h-4 transition-transform",
+          collapsed && "rotate-180"
+        )}
+      />
     </button>
   );
 };
@@ -162,7 +205,8 @@ const ItemRow = ({
     AlertTriangle = () => null,
   } = Icons;
 
-  const stateTone = STATE_COLORS[item?.state] || "bg-gray-50 border-gray-200 text-gray-700";
+  const stateTone =
+    STATE_COLORS[item?.state] || "bg-gray-50 border-gray-200 text-gray-700";
   const est = money(item?.price && item?.qty ? item.price * item.qty : null);
 
   return (
@@ -177,22 +221,41 @@ const ItemRow = ({
             aria-label={item?.checked ? "Uncheck item" : "Check item"}
             title={item?.checked ? "Uncheck" : "Check"}
           >
-            {item?.checked ? <CheckSquare className="w-5 h-5 text-emerald-600" /> : <Square className="w-5 h-5 text-gray-400" />}
+            {item?.checked ? (
+              <CheckSquare className="w-5 h-5 text-emerald-600" />
+            ) : (
+              <Square className="w-5 h-5 text-gray-400" />
+            )}
           </button>
           <div className="min-w-0">
-            <div className={cx("font-medium truncate", item?.checked && "line-through text-gray-400")}>
+            <div
+              className={cx(
+                "font-medium truncate",
+                item?.checked && "line-through text-gray-400"
+              )}
+            >
               {item?.name || "Item"}
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-1.5">
-              <span className={cx("inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] border", stateTone)}>
+              <span
+                className={cx(
+                  "inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] border",
+                  stateTone
+                )}
+              >
                 {item?.state || "need"}
               </span>
-              {Array.isArray(item?.sourceRecipes) && item.sourceRecipes.slice(0, 2).map((r, i) => (
-                <Pill key={`${r?.id || r?.title || i}`} tone="info" title="Source recipe">
-                  <ChefHat className="w-3 h-3 mr-1" />
-                  {r?.title || "Recipe"}
-                </Pill>
-              ))}
+              {Array.isArray(item?.sourceRecipes) &&
+                item.sourceRecipes.slice(0, 2).map((r, i) => (
+                  <Pill
+                    key={`${r?.id || r?.title || i}`}
+                    tone="info"
+                    title="Source recipe"
+                  >
+                    <ChefHat className="w-3 h-3 mr-1" />
+                    {r?.title || "Recipe"}
+                  </Pill>
+                ))}
               {item?.note ? <Pill>{item.note}</Pill> : null}
               {est ? <Pill tone="info">{est}</Pill> : null}
               {item?.state === "short" ? (
@@ -205,35 +268,46 @@ const ItemRow = ({
         </div>
 
         {/* right: qty editor */}
-        <QtyEditor value={item?.qty ?? 1} unit={item?.unit} onChange={(v) => onQtyChange?.(item, v)} />
+        <QtyEditor
+          value={item?.qty ?? 1}
+          unit={item?.unit}
+          onChange={(v) => onQtyChange?.(item, v)}
+        />
       </div>
 
       {/* footer: actions & substitutions */}
-      <div className={cx("mt-2 flex flex-wrap items-center gap-1.5", dense ? "text-[11px]" : "text-xs")}>
+      <div
+        className={cx(
+          "mt-2 flex flex-wrap items-center gap-1.5",
+          dense ? "text-[11px]" : "text-xs"
+        )}
+      >
         <button
           type="button"
           className="px-2 py-1 rounded-md border hover:bg-gray-50"
-          onClick={() => onStateChange?.(item, item?.state === "have" ? "need" : "have")}
+          onClick={() =>
+            onStateChange?.(item, item?.state === "have" ? "need" : "have")
+          }
           title="Toggle have/need"
         >
           <Package className="w-3.5 h-3.5 inline-block mr-1" />
           {item?.state === "have" ? "Mark need" : "Mark have"}
         </button>
 
-        {Array.isArray(item?.substitutions) && item.substitutions.length ? (
-          item.substitutions.slice(0, 3).map((s, i) => (
-            <button
-              key={`${s}-${i}`}
-              type="button"
-              className="px-2 py-1 rounded-md border hover:bg-gray-50"
-              onClick={() => onApplySub?.(item, s)}
-              title={`Substitute with ${s}`}
-            >
-              <Replace className="w-3.5 h-3.5 inline-block mr-1" />
-              {s}
-            </button>
-          ))
-        ) : null}
+        {Array.isArray(item?.substitutions) && item.substitutions.length
+          ? item.substitutions.slice(0, 3).map((s, i) => (
+              <button
+                key={`${s}-${i}`}
+                type="button"
+                className="px-2 py-1 rounded-md border hover:bg-gray-50"
+                onClick={() => onApplySub?.(item, s)}
+                title={`Substitute with ${s}`}
+              >
+                <Replace className="w-3.5 h-3.5 inline-block mr-1" />
+                {s}
+              </button>
+            ))
+          : null}
 
         <span className="flex-1" />
 
@@ -264,7 +338,7 @@ const ItemRow = ({
 /* ------------------------------- Main component ------------------------------ */
 /**
  * AisleGroupList
- * 
+ *
  * Props:
  * - items: Item[]       (see type above)
  * - dense?: boolean     (compact spacing)
@@ -272,7 +346,7 @@ const ItemRow = ({
  * - householdId?: string
  * - onChange?: (nextItems) => void
  * - onEvent?: (type, payload) => void    // after eventBus/automation emits
- * 
+ *
  * Events emitted (if eventBus exists):
  * - grocery.item.toggled          { id, checked }
  * - grocery.item.qtyChanged       { id, qty }
@@ -294,42 +368,69 @@ const AisleGroupList = ({
   const [query, setQuery] = useState("");
   const [collapsed, setCollapsed] = useState(loadCollapsed(householdId));
 
-  useEffect(() => saveCollapsed(householdId, collapsed), [collapsed, householdId]);
+  useEffect(
+    () => saveCollapsed(householdId, collapsed),
+    [collapsed, householdId]
+  );
 
   const normalized = useMemo(() => {
     const q = query.trim().toLowerCase();
     const base = items.map((x, i) => ({ idx: i, ...x }));
     if (!q) return base;
     return base.filter((x) => {
-      const hay = `${x.name || ""} ${x.aisle || ""} ${x.note || ""} ${(x.sourceRecipes || []).map((r) => r?.title).join(" ")}`.toLowerCase();
+      const hay = `${x.name || ""} ${x.aisle || ""} ${x.note || ""} ${(
+        x.sourceRecipes || []
+      )
+        .map((r) => r?.title)
+        .join(" ")}`.toLowerCase();
       return hay.includes(q);
     });
   }, [items, query]);
 
-  const groups = useMemo(() => groupBy(normalized, (x) => x.aisle || "Other"), [normalized]);
-  const aisleKeys = useMemo(() => Object.keys(groups).sort((a, b) => a.localeCompare(b)), [groups]);
+  const groups = useMemo(
+    () => groupBy(normalized, (x) => x.aisle || "Other"),
+    [normalized]
+  );
+  const aisleKeys = useMemo(
+    () => Object.keys(groups).sort((a, b) => a.localeCompare(b)),
+    [groups]
+  );
 
-  const updateItem = useCallback((idx, patch) => {
-    const next = items.slice();
-    next[idx] = { ...next[idx], ...patch };
-    onChange?.(next);
-  }, [items, onChange]);
+  const updateItem = useCallback(
+    (idx, patch) => {
+      const next = items.slice();
+      next[idx] = { ...next[idx], ...patch };
+      onChange?.(next);
+    },
+    [items, onChange]
+  );
 
-  const removeItem = useCallback((idx) => {
-    const next = items.slice(0, idx).concat(items.slice(idx + 1));
-    onChange?.(next);
-  }, [items, onChange]);
+  const removeItem = useCallback(
+    (idx) => {
+      const next = items.slice(0, idx).concat(items.slice(idx + 1));
+      onChange?.(next);
+    },
+    [items, onChange]
+  );
 
   /* --------------------------------- Handlers --------------------------------- */
   const emit = (type, payload) => {
-    try { eventBus?.emit?.(type, payload); } catch {}
-    try { automation?.runTemplate?.(type, payload); } catch {}
+    try {
+      eventBus?.emit?.(type, payload);
+    } catch {}
+    try {
+      automation?.runTemplate?.(type, payload);
+    } catch {}
     onEvent?.(type, payload);
   };
 
   const handleToggle = (it) => {
     updateItem(it.idx, { checked: !it.checked });
-    emit("grocery.item.toggled", { id: it.id, checked: !it.checked, householdId });
+    emit("grocery.item.toggled", {
+      id: it.id,
+      checked: !it.checked,
+      householdId,
+    });
   };
 
   const handleQty = (it, qty) => {
@@ -342,14 +443,20 @@ const AisleGroupList = ({
     updateItem(it.idx, { state });
     emit("grocery.item.stateChanged", { id: it.id, state, householdId });
     if (state === "have") {
-      try { inv?.markHave?.(it.name, it.unit, it.qty); } catch {}
+      try {
+        inv?.markHave?.(it.name, it.unit, it.qty);
+      } catch {}
     }
   };
 
   const handleSub = (it, s) => {
     updateItem(it.idx, { name: s, state: "need" });
     toast.info(`Substituted ${it.name} → ${s}`);
-    emit("grocery.item.substituted", { id: it.id, substitution: s, householdId });
+    emit("grocery.item.substituted", {
+      id: it.id,
+      substitution: s,
+      householdId,
+    });
   };
 
   const handleMove = (it, to) => {
@@ -368,13 +475,24 @@ const AisleGroupList = ({
   };
 
   const toggleAisle = (aisle) => {
-    const next = { ...collapsed, [aisle || "Other"]: !collapsed[aisle || "Other"] };
+    const next = {
+      ...collapsed,
+      [aisle || "Other"]: !collapsed[aisle || "Other"],
+    };
     setCollapsed(next);
-    emit("grocery.aisle.collapsed", { aisle: aisle || "Other", collapsed: next[aisle || "Other"], householdId });
+    emit("grocery.aisle.collapsed", {
+      aisle: aisle || "Other",
+      collapsed: next[aisle || "Other"],
+      householdId,
+    });
   };
 
   /* ----------------------------------- UI ------------------------------------ */
-  const { Search = () => null, RefreshCcw = () => null, CheckSquare = () => null } = Icons;
+  const {
+    Search = () => null,
+    RefreshCcw = () => null,
+    CheckSquare = () => null,
+  } = Icons;
 
   const Toolbar = () => (
     <div className="mb-2 flex items-center gap-2">
@@ -434,7 +552,12 @@ const AisleGroupList = ({
             const isCollapsed = !!collapsed[k];
             return (
               <div key={k} className="rounded-xl border overflow-hidden">
-                <AisleHeader title={k} count={arr.length} collapsed={isCollapsed} onToggle={() => toggleAisle(k)} />
+                <AisleHeader
+                  title={k}
+                  count={arr.length}
+                  collapsed={isCollapsed}
+                  onToggle={() => toggleAisle(k)}
+                />
                 {!isCollapsed ? (
                   <div className="p-2 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
                     {arr.map((it) => (

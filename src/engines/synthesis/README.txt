@@ -49,7 +49,7 @@ normalize → synthesize → dedupe → lead-time → validate → register/comm
 
 Event Model
 -----------
-• Single bus: src/services/eventBus.js
+• Single bus: src/services/events/eventBus.js
 • Envelope: { type, ts, source, data } (ts = ISO string)
 • Synthesis EventEmitter provides typed helpers for common events and handles optional Hub export for mutation events.
 

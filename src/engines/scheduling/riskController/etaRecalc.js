@@ -36,7 +36,7 @@ let eventBus = {
   on: () => () => {},
 };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -167,13 +167,13 @@ const store = {
  */
 function estimateRemainingMinutes(args) {
   const {
-    plannedMinutes,     // number
-    startISO,           // may be null
-    endISO,             // planned end (for context)
-    nowMs,              // now in ms
-    percent,            // 0..1
-    remainingOverride,  // optional number
-    prevVelMinPerUnit,  // optional previous velocity (min per pct-unit)
+    plannedMinutes, // number
+    startISO, // may be null
+    endISO, // planned end (for context)
+    nowMs, // now in ms
+    percent, // 0..1
+    remainingOverride, // optional number
+    prevVelMinPerUnit, // optional previous velocity (min per pct-unit)
   } = args;
 
   if (isNum(remainingOverride)) {
@@ -199,7 +199,9 @@ function estimateRemainingMinutes(args) {
   const rawVel = p > 0 ? elapsedMin / p : planned;
   // Smooth with EWMA toward previous velocity if given
   const alpha = 0.3;
-  const vel = isNum(prevVelMinPerUnit) ? (1 - alpha) * prevVelMinPerUnit + alpha * rawVel : rawVel;
+  const vel = isNum(prevVelMinPerUnit)
+    ? (1 - alpha) * prevVelMinPerUnit + alpha * rawVel
+    : rawVel;
 
   const remainingPct = max(0, 1 - p);
   const remain = remainingPct * vel;
@@ -231,13 +233,32 @@ async function recalcETA(req = {}) {
     const planId = String(req.planId || "").trim();
     if (!planId) {
       emit("scheduling.eta.error", source, { message: "Missing planId" });
-      return { planId: "", planETAISO: null, windows: [], driftMin: 0, ts: nowISO() };
+      return {
+        planId: "",
+        planETAISO: null,
+        windows: [],
+        driftMin: 0,
+        ts: nowISO(),
+      };
     }
 
     const snap = await store.getPlan(planId);
-    if (!snap || !Array.isArray(snap.windows) || !Array.isArray(snap.schedule)) {
-      emit("scheduling.eta.error", source, { message: "Plan not found or invalid", planId });
-      return { planId, planETAISO: null, windows: [], driftMin: 0, ts: nowISO() };
+    if (
+      !snap ||
+      !Array.isArray(snap.windows) ||
+      !Array.isArray(snap.schedule)
+    ) {
+      emit("scheduling.eta.error", source, {
+        message: "Plan not found or invalid",
+        planId,
+      });
+      return {
+        planId,
+        planETAISO: null,
+        windows: [],
+        driftMin: 0,
+        ts: nowISO(),
+      };
     }
 
     // Merge progress updates into progress map
@@ -270,7 +291,10 @@ async function recalcETA(req = {}) {
       const row = schedIdx.get(w.id) || {};
       const plannedStart = toMs(w.startISO);
       const plannedEnd = toMs(w.endISO);
-      const plannedDurMin = isNum(row?.ef) && isNum(row?.es) ? (row.ef - row.es) : max(1, Math.round((plannedEnd - plannedStart) / 60000));
+      const plannedDurMin =
+        isNum(row?.ef) && isNum(row?.es)
+          ? row.ef - row.es
+          : max(1, Math.round((plannedEnd - plannedStart) / 60000));
 
       const prog = mergedProgress[w.id] || {};
       let etaMs;
@@ -290,7 +314,9 @@ async function recalcETA(req = {}) {
           endISO: w.endISO,
           nowMs,
           percent: isNum(prog.percent) ? prog.percent : 0,
-          remainingOverride: isNum(prog.remainingMinutes) ? prog.remainingMinutes : undefined,
+          remainingOverride: isNum(prog.remainingMinutes)
+            ? prog.remainingMinutes
+            : undefined,
           prevVelMinPerUnit: isNum(prog.prevVel) ? prog.prevVel : undefined,
         });
         etaMs = addMin(nowMs, remainMin);
@@ -323,7 +349,10 @@ async function recalcETA(req = {}) {
       if (dag?.buildGraph) {
         const planTasks = snap.windows.map((w) => ({
           id: w.id,
-          duration: max(1, Math.round((toMs(w.endISO) - toMs(w.startISO)) / 60000)),
+          duration: max(
+            1,
+            Math.round((toMs(w.endISO) - toMs(w.startISO)) / 60000)
+          ),
         }));
         const links = inferLinksFromSchedule(snap.schedule);
         const g = dag.buildGraph(planTasks, links);
@@ -367,11 +396,16 @@ async function recalcETA(req = {}) {
     }));
 
     // Plan-level ETA is max of window ETAs
-    const planETAms = updatedWindows.reduce((acc, w) => max(acc, toMs(w.etaISO) || 0), 0);
-    const planETAISO = planETAms ? toISO(planETAms) : (snap.planEndISO || null);
+    const planETAms = updatedWindows.reduce(
+      (acc, w) => max(acc, toMs(w.etaISO) || 0),
+      0
+    );
+    const planETAISO = planETAms ? toISO(planETAms) : snap.planEndISO || null;
 
     const prevPlanEnd = toMs(snap.planEndISO);
-    const driftMin = isNum(prevPlanEnd) ? Math.round((planETAms - prevPlanEnd) / 60000) : 0;
+    const driftMin = isNum(prevPlanEnd)
+      ? Math.round((planETAms - prevPlanEnd) / 60000)
+      : 0;
 
     const updatedSnap = {
       ...snap,
@@ -386,7 +420,12 @@ async function recalcETA(req = {}) {
       planId,
       planETAISO,
       driftMin,
-      windows: updatedWindows.map((w) => ({ id: w.id, etaISO: w.etaISO, delayMin: w.delayMin, status: w.status })),
+      windows: updatedWindows.map((w) => ({
+        id: w.id,
+        etaISO: w.etaISO,
+        delayMin: w.delayMin,
+        status: w.status,
+      })),
       planMeta: snap.planMeta || {},
     };
 
@@ -395,12 +434,28 @@ async function recalcETA(req = {}) {
       await exportToHubIfEnabled({ action: "eta.recalculated", ...payload });
     }
 
-    return { planId, planETAISO, windows: payload.windows, driftMin, ts: nowISO() };
+    return {
+      planId,
+      planETAISO,
+      windows: payload.windows,
+      driftMin,
+      ts: nowISO(),
+    };
   } catch (err) {
-    emit("scheduling.eta.error", "engines/scheduling/riskController/etaRecalc.recalcETA", {
-      message: String(err?.message || err),
-    });
-    return { planId: String(req?.planId || ""), planETAISO: null, windows: [], driftMin: 0, ts: nowISO() };
+    emit(
+      "scheduling.eta.error",
+      "engines/scheduling/riskController/etaRecalc.recalcETA",
+      {
+        message: String(err?.message || err),
+      }
+    );
+    return {
+      planId: String(req?.planId || ""),
+      planETAISO: null,
+      windows: [],
+      driftMin: 0,
+      ts: nowISO(),
+    };
   }
 }
 
@@ -408,10 +463,21 @@ async function recalcETA(req = {}) {
 
 function normalizeProgress(p) {
   const out = {};
-  if (p.startedAt) out.startedAt = isStr(p.startedAt) ? p.startedAt : (p.startedAt instanceof Date ? p.startedAt.toISOString() : undefined);
-  if (p.completedAt) out.completedAt = isStr(p.completedAt) ? p.completedAt : (p.completedAt instanceof Date ? p.completedAt.toISOString() : undefined);
+  if (p.startedAt)
+    out.startedAt = isStr(p.startedAt)
+      ? p.startedAt
+      : p.startedAt instanceof Date
+      ? p.startedAt.toISOString()
+      : undefined;
+  if (p.completedAt)
+    out.completedAt = isStr(p.completedAt)
+      ? p.completedAt
+      : p.completedAt instanceof Date
+      ? p.completedAt.toISOString()
+      : undefined;
   if (isNum(p.percent)) out.percent = clamp01(p.percent);
-  if (isNum(p.remainingMinutes)) out.remainingMinutes = max(0, Math.round(p.remainingMinutes));
+  if (isNum(p.remainingMinutes))
+    out.remainingMinutes = max(0, Math.round(p.remainingMinutes));
   if (isNum(p.prevVel)) out.prevVel = max(0.1, p.prevVel);
   if (isStr(p.notes)) out.notes = p.notes;
   return out;

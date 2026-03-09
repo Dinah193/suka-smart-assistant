@@ -32,7 +32,7 @@ try {
 
 let eventBus = { emit: () => {}, on: () => {}, off: () => {} };
 try {
-  eventBus = require("@/services/eventBus").eventBus || eventBus;
+  eventBus = require("@/services/events/eventBus").eventBus || eventBus;
 } catch {}
 
 let automation = null;
@@ -54,14 +54,15 @@ try {
 let usePersonalFoodStandards = () => ({ standards: {} });
 try {
   usePersonalFoodStandards =
-    require("@/app/context/HouseholdSettingsContext").usePersonalFoodStandards ||
-    usePersonalFoodStandards;
+    require("@/app/context/HouseholdSettingsContext")
+      .usePersonalFoodStandards || usePersonalFoodStandards;
 } catch {}
 
 let useBatchQueue = () => ({ count: 0, startSession: () => {} });
 try {
   useBatchQueue =
-    require("@/features/meals/BatchQueueProvider").useBatchQueue || useBatchQueue;
+    require("@/features/meals/BatchQueueProvider").useBatchQueue ||
+    useBatchQueue;
 } catch {}
 
 let useMealPlanStore = () => ({
@@ -72,7 +73,8 @@ let useMealPlanStore = () => ({
   buildFromRules: () => {},
 });
 try {
-  useMealPlanStore = require("@/store/MealPlanStore").useMealPlanStore || useMealPlanStore;
+  useMealPlanStore =
+    require("@/store/MealPlanStore").useMealPlanStore || useMealPlanStore;
 } catch {}
 
 /* --------------------------------- Utilities -------------------------------- */
@@ -82,12 +84,27 @@ const fmt = (n) => new Intl.NumberFormat().format(n);
 /* ---------------------------------- Component -------------------------------- */
 export default function EmptyStatePrompt({
   scope = "week", // 'day' | 'week' | 'month'
-  onAction,       // optional callback (actionId) => void
+  onAction, // optional callback (actionId) => void
   className,
 }) {
   const {
-    Sparkles, FolderOpen, ScanText, ListChecks, Refrigerator, Soup, CalendarDays,
-    ClipboardList, Upload, Download, Brain, Filter, ChevronRight, Search, Settings2, Clock, Layers
+    Sparkles,
+    FolderOpen,
+    ScanText,
+    ListChecks,
+    Refrigerator,
+    Soup,
+    CalendarDays,
+    ClipboardList,
+    Upload,
+    Download,
+    Brain,
+    Filter,
+    ChevronRight,
+    Search,
+    Settings2,
+    Clock,
+    Layers,
   } = Icons;
 
   const { standards } = usePersonalFoodStandards();
@@ -107,7 +124,8 @@ export default function EmptyStatePrompt({
   // Lightweight recommendations from pantry + standards
   const pantryIdeas = useMemo(() => {
     try {
-      const list = InventoryMonitor.suggestFromPantry?.({ standards, max: 6 }) || [];
+      const list =
+        InventoryMonitor.suggestFromPantry?.({ standards, max: 6 }) || [];
       return Array.isArray(list) ? list.slice(0, 6) : [];
     } catch {
       return [];
@@ -117,7 +135,8 @@ export default function EmptyStatePrompt({
   // Feature flags (soft detection so we never crash)
   const hasScanner = !!automation?.runTemplate;
   const hasTemplates = typeof mealPlan?.hydrateFromTemplates === "function";
-  const hasAIBuilder = typeof mealPlan?.buildFromRules === "function" || !!automation?.runTemplate;
+  const hasAIBuilder =
+    typeof mealPlan?.buildFromRules === "function" || !!automation?.runTemplate;
 
   // Quick CTA definitions
   const actions = [
@@ -138,16 +157,19 @@ export default function EmptyStatePrompt({
       desc: "Capture from web, photos, or files.",
       icon: ScanText,
       onClick: () => {
-        automation.runTemplate?.("meals.collector.openScanner", { source: "EmptyStatePrompt" });
+        automation.runTemplate?.("meals.collector.openScanner", {
+          source: "EmptyStatePrompt",
+        });
         onAction?.("scan-recipes");
       },
     },
     {
       id: "pantry-suggest",
       label: "Generate from Pantry",
-      desc: pantry.itemsOnHand > 0
-        ? `Use ${fmt(pantry.itemsOnHand)} on-hand items`
-        : "Use what you already have",
+      desc:
+        pantry.itemsOnHand > 0
+          ? `Use ${fmt(pantry.itemsOnHand)} on-hand items`
+          : "Use what you already have",
       icon: Refrigerator,
       onClick: () => {
         eventBus.emit("meals.plan.generateFromPantry", { scope, standards });
@@ -157,7 +179,9 @@ export default function EmptyStatePrompt({
     {
       id: "batch-session",
       label: "Start Batch Session",
-      desc: batch.count ? `Queue has ${batch.count} recipe(s)` : "Cook ahead for the week",
+      desc: batch.count
+        ? `Queue has ${batch.count} recipe(s)`
+        : "Cook ahead for the week",
       icon: Soup,
       onClick: () => {
         batch.startSession?.();
@@ -171,7 +195,9 @@ export default function EmptyStatePrompt({
       desc: "Drop in a proven weekly structure",
       icon: ClipboardList,
       onClick: () => {
-        try { mealPlan.hydrateFromTemplates?.({ scope }); } catch {}
+        try {
+          mealPlan.hydrateFromTemplates?.({ scope });
+        } catch {}
         eventBus.emit("meals.plan.applyTemplate", { scope });
         onAction?.("apply-template");
       },
@@ -184,9 +210,16 @@ export default function EmptyStatePrompt({
       onClick: () => {
         // Prefer your store builder; fall back to an automation template
         if (typeof mealPlan.buildFromRules === "function") {
-          mealPlan.buildFromRules({ scope, standards, source: "EmptyStatePrompt" });
+          mealPlan.buildFromRules({
+            scope,
+            standards,
+            source: "EmptyStatePrompt",
+          });
         } else {
-          automation.runTemplate?.("meals.ai.builder.open", { scope, standards });
+          automation.runTemplate?.("meals.ai.builder.open", {
+            scope,
+            standards,
+          });
         }
         eventBus.emit("meals.ai.builder.requested", { scope });
         onAction?.("ai-builder");
@@ -221,7 +254,8 @@ export default function EmptyStatePrompt({
         </h3>
       </div>
       <p className="mt-2 text-sm text-gray-600">
-        Start with what you have, pull favorites from your vault, or let the system propose a balanced plan.
+        Start with what you have, pull favorites from your vault, or let the
+        system propose a balanced plan.
       </p>
 
       {/* Collect • Decide • Plan */}
@@ -280,7 +314,9 @@ export default function EmptyStatePrompt({
         <div className="mt-6 text-left">
           <div className="flex items-center gap-2 mb-2">
             <Refrigerator className="w-4 h-4 text-gray-600" />
-            <h4 className="text-sm font-semibold text-gray-800">Quick ideas from your pantry</h4>
+            <h4 className="text-sm font-semibold text-gray-800">
+              Quick ideas from your pantry
+            </h4>
           </div>
           <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
             {pantryIdeas.map((r, idx) => (
@@ -289,15 +325,25 @@ export default function EmptyStatePrompt({
                 className="flex items-center justify-between gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2"
               >
                 <div className="truncate">
-                  <div className="text-sm font-medium text-gray-900 truncate">{r.title || "Recipe"}</div>
-                  {r.badge ? <div className="text-[11px] text-gray-600">{r.badge}</div> : null}
+                  <div className="text-sm font-medium text-gray-900 truncate">
+                    {r.title || "Recipe"}
+                  </div>
+                  {r.badge ? (
+                    <div className="text-[11px] text-gray-600">{r.badge}</div>
+                  ) : null}
                 </div>
                 <button
                   type="button"
                   className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-xs bg-white border-gray-300 text-gray-800 hover:bg-gray-50"
                   onClick={() => {
-                    try { mealPlan.addFromRecipe?.(r); } catch {}
-                    eventBus.emit("meals.plan.add", { id: r.id, title: r.title, source: "EmptyStatePrompt" });
+                    try {
+                      mealPlan.addFromRecipe?.(r);
+                    } catch {}
+                    eventBus.emit("meals.plan.add", {
+                      id: r.id,
+                      title: r.title,
+                      source: "EmptyStatePrompt",
+                    });
                   }}
                 >
                   Add <ChevronRight className="w-3 h-3" />
@@ -312,7 +358,9 @@ export default function EmptyStatePrompt({
       <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-500">
         <div className="flex items-center gap-2">
           <Settings2 className="w-3 h-3" />
-          Tip: set defaults in <span className="font-medium">Settings → Meals</span> (e.g., auto-apply standards, default plan scope).
+          Tip: set defaults in{" "}
+          <span className="font-medium">Settings → Meals</span> (e.g.,
+          auto-apply standards, default plan scope).
         </div>
         <div className="flex items-center gap-3">
           <span className="hidden sm:inline">Shortcuts:</span>
@@ -327,7 +375,14 @@ export default function EmptyStatePrompt({
 
 /* --------------------------------- Subparts --------------------------------- */
 
-function ActionButton({ id, label, desc, icon: Icon, tone = "default", onClick }) {
+function ActionButton({
+  id,
+  label,
+  desc,
+  icon: Icon,
+  tone = "default",
+  onClick,
+}) {
   return (
     <button
       type="button"
@@ -344,18 +399,35 @@ function ActionButton({ id, label, desc, icon: Icon, tone = "default", onClick }
         <div
           className={cx(
             "rounded-lg p-2 border",
-            tone === "primary" ? "bg-emerald-700/20 border-emerald-500" : "bg-gray-100 border-gray-200"
+            tone === "primary"
+              ? "bg-emerald-700/20 border-emerald-500"
+              : "bg-gray-100 border-gray-200"
           )}
         >
           {Icon ? (
-            <Icon className={cx("w-5 h-5", tone === "primary" ? "text-white" : "text-gray-700")} />
+            <Icon
+              className={cx(
+                "w-5 h-5",
+                tone === "primary" ? "text-white" : "text-gray-700"
+              )}
+            />
           ) : null}
         </div>
         <div className="flex-1">
-          <div className={cx("font-medium", tone === "primary" ? "text-white" : "text-gray-900")}>
+          <div
+            className={cx(
+              "font-medium",
+              tone === "primary" ? "text-white" : "text-gray-900"
+            )}
+          >
             {label}
           </div>
-          <div className={cx("text-xs", tone === "primary" ? "text-emerald-50/90" : "text-gray-600")}>
+          <div
+            className={cx(
+              "text-xs",
+              tone === "primary" ? "text-emerald-50/90" : "text-gray-600"
+            )}
+          >
             {desc}
           </div>
         </div>

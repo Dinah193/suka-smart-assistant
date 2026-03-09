@@ -1,0 +1,382 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-20T00:00:00.000Z",
+
+  "meta": {
+    "id": "recipes.levantine.goat_shawarma",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Goat Shawarma (Oven or Stovetop)",
+    "description": "Levantine-style goat shawarma with a bold warm-spice marinade, lemon, garlic, and optional yogurt for tenderness. Designed for home kitchens: sheet-pan roast, Dutch-oven roast, or quick skillet sear depending on the cut.",
+    "tags": [
+      "cuisine.levantine",
+      "goat",
+      "shawarma",
+      "high_protein",
+      "mealprep.friendly",
+      "oven",
+      "stovetop",
+      "spiced",
+      "halal_friendly"
+    ]
+  },
+
+  "summary": "Goat shawarma with a classic Levantine shawarma spice profile (cumin, coriander, paprika, turmeric, allspice/cinnamon) plus garlic and lemon. Use shoulder/leg cubes for roasting or braising, or thin slices for skillet searing. Finish with high heat for charred edges and serve in pita or bowls with tahini/garlic sauce, pickles, and salad.",
+
+  "yields": {
+    "servings": 6,
+    "makes": "About 1.0–1.3 kg cooked goat (enough for 6 wraps or 6 bowls)"
+  },
+
+  "timing": {
+    "activeMins": 30,
+    "totalMins": 90,
+    "notes": "Total assumes oven roasting of cubes plus resting. If braising tougher cuts, total can be 2–3 hours. Excludes marinating time (recommended 4–24 hours)."
+  },
+
+  "diet": {
+    "tags": ["gluten_free_optional", "high_protein"],
+    "notes": "Use gluten-free pita or serve as a bowl for gluten-free. Omit yogurt or use dairy-free yogurt to avoid dairy."
+  },
+
+  "methods": [
+    "marinate",
+    "roast",
+    "sear_optional",
+    "braise_optional",
+    "broil_optional"
+  ],
+
+  "compat": {
+    "kitchenCapabilitiesAnyOf": [
+      "oven",
+      "stovetop",
+      "broiler_optional",
+      "dutch_oven_optional"
+    ],
+    "notes": "Best results come from roasting then broiling (or searing) for charred edges."
+  },
+
+  "allergens": ["milk"],
+
+  "safety": {
+    "foodSafetyNotes": [
+      "Handle raw meat safely; avoid cross-contamination.",
+      "Cook goat until appropriately tender for the cut: thin slices cook quickly; shoulder/leg cubes need time to become tender.",
+      "If using leftover marinade as sauce, boil it first; do not use raw marinade that touched raw meat.",
+      "Cool leftovers quickly and refrigerate within 2 hours; reheat until steaming hot."
+    ]
+  },
+
+  "ingredientGroups": [
+    {
+      "id": "group.goat",
+      "label": "Goat",
+      "ingredientIds": ["ing.goat_shoulder_or_leg_cubed"]
+    },
+    {
+      "id": "group.marinade",
+      "label": "Shawarma marinade",
+      "ingredientIds": [
+        "ing.lemon_juice",
+        "ing.olive_oil",
+        "ing.garlic",
+        "ing.yogurt_plain_optional",
+        "ing.cumin_ground",
+        "ing.coriander_ground",
+        "ing.paprika",
+        "ing.turmeric_ground",
+        "ing.allspice_ground",
+        "ing.cinnamon_ground_optional",
+        "ing.black_pepper",
+        "ing.salt_kosher",
+        "ing.red_pepper_flakes_optional"
+      ]
+    },
+    {
+      "id": "group.onion_pan_optional",
+      "label": "Optional roasting aromatics",
+      "ingredientIds": ["ing.onion_yellow", "ing.lemon_slices_optional"]
+    },
+    {
+      "id": "group.serving_optional",
+      "label": "To serve (optional)",
+      "ingredientIds": [
+        "ing.pita_optional",
+        "ing.tahini_sauce_optional",
+        "ing.garlic_sauce_optional",
+        "ing.tomato",
+        "ing.cucumber",
+        "ing.red_onion_optional",
+        "ing.pickles_or_pickled_turnips",
+        "ing.parsley_optional",
+        "ing.hot_sauce_optional"
+      ]
+    }
+  ],
+
+  "ingredients": [
+    {
+      "id": "ing.goat_shoulder_or_leg_cubed",
+      "label": "Goat shoulder or leg, cut into 1-inch cubes",
+      "amount": { "value": 1400, "unit": "g" },
+      "notes": "Use boneless if possible. For very tough cuts, use the braise option."
+    },
+
+    {
+      "id": "ing.lemon_juice",
+      "label": "Fresh lemon juice",
+      "amount": { "value": 60, "unit": "ml" },
+      "notes": "About 1/4 cup."
+    },
+    {
+      "id": "ing.olive_oil",
+      "label": "Olive oil",
+      "amount": { "value": 60, "unit": "ml" },
+      "notes": "About 1/4 cup."
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic cloves, finely grated or minced",
+      "amount": { "value": 18, "unit": "g" },
+      "notes": "About 5–6 cloves."
+    },
+    {
+      "id": "ing.yogurt_plain_optional",
+      "label": "Plain yogurt (optional, for tenderness)",
+      "amount": { "value": 180, "unit": "g" },
+      "notes": "Optional. Helps tenderize and add richness. Use dairy-free yogurt if needed."
+    },
+    {
+      "id": "ing.cumin_ground",
+      "label": "Ground cumin",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "About 2 tsp."
+    },
+    {
+      "id": "ing.coriander_ground",
+      "label": "Ground coriander",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "About 2 tsp."
+    },
+    {
+      "id": "ing.paprika",
+      "label": "Paprika (sweet or smoked)",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": "About 1 Tbsp."
+    },
+    {
+      "id": "ing.turmeric_ground",
+      "label": "Ground turmeric",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1 tsp."
+    },
+    {
+      "id": "ing.allspice_ground",
+      "label": "Ground allspice",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1 tsp."
+    },
+    {
+      "id": "ing.cinnamon_ground_optional",
+      "label": "Ground cinnamon (optional)",
+      "amount": { "value": 0.5, "unit": "g" },
+      "notes": "About 1/4 tsp."
+    },
+    {
+      "id": "ing.black_pepper",
+      "label": "Ground black pepper",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1 tsp."
+    },
+    {
+      "id": "ing.salt_kosher",
+      "label": "Kosher salt",
+      "amount": { "value": 14, "unit": "g" },
+      "notes": "About 2 1/4 tsp. Adjust to taste."
+    },
+    {
+      "id": "ing.red_pepper_flakes_optional",
+      "label": "Red pepper flakes (optional)",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "About 1/2 tsp, or to taste."
+    },
+
+    {
+      "id": "ing.onion_yellow",
+      "label": "Yellow onion, thinly sliced (optional)",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "Optional bed for roasting; turns sweet and jammy."
+    },
+    {
+      "id": "ing.lemon_slices_optional",
+      "label": "Lemon, thinly sliced (optional)",
+      "amount": { "value": 1, "unit": "count" }
+    },
+
+    {
+      "id": "ing.pita_optional",
+      "label": "Pita bread (optional)",
+      "amount": { "value": 6, "unit": "count" },
+      "notes": "Warm before serving."
+    },
+    {
+      "id": "ing.tahini_sauce_optional",
+      "label": "Tahini sauce (optional)",
+      "amount": { "value": 180, "unit": "ml" },
+      "notes": "Serve alongside or drizzle."
+    },
+    {
+      "id": "ing.garlic_sauce_optional",
+      "label": "Garlic sauce (optional)",
+      "amount": { "value": 180, "unit": "ml" },
+      "notes": "Toum-style or quick yogurt-garlic sauce."
+    },
+    {
+      "id": "ing.tomato",
+      "label": "Tomatoes, sliced (optional)",
+      "amount": { "value": 250, "unit": "g" }
+    },
+    {
+      "id": "ing.cucumber",
+      "label": "Cucumber, sliced (optional)",
+      "amount": { "value": 200, "unit": "g" }
+    },
+    {
+      "id": "ing.red_onion_optional",
+      "label": "Red onion, thinly sliced (optional)",
+      "amount": { "value": 80, "unit": "g" }
+    },
+    {
+      "id": "ing.pickles_or_pickled_turnips",
+      "label": "Pickles or pickled turnips (optional)",
+      "amount": { "value": 150, "unit": "g" }
+    },
+    {
+      "id": "ing.parsley_optional",
+      "label": "Fresh parsley, chopped (optional)",
+      "amount": { "value": 10, "unit": "g" }
+    },
+    {
+      "id": "ing.hot_sauce_optional",
+      "label": "Hot sauce (optional)",
+      "amount": { "value": 60, "unit": "ml" }
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.make_marinade",
+      "title": "Make the shawarma marinade",
+      "instructions": [
+        "In a large bowl, whisk together lemon juice, olive oil, grated garlic, yogurt (optional), cumin, coriander, paprika, turmeric, allspice, cinnamon (optional), black pepper, salt, and red pepper flakes (optional).",
+        "Taste the marinade (before adding meat) and adjust salt/lemon/spice; it should be boldly seasoned."
+      ]
+    },
+    {
+      "id": "step.marinate_goat",
+      "title": "Marinate the goat",
+      "instructions": [
+        "Add goat cubes and toss until fully coated.",
+        "Cover and refrigerate at least 4 hours (best 12–24 hours).",
+        "If short on time, marinate at room temperature for 45 minutes and cook promptly (flavor will be lighter)."
+      ],
+      "timers": [
+        {
+          "id": "timer.minimum_marinade",
+          "label": "Minimum marinate",
+          "minutes": 240
+        }
+      ]
+    },
+    {
+      "id": "step.preheat_setup",
+      "title": "Preheat and set up the pan",
+      "instructions": [
+        "Heat oven to 425°F / 220°C.",
+        "Line a sheet pan with foil for easier cleanup.",
+        "Optional: spread sliced onion on the pan as a bed; add lemon slices if using."
+      ]
+    },
+    {
+      "id": "step.roast",
+      "title": "Roast until browned and tender",
+      "instructions": [
+        "Spread goat in a single layer on the sheet pan (include onions if using). Leave space so it roasts rather than steams.",
+        "Roast 25–40 minutes, stirring once or twice, until browned and the pieces are tender enough to bite.",
+        "If your goat is older/tougher and not tender by 40 minutes, switch to the braise option (below) for best texture."
+      ],
+      "timers": [
+        {
+          "id": "timer.roast",
+          "label": "Roast (check tenderness)",
+          "minutes": 35
+        }
+      ]
+    },
+    {
+      "id": "step.char_finish",
+      "title": "Finish with char (recommended)",
+      "instructions": [
+        "For shawarma-style edges, broil 2–5 minutes until browned/charred in spots (watch closely).",
+        "Alternatively, sear the roasted goat quickly in a very hot skillet with a drizzle of oil for 2–3 minutes."
+      ],
+      "timers": [
+        { "id": "timer.broil", "label": "Broil (watch closely)", "minutes": 3 }
+      ]
+    },
+    {
+      "id": "step.rest",
+      "title": "Rest and toss with juices",
+      "instructions": [
+        "Rest goat 5 minutes.",
+        "Toss with pan juices and roasted onions for maximum flavor."
+      ],
+      "timers": [{ "id": "timer.rest", "label": "Rest", "minutes": 5 }]
+    },
+    {
+      "id": "step.serve",
+      "title": "Serve",
+      "instructions": [
+        "Serve in warm pita or bowls with tahini sauce or garlic sauce, sliced tomatoes and cucumber, red onion (optional), pickles/pickled turnips, parsley, and hot sauce (optional).",
+        "Leftovers keep 3–4 days refrigerated. Reheat in a hot skillet for best texture."
+      ]
+    }
+  ],
+
+  "notes": [
+    "Cut guidance: If you have thin goat slices (like shaved/steak-style), cook fast in a hot skillet 2–4 minutes total, then finish with a quick char.",
+    "Tenderness guidance: Goat varies widely by age/cut. If your roast is flavorful but chewy, convert to a braise: add a splash of water/stock, cover tightly, and cook low until tender.",
+    "Flavor options: Add 1 tsp ground cardamom or 1–2 tsp sumac to the spice blend for a more aromatic profile."
+  ],
+
+  "variations": [
+    {
+      "id": "var.braise_for_tough_goat",
+      "label": "Braise option (best for tougher/older goat)",
+      "changes": [
+        "After 20–25 minutes of roasting (or instead of roasting), transfer goat and all pan juices to a Dutch oven.",
+        "Add 240–360 ml water/stock, cover tightly, and simmer very gently (or bake at 325°F / 165°C) for 1.5–2.5 hours until fork-tender.",
+        "Uncover, increase heat, and reduce liquid to coat the meat; finish with a quick broil or skillet sear for charred edges."
+      ]
+    },
+    {
+      "id": "var.skewer_style",
+      "label": "Skewer-style goat shawarma",
+      "changes": [
+        "Thread marinated goat onto skewers and grill or broil, turning, until browned and tender.",
+        "Rest, then slice/shave into pita."
+      ]
+    },
+    {
+      "id": "var.dairy_free",
+      "label": "Dairy-free marinade",
+      "changes": [
+        "Omit yogurt; add an extra 15 ml olive oil.",
+        "Marinate 12–24 hours for best tenderness without dairy."
+      ]
+    }
+  ]
+}

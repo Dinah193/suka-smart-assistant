@@ -24,21 +24,25 @@
  *   nutrition.scrape.error
  */
 
-import crypto from 'crypto';
-import eventBus from 'src/services/eventBus.js';
+import crypto from "crypto";
+import eventBus from "src/services/events/eventBus.js";
 
 // Soft-select a DB adapter at runtime (Postgres, Mongo, or a generic adapter).
-const pgAdapter = await softImport('src/server/db/adapters/nutrition.pg.js');
-const mongoAdapter = await softImport('src/server/db/adapters/nutrition.mongo.js');
-const genericService = await softImport('src/server/services/NutritionDB.js'); // legacy or generic
+const pgAdapter = await softImport("src/server/db/adapters/nutrition.pg.js");
+const mongoAdapter = await softImport(
+  "src/server/db/adapters/nutrition.mongo.js"
+);
+const genericService = await softImport("src/server/services/NutritionDB.js"); // legacy or generic
 
 // Soft-select a scraper implementation.
 //  A) src/server/scrapers/nutritionScraper.js  → { fetchNutrition(name, hint?) }
 //  B) src/server/services/ScraperOrchestrator.js → { enqueueNutritionJob({ normalizedName, hint }) }
-const scraper = await softImport('src/server/scrapers/nutritionScraper.js');
-const orchestrator = await softImport('src/server/services/ScraperOrchestrator.js');
+const scraper = await softImport("src/server/scrapers/nutritionScraper.js");
+const orchestrator = await softImport(
+  "src/server/services/ScraperOrchestrator.js"
+);
 
-const SOURCE = 'server.services.nutrition';
+const SOURCE = "server.services.nutrition";
 
 // ───────────────────────────────────────────────────────────────────────────────
 // Public API
@@ -60,17 +64,24 @@ export async function getNutritionFromDB(params = {}) {
 
     let out = null;
     if (id) out = await safeCall(() => adapter.getById(id));
-    if (!out?.data && name) out = await safeCall(() => adapter.getByName(normalizeName(name)));
+    if (!out?.data && name)
+      out = await safeCall(() => adapter.getByName(normalizeName(name)));
 
     if (out?.ok && out.data) {
-      emit('nutrition.db.lookup.hit', { id, name: name || undefined, idOrName: id || name });
+      emit("nutrition.db.lookup.hit", {
+        id,
+        name: name || undefined,
+        idOrName: id || name,
+      });
       return { ok: true, data: out.data };
     }
 
-    emit('nutrition.db.lookup.miss', { id, name: name || undefined });
+    emit("nutrition.db.lookup.miss", { id, name: name || undefined });
     return { ok: true, data: null };
   } catch (err) {
-    emit('nutrition.db.lookup.error', { message: err?.message || 'lookup failed' });
+    emit("nutrition.db.lookup.error", {
+      message: err?.message || "lookup failed",
+    });
     return { ok: false, data: null };
   }
 }
@@ -88,7 +99,7 @@ export async function getNutritionFromDB(params = {}) {
  * >}
  */
 export async function scrapeNutritionIfMissing(params = {}) {
-  const normalizedName = normalizeName(params?.normalizedName || '');
+  const normalizedName = normalizeName(params?.normalizedName || "");
   const hint = stringOrNull(params?.hint);
   const force = !!params?.force;
 
@@ -100,61 +111,80 @@ export async function scrapeNutritionIfMissing(params = {}) {
   if (!force) {
     const existing = await getNutritionFromDB({ name: normalizedName });
     if (existing?.ok && existing.data) {
-      emit('nutrition.scrape.skipped', { normalizedName, reason: 'ALREADY_EXISTS' });
+      emit("nutrition.scrape.skipped", {
+        normalizedName,
+        reason: "ALREADY_EXISTS",
+      });
       return { ok: true, data: existing.data };
     }
   }
 
-  emit('nutrition.scrape.started', { normalizedName, hint });
+  emit("nutrition.scrape.started", { normalizedName, hint });
 
   // Prefer a synchronous scraper (fast path)
-  if (scraper?.fetchNutrition && typeof scraper.fetchNutrition === 'function') {
+  if (scraper?.fetchNutrition && typeof scraper.fetchNutrition === "function") {
     try {
       const r = await scraper.fetchNutrition(normalizedName, hint || undefined);
       if (r?.ok && r.data) {
         const valid = validateNutritionPayload(r.data, normalizedName);
         if (!valid.ok) {
-          emit('nutrition.scrape.error', { normalizedName, reason: 'INVALID_PAYLOAD', detail: valid.error });
+          emit("nutrition.scrape.error", {
+            normalizedName,
+            reason: "INVALID_PAYLOAD",
+            detail: valid.error,
+          });
           return { ok: false };
         }
 
         // Persist
         const saved = await upsertNutrition(valid.data);
         if (!saved.ok) {
-          emit('nutrition.db.upsert.error', { normalizedName, message: saved.error || 'upsert failed' });
+          emit("nutrition.db.upsert.error", {
+            normalizedName,
+            message: saved.error || "upsert failed",
+          });
           return { ok: false };
         }
 
-        emit('nutrition.scrape.completed', { normalizedName, id: saved.id });
+        emit("nutrition.scrape.completed", { normalizedName, id: saved.id });
         return { ok: true, data: valid.data };
       }
     } catch (err) {
-      emit('nutrition.scrape.error', {
+      emit("nutrition.scrape.error", {
         normalizedName,
-        reason: 'SCRAPER_THROW',
-        message: err?.message || 'scraper failed',
+        reason: "SCRAPER_THROW",
+        message: err?.message || "scraper failed",
       });
       // Fall through to orchestrator attempt
     }
   }
 
   // Fallback: queue a job with orchestrator
-  if (orchestrator?.enqueueNutritionJob && typeof orchestrator.enqueueNutritionJob === 'function') {
+  if (
+    orchestrator?.enqueueNutritionJob &&
+    typeof orchestrator.enqueueNutritionJob === "function"
+  ) {
     try {
-      const queued = await orchestrator.enqueueNutritionJob({ normalizedName, hint: hint || undefined });
-      emit('nutrition.scrape.queued', { normalizedName, jobId: queued?.jobId });
+      const queued = await orchestrator.enqueueNutritionJob({
+        normalizedName,
+        hint: hint || undefined,
+      });
+      emit("nutrition.scrape.queued", { normalizedName, jobId: queued?.jobId });
       return { queued: true, jobId: queued?.jobId };
     } catch (err) {
-      emit('nutrition.scrape.error', {
+      emit("nutrition.scrape.error", {
         normalizedName,
-        reason: 'QUEUE_THROW',
-        message: err?.message || 'queue failed',
+        reason: "QUEUE_THROW",
+        message: err?.message || "queue failed",
       });
       return { ok: false };
     }
   }
 
-  emit('nutrition.scrape.skipped', { normalizedName, reason: 'NO_SCRAPER_AVAILABLE' });
+  emit("nutrition.scrape.skipped", {
+    normalizedName,
+    reason: "NO_SCRAPER_AVAILABLE",
+  });
   return { ok: false };
 }
 
@@ -175,12 +205,15 @@ async function upsertNutrition(doc) {
     const adapter = pickAdapter();
     const result = await safeCall(() => adapter.upsert(doc));
     if (result?.ok) {
-      emit('nutrition.db.upsert.ok', { id: result.id, normalizedName: doc.normalizedName });
+      emit("nutrition.db.upsert.ok", {
+        id: result.id,
+        normalizedName: doc.normalizedName,
+      });
       return { ok: true, id: result.id };
     }
-    return { ok: false, error: 'adapter upsert failed' };
+    return { ok: false, error: "adapter upsert failed" };
   } catch (err) {
-    return { ok: false, error: err?.message || 'upsert error' };
+    return { ok: false, error: err?.message || "upsert error" };
   }
 }
 
@@ -189,8 +222,10 @@ async function upsertNutrition(doc) {
 
 function pickAdapter() {
   // Priority: explicit adapter files first, then a generic service shim.
-  if (pgAdapter?.getById && pgAdapter?.getByName && pgAdapter?.upsert) return pgAdapter;
-  if (mongoAdapter?.getById && mongoAdapter?.getByName && mongoAdapter?.upsert) return mongoAdapter;
+  if (pgAdapter?.getById && pgAdapter?.getByName && pgAdapter?.upsert)
+    return pgAdapter;
+  if (mongoAdapter?.getById && mongoAdapter?.getByName && mongoAdapter?.upsert)
+    return mongoAdapter;
 
   if (genericService) {
     // Provide a small shim over the generic service shape:
@@ -198,7 +233,8 @@ function pickAdapter() {
     const s = genericService;
     return {
       getById: (id) => s.getById(id),
-      getByName: (name) => (s.getByName ? s.getByName(name) : s.getById(generateIdFromName(name))),
+      getByName: (name) =>
+        s.getByName ? s.getByName(name) : s.getById(generateIdFromName(name)),
       upsert: (doc) => (s.upsert ? s.upsert(doc) : s.save(doc)),
     };
   }
@@ -237,9 +273,11 @@ function validateNutritionPayload(incoming, fallbackName) {
   try {
     const data = { ...(incoming || {}) };
 
-    data.normalizedName = normalizeName(data.normalizedName || fallbackName || '');
+    data.normalizedName = normalizeName(
+      data.normalizedName || fallbackName || ""
+    );
     if (!data.normalizedName) {
-      return { ok: false, error: 'missing normalizedName' };
+      return { ok: false, error: "missing normalizedName" };
     }
 
     // Ensure id is deterministic when not supplied
@@ -252,7 +290,7 @@ function validateNutritionPayload(incoming, fallbackName) {
 
     return { ok: true, data };
   } catch (err) {
-    return { ok: false, error: err?.message || 'validation error' };
+    return { ok: false, error: err?.message || "validation error" };
   }
 }
 
@@ -264,14 +302,14 @@ function sanitizeLookup({ id, name }) {
 }
 
 function normalizeName(name) {
-  return String(name || '')
+  return String(name || "")
     .toLowerCase()
-    .normalize('NFKD')
-    .replace(/\p{Diacritic}/gu, '')
-    .replace(/[^a-z0-9\s\-]/g, ' ')
-    .replace(/\s+/g, ' ')
+    .normalize("NFKD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[^a-z0-9\s\-]/g, " ")
+    .replace(/\s+/g, " ")
     .trim()
-    .replace(/s$/, ''); // light plural→singular
+    .replace(/s$/, ""); // light plural→singular
 }
 
 function generateIdFromName(normalizedName) {
@@ -281,15 +319,15 @@ function generateIdFromName(normalizedName) {
 }
 
 function sha1(str) {
-  return crypto.createHash('sha1').update(String(str)).digest('hex');
+  return crypto.createHash("sha1").update(String(str)).digest("hex");
 }
 
 function isPlainObject(v) {
-  return v && typeof v === 'object' && !Array.isArray(v);
+  return v && typeof v === "object" && !Array.isArray(v);
 }
 
 function isISO(v) {
-  if (!v || typeof v !== 'string') return false;
+  if (!v || typeof v !== "string") return false;
   const t = Date.parse(v);
   return Number.isFinite(t);
 }
@@ -299,13 +337,13 @@ function now() {
 }
 
 function stringOrNull(v) {
-  const s = typeof v === 'string' ? v.trim() : '';
+  const s = typeof v === "string" ? v.trim() : "";
   return s ? s : null;
 }
 
 function emit(type, data) {
   try {
-    eventBus.emit('automation.event', {
+    eventBus.emit("automation.event", {
       type,
       ts: now(),
       source: SOURCE,
@@ -330,7 +368,7 @@ async function safeCall(fn) {
     const r = await fn();
     // Normalize adapter outputs: allow returning raw doc or {ok,data}
     if (r && r.ok !== undefined) return r;
-    if (r && typeof r === 'object') return { ok: true, data: r };
+    if (r && typeof r === "object") return { ok: true, data: r };
     return { ok: true, data: null };
   } catch (err) {
     return { ok: false, data: null, error: err?.message };

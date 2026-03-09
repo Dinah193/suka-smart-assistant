@@ -16,8 +16,8 @@
  * - addTimingHeuristics(): refine step duration estimation, parallelization hints, etc.
  */
 
-import { emit } from "@/services/eventBus"; // optional use in future; not used here to keep pure
-import { familyFundMode } from "@/services/featureFlags"; // not used directly here
+import { emit } from "@/services/events/eventBus"; // optional use in future; not used here to keep pure
+import { familyFundMode } from "@/config/featureFlags"; // not used directly here
 // HubPacketFormatter/FamilyFundConnector are used at export time by the SessionRunner, not here.
 
 /** @typedef {Object} RecipeSource

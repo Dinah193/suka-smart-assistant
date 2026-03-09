@@ -1,0 +1,1034 @@
+{
+  "$schema": "../../../schemas/cuisine.profile.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.peruvian",
+    "type": "cuisine_profile",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Peruvian",
+    "name": "Peruvian",
+    "shortName": "Peru",
+    "subtitle": "Bright acids, ají chiles, earthy potatoes, and coastal + Andean + Amazonian influences",
+    "description": "Peruvian cooking blends Indigenous Andean foundations (potatoes, corn, quinoa, ají chiles) with coastal seafood traditions and global influences (notably Spanish, African, Chinese-Cantonese “chifa,” and Japanese “nikkei”). SSA’s Peruvian profile emphasizes ají amarillo + ají panca, lime-forward marinades, punchy herb sauces, and starch-forward plates built around potatoes, rice, and corn.",
+    "originRegions": ["Andes", "Pacific Coast", "Amazon Basin"],
+    "regions": [
+      "Lima & Central Coast",
+      "Northern Coast",
+      "Southern Highlands",
+      "Cusco & Sacred Valley",
+      "Arequipa",
+      "Amazonia"
+    ],
+    "primaryCountriesAndIslands": ["Peru"],
+    "tags": [
+      "cuisine.peruvian",
+      "region.south_america",
+      "style.aji_forward",
+      "style.lime_forward",
+      "style.potato_forward",
+      "style.rice_and_sauce",
+      "influence.chifa",
+      "influence.nikkei",
+      "weeknight.friendly",
+      "batch.friendly"
+    ],
+    "icon": "chef_hat",
+    "colorHint": "gold_lime_red",
+    "heritageNotes": [
+      "Common pantry anchors include ají amarillo and ají panca, Peruvian purple corn, and multiple potato varieties.",
+      "Flavor often balances acid (lime/vinegar), heat (ají), and savory depth (soy sauce in chifa, long-simmered broths, or roasted peppers).",
+      "Many dishes are built as: starch + protein + sauce/aji + crisp garnish."
+    ],
+    "version": "2026.01",
+    "author": "SSA Catalogs",
+    "createdAt": "2026-01-23T00:00:00.000Z",
+    "updatedAt": "2026-01-23T00:00:00.000Z",
+    "status": "canonical",
+    "source": {
+      "curation": "SSA canonical cuisine profile",
+      "maintainer": "SSA",
+      "license": "proprietary",
+      "attribution": "General culinary knowledge synthesis (no single source).",
+      "kind": "catalog",
+      "author": "SSA",
+      "origin": "Peru",
+      "type": "curated",
+      "notes": "IDs reference SSA ingredient/method/equipment catalogs by convention."
+    },
+    "family": {
+      "parent": "cuisines.latin_american",
+      "siblings": [
+        "cuisines.mexican",
+        "cuisines.colombian",
+        "cuisines.brazilian"
+      ],
+      "overlapsWith": [
+        {
+          "id": "cuisines.mexican",
+          "reason": "Shared use of chiles, lime, and street-food patterns; distinct ají + potato emphasis in Peru."
+        },
+        {
+          "id": "cuisines.japanese",
+          "reason": "Nikkei influence (seafood techniques, clean acid balance, soy/umami accents)."
+        },
+        {
+          "id": "cuisines.chinese",
+          "reason": "Chifa influence (soy sauce, stir-fries, fried rice, wok methods)."
+        }
+      ]
+    },
+    "subprofiles": [
+      {
+        "id": "peruvian.coastal",
+        "name": "Coastal (Marino)",
+        "signatureNotes": "Lime-forward seafood, ceviche, bright herb sauces, quick cooks.",
+        "commonSauceBases": [
+          "sauce.leche_de_tigre",
+          "sauce.aji_verde",
+          "sauce.rocoto"
+        ]
+      },
+      {
+        "id": "peruvian.andean",
+        "name": "Andean (Sierra)",
+        "signatureNotes": "Potatoes, corn, quinoa; hearty stews and long braises; earthy pepper pastes.",
+        "commonSauceBases": [
+          "sauce.aji_amarillo_base",
+          "sauce.aji_panca_base",
+          "sauce.huancaina"
+        ]
+      },
+      {
+        "id": "peruvian.chifa",
+        "name": "Chifa",
+        "signatureNotes": "Soy + garlic + ginger + scallion; wok cooking; fried rice/noodle patterns.",
+        "commonSauceBases": ["sauce.soy_garlic", "sauce.stir_fry_base"]
+      },
+      {
+        "id": "peruvian.nikkei",
+        "name": "Nikkei",
+        "signatureNotes": "Clean, precise acid balance; seafood; soy/citrus emulsions; fresh aromatics.",
+        "commonSauceBases": ["sauce.citrus_soy", "sauce.ponzu_like"]
+      }
+    ],
+    "regionHints": ["Lima", "Cusco", "Arequipa", "Iquitos"],
+    "countryHints": ["Peru"]
+  },
+
+  "plannerDefaults": {
+    "servingStyles": ["plates", "bowls", "street_food", "family_style"],
+    "weeknightBias": "Sauce + starch + protein is the default shortcut (aji sauce, rice/potatoes, quick-seared protein).",
+    "leftoversStrategy": "batch_and_remix",
+    "batchCookingBias": {
+      "level": "high",
+      "bestBatches": [
+        "batch.aji_amarillo_paste",
+        "batch.aji_verde_sauce",
+        "batch.huancaina_sauce",
+        "batch.arroz_blanco",
+        "batch.peruvian_braised_chicken_base"
+      ],
+      "notes": "Peruvian meals remix well: leftover rice becomes fried rice; sauces become sandwich spreads; braises become bowls."
+    },
+    "spiceHeatDefault": 2,
+    "saltinessDefault": "medium",
+    "sournessDefault": 3,
+    "sweetnessDefault": "low",
+    "umamiDefault": "medium",
+    "oilUseDefault": "medium",
+    "preferredCookingFats": [
+      "fat.neutral_oil",
+      "fat.olive_oil",
+      "fat.lard_optional"
+    ],
+    "primaryStarches": [
+      "ingredient.potato",
+      "ingredient.rice",
+      "ingredient.corn",
+      "ingredient.quinoa",
+      "ingredient.yuca"
+    ],
+    "primaryProteins": [
+      "ingredient.chicken",
+      "ingredient.beef",
+      "ingredient.pork",
+      "ingredient.fish_white",
+      "ingredient.shrimp",
+      "ingredient.eggs"
+    ],
+    "defaultMealArchetypes": [
+      "archetype.starch_plus_sauce",
+      "archetype.grill_and_sides",
+      "archetype.stew_and_starch",
+      "archetype.seafood_acid",
+      "archetype.stir_fry_and_rice"
+    ],
+    "defaultPlateTemplateIds": ["plate.peruvian.classic", "plate.peruvian.bowl"]
+  },
+
+  "flavorSystem": {
+    "signatureNotes": [
+      "Ají chiles (especially ají amarillo and ají panca) build signature flavor more than generic “chili heat.”",
+      "Acid (lime/vinegar) is used boldly: marinades, ceviche, and bright finishing squeezes.",
+      "Savory depth can come from roasted pepper pastes, long braises, or chifa soy sauce accents."
+    ],
+    "aromaticsCore": [
+      "ingredient.garlic",
+      "ingredient.red_onion",
+      "ingredient.green_onion",
+      "ingredient.cilantro",
+      "ingredient.cumin",
+      "ingredient.black_pepper"
+    ],
+    "spiceCore": [
+      "ingredient.aji_amarillo_paste",
+      "ingredient.aji_panca_paste",
+      "ingredient.paprika",
+      "ingredient.oregano",
+      "ingredient.cumin"
+    ],
+    "umamiBuilders": [
+      "ingredient.soy_sauce",
+      "ingredient.anchovy_optional",
+      "ingredient.chicken_stock",
+      "ingredient.beef_stock",
+      "ingredient.parmesan_optional"
+    ],
+    "acidOptions": [
+      "ingredient.lime",
+      "ingredient.lime_juice",
+      "ingredient.lemon_juice",
+      "ingredient.vinegar_white",
+      "ingredient.vinegar_red_wine"
+    ],
+    "sweetBalanceOptions": [
+      "ingredient.honey",
+      "ingredient.brown_sugar",
+      "ingredient.sweet_potato",
+      "ingredient.corn"
+    ],
+    "heatOptions": [
+      "ingredient.aji_amarillo_paste",
+      "ingredient.rocoto_paste",
+      "ingredient.aji_panca_paste",
+      "ingredient.jalapeno",
+      "ingredient.chili_flakes"
+    ]
+  },
+
+  "pantryTiers": {
+    "tier0_minimum": {
+      "description": "Works for ‘Peru-inspired’ bowls and quick weeknight plates.",
+      "items": [
+        "ingredient.rice",
+        "ingredient.potato",
+        "ingredient.lime",
+        "ingredient.garlic",
+        "ingredient.red_onion",
+        "ingredient.cilantro",
+        "ingredient.neutral_oil",
+        "ingredient.cumin",
+        "ingredient.black_pepper",
+        "ingredient.salt"
+      ]
+    },
+    "tier1_core": {
+      "description": "Core Peruvian flavor engines: ají amarillo/panca + key sauces.",
+      "items": [
+        "ingredient.aji_amarillo_paste",
+        "ingredient.aji_panca_paste",
+        "ingredient.evaporated_milk",
+        "ingredient.feta_or_queso_fresco",
+        "ingredient.crackers_or_bread",
+        "ingredient.soy_sauce",
+        "ingredient.white_vinegar"
+      ]
+    },
+    "tier2_traditional": {
+      "description": "Traditional/specialty staples: corn types, quinoa, key condiments.",
+      "items": [
+        "ingredient.quinoa",
+        "ingredient.yuca",
+        "ingredient.corn_kernels",
+        "ingredient.corn_flour",
+        "ingredient.rocoto_paste",
+        "ingredient.annatto_optional",
+        "ingredient.huacatay_optional"
+      ]
+    },
+    "tier3_specialty": {
+      "description": "Specialty items often harder to source; great for deeper authenticity.",
+      "items": [
+        "ingredient.purple_corn",
+        "ingredient.pisco",
+        "ingredient.chicha_morada_mix_optional",
+        "ingredient.peruvian_corn_giant_optional",
+        "ingredient.peruvian_potato_variety_optional"
+      ]
+    }
+  },
+
+  "techniquesEmphasis": {
+    "primary": [
+      "technique.quick_marinade",
+      "technique.sear_hot_fast",
+      "technique.roast",
+      "technique.braise",
+      "technique.emulsify_sauce",
+      "technique.ceviche_cure"
+    ],
+    "common": [
+      "technique.stir_fry_wok",
+      "technique.simmer_stock",
+      "technique.blend_sauce",
+      "technique.fry",
+      "technique.boil_potatoes",
+      "technique.rice_absorption"
+    ],
+    "notes": [
+      "Keep acids bright: add lime/vinegar near the end unless curing seafood.",
+      "Ají pastes can scorch—cook gently in oil before adding liquids.",
+      "Chifa dishes benefit from very high heat and quick tosses; avoid overcrowding the pan."
+    ]
+  },
+
+  "dishArchetypes": [
+    {
+      "id": "archetype.seafood_acid",
+      "label": "Seafood + Acid (Ceviche Pattern)",
+      "description": "Quick seafood prep driven by lime/acid, chili paste, onion, and crisp garnish; served with a starchy counterbalance.",
+      "commonExamples": [
+        "Ceviche",
+        "Leche de tigre shooters",
+        "Nikkei citrus-soy ceviche"
+      ],
+      "defaults": {
+        "proteinOptions": ["ingredient.fish_white", "ingredient.shrimp"],
+        "starchOptions": [
+          "ingredient.sweet_potato",
+          "ingredient.corn_kernels",
+          "ingredient.potato"
+        ],
+        "sauceOptions": ["sauce.leche_de_tigre", "sauce.citrus_soy"],
+        "garnishOptions": [
+          "ingredient.red_onion",
+          "ingredient.cilantro",
+          "ingredient.aji_amarillo_paste"
+        ]
+      }
+    },
+    {
+      "id": "archetype.starch_plus_sauce",
+      "label": "Starch + Sauce + Protein",
+      "description": "Potatoes or rice anchored with a creamy/spicy sauce and a protein topper (chicken, beef, eggs).",
+      "commonExamples": [
+        "Papa a la huancaína (as a plate or side)",
+        "Aji de gallina bowl",
+        "Lomo saltado plate"
+      ],
+      "defaults": {
+        "starchOptions": ["ingredient.potato", "ingredient.rice"],
+        "proteinOptions": [
+          "ingredient.chicken",
+          "ingredient.beef",
+          "ingredient.eggs"
+        ],
+        "sauceOptions": [
+          "sauce.huancaina",
+          "sauce.aji_amarillo_base",
+          "sauce.soy_garlic"
+        ],
+        "vegOptions": [
+          "ingredient.tomato",
+          "ingredient.red_onion",
+          "ingredient.lettuce_optional"
+        ],
+        "garnishOptions": ["ingredient.cilantro", "ingredient.lime"]
+      }
+    },
+    {
+      "id": "archetype.stir_fry_and_rice",
+      "label": "Chifa Stir-Fry + Rice",
+      "description": "High-heat stir-fry with soy/garlic accents served with white rice; often includes onions, tomatoes, and fries (lomo saltado).",
+      "commonExamples": ["Lomo saltado", "Arroz chaufa", "Pollo saltado"],
+      "defaults": {
+        "baseOptions": ["ingredient.rice"],
+        "proteinOptions": [
+          "ingredient.beef",
+          "ingredient.chicken",
+          "ingredient.pork"
+        ],
+        "vegOptions": [
+          "ingredient.red_onion",
+          "ingredient.tomato",
+          "ingredient.green_onion"
+        ],
+        "sauceOptions": ["sauce.soy_garlic", "sauce.stir_fry_base"],
+        "sideOptions": ["ingredient.potato_fries_optional"]
+      }
+    },
+    {
+      "id": "archetype.stew_and_starch",
+      "label": "Stew + Starch",
+      "description": "Comforting braises and stews served with rice/potatoes or corn/quinoa.",
+      "commonExamples": [
+        "Seco de res/pollo",
+        "Estofado",
+        "Carapulcra-style stews"
+      ],
+      "defaults": {
+        "stew_baseOptions": [
+          "base.braised_aji_panca",
+          "base.herb_cilantro_braise"
+        ],
+        "proteinOptions": [
+          "ingredient.beef",
+          "ingredient.chicken",
+          "ingredient.pork"
+        ],
+        "starchOptions": [
+          "ingredient.rice",
+          "ingredient.potato",
+          "ingredient.quinoa"
+        ],
+        "garnishOptions": ["ingredient.cilantro", "ingredient.lime"]
+      }
+    }
+  ],
+
+  "ingredientPreferences": {
+    "preferred": [
+      "ingredient.aji_amarillo_paste",
+      "ingredient.aji_panca_paste",
+      "ingredient.lime",
+      "ingredient.red_onion",
+      "ingredient.cilantro",
+      "ingredient.potato",
+      "ingredient.rice",
+      "ingredient.quinoa",
+      "ingredient.corn_kernels",
+      "ingredient.evaporated_milk",
+      "ingredient.soy_sauce"
+    ],
+    "optional_traditional": [
+      "ingredient.huacatay_optional",
+      "ingredient.rocoto_paste",
+      "ingredient.purple_corn",
+      "ingredient.pisco"
+    ],
+    "avoid_or_limit": [
+      {
+        "id": "ingredient.curry_powder",
+        "label": "Curry powder",
+        "reason": "Not typical to Peruvian flavor identity; can dominate and blur ají-based profiles."
+      }
+    ]
+  },
+
+  "substitutionGuidance": {
+    "proteinSubstitutions": [
+      {
+        "for": "ingredient.fish_white",
+        "options": ["ingredient.shrimp", "ingredient.scallops_optional"],
+        "notes": "For ceviche-style dishes, use firm seafood that holds shape. Avoid very delicate fish unless handled gently."
+      },
+      {
+        "for": "ingredient.chicken",
+        "options": ["ingredient.turkey", "ingredient.pork"],
+        "notes": "Aji-style sauces and braises adapt well to turkey or pork."
+      }
+    ],
+    "sideSubstitutions": [
+      {
+        "for": "ingredient.potato",
+        "options": ["ingredient.yuca", "ingredient.sweet_potato"],
+        "notes": "Yuca works best when fried/boiled; sweet potato is classic with ceviche."
+      },
+      {
+        "for": "ingredient.rice",
+        "options": [
+          "ingredient.quinoa",
+          "ingredient.cauliflower_rice_optional"
+        ],
+        "notes": "Quinoa is culturally aligned; cauliflower rice is a dietary adaptation."
+      }
+    ],
+    "thickenerSubstitutions": [
+      {
+        "for": "ingredient.crackers_or_bread",
+        "options": [
+          "ingredient.breadcrumbs",
+          "ingredient.gluten_free_crackers_optional"
+        ],
+        "notes": "Huancaína/aji sauces often use crackers or bread for body; gluten-free swaps work if blended thoroughly."
+      }
+    ],
+    "notes": [
+      "If ají amarillo paste is unavailable, use a mild yellow chili paste or a blend of roasted yellow bell pepper + a small amount of hot chili, but keep color and fruitiness in mind.",
+      "Ají panca can be approximated with ancho paste + a touch of smoked paprika; avoid making it too smoky."
+    ]
+  },
+
+  "mealTemplates": [
+    {
+      "id": "template.peruvian.aji_bowl",
+      "label": "Ají Bowl (Weeknight)",
+      "archetypeId": "archetype.starch_plus_sauce",
+      "components": [
+        {
+          "role": "starch",
+          "ingredientIds": ["ingredient.rice", "ingredient.potato"],
+          "chooseOne": true,
+          "notes": "Rice for a bowl; potatoes for a plated meal."
+        },
+        {
+          "role": "protein",
+          "ingredientIds": [
+            "ingredient.chicken",
+            "ingredient.beef",
+            "ingredient.eggs"
+          ],
+          "chooseOne": true,
+          "notes": "Use leftovers or quick-seared protein."
+        },
+        {
+          "role": "sauce",
+          "ingredientIds": [
+            "sauce.aji_verde",
+            "sauce.huancaina",
+            "sauce.aji_amarillo_base"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "garnish",
+          "ingredientIds": [
+            "ingredient.cilantro",
+            "ingredient.lime",
+            "ingredient.red_onion"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "prepNotes": [
+        "Batch the sauce on Sunday; use across bowls, sandwiches, and grilled proteins."
+      ]
+    },
+    {
+      "id": "template.peruvian.cevice_plate",
+      "label": "Ceviche Plate (Fresh)",
+      "archetypeId": "archetype.seafood_acid",
+      "components": [
+        {
+          "role": "protein",
+          "ingredientIds": ["ingredient.fish_white", "ingredient.shrimp"],
+          "chooseOne": true
+        },
+        {
+          "role": "base",
+          "ingredientIds": ["sauce.leche_de_tigre"],
+          "chooseOne": true
+        },
+        {
+          "role": "side",
+          "ingredientIds": [
+            "ingredient.sweet_potato",
+            "ingredient.corn_kernels",
+            "ingredient.potato"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "garnish",
+          "ingredientIds": [
+            "ingredient.red_onion",
+            "ingredient.cilantro",
+            "ingredient.aji_amarillo_paste"
+          ],
+          "chooseOne": false
+        }
+      ],
+      "prepNotes": [
+        "Keep seafood very cold; cut evenly; add lime right before serving for best texture."
+      ]
+    }
+  ],
+
+  "safetyNotes": [
+    {
+      "id": "safety.peruvian.ceviche_food_safety",
+      "label": "Ceviche Food Safety",
+      "notes": [
+        "Use very fresh, properly handled seafood. Keep it refrigerated until the moment of prep.",
+        "Acid does not reliably ‘sterilize’ seafood—treat ceviche as raw seafood handling.",
+        "If serving to high-risk individuals, consider cooked seafood versions (poached shrimp) or fully cooked dishes."
+      ]
+    },
+    {
+      "id": "safety.peruvian.aji_paste_handling",
+      "label": "Ají Paste Handling",
+      "notes": [
+        "Ají pastes can stain and irritate skin—use gloves if sensitive.",
+        "Toast/cook ají pastes gently in oil to prevent bitterness or scorching."
+      ]
+    }
+  ],
+
+  "searchHints": {
+    "keywords": [
+      "aji amarillo",
+      "aji panca",
+      "huancaina",
+      "aji de gallina",
+      "lomo saltado",
+      "arroz chaufa",
+      "ceviche",
+      "leche de tigre",
+      "nikkei",
+      "chifa",
+      "anticuchos",
+      "papa",
+      "causa"
+    ],
+    "commonAlternateNames": [
+      "Peru cuisine",
+      "Peruvian-style",
+      "Nikkei Peruvian",
+      "Chifa Peruvian"
+    ]
+  },
+
+  "pantry": {
+    "freshCore": [
+      "ingredient.lime",
+      "ingredient.red_onion",
+      "ingredient.garlic",
+      "ingredient.cilantro",
+      "ingredient.tomato"
+    ],
+    "proteinsCommon": [
+      "ingredient.chicken",
+      "ingredient.beef",
+      "ingredient.pork",
+      "ingredient.fish_white",
+      "ingredient.shrimp",
+      "ingredient.eggs"
+    ],
+    "produceCommon": [
+      "ingredient.potato",
+      "ingredient.sweet_potato",
+      "ingredient.corn_kernels",
+      "ingredient.yuca",
+      "ingredient.lemons_optional"
+    ],
+    "availabilityNotes": [
+      {
+        "ingredient": "ingredient.aji_amarillo_paste",
+        "fallbacks": [
+          "ingredient.yellow_chili_paste_optional",
+          "ingredient.roasted_yellow_pepper_optional"
+        ],
+        "note": "If ají amarillo is hard to source, use a mild yellow chili paste or roast yellow peppers and blend with a small amount of hot chili to keep color + fruitiness."
+      },
+      {
+        "ingredient": "ingredient.aji_panca_paste",
+        "fallbacks": [
+          "ingredient.ancho_chile_paste_optional",
+          "ingredient.chipotle_in_adobo_optional"
+        ],
+        "note": "Prefer ancho paste for fruitiness; keep smokiness low unless the dish calls for it."
+      }
+    ],
+    "coreStaples": {
+      "spices_and_pastes": [
+        "ingredient.aji_amarillo_paste",
+        "ingredient.aji_panca_paste",
+        "ingredient.cumin",
+        "ingredient.oregano",
+        "ingredient.paprika"
+      ],
+      "liquids": [
+        "ingredient.soy_sauce",
+        "ingredient.vinegar_white",
+        "ingredient.chicken_stock"
+      ],
+      "dairy_and_body": [
+        "ingredient.evaporated_milk",
+        "ingredient.feta_or_queso_fresco",
+        "ingredient.crackers_or_bread"
+      ],
+      "starches": [
+        "ingredient.rice",
+        "ingredient.potato",
+        "ingredient.quinoa",
+        "ingredient.corn_kernels"
+      ]
+    },
+    "optionalRegionalStaples": {
+      "specialty": [
+        "ingredient.huacatay_optional",
+        "ingredient.purple_corn",
+        "ingredient.pisco"
+      ]
+    }
+  },
+
+  "techniques": {
+    "coreMethods": [
+      "technique.blend_sauce",
+      "technique.quick_marinade",
+      "technique.sear_hot_fast",
+      "technique.braise",
+      "technique.ceviche_cure",
+      "technique.stir_fry_wok",
+      "technique.rice_absorption"
+    ],
+    "hallmarkProcesses": [
+      {
+        "id": "process.aji_sauce_base",
+        "name": "Ají Sauce Base (Blended)",
+        "steps": [
+          "technique.toast_paste_gently",
+          "technique.blend_sauce",
+          "technique.adjust_acid_salt"
+        ],
+        "notes": "Cook ají paste briefly in oil, then blend with dairy/cheese/crackers or herbs; adjust acid at the end."
+      },
+      {
+        "id": "process.ceviche_leche_de_tigre",
+        "name": "Leche de Tigre (Ceviche Base)",
+        "steps": [
+          "technique.slice_onion_thin",
+          "technique.blend_or_whisk_base",
+          "technique.cure_seafood_briefly"
+        ],
+        "notes": "Keep everything cold; add lime close to service for best texture."
+      }
+    ],
+    "signatureMethods": [
+      "High-heat stir-fry with soy and aromatics (chifa).",
+      "Creamy ají sauces thickened with bread/crackers and cheese (huancaína/ají variants).",
+      "Acid cure for seafood with crisp onion and chile (ceviche/leche de tigre)."
+    ],
+    "equipmentAffinity": {
+      "wok_or_large_skillet": "high",
+      "blender": "high",
+      "grill": "medium",
+      "pressure_cooker": "optional",
+      "rice_cooker": "medium"
+    }
+  },
+
+  "equipment": {
+    "recommended": [
+      "equipment.blender",
+      "equipment.wok_or_large_skillet",
+      "equipment.rice_cooker_optional",
+      "equipment.instant_read_thermometer_optional",
+      "equipment.mortar_and_pestle_optional"
+    ],
+    "optionalButHelpful": [
+      "equipment.food_processor",
+      "equipment.cast_iron_skillet",
+      "equipment.grill"
+    ],
+    "notes": [
+      "A blender is the single most useful tool for Peruvian sauces (ají verde, huancaína, leche de tigre blends).",
+      "For chifa, a large skillet works if you don’t have a wok—just keep batches small for high heat."
+    ]
+  },
+
+  "dietAndAllergens": {
+    "commonAllergens": [
+      "allergen.dairy",
+      "allergen.fish",
+      "allergen.shellfish",
+      "allergen.eggs",
+      "allergen.gluten",
+      "allergen.soy"
+    ],
+    "dietCompatibility": {
+      "diet.gluten_free": "medium",
+      "diet.dairy_free": "low",
+      "diet.low_carb": "low",
+      "diet.pescatarian": "medium",
+      "diet.vegetarian": "medium"
+    }
+  },
+
+  "signatureDishes": {
+    "core": [
+      {
+        "id": "peruvian.ceviche",
+        "name": "Ceviche",
+        "subprofiles": ["peruvian.coastal", "peruvian.nikkei"],
+        "difficulty": "intermediate",
+        "heatTypical": 2,
+        "notes": "Fresh seafood, lime, onion, ají. Starch sides balance the acid."
+      },
+      {
+        "id": "peruvian.lomo_saltado",
+        "name": "Lomo Saltado",
+        "subprofiles": ["peruvian.chifa"],
+        "difficulty": "intermediate",
+        "heatTypical": 1,
+        "notes": "High-heat beef stir-fry with onions/tomatoes, soy accents, served with fries and rice."
+      },
+      {
+        "id": "peruvian.aji_de_gallina",
+        "name": "Ají de Gallina",
+        "subprofiles": ["peruvian.andean"],
+        "difficulty": "intermediate",
+        "heatTypical": 2,
+        "notes": "Creamy ají amarillo chicken sauce thickened with bread/crackers; served with rice and potatoes."
+      },
+      {
+        "id": "peruvian.papa_a_la_huancaina",
+        "name": "Papa a la Huancaína",
+        "subprofiles": ["peruvian.andean"],
+        "difficulty": "beginner",
+        "heatTypical": 1,
+        "notes": "Boiled potatoes with huancaína sauce; classic starter/side."
+      },
+      {
+        "id": "peruvian.arroz_chaufa",
+        "name": "Arroz Chaufa (Chifa Fried Rice)",
+        "subprofiles": ["peruvian.chifa"],
+        "difficulty": "beginner",
+        "heatTypical": 1,
+        "notes": "Use day-old rice; soy/garlic; eggs; scallions."
+      }
+    ],
+    "dessertsAndDrinks": [
+      {
+        "id": "peruvian.picarones",
+        "name": "Picarones",
+        "subprofiles": ["peruvian.andean"],
+        "difficulty": "advanced",
+        "heatTypical": 0,
+        "notes": "Fried squash/sweet potato rings with spiced syrup."
+      },
+      {
+        "id": "peruvian.chicha_morada",
+        "name": "Chicha Morada",
+        "subprofiles": ["peruvian.andean", "peruvian.coastal"],
+        "difficulty": "beginner",
+        "heatTypical": 0,
+        "notes": "Purple corn drink with fruit and spice notes."
+      },
+      {
+        "id": "peruvian.pisco_sour",
+        "name": "Pisco Sour",
+        "subprofiles": ["peruvian.coastal"],
+        "difficulty": "intermediate",
+        "heatTypical": 0,
+        "notes": "Classic cocktail (optional in SSA depending on household policies)."
+      }
+    ],
+    "examples": [
+      "Causa (layered potato dish)",
+      "Anticuchos (grilled skewers)",
+      "Seco (cilantro-forward braise)",
+      "Tacu tacu (beans + rice cake)"
+    ],
+    "mealPatterns": [
+      "Acid-forward seafood + starchy balance (sweet potato/corn).",
+      "Creamy ají sauce + rice/potatoes + shredded chicken.",
+      "Chifa stir-fry + rice (often with fries as a second starch)."
+    ]
+  },
+
+  "pairingRules": {
+    "typicalStarches": [
+      "ingredient.potato",
+      "ingredient.rice",
+      "ingredient.corn_kernels",
+      "ingredient.sweet_potato",
+      "ingredient.quinoa"
+    ],
+    "typicalVegSides": [
+      "ingredient.red_onion",
+      "ingredient.tomato",
+      "ingredient.lettuce_optional"
+    ],
+    "typicalCondiments": ["sauce.aji_verde", "sauce.huancaina", "sauce.rocoto"],
+    "typicalFlavorPairings": [
+      {
+        "with": "ingredient.aji_amarillo_paste",
+        "pair": [
+          "ingredient.evaporated_milk",
+          "ingredient.feta_or_queso_fresco",
+          "ingredient.lime"
+        ],
+        "note": "Ají amarillo’s fruitiness pairs well with creamy dairy and bright lime."
+      },
+      {
+        "with": "ingredient.beef",
+        "pair": [
+          "ingredient.soy_sauce",
+          "ingredient.red_onion",
+          "ingredient.tomato"
+        ],
+        "note": "Chifa-style beef commonly uses soy with onion/tomato for savory-sweet balance."
+      },
+      {
+        "with": "ingredient.fish_white",
+        "pair": [
+          "ingredient.lime",
+          "ingredient.red_onion",
+          "ingredient.cilantro"
+        ],
+        "note": "Classic ceviche trio; keep onion crisp and lime fresh."
+      }
+    ],
+    "antiPairings": [
+      {
+        "id": "anti.peruvian.over_smoke",
+        "avoid": ["ingredient.liquid_smoke_optional"],
+        "note": "Over-smoky flavors can mask ají profiles; keep smoke subtle unless a specific dish calls for it."
+      }
+    ]
+  },
+
+  "substitutions": {
+    "ingredientRules": [
+      {
+        "id": "sub.peruvian.aji_amarillo_fallback",
+        "whenMissing": ["ingredient.aji_amarillo_paste"],
+        "use": [
+          "ingredient.roasted_yellow_pepper_optional",
+          "ingredient.yellow_chili_paste_optional"
+        ],
+        "notes": "Aim for yellow color + mild fruitiness. Add heat separately if needed."
+      },
+      {
+        "id": "sub.peruvian.aji_panca_fallback",
+        "whenMissing": ["ingredient.aji_panca_paste"],
+        "use": ["ingredient.ancho_chile_paste_optional"],
+        "notes": "Ancho approximates fruitiness; add a pinch of smoked paprika only if desired."
+      },
+      {
+        "id": "sub.peruvian.huancaina_body",
+        "whenMissing": ["ingredient.crackers_or_bread"],
+        "use": [
+          "ingredient.breadcrumbs",
+          "ingredient.gluten_free_crackers_optional"
+        ],
+        "notes": "Blend thoroughly for a smooth sauce; adjust thickness with evaporated milk or stock."
+      }
+    ],
+    "methodRules": [
+      {
+        "id": "method.peruvian.chifa_no_wok",
+        "whenNoEquipment": ["equipment.wok"],
+        "adapt": "technique.stir_fry_wide_pan_batches",
+        "notes": "Use a large skillet; cook in smaller batches to keep heat high."
+      }
+    ],
+    "rules": [
+      {
+        "for": "diet.gluten_free",
+        "notes": "Many dishes can be gluten-free by swapping soy sauce (use GF) and using GF crackers/bread in sauces."
+      },
+      {
+        "for": "diet.dairy_free",
+        "notes": "Huancaína/ají creamy sauces are dairy-heavy; use cashew or oat cream substitutes but expect a different profile."
+      }
+    ]
+  },
+
+  "planningHints": {
+    "batchFriendly": [
+      {
+        "id": "batch.aji_verde_sauce",
+        "name": "Ají Verde Sauce",
+        "makes": "sauce.aji_verde",
+        "freezerFriendly": false,
+        "notes": "Make 3–5 days ahead; use on grilled chicken, bowls, sandwiches, roasted potatoes."
+      },
+      {
+        "id": "batch.huancaina_sauce",
+        "name": "Huancaína Sauce",
+        "makes": "sauce.huancaina",
+        "freezerFriendly": false,
+        "notes": "Best within 3–4 days refrigerated; thin with evaporated milk as needed."
+      },
+      {
+        "id": "batch.arroz_blanco",
+        "name": "White Rice",
+        "makes": "base.rice_white",
+        "freezerFriendly": true,
+        "notes": "Cook extra; chill for arroz chaufa; freeze portions for quick bowls."
+      }
+    ],
+    "weeknightShortcuts": [
+      "Use pre-cooked rice + seared protein + ají verde as a 15-minute bowl.",
+      "Roast potatoes while blending a sauce; add eggs or leftover chicken for a full meal.",
+      "For chifa, use day-old rice and high heat; keep sauce simple (soy + garlic + scallion)."
+    ],
+    "seasonality": [
+      { "season": "season.winter", "focus": ["archetype.stew_and_starch"] },
+      { "season": "season.summer", "focus": ["archetype.seafood_acid"] }
+    ]
+  },
+
+  "ui": {
+    "heroSuggestions": [
+      {
+        "title": "Start Here (Peruvian Basics)",
+        "items": [
+          "peruvian.papa_a_la_huancaina",
+          "peruvian.arroz_chaufa",
+          "peruvian.aji_de_gallina"
+        ]
+      },
+      {
+        "title": "Coastal + Fresh",
+        "items": ["peruvian.ceviche", "sauce.leche_de_tigre", "sauce.aji_verde"]
+      },
+      {
+        "title": "Chifa Night",
+        "items": ["peruvian.lomo_saltado", "peruvian.arroz_chaufa"]
+      }
+    ],
+    "searchBoostTerms": [
+      "ají",
+      "huancaína",
+      "chifa",
+      "nikkei",
+      "leche de tigre",
+      "ceviche",
+      "chaufa",
+      "saltado"
+    ],
+    "colorHints": {
+      "primary": "gold",
+      "accent": "lime",
+      "secondary": "deep_red"
+    },
+    "iconHints": [
+      "icon.aji",
+      "icon.lime",
+      "icon.potato",
+      "icon.wok",
+      "icon.seafood"
+    ]
+  },
+
+  "compat": {
+    "recipeTagDefaults": ["cuisine.peruvian", "region.south_america"],
+    "defaultPlateTemplateIds": ["plate.peruvian.classic"],
+    "notes": [
+      "IDs in this profile assume SSA ingredient/method/equipment catalogs exist for common Peruvian staples and can be aliased if needed."
+    ]
+  },
+
+  "notes": [
+    "If your SSA ingredient catalog does not include ají/rocoto/huacatay IDs yet, add them or map aliases in the Peruvian ruleset for deterministic matching.",
+    "Peruvian plates often feel ‘right’ when a starch is present alongside sauce/acid; avoid planning too many ‘protein + veg only’ meals if aiming for authenticity.",
+    "Chifa patterns can share technique overlap with Chinese stir-fries but keep seasoning simpler and lime optional (not mandatory)."
+  ]
+}

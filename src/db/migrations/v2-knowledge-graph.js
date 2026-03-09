@@ -25,8 +25,8 @@
 // → (optional) hub export.
 // -----------------------------------------------------------------------------
 
-import eventBus from "../../services/eventBus.js";
-import featureFlags from "../../config/featureFlags.json" assert { type: "json" };
+import eventBus from "../../services/events/eventBus.js";
+import featureFlags from "@/config/featureFlags.json" assert { type: "json" };
 
 let HubPacketFormatter = null;
 let FamilyFundConnector = null;
@@ -34,8 +34,8 @@ let FamilyFundConnector = null;
 // Soft import Hub deps – do NOT break SSA if Hub is not installed.
 (async function softImportHubDeps() {
   try {
-    const fmt = await import("../../services/hub/HubPacketFormatter.js");
-    const conn = await import("../../services/hub/FamilyFundConnector.js");
+    const fmt = await import("@/services/hub/HubPacketFormatter.js");
+    const conn = await import("@/services/hub/FamilyFundConnector.js");
     HubPacketFormatter = fmt?.default || fmt;
     FamilyFundConnector = conn?.default || conn;
   } catch (_err) {
@@ -63,7 +63,7 @@ export async function applyMigration(db) {
   if (already) {
     emitEvent("system.migration.skipped", {
       migrationId: MIGRATION_ID,
-      reason: "already-applied"
+      reason: "already-applied",
     });
     return;
   }
@@ -84,7 +84,7 @@ export async function applyMigration(db) {
   emitEvent("system.migration.applied", {
     migrationId: MIGRATION_ID,
     affects: ["kg_nodes", "kg_relations", "kg_meta"],
-    tsApplied: new Date().toISOString()
+    tsApplied: new Date().toISOString(),
   });
 
   // 6. optionally export to Hub
@@ -94,8 +94,8 @@ export async function applyMigration(db) {
     source: SOURCE,
     data: {
       migrationId: MIGRATION_ID,
-      modules: ["knowledge-graph", "context-intelligence"]
-    }
+      modules: ["knowledge-graph", "context-intelligence"],
+    },
   });
 }
 
@@ -105,7 +105,9 @@ export async function applyMigration(db) {
 
 async function isMigrationApplied(db, migrationId) {
   try {
-    const row = await db.table("system_meta").get({ key: `migration:${migrationId}` });
+    const row = await db
+      .table("system_meta")
+      .get({ key: `migration:${migrationId}` });
     return !!row;
   } catch (_err) {
     return false;
@@ -119,8 +121,8 @@ async function markMigrationApplied(db, migrationId) {
       key: `migration:${migrationId}`,
       value: {
         id: migrationId,
-        appliedAt: ts
-      }
+        appliedAt: ts,
+      },
     });
   } catch (_err) {
     // non-fatal
@@ -132,7 +134,7 @@ function emitEvent(type, data) {
     type,
     ts: new Date().toISOString(),
     source: SOURCE,
-    data
+    data,
   };
   try {
     eventBus.emit(env);
@@ -165,10 +167,11 @@ async function seedCoreNodeTypes(db) {
       label: "Ingredient",
       domain: "global",
       props: {
-        description: "Base node for edible/consumable items (meals, preservation)."
+        description:
+          "Base node for edible/consumable items (meals, preservation).",
       },
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       id: "type:method",
@@ -176,10 +179,11 @@ async function seedCoreNodeTypes(db) {
       label: "Method",
       domain: "global",
       props: {
-        description: "Base node for how-tos: cook, clean, preserve, harvest, butcher."
+        description:
+          "Base node for how-tos: cook, clean, preserve, harvest, butcher.",
       },
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       id: "type:equipment",
@@ -187,10 +191,11 @@ async function seedCoreNodeTypes(db) {
       label: "Equipment",
       domain: "global",
       props: {
-        description: "Things needed to do methods: pressure canner, dehydrator, mop, vacuum."
+        description:
+          "Things needed to do methods: pressure canner, dehydrator, mop, vacuum.",
       },
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       id: "type:season",
@@ -198,10 +203,10 @@ async function seedCoreNodeTypes(db) {
       label: "Season",
       domain: "global",
       props: {
-        description: "Seasonality for garden and preservation."
+        description: "Seasonality for garden and preservation.",
       },
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       id: "type:domain",
@@ -209,11 +214,12 @@ async function seedCoreNodeTypes(db) {
       label: "Domain",
       domain: "global",
       props: {
-        description: "SSA domains: meals, cleaning, garden, animals, storehouse, preservation."
+        description:
+          "SSA domains: meals, cleaning, garden, animals, storehouse, preservation.",
       },
       createdAt: now,
-      updatedAt: now
-    }
+      updatedAt: now,
+    },
   ];
 
   for (const node of core) {
@@ -243,7 +249,7 @@ async function seedStarterNodes(db) {
       domain: "global",
       props: { engines: ["MealSessionEngine"] },
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       id: "domain:cleaning",
@@ -252,7 +258,7 @@ async function seedStarterNodes(db) {
       domain: "global",
       props: { engines: ["CleaningSessionEngine"] },
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       id: "domain:garden",
@@ -261,7 +267,7 @@ async function seedStarterNodes(db) {
       domain: "global",
       props: { engines: ["GardenSessionEngine"] },
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       id: "domain:animals",
@@ -270,7 +276,7 @@ async function seedStarterNodes(db) {
       domain: "global",
       props: { engines: ["AnimalSessionEngine"] },
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       id: "domain:storehouse",
@@ -279,7 +285,7 @@ async function seedStarterNodes(db) {
       domain: "global",
       props: { engines: ["StorehousePlanner"] },
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       id: "domain:preservation",
@@ -288,7 +294,7 @@ async function seedStarterNodes(db) {
       domain: "global",
       props: { engines: ["PreservationSessionEngine"] },
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
 
     // INGREDIENT / RESOURCE NODES --------------------------------------------
@@ -300,10 +306,10 @@ async function seedStarterNodes(db) {
       props: {
         clean: true,
         yieldRefs: ["yieldCurves/meat/sheep_katahdin.json"],
-        storehouseAlt: "frozen_lamb"
+        storehouseAlt: "frozen_lamb",
       },
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       id: "ing:meat:goat",
@@ -313,10 +319,10 @@ async function seedStarterNodes(db) {
       props: {
         clean: true,
         yieldRefs: ["yieldCurves/meat/goat_kiko.json"],
-        storehouseAlt: "frozen_goat"
+        storehouseAlt: "frozen_goat",
       },
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       id: "ing:herb:rosemary",
@@ -325,10 +331,10 @@ async function seedStarterNodes(db) {
       domain: "meals",
       props: {
         gardenAlt: "Rosemary (perennial)",
-        preservation: ["dehydrate", "infuse_oil"]
+        preservation: ["dehydrate", "infuse_oil"],
       },
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       id: "ing:veg:tomato_roma",
@@ -338,10 +344,10 @@ async function seedStarterNodes(db) {
       props: {
         gardenAlt: "Tomato, Roma",
         preservation: ["can_hot_water", "freeze"],
-        triggers: ["garden.harvest.logged"]
+        triggers: ["garden.harvest.logged"],
       },
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     // CLEANING ----------------------------------------------------------------
     {
@@ -351,10 +357,10 @@ async function seedStarterNodes(db) {
       domain: "cleaning",
       props: {
         storehouseAlt: "vinegar",
-        methods: ["wipe", "sanitize"]
+        methods: ["wipe", "sanitize"],
       },
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       id: "clean:baking_soda",
@@ -363,7 +369,7 @@ async function seedStarterNodes(db) {
       domain: "cleaning",
       props: { methods: ["scrub", "deodorize"] },
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     // GARDEN SEASONALITY ------------------------------------------------------
     {
@@ -371,19 +377,25 @@ async function seedStarterNodes(db) {
       type: "season",
       label: "Cool Season",
       domain: "garden",
-      props: { months: ["Feb", "Mar", "Oct", "Nov"], tasks: ["sow", "transplant"] },
+      props: {
+        months: ["Feb", "Mar", "Oct", "Nov"],
+        tasks: ["sow", "transplant"],
+      },
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       id: "season:warm",
       type: "season",
       label: "Warm Season",
       domain: "garden",
-      props: { months: ["Apr", "May", "Jun", "Jul", "Aug"], tasks: ["sow", "transplant"] },
+      props: {
+        months: ["Apr", "May", "Jun", "Jul", "Aug"],
+        tasks: ["sow", "transplant"],
+      },
       createdAt: now,
-      updatedAt: now
-    }
+      updatedAt: now,
+    },
   ];
 
   for (const node of nodes) {
@@ -411,8 +423,10 @@ async function seedStarterRelations(db) {
       to: "ing:meat:lamb",
       relType: "uses",
       weight: 0.9,
-      props: { note: "meals frequently use lamb (Torah-clean replacement for pork)" },
-      createdAt: now
+      props: {
+        note: "meals frequently use lamb (Torah-clean replacement for pork)",
+      },
+      createdAt: now,
     },
     {
       id: "rel:meals-uses-goat",
@@ -421,7 +435,7 @@ async function seedStarterRelations(db) {
       relType: "uses",
       weight: 0.85,
       props: { note: "meals use goat for sausage, breakfast meats, curries" },
-      createdAt: now
+      createdAt: now,
     },
     {
       id: "rel:meals-uses-rosemary",
@@ -430,7 +444,7 @@ async function seedStarterRelations(db) {
       relType: "uses",
       weight: 0.7,
       props: { note: "SSA can suggest planting rosemary if inventory is low" },
-      createdAt: now
+      createdAt: now,
     },
 
     // garden → seasons
@@ -441,7 +455,7 @@ async function seedStarterRelations(db) {
       relType: "in-season",
       weight: 1.0,
       props: { note: "cool-season crops go here" },
-      createdAt: now
+      createdAt: now,
     },
     {
       id: "rel:garden-in-season-warm",
@@ -450,7 +464,7 @@ async function seedStarterRelations(db) {
       relType: "in-season",
       weight: 1.0,
       props: { note: "warm-season crops go here" },
-      createdAt: now
+      createdAt: now,
     },
 
     // preservation ↔ tomato
@@ -462,9 +476,9 @@ async function seedStarterRelations(db) {
       weight: 0.95,
       props: {
         method: "can_hot_water",
-        triggerFromEvent: "garden.harvest.logged"
+        triggerFromEvent: "garden.harvest.logged",
       },
-      createdAt: now
+      createdAt: now,
     },
 
     // cleaning ↔ ingredients
@@ -474,8 +488,10 @@ async function seedStarterRelations(db) {
       to: "clean:all_purpose",
       relType: "uses",
       weight: 1.0,
-      props: { note: "if inventory low → suggest storehouse vinegar or DIY cleaner" },
-      createdAt: now
+      props: {
+        note: "if inventory low → suggest storehouse vinegar or DIY cleaner",
+      },
+      createdAt: now,
     },
     {
       id: "rel:cleaning-alt-baking-soda",
@@ -484,7 +500,7 @@ async function seedStarterRelations(db) {
       relType: "alternative-to",
       weight: 0.6,
       props: { note: "can replace all-purpose for scrub jobs" },
-      createdAt: now
+      createdAt: now,
     },
 
     // animals ↔ meals/storehouse (future butchery)
@@ -496,9 +512,9 @@ async function seedStarterRelations(db) {
       weight: 1.0,
       props: {
         yieldCurves: ["yieldCurves/meat/sheep_katahdin.json"],
-        triggers: ["animal.butchery.logged"]
+        triggers: ["animal.butchery.logged"],
       },
-      createdAt: now
+      createdAt: now,
     },
     {
       id: "rel:animals-yield-goat",
@@ -508,10 +524,10 @@ async function seedStarterRelations(db) {
       weight: 1.0,
       props: {
         yieldCurves: ["yieldCurves/meat/goat_kiko.json"],
-        triggers: ["animal.butchery.logged"]
+        triggers: ["animal.butchery.logged"],
       },
-      createdAt: now
-    }
+      createdAt: now,
+    },
   ];
 
   for (const rel of rels) {
@@ -532,8 +548,8 @@ async function seedStarterRelations(db) {
     intelType: "kg-seed",
     intel: {
       nodes: rels.length,
-      note: "seeded default KG domains/ingredients/relations for SSA"
-    }
+      note: "seeded default KG domains/ingredients/relations for SSA",
+    },
   });
 }
 
@@ -554,14 +570,14 @@ async function exportToHubIfEnabled(ssaEventEnvelope) {
 
       emitEvent("hub.export.succeeded", {
         exportId: packet?.data?.migrationId || randomId(),
-        responseMeta: { mode: "knowledge-graph" }
+        responseMeta: { mode: "knowledge-graph" },
       });
     }
   } catch (_err) {
     emitEvent("hub.export.failed", {
       exportId: packet?.data?.migrationId || randomId(),
       reason: "hub-unavailable",
-      attempts: 1
+      attempts: 1,
     });
   }
 }

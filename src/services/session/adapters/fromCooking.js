@@ -36,7 +36,7 @@ try {
   Events = eb.Events || {};
 } catch {
   try {
-    const eb = require("@/services/eventBus.js");
+    const eb = require("@/services/events/eventBus.js");
     eventBus = eb.default || eb.eventBus || eb;
     Events = eb.Events || {};
   } catch {
@@ -47,7 +47,9 @@ try {
 
 let featureFlags = {};
 try {
-  featureFlags = require("@/config/featureFlags").default || require("@/config/featureFlags");
+  featureFlags =
+    require("@/config/featureFlags").default ||
+    require("@/config/featureFlags");
 } catch {}
 
 let HubPacketFormatter, FamilyFundConnector;
@@ -76,25 +78,29 @@ export function initCookingAdapter() {
   }
 
   // Main glue: when cooking engines request a session, map and emit draft
-  eventBus.on(Events?.COOKING_REQUEST_SESSION || "cooking/requestSession", ({ data }) => {
-    try {
-      const draft = mapCookingToSession(data);
-      emit(Events?.COOKING_DRAFT_READY || "cooking/draftReady", { draft });
-      // optional hub mirror (creating a draft is a household data change)
-      exportToHubIfEnabled({
-        type: "cooking/draftReady",
-        ts: new Date().toISOString(),
-        source: "adapter.cooking",
-        data: { draft },
-      });
-    } catch (e) {
-      emit(Events?.SESSION_ERROR || "session/error", {
-        domain: "cooking",
-        error: String(e?.message || e),
-        input: safeSmall(data),
-      });
-    }
-  }, { priority: 1 });
+  eventBus.on(
+    Events?.COOKING_REQUEST_SESSION || "cooking/requestSession",
+    ({ data }) => {
+      try {
+        const draft = mapCookingToSession(data);
+        emit(Events?.COOKING_DRAFT_READY || "cooking/draftReady", { draft });
+        // optional hub mirror (creating a draft is a household data change)
+        exportToHubIfEnabled({
+          type: "cooking/draftReady",
+          ts: new Date().toISOString(),
+          source: "adapter.cooking",
+          data: { draft },
+        });
+      } catch (e) {
+        emit(Events?.SESSION_ERROR || "session/error", {
+          domain: "cooking",
+          error: String(e?.message || e),
+          input: safeSmall(data),
+        });
+      }
+    },
+    { priority: 1 }
+  );
 }
 
 /**
@@ -150,7 +156,8 @@ export function mapCookingToSession(input = {}) {
 
   // 4) Minimal validation
   if (!Array.isArray(draft.ingredients)) draft.ingredients = [];
-  if (draft.durationMin <= 0) throw new Error("Invalid duration for cooking draft");
+  if (draft.durationMin <= 0)
+    throw new Error("Invalid duration for cooking draft");
 
   return draft;
 }
@@ -189,7 +196,8 @@ function normalizeCookingInput(x = {}) {
     sessionId: String(meta.sessionId || r.sessionId || ""),
     title: String(r.title || meal.title || meta.title || "Cooking Session"),
     sourceUrl: r.url || r.sourceUrl || meta.sourceUrl,
-    servings: num(r.servings ?? meta.servings ?? meal.servings ?? 0) || undefined,
+    servings:
+      num(r.servings ?? meta.servings ?? meal.servings ?? 0) || undefined,
     tags: arr(r.tags || meta.tags),
     nutrition: isPojo(r.nutrition) ? r.nutrition : undefined,
     allergens: arr(meta.allergens || r.allergens),
@@ -203,7 +211,7 @@ function normalizeCookingInput(x = {}) {
     end: firstISO(time.end, meta.end, meal.end),
     planDate: firstISO(meal.planDate, meta.planDate),
     dayPart: meal.dayPart || meta.dayPart, // breakfast/lunch/dinner
-    slot: meal.slot || meta.slot,          // A/B/C etc.
+    slot: meal.slot || meta.slot, // A/B/C etc.
     priority: rankPriority(meta.priority || meal.priority),
     flexibilityMin: num(meta.flexibilityMin),
     // domain payloads
@@ -216,14 +224,24 @@ function normalizeCookingInput(x = {}) {
 
 function deriveDurationMin(src) {
   if (num(src.totalMin)) return clamp(num(src.totalMin), 5, 12 * 60);
-  const parts = [src.prepMin, src.cookMin, src.restMin].map(num).filter(Boolean);
+  const parts = [src.prepMin, src.cookMin, src.restMin]
+    .map(num)
+    .filter(Boolean);
   if (!parts.length) return 45; // default single-dish
-  return clamp(parts.reduce((a, b) => a + b, 0), 5, 12 * 60);
+  return clamp(
+    parts.reduce((a, b) => a + b, 0),
+    5,
+    12 * 60
+  );
 }
 
 function deriveWindow(src, durationMin) {
   const s = isISO(src.start) ? src.start : null;
-  const e = isISO(src.end) ? src.end : (s ? new Date(Date.parse(s) + durationMin * 60000).toISOString() : null);
+  const e = isISO(src.end)
+    ? src.end
+    : s
+    ? new Date(Date.parse(s) + durationMin * 60000).toISOString()
+    : null;
   if (!s && !e) return undefined;
   return { startISO: s || undefined, endISO: e || undefined };
 }
@@ -241,7 +259,8 @@ function deriveEquipment(src) {
   // Methods imply equipment (grill, smoker, oven, stovetop, sous-vide)
   for (const m of src.methods || []) {
     const kind = methodToKind(String(m));
-    if (kind && !out.some(o => o.kind === kind)) out.push({ kind, title: labelForKind(kind) });
+    if (kind && !out.some((o) => o.kind === kind))
+      out.push({ kind, title: labelForKind(kind) });
   }
   return out;
 }
@@ -255,7 +274,13 @@ function deriveIngredients(src) {
     const qty = num(ing?.qty || ing?.quantity);
     const unit = String(ing?.unit || ing?.uom || "");
     if (!id && !name) continue;
-    out.push({ id: id || undefined, sku, name: name || undefined, qty: qty || undefined, unit: unit || undefined });
+    out.push({
+      id: id || undefined,
+      sku,
+      name: name || undefined,
+      qty: qty || undefined,
+      unit: unit || undefined,
+    });
   }
   return out;
 }
@@ -265,15 +290,18 @@ function deriveRoles(src) {
   const base = [{ role: "cook", count: 1 }];
   // If grilling/smoker or heavy-lift methods present, suggest helper
   const methods = (src.methods || []).map((m) => String(m).toLowerCase());
-  const needsHelper = methods.some((m) => /smoke|grill|whole|butcher|pressure canner/.test(m));
+  const needsHelper = methods.some((m) =>
+    /smoke|grill|whole|butcher|pressure canner/.test(m)
+  );
   if (needsHelper) base.push({ role: "helper", count: 1 });
   return base;
 }
 
 function deriveSteps(src) {
-  const arrSteps = Array.isArray(src.steps) && src.steps.length
-    ? src.steps
-    : guessStepsFromMethods(src);
+  const arrSteps =
+    Array.isArray(src.steps) && src.steps.length
+      ? src.steps
+      : guessStepsFromMethods(src);
   return arrSteps.map((s, i) => ({
     idx: i + 1,
     label: String(s?.label || s?.text || s || `Step ${i + 1}`),
@@ -282,7 +310,9 @@ function deriveSteps(src) {
 }
 
 function inferOutdoor(equipment) {
-  const kinds = new Set((equipment || []).map((e) => (e.kind || "").toLowerCase()));
+  const kinds = new Set(
+    (equipment || []).map((e) => (e.kind || "").toLowerCase())
+  );
   return ["grill", "smoker", "firepit"].some((k) => kinds.has(k));
 }
 
@@ -293,7 +323,13 @@ function methodToKind(m) {
   if (s.includes("smok")) return "smoker";
   if (s.includes("sous")) return "sous-vide";
   if (s.includes("bake") || s.includes("roast")) return "oven";
-  if (s.includes("stir") || s.includes("saute") || s.includes("sauté") || s.includes("boil")) return "stovetop";
+  if (
+    s.includes("stir") ||
+    s.includes("saute") ||
+    s.includes("sauté") ||
+    s.includes("boil")
+  )
+    return "stovetop";
   if (s.includes("pressure canner")) return "pressure-canner";
   return null;
 }
@@ -321,12 +357,21 @@ function guessKindFrom(name) {
 function guessStepsFromMethods(src) {
   const m = (src.methods || []).map((x) => String(x).toLowerCase()).join(" ");
   const steps = [];
-  if (/marinat/.test(m)) steps.push({ label: "Marinate ingredients", estMin: 30 });
-  if (/chop|dice|slice/.test(m)) steps.push({ label: "Prep and chop produce", estMin: 15 });
-  if (/preheat|bake|roast|grill|smok/.test(m)) steps.push({ label: "Preheat equipment", estMin: 10 });
-  steps.push({ label: "Cook dish", estMin: Math.max(15, num(src.cookMin) || 30) });
-  if (/rest|cool/.test(m)) steps.push({ label: "Rest / cool", estMin: num(src.restMin) || 5 });
-  return steps.length ? steps : [{ label: "Prepare and cook", estMin: num(src.totalMin) || 45 }];
+  if (/marinat/.test(m))
+    steps.push({ label: "Marinate ingredients", estMin: 30 });
+  if (/chop|dice|slice/.test(m))
+    steps.push({ label: "Prep and chop produce", estMin: 15 });
+  if (/preheat|bake|roast|grill|smok/.test(m))
+    steps.push({ label: "Preheat equipment", estMin: 10 });
+  steps.push({
+    label: "Cook dish",
+    estMin: Math.max(15, num(src.cookMin) || 30),
+  });
+  if (/rest|cool/.test(m))
+    steps.push({ label: "Rest / cool", estMin: num(src.restMin) || 5 });
+  return steps.length
+    ? steps
+    : [{ label: "Prepare and cook", estMin: num(src.totalMin) || 45 }];
 }
 function buildTitle(src) {
   const base = src.title || "Cooking Session";
@@ -347,11 +392,15 @@ async function exportToHubIfEnabled(payload) {
     if (!HubPacketFormatter || !FamilyFundConnector) return;
     const pkt = HubPacketFormatter.format(payload);
     await FamilyFundConnector.send(pkt);
-  } catch { /* fail-silent */ }
+  } catch {
+    /* fail-silent */
+  }
 }
 
 /* --------------------------------- Utils ----------------------------------- */
-function num(n) { return Number.isFinite(n) ? n : Number.isFinite(+n) ? +n : undefined; }
+function num(n) {
+  return Number.isFinite(n) ? n : Number.isFinite(+n) ? +n : undefined;
+}
 function minutesFrom(v) {
   if (!v && v !== 0) return undefined;
   if (Number.isFinite(v)) return v;
@@ -359,11 +408,13 @@ function minutesFrom(v) {
   // Support ISO 8601 duration (PT1H30M), "1h 30m", "90", "45m"
   const iso = /^p(t(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?)$/i.exec(s);
   if (iso) {
-    const h = +(iso[2] || 0), m = +(iso[3] || 0), sec = +(iso[4] || 0);
+    const h = +(iso[2] || 0),
+      m = +(iso[3] || 0),
+      sec = +(iso[4] || 0);
     return h * 60 + m + Math.round(sec / 60);
   }
   const hm = /(?:(\d+)\s*h)?\s*(?:(\d+)\s*m)?/.exec(s);
-  if (hm && (hm[1] || hm[2])) return (+(hm[1] || 0)) * 60 + +(hm[2] || 0);
+  if (hm && (hm[1] || hm[2])) return +(hm[1] || 0) * 60 + +(hm[2] || 0);
   const n = +s;
   return Number.isFinite(n) ? n : undefined;
 }
@@ -371,13 +422,22 @@ function clamp(n, lo, hi) {
   const x = Number.isFinite(n) ? n : lo;
   return Math.max(lo, Math.min(hi, x));
 }
-function firstISO(...vals) { return vals.find(isISO) || undefined; }
-function isISO(s) { return typeof s === "string" && !Number.isNaN(Date.parse(s)); }
-function arr(v) { return Array.isArray(v) ? v : []; }
-function isPojo(v) { return v && typeof v === "object" && v.constructor === Object; }
+function firstISO(...vals) {
+  return vals.find(isISO) || undefined;
+}
+function isISO(s) {
+  return typeof s === "string" && !Number.isNaN(Date.parse(s));
+}
+function arr(v) {
+  return Array.isArray(v) ? v : [];
+}
+function isPojo(v) {
+  return v && typeof v === "object" && v.constructor === Object;
+}
 function pick(obj, keys) {
   const out = {};
-  for (const k of keys) if (obj && Object.prototype.hasOwnProperty.call(obj, k)) out[k] = obj[k];
+  for (const k of keys)
+    if (obj && Object.prototype.hasOwnProperty.call(obj, k)) out[k] = obj[k];
   return out;
 }
 function rankPriority(v) {
@@ -386,12 +446,16 @@ function rankPriority(v) {
   if (["low", "3"].includes(s)) return "low";
   return "normal";
 }
-function genId() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
+function genId() {
+  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
 function safeSmall(obj) {
   try {
     const s = JSON.stringify(obj);
     return s && s.length > 2000 ? s.slice(0, 2000) + "…" : s;
-  } catch { return "[unserializable]"; }
+  } catch {
+    return "[unserializable]";
+  }
 }
 
 /* --------------------------------- Exports --------------------------------- */

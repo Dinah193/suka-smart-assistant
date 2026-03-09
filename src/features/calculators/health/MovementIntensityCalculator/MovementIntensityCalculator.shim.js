@@ -27,8 +27,8 @@
  * - From SessionRunner prep flows.
  */
 
-import { emit } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import HubPacketFormatter from "@/services/hub/HubPacketFormatter";
 import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 
@@ -188,7 +188,8 @@ export async function runMovementIntensityCalculatorShim(
 
   // Defensive input guard
   if (!rawInput || typeof rawInput !== "object") {
-    const errMsg = "[MovementIntensityCalculator.shim] input must be a non-null object.";
+    const errMsg =
+      "[MovementIntensityCalculator.shim] input must be a non-null object.";
     emit({
       type: "calculator.movementIntensity.error",
       ts,
@@ -208,13 +209,9 @@ export async function runMovementIntensityCalculatorShim(
   const unitSystem = input.unitSystem === "metric" ? "metric" : "imperial";
   const bodyWeight = toNum(input.bodyWeight);
   const age = toNum(input.age);
-  const baselineStepGoalPerDay = toNum(
-    input.baselineStepGoalPerDay || 8000
-  );
+  const baselineStepGoalPerDay = toNum(input.baselineStepGoalPerDay || 8000);
 
-  const stepHistory = Array.isArray(input.stepHistory)
-    ? input.stepHistory
-    : [];
+  const stepHistory = Array.isArray(input.stepHistory) ? input.stepHistory : [];
 
   const sessionHistory = Array.isArray(input.sessionHistory)
     ? input.sessionHistory
@@ -340,9 +337,7 @@ export async function runMovementIntensityCalculatorShim(
   let movementIntensityScore =
     scoreWeightSum > 0 ? scoreComponents / scoreWeightSum + ageAdjustment : 0;
   movementIntensityScore = clamp(movementIntensityScore, 0, 100);
-  const movementIntensityCategory = categorizeIntensity(
-    movementIntensityScore
-  );
+  const movementIntensityCategory = categorizeIntensity(movementIntensityScore);
 
   // ---------------------------------------------------------------------------
   // Zone breakdown (simple mapping from light/moderate/vigorous)
@@ -481,8 +476,7 @@ export async function runMovementIntensityCalculatorShim(
       sleepQualityFlags.sleepFragmented);
 
   const undertrainingRisk =
-    combinedGuidelineEquivalentMinutesPerWeek <
-    guidelineEquivalentTarget * 0.5;
+    combinedGuidelineEquivalentMinutesPerWeek < guidelineEquivalentTarget * 0.5;
 
   const zone4And5 = weeklyMinutesByZone.zone4 + weeklyMinutesByZone.zone5;
   const recoveryDayRecommended =
@@ -536,16 +530,10 @@ export async function runMovementIntensityCalculatorShim(
     // If they are around or above guidelines and not high-risk, allow a slight
     // bump for users with "high" or "athlete" scores.
     if (movementIntensityCategory === "high") {
-      moderateMinutesPerWeek = Math.round(
-        targetModerateMinutesPerWeek * 1.1
-      );
+      moderateMinutesPerWeek = Math.round(targetModerateMinutesPerWeek * 1.1);
     } else if (movementIntensityCategory === "athlete") {
-      moderateMinutesPerWeek = Math.round(
-        targetModerateMinutesPerWeek * 1.3
-      );
-      vigorousMinutesPerWeek = Math.round(
-        targetVigorousMinutesPerWeek * 1.3
-      );
+      moderateMinutesPerWeek = Math.round(targetModerateMinutesPerWeek * 1.3);
+      vigorousMinutesPerWeek = Math.round(targetVigorousMinutesPerWeek * 1.3);
     }
   }
 
@@ -603,8 +591,7 @@ export async function runMovementIntensityCalculatorShim(
     templates.push({
       templateId: "movement.vigorous-interval-20",
       title: "20-min Vigorous Intervals",
-      recommendedPerWeek:
-        movementIntensityCategory === "athlete" ? 2 : 1,
+      recommendedPerWeek: movementIntensityCategory === "athlete" ? 2 : 1,
       durationMinutes: clamp(preferredBlock, 15, 30),
       intensityCategory: "vigorous",
       domain: "movement",

@@ -37,7 +37,7 @@ try {
   Events = eb.Events || {};
 } catch {
   try {
-    const eb = require("@/services/eventBus.js");
+    const eb = require("@/services/events/eventBus.js");
     eventBus = eb.default || eb.eventBus || eb;
     Events = eb.Events || {};
   } catch {
@@ -54,7 +54,9 @@ try {
 
 let featureFlags = {};
 try {
-  featureFlags = require("@/config/featureFlags").default || require("@/config/featureFlags");
+  featureFlags =
+    require("@/config/featureFlags").default ||
+    require("@/config/featureFlags");
 } catch {}
 
 let HubPacketFormatter, FamilyFundConnector;
@@ -89,22 +91,31 @@ export async function initPrereqCheck() {
 
   // 1) When a domain draft becomes a shared session draft ready (glue handles),
   // 2) and especially when a session is APPROVED / SCHEDULE_SAVED, run prereq.
-  eventBus.on(Events?.SESSION_DRAFT_READY || "session/draftReady", ({ data }) => {
-    // Soft check on drafts if time window present
-    const s = readSessionData(data);
-    if (s.sessionId && s.start && s.end) runCheckAndMaybeSchedule(s, { soft: true });
-  });
+  eventBus.on(
+    Events?.SESSION_DRAFT_READY || "session/draftReady",
+    ({ data }) => {
+      // Soft check on drafts if time window present
+      const s = readSessionData(data);
+      if (s.sessionId && s.start && s.end)
+        runCheckAndMaybeSchedule(s, { soft: true });
+    }
+  );
 
   // Main trigger: APPROVED session (user confirmed)
   eventBus.on(Events?.SESSION_APPROVED || "session/approved", ({ data }) => {
     const s = readSessionData(data);
-    if (s.sessionId && s.start && s.end) runCheckAndMaybeSchedule(s, { soft: false });
+    if (s.sessionId && s.start && s.end)
+      runCheckAndMaybeSchedule(s, { soft: false });
   });
 
   // Also listen to calendar save if sessions are persisted there
   eventBus.on(Events?.SCHEDULE_SAVED || "schedule/saved", ({ data }) => {
     const item = data?.item || {};
-    if ((item.kind === "session" || /session/i.test(item?.title || "")) && item?.start && item?.end) {
+    if (
+      (item.kind === "session" || /session/i.test(item?.title || "")) &&
+      item?.start &&
+      item?.end
+    ) {
       const s = {
         sessionId: item?.meta?.sessionId || item.id,
         domain: item?.domain || item?.meta?.domain,
@@ -167,7 +178,9 @@ function clearPreflight(sessionId) {
 /** Persist all current timers (sessions) to localStorage */
 function persistPendingSchedules() {
   try {
-    const arr = Array.from(_timers.keys()).map((k) => _pendingIndex.get(k)).filter(Boolean);
+    const arr = Array.from(_timers.keys())
+      .map((k) => _pendingIndex.get(k))
+      .filter(Boolean);
     localStorage.setItem(LS_KEY, JSON.stringify(arr));
   } catch {}
 }
@@ -197,12 +210,22 @@ function forgetPending(sessionId) {
  * Returns a compact report for UX + automation.
  */
 async function performPrereqCheck(session) {
-  const { sessionId, domain, start, end, ingredients, equipment, roles } = session;
+  const { sessionId, domain, start, end, ingredients, equipment, roles } =
+    session;
   if (!sessionId || !isISO(start) || !isISO(end)) {
-    return { ok: false, reason: "missing-session-times", shortages: [], toolsConflicts: [], rolesConflicts: [] };
+    return {
+      ok: false,
+      reason: "missing-session-times",
+      shortages: [],
+      toolsConflicts: [],
+      rolesConflicts: [],
+    };
   }
 
-  const durationMin = Math.max(1, Math.round((toMs(end) - toMs(start)) / 60000));
+  const durationMin = Math.max(
+    1,
+    Math.round((toMs(end) - toMs(start)) / 60000)
+  );
   const window = { startISO: start, endISO: end };
 
   // Inventory check (best-effort)
@@ -212,8 +235,10 @@ async function performPrereqCheck(session) {
   // Device availability check (best-effort)
   let toolsConflicts = [];
   if (equipment.length) {
-    const kinds = distinct(equipment.map(e => e.kind).filter(Boolean));
-    const deviceIds = distinct(equipment.map(e => e.deviceId).filter(Boolean));
+    const kinds = distinct(equipment.map((e) => e.kind).filter(Boolean));
+    const deviceIds = distinct(
+      equipment.map((e) => e.deviceId).filter(Boolean)
+    );
     const devRes = await safeAsk("device/availability", {
       deviceIds: deviceIds.length ? deviceIds : undefined,
       kinds: deviceIds.length ? undefined : kinds,
@@ -223,7 +248,12 @@ async function performPrereqCheck(session) {
       granularityMin: 5,
       applyQuiet: true,
     });
-    toolsConflicts = findToolConflicts(equipment, devRes?.slots || [], start, end);
+    toolsConflicts = findToolConflicts(
+      equipment,
+      devRes?.slots || [],
+      start,
+      end
+    );
   }
 
   // Role availability (optional)
@@ -238,17 +268,26 @@ async function performPrereqCheck(session) {
         granularityMin: 15,
         domain,
       });
-      const ok = (rr?.slots || []).some(s => within(s.start, s.end, start, end));
+      const ok = (rr?.slots || []).some((s) =>
+        within(s.start, s.end, start, end)
+      );
       if (!ok) rolesConflicts.push({ role: need.role });
     }
   }
 
-  const ok = shortages.length === 0 && toolsConflicts.length === 0 && rolesConflicts.length === 0;
+  const ok =
+    shortages.length === 0 &&
+    toolsConflicts.length === 0 &&
+    rolesConflicts.length === 0;
   return { ok, shortages, toolsConflicts, rolesConflicts, window, durationMin };
 }
 
 /* ----------------------------- Announcements ------------------------------- */
-function announceResults(session, results, { soft = false, window = "immediate" } = {}) {
+function announceResults(
+  session,
+  results,
+  { soft = false, window = "immediate" } = {}
+) {
   const { sessionId, title, domain } = session;
   rememberPending(session); // store minimal info for persistence
   persistPendingSchedules();
@@ -262,7 +301,10 @@ function announceResults(session, results, { soft = false, window = "immediate" 
       window,
       items: results.shortages,
     };
-    emit(Events?.INVENTORY_SHORTAGE_DETECTED || "inventory/shortageDetected", data);
+    emit(
+      Events?.INVENTORY_SHORTAGE_DETECTED || "inventory/shortageDetected",
+      data
+    );
     // UX hints
     emit(Events?.UI_NBA_SUGGESTED || "ui/nbaSuggested", {
       label: "Open Grocery List",
@@ -272,7 +314,9 @@ function announceResults(session, results, { soft = false, window = "immediate" 
     emit(Events?.UI_TOAST || "ui/toast", {
       variant: "warning",
       title: "Some items are missing",
-      message: `${results.shortages.length} item(s) short for "${title || "session"}".`,
+      message: `${results.shortages.length} item(s) short for "${
+        title || "session"
+      }".`,
     });
     // Optional hub mirror (not required because it's not mutating, but useful)
     exportToHubIfEnabled({
@@ -308,7 +352,9 @@ function announceResults(session, results, { soft = false, window = "immediate" 
     emit(Events?.UI_TOAST || "ui/toast", {
       variant: "info",
       title: "Helpers not available",
-      message: `No matching role available for "${title || "session"}" at this time.`,
+      message: `No matching role available for "${
+        title || "session"
+      }" at this time.`,
     });
     emit("people/conflictDetected", {
       sessionId,
@@ -377,7 +423,9 @@ function extractEquipment(meta) {
 function extractRoles(meta) {
   // Expect meta.rolesNeeded: [{ role }]
   const arr = Array.isArray(meta?.rolesNeeded) ? meta.rolesNeeded : [];
-  return arr.map((x) => ({ role: String(x?.role || "") })).filter((x) => x.role);
+  return arr
+    .map((x) => ({ role: String(x?.role || "") }))
+    .filter((x) => x.role);
 }
 
 function normalizeShortages(invRes, requested) {
@@ -408,7 +456,8 @@ function findToolConflicts(equipment, slots, start, end) {
         (!eq.deviceId && eq.kind && !!s.deviceId); // when kind-only, any available device works
       return match && within(s.start, s.end, start, end);
     });
-    if (!ok) res.push({ deviceId: eq.deviceId, kind: eq.kind, title: eq.title });
+    if (!ok)
+      res.push({ deviceId: eq.deviceId, kind: eq.kind, title: eq.title });
   }
   return res;
 }
@@ -447,17 +496,32 @@ function toMs(v) {
   if (v instanceof Date) return v.getTime();
   return Date.parse(v);
 }
-function isISO(s) { return typeof s === "string" && !Number.isNaN(Date.parse(s)); }
-function firstISO(...vals) { return vals.find(isISO) || null; }
-function HOURS(n) { return n * 60 * 60 * 1000; }
+function isISO(s) {
+  return typeof s === "string" && !Number.isNaN(Date.parse(s));
+}
+function firstISO(...vals) {
+  return vals.find(isISO) || null;
+}
+function HOURS(n) {
+  return n * 60 * 60 * 1000;
+}
 function within(aStart, aEnd, bStart, bEnd) {
-  const as = toMs(aStart), ae = toMs(aEnd);
-  const bs = toMs(bStart), be = toMs(bEnd);
+  const as = toMs(aStart),
+    ae = toMs(aEnd);
+  const bs = toMs(bStart),
+    be = toMs(bEnd);
   return as <= bs && be <= ae;
 }
 function distinct(arr) {
-  const out = []; const seen = new Set();
-  for (const x of arr) { const k = String(x); if (!seen.has(k)) { seen.add(k); out.push(k); } }
+  const out = [];
+  const seen = new Set();
+  for (const x of arr) {
+    const k = String(x);
+    if (!seen.has(k)) {
+      seen.add(k);
+      out.push(k);
+    }
+  }
   return out;
 }
 

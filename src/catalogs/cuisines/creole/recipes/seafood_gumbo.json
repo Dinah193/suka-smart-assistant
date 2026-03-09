@@ -1,0 +1,146 @@
+{
+  "id": "creole_seafood_gumbo",
+  "name": "Creole Seafood Gumbo",
+  "servings": 10,
+  "ingredients": [
+    { "item": "neutral oil", "amount": 0.5, "unit": "cup" },
+    { "item": "all-purpose flour", "amount": 0.5, "unit": "cup" },
+
+    { "item": "yellow onion", "amount": 1, "unit": "large", "prep": "diced" },
+    {
+      "item": "green bell pepper",
+      "amount": 1,
+      "unit": "large",
+      "prep": "diced"
+    },
+    { "item": "celery", "amount": 3, "unit": "stalks", "prep": "diced" },
+    { "item": "garlic", "amount": 5, "unit": "cloves", "prep": "minced" },
+
+    {
+      "item": "okra",
+      "amount": 2,
+      "unit": "cups",
+      "prep": "sliced (fresh or frozen)"
+    },
+    {
+      "item": "diced tomatoes",
+      "amount": 1,
+      "unit": "can",
+      "prep": "14-15 oz (optional for more Creole tomato-forward style)"
+    },
+
+    {
+      "item": "seafood stock",
+      "amount": 10,
+      "unit": "cups",
+      "prep": "or a mix of seafood + chicken stock"
+    },
+
+    { "item": "bay leaves", "amount": 3, "unit": "each" },
+    { "item": "dried thyme", "amount": 1.5, "unit": "tsp" },
+    { "item": "dried oregano", "amount": 1, "unit": "tsp" },
+    { "item": "paprika", "amount": 2, "unit": "tsp" },
+    {
+      "item": "cayenne pepper",
+      "amount": 0.5,
+      "unit": "tsp",
+      "prep": "adjust to heat preference"
+    },
+    { "item": "black pepper", "amount": 1, "unit": "tsp" },
+    {
+      "item": "kosher salt",
+      "amount": 1.5,
+      "unit": "tsp",
+      "prep": "adjust to taste"
+    },
+
+    { "item": "Worcestershire sauce", "amount": 1, "unit": "tbsp" },
+    {
+      "item": "hot sauce",
+      "amount": 1,
+      "unit": "tsp",
+      "prep": "optional, to taste"
+    },
+
+    {
+      "item": "crab",
+      "amount": 1.5,
+      "unit": "lb",
+      "prep": "picked meat (or cracked pieces)"
+    },
+    {
+      "item": "shrimp",
+      "amount": 2,
+      "unit": "lb",
+      "prep": "peeled and deveined"
+    },
+    {
+      "item": "oysters",
+      "amount": 1,
+      "unit": "pint",
+      "prep": "shucked with liquor (optional)"
+    },
+
+    {
+      "item": "green onions",
+      "amount": 6,
+      "unit": "stalks",
+      "prep": "sliced (reserve a little for garnish)"
+    },
+    {
+      "item": "fresh parsley",
+      "amount": 0.5,
+      "unit": "cup",
+      "prep": "chopped (reserve a little for garnish)"
+    },
+    { "item": "lemon juice", "amount": 1, "unit": "tbsp" },
+
+    { "item": "cooked white rice", "amount": 10, "unit": "servings" }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "text": "Prep: Dice onion, bell pepper, and celery. Mince garlic. Slice okra. Pat shrimp dry. If using oysters, keep them chilled with their liquor. Have stock warmed and ready."
+    },
+    {
+      "order": 2,
+      "text": "Make a light-to-medium roux: In a heavy pot over medium heat, whisk oil and flour together. Cook, whisking constantly, until the roux turns peanut-butter to light caramel color (Creole gumbo often uses a lighter roux than Cajun)."
+    },
+    {
+      "order": 3,
+      "text": "Cook the trinity: Stir in onion, bell pepper, and celery (it will sizzle). Cook until softened and the roux thickens around the vegetables. Add garlic and cook 30–60 seconds."
+    },
+    {
+      "order": 4,
+      "text": "Add okra and optional tomatoes: Stir in okra and cook a few minutes. If using diced tomatoes, stir them in now."
+    },
+    {
+      "order": 5,
+      "text": "Build the gumbo: Slowly add warm seafood stock while stirring to keep the gumbo smooth. Add bay leaves, thyme, oregano, paprika, cayenne, black pepper, salt, Worcestershire, and optional hot sauce. Bring to a gentle simmer."
+    },
+    {
+      "order": 6,
+      "text": "Simmer and develop flavor: Simmer uncovered until the gumbo thickens slightly and flavors meld. Stir occasionally to prevent sticking. Skim excess oil if needed."
+    },
+    {
+      "order": 7,
+      "text": "Add crab: Stir in crab and simmer briefly to heat through and infuse the broth."
+    },
+    {
+      "order": 8,
+      "text": "Add shrimp near the end: Add shrimp and simmer gently just until pink and cooked through (avoid hard boiling)."
+    },
+    {
+      "order": 9,
+      "text": "Add oysters last (optional): Stir in oysters with their liquor and cook just until the edges curl and they are warmed through."
+    },
+    {
+      "order": 10,
+      "text": "Finish: Remove bay leaves. Stir in lemon juice, most green onions, and most parsley. Taste and adjust salt and hot sauce."
+    },
+    {
+      "order": 11,
+      "text": "Serve: Ladle gumbo over hot cooked rice. Garnish with remaining green onions and parsley. Serve extra hot sauce on the side."
+    }
+  ]
+}

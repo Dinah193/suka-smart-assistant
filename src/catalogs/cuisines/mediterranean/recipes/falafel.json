@@ -1,0 +1,329 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.mediterranean.recipes.falafel",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Falafel (Herb-Forward Chickpea Patties)",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalog",
+      "notes": [
+        "Mediterranean / Levantine-style falafel designed for deterministic planning and technique training.",
+        "Uses soaked dried chickpeas for proper texture; includes baked + pan-fry variants for tool constraints."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.mediterranean",
+    "category": "main",
+    "mealArchetypes": ["main", "protein_main", "vegetarian", "street_food"],
+    "servingStyles": ["plated", "wrap", "bowl", "family_style"],
+    "plannerTags": [
+      "cuisine.mediterranean",
+      "protein.legume",
+      "vegetarian",
+      "vegan",
+      "gluten_free_option",
+      "method.fry",
+      "method.bake_option",
+      "mealprep_friendly",
+      "freezer_friendly",
+      "herb_forward"
+    ]
+  },
+
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 4, "unit": "each" },
+    "notes": "Makes ~16 falafel (about 1.5-inch balls) — ~4 per serving."
+  },
+
+  "time": {
+    "activeMins": 30,
+    "handsOffMins": 720,
+    "totalMins": 750
+  },
+
+  "difficulty": "intermediate",
+
+  "equipment": {
+    "minimum": [
+      "mixing_bowl",
+      "strainer",
+      "food_processor",
+      "measuring_spoons",
+      "measuring_cups",
+      "sheet_pan",
+      "thermometer_optional"
+    ],
+    "recommended": [
+      "deep_pot_or_dutch_oven",
+      "slotted_spoon",
+      "cooling_rack",
+      "parchment_paper",
+      "cookie_scoop"
+    ],
+    "optional": ["air_fryer", "skillet"]
+  },
+
+  "dietFlags": ["vegan", "vegetarian", "dairy_free", "gluten_free"],
+
+  "allergens": ["sesame_optional"],
+
+  "keywords": [
+    "falafel",
+    "chickpeas",
+    "herbs",
+    "Levantine",
+    "Mediterranean",
+    "vegetarian",
+    "vegan",
+    "fried",
+    "baked"
+  ],
+
+  "tags": [
+    "cuisine.mediterranean",
+    "protein.legume",
+    "method.deep_fry",
+    "method.pan_fry_option",
+    "method.bake_option",
+    "flavor.herb_forward",
+    "mealprep",
+    "freezer_friendly"
+  ],
+
+  "signals": {
+    "profile": "herb_forward_legume",
+    "protein": "chickpeas",
+    "primaryFat": "olive_oil_or_neutral_oil",
+    "techniqueCore": ["soak", "process", "form", "fry_or_bake"],
+    "pairingCore": [
+      "tahini_sauce_optional",
+      "tzatziki_optional",
+      "salad",
+      "pita"
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "ingredients.chickpeas_dried",
+      "label": "Dried chickpeas (not canned), sorted and rinsed",
+      "amount": { "value": 340, "unit": "g" },
+      "notes": "Soak to hydrate. Canned chickpeas are too soft and can cause falafel to fall apart."
+    },
+    {
+      "id": "ingredients.water",
+      "label": "Water (for soaking)",
+      "amount": { "value": 1500, "unit": "ml" },
+      "notes": "Use enough to cover chickpeas by 2–3 inches."
+    },
+    {
+      "id": "ingredients.baking_soda",
+      "label": "Baking soda (optional, for soaking water)",
+      "amount": { "value": 2, "unit": "g" },
+      "optional": true,
+      "notes": "Helps soften chickpeas slightly; reduces soak time variability."
+    },
+    {
+      "id": "ingredients.onion",
+      "label": "Onion, roughly chopped",
+      "amount": { "value": 120, "unit": "g" },
+      "notes": "About 1 small onion."
+    },
+    {
+      "id": "ingredients.garlic",
+      "label": "Garlic cloves",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": "About 4 cloves."
+    },
+    {
+      "id": "ingredients.parsley",
+      "label": "Flat-leaf parsley, roughly chopped",
+      "amount": { "value": 40, "unit": "g" }
+    },
+    {
+      "id": "ingredients.cilantro",
+      "label": "Cilantro, roughly chopped",
+      "amount": { "value": 25, "unit": "g" },
+      "optional": true,
+      "notes": "If you dislike cilantro, replace with more parsley."
+    },
+    {
+      "id": "ingredients.cumin",
+      "label": "Ground cumin",
+      "amount": { "value": 4, "unit": "g" }
+    },
+    {
+      "id": "ingredients.coriander",
+      "label": "Ground coriander",
+      "amount": { "value": 4, "unit": "g" }
+    },
+    {
+      "id": "ingredients.black_pepper",
+      "label": "Black pepper",
+      "amount": { "value": 1, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "ingredients.cayenne",
+      "label": "Cayenne pepper (optional)",
+      "amount": { "value": 0.5, "unit": "g" },
+      "optional": true,
+      "notes": "Optional heat."
+    },
+    {
+      "id": "ingredients.salt",
+      "label": "Fine salt",
+      "amount": { "value": 7, "unit": "g" }
+    },
+    {
+      "id": "ingredients.baking_powder",
+      "label": "Baking powder",
+      "amount": { "value": 4, "unit": "g" },
+      "notes": "Adds lift; helps lighter texture."
+    },
+    {
+      "id": "ingredients.chickpea_flour",
+      "label": "Chickpea flour or all-purpose flour",
+      "amount": { "value": 20, "unit": "g" },
+      "notes": "Binder if needed. Start with half; add only if mixture is too wet."
+    },
+    {
+      "id": "ingredients.neutral_oil",
+      "label": "Neutral oil for frying (or olive oil for pan-fry/bake brush)",
+      "amount": { "value": 900, "unit": "ml" },
+      "notes": "For deep frying: enough for 2–3 inches depth in a pot. For baked/pan-fry: use much less."
+    },
+    {
+      "id": "ingredients.sesame_seeds",
+      "label": "Sesame seeds (optional, for coating)",
+      "amount": { "value": 12, "unit": "g" },
+      "optional": true,
+      "notes": "Adds texture and aroma."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_soak_chickpeas",
+      "title": "Soak chickpeas (hands-off)",
+      "body": "Place dried chickpeas in a large bowl and cover with plenty of water (they will expand). Add baking soda (optional). Soak 10–14 hours at room temperature. Drain well and rinse. Pat dry or let drain thoroughly—excess water makes shaping harder.",
+      "timers": [{ "label": "Soak chickpeas", "seconds": 43200 }]
+    },
+    {
+      "id": "step_02_prep_aromatics",
+      "title": "Prep aromatics and herbs",
+      "body": "Roughly chop onion. Gather garlic, parsley, and cilantro (optional). This recipe relies on herbs for classic green, fragrant falafel."
+    },
+    {
+      "id": "step_03_process_base",
+      "title": "Process falafel mixture (grainy, not smooth)",
+      "body": "In a food processor, add drained chickpeas, onion, garlic, herbs, cumin, coriander, salt, pepper, and cayenne (optional). Pulse in short bursts, scraping down as needed, until the mixture resembles coarse sand and clumps when squeezed. Do not puree into hummus.",
+      "notes": "If mixture is too wet and won’t clump, add 1–2 tablespoons chickpea flour/AP flour and pulse briefly."
+    },
+    {
+      "id": "step_04_rest_and_lift",
+      "title": "Rest mixture; add baking powder just before cooking",
+      "body": "Transfer mixture to a bowl, cover, and refrigerate 30–60 minutes to hydrate and firm. Right before shaping/cooking, sprinkle in baking powder and mix evenly.",
+      "timers": [{ "label": "Rest (minimum)", "seconds": 1800 }]
+    },
+    {
+      "id": "step_05_shape",
+      "title": "Shape falafel",
+      "body": "Form into 1.5-inch balls or small patties (about 35–40 g each). If using sesame seeds, lightly roll the outside. Place shaped falafel on a tray while oil heats.",
+      "notes": "Patties cook slightly faster; balls stay moister inside."
+    },
+    {
+      "id": "step_06_choose_cook_method",
+      "title": "Cook: deep fry (classic) OR pan-fry OR bake",
+      "body": "Choose your method:\n- Deep fry (best texture): Fry at 350°F (175°C) for 3–4 minutes until deep golden.\n- Pan-fry: Shallow oil over medium heat; fry 2–3 minutes per side.\n- Bake: Brush lightly with oil and bake at 425°F (220°C) ~20–25 minutes, flipping once.\nUse the detailed steps that follow for each method.",
+      "temperature": {
+        "type": "oil_or_oven",
+        "value": 350,
+        "unit": "F",
+        "notes": "Deep-fry oil: 350°F / 175°C. Bake option: 425°F / 220°C."
+      }
+    },
+    {
+      "id": "step_07_deep_fry",
+      "title": "Deep fry (classic, crisp outside / tender inside)",
+      "body": "Heat 2–3 inches of neutral oil in a heavy pot to 350°F (175°C). Fry in small batches (avoid crowding) for 3–4 minutes until deep golden and crisp. Remove with a slotted spoon and drain on a rack or paper towels. Return oil to temp between batches.",
+      "timers": [{ "label": "Deep fry batch", "seconds": 240 }]
+    },
+    {
+      "id": "step_08_pan_fry_option",
+      "title": "Pan-fry option (skillet)",
+      "body": "Heat ~6–8 mm (1/4 inch) oil in a skillet over medium heat. Fry falafel 2–3 minutes per side until golden and cooked through. Drain briefly on a rack/paper towels.",
+      "timers": [{ "label": "Pan-fry per side (typical)", "seconds": 150 }]
+    },
+    {
+      "id": "step_09_bake_option",
+      "title": "Bake option (oven)",
+      "body": "Heat oven to 425°F (220°C). Place falafel on a parchment-lined sheet pan. Brush tops lightly with oil. Bake 10–12 minutes, flip, brush again lightly, then bake 10–13 minutes more until browned and firm. (Texture is drier than fried; serve with sauce.)",
+      "timers": [
+        { "label": "Bake side 1", "seconds": 720 },
+        { "label": "Bake side 2", "seconds": 780 }
+      ],
+      "temperature": { "type": "oven", "value": 425, "unit": "F" }
+    },
+    {
+      "id": "step_10_serve",
+      "title": "Serve",
+      "body": "Serve hot with pita/flatbread, chopped salad, pickles, and a sauce such as tahini sauce or tzatziki. For bowls: add rice or roasted vegetables and finish with lemon."
+    }
+  ],
+
+  "storage": {
+    "refrigerate": {
+      "maxDays": 4,
+      "container": "airtight",
+      "notes": "Re-crisp in oven/air fryer at 375°F (190°C) for 6–10 minutes."
+    },
+    "freeze": {
+      "maxMonths": 3,
+      "notes": "Freeze shaped uncooked falafel on a tray, then bag. Fry/bake from frozen (add a few minutes)."
+    }
+  },
+
+  "variations": [
+    {
+      "id": "variation_all_parsley",
+      "title": "All-parsley falafel",
+      "changes": [
+        "Replace cilantro with additional parsley.",
+        "Increase lemon-forward serving finish (lemon wedge + parsley)."
+      ]
+    },
+    {
+      "id": "variation_fava_beans_blend",
+      "title": "Chickpea + fava bean blend (Egyptian-style nod)",
+      "changes": [
+        "Replace 170 g of chickpeas with 170 g dried split fava beans (soaked similarly).",
+        "Adjust salt to taste; mixture may brown faster."
+      ]
+    },
+    {
+      "id": "variation_spice_forward",
+      "title": "Spice-forward",
+      "changes": [
+        "Add 1–2 g ground cardamom or a pinch of cinnamon (very subtle).",
+        "Add 1 g smoked paprika for deeper aroma."
+      ]
+    }
+  ],
+
+  "notes": [
+    "Key success factor: soaked DRIED chickpeas, not canned. Canned chickpeas are too wet/soft and can cause collapse.",
+    "Texture target is coarse and clumpy, not smooth. Over-processing creates dense falafel.",
+    "If your kitchen tools are limited, baking is the safest baseline method, but serve with a sauce to offset dryness.",
+    "Pairs well with: hummus, tabbouleh, roasted_vegetables_olive_oil, cucumber-tomato salad, pita."
+  ]
+}

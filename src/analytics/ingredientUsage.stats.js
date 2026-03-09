@@ -43,8 +43,8 @@
 //
 // -----------------------------------------------------------------------------
 
-import eventBus from "@/services/eventBus.js";
-import featureFlags from "@/config/featureFlags.js";
+import eventBus from "@/services/events/eventBus.js";
+import featureFlags from "@/config/featureFlags.json";
 
 // soft hub deps
 let HubPacketFormatter = null;
@@ -95,7 +95,12 @@ async function exportToHubIfEnabled(payload) {
 }
 
 function emit(type, data = {}) {
-  const evt = { type, ts: nowIso(), source: "analytics:ingredient-usage", data };
+  const evt = {
+    type,
+    ts: nowIso(),
+    source: "analytics:ingredient-usage",
+    data,
+  };
   try {
     eventBus?.emit?.(evt);
   } catch (_) {
@@ -201,7 +206,11 @@ function mapToIngredients(evt = {}) {
     }
 
     // storehouse
-    if (k === "storehouse" || k === "storehouseStock" || k === "storehouseGoal") {
+    if (
+      k === "storehouse" ||
+      k === "storehouseStock" ||
+      k === "storehouseGoal"
+    ) {
       const items = data.items || [];
       for (const it of items) {
         const name = it.item || it.name;
@@ -224,11 +233,13 @@ function mapToIngredients(evt = {}) {
     if (k === "video" && typeof data.text === "string") {
       const text = data.text.toLowerCase();
       // simple heuristic – track high-value crops
-      ["tomato", "pepper", "okra", "greens", "lamb", "goat", "beef"].forEach((w) => {
-        if (text.includes(w)) {
-          results.push({ name: w, domain, sourceId });
+      ["tomato", "pepper", "okra", "greens", "lamb", "goat", "beef"].forEach(
+        (w) => {
+          if (text.includes(w)) {
+            results.push({ name: w, domain, sourceId });
+          }
         }
-      });
+      );
     }
   }
 
@@ -277,7 +288,8 @@ function mapKindToDomain(kind = "") {
   const k = kind.toLowerCase();
   if (k.includes("recipe") || k.includes("meal")) return "meals";
   if (k.includes("clean")) return "cleaning";
-  if (k.includes("garden") || k.includes("harvest") || k.includes("seed")) return "garden";
+  if (k.includes("garden") || k.includes("harvest") || k.includes("seed"))
+    return "garden";
   if (k.includes("animal") || k.includes("butcher")) return "animals";
   if (k.includes("store")) return "storehouse";
   if (k.includes("video")) return "video";
@@ -303,7 +315,12 @@ function initListener() {
     const updatedNames = [];
 
     for (const { name, domain, sourceId } of mapped) {
-      const entry = upsertIngredient(name, domain, evt.ts || Date.now(), sourceId);
+      const entry = upsertIngredient(
+        name,
+        domain,
+        evt.ts || Date.now(),
+        sourceId
+      );
       if (entry) {
         updatedNames.push(entry.name);
       }
@@ -389,9 +406,4 @@ const ingredientUsageStats = {
 };
 
 export default ingredientUsageStats;
-export {
-  initListener,
-  getAllStats,
-  getIngredientSeasonality,
-  prune,
-};
+export { initListener, getAllStats, getIngredientSeasonality, prune };

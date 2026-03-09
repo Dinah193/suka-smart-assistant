@@ -5,7 +5,7 @@
  * SessionAnalytics — resilient analytics recorder for SessionRunner
  * ----------------------------------------------------------------------------
  * How this fits:
- * - Listens to SessionRunner lifecycle events via src/services/eventBus.js.
+ * - Listens to SessionRunner lifecycle events via src/services/events/eventBus.js.
  * - Persists light analytics alongside sessions using Dexie if available
  *   (table: 'session_analytics'); falls back to localStorage if Dexie/db missing.
  * - On session completed|aborted: writes a final analytics record, emits an
@@ -42,25 +42,27 @@ async function _tryImport(paths = []) {
     try {
       const mod = await import(/* @vite-ignore */ p);
       if (mod) return mod;
-    } catch (_) { /* keep trying */ }
+    } catch (_) {
+      /* keep trying */
+    }
   }
   return null;
 }
 
 const _loadEventBus = async () => {
   const mod = await _tryImport([
-    "@/services/eventBus.js",
-    "../../services/eventBus.js",
-    "../../../services/eventBus.js",
+    "@/services/events/eventBus.js",
+    "../../services/events/eventBus.js",
+    "../../../services/events/eventBus.js",
   ]);
   return (mod && mod.eventBus) || _createLocalBus();
 };
 
 const _loadFeatureFlags = async () => {
   const mod = await _tryImport([
-    "@/services/featureFlags.js",
-    "../../services/featureFlags.js",
-    "../../../services/featureFlags.js",
+    "@/config/featureFlags.json",
+    "@/config/featureFlags.json",
+    "@/config/featureFlags.json",
   ]);
   return (mod && mod.featureFlags) || { familyFundMode: false };
 };
@@ -68,10 +70,10 @@ const _loadFeatureFlags = async () => {
 const _loadHubFormatter = async () => {
   const mod = await _tryImport([
     "@/services/hub/HubPacketFormatter.js",
-    "../../services/hub/HubPacketFormatter.js",
-    "../../../services/hub/HubPacketFormatter.js",
-    "@/services/HubPacketFormatter.js",
-    "../../services/HubPacketFormatter.js",
+    "@/services/hub/HubPacketFormatter.js",
+    "@/services/hub/HubPacketFormatter.js",
+    "@/services/hub/HubPacketFormatter.js",
+    "@/services/hub/HubPacketFormatter.js",
   ]);
   return mod || {};
 };
@@ -79,10 +81,10 @@ const _loadHubFormatter = async () => {
 const _loadHubConnector = async () => {
   const mod = await _tryImport([
     "@/services/hub/FamilyFundConnector.js",
-    "../../services/hub/FamilyFundConnector.js",
-    "../../../services/hub/FamilyFundConnector.js",
-    "@/services/FamilyFundConnector.js",
-    "../../services/FamilyFundConnector.js",
+    "@/services/hub/FamilyFundConnector.js",
+    "@/services/hub/FamilyFundConnector.js",
+    "@/services/hub/FamilyFundConnector.js",
+    "@/services/hub/FamilyFundConnector.js",
   ]);
   return mod || {};
 };
@@ -108,27 +110,45 @@ function _createLocalBus() {
     on(evt, cb) {
       listeners[evt] = listeners[evt] || [];
       listeners[evt].push(cb);
-      return () => (listeners[evt] = (listeners[evt] || []).filter((f) => f !== cb));
+      return () =>
+        (listeners[evt] = (listeners[evt] || []).filter((f) => f !== cb));
     },
     emit(evt, payload) {
       (listeners[evt] || []).forEach((cb) => {
-        try { cb(payload); } catch (e) { console.warn("eventBus listener error:", e); }
+        try {
+          cb(payload);
+        } catch (e) {
+          console.warn("eventBus listener error:", e);
+        }
       });
     },
   };
 }
-function _safeId(x) { return String(x || ""); }
-function _safeArr(a) { return Array.isArray(a) ? a : []; }
-function _num(n, d = 0) { const v = Number(n); return Number.isFinite(v) ? v : d; }
+function _safeId(x) {
+  return String(x || "");
+}
+function _safeArr(a) {
+  return Array.isArray(a) ? a : [];
+}
+function _num(n, d = 0) {
+  const v = Number(n);
+  return Number.isFinite(v) ? v : d;
+}
 
 // ----------------------------- localStorage fallback ---------------------------
 const LS_KEY = "ssa.session.analytics.v1";
 function _lsReadAll() {
-  try { const raw = localStorage.getItem(LS_KEY); return raw ? JSON.parse(raw) : {}; }
-  catch { return {}; }
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
 }
 function _lsWriteAll(map) {
-  try { localStorage.setItem(LS_KEY, JSON.stringify(map)); } catch {}
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify(map));
+  } catch {}
 }
 function _lsUpsert(id, obj) {
   const map = _lsReadAll();
@@ -142,8 +162,10 @@ function _lsRead(id) {
 function _lsList(limit = 50, domain) {
   const map = _lsReadAll();
   let rows = Object.values(map);
-  if (domain) rows = rows.filter(r => r.domain === domain);
-  rows.sort((a, b) => String(b.updatedAt || "").localeCompare(String(a.updatedAt || "")));
+  if (domain) rows = rows.filter((r) => r.domain === domain);
+  rows.sort((a, b) =>
+    String(b.updatedAt || "").localeCompare(String(a.updatedAt || ""))
+  );
   return rows.slice(0, limit);
 }
 function _lsPrune(days = 90) {
@@ -165,7 +187,9 @@ async function _ensureDexieTable(db) {
   try {
     if (!db.session_analytics && db.table) {
       // Some apps register tables lazily; attempt probing
-      try { db.session_analytics = db.table("session_analytics"); } catch {}
+      try {
+        db.session_analytics = db.table("session_analytics");
+      } catch {}
     }
     if (db.session_analytics) return true;
   } catch {}
@@ -178,7 +202,13 @@ async function _dexieUpsert(db, id, obj) {
     if (!has) return false;
     const key = _safeId(id);
     const prev = await db.session_analytics.get(key);
-    const next = { ...(prev || {}), ...obj, id: key, updatedAt: _iso(), createdAt: prev?.createdAt || _iso() };
+    const next = {
+      ...(prev || {}),
+      ...obj,
+      id: key,
+      updatedAt: _iso(),
+      createdAt: prev?.createdAt || _iso(),
+    };
     await db.session_analytics.put(next);
     return true;
   } catch (e) {
@@ -187,8 +217,13 @@ async function _dexieUpsert(db, id, obj) {
   }
 }
 async function _dexieRead(db, id) {
-  try { const has = await _ensureDexieTable(db); if (!has) return null; return await db.session_analytics.get(_safeId(id)); }
-  catch { return null; }
+  try {
+    const has = await _ensureDexieTable(db);
+    if (!has) return null;
+    return await db.session_analytics.get(_safeId(id));
+  } catch {
+    return null;
+  }
 }
 async function _dexieList(db, limit = 50, domain) {
   try {
@@ -200,7 +235,9 @@ async function _dexieList(db, limit = 50, domain) {
     }
     const rows = await coll.toArray();
     return (rows || []).slice(0, limit);
-  } catch { return []; }
+  } catch {
+    return [];
+  }
 }
 async function _dexiePrune(db, days = 90) {
   try {
@@ -208,39 +245,72 @@ async function _dexiePrune(db, days = 90) {
     if (!has) return false;
     const cutoff = Date.now() - days * 86400000;
     const all = await db.session_analytics.toArray();
-    const old = all.filter(r => Date.parse(r.updatedAt || r.createdAt || 0) < cutoff);
-    await Promise.all(old.map(r => db.session_analytics.delete(r.id)));
+    const old = all.filter(
+      (r) => Date.parse(r.updatedAt || r.createdAt || 0) < cutoff
+    );
+    await Promise.all(old.map((r) => db.session_analytics.delete(r.id)));
     return true;
-  } catch { return false; }
+  } catch {
+    return false;
+  }
 }
 
 // ----------------------------- Hub export helper ------------------------------
 async function _exportToHubIfEnabled(ctx, finalRecord) {
   try {
-    const { featureFlags, HubPacketFormatter, FamilyFundConnector, eventBus } = ctx;
+    const { featureFlags, HubPacketFormatter, FamilyFundConnector, eventBus } =
+      ctx;
     const on = !!(featureFlags && featureFlags.familyFundMode);
     if (!on) return;
 
-    const fmt = HubPacketFormatter && (HubPacketFormatter.default || HubPacketFormatter);
-    const conn = FamilyFundConnector && (FamilyFundConnector.default || FamilyFundConnector);
+    const fmt =
+      HubPacketFormatter && (HubPacketFormatter.default || HubPacketFormatter);
+    const conn =
+      FamilyFundConnector &&
+      (FamilyFundConnector.default || FamilyFundConnector);
     if (!fmt || !conn || !conn.send) return;
 
-    eventBus.emit("analytics.export.request", { type: "analytics.export.request", ts: _iso(), source: "SessionAnalytics", data: { id: finalRecord.id } });
+    eventBus.emit("analytics.export.request", {
+      type: "analytics.export.request",
+      ts: _iso(),
+      source: "SessionAnalytics",
+      data: { id: finalRecord.id },
+    });
 
-    const envelope =
-      (fmt.format && fmt.format("session.analytics", finalRecord)) ||
-      { kind: "session.analytics", at: _iso(), payload: finalRecord };
+    const envelope = (fmt.format &&
+      fmt.format("session.analytics", finalRecord)) || {
+      kind: "session.analytics",
+      at: _iso(),
+      payload: finalRecord,
+    };
 
-    const ok = await conn.send(envelope).catch((e) => { throw e; });
+    const ok = await conn.send(envelope).catch((e) => {
+      throw e;
+    });
     if (ok !== false) {
-      eventBus.emit("session.exported", { type: "session.exported", ts: _iso(), source: "SessionAnalytics", data: { id: finalRecord.id } });
-      eventBus.emit("analytics.export.success", { type: "analytics.export.success", ts: _iso(), source: "SessionAnalytics", data: { id: finalRecord.id } });
+      eventBus.emit("session.exported", {
+        type: "session.exported",
+        ts: _iso(),
+        source: "SessionAnalytics",
+        data: { id: finalRecord.id },
+      });
+      eventBus.emit("analytics.export.success", {
+        type: "analytics.export.success",
+        ts: _iso(),
+        source: "SessionAnalytics",
+        data: { id: finalRecord.id },
+      });
     } else {
       throw new Error("FamilyFundConnector.send returned false");
     }
   } catch (error) {
     try {
-      ctx.eventBus.emit("analytics.export.failed", { type: "analytics.export.failed", ts: _iso(), source: "SessionAnalytics", data: { error: String(error && error.message || error) } });
+      ctx.eventBus.emit("analytics.export.failed", {
+        type: "analytics.export.failed",
+        ts: _iso(),
+        source: "SessionAnalytics",
+        data: { error: String((error && error.message) || error) },
+      });
     } catch {}
   }
 }
@@ -248,15 +318,15 @@ async function _exportToHubIfEnabled(ctx, finalRecord) {
 // ----------------------------- derivations & reducers -------------------------
 function _deriveFinalStats(state = {}) {
   const stepsCompleted = _num(state.stepsCompleted, 0);
-  const stepsTotal     = _num(state.stepsTotal, 0);
-  const elapsedSec     = _num(state.elapsedSec, 0);
-  const pauses         = _num(state.pauseCount, 0);
-  const guards         = state.guards || {}; // { inventoryBlocks, weatherBlocks, quietBlocks, sabbathBlocks, equipmentBlocks }
+  const stepsTotal = _num(state.stepsTotal, 0);
+  const elapsedSec = _num(state.elapsedSec, 0);
+  const pauses = _num(state.pauseCount, 0);
+  const guards = state.guards || {}; // { inventoryBlocks, weatherBlocks, quietBlocks, sabbathBlocks, equipmentBlocks }
 
   return {
     stepsCompleted,
     stepsTotal,
-    stepCompletionRate: stepsTotal ? (stepsCompleted / stepsTotal) : 0,
+    stepCompletionRate: stepsTotal ? stepsCompleted / stepsTotal : 0,
     elapsedSec,
     pauseCount: pauses,
     guardBlocks: {
@@ -291,11 +361,27 @@ const SessionAnalytics = (() => {
 
   async function init() {
     // Load deps
-    try { ctx.eventBus = await _loadEventBus(); } catch { ctx.eventBus = _createLocalBus(); }
-    try { ctx.featureFlags = await _loadFeatureFlags(); } catch { ctx.featureFlags = { familyFundMode: false }; }
-    try { ctx.HubPacketFormatter = await _loadHubFormatter(); } catch {}
-    try { ctx.FamilyFundConnector = await _loadHubConnector(); } catch {}
-    try { ctx.db = await _loadDb(); } catch { ctx.db = null; }
+    try {
+      ctx.eventBus = await _loadEventBus();
+    } catch {
+      ctx.eventBus = _createLocalBus();
+    }
+    try {
+      ctx.featureFlags = await _loadFeatureFlags();
+    } catch {
+      ctx.featureFlags = { familyFundMode: false };
+    }
+    try {
+      ctx.HubPacketFormatter = await _loadHubFormatter();
+    } catch {}
+    try {
+      ctx.FamilyFundConnector = await _loadHubConnector();
+    } catch {}
+    try {
+      ctx.db = await _loadDb();
+    } catch {
+      ctx.db = null;
+    }
 
     // Attach listeners once
     if (!ctx.attached) {
@@ -407,7 +493,12 @@ const SessionAnalytics = (() => {
       st.updatedAt = _iso();
 
       const record = await _finalizeAndStore(s.id, s.domain, st);
-      ctx.eventBus.emit("analytics.written", { type: "analytics.written", ts: _iso(), source: "SessionAnalytics", data: { id: record.id, domain: record.domain, status: record.status } });
+      ctx.eventBus.emit("analytics.written", {
+        type: "analytics.written",
+        ts: _iso(),
+        source: "SessionAnalytics",
+        data: { id: record.id, domain: record.domain, status: record.status },
+      });
       await _exportToHubIfEnabled(ctx, record);
     });
 
@@ -423,7 +514,12 @@ const SessionAnalytics = (() => {
       st.updatedAt = _iso();
 
       const record = await _finalizeAndStore(s.id, s.domain, st);
-      ctx.eventBus.emit("analytics.written", { type: "analytics.written", ts: _iso(), source: "SessionAnalytics", data: { id: record.id, domain: record.domain, status: record.status } });
+      ctx.eventBus.emit("analytics.written", {
+        type: "analytics.written",
+        ts: _iso(),
+        source: "SessionAnalytics",
+        data: { id: record.id, domain: record.domain, status: record.status },
+      });
       await _exportToHubIfEnabled(ctx, record); // still export aborted runs for post-mortem
     });
 
@@ -446,7 +542,7 @@ const SessionAnalytics = (() => {
     // Optional: record guards (if your guards emit these)
     ctx.eventBus.on("guard.blocked", (evt) => {
       const data = evt && (evt.data || evt.payload);
-      const { sessionId, kind } = (data || {});
+      const { sessionId, kind } = data || {};
       if (!sessionId || !kind) return;
       const st = mem.get(sessionId);
       if (st) {
@@ -461,7 +557,7 @@ const SessionAnalytics = (() => {
     const st = mem.get(id);
     if (!st || !id) return;
     // Try Dexie first
-    if (ctx.db && await _dexieUpsert(ctx.db, id, st)) return;
+    if (ctx.db && (await _dexieUpsert(ctx.db, id, st))) return;
     // Fallback to localStorage
     _lsUpsert(id, st);
   }
@@ -504,7 +600,7 @@ const SessionAnalytics = (() => {
     };
 
     // Persist
-    if (ctx.db && await _dexieUpsert(ctx.db, id, finalRecord)) {
+    if (ctx.db && (await _dexieUpsert(ctx.db, id, finalRecord))) {
       mem.set(id, finalRecord);
       return finalRecord;
     }
@@ -521,7 +617,11 @@ const SessionAnalytics = (() => {
     /** Manually record a step skip or adjustment (UI helpers can call these). */
     async noteSkippedStep(sessionId, stepId) {
       if (!sessionId) return;
-      const st = mem.get(sessionId) || { id: sessionId, skippedSteps: [], adjustments: [] };
+      const st = mem.get(sessionId) || {
+        id: sessionId,
+        skippedSteps: [],
+        adjustments: [],
+      };
       const set = new Set(_safeArr(st.skippedSteps));
       if (stepId) set.add(String(stepId));
       st.skippedSteps = Array.from(set);
@@ -532,8 +632,14 @@ const SessionAnalytics = (() => {
 
     async noteAdjustment(sessionId, msg, meta) {
       if (!sessionId) return;
-      const st = mem.get(sessionId) || { id: sessionId, skippedSteps: [], adjustments: [] };
-      st.adjustments = _safeArr(st.adjustments).concat([{ at: _iso(), msg: String(msg || ""), meta: meta || {} }]);
+      const st = mem.get(sessionId) || {
+        id: sessionId,
+        skippedSteps: [],
+        adjustments: [],
+      };
+      st.adjustments = _safeArr(st.adjustments).concat([
+        { at: _iso(), msg: String(msg || ""), meta: meta || {} },
+      ]);
       st.updatedAt = _iso();
       mem.set(sessionId, st);
       await _persistWorkingSet(sessionId);
@@ -576,13 +682,22 @@ const SessionAnalytics = (() => {
     },
 
     /** For tests/dev: inject a fake eventBus or db. */
-    __inject({ eventBus, db, featureFlags, HubPacketFormatter, FamilyFundConnector } = {}) {
+    __inject({
+      eventBus,
+      db,
+      featureFlags,
+      HubPacketFormatter,
+      FamilyFundConnector,
+    } = {}) {
       if (eventBus) ctx.eventBus = eventBus;
       if (db) ctx.db = db;
       if (featureFlags) ctx.featureFlags = featureFlags;
       if (HubPacketFormatter) ctx.HubPacketFormatter = HubPacketFormatter;
       if (FamilyFundConnector) ctx.FamilyFundConnector = FamilyFundConnector;
-      if (!ctx.attached) { _attachListeners(); ctx.attached = true; }
+      if (!ctx.attached) {
+        _attachListeners();
+        ctx.attached = true;
+      }
       return this;
     },
   };

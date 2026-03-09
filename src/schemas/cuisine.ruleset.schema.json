@@ -1,0 +1,539 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://suka-smart-assistant.local/schemas/cuisine.ruleset.schema.json",
+  "title": "SSA Cuisine Ruleset Schema",
+  "description": "Schema for SSA cuisine rulesets (deterministic planning + adaptation rules). Designed to be strict at top-level while allowing forward-compatible 'when'/'adapt' payloads.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schemaVersion",
+    "updatedAt",
+    "meta",
+    "normalization",
+    "scope"
+  ],
+  "properties": {
+    "$schema": { "type": "string", "minLength": 1 },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "updatedAt": { "type": "string", "format": "date-time" },
+
+    "meta": { "$ref": "#/$defs/Meta" },
+    "normalization": { "$ref": "#/$defs/Normalization" },
+    "scope": { "$ref": "#/$defs/Scope" },
+
+    "identity": { "$ref": "#/$defs/Identity" },
+    "plannerDefaults": { "$ref": "#/$defs/PlannerDefaults" },
+    "pantry": { "$ref": "#/$defs/Pantry" },
+
+    "equipmentPolicy": { "$ref": "#/$defs/EquipmentPolicy" },
+    "dietPolicy": { "$ref": "#/$defs/DietPolicy" },
+    "timePolicy": { "$ref": "#/$defs/TimePolicy" },
+
+    "pairingPolicy": { "$ref": "#/$defs/PairingPolicy" },
+    "substitutionPolicy": { "$ref": "#/$defs/SubstitutionPolicy" },
+
+    "rotationPolicy": { "$ref": "#/$defs/RotationPolicy" },
+    "selectionPolicy": { "$ref": "#/$defs/SelectionPolicy" },
+
+    "exports": { "$ref": "#/$defs/Exports" }
+  },
+
+  "$defs": {
+    "Meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "domain", "locale"],
+      "properties": {
+        "id": { "type": "string", "minLength": 3 },
+        "type": { "const": "cuisine_ruleset" },
+        "domain": { "const": "cuisines" },
+        "locale": { "type": "string", "minLength": 2 },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        }
+      }
+    },
+
+    "Normalization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "idPattern",
+        "idCase",
+        "aliasCaseFold",
+        "keywordCaseFold",
+        "trimWhitespace",
+        "collapseSpaces"
+      ],
+      "properties": {
+        "idPattern": { "type": "string", "minLength": 1 },
+        "idCase": { "type": "string", "enum": ["lower", "upper", "preserve"] },
+        "aliasCaseFold": { "type": "boolean" },
+        "keywordCaseFold": { "type": "boolean" },
+        "trimWhitespace": { "type": "boolean" },
+        "collapseSpaces": { "type": "boolean" }
+      }
+    },
+
+    "Scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cuisineId"],
+      "properties": {
+        "cuisineId": { "type": "string", "minLength": 1 },
+        "subprofiles": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "supportedMealArchetypes": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      }
+    },
+
+    "Identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "signatureAromatics": { "$ref": "#/$defs/StringIdList" },
+        "signatureSpices": { "$ref": "#/$defs/StringIdList" },
+        "signatureAcids": { "$ref": "#/$defs/StringIdList" },
+        "signatureHeat": { "$ref": "#/$defs/StringIdList" },
+        "signatureBases": { "$ref": "#/$defs/StringIdList" },
+        "signatureStarches": { "$ref": "#/$defs/StringIdList" },
+        "signatureSides": { "$ref": "#/$defs/StringIdList" },
+        "signatureDrinks": { "$ref": "#/$defs/StringIdList" }
+      }
+    },
+
+    "PlannerDefaults": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "defaultHeatLevel": { "type": "integer", "minimum": 0 },
+        "heatScale": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["min", "max"],
+          "properties": {
+            "min": { "type": "integer" },
+            "max": { "type": "integer" }
+          }
+        },
+        "defaultSaltStyle": { "type": "string", "minLength": 1 },
+        "defaultSweetnessStyle": { "type": "string", "minLength": 1 },
+        "defaultCookingFats": { "$ref": "#/$defs/StringIdList" },
+        "defaultMealBalance": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "aimForArchetypeBalance": { "type": "boolean" },
+            "preferVegAtLeastOnceDaily": { "type": "boolean" },
+            "preferLegumesEveryOtherDay": { "type": "boolean" },
+            "preferFermentsOrPicklesEveryOtherDay": { "type": "boolean" }
+          }
+        }
+      }
+    },
+
+    "Pantry": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "corePantryItems": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PantryItem" }
+        },
+        "optionalPantryItems": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PantryItem" }
+        }
+      }
+    },
+
+    "PantryItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "category", "priority"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "category": { "type": "string", "minLength": 1 },
+        "priority": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "notes": { "type": "string" }
+      }
+    },
+
+    "EquipmentPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "minimums": { "$ref": "#/$defs/StringIdListMap" },
+        "preferred": { "$ref": "#/$defs/StringIdListMap" },
+        "adaptationRules": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Rule" }
+        }
+      }
+    },
+
+    "DietPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "supportedDietFlags": { "$ref": "#/$defs/StringIdList" },
+        "rules": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Rule" }
+        },
+        "allergenSubstitutions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/AllergenSubstitutionRule" }
+        }
+      }
+    },
+
+    "AllergenSubstitutionRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "allergen", "swapMap"],
+      "properties": {
+        "id": { "type": "string", "minLength": 3 },
+        "allergen": { "type": "string", "minLength": 1 },
+        "swapMap": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/SwapMapEntry" }
+        },
+        "notes": { "type": "string" }
+      }
+    },
+
+    "SwapMapEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from"],
+      "properties": {
+        "from": { "type": "string", "minLength": 1 },
+        "to": { "type": "string", "minLength": 1 },
+        "toAlt": { "$ref": "#/$defs/StringIdList" }
+      },
+      "anyOf": [{ "required": ["to"] }, { "required": ["toAlt"] }]
+    },
+
+    "TimePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "weeknightMaxTotalMins": { "type": "integer", "minimum": 0 },
+        "rules": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Rule" }
+        }
+      }
+    },
+
+    "PairingPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "archetypeDefinitions": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/ArchetypeDefinition" }
+        },
+        "recommendedRoleFillers": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/StringIdList" }
+        },
+        "dishPairingOverrides": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/DishPairingOverride" }
+        }
+      }
+    },
+
+    "ArchetypeDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mustHaveRoles": { "$ref": "#/$defs/StringList" },
+        "shouldHaveRoles": { "$ref": "#/$defs/StringList" },
+        "examples": { "$ref": "#/$defs/StringList" }
+      }
+    },
+
+    "DishPairingOverride": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dishId"],
+      "properties": {
+        "dishId": { "type": "string", "minLength": 1 },
+        "preferSides": { "$ref": "#/$defs/StringIdList" },
+        "preferVeg": { "$ref": "#/$defs/StringIdList" },
+        "preferCondiments": { "$ref": "#/$defs/StringIdList" },
+        "preferDrinks": { "$ref": "#/$defs/StringIdList" }
+      }
+    },
+
+    "SubstitutionPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ingredientSwapRules": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/SubstitutionRule" }
+        },
+        "proteinSwapRules": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/SubstitutionRule" }
+        }
+      }
+    },
+
+    "SubstitutionRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": { "type": "string", "minLength": 3 },
+        "category": { "type": "string" },
+        "when": { "$ref": "#/$defs/When" },
+        "swaps": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/SwapMapEntry" }
+        },
+        "notes": { "type": "string" }
+      }
+    },
+
+    "RotationPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "defaultRotationDays": { "type": "integer", "minimum": 1 },
+        "preferredDistribution": { "$ref": "#/$defs/DistributionMap" },
+        "anchorDishes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/WeightedDish" }
+        },
+        "specialOccasionBoosts": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/OccasionBoost" }
+        }
+      }
+    },
+
+    "DistributionMap": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/MinMax" }
+    },
+
+    "MinMax": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min", "max"],
+      "properties": {
+        "min": { "type": "integer", "minimum": 0 },
+        "max": { "type": "integer", "minimum": 0 }
+      }
+    },
+
+    "WeightedDish": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dishId", "weight"],
+      "properties": {
+        "dishId": { "type": "string", "minLength": 1 },
+        "weight": { "type": "integer", "minimum": 1, "maximum": 10 }
+      }
+    },
+
+    "OccasionBoost": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["when", "boostDishIds"],
+      "properties": {
+        "when": { "$ref": "#/$defs/When" },
+        "boostDishIds": { "$ref": "#/$defs/StringIdList" },
+        "notes": { "type": "string" }
+      }
+    },
+
+    "SelectionPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "dishAllowList": { "$ref": "#/$defs/StringIdList" },
+        "tagWeights": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10
+          }
+        },
+        "conflictRules": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ConflictRule" }
+        }
+      }
+    },
+
+    "ConflictRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "when", "resolve"],
+      "properties": {
+        "id": { "type": "string", "minLength": 3 },
+        "when": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "horizonDays": { "type": "integer", "minimum": 1 },
+            "selectedDishIdsMaxFromSet": { "$ref": "#/$defs/MaxFromSet" }
+          }
+        },
+        "resolve": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "preferSwapIn": { "$ref": "#/$defs/StringIdList" },
+            "notes": { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "MaxFromSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max", "set"],
+      "properties": {
+        "max": { "type": "integer", "minimum": 0 },
+        "set": { "$ref": "#/$defs/StringIdList" }
+      }
+    },
+
+    "Exports": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "events": { "$ref": "#/$defs/StringList" },
+        "uiHints": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "badgeLabel": { "type": "string" },
+            "badgeTags": { "$ref": "#/$defs/StringList" },
+            "suggestedQuickAdds": { "$ref": "#/$defs/StringIdList" }
+          }
+        }
+      }
+    },
+
+    "Rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "when", "adapt"],
+      "properties": {
+        "id": { "type": "string", "minLength": 3 },
+        "when": { "$ref": "#/$defs/When" },
+        "adapt": { "$ref": "#/$defs/Adapt" }
+      }
+    },
+
+    "When": {
+      "type": "object",
+      "description": "Forward-compatible condition object used by rules. Additional properties are allowed by design.",
+      "additionalProperties": true,
+      "properties": {
+        "dishIdAny": { "$ref": "#/$defs/StringIdList" },
+        "dishIdAll": { "$ref": "#/$defs/StringIdList" },
+
+        "subprofileAny": { "$ref": "#/$defs/StringList" },
+        "subprofileAll": { "$ref": "#/$defs/StringList" },
+
+        "mealArchetypeAny": { "$ref": "#/$defs/StringList" },
+        "mealArchetypeAll": { "$ref": "#/$defs/StringList" },
+
+        "servingStyleAny": { "$ref": "#/$defs/StringList" },
+
+        "hasEquipmentAll": { "$ref": "#/$defs/StringIdList" },
+        "hasEquipmentAny": { "$ref": "#/$defs/StringIdList" },
+        "missingEquipmentAny": { "$ref": "#/$defs/StringIdList" },
+
+        "dietAny": { "$ref": "#/$defs/StringList" },
+        "dietAll": { "$ref": "#/$defs/StringList" },
+
+        "healthFlagsAny": { "$ref": "#/$defs/StringList" },
+
+        "timeMaxTotalMins": { "type": "integer", "minimum": 0 },
+        "tasteMaxHeat": { "type": "integer", "minimum": 0 },
+
+        "proteinSwapAllowed": { "type": "boolean" },
+        "skillMin": { "type": "string", "minLength": 1 }
+      }
+    },
+
+    "Adapt": {
+      "type": "object",
+      "description": "Forward-compatible adaptation payload object. Additional properties are allowed by design.",
+      "additionalProperties": true,
+      "properties": {
+        "preferredMethods": { "$ref": "#/$defs/StringList" },
+        "method": { "type": "string" },
+
+        "notes": { "type": "string" },
+
+        "omit": { "$ref": "#/$defs/StringIdList" },
+        "add": { "$ref": "#/$defs/StringIdList" },
+
+        "swapProtein": { "type": "string" },
+        "swapFat": { "type": "string" },
+
+        "flavorCompensationAdd": { "$ref": "#/$defs/StringIdList" },
+
+        "reduceHeat": { "type": "boolean" },
+        "sweetener": { "type": "string" },
+
+        "useCannedBeans": { "type": "boolean" },
+
+        "batchSuggestion": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "makeAheadAny": { "$ref": "#/$defs/StringIdList" },
+            "freezeIfPossible": { "type": "boolean" }
+          }
+        }
+      }
+    },
+
+    "StringIdList": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+
+    "StringList": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+
+    "StringIdListMap": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/StringIdList" }
+    }
+  }
+}

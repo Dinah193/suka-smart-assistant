@@ -1,0 +1,253 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-13",
+  "meta": {
+    "id": "recipe.west_african.fufu",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "cuisineId": "cuisine.west_african",
+    "dishId": "dish.fufu",
+    "label": "Fufu",
+    "altLabels": ["Cassava Fufu", "Fufu (Swallow)", "Fufu Dough"],
+    "source": "catalog",
+    "author": "SSA Canonical Catalog",
+    "regionHints": ["Nigeria", "Ghana", "West Africa"],
+    "tags": [
+      "west_african",
+      "starch",
+      "swallow",
+      "stew_and_starch",
+      "family_style",
+      "gluten_free_option",
+      "stovetop"
+    ]
+  },
+  "summary": {
+    "oneLine": "A smooth, elastic swallow made from cassava (and optional plantain) flour cooked into a cohesive dough.",
+    "notes": [
+      "Fufu methods vary: traditional pounded fufu vs quick flour-based stovetop fufu. This SSA baseline is the flour-based stovetop method for repeatable planning.",
+      "Use cassava fufu flour (or a cassava/plantain blend) if available. SSA adapters can map regional flour choices."
+    ]
+  },
+  "yields": {
+    "servings": 6,
+    "servingSizeNote": "Side starch portions served with soup/stew."
+  },
+  "time": {
+    "totalMinutes": 20,
+    "activeMinutes": 18,
+    "restMinutes": 2
+  },
+  "difficulty": "beginner",
+  "servingStyles": ["stew_and_starch", "family_style"],
+  "plannerHints": {
+    "batchFriendly": false,
+    "leftoversFriendly": false,
+    "weeknightBias": "high",
+    "mealArchetypeId": "archetype_stew_with_starch"
+  },
+  "nutrition": {
+    "isEstimate": true,
+    "notes": [
+      "Nutrition varies by flour blend. SSA nutrition pipeline should compute based on catalog ingredient mapping."
+    ]
+  },
+  "allergens": {
+    "mayContain": [],
+    "commonTriggers": [],
+    "notes": [
+      "Cassava-based fufu is typically gluten-free; confirm flour is not cross-contaminated.",
+      "Some store-bought fufu flours may include additives; apply ingredient preference rules if needed."
+    ]
+  },
+  "equipment": {
+    "required": [
+      { "id": "pot_lidded", "label": "Heavy pot with lid", "qty": 1 },
+      { "id": "stove_burner", "label": "Stovetop burner", "qty": 1 },
+      {
+        "id": "spoon_wooden",
+        "label": "Strong wooden spoon / turning stick",
+        "qty": 1
+      },
+      { "id": "measuring_cups", "label": "Measuring cups", "qty": 1 }
+    ],
+    "optional": [
+      { "id": "whisk", "label": "Whisk (helps prevent lumps early)", "qty": 1 },
+      {
+        "id": "thermometer_optional",
+        "label": "Thermometer (optional)",
+        "qty": 1
+      }
+    ]
+  },
+  "ingredients": [
+    {
+      "id": "cassava_fufu_flour_optional",
+      "label": "Cassava fufu flour (or cassava/plantain fufu flour)",
+      "qty": 2,
+      "unit": "cup",
+      "role": "starch",
+      "notes": [
+        "If using a blended flour (cassava/plantain), follow package guidance; hydration can differ."
+      ]
+    },
+    {
+      "id": "water",
+      "label": "Water",
+      "qty": 3,
+      "unit": "cup",
+      "role": "liquid",
+      "notes": [
+        "Start with 3 cups for 2 cups flour; adjust slightly as needed for smooth elastic dough."
+      ]
+    },
+    {
+      "id": "salt_optional",
+      "label": "Salt (optional)",
+      "qty": 0.25,
+      "unit": "tsp",
+      "role": "seasoning",
+      "optional": true,
+      "notes": [
+        "Many households keep fufu unseasoned; optional tiny pinch is acceptable."
+      ]
+    }
+  ],
+  "techniques": [
+    "prep_mise_en_place",
+    "whisk_optional",
+    "stir",
+    "cook_until_thick",
+    "knead_in_pot",
+    "rest"
+  ],
+  "steps": [
+    {
+      "id": "step.boil_water",
+      "title": "Bring water to a simmer",
+      "body": "Add water to a heavy pot and bring to a gentle simmer over medium heat. If using salt, add it now.",
+      "timeMinutes": 5,
+      "timers": [{ "label": "Heat water", "seconds": 300 }],
+      "hazards": [
+        {
+          "type": "burn",
+          "message": "Hot water and steam can burn—use care when stirring and avoid splashing."
+        }
+      ]
+    },
+    {
+      "id": "step.start_slurry",
+      "title": "Start a lump-free base",
+      "body": "Reduce heat to medium-low. Sprinkle in fufu flour gradually while whisking (or stirring vigorously) to prevent lumps. Keep the mixture moving as it thickens.",
+      "timeMinutes": 5,
+      "timers": [{ "label": "Incorporate flour", "seconds": 300 }],
+      "hazards": [
+        {
+          "type": "splatter",
+          "message": "As it thickens it may splatter—stir steadily and keep heat moderate."
+        }
+      ],
+      "checks": [
+        "No dry pockets of flour remain",
+        "Mixture is thick and glossy"
+      ]
+    },
+    {
+      "id": "step.turn_until_smooth",
+      "title": "Turn (stir) until smooth and elastic",
+      "body": "Continue to 'turn' the dough with a strong wooden spoon on low heat for 6–8 minutes, scraping the bottom to prevent sticking. The dough should become smooth, cohesive, and stretchy. If too stiff, add 1–2 tbsp water and turn again. If too soft, sprinkle 1–2 tbsp flour and turn again.",
+      "timeMinutes": 8,
+      "timers": [{ "label": "Turn dough", "seconds": 420 }],
+      "hazards": [
+        {
+          "type": "strain",
+          "message": "Turning fufu is physically demanding—use a stable pot and take short pauses if needed."
+        }
+      ],
+      "checks": [
+        "Dough pulls cleanly from pot sides",
+        "Surface looks smooth and slightly glossy",
+        "Elastic stretch without tearing"
+      ]
+    },
+    {
+      "id": "step.rest_and_portion",
+      "title": "Rest briefly, then portion",
+      "body": "Turn off heat and cover 1–2 minutes. Wet a bowl/spoon lightly and portion fufu into smooth balls. Serve immediately with soup/stew. Keep covered to prevent drying.",
+      "timeMinutes": 2,
+      "timers": [{ "label": "Rest", "seconds": 120 }],
+      "hazards": []
+    }
+  ],
+  "serving": {
+    "suggestions": [
+      "Serve with egusi soup, okra soup, pepper soup, or other stews.",
+      "Eat by pinching small pieces and dipping/scooping stew."
+    ],
+    "garnishes": [],
+    "storage": {
+      "refrigeratorDays": 1,
+      "freezerDays": 0,
+      "reheatNotes": [
+        "Best eaten fresh. If needed, wrap tightly to prevent drying and reheat gently with steam; texture may degrade."
+      ]
+    }
+  },
+  "adaptation": {
+    "donenessTargets": {
+      "texture": "smooth_elastic_no_lumps",
+      "firmness": "holds_shape_soft_pull"
+    },
+    "substitutions": [
+      {
+        "whenMissing": ["cassava_fufu_flour_optional"],
+        "useInstead": ["cornmeal_fufu_optional", "yam_flour_optional"],
+        "notes": "Different flours hydrate differently; add liquid gradually and cook until elastic and smooth."
+      }
+    ],
+    "equipmentFallbacks": [
+      {
+        "whenMissing": ["whisk"],
+        "doInstead": "Sprinkle flour slowly while stirring vigorously; break up any small lumps early before dough fully thickens."
+      }
+    ],
+    "allergenConsiderations": [
+      {
+        "ifAllergenActive": "gluten",
+        "avoid": ["wheat_flour_optional"],
+        "notes": "Use cassava/plantain/yam-based fufu flours to stay gluten-free; confirm packaging."
+      }
+    ]
+  },
+  "qa": {
+    "validators": {
+      "requiresCatalogIngredientIds": true,
+      "requiresTechniqueIds": true,
+      "requiresEquipmentIds": true
+    },
+    "knownGood": [
+      "Fufu should be smooth and elastic with no raw flour taste.",
+      "Consistency should hold shape but still be soft enough to pull and dip.",
+      "Keep covered while serving to prevent drying and cracking."
+    ],
+    "commonIssues": [
+      {
+        "problem": "Lumpy fufu",
+        "likelyCause": "Flour added too fast or not whisked/stirred early",
+        "fix": "Sprinkle flour gradually; whisk vigorously at the start; break lumps before it becomes very thick."
+      },
+      {
+        "problem": "Too stiff / hard",
+        "likelyCause": "Too much flour or overcooked without enough water",
+        "fix": "Add 1–2 tbsp water and turn; reduce flour slightly next time."
+      },
+      {
+        "problem": "Too soft / runny",
+        "likelyCause": "Too much water or undercooked",
+        "fix": "Sprinkle 1–2 tbsp flour and turn; cook a few minutes longer on low heat."
+      }
+    ]
+  }
+}

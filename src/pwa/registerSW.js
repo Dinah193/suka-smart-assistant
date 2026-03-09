@@ -20,18 +20,24 @@ let eventBus = {
   emit: (...a) => console.debug("[registerSW:eventBus.emit]", ...a),
 };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
-} catch { /* optional */ }
+} catch {
+  /* optional */
+}
 
 const SRC = "pwa.registerSW";
 
-function nowIso() { return new Date().toISOString(); }
+function nowIso() {
+  return new Date().toISOString();
+}
 function envelope(type, data = {}) {
   return { type, ts: nowIso(), source: SRC, data };
 }
 function emit(type, data) {
-  try { eventBus.emit(envelope(type, data)); } catch (err) {
+  try {
+    eventBus.emit(envelope(type, data));
+  } catch (err) {
     // non-fatal; still useful in apps without eventBus wired
     console.warn("[registerSW] eventBus.emit failed", err);
   }
@@ -41,14 +47,18 @@ function isLocalhost() {
   try {
     const h = self?.location?.hostname || window.location.hostname;
     return h === "localhost" || h === "127.0.0.1" || h === "[::1]";
-  } catch { return false; }
+  } catch {
+    return false;
+  }
 }
 
 function isSupported() {
   try {
     const httpsLike = window.isSecureContext || isLocalhost();
     return "serviceWorker" in navigator && httpsLike;
-  } catch { return false; }
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -72,14 +82,18 @@ function registerSW(opts = {}) {
   } = opts;
 
   if (!isSupported()) {
-    !silent && console.info("[registerSW] SW not supported or insecure context; skipping");
+    !silent &&
+      console.info(
+        "[registerSW] SW not supported or insecure context; skipping"
+      );
     emit("sw.register.skip", { reason: "unsupported" });
     return apiNoop();
   }
 
   const swUrl = resolveSwUrl(inputUrl);
   if (!swUrl) {
-    !silent && console.warn("[registerSW] No service worker URL resolved; skipping");
+    !silent &&
+      console.warn("[registerSW] No service worker URL resolved; skipping");
     emit("sw.register.skip", { reason: "no-url" });
     return apiNoop();
   }
@@ -93,7 +107,9 @@ function registerSW(opts = {}) {
       wireLifecycle(registration, { autoUpdate, silent });
       wireMessages({ silent });
       if (typeof onReady === "function") {
-        try { onReady(registration); } catch {}
+        try {
+          onReady(registration);
+        } catch {}
       }
       emit("sw.register.success", { scope, url: swUrl });
       return registration;
@@ -107,7 +123,8 @@ function registerSW(opts = {}) {
   // Public API
   const api = {
     ready,
-    getRegistration: async () => (await ready) || navigator.serviceWorker.getRegistration(scope),
+    getRegistration: async () =>
+      (await ready) || navigator.serviceWorker.getRegistration(scope),
     registration: null, // will be set when ready resolves
     async checkForUpdates() {
       const reg = await api.getRegistration();
@@ -118,7 +135,10 @@ function registerSW(opts = {}) {
         emit("sw.update.check", { ok: true });
         return true;
       } catch (err) {
-        emit("sw.update.check", { ok: false, message: err?.message || String(err) });
+        emit("sw.update.check", {
+          ok: false,
+          message: err?.message || String(err),
+        });
         return false;
       }
     },
@@ -128,7 +148,9 @@ function registerSW(opts = {}) {
       try {
         controller.postMessage({ cmd, ...payload });
         return true;
-      } catch { return false; }
+      } catch {
+        return false;
+      }
     },
     async flushPlayLogs() {
       // Prefer Background Sync route; fallback to direct message
@@ -145,14 +167,19 @@ function registerSW(opts = {}) {
         emit("sw.unregister", { ok: true });
         return true;
       } catch (err) {
-        emit("sw.unregister", { ok: false, message: err?.message || String(err) });
+        emit("sw.unregister", {
+          ok: false,
+          message: err?.message || String(err),
+        });
         return false;
       }
     },
   };
 
   // stash registration on resolution
-  ready.then((reg) => { api.registration = reg; });
+  ready.then((reg) => {
+    api.registration = reg;
+  });
 
   return api;
 }
@@ -185,7 +212,9 @@ function wireLifecycle(registration, { autoUpdate, silent }) {
             emit("sw.update.available", {});
             if (autoUpdate && registration.waiting) {
               // Ask the waiting SW to skip waiting so it becomes active
-              try { registration.waiting.postMessage({ cmd: "SKIP_WAITING" }); } catch {}
+              try {
+                registration.waiting.postMessage({ cmd: "SKIP_WAITING" });
+              } catch {}
             }
           } else {
             // First install
@@ -201,7 +230,9 @@ function wireLifecycle(registration, { autoUpdate, silent }) {
       if (autoUpdate) {
         // Give the app a beat to save UI state if needed
         setTimeout(() => {
-          try { window.location.reload(); } catch {}
+          try {
+            window.location.reload();
+          } catch {}
         }, 100);
       }
     });

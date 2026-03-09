@@ -1,0 +1,596 @@
+{
+  "$schema": "../../../schemas/ruleset.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+  "kind": "cuisine_ruleset",
+  "meta": {
+    "id": "cuisines.french_country.ruleset",
+    "type": "cuisine_ruleset",
+    "label": "French Country • Cuisine Ruleset",
+    "cuisineId": "cuisines.french_country",
+    "status": "canonical",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa.cuisines.french_country",
+      "notes": [
+        "Deterministic cuisine ruleset used by planners + recipe adapter scoring.",
+        "All rule ids are lowercase and match ^[a-z0-9_.-]+$."
+      ]
+    }
+  },
+  "scope": {
+    "kind": "cuisine",
+    "cuisineId": "cuisines.french_country",
+    "locales": ["en-US"]
+  },
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true,
+    "tokens": {
+      "stopWords": [
+        "a",
+        "an",
+        "and",
+        "or",
+        "the",
+        "of",
+        "with",
+        "au",
+        "aux",
+        "de",
+        "des",
+        "du",
+        "la",
+        "le",
+        "les",
+        "à"
+      ]
+    },
+    "ingredientAliases": {
+      "ingredient.herbes_de_provence": [
+        "herbes de provence",
+        "herbs de provence",
+        "provencal herb blend"
+      ],
+      "ingredient.dijon_mustard": [
+        "dijon",
+        "dijon mustard",
+        "moutarde de dijon"
+      ],
+      "ingredient.gruyere": ["gruyere", "gruyère"],
+      "ingredient.red_wine_dry": ["dry red wine", "red wine", "bourgogne red"],
+      "ingredient.white_wine_dry": [
+        "dry white wine",
+        "white wine",
+        "vin blanc sec"
+      ],
+      "ingredient.shallots": ["shallot", "shallots"],
+      "ingredient.leeks": ["leek", "leeks"],
+      "ingredient.pearl_onions": ["pearl onions", "cipollini", "small onions"],
+      "ingredient.bacon": ["bacon", "lardons"],
+      "ingredient.beef_stock": ["beef broth", "beef stock"],
+      "ingredient.chicken_stock": ["chicken broth", "chicken stock"],
+      "ingredient.vegetable_stock": [
+        "veg stock",
+        "vegetable broth",
+        "vegetable stock"
+      ],
+      "ingredient.tarragon": ["tarragon", "estragon"],
+      "ingredient.creme_fraiche": ["creme fraiche", "crème fraîche"],
+      "ingredient.cognac": ["cognac", "brandy"],
+      "ingredient.brandy": ["brandy", "cognac"]
+    },
+    "dishAliases": {
+      "dishes.french_country.beef_bourguignon": [
+        "boeuf bourguignon",
+        "beef bourguignon",
+        "burgundy beef stew"
+      ],
+      "dishes.french_country.coq_au_vin": [
+        "coq au vin",
+        "chicken in wine",
+        "coq au vin rouge"
+      ],
+      "dishes.french_country.french_onion_soup": [
+        "french onion soup",
+        "soupe a l'oignon",
+        "soupe à l'oignon"
+      ],
+      "dishes.french_country.potato_gratin_dauphinois": [
+        "gratin dauphinois",
+        "potato gratin",
+        "gratin of potatoes"
+      ],
+      "dishes.french_country.ratatouille": [
+        "ratatouille",
+        "provencal vegetable stew"
+      ]
+    },
+    "equipmentAliases": {
+      "equipment.dutch_oven": [
+        "dutch oven",
+        "cocotte",
+        "enameled cast iron pot"
+      ],
+      "equipment.baking_dish": ["baking dish", "gratin dish", "casserole dish"],
+      "equipment.roasting_pan": ["roasting pan", "roaster"],
+      "equipment.nonstick_skillet": ["nonstick skillet", "non stick pan"],
+      "equipment.skillet": ["skillet", "frying pan"],
+      "equipment.thermometer_instant": [
+        "instant read thermometer",
+        "meat thermometer"
+      ]
+    },
+    "methodAliases": {
+      "method.braise": ["braise", "slow braise", "stew-braise"],
+      "method.sear": ["sear", "brown"],
+      "method.deglaze": ["deglaze"],
+      "method.reduce": ["reduce", "simmer down"],
+      "method.caramelize": ["caramelize", "caramelise"],
+      "method.roast": ["roast", "oven roast"],
+      "method.simmer": ["simmer", "gentle simmer"]
+    }
+  },
+  "globals": {
+    "cuisine": "cuisines.french_country",
+    "plannerBias": {
+      "umami": "medium",
+      "acid": "medium",
+      "butterUse": "high",
+      "wineDeglaze": "medium",
+      "herbForward": "medium"
+    },
+    "defaultServingStyles": ["family_style", "plated_meals"],
+    "defaultSignals": {
+      "batchFriendly": true,
+      "leftoversGood": true
+    },
+    "defaultTagAdds": ["cuisine.french_country"]
+  },
+  "rules": [
+    {
+      "id": "fc.tags.add_base_cuisine_tag",
+      "enabled": true,
+      "priority": 1,
+      "title": "Always tag French Country context",
+      "description": "Adds a base cuisine tag for any item evaluated under this ruleset scope.",
+      "tags": ["tagging", "cuisine"],
+      "source": "ssa.catalog.french_country",
+      "stopOnMatch": false,
+      "when": { "type": "exists", "path": "$" },
+      "then": {
+        "actions": [{ "type": "addTag", "value": "cuisine.french_country" }]
+      }
+    },
+
+    {
+      "id": "fc.score.boost_braise_and_stew_dishes",
+      "enabled": true,
+      "priority": 10,
+      "title": "Boost braises, stews, and long simmers",
+      "description": "French Country is strong in braises and long-simmer comfort dishes; boost candidates with these techniques.",
+      "tags": ["scoring", "methods"],
+      "source": "ssa.catalog.french_country",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.techniques",
+            "values": ["method.braise", "method.simmer", "method.stew"]
+          },
+          {
+            "type": "intersects",
+            "path": "$.methods",
+            "values": ["method.braise", "method.simmer", "method.stew"]
+          },
+          {
+            "type": "intersects",
+            "path": "$.plannerTags",
+            "values": ["braise", "stew", "comfort_food"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 2.0 },
+          { "type": "addTag", "value": "bias.braise_stew" }
+        ]
+      }
+    },
+
+    {
+      "id": "fc.score.boost_pan_sauce_and_deglaze",
+      "enabled": true,
+      "priority": 12,
+      "title": "Boost pan-sauce and deglazing patterns",
+      "description": "Deglazing and quick pan sauces are a signature technique (wine/stock/butter reduction).",
+      "tags": ["scoring", "methods"],
+      "source": "ssa.catalog.french_country",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.techniques",
+            "values": ["method.deglaze", "method.reduce"]
+          },
+          {
+            "type": "intersects",
+            "path": "$.methods",
+            "values": ["method.deglaze", "method.reduce"]
+          },
+          {
+            "type": "intersects",
+            "path": "$.ingredientsCore",
+            "values": [
+              "ingredient.red_wine_dry",
+              "ingredient.white_wine_dry",
+              "ingredient.beef_stock",
+              "ingredient.chicken_stock"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 1.25 },
+          { "type": "addTag", "value": "pattern.pan_sauce" }
+        ]
+      }
+    },
+
+    {
+      "id": "fc.score.boost_classic_aromatics",
+      "enabled": true,
+      "priority": 14,
+      "title": "Boost classic aromatics (shallot, leek, thyme, bay)",
+      "description": "French Country relies on aromatics and herbs: shallots/leeks/thyme/bay leaf/parsley/tarragon.",
+      "tags": ["scoring", "ingredients"],
+      "source": "ssa.catalog.french_country",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "$.ingredientsCore",
+        "values": [
+          "ingredient.shallots",
+          "ingredient.leeks",
+          "ingredient.thyme",
+          "ingredient.bay_leaf",
+          "ingredient.parsley",
+          "ingredient.tarragon"
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 0.75 },
+          { "type": "addTag", "value": "pattern.aromatics_herbs" }
+        ]
+      }
+    },
+
+    {
+      "id": "fc.score.boost_butter_and_creamy_sauces",
+      "enabled": true,
+      "priority": 16,
+      "title": "Boost butter/cream sauce patterns",
+      "description": "Butter/cream/cheese appear frequently (gratins, pan sauces, bistro staples).",
+      "tags": ["scoring", "ingredients"],
+      "source": "ssa.catalog.french_country",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "$.ingredientsCore",
+        "values": [
+          "ingredient.butter_unsalted",
+          "ingredient.heavy_cream",
+          "ingredient.creme_fraiche",
+          "ingredient.gruyere"
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 0.6 },
+          { "type": "addTag", "value": "pattern.butter_cream" }
+        ]
+      }
+    },
+
+    {
+      "id": "fc.score.boost_soups_and_breads",
+      "enabled": true,
+      "priority": 18,
+      "title": "Boost soup-and-bread pairings",
+      "description": "Country-style soups (onion soup, lentil soup) pair strongly with crusty bread and gratin toppings.",
+      "tags": ["scoring", "meal_pattern"],
+      "source": "ssa.catalog.french_country",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          { "type": "eq", "path": "$.category", "value": "soup" },
+          {
+            "type": "intersects",
+            "path": "$.servingStyles",
+            "values": ["bowls"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 0.8 },
+          { "type": "addTag", "value": "pattern.soup_and_bread" }
+        ]
+      }
+    },
+
+    {
+      "id": "fc.score.penalize_high_heat_profiles",
+      "enabled": true,
+      "priority": 30,
+      "title": "Penalize high-heat/spicy profiles",
+      "description": "French Country is generally low-heat; reduce score for very spicy items.",
+      "tags": ["scoring", "heat"],
+      "source": "ssa.catalog.french_country",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          { "type": "gte", "path": "$.heatTypical", "value": 3 },
+          {
+            "type": "intersects",
+            "path": "$.plannerTags",
+            "values": ["spicy", "high_heat"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": -1.25 },
+          { "type": "addTag", "value": "penalty.high_heat" }
+        ]
+      }
+    },
+
+    {
+      "id": "fc.add_tag.bistro_style",
+      "enabled": true,
+      "priority": 40,
+      "title": "Tag bistro-style items (onion soup, omelet, pan sauces)",
+      "description": "Adds a bistro tag when key bistro cues appear.",
+      "tags": ["tagging", "style"],
+      "source": "ssa.catalog.french_country",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.plannerTags",
+            "values": ["bistro"]
+          },
+          {
+            "type": "matches",
+            "path": "$.label",
+            "regex": "(?i)omelet|onion soup|gratin|bistro|niçoise|nicoise"
+          }
+        ]
+      },
+      "then": {
+        "actions": [{ "type": "addTag", "value": "style.bistro" }]
+      }
+    },
+
+    {
+      "id": "fc.adapter.suggest_stock_when_deglazing",
+      "enabled": true,
+      "priority": 60,
+      "title": "Suggest stock fallback when wine is unavailable",
+      "description": "For pan sauces/deglazing: if wine is missing, lean on stock + a small acid (vinegar/lemon) + butter reduction.",
+      "tags": ["adapter", "substitution"],
+      "source": "ssa.catalog.french_country",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "any",
+            "conditions": [
+              {
+                "type": "intersects",
+                "path": "$.techniques",
+                "values": ["method.deglaze"]
+              },
+              {
+                "type": "intersects",
+                "path": "$.methods",
+                "values": ["method.deglaze"]
+              }
+            ]
+          },
+          {
+            "op": "not",
+            "conditions": [
+              {
+                "type": "intersects",
+                "path": "$.availableIngredientIds",
+                "values": [
+                  "ingredient.red_wine_dry",
+                  "ingredient.white_wine_dry"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "adaptation.no_wine_fallback" },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "adapter.suggestion",
+              "payload": {
+                "cuisine": "cuisines.french_country",
+                "topic": "deglaze_fallback",
+                "suggested": [
+                  "Use stock to deglaze; add a small amount of vinegar or lemon for brightness; finish with butter for body."
+                ],
+                "swapCandidates": [
+                  {
+                    "missing": "ingredient.red_wine_dry",
+                    "useInstead": [
+                      "ingredient.beef_stock",
+                      "ingredient.chicken_stock"
+                    ]
+                  },
+                  {
+                    "missing": "ingredient.white_wine_dry",
+                    "useInstead": [
+                      "ingredient.chicken_stock",
+                      "ingredient.vegetable_stock"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "fc.adapter.no_dairy_flag_for_gratin_or_sauce",
+      "enabled": true,
+      "priority": 70,
+      "title": "Flag dairy-heavy dishes when dairy-free preference is present",
+      "description": "If user flags dairy-free and dish uses butter/cream/cheese, emit an adapter warning + reduce score.",
+      "tags": ["adapter", "diet"],
+      "source": "ssa.catalog.french_country",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.dietaryPrefs",
+            "values": ["diet.dairy_free"]
+          },
+          {
+            "type": "intersects",
+            "path": "$.ingredientsCore",
+            "values": [
+              "ingredient.butter_unsalted",
+              "ingredient.heavy_cream",
+              "ingredient.creme_fraiche",
+              "ingredient.gruyere"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "adaptation.dairy_free_needed" },
+          { "type": "scoreAdjust", "scoreDelta": -2.0 },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "adapter.warning",
+              "payload": {
+                "cuisine": "cuisines.french_country",
+                "topic": "dairy_free_conflict",
+                "message": "This French Country dish is dairy-forward (butter/cream/cheese). Consider dairy-free adaptations (olive oil, dairy-free cream, nutritional yeast, or skip gratin topping).",
+                "ingredientsTriggered": [
+                  "ingredient.butter_unsalted",
+                  "ingredient.heavy_cream",
+                  "ingredient.creme_fraiche",
+                  "ingredient.gruyere"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "fc.planner.boost_freezer_friendly_when_batch_mode",
+      "enabled": true,
+      "priority": 80,
+      "title": "Boost freezer-friendly items when batch cooking mode is on",
+      "description": "If planner is in batch mode, freezer-friendly French Country items rise to the top (stews, soups).",
+      "tags": ["planner", "batch"],
+      "source": "ssa.catalog.french_country",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "eq", "path": "$.planner.mode", "value": "batch" },
+          {
+            "op": "any",
+            "conditions": [
+              {
+                "type": "intersects",
+                "path": "$.plannerTags",
+                "values": ["freezer_friendly", "batch_friendly"]
+              },
+              {
+                "type": "eq",
+                "path": "$.signals.freezerFriendly",
+                "value": "excellent"
+              },
+              {
+                "type": "eq",
+                "path": "$.signals.freezerFriendly",
+                "value": "good"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 1.5 },
+          { "type": "addTag", "value": "planner.batch_priority" }
+        ]
+      }
+    },
+
+    {
+      "id": "fc.planner.set_default_serving_style_if_missing",
+      "enabled": true,
+      "priority": 90,
+      "title": "Set default serving style when missing",
+      "description": "If a candidate lacks serving styles, set a safe default for French Country.",
+      "tags": ["planner", "defaults"],
+      "source": "ssa.catalog.french_country",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "exists", "path": "$.id" },
+          {
+            "op": "not",
+            "conditions": [{ "type": "exists", "path": "$.servingStyles" }]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.servingStyles",
+            "value": ["family_style", "plated_meals"]
+          },
+          { "type": "addTag", "value": "defaults.serving_style_applied" }
+        ]
+      }
+    }
+  ]
+}

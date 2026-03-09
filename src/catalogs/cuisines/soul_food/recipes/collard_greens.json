@@ -1,0 +1,190 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+
+  "meta": {
+    "type": "recipe",
+    "id": "soul_food.collard_greens.v1",
+    "name": "Soul Food Collard Greens",
+    "cuisine": "soul_food",
+    "region": "US_South",
+    "version": "1.0.0",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-17",
+    "updatedAt": "2026-01-17",
+    "status": "canonical",
+    "source": {
+      "type": "compiled",
+      "notes": "Canonical SSA soul food baseline. Slow-simmered collards with smoky pork and vinegar heat. Includes a turkey option."
+    },
+    "tags": [
+      "soul_food",
+      "collard_greens",
+      "greens",
+      "braise",
+      "simmer",
+      "comfort_food",
+      "smoky",
+      "vinegar"
+    ],
+    "allergens": [],
+    "dietary": {
+      "halal": false,
+      "kosher_style": false,
+      "gluten_free": true,
+      "dairy_free": true
+    },
+    "summary": "Tender, slow-simmered collard greens with smoky meat, onion-garlic aromatics, and tangy pepper vinegar potlikker.",
+    "difficulty": "easy",
+    "servings": {
+      "count": 8,
+      "unit": "servings"
+    },
+    "yield": "About 8 servings (large pot)",
+    "timing": {
+      "prepMinutes": 20,
+      "inactiveMinutes": 0,
+      "cookMinutes": 90,
+      "totalMinutes": 110
+    },
+    "equipment": [
+      {
+        "id": "large_pot_dutch_oven",
+        "label": "Large pot / Dutch oven (6–8 qt)",
+        "required": true
+      },
+      { "id": "cutting_board", "label": "Cutting board", "required": true },
+      { "id": "chef_knife", "label": "Chef's knife", "required": true },
+      { "id": "wooden_spoon", "label": "Wooden spoon", "required": true },
+      { "id": "tongs", "label": "Tongs", "required": false },
+      {
+        "id": "fine_mesh_strainer",
+        "label": "Fine mesh strainer / colander",
+        "required": false
+      }
+    ],
+    "foodSafety": {
+      "minInternalTempF": 165,
+      "notes": [
+        "If using smoked turkey or pork, reheat to at least 165°F and simmer until greens are tender.",
+        "Cool leftovers quickly and refrigerate within 2 hours."
+      ]
+    }
+  },
+
+  "ingredients": [
+    {
+      "id": "collard_greens",
+      "label": "Collard greens, fresh (about 2 large bunches)",
+      "amount": { "value": 2.5, "unit": "lb" }
+    },
+    {
+      "id": "yellow_onion",
+      "label": "Yellow onion, diced",
+      "amount": { "value": 1, "unit": "medium" }
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic cloves, minced",
+      "amount": { "value": 4, "unit": "clove" }
+    },
+    {
+      "id": "smoked_meat",
+      "label": "Smoked meat (ham hock, smoked turkey wing/leg, or smoked neck bones)",
+      "amount": { "value": 1.5, "unit": "lb" }
+    },
+    {
+      "id": "chicken_broth",
+      "label": "Chicken broth (or water + bouillon)",
+      "amount": { "value": 6, "unit": "cup" }
+    },
+    {
+      "id": "apple_cider_vinegar",
+      "label": "Apple cider vinegar",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "hot_sauce",
+      "label": "Hot sauce",
+      "amount": { "value": 1, "unit": "tbsp" }
+    },
+    {
+      "id": "crushed_red_pepper",
+      "label": "Crushed red pepper flakes (optional)",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "brown_sugar",
+      "label": "Brown sugar (optional, balances bitterness)",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "kosher_salt",
+      "label": "Kosher salt (start low; smoked meat/broth can be salty)",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "neutral_oil",
+      "label": "Neutral oil (or bacon fat), for sautéing",
+      "amount": { "value": 1, "unit": "tbsp" }
+    },
+    {
+      "id": "bay_leaf",
+      "label": "Bay leaf (optional)",
+      "amount": { "value": 1, "unit": "leaf" }
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_clean_greens",
+      "title": "Wash and prep collards",
+      "body": "Strip collard leaves from thick stems. Stack leaves, roll into a cigar, and slice into 1/2-inch ribbons. Wash thoroughly in a sink/bowl of cold water, swishing to release grit. Lift greens out (don’t pour grit back over), drain well."
+    },
+    {
+      "id": "step_02_saute_aromatics",
+      "title": "Sauté onion and garlic",
+      "body": "Heat oil (or bacon fat) in a large pot over medium heat. Add diced onion and cook 4–6 minutes until softened. Add garlic and cook 30–60 seconds until fragrant."
+    },
+    {
+      "id": "step_03_add_smoked_meat",
+      "title": "Add smoked meat and broth",
+      "body": "Add smoked meat to the pot, then pour in chicken broth. Add black pepper and bay leaf (optional). Bring to a simmer."
+    },
+    {
+      "id": "step_04_simmer_base",
+      "title": "Simmer the base for flavor",
+      "body": "Cover partially and simmer 20 minutes so the broth takes on smoky flavor. Keep at a gentle simmer, not a rolling boil."
+    },
+    {
+      "id": "step_05_add_greens",
+      "title": "Add collard greens in batches",
+      "body": "Add greens a handful at a time, stirring to wilt and make room. Once all greens are in, they should be mostly submerged (add a splash of water/broth if needed)."
+    },
+    {
+      "id": "step_06_long_simmer",
+      "title": "Simmer until tender",
+      "body": "Partially cover and simmer 45–70 minutes, stirring occasionally, until greens are tender and silky. If the liquid reduces too much, add a little water/broth to keep a soupy potlikker."
+    },
+    {
+      "id": "step_07_shred_meat_optional",
+      "title": "Shred meat (optional)",
+      "body": "If using smoked turkey or a hock, remove it, let cool briefly, pull meat from bones, and return meat to the pot. Discard bones/skin as desired."
+    },
+    {
+      "id": "step_08_season_finish",
+      "title": "Season and finish with vinegar heat",
+      "body": "Stir in apple cider vinegar and hot sauce. Add crushed red pepper and brown sugar (optional) if desired. Taste the potlikker and adjust salt at the end (smoked meats vary)."
+    },
+    {
+      "id": "step_09_rest_serve",
+      "title": "Rest briefly, then serve",
+      "body": "Turn off heat and let sit 10 minutes for flavors to meld. Serve hot with cornbread to soak up the potlikker."
+    }
+  ]
+}

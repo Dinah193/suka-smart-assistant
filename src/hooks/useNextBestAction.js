@@ -19,7 +19,7 @@ const isBrowser = typeof window !== "undefined";
 
 let eventBus = { emit() {}, on() {}, off() {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch {}
 
@@ -30,7 +30,11 @@ try {
 } catch {}
 
 let pausePolicies = {
-  constants: { REASON_USER: "user", REASON_SAFETY: "safety", REASON_SABBATH: "sabbath" },
+  constants: {
+    REASON_USER: "user",
+    REASON_SAFETY: "safety",
+    REASON_SABBATH: "sabbath",
+  },
   shouldFreeze: () => false,
   canContinue: () => true,
   normalize: (p) => ({ ...p }),
@@ -40,7 +44,11 @@ try {
   pausePolicies = (mod && (mod.default || mod)) || pausePolicies;
 } catch {}
 
-let calendarSync = { upcoming: async () => [], addEvents: async () => ({ ok: true }), writeSession: async () => ({ ok: true }) };
+let calendarSync = {
+  upcoming: async () => [],
+  addEvents: async () => ({ ok: true }),
+  writeSession: async () => ({ ok: true }),
+};
 try {
   const mod = require("@/services/calendar/calendarSync");
   calendarSync = (mod && (mod.default || mod)) || calendarSync;
@@ -65,7 +73,8 @@ let useSettingsStore = () => ({
 });
 try {
   const mod = require("@/stores/settingsStore");
-  useSettingsStore = (mod && (mod.default || mod.useSettingsStore)) || useSettingsStore;
+  useSettingsStore =
+    (mod && (mod.default || mod.useSettingsStore)) || useSettingsStore;
 } catch {}
 
 let InventoryMonitor = { getSignals: () => ({ low: [], short: [] }) };
@@ -86,10 +95,15 @@ try {
   AnimalQueueManager = (mod && (mod.default || mod)) || AnimalQueueManager;
 } catch {}
 
-let useFavoriteSessions = () => ({ list: () => [], save: async () => ({ ok: true }), remove: async () => ({ ok: true }) });
+let useFavoriteSessions = () => ({
+  list: () => [],
+  save: async () => ({ ok: true }),
+  remove: async () => ({ ok: true }),
+});
 try {
   const mod = require("@/hooks/useFavoriteSessions");
-  useFavoriteSessions = (mod && (mod.default || mod.useFavoriteSessions)) || useFavoriteSessions;
+  useFavoriteSessions =
+    (mod && (mod.default || mod.useFavoriteSessions)) || useFavoriteSessions;
 } catch {}
 
 let useSchedules = () => ({ list: () => [], save: async () => ({ ok: true }) });
@@ -107,18 +121,27 @@ const schedKey = (domain) => `${domain || "session"}:schedules`;
 const localFavAPI = (domain) => ({
   list: () => {
     if (!isBrowser) return [];
-    try { return JSON.parse(localStorage.getItem(favKey(domain)) || "[]"); } catch { return []; }
+    try {
+      return JSON.parse(localStorage.getItem(favKey(domain)) || "[]");
+    } catch {
+      return [];
+    }
   },
   save: async (fav) => {
     if (!isBrowser) return { ok: false };
     const all = localFavAPI(domain).list();
-    const next = [...all.filter((f) => f.id !== fav.id), { ...fav, updatedAt: Date.now() }];
+    const next = [
+      ...all.filter((f) => f.id !== fav.id),
+      { ...fav, updatedAt: Date.now() },
+    ];
     localStorage.setItem(favKey(domain), JSON.stringify(next));
     return { ok: true };
   },
   remove: async (id) => {
     if (!isBrowser) return { ok: false };
-    const next = localFavAPI(domain).list().filter((f) => f.id !== id);
+    const next = localFavAPI(domain)
+      .list()
+      .filter((f) => f.id !== id);
     localStorage.setItem(favKey(domain), JSON.stringify(next));
     return { ok: true };
   },
@@ -127,12 +150,19 @@ const localFavAPI = (domain) => ({
 const localSchedAPI = (domain) => ({
   list: () => {
     if (!isBrowser) return [];
-    try { return JSON.parse(localStorage.getItem(schedKey(domain)) || "[]"); } catch { return []; }
+    try {
+      return JSON.parse(localStorage.getItem(schedKey(domain)) || "[]");
+    } catch {
+      return [];
+    }
   },
   save: async (s) => {
     if (!isBrowser) return { ok: false };
     const all = localSchedAPI(domain).list();
-    const next = [...all.filter((x) => x.id !== s.id), { ...s, updatedAt: Date.now() }];
+    const next = [
+      ...all.filter((x) => x.id !== s.id),
+      { ...s, updatedAt: Date.now() },
+    ];
     localStorage.setItem(schedKey(domain), JSON.stringify(next));
     return { ok: true };
   },
@@ -200,11 +230,17 @@ export function useNextBestAction() {
 
   // Resolve persistence APIs (domain passed per-call in helpers)
   const favHookFactory = (domain) => {
-    try { const h = useFavoriteSessions(); if (h && typeof h.list === "function") return h; } catch {}
+    try {
+      const h = useFavoriteSessions();
+      if (h && typeof h.list === "function") return h;
+    } catch {}
     return localFavAPI(domain);
   };
   const schedHookFactory = (domain) => {
-    try { const h = useSchedules(); if (h && typeof h.list === "function") return h; } catch {}
+    try {
+      const h = useSchedules();
+      if (h && typeof h.list === "function") return h;
+    } catch {}
     return localSchedAPI(domain);
   };
 
@@ -214,8 +250,16 @@ export function useNextBestAction() {
 
   const computeFrozen = useCallback(() => {
     try {
-      return !!pausePolicies.shouldFreeze?.({ domain: "system", quietHours, sabbath, rhythms, now: new Date() });
-    } catch { return false; }
+      return !!pausePolicies.shouldFreeze?.({
+        domain: "system",
+        quietHours,
+        sabbath,
+        rhythms,
+        now: new Date(),
+      });
+    } catch {
+      return false;
+    }
   }, [quietHours, sabbath, rhythms]);
 
   const refresh = useCallback(async () => {
@@ -223,17 +267,33 @@ export function useNextBestAction() {
 
     // Gather signals defensively
     let inv = { low: [], short: [] };
-    try { inv = (await InventoryMonitor.getSignals?.()) || inv; } catch {}
+    try {
+      inv = (await InventoryMonitor.getSignals?.()) || inv;
+    } catch {}
 
     let upcoming = [];
-    try { upcoming = (await calendarSync.upcoming?.({ withinHours: 10 })) || []; } catch {}
+    try {
+      upcoming = (await calendarSync.upcoming?.({ withinHours: 10 })) || [];
+    } catch {}
 
     let gardenPeeks = [];
-    try { gardenPeeks = (await GardenQueueManager.peek?.()) || []; } catch {}
+    try {
+      gardenPeeks = (await GardenQueueManager.peek?.()) || [];
+    } catch {}
     let animalPeeks = [];
-    try { animalPeeks = (await AnimalQueueManager.peek?.()) || []; } catch {}
+    try {
+      animalPeeks = (await AnimalQueueManager.peek?.()) || [];
+    } catch {}
 
-    const ctx = { frozenByGuard, inv, upcoming, gardenPeeks, animalPeeks, rhythms, defaults };
+    const ctx = {
+      frozenByGuard,
+      inv,
+      upcoming,
+      gardenPeeks,
+      animalPeeks,
+      rhythms,
+      defaults,
+    };
     lastCtx.current = ctx;
 
     const ideas = [];
@@ -248,7 +308,11 @@ export function useNextBestAction() {
         title: "Restock essentials",
         subtitle: `${shortages.length} item(s) need attention`,
         meta: { shortages },
-        cta: { label: "Open Inventory", onClick: () => eventBus.emit("ui:navigate", { to: "/tier2/household/inventory" }) },
+        cta: {
+          label: "Open Inventory",
+          onClick: () =>
+            eventBus.emit("ui:navigate", { to: "/tier2/household/inventory" }),
+        },
       });
     }
 
@@ -260,10 +324,17 @@ export function useNextBestAction() {
         kind: rhythms?.preferMorning ? "urgent" : "task",
         title: "Animal rounds",
         subtitle: "Feed • Water • Health check • Bedding",
-        meta: { templateId: defaults?.animalsTemplateId || "daily-animal-rounds", weight: 8 },
+        meta: {
+          templateId: defaults?.animalsTemplateId || "daily-animal-rounds",
+          weight: 8,
+        },
         cta: {
           label: "Start session",
-          onClick: () => eventBus.emit("ui:startSession", { domain: "animals", templateId: defaults?.animalsTemplateId || "daily-animal-rounds" }),
+          onClick: () =>
+            eventBus.emit("ui:startSession", {
+              domain: "animals",
+              templateId: defaults?.animalsTemplateId || "daily-animal-rounds",
+            }),
         },
       });
     }
@@ -276,10 +347,17 @@ export function useNextBestAction() {
         kind: rhythms?.preferMorning ? "urgent" : "task",
         title: "Garden bed refresh",
         subtitle: "Weed • Amend • Transplant • Water",
-        meta: { templateId: defaults?.gardenTemplateId || "transplant-bed-basic", weight: 6 },
+        meta: {
+          templateId: defaults?.gardenTemplateId || "transplant-bed-basic",
+          weight: 6,
+        },
         cta: {
           label: "Start session",
-          onClick: () => eventBus.emit("ui:startSession", { domain: "garden", templateId: defaults?.gardenTemplateId || "transplant-bed-basic" }),
+          onClick: () =>
+            eventBus.emit("ui:startSession", {
+              domain: "garden",
+              templateId: defaults?.gardenTemplateId || "transplant-bed-basic",
+            }),
         },
       });
     }
@@ -294,12 +372,18 @@ export function useNextBestAction() {
       meta: { templateId: defaults?.cleaningTemplateId || "speed-clean-30" },
       cta: {
         label: "Start session",
-        onClick: () => eventBus.emit("ui:startSession", { domain: "cleaning", templateId: defaults?.cleaningTemplateId || "speed-clean-30" }),
+        onClick: () =>
+          eventBus.emit("ui:startSession", {
+            domain: "cleaning",
+            templateId: defaults?.cleaningTemplateId || "speed-clean-30",
+          }),
       },
     });
 
     // 5) Meals — suggest prep if dinner window in next 90m
-    const dinner = (upcoming || []).find((e) => normalizeStr(e.title).includes("dinner"));
+    const dinner = (upcoming || []).find((e) =>
+      normalizeStr(e.title).includes("dinner")
+    );
     if (dinner) {
       const m = minutesUntil(dinner.start);
       ideas.push({
@@ -308,10 +392,18 @@ export function useNextBestAction() {
         kind: m <= 90 ? "urgent" : "task",
         title: "Start dinner prep",
         subtitle: m <= 0 ? "Scheduled now" : `Starts in ~${m} min`,
-        meta: { templateId: defaults?.mealsTemplateId || "dinner-quick-40", windowStart: dinner.start, weight: 5 },
+        meta: {
+          templateId: defaults?.mealsTemplateId || "dinner-quick-40",
+          windowStart: dinner.start,
+          weight: 5,
+        },
         cta: {
           label: "Start session",
-          onClick: () => eventBus.emit("ui:startSession", { domain: "meals", templateId: defaults?.mealsTemplateId || "dinner-quick-40" }),
+          onClick: () =>
+            eventBus.emit("ui:startSession", {
+              domain: "meals",
+              templateId: defaults?.mealsTemplateId || "dinner-quick-40",
+            }),
         },
       });
     } else {
@@ -324,8 +416,15 @@ export function useNextBestAction() {
           kind: "task",
           title: "Plan tonight’s dinner",
           subtitle: "Quick 40-minute dinner flow",
-          meta: { templateId: defaults?.mealsTemplateId || "dinner-quick-40", weight: 3 },
-          cta: { label: "Open Meal Planner", onClick: () => eventBus.emit("ui:navigate", { to: "/tier2/household/meals" }) },
+          meta: {
+            templateId: defaults?.mealsTemplateId || "dinner-quick-40",
+            weight: 3,
+          },
+          cta: {
+            label: "Open Meal Planner",
+            onClick: () =>
+              eventBus.emit("ui:navigate", { to: "/tier2/household/meals" }),
+          },
         });
       }
     }
@@ -346,7 +445,13 @@ export function useNextBestAction() {
     // Down-rank actionable tasks if guard is active, but keep schedules/inventory
     const finalList = unique.map((n) =>
       ctx.frozenByGuard && n.kind !== "schedule" && n.kind !== "inventory"
-        ? { ...n, score: n.score - 30, subtitle: (n.subtitle ? n.subtitle + " • " : "") + "Paused by household guard" }
+        ? {
+            ...n,
+            score: n.score - 30,
+            subtitle:
+              (n.subtitle ? n.subtitle + " • " : "") +
+              "Paused by household guard",
+          }
         : n
     );
 
@@ -383,89 +488,130 @@ export function useNextBestAction() {
   ----------------------------------------------------------------------------- */
 
   // Mark an NBA as chosen (emit + optimistic filter)
-  const pick = useCallback((id) => {
-    const chosen = nbas.find((x) => x.id === id);
-    if (!chosen) return;
-    eventBus.emit("nba:picked", { id, nba: chosen, at: nowISO() });
-    setNbas((prev) => prev.filter((x) => x.id !== id));
-  }, [nbas]);
+  const pick = useCallback(
+    (id) => {
+      const chosen = nbas.find((x) => x.id === id);
+      if (!chosen) return;
+      eventBus.emit("nba:picked", { id, nba: chosen, at: nowISO() });
+      setNbas((prev) => prev.filter((x) => x.id !== id));
+    },
+    [nbas]
+  );
 
   // Dismiss an NBA (session-local)
-  const dismiss = useCallback((id) => {
-    const target = nbas.find((x) => x.id === id);
-    if (!target) return;
-    const key = `${target.domain}:${target.title}`;
-    pendingDismiss.current.add(key);
-    setNbas((prev) => prev.filter((x) => x.id !== id));
-    eventBus.emit("nba:dismissed", { id, domain: target.domain, title: target.title, at: nowISO() });
-  }, [nbas]);
+  const dismiss = useCallback(
+    (id) => {
+      const target = nbas.find((x) => x.id === id);
+      if (!target) return;
+      const key = `${target.domain}:${target.title}`;
+      pendingDismiss.current.add(key);
+      setNbas((prev) => prev.filter((x) => x.id !== id));
+      eventBus.emit("nba:dismissed", {
+        id,
+        domain: target.domain,
+        title: target.title,
+        at: nowISO(),
+      });
+    },
+    [nbas]
+  );
 
   // Start a session via eventBus; SessionRunner pages are already listening
   const startSession = useCallback(({ domain, templateId, steps }) => {
     const sessionId = `${domain}-${uid()}`;
-    eventBus.emit("session:created", { sessionId, domain, title: `${domain[0].toUpperCase()}${domain.slice(1)} Session`, steps: steps || [], startedAt: nowISO() });
+    eventBus.emit("session:created", {
+      sessionId,
+      domain,
+      title: `${domain[0].toUpperCase()}${domain.slice(1)} Session`,
+      steps: steps || [],
+      startedAt: nowISO(),
+    });
     eventBus.emit("ui:startSession", { domain, templateId, steps, sessionId });
   }, []);
 
   // Save user's favorite session for any domain (hooks or localStorage)
-  const saveFavorite = useCallback(async ({ domain, sessionId = `fav-${uid()}`, title = "Session", templateId, steps = [], meta = {} }) => {
-    const favHook = favHookFactory(domain);
-    const fav = {
-      id: `fav-${sessionId}`,
+  const saveFavorite = useCallback(
+    async ({
       domain,
-      title,
+      sessionId = `fav-${uid()}`,
+      title = "Session",
       templateId,
-      steps,
-      createdAt: meta.createdAt || nowISO(),
-      updatedAt: Date.now(),
-      meta: { source: "user", ...meta },
-    };
-    const res = await (favHook.save?.(fav) || Promise.resolve({ ok: false }));
-    if (res?.ok) eventBus.emit("favorites:changed", { domain });
-    return res;
-  }, []);
+      steps = [],
+      meta = {},
+    }) => {
+      const favHook = favHookFactory(domain);
+      const fav = {
+        id: `fav-${sessionId}`,
+        domain,
+        title,
+        templateId,
+        steps,
+        createdAt: meta.createdAt || nowISO(),
+        updatedAt: Date.now(),
+        meta: { source: "user", ...meta },
+      };
+      const res = await (favHook.save?.(fav) || Promise.resolve({ ok: false }));
+      if (res?.ok) eventBus.emit("favorites:changed", { domain });
+      return res;
+    },
+    []
+  );
 
   // Save a user's schedule template (hooks or localStorage) + calendar write
-  const saveSchedule = useCallback(async ({ domain, title = "Session Schedule", templateId, steps = [], rrule = "FREQ=WEEKLY;BYDAY=MO", firstRunAt }) => {
-    const schedHook = schedHookFactory(domain);
-    const base = new Date(firstRunAt || Date.now());
-    if (rhythms?.preferMorning) {
-      base.setHours(8, 0, 0, 0);
-      if (base < new Date()) base.setDate(base.getDate() + 1);
-    }
-    const sched = {
-      id: `sched-${uid()}`,
+  const saveSchedule = useCallback(
+    async ({
       domain,
-      title,
-      sessionTemplate: { templateId, steps },
-      rrule,
-      firstRunAt: base.toISOString(),
-    };
-    const res = await (schedHook.save?.(sched) || Promise.resolve({ ok: false }));
-    if (res?.ok) {
-      eventBus.emit("schedules:changed", { domain });
-      try {
-        await calendarSync.addEvents?.({
-          domain,
-          title: sched.title,
-          rrule: sched.rrule,
-          firstRunAt: sched.firstRunAt,
-          meta: { sessionTemplateId: sched.id, source: "useNextBestAction" },
-        });
-      } catch {}
-    }
-    return res;
-  }, [rhythms?.preferMorning]);
+      title = "Session Schedule",
+      templateId,
+      steps = [],
+      rrule = "FREQ=WEEKLY;BYDAY=MO",
+      firstRunAt,
+    }) => {
+      const schedHook = schedHookFactory(domain);
+      const base = new Date(firstRunAt || Date.now());
+      if (rhythms?.preferMorning) {
+        base.setHours(8, 0, 0, 0);
+        if (base < new Date()) base.setDate(base.getDate() + 1);
+      }
+      const sched = {
+        id: `sched-${uid()}`,
+        domain,
+        title,
+        sessionTemplate: { templateId, steps },
+        rrule,
+        firstRunAt: base.toISOString(),
+      };
+      const res = await (schedHook.save?.(sched) ||
+        Promise.resolve({ ok: false }));
+      if (res?.ok) {
+        eventBus.emit("schedules:changed", { domain });
+        try {
+          await calendarSync.addEvents?.({
+            domain,
+            title: sched.title,
+            rrule: sched.rrule,
+            firstRunAt: sched.firstRunAt,
+            meta: { sessionTemplateId: sched.id, source: "useNextBestAction" },
+          });
+        } catch {}
+      }
+      return res;
+    },
+    [rhythms?.preferMorning]
+  );
 
-  const api = useMemo(() => ({
-    nbas,
-    refresh,
-    pick,
-    dismiss,
-    startSession,
-    saveFavorite,
-    saveSchedule,
-  }), [dismiss, nbas, pick, refresh, saveFavorite, saveSchedule, startSession]);
+  const api = useMemo(
+    () => ({
+      nbas,
+      refresh,
+      pick,
+      dismiss,
+      startSession,
+      saveFavorite,
+      saveSchedule,
+    }),
+    [dismiss, nbas, pick, refresh, saveFavorite, saveSchedule, startSession]
+  );
 
   return api;
 }

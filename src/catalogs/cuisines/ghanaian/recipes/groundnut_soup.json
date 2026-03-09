@@ -1,0 +1,419 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "meta": {
+    "id": "recipe.ghanaian.groundnut_soup",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Ghanaian Groundnut Soup",
+    "subtitle": "Rich peanut stew/soup with aromatics, tomatoes, and optional meats",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa",
+      "notes": [
+        "Canonical Ghana-style groundnut soup built on peanut paste and tomato-onion base.",
+        "Designed for SSA planners: batch-friendly, freezer-friendly, adaptable for different proteins and heat levels."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "cuisines.ghanaian",
+    "category": "category.soup_stew",
+    "mealArchetypes": [
+      "archetype.stew_and_starch",
+      "archetype.one_pot",
+      "archetype.batch_cook"
+    ],
+    "servingStyles": ["stew_and_starch", "family_style", "one_pot"],
+    "plannerTags": [
+      "cuisine.ghanaian",
+      "dish.groundnut_soup",
+      "peanut_forward",
+      "tomato_base",
+      "batch_friendly",
+      "freezer_friendly",
+      "leftovers_good",
+      "stew_and_starch"
+    ]
+  },
+  "yield": {
+    "servings": 6,
+    "notes": "Serves 6 as a main with fufu/rice balls/omotuo, or 8 as a starter."
+  },
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 60,
+    "totalMins": 85
+  },
+  "difficulty": "intermediate",
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": false,
+    "leftoversGood": true,
+    "freezerFriendly": true,
+    "onePot": true,
+    "spiceLevelDefault": 2,
+    "proteinOptional": true
+  },
+  "tasteProfile": {
+    "signatureNotes": [
+      "peanut",
+      "savory",
+      "tomato",
+      "aromatic onion",
+      "warming spice"
+    ],
+    "heat": 2,
+    "salt": 3,
+    "acid": 2,
+    "sweet": 1,
+    "umami": 3
+  },
+  "equipment": {
+    "minimum": [
+      "tool.pot_heavy_lid",
+      "tool.spoon_wood",
+      "tool.knife",
+      "tool.board"
+    ],
+    "recommended": [
+      "tool.blender",
+      "tool.fine_mesh_sieve",
+      "tool.thermometer_instant"
+    ],
+    "optional": [
+      {
+        "id": "tool.dutch_oven",
+        "label": "Dutch oven / heavy pot",
+        "required": false,
+        "notes": "Helps prevent scorching and keeps a steady simmer."
+      }
+    ]
+  },
+  "dietFlags": ["diet.dairy_free", "diet.gluten_free"],
+  "allergens": ["allergen.peanut"],
+  "ingredients": [
+    {
+      "id": "ingredient.peanut_butter_natural",
+      "label": "Natural peanut butter (unsweetened) or ground roasted peanuts paste",
+      "role": "thickener",
+      "amount": { "value": 1.25, "unit": "cup" },
+      "notes": [
+        "Use unsweetened peanut butter (just peanuts + salt).",
+        "If using peanut paste (ground roasted peanuts), use the same volume."
+      ]
+    },
+    {
+      "id": "ingredient.onion_yellow",
+      "label": "Onion, roughly chopped",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "large" }
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic",
+      "role": "aromatic",
+      "amount": { "value": 4, "unit": "clove" }
+    },
+    {
+      "id": "ingredient.ginger",
+      "label": "Ginger",
+      "role": "aromatic",
+      "amount": { "value": 1.5, "unit": "tbsp" },
+      "notes": "Freshly grated is best."
+    },
+    {
+      "id": "ingredient.tomatoes",
+      "label": "Tomatoes (Roma or plum), chopped",
+      "role": "base",
+      "amount": { "value": 6, "unit": "each" },
+      "notes": "Or substitute 1 can (28 oz) crushed tomatoes."
+    },
+    {
+      "id": "ingredient.tomato_paste",
+      "label": "Tomato paste",
+      "role": "umami",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.red_bell_pepper",
+      "label": "Red bell pepper",
+      "role": "base",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": "Optional but common for a sweeter, fuller tomato-pepper base."
+    },
+    {
+      "id": "ingredient.hot_pepper_scotch_bonnet",
+      "label": "Hot pepper (scotch bonnet or habanero)",
+      "role": "heat",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": "Use whole for gentle heat, or blend a piece in for more heat."
+    },
+    {
+      "id": "ingredient.oil_neutral",
+      "label": "Neutral oil",
+      "role": "fat",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.protein_goat_or_beef_or_chicken",
+      "label": "Protein (optional): goat, beef, or chicken pieces",
+      "role": "protein",
+      "amount": { "value": 2, "unit": "lb" },
+      "optional": true,
+      "notes": [
+        "Traditional versions often use goat or beef; chicken is common too.",
+        "If using meat, brown/simmer until tender before adding peanut mix."
+      ]
+    },
+    {
+      "id": "ingredient.stock_chicken_or_beef_or_veg",
+      "label": "Stock (chicken/beef) or water",
+      "role": "liquid",
+      "amount": { "value": 8, "unit": "cup" },
+      "notes": "Start with 8 cups; you can thin later to your preferred soup consistency."
+    },
+    {
+      "id": "ingredient.bay_leaf",
+      "label": "Bay leaves",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.thyme_dried",
+      "label": "Dried thyme",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.cayenne_or_chili_flakes",
+      "label": "Cayenne or chili flakes",
+      "role": "heat",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "optional": true,
+      "notes": "Optional if you didn’t use a hot pepper."
+    },
+    {
+      "id": "ingredient.salt",
+      "label": "Salt",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Adjust depending on stock saltiness."
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.smoked_dried_fish",
+      "label": "Smoked dried fish (optional)",
+      "role": "umami",
+      "amount": { "value": 4, "unit": "oz" },
+      "optional": true,
+      "notes": "Optional traditional umami booster. Remove bones and rinse if very salty."
+    },
+    {
+      "id": "ingredient.fresh_greens_optional",
+      "label": "Greens (optional): spinach or kontomire/cocoyam leaves",
+      "role": "greens",
+      "amount": { "value": 4, "unit": "cup" },
+      "optional": true,
+      "notes": "Not always included; add near the end if desired."
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.gn_01_blend_base",
+      "title": "Blend aromatics and tomato base",
+      "instructions": [
+        "In a blender, combine onion, tomatoes, garlic, ginger, and bell pepper (if using).",
+        "Blend until smooth (add a splash of water only if needed to move the blender).",
+        "Optional: add the hot pepper to the blender for more heat, or keep it whole for a gentler infusion."
+      ],
+      "activeMins": 8,
+      "handsOffMins": 0,
+      "checks": ["Base is smooth with no large chunks."]
+    },
+    {
+      "id": "step.gn_02_build_stew_base",
+      "title": "Cook down the tomato base",
+      "instructions": [
+        "Heat oil in a heavy pot over medium heat.",
+        "Add tomato paste and fry for 1–2 minutes, stirring constantly, until the raw smell fades.",
+        "Pour in the blended base carefully (it may sputter).",
+        "Add thyme, bay leaves (if using), black pepper, and the whole hot pepper (if keeping whole).",
+        "Simmer uncovered, stirring occasionally, until the base reduces and darkens slightly and the oil begins to show on top."
+      ],
+      "activeMins": 7,
+      "handsOffMins": 18,
+      "timers": [
+        { "label": "Fry tomato paste", "minutes": 2 },
+        { "label": "Reduce tomato base", "minutes": 18 }
+      ],
+      "checks": [
+        "Base thickens and deepens in color.",
+        "Oil begins to separate slightly (good sign)."
+      ]
+    },
+    {
+      "id": "step.gn_03_add_protein_optional",
+      "title": "Add and simmer protein (optional)",
+      "instructions": [
+        "If using meat/chicken: add it now and stir to coat in the base.",
+        "Add about 4 cups of stock/water (enough to partially cover).",
+        "Simmer until the protein is mostly tender.",
+        "If using smoked dried fish, add it during the last 10–15 minutes of this simmer."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 30,
+      "timers": [{ "label": "Protein simmer (until tender)", "minutes": 30 }],
+      "checks": [
+        "Protein is mostly tender before adding peanut mixture (to avoid over-thickening too early)."
+      ]
+    },
+    {
+      "id": "step.gn_04_mix_peanut_liquid",
+      "title": "Loosen peanut butter into a smooth slurry",
+      "instructions": [
+        "In a bowl, whisk peanut butter with 2 cups of warm stock/water until completely smooth and pourable.",
+        "This prevents clumping and helps the soup thicken evenly."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 0,
+      "checks": ["Peanut mixture is smooth with no lumps."]
+    },
+    {
+      "id": "step.gn_05_thicken_and_simmer",
+      "title": "Add peanut slurry and simmer gently",
+      "instructions": [
+        "Reduce heat to low-medium so the pot is at a gentle simmer.",
+        "Slowly stir in the peanut slurry.",
+        "Add remaining stock/water to reach your preferred soup thickness (start by adding 2 more cups, then adjust).",
+        "Simmer gently, stirring frequently (peanut soups can scorch), until flavors meld and the soup thickens."
+      ],
+      "activeMins": 10,
+      "handsOffMins": 20,
+      "timers": [
+        { "label": "Gentle simmer after peanut addition", "minutes": 20 }
+      ],
+      "checks": [
+        "Soup is gently bubbling (not boiling hard).",
+        "No scorching on bottom; stir well every few minutes.",
+        "Texture is creamy and cohesive."
+      ]
+    },
+    {
+      "id": "step.gn_06_season_finish",
+      "title": "Season and finish (optional greens)",
+      "instructions": [
+        "Taste and add salt gradually (stock saltiness varies). Add cayenne/chili flakes if you want more heat.",
+        "If adding greens, stir them in and simmer 2–3 minutes until just wilted.",
+        "Remove bay leaves and the whole hot pepper (if used whole)."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 3,
+      "timers": [{ "label": "Wilt greens (optional)", "minutes": 3 }],
+      "checks": [
+        "Salt/heat are balanced and peanut flavor is prominent.",
+        "Greens are wilted but still vibrant (if used)."
+      ]
+    },
+    {
+      "id": "step.gn_07_serve",
+      "title": "Serve",
+      "instructions": [
+        "Serve hot with fufu, rice balls (omotuo), banku, kenkey, or plain rice.",
+        "Optional: garnish with extra chili oil or a squeeze of lime for brightness."
+      ],
+      "activeMins": 2,
+      "handsOffMins": 0
+    }
+  ],
+  "pairings": {
+    "starches": [
+      "dish.ghanaian.fufu",
+      "dish.ghanaian.omotuo_rice_balls",
+      "dish.ghanaian.banku",
+      "dish.ghanaian.kenkey"
+    ],
+    "condiments": ["dish.ghanaian.shito", "dish.ghanaian.fresh_pepper_sauce"]
+  },
+  "storage": {
+    "fridge": {
+      "durationDays": 4,
+      "notes": "Cool quickly and refrigerate within 2 hours. Peanut soups thicken as they chill—thin with water/stock when reheating."
+    },
+    "freezer": {
+      "durationDays": 90,
+      "notes": "Freeze in portions. Thaw overnight and reheat gently, stirring often."
+    },
+    "reheat": {
+      "notes": "Reheat on low, stirring frequently to prevent scorching; add water/stock to loosen."
+    }
+  },
+  "planner": {
+    "batch": {
+      "recommended": true,
+      "bestBatchSizeServings": 10,
+      "notes": "Excellent make-ahead stew for busy weeks; freezes very well."
+    },
+    "leftovers": {
+      "goodFor": ["lunch_boxes", "quick_dinners"],
+      "remixNotes": [
+        "Thin leftovers slightly and serve over rice for a faster meal.",
+        "Add extra greens on reheat to refresh the pot."
+      ]
+    }
+  },
+  "notes": [
+    "Keep the simmer gentle after adding peanut butter to reduce risk of splitting and scorching.",
+    "If the soup tastes flat, add a pinch more salt and simmer 5 minutes; peanut-based stews often need enough salt to 'open up.'",
+    "For a deeper smoky profile, add a small piece of smoked fish or a pinch of smoked paprika."
+  ],
+  "variations": [
+    {
+      "id": "variation.vegetarian_groundnut",
+      "label": "Vegetarian groundnut soup",
+      "when": { "diet": "diet.vegetarian" },
+      "adapt": {
+        "notes": "Use vegetable stock, omit meats/fish, and add extra greens + mushrooms for body."
+      }
+    },
+    {
+      "id": "variation.goat_groundnut",
+      "label": "Goat groundnut soup",
+      "when": { "prefers": "protein.goat" },
+      "adapt": {
+        "notes": "Simmer goat until tender before peanut slurry; goat benefits from a longer pre-simmer (45–75 minutes depending on cut)."
+      }
+    }
+  ],
+  "methods": ["method.simmer", "method.stew", "method.blend"],
+  "compat": {
+    "cuisineId": "cuisines.ghanaian",
+    "dishId": "dish.ghanaian.groundnut_soup",
+    "search": {
+      "aliases": [
+        "groundnut soup",
+        "ghana groundnut soup",
+        "peanut soup ghana",
+        "nkate nkwan"
+      ],
+      "keywords": [
+        "peanut",
+        "tomato",
+        "stew",
+        "soup",
+        "west african",
+        "ghanaian"
+      ]
+    }
+  }
+}

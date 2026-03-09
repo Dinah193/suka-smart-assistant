@@ -26,8 +26,8 @@
 // -----------------------------------------------------------------------------
 
 import React, { useCallback, useState } from "react";
-import { emitEvent } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emitEvent } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
 /**
  * Emit a “play the next runnable session now” request.
@@ -59,7 +59,10 @@ function requestNextSession(domainHints, focusArea) {
     });
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.error("[HealthResetPlanning] Failed to emit session.requestNext", err);
+    console.error(
+      "[HealthResetPlanning] Failed to emit session.requestNext",
+      err
+    );
   }
 }
 
@@ -222,7 +225,14 @@ function HealthResetPlanningPage() {
 
   const handleNow7Day = useCallback(() => {
     requestNextSession(
-      ["cooking", "cleaning", "garden", "animals", "preservation", "storehouse"],
+      [
+        "cooking",
+        "cleaning",
+        "garden",
+        "animals",
+        "preservation",
+        "storehouse",
+      ],
       "7-day-health-reset"
     );
   }, []);
@@ -256,7 +266,8 @@ function HealthResetPlanningPage() {
             <p className="text-[11px] text-slate-500">
               Opens the next runnable{" "}
               <span className="font-semibold text-slate-300">
-                cooking / cleaning / garden / animals / preservation / storehouse
+                cooking / cleaning / garden / animals / preservation /
+                storehouse
               </span>{" "}
               session in the SessionRunner.
             </p>
@@ -414,8 +425,8 @@ function HealthResetPlanningPage() {
                 Health Reset Status
               </h2>
               <p className="text-[11px] text-emerald-100/80">
-                Use this card as a simple self-check. You can later connect it to
-                logs or analytics if you want more automation.
+                Use this card as a simple self-check. You can later connect it
+                to logs or analytics if you want more automation.
               </p>
 
               <div className="mt-3 grid gap-2 text-[11px] text-emerald-100/90">
@@ -464,9 +475,11 @@ function HealthResetPlanningPage() {
                 <li className="flex gap-2">
                   <span className="mt-[3px] inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />
                   <span>
-                    <span className="font-semibold">Macro & calorie planner:</span>{" "}
-                    design simple rotation meals that hit your targets using what
-                    you already have.
+                    <span className="font-semibold">
+                      Macro & calorie planner:
+                    </span>{" "}
+                    design simple rotation meals that hit your targets using
+                    what you already have.
                   </span>
                 </li>
                 <li className="flex gap-2">
@@ -520,7 +533,10 @@ function HealthResetPlanningPage() {
       </main>
 
       {/* Local informational modal */}
-      <HealthResetFlowModal open={flowOpen} onClose={() => setFlowOpen(false)} />
+      <HealthResetFlowModal
+        open={flowOpen}
+        onClose={() => setFlowOpen(false)}
+      />
     </div>
   );
 }

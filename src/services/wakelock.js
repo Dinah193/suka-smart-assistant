@@ -36,15 +36,17 @@
  * -----------------------------------------------------------------------------
  */
 
-import eventBus from "@/services/eventBus";
-import { featureFlags } from "@/services/featureFlags";
+import eventBus from "@/services/events/eventBus";
+import { featureFlags } from "@/config/featureFlags";
 
 let HubPacketFormatter = null;
 let FamilyFundConnector = null;
 try {
   // Soft imports: optional Hub
-  HubPacketFormatter = (await import("@/services/hub/HubPacketFormatter")).default;
-  FamilyFundConnector = (await import("@/services/hub/FamilyFundConnector")).default;
+  HubPacketFormatter = (await import("@/services/hub/HubPacketFormatter"))
+    .default;
+  FamilyFundConnector = (await import("@/services/hub/FamilyFundConnector"))
+    .default;
   // eslint-disable-next-line no-empty
 } catch {}
 
@@ -92,10 +94,16 @@ class WakeLockService {
     this._hubSync = false;
 
     if (typeof document !== "undefined") {
-      document.addEventListener("visibilitychange", this._onVisibilityChange, false);
+      document.addEventListener(
+        "visibilitychange",
+        this._onVisibilityChange,
+        false
+      );
     }
     if (typeof window !== "undefined") {
-      window.addEventListener("beforeunload", this._onBeforeUnload, { capture: true });
+      window.addEventListener("beforeunload", this._onBeforeUnload, {
+        capture: true,
+      });
     }
   }
 
@@ -139,9 +147,15 @@ class WakeLockService {
     // Already have it?
     if (this._sentinel && this._active) return true;
 
-    if (typeof document !== "undefined" && document.visibilityState === "hidden") {
+    if (
+      typeof document !== "undefined" &&
+      document.visibilityState === "hidden"
+    ) {
       // Can't acquire while hidden. We'll try again when visible if still wanted.
-      const p = emit("device.wakelock.deferred", { visibility: "hidden", reason: this._reason });
+      const p = emit("device.wakelock.deferred", {
+        visibility: "hidden",
+        reason: this._reason,
+      });
       if (this._hubSync) exportToHubIfEnabled(p);
       return false;
     }
@@ -228,7 +242,11 @@ class WakeLockService {
 
   _detachSentinel() {
     try {
-      this._sentinel?.removeEventListener?.("release", this._onForcedRelease, false);
+      this._sentinel?.removeEventListener?.(
+        "release",
+        this._onForcedRelease,
+        false
+      );
       // eslint-disable-next-line no-empty
     } catch {}
     this._sentinel = null;
@@ -238,7 +256,10 @@ class WakeLockService {
     // Browser/OS released our lock.
     this._active = false;
     this._detachSentinel();
-    const p = emit("device.wakelock.released", { reason: this._reason, forced: true });
+    const p = emit("device.wakelock.released", {
+      reason: this._reason,
+      forced: true,
+    });
     if (this._hubSync) exportToHubIfEnabled(p);
   };
 
@@ -246,7 +267,11 @@ class WakeLockService {
     if (!this.supported()) return;
     if (typeof document === "undefined") return;
 
-    if (document.visibilityState === "visible" && this._wanted && !this._sentinel) {
+    if (
+      document.visibilityState === "visible" &&
+      this._wanted &&
+      !this._sentinel
+    ) {
       // Try reacquire silently; if it fails, emit error and leave wanted=true so
       // another visibility change (or manual request) can try again.
       await this.acquire(this._reason, { hubSync: this._hubSync });

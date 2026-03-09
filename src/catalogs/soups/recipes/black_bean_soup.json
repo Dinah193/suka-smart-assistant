@@ -1,0 +1,352 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00Z",
+
+  "meta": {
+    "id": "soups.black_bean_soup",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Black Bean Soup",
+    "subtitle": "Smoky, mildly spiced black bean soup with citrus finish • Panera-style vibe (not a copy)",
+    "source": {
+      "kind": "ssa-canonical",
+      "notes": "Modeled for a Panera-style flavor profile: smooth + chunky texture, mild smoky spice, tomato + cumin backbone, finished with lime/cilantro. This is an original formulation (not a proprietary copy)."
+    }
+  },
+
+  "classification": {
+    "cuisine": "soups",
+    "category": "soup",
+    "subprofiles": [
+      "beans",
+      "vegetarian-optional",
+      "smoky",
+      "panera-style-vibe",
+      "stovetop",
+      "batch-cooking",
+      "freezer-friendly"
+    ],
+    "mealArchetypes": ["lunch", "dinner"],
+    "servingStyles": ["bowl"],
+    "plannerTags": [
+      "black bean",
+      "pantry soup",
+      "meal prep",
+      "freezer meal",
+      "high fiber",
+      "comfort soup"
+    ]
+  },
+
+  "yield": {
+    "servings": 8,
+    "servingSize": { "value": 2, "unit": "cups" },
+    "notes": "Makes ~14–16 cups depending on blending and simmer."
+  },
+
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 35,
+    "totalMins": 60
+  },
+
+  "difficulty": "beginner",
+
+  "equipment": {
+    "minimum": [
+      "large pot",
+      "knife",
+      "cutting board",
+      "stirring spoon",
+      "measuring cup"
+    ],
+    "recommended": [
+      "immersion blender or countertop blender",
+      "fine mesh strainer (optional)"
+    ],
+    "optional": ["citrus juicer", "microplane"]
+  },
+
+  "dietFlags": ["vegetarian-optional", "gluten-free-optional"],
+  "allergens": [],
+
+  "signals": {
+    "batchCooking": true,
+    "freezerFriendly": true,
+    "useWhatYouHave": true,
+    "highFiber": true,
+    "highProtein": true
+  },
+
+  "tasteProfile": {
+    "richness": "medium",
+    "savory": "high",
+    "smoky": "medium",
+    "heat": "mild",
+    "notes": "Cumin-forward, lightly smoky, tomato-based black bean soup with a smooth-and-chunky texture and bright lime finish."
+  },
+
+  "ingredients": [
+    {
+      "id": "oil",
+      "label": "Olive oil or neutral oil",
+      "role": "cook",
+      "amount": { "value": 30, "unit": "g" },
+      "notes": "About 2 tablespoons."
+    },
+    {
+      "id": "onion",
+      "label": "Yellow onion, diced",
+      "role": "aromatic",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "About 1 medium."
+    },
+    {
+      "id": "carrot_optional",
+      "label": "Carrot, diced (optional)",
+      "role": "vegetable",
+      "amount": { "value": 120, "unit": "g" },
+      "optional": true,
+      "notes": "Adds subtle sweetness."
+    },
+    {
+      "id": "celery_optional",
+      "label": "Celery, diced (optional)",
+      "role": "vegetable",
+      "amount": { "value": 100, "unit": "g" },
+      "optional": true,
+      "notes": "Adds a classic soup base note."
+    },
+    {
+      "id": "bell_pepper",
+      "label": "Red bell pepper, diced",
+      "role": "vegetable",
+      "amount": { "value": 150, "unit": "g" },
+      "notes": "About 1 medium. (Green works too; red is sweeter.)"
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": "About 4 cloves."
+    },
+    {
+      "id": "tomato_paste",
+      "label": "Tomato paste",
+      "role": "base",
+      "amount": { "value": 30, "unit": "g" },
+      "notes": "About 2 tablespoons."
+    },
+    {
+      "id": "cumin",
+      "label": "Ground cumin",
+      "role": "seasoning",
+      "amount": { "value": 4, "unit": "g" },
+      "notes": "About 2 teaspoons."
+    },
+    {
+      "id": "chili_powder",
+      "label": "Chili powder",
+      "role": "seasoning",
+      "amount": { "value": 3, "unit": "g" },
+      "notes": "About 1 1/2 teaspoons."
+    },
+    {
+      "id": "smoked_paprika_optional",
+      "label": "Smoked paprika (optional, for smoky note)",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "g" },
+      "optional": true,
+      "notes": "About 1 teaspoon."
+    },
+    {
+      "id": "oregano_optional",
+      "label": "Dried oregano (optional)",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "g" },
+      "optional": true,
+      "notes": "About 1/2 teaspoon."
+    },
+    {
+      "id": "bay_leaf_optional",
+      "label": "Bay leaf (optional)",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "black_beans",
+      "label": "Black beans, cooked and drained (or canned, drained)",
+      "role": "protein",
+      "amount": { "value": 1100, "unit": "g" },
+      "notes": "Equivalent to ~4 cans (15 oz/425g each) drained, or ~5–6 cups cooked."
+    },
+    {
+      "id": "broth",
+      "label": "Vegetable broth or chicken broth (low-sodium preferred)",
+      "role": "liquid",
+      "amount": { "value": 1400, "unit": "g" },
+      "notes": "About 6 cups."
+    },
+    {
+      "id": "water_optional",
+      "label": "Water (optional, for thinning as needed)",
+      "role": "liquid",
+      "amount": { "value": 240, "unit": "g" },
+      "optional": true,
+      "notes": "Add a splash at a time to reach desired thickness."
+    },
+    {
+      "id": "salt",
+      "label": "Salt",
+      "role": "seasoning",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "Start with ~1 teaspoon; adjust at the end."
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "About 1/2 teaspoon."
+    },
+    {
+      "id": "lime",
+      "label": "Lime juice",
+      "role": "finish",
+      "amount": { "value": 20, "unit": "g" },
+      "notes": "About 1–2 limes, to taste. Key to the 'Panera-style' brightness."
+    },
+    {
+      "id": "cilantro_optional",
+      "label": "Fresh cilantro, chopped (optional)",
+      "role": "finish",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "sugar_optional",
+      "label": "Sugar or honey (optional, to balance acidity)",
+      "role": "finish",
+      "amount": { "value": 4, "unit": "g" },
+      "optional": true,
+      "notes": "About 1 teaspoon. Use only if tomatoes feel sharp."
+    },
+    {
+      "id": "yogurt_or_sour_cream_optional",
+      "label": "Plain yogurt or sour cream (optional garnish)",
+      "role": "finish",
+      "amount": { "value": 60, "unit": "g" },
+      "optional": true,
+      "notes": "About 1/4 cup total for serving."
+    },
+    {
+      "id": "tortilla_chips_optional",
+      "label": "Tortilla chips or toasted pepitas (optional garnish)",
+      "role": "finish",
+      "amount": { "value": 50, "unit": "g" },
+      "optional": true
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Sweat vegetables",
+      "instructions": [
+        "Heat oil in a large pot over medium heat.",
+        "Add onion, bell pepper, and (optional) carrot/celery. Cook 6–8 minutes until softened.",
+        "Add garlic and cook 30 seconds until fragrant."
+      ],
+      "activeMins": 10,
+      "timers": [
+        { "label": "Cook vegetables", "mins": 8 },
+        { "label": "Cook garlic", "seconds": 30 }
+      ]
+    },
+    {
+      "id": "step_02",
+      "title": "Bloom tomato paste and spices",
+      "instructions": [
+        "Stir in tomato paste; cook 1–2 minutes to deepen flavor.",
+        "Add cumin, chili powder, smoked paprika (optional), oregano (optional). Stir 30 seconds."
+      ],
+      "activeMins": 3,
+      "timers": [{ "label": "Bloom paste/spices", "mins": 2 }]
+    },
+    {
+      "id": "step_03",
+      "title": "Simmer with beans and broth",
+      "instructions": [
+        "Add black beans, broth, bay leaf (optional), salt, and pepper.",
+        "Bring to a simmer and cook 20 minutes to meld flavors."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 20,
+      "timers": [{ "label": "Simmer", "mins": 20 }]
+    },
+    {
+      "id": "step_04",
+      "title": "Blend for smooth-and-chunky texture",
+      "instructions": [
+        "Remove bay leaf (if used).",
+        "Blend a portion of the soup to thicken: use an immersion blender for 5–10 seconds bursts, or transfer 2–3 cups to a blender and puree, then return to the pot.",
+        "Adjust thickness with a splash of water or broth if needed."
+      ],
+      "activeMins": 7
+    },
+    {
+      "id": "step_05",
+      "title": "Finish with lime and serve",
+      "instructions": [
+        "Stir in lime juice. Taste and adjust salt/pepper.",
+        "If the soup tastes sharp, add optional sugar/honey a little at a time.",
+        "Serve with optional cilantro and garnishes (yogurt/sour cream, chips/pepitas)."
+      ],
+      "activeMins": 5
+    }
+  ],
+
+  "planner": {
+    "useWhatYouHaveLogic": {
+      "textureControl": [
+        "For a Panera-style feel: blend about 1/3 to 1/2 of the soup.",
+        "For extra smooth: blend more and strain (optional).",
+        "For chunky: blend less and simmer 5 minutes more."
+      ],
+      "smokyNotes": [
+        "Smoked paprika provides smoky depth without meat.",
+        "If not vegetarian, a small amount of cooked bacon or smoked turkey can be added as an optional topping (not required)."
+      ],
+      "heatControl": [
+        "Keep mild by limiting chili powder and skipping cayenne.",
+        "Increase heat with cayenne, hot sauce, or diced jalapeño."
+      ],
+      "brightnessControl": [
+        "Lime is essential for the cafe-style brightness; add at the end.",
+        "A splash of vinegar can substitute if no lime."
+      ]
+    },
+    "batchCooking": {
+      "recommendedBatchMultiplier": 2,
+      "bestPractices": [
+        "Cool quickly; portion into 2-cup servings.",
+        "Flavor improves overnight; lime can be added fresh when serving if preferred."
+      ]
+    }
+  },
+
+  "storage": {
+    "fridge": "Refrigerate up to 5 days.",
+    "freezer": "Freeze up to 3 months. Thaw and reheat gently; add a splash of broth/water if thick.",
+    "reheat": "Warm to a simmer, stirring. Finish with fresh lime/cilantro if desired."
+  },
+
+  "audit": {
+    "tested": true,
+    "testNotes": "Schema-compliant: schemaVersion+meta present; all ingredients include id+label+amount; all steps include id+title+instructions; no disallowed top-level properties per current recipe.schema.json."
+  }
+}

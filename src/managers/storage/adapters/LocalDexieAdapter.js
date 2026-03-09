@@ -11,11 +11,17 @@
 
   /* --------------------------- Defensive imports --------------------------- */
   var Dexie = null;
-  try { Dexie = require("dexie"); } catch (_e) {}
-
-  var eventBus = { emit: function(){}, on: function(){}, off: function(){} };
   try {
-    var eb = require("@/services/eventBus");
+    Dexie = require("dexie");
+  } catch (_e) {}
+
+  var eventBus = {
+    emit: function () {},
+    on: function () {},
+    off: function () {},
+  };
+  try {
+    var eb = require("@/services/events/eventBus");
     eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
   } catch (_e) {}
 
@@ -25,9 +31,15 @@
     automation = (rt && (rt.automation || rt.default)) || null;
   } catch (_e) {}
 
-  var clamp = function(n,a,b){ return Math.max(a, Math.min(b, n)); };
-  var now = function(){ return Date.now(); };
-  var isStr = function (v){ return typeof v === "string"; };
+  var clamp = function (n, a, b) {
+    return Math.max(a, Math.min(b, n));
+  };
+  var now = function () {
+    return Date.now();
+  };
+  var isStr = function (v) {
+    return typeof v === "string";
+  };
 
   /* ------------------------------- Adapter --------------------------------- */
   function LocalDexieAdapter(options) {
@@ -43,15 +55,18 @@
     this._version = clamp(options.version || 1, 1, 99);
   }
 
-  LocalDexieAdapter.prototype._open = async function() {
-    if (!Dexie) { this.ready = false; return; }
+  LocalDexieAdapter.prototype._open = async function () {
+    if (!Dexie) {
+      this.ready = false;
+      return;
+    }
 
     // Create DB and schema
     var db = new Dexie(this._dbName);
     // v1 schema: simple KV table with primary key on 'key'
     db.version(1).stores({
-      kv: "&key",         // key -> value
-      meta: "&name"       // simple metadata store (e.g., migrations)
+      kv: "&key", // key -> value
+      meta: "&name", // simple metadata store (e.g., migrations)
     });
 
     // Future schema bumps go here:
@@ -62,14 +77,17 @@
     this.ready = true;
   };
 
-  LocalDexieAdapter.prototype.init = async function() {
+  LocalDexieAdapter.prototype.init = async function () {
     try {
       await this._open();
       if (!this.ready) return;
 
       // Optionally record adapter meta
       try {
-        await this._db[this._metaTable].put({ name: "adapter", value: { kind: "LocalDexieAdapter", at: now() } });
+        await this._db[this._metaTable].put({
+          name: "adapter",
+          value: { kind: "LocalDexieAdapter", at: now() },
+        });
       } catch (_e) {}
 
       // No outbox needed locally; just ready to serve
@@ -82,7 +100,7 @@
   };
 
   /* -------------------------------- Primitives ----------------------------- */
-  LocalDexieAdapter.prototype.get = async function(key) {
+  LocalDexieAdapter.prototype.get = async function (key) {
     if (!this.ready || !this._db) return undefined;
     try {
       var row = await this._db[this._kvTable].get(key);
@@ -92,7 +110,7 @@
     }
   };
 
-  LocalDexieAdapter.prototype.set = async function(key, value) {
+  LocalDexieAdapter.prototype.set = async function (key, value) {
     if (!this.ready || !this._db) return;
     try {
       await this._db[this._kvTable].put({ key: key, value: value });
@@ -107,15 +125,17 @@
             scope: value.scope,
             userId: (value.meta && value.meta.createdBy) || undefined,
             version: value.meta && value.meta.version,
-            at: now()
+            at: now(),
           });
-          automation && automation.emit && automation.emit("nba.signal", {
-            kind: "plan.saved",
-            domain: value.domain,
-            planId: value.id,
-            userId: (value.meta && value.meta.createdBy) || undefined,
-            ts: now()
-          });
+          automation &&
+            automation.emit &&
+            automation.emit("nba.signal", {
+              kind: "plan.saved",
+              domain: value.domain,
+              planId: value.id,
+              userId: (value.meta && value.meta.createdBy) || undefined,
+              ts: now(),
+            });
         } catch (_e) {}
       }
 
@@ -126,7 +146,7 @@
     }
   };
 
-  LocalDexieAdapter.prototype.del = async function(key) {
+  LocalDexieAdapter.prototype.del = async function (key) {
     if (!this.ready || !this._db) return;
     try {
       await this._db[this._kvTable].delete(key);
@@ -136,7 +156,7 @@
     }
   };
 
-  LocalDexieAdapter.prototype.keys = async function(prefix) {
+  LocalDexieAdapter.prototype.keys = async function (prefix) {
     if (!this.ready || !this._db) return [];
     try {
       if (!prefix) {
@@ -155,19 +175,26 @@
     }
   };
 
-  LocalDexieAdapter.prototype.bulkGet = async function(keys) {
-    if (!this.ready || !this._db) return (keys || []).map(function(){ return undefined; });
+  LocalDexieAdapter.prototype.bulkGet = async function (keys) {
+    if (!this.ready || !this._db)
+      return (keys || []).map(function () {
+        return undefined;
+      });
     try {
       var table = this._db[this._kvTable];
       var found = await table.bulkGet(keys || []);
       // bulkGet returns array of rows in the same order
-      return (found || []).map(function(row){ return row ? row.value : undefined; });
+      return (found || []).map(function (row) {
+        return row ? row.value : undefined;
+      });
     } catch (_e) {
-      return (keys || []).map(function(){ return undefined; });
+      return (keys || []).map(function () {
+        return undefined;
+      });
     }
   };
 
-  LocalDexieAdapter.prototype.bulkSet = async function(entries) {
+  LocalDexieAdapter.prototype.bulkSet = async function (entries) {
     if (!this.ready || !this._db) return;
     if (!Array.isArray(entries) || !entries.length) return;
     var db = this._db;
@@ -175,7 +202,7 @@
       await db.transaction("rw", db[this._kvTable], async function () {
         // We could use bulkPut directly, but we also want to emit orchestration for plan rows
         // so we iterate (still inside a single tx).
-        for (var i=0;i<entries.length;i++){
+        for (var i = 0; i < entries.length; i++) {
           var e = entries[i];
           if (!e || !isStr(e.key)) continue;
           await db.kv.put({ key: e.key, value: e.value });
@@ -184,24 +211,33 @@
 
       // Emit plan.saved for plan items (outside tx to avoid blocking)
       try {
-        for (var j=0;j<entries.length;j++){
+        for (var j = 0; j < entries.length; j++) {
           var ent = entries[j];
-          if (ent && isStr(ent.key) && ent.key.indexOf("plans:") === 0 && ent.value && ent.value.id) {
+          if (
+            ent &&
+            isStr(ent.key) &&
+            ent.key.indexOf("plans:") === 0 &&
+            ent.value &&
+            ent.value.id
+          ) {
             eventBus.emit("plan.saved", {
               id: ent.value.id,
               domain: ent.value.domain,
               scope: ent.value.scope,
               userId: (ent.value.meta && ent.value.meta.createdBy) || undefined,
               version: ent.value.meta && ent.value.meta.version,
-              at: now()
+              at: now(),
             });
-            automation && automation.emit && automation.emit("nba.signal", {
-              kind: "plan.saved",
-              domain: ent.value.domain,
-              planId: ent.value.id,
-              userId: (ent.value.meta && ent.value.meta.createdBy) || undefined,
-              ts: now()
-            });
+            automation &&
+              automation.emit &&
+              automation.emit("nba.signal", {
+                kind: "plan.saved",
+                domain: ent.value.domain,
+                planId: ent.value.id,
+                userId:
+                  (ent.value.meta && ent.value.meta.createdBy) || undefined,
+                ts: now(),
+              });
           }
         }
       } catch (_e) {}
@@ -221,7 +257,7 @@
   if (typeof module !== "undefined" && module.exports) {
     module.exports = {
       LocalDexieAdapter: LocalDexieAdapter,
-      createLocalDexieAdapter: createLocalDexieAdapter
+      createLocalDexieAdapter: createLocalDexieAdapter,
     };
   } else {
     // @ts-ignore

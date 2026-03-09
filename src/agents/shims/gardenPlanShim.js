@@ -39,130 +39,130 @@
  * @property {Array<Object>} [debug]
  */
 
-import dayjs from 'dayjs';
-import { emit } from '@/services/eventBus';
-import { familyFundMode } from '@/services/featureFlags';
+import dayjs from "dayjs";
+import { emit } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
 // Reasoner runtime support
-import { enforceBudget } from '@/services/reasoner/budget';
-import { isGated } from '@/services/reasoner/gating';
-import { checkConfidence } from '@/services/reasoner/confidence';
-import { applyFreshnessRules } from '@/services/reasoner/freshness';
-import { getCachedResponse, setCachedResponse } from '@/services/reasoner/cache/memo';
-import { gardenShimKey } from '@/services/reasoner/cache/keys';
-import { selectModeForIntent } from '@/services/reasoner/modes/map';
-import { validateResponse } from '@/services/reasoner/validate';
-import { buildSystemPrompt } from '@/services/reasoner/prompts/system';
-import { buildTemplatePrompt } from '@/services/reasoner/prompts/templates';
-import { callReasoner } from '@/services/reasoner/core';
+import { enforceBudget } from "@/reasoner/budget";
+import { isGated } from "@/reasoner/gating";
+import { checkConfidence } from "@/reasoner/confidence";
+import { applyFreshnessRules } from "@/reasoner/freshness";
+import { getCachedResponse, setCachedResponse } from "@/reasoner/cache/memo";
+import { gardenShimKey } from "@/reasoner/cache/keys";
+import { selectModeForIntent } from "@/reasoner/modes/map";
+import { validateResponse } from "@/reasoner/modes/validate";
+import { buildSystemPrompt } from "@/reasoner/prompts/system";
+import { buildTemplatePrompt } from "@/reasoner/prompts/templates";
+import { callReasoner } from "@/reasoner/core";
 
 // Context selectors
-import { selectGardenContext } from '@/services/selectors/gardenSelectors';
+import { selectGardenContext } from "@/services/selectors/gardenSelectors";
 
 // Hub export (optional)
-import { HubPacketFormatter } from '@/services/hub/HubPacketFormatter';
-import { FamilyFundConnector } from '@/services/hub/FamilyFundConnector';
+import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
+import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
 
 const isoNow = () => dayjs().toISOString();
-const lower = (s) => (s || '').toLowerCase().trim();
+const lower = (s) => (s || "").toLowerCase().trim();
 
 /* -----------------------------------------------------------------------------
  * Shared horticulture hints (fed into Reasoner as structured hints)
  * -------------------------------------------------------------------------- */
 
 const FAMILY_MAP = {
-  tomato: 'solanaceae',
-  pepper: 'solanaceae',
-  potato: 'solanaceae',
-  eggplant: 'solanaceae',
-  kale: 'brassicaceae',
-  cabbage: 'brassicaceae',
-  broccoli: 'brassicaceae',
-  cauliflower: 'brassicaceae',
-  radish: 'brassicaceae',
-  turnip: 'brassicaceae',
-  bean: 'fabaceae',
-  pea: 'fabaceae',
-  chickpea: 'fabaceae',
-  lentil: 'fabaceae',
-  carrot: 'apiaceae',
-  dill: 'apiaceae',
-  parsley: 'apiaceae',
-  beet: 'amaranthaceae',
-  chard: 'amaranthaceae',
-  spinach: 'amaranthaceae',
-  onion: 'amaryllidaceae',
-  garlic: 'amaryllidaceae',
-  leek: 'amaryllidaceae',
-  corn: 'poaceae',
-  wheat: 'poaceae',
-  cucumber: 'cucurbitaceae',
-  squash: 'cucurbitaceae',
-  pumpkin: 'cucurbitaceae',
-  melon: 'cucurbitaceae',
-  lettuce: 'asteraceae',
+  tomato: "solanaceae",
+  pepper: "solanaceae",
+  potato: "solanaceae",
+  eggplant: "solanaceae",
+  kale: "brassicaceae",
+  cabbage: "brassicaceae",
+  broccoli: "brassicaceae",
+  cauliflower: "brassicaceae",
+  radish: "brassicaceae",
+  turnip: "brassicaceae",
+  bean: "fabaceae",
+  pea: "fabaceae",
+  chickpea: "fabaceae",
+  lentil: "fabaceae",
+  carrot: "apiaceae",
+  dill: "apiaceae",
+  parsley: "apiaceae",
+  beet: "amaranthaceae",
+  chard: "amaranthaceae",
+  spinach: "amaranthaceae",
+  onion: "amaryllidaceae",
+  garlic: "amaryllidaceae",
+  leek: "amaryllidaceae",
+  corn: "poaceae",
+  wheat: "poaceae",
+  cucumber: "cucurbitaceae",
+  squash: "cucurbitaceae",
+  pumpkin: "cucurbitaceae",
+  melon: "cucurbitaceae",
+  lettuce: "asteraceae",
 };
 
 const FEEDING_CLASS = {
-  solanaceae: 'heavy',
-  cucurbitaceae: 'heavy',
-  poaceae: 'heavy',
-  brassicaceae: 'medium',
-  amaranthaceae: 'medium',
-  apiaceae: 'light',
-  amaryllidaceae: 'light',
-  fabaceae: 'light',
-  asteraceae: 'light',
+  solanaceae: "heavy",
+  cucurbitaceae: "heavy",
+  poaceae: "heavy",
+  brassicaceae: "medium",
+  amaranthaceae: "medium",
+  apiaceae: "light",
+  amaryllidaceae: "light",
+  fabaceae: "light",
+  asteraceae: "light",
 };
 
 const SPICE_GROW_MAP = {
-  thyme: ['Thyme'],
-  oregano: ['Oregano'],
-  rosemary: ['Rosemary'],
-  basil: ['Basil'],
-  cilantro: ['Cilantro/Coriander'],
-  parsley: ['Parsley'],
-  dill: ['Dill'],
-  mint: ['Mint'],
-  chive: ['Chive'],
-  bay_leaf: ['Bay Laurel (container)'],
-  lemon: ['Meyer Lemon (container)'],
-  lime: ['Key Lime (container)'],
-  paprika: ['Sweet Pepper'],
-  cayenne: ['Hot Pepper'],
-  garlic: ['Garlic'],
-  onion: ['Onion', 'Green Onion'],
-  turmeric: ['Turmeric (container)'],
-  ginger: ['Ginger (container)'],
-  sumac: ['Staghorn Sumac'],
-  tomato_paste: ['Tomato (sauce type)'],
-  tomato: ['Tomato'],
-  mushroom_powder: ['Wine Cap Mushroom Bed'],
-  coriander: ['Cilantro/Coriander'],
-  cumin: ['Cumin'],
-  sesame: ['Sesame'],
+  thyme: ["Thyme"],
+  oregano: ["Oregano"],
+  rosemary: ["Rosemary"],
+  basil: ["Basil"],
+  cilantro: ["Cilantro/Coriander"],
+  parsley: ["Parsley"],
+  dill: ["Dill"],
+  mint: ["Mint"],
+  chive: ["Chive"],
+  bay_leaf: ["Bay Laurel (container)"],
+  lemon: ["Meyer Lemon (container)"],
+  lime: ["Key Lime (container)"],
+  paprika: ["Sweet Pepper"],
+  cayenne: ["Hot Pepper"],
+  garlic: ["Garlic"],
+  onion: ["Onion", "Green Onion"],
+  turmeric: ["Turmeric (container)"],
+  ginger: ["Ginger (container)"],
+  sumac: ["Staghorn Sumac"],
+  tomato_paste: ["Tomato (sauce type)"],
+  tomato: ["Tomato"],
+  mushroom_powder: ["Wine Cap Mushroom Bed"],
+  coriander: ["Cilantro/Coriander"],
+  cumin: ["Cumin"],
+  sesame: ["Sesame"],
 };
 
 const PEST_TIPS = {
   solanaceae: [
-    'Scout aphids/flea beetles weekly; yellow sticky cards early.',
-    'Row cover until bloom; remove for pollination.',
-    'Even moisture + Ca for blossom-end rot prevention.',
+    "Scout aphids/flea beetles weekly; yellow sticky cards early.",
+    "Row cover until bloom; remove for pollination.",
+    "Even moisture + Ca for blossom-end rot prevention.",
   ],
   brassicaceae: [
-    'Cover post-sow to block cabbage moths; Bt on active feeding only.',
-    'Flea beetles: row cover + radish trap crop on edges.',
+    "Cover post-sow to block cabbage moths; Bt on active feeding only.",
+    "Flea beetles: row cover + radish trap crop on edges.",
   ],
   cucurbitaceae: [
-    'Row cover for cucumber beetles; uncover at bloom.',
-    'Hand-pick squash bug egg clusters; remove debris.',
+    "Row cover for cucumber beetles; uncover at bloom.",
+    "Hand-pick squash bug egg clusters; remove debris.",
   ],
-  fabaceae: ['Avoid excess N; trellis; encourage lady beetles.'],
-  amaryllidaceae: ['Fine mesh for onion maggot; rotate 3+ years; weed clean.'],
-  asteraceae: ['Tip-burn ≈ Ca/irregular moisture; use shade in heat waves.'],
+  fabaceae: ["Avoid excess N; trellis; encourage lady beetles."],
+  amaryllidaceae: ["Fine mesh for onion maggot; rotate 3+ years; weed clean."],
+  asteraceae: ["Tip-burn ≈ Ca/irregular moisture; use shade in heat waves."],
   default: [
-    'Scout weekly; sanitize tools; remove diseased tissue.',
-    'Support beneficials: diverse flowers; avoid broad-spectrum sprays.',
+    "Scout weekly; sanitize tools; remove diseased tissue.",
+    "Support beneficials: diverse flowers; avoid broad-spectrum sprays.",
   ],
 };
 
@@ -172,34 +172,34 @@ const PEST_TIPS = {
  */
 const CUISINE_PLANT_HINTS = {
   italian: {
-    key: 'italian',
-    herbs: ['Basil', 'Oregano', 'Rosemary', 'Parsley', 'Thyme'],
-    aromatics: ['Garlic', 'Onion'],
-    veg: ['Tomato', 'Sweet Pepper', 'Zucchini'],
+    key: "italian",
+    herbs: ["Basil", "Oregano", "Rosemary", "Parsley", "Thyme"],
+    aromatics: ["Garlic", "Onion"],
+    veg: ["Tomato", "Sweet Pepper", "Zucchini"],
   },
   mexican: {
-    key: 'mexican',
-    herbs: ['Cilantro/Coriander', 'Oregano'],
-    aromatics: ['Garlic', 'Onion', 'Green Onion'],
-    veg: ['Tomato', 'Hot Pepper', 'Sweet Pepper'],
+    key: "mexican",
+    herbs: ["Cilantro/Coriander", "Oregano"],
+    aromatics: ["Garlic", "Onion", "Green Onion"],
+    veg: ["Tomato", "Hot Pepper", "Sweet Pepper"],
   },
   mediterranean: {
-    key: 'mediterranean',
-    herbs: ['Thyme', 'Oregano', 'Rosemary', 'Parsley', 'Mint'],
-    aromatics: ['Garlic', 'Onion'],
-    veg: ['Tomato', 'Cucumber', 'Eggplant'],
+    key: "mediterranean",
+    herbs: ["Thyme", "Oregano", "Rosemary", "Parsley", "Mint"],
+    aromatics: ["Garlic", "Onion"],
+    veg: ["Tomato", "Cucumber", "Eggplant"],
   },
   caribbean: {
-    key: 'caribbean',
-    herbs: ['Thyme', 'Cilantro/Coriander'],
-    aromatics: ['Garlic', 'Onion', 'Green Onion'],
-    veg: ['Hot Pepper', 'Sweet Pepper'],
+    key: "caribbean",
+    herbs: ["Thyme", "Cilantro/Coriander"],
+    aromatics: ["Garlic", "Onion", "Green Onion"],
+    veg: ["Hot Pepper", "Sweet Pepper"],
   },
   soul_food: {
-    key: 'soul_food',
-    herbs: ['Parsley', 'Thyme'],
-    aromatics: ['Garlic', 'Onion'],
-    veg: ['Kale', 'Collards', 'Turnip', 'Mustard Greens', 'Sweet Pepper'],
+    key: "soul_food",
+    herbs: ["Parsley", "Thyme"],
+    aromatics: ["Garlic", "Onion"],
+    veg: ["Kale", "Collards", "Turnip", "Mustard Greens", "Sweet Pepper"],
   },
 };
 
@@ -212,31 +212,33 @@ const CUISINE_PLANT_HINTS = {
  * @returns {string}
  */
 function normalizeIntent(rawIntentOrCommand) {
-  const s = String(rawIntentOrCommand || '').trim().toLowerCase();
+  const s = String(rawIntentOrCommand || "")
+    .trim()
+    .toLowerCase();
 
   const map = {
-    generate: 'garden.generatePlan',
-    generategardenplan: 'garden.generatePlan',
-    generate_garden_plan: 'garden.generatePlan',
-    'garden.generateplan': 'garden.generatePlan',
+    generate: "garden.generatePlan",
+    generategardenplan: "garden.generatePlan",
+    generate_garden_plan: "garden.generatePlan",
+    "garden.generateplan": "garden.generatePlan",
 
-    pest: 'garden.pestPlaybook',
-    pestplaybook: 'garden.pestPlaybook',
-    pest_playbook: 'garden.pestPlaybook',
-    'garden.pestplaybook': 'garden.pestPlaybook',
+    pest: "garden.pestPlaybook",
+    pestplaybook: "garden.pestPlaybook",
+    pest_playbook: "garden.pestPlaybook",
+    "garden.pestplaybook": "garden.pestPlaybook",
 
-    suggestplants: 'garden.spiceSuggest',
-    suggest_plants: 'garden.spiceSuggest',
-    'garden.suggestplants': 'garden.spiceSuggest',
+    suggestplants: "garden.spiceSuggest",
+    suggest_plants: "garden.spiceSuggest",
+    "garden.suggestplants": "garden.spiceSuggest",
 
-    makeplan: 'garden.skeletonPlan',
-    make_plan: 'garden.skeletonPlan',
-    'garden.makeplan': 'garden.skeletonPlan',
+    makeplan: "garden.skeletonPlan",
+    make_plan: "garden.skeletonPlan",
+    "garden.makeplan": "garden.skeletonPlan",
   };
 
   if (map[s]) return map[s];
 
-  if (s.startsWith('garden.')) return s;
+  if (s.startsWith("garden.")) return s;
   return `garden.${s}`;
 }
 
@@ -280,10 +282,10 @@ function normalizeGardenOutput(intent, raw) {
   const warnings = [];
   const debug = [];
 
-  if (!raw || typeof raw !== 'object') {
+  if (!raw || typeof raw !== "object") {
     return {
       data: {
-        summary: 'Reasoner returned empty result.',
+        summary: "Reasoner returned empty result.",
         recommendations: [],
         calendarEvents: [],
         gardenUpdates: [],
@@ -292,8 +294,8 @@ function normalizeGardenOutput(intent, raw) {
       },
       warnings: [
         {
-          type: 'emptyResult',
-          message: 'Reasoner returned no structured payload for garden intent.',
+          type: "emptyResult",
+          message: "Reasoner returned no structured payload for garden intent.",
         },
       ],
       debug,
@@ -302,55 +304,71 @@ function normalizeGardenOutput(intent, raw) {
 
   const baseSummary =
     raw.summary ||
-    (intent === 'garden.generatePlan'
-      ? 'Garden plan generated.'
-      : intent === 'garden.skeletonPlan'
-      ? 'Garden skeleton plan created.'
-      : intent === 'garden.spiceSuggest'
-      ? 'Spice/herb plant suggestions generated.'
-      : intent === 'garden.pestPlaybook'
-      ? 'Pest/IPM playbook generated.'
-      : 'Garden output ready.');
+    (intent === "garden.generatePlan"
+      ? "Garden plan generated."
+      : intent === "garden.skeletonPlan"
+      ? "Garden skeleton plan created."
+      : intent === "garden.spiceSuggest"
+      ? "Spice/herb plant suggestions generated."
+      : intent === "garden.pestPlaybook"
+      ? "Pest/IPM playbook generated."
+      : "Garden output ready.");
 
-  const recommendations = Array.isArray(raw.recommendations) ? raw.recommendations : [];
-  const calendarEvents = Array.isArray(raw.calendarEvents) ? raw.calendarEvents : [];
-  const gardenUpdates = Array.isArray(raw.gardenUpdates) ? raw.gardenUpdates : [];
+  const recommendations = Array.isArray(raw.recommendations)
+    ? raw.recommendations
+    : [];
+  const calendarEvents = Array.isArray(raw.calendarEvents)
+    ? raw.calendarEvents
+    : [];
+  const gardenUpdates = Array.isArray(raw.gardenUpdates)
+    ? raw.gardenUpdates
+    : [];
 
   let nextBestAction = raw.nextBestAction || null;
   const extraData = raw.data || {};
 
   // Ensure we surface conventional update types if the Reasoner followed old agent semantics
-  if (intent === 'garden.spiceSuggest' && !gardenUpdates.some((g) => g.type === 'garden.spice_suggestions')) {
+  if (
+    intent === "garden.spiceSuggest" &&
+    !gardenUpdates.some((g) => g.type === "garden.spice_suggestions")
+  ) {
     const items = Array.isArray(raw.items) ? raw.items : [];
     gardenUpdates.push({
-      type: 'garden.spice_suggestions',
+      type: "garden.spice_suggestions",
       zone: raw.zone || null,
       items,
     });
   }
 
-  if (intent === 'garden.skeletonPlan' && !gardenUpdates.some((g) => g.type === 'garden.plan.skeleton')) {
+  if (
+    intent === "garden.skeletonPlan" &&
+    !gardenUpdates.some((g) => g.type === "garden.plan.skeleton")
+  ) {
     gardenUpdates.push({
-      type: 'garden.plan.skeleton',
+      type: "garden.plan.skeleton",
       perCrop: raw.perCrop || [],
       events: calendarEvents,
       zone: raw.zone || null,
     });
   }
 
-  if (intent === 'garden.pestPlaybook' && !gardenUpdates.some((g) => g.type === 'garden.pest_playbook')) {
+  if (
+    intent === "garden.pestPlaybook" &&
+    !gardenUpdates.some((g) => g.type === "garden.pest_playbook")
+  ) {
     gardenUpdates.push({
-      type: 'garden.pest_playbook',
+      type: "garden.pest_playbook",
       family: raw.family || raw.cropFamily || null,
       tips: raw.tips || [],
     });
   }
 
   // If Reasoner did not provide an NBA, we can leave it null; UI will decide
-  if (nextBestAction && typeof nextBestAction !== 'object') {
+  if (nextBestAction && typeof nextBestAction !== "object") {
     warnings.push({
-      type: 'invalidNextBestAction',
-      message: 'nextBestAction must be an object or null; received non-object, dropping it.',
+      type: "invalidNextBestAction",
+      message:
+        "nextBestAction must be an object or null; received non-object, dropping it.",
     });
     nextBestAction = null;
   }
@@ -365,7 +383,7 @@ function normalizeGardenOutput(intent, raw) {
   };
 
   debug.push({
-    type: 'gardenShim.normalize',
+    type: "gardenShim.normalize",
     ts: isoNow(),
     intent,
     rawKeys: Object.keys(raw || {}),
@@ -386,31 +404,34 @@ export async function invokeShim(req) {
   const debug = [];
 
   try {
-    if (!req || typeof req !== 'object') {
+    if (!req || typeof req !== "object") {
       return {
         ok: false,
-        mode: 'none',
+        mode: "none",
         data: {},
         warnings: [
-          { type: 'badRequest', message: 'ShimRequest is required and must be an object.' },
+          {
+            type: "badRequest",
+            message: "ShimRequest is required and must be an object.",
+          },
         ],
         debug,
       };
     }
 
-    const domain = req.domain || 'garden';
-    const intent = normalizeIntent(req.intent || '');
+    const domain = req.domain || "garden";
+    const intent = normalizeIntent(req.intent || "");
     const input = req.input || {};
     const runtime = req.runtime || {};
 
-    if (domain !== 'garden') {
+    if (domain !== "garden") {
       return {
         ok: false,
-        mode: 'none',
+        mode: "none",
         data: {},
         warnings: [
           {
-            type: 'badDomain',
+            type: "badDomain",
             message: `Garden shim only supports domain="garden", received "${domain}".`,
           },
         ],
@@ -420,29 +441,29 @@ export async function invokeShim(req) {
 
     // Emit early invocation event
     emit({
-      type: 'reasoner.invoked',
+      type: "reasoner.invoked",
       ts: startedAt,
-      source: 'agents/shims/gardenPlan',
+      source: "agents/shims/gardenPlan",
       data: { intent, domain, runtime },
     });
 
     // Gating
     if (isGated({ domain, intent, runtime })) {
       warnings.push({
-        type: 'gated',
+        type: "gated",
         message: `Reasoner calls gated for intent "${intent}".`,
       });
 
       emit({
-        type: 'reasoner.gated',
+        type: "reasoner.gated",
         ts: isoNow(),
-        source: 'agents/shims/gardenPlan',
+        source: "agents/shims/gardenPlan",
         data: { intent, domain },
       });
 
       return {
         ok: false,
-        mode: 'none',
+        mode: "none",
         data: {},
         warnings,
         debug,
@@ -455,20 +476,20 @@ export async function invokeShim(req) {
         domain,
         intent,
         input,
-      }) || 'garden.generatePlan.v1';
+      }) || "garden.generatePlan.v1";
 
     // Budget enforcement
     const budgetInfo = enforceBudget({ domain, intent, mode, runtime });
     if (!budgetInfo.ok) {
       warnings.push({
-        type: 'budgetExceeded',
-        message: budgetInfo.message || 'Budget exceeded for garden shim.',
+        type: "budgetExceeded",
+        message: budgetInfo.message || "Budget exceeded for garden shim.",
       });
 
       emit({
-        type: 'reasoner.budgetExceeded',
+        type: "reasoner.budgetExceeded",
         ts: isoNow(),
-        source: 'agents/shims/gardenPlan',
+        source: "agents/shims/gardenPlan",
         data: { intent, domain, mode, budgetInfo },
       });
 
@@ -485,7 +506,7 @@ export async function invokeShim(req) {
     const context = await selectGardenContext({ input, runtime, intent });
 
     debug.push({
-      type: 'context.loaded',
+      type: "context.loaded",
       ts: isoNow(),
       keys: Object.keys(context || {}),
     });
@@ -512,14 +533,14 @@ export async function invokeShim(req) {
     let cuisineKeys = [];
     if (Array.isArray(cuisinePreferences)) {
       cuisineKeys = cuisinePreferences.map((c) => lower(c));
-    } else if (cuisinePreferences && typeof cuisinePreferences === 'object') {
+    } else if (cuisinePreferences && typeof cuisinePreferences === "object") {
       if (cuisinePreferences.primary) {
         cuisineKeys.push(lower(cuisinePreferences.primary));
       }
       if (Array.isArray(cuisinePreferences.secondary)) {
         cuisineKeys.push(...cuisinePreferences.secondary.map((c) => lower(c)));
       }
-    } else if (typeof cuisinePreferences === 'string') {
+    } else if (typeof cuisinePreferences === "string") {
       cuisineKeys = [lower(cuisinePreferences)];
     }
 
@@ -533,8 +554,8 @@ export async function invokeShim(req) {
       hints: {
         garden: gardenHints,
         cuisine: {
-          preferences: cuisineKeys,       // e.g. ["soul_food","caribbean"]
-          plantHints: CUISINE_PLANT_HINTS // same shape as in gardenHints for convenience
+          preferences: cuisineKeys, // e.g. ["soul_food","caribbean"]
+          plantHints: CUISINE_PLANT_HINTS, // same shape as in gardenHints for convenience
         },
       },
       meta: {
@@ -548,13 +569,17 @@ export async function invokeShim(req) {
     const cached = await getCachedResponse(cacheKey);
     if (cached) {
       emit({
-        type: 'reasoner.cachedHit',
+        type: "reasoner.cachedHit",
         ts: isoNow(),
-        source: 'agents/shims/gardenPlan',
+        source: "agents/shims/gardenPlan",
         data: { intent, mode, cacheKey },
       });
 
-      const { data, warnings: w2, debug: d2 } = normalizeGardenOutput(intent, cached);
+      const {
+        data,
+        warnings: w2,
+        debug: d2,
+      } = normalizeGardenOutput(intent, cached);
       if (w2?.length) warnings.push(...w2);
       if (d2?.length) debug.push(...d2);
 
@@ -568,28 +593,28 @@ export async function invokeShim(req) {
     }
 
     emit({
-      type: 'reasoner.cachedMiss',
+      type: "reasoner.cachedMiss",
       ts: isoNow(),
-      source: 'agents/shims/gardenPlan',
+      source: "agents/shims/gardenPlan",
       data: { intent, mode, cacheKey },
     });
 
     // Build prompts
     const systemPrompt = buildSystemPrompt({
-      domain: 'garden',
+      domain: "garden",
       mode,
       extra: {
         // Encourage the Reasoner to leverage the hints instead of inventing wildly
         gardenInstruction:
-          'Use the provided familyMap, feedingClass, spiceGrowMap, pestTips, and cuisinePlantHints as strong heuristics ' +
-          'for planning crop rotations, feeding programs, spice/herb plant suggestions, cuisine-aligned crop choices, and IPM playbooks. ' +
-          'Prioritize crops and herbs that strongly support the user’s cuisine preferences when designing plans or successions. ' +
-          'When you deviate from these hints or cuisine preferences, briefly explain why.',
+          "Use the provided familyMap, feedingClass, spiceGrowMap, pestTips, and cuisinePlantHints as strong heuristics " +
+          "for planning crop rotations, feeding programs, spice/herb plant suggestions, cuisine-aligned crop choices, and IPM playbooks. " +
+          "Prioritize crops and herbs that strongly support the user’s cuisine preferences when designing plans or successions. " +
+          "When you deviate from these hints or cuisine preferences, briefly explain why.",
       },
     });
 
     const userPrompt = buildTemplatePrompt({
-      domain: 'garden',
+      domain: "garden",
       mode,
       intent,
       payload: reasonerPayload,
@@ -614,31 +639,39 @@ export async function invokeShim(req) {
 
     if (!confidence.ok) {
       warnings.push({
-        type: 'lowConfidence',
-        message: confidence.message || 'Reasoner confidence below threshold for garden intent.',
+        type: "lowConfidence",
+        message:
+          confidence.message ||
+          "Reasoner confidence below threshold for garden intent.",
       });
 
       emit({
-        type: 'reasoner.lowConfidence',
+        type: "reasoner.lowConfidence",
         ts: isoNow(),
-        source: 'agents/shims/gardenPlan',
+        source: "agents/shims/gardenPlan",
         data: { intent, mode, confidence },
       });
     }
 
     // Schema validation
-    const validation = validateResponse({ domain, intent, mode, raw: rawResult });
+    const validation = validateResponse({
+      domain,
+      intent,
+      mode,
+      raw: rawResult,
+    });
     if (!validation.ok) {
       warnings.push({
-        type: 'invalidSchema',
-        message: validation.message || 'Reasoner output failed schema validation.',
+        type: "invalidSchema",
+        message:
+          validation.message || "Reasoner output failed schema validation.",
         details: validation.errors || [],
       });
 
       emit({
-        type: 'reasoner.invalidSchema',
+        type: "reasoner.invalidSchema",
         ts: isoNow(),
-        source: 'agents/shims/gardenPlan',
+        source: "agents/shims/gardenPlan",
         data: { intent, mode, errors: validation.errors || [] },
       });
 
@@ -652,14 +685,18 @@ export async function invokeShim(req) {
     }
 
     emit({
-      type: 'reasoner.validated',
+      type: "reasoner.validated",
       ts: isoNow(),
-      source: 'agents/shims/gardenPlan',
+      source: "agents/shims/gardenPlan",
       data: { intent, mode },
     });
 
     // Normalize into SSA garden payload
-    const { data, warnings: w3, debug: d3 } = normalizeGardenOutput(intent, rawResult);
+    const {
+      data,
+      warnings: w3,
+      debug: d3,
+    } = normalizeGardenOutput(intent, rawResult);
     if (w3?.length) warnings.push(...w3);
     if (d3?.length) debug.push(...d3);
 
@@ -668,20 +705,20 @@ export async function invokeShim(req) {
 
     // Emit domain-level event
     const domainEventType =
-      intent === 'garden.generatePlan'
-        ? 'garden.plan.generated'
-        : intent === 'garden.pestPlaybook'
-        ? 'garden.pest_playbook.generated'
-        : intent === 'garden.spiceSuggest'
-        ? 'garden.spice_suggestions.generated'
-        : intent === 'garden.skeletonPlan'
-        ? 'garden.plan.skeleton.generated'
-        : 'garden.output.ready';
+      intent === "garden.generatePlan"
+        ? "garden.plan.generated"
+        : intent === "garden.pestPlaybook"
+        ? "garden.pest_playbook.generated"
+        : intent === "garden.spiceSuggest"
+        ? "garden.spice_suggestions.generated"
+        : intent === "garden.skeletonPlan"
+        ? "garden.plan.skeleton.generated"
+        : "garden.output.ready";
 
     emit({
       type: domainEventType,
       ts: isoNow(),
-      source: 'agents/shims/gardenPlan',
+      source: "agents/shims/gardenPlan",
       data: {
         intent,
         mode,
@@ -693,7 +730,7 @@ export async function invokeShim(req) {
     if (
       familyFundMode &&
       runtime?.exportToHub &&
-      (intent === 'garden.generatePlan' || intent === 'garden.skeletonPlan')
+      (intent === "garden.generatePlan" || intent === "garden.skeletonPlan")
     ) {
       try {
         const packet = HubPacketFormatter.formatGardenPlan({
@@ -706,15 +743,16 @@ export async function invokeShim(req) {
         await FamilyFundConnector.export(packet);
 
         emit({
-          type: 'session.exported',
+          type: "session.exported",
           ts: isoNow(),
-          source: 'agents/shims/gardenPlan',
-          data: { intent, mode, packetType: 'gardenPlan' },
+          source: "agents/shims/gardenPlan",
+          data: { intent, mode, packetType: "gardenPlan" },
         });
       } catch (e) {
         warnings.push({
-          type: 'hubExportFailed',
-          message: e?.message || 'Failed to export garden plan to Family Fund Hub.',
+          type: "hubExportFailed",
+          message:
+            e?.message || "Failed to export garden plan to Family Fund Hub.",
         });
       }
     }
@@ -731,26 +769,26 @@ export async function invokeShim(req) {
     const stack = err?.stack || null;
 
     emit({
-      type: 'reasoner.error',
+      type: "reasoner.error",
       ts: isoNow(),
-      source: 'agents/shims/gardenPlan',
+      source: "agents/shims/gardenPlan",
       data: { message, stack },
     });
 
     return {
       ok: false,
-      mode: 'none',
+      mode: "none",
       data: {},
       warnings: [
         {
-          type: 'shimError',
+          type: "shimError",
           message,
         },
       ],
       debug: [
         ...debug,
         {
-          type: 'exception',
+          type: "exception",
           ts: isoNow(),
           message,
           stack,
@@ -780,27 +818,29 @@ export async function invokeShim(req) {
  * @returns {Promise<ShimResponse>}
  */
 export async function handleLegacy(command, payload = {}) {
-  const c = String(command || '').toLowerCase().trim();
+  const c = String(command || "")
+    .toLowerCase()
+    .trim();
 
   let intent;
   switch (c) {
-    case 'generate':
-    case 'generategardenplan':
-    case 'generate_garden_plan':
-      intent = 'garden.generatePlan';
+    case "generate":
+    case "generategardenplan":
+    case "generate_garden_plan":
+      intent = "garden.generatePlan";
       break;
-    case 'pest':
-    case 'pestplaybook':
-    case 'pest_playbook':
-      intent = 'garden.pestPlaybook';
+    case "pest":
+    case "pestplaybook":
+    case "pest_playbook":
+      intent = "garden.pestPlaybook";
       break;
-    case 'suggestplants':
-    case 'suggest_plants':
-      intent = 'garden.spiceSuggest';
+    case "suggestplants":
+    case "suggest_plants":
+      intent = "garden.spiceSuggest";
       break;
-    case 'makeplan':
-    case 'make_plan':
-      intent = 'garden.skeletonPlan';
+    case "makeplan":
+    case "make_plan":
+      intent = "garden.skeletonPlan";
       break;
     default:
       // Default: treat the command as a raw intent; normalizeIntent() will handle it
@@ -809,7 +849,7 @@ export async function handleLegacy(command, payload = {}) {
   }
 
   return invokeShim({
-    domain: 'garden',
+    domain: "garden",
     intent,
     input: payload,
     runtime: payload?.runtime || {},
@@ -822,17 +862,37 @@ export async function handleLegacy(command, payload = {}) {
  */
 
 export async function generateGardenPlan(input = {}) {
-  return invokeShim({ domain: 'garden', intent: 'garden.generatePlan', input, runtime: input.runtime || {} });
+  return invokeShim({
+    domain: "garden",
+    intent: "garden.generatePlan",
+    input,
+    runtime: input.runtime || {},
+  });
 }
 
 export async function pestPlaybook(input = {}) {
-  return invokeShim({ domain: 'garden', intent: 'garden.pestPlaybook', input, runtime: input.runtime || {} });
+  return invokeShim({
+    domain: "garden",
+    intent: "garden.pestPlaybook",
+    input,
+    runtime: input.runtime || {},
+  });
 }
 
 export async function suggestPlants(input = {}) {
-  return invokeShim({ domain: 'garden', intent: 'garden.spiceSuggest', input, runtime: input.runtime || {} });
+  return invokeShim({
+    domain: "garden",
+    intent: "garden.spiceSuggest",
+    input,
+    runtime: input.runtime || {},
+  });
 }
 
 export async function makePlan(input = {}) {
-  return invokeShim({ domain: 'garden', intent: 'garden.skeletonPlan', input, runtime: input.runtime || {} });
+  return invokeShim({
+    domain: "garden",
+    intent: "garden.skeletonPlan",
+    input,
+    runtime: input.runtime || {},
+  });
 }

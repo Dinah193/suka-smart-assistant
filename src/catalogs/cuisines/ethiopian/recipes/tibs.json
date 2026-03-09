@@ -1,0 +1,482 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.ethiopian.recipes.tibs",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Tibs (Ethiopian Sautéed Meat)",
+    "subtitle": "Quick-seared beef (or lamb) with onions, peppers, and Ethiopian spices; served sizzling with injera.",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalog",
+      "notes": [
+        "This file models a flexible tibs baseline with a beef default and lamb variation.",
+        "Supports both 'dereq tibs' (drier, high-heat sear) and 'wet tibs' (saucy) approaches via variations.",
+        "Spice set uses mitmita/berbere conventions; substitutions provided for availability."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "Ethiopian",
+    "category": "main",
+    "mealArchetypes": ["saute", "stir_fry", "protein_main", "injera_platter"],
+    "servingStyles": ["family_style", "plated_meals", "street_food"],
+    "plannerTags": [
+      "cuisine.ethiopian",
+      "dish.ethiopian.tibs",
+      "protein.beef",
+      "protein.lamb_option",
+      "weeknight.friendly",
+      "quick.cook",
+      "high_heat",
+      "injera.pairing",
+      "leftovers.good"
+    ]
+  },
+
+  "summary": "Tibs are Ethiopian sautéed meat—typically quick-seared beef or lamb with onions, peppers, garlic, and berbere/mitmita—often served hot with injera.",
+
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 250, "unit": "g" },
+    "notes": "Serves 4 as a main with injera and sides; 6 as part of a platter."
+  },
+
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 10,
+    "totalMins": 35
+  },
+
+  "difficulty": "beginner",
+
+  "signals": {
+    "batchFriendly": "low",
+    "leftoversGood": true,
+    "freezerFriendly": false,
+    "weeknightPossible": true,
+    "quickCook": true
+  },
+
+  "tasteProfile": {
+    "heat": "medium",
+    "savory": "high",
+    "acidity": "low",
+    "sweetness": "low",
+    "aromatics": ["onion", "garlic", "ginger"],
+    "spiceProfile": ["berbere", "mitmita_optional", "black_pepper"],
+    "texture": ["seared_edges", "juicy_center"],
+    "finish": ["lemon_optional", "niter_kibbeh_optional"]
+  },
+
+  "equipment": {
+    "required": [
+      {
+        "id": "tool.heavy_skillet",
+        "label": "Heavy skillet or cast iron pan",
+        "required": true
+      },
+      { "id": "tool.knife", "label": "Chef’s knife", "required": true },
+      {
+        "id": "tool.cutting_board",
+        "label": "Cutting board",
+        "required": true
+      },
+      { "id": "tool.tongs", "label": "Tongs or spatula", "required": true }
+    ],
+    "recommended": ["tool.kitchen_scale", "tool.timer"],
+    "optional": [
+      {
+        "id": "tool.thermometer_instant_read",
+        "label": "Instant-read thermometer",
+        "required": false,
+        "notes": "Helpful for doneness targeting in SSA."
+      }
+    ]
+  },
+
+  "dietFlags": ["high_protein", "gluten_free", "dairy_optional"],
+  "allergens": {
+    "contains": ["dairy_optional"],
+    "notes": [
+      "If using niter kibbeh/ghee, contains dairy.",
+      "Serve with injera (typically teff; verify blend if gluten avoidance matters)."
+    ]
+  },
+
+  "ingredientGroups": [
+    {
+      "id": "group.meat",
+      "label": "Meat",
+      "items": ["protein.beef", "protein.lamb"]
+    },
+    {
+      "id": "group.aromatics_veg",
+      "label": "Aromatics & vegetables",
+      "items": [
+        "aromatic.onion",
+        "veg.jalapeno",
+        "veg.bell_pepper",
+        "aromatic.garlic",
+        "aromatic.ginger"
+      ]
+    },
+    {
+      "id": "group.spices_fat",
+      "label": "Spices & fat",
+      "items": [
+        "fat.neutral_oil",
+        "fat.niter_kibbeh",
+        "spice.berbere",
+        "spice.mitmita",
+        "salt.kosher",
+        "spice.black_pepper"
+      ]
+    },
+    {
+      "id": "group.finish_serve",
+      "label": "Finish & serving",
+      "items": ["acid.lemon_juice", "starch.injera", "herb.cilantro"]
+    }
+  ],
+
+  "ingredients": [
+    {
+      "id": "protein.beef",
+      "label": "Beef, cut into bite-size cubes (sirloin, ribeye, or chuck steak)",
+      "role": "protein",
+      "amount": { "value": 680, "unit": "g" },
+      "notes": [
+        "Sirloin/ribeye = fastest and tender.",
+        "Chuck works well but benefits from a slightly longer cook or a 'wet tibs' variation."
+      ]
+    },
+    {
+      "id": "fat.neutral_oil",
+      "label": "Neutral oil",
+      "role": "fat",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "Avocado, grapeseed, canola, or other high-heat oil."
+    },
+    {
+      "id": "fat.niter_kibbeh",
+      "label": "Niter kibbeh (optional, for Ethiopian richness)",
+      "role": "fat_finish",
+      "amount": { "value": 20, "unit": "g" },
+      "optional": true,
+      "notes": "Stir in at the end (or replace part of oil)."
+    },
+    {
+      "id": "aromatic.onion",
+      "label": "Red or yellow onion, sliced",
+      "role": "aromatic",
+      "amount": { "value": 200, "unit": "g" }
+    },
+    {
+      "id": "veg.bell_pepper",
+      "label": "Green bell pepper, sliced",
+      "role": "veg",
+      "amount": { "value": 150, "unit": "g" },
+      "optional": true,
+      "notes": "Common in many home-style tibs; omit for a more meat-forward version."
+    },
+    {
+      "id": "veg.jalapeno",
+      "label": "Jalapeño or Ethiopian green chile, sliced",
+      "role": "heat",
+      "amount": { "value": 20, "unit": "g" },
+      "optional": true,
+      "notes": "Adjust heat to preference; remove seeds for milder."
+    },
+    {
+      "id": "aromatic.garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 12, "unit": "g" }
+    },
+    {
+      "id": "aromatic.ginger",
+      "label": "Fresh ginger, minced",
+      "role": "aromatic",
+      "amount": { "value": 6, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "spice.berbere",
+      "label": "Berbere spice blend",
+      "role": "spice_core",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": [
+        "Typical range: 8–16 g depending on blend heat and desired color.",
+        "Add after searing so it doesn’t scorch."
+      ]
+    },
+    {
+      "id": "spice.mitmita",
+      "label": "Mitmita (optional, for extra heat)",
+      "role": "spice_heat",
+      "amount": { "value": 1.5, "unit": "g" },
+      "optional": true,
+      "notes": "Start small; mitmita can be very hot."
+    },
+    {
+      "id": "salt.kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": "Split between seasoning the meat and finishing to taste."
+    },
+    {
+      "id": "spice.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "acid.lemon_juice",
+      "label": "Lemon juice (optional, to finish)",
+      "role": "finish",
+      "amount": { "value": 10, "unit": "ml" },
+      "optional": true
+    },
+    {
+      "id": "herb.cilantro",
+      "label": "Cilantro, chopped (optional garnish)",
+      "role": "garnish",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "starch.injera",
+      "label": "Injera, for serving",
+      "role": "serving_base",
+      "amount": { "value": 4, "unit": "servings" },
+      "optional": true
+    }
+  ],
+
+  "methods": ["method.high_heat_sear", "method.saute", "method.pan_roast"],
+
+  "notes": [
+    "Key to great tibs: very hot pan + dry meat + cook in batches to avoid steaming.",
+    "If you want the classic sizzling presentation, heat the pan until very hot and serve immediately.",
+    "Berbere can burn easily—add once the pan is not bone-dry, and stir quickly."
+  ],
+
+  "variations": [
+    {
+      "id": "variation.lamb_tibs",
+      "label": "Lamb tibs",
+      "changes": {
+        "protein": "Replace beef with lamb shoulder or leg cubes (same weight).",
+        "notes": "Lamb pairs especially well with berbere; consider adding a little extra niter kibbeh at the end."
+      }
+    },
+    {
+      "id": "variation.dereq_tibs_dry",
+      "label": "Dereq tibs (drier, extra-seared)",
+      "changes": {
+        "technique": "Cook meat in smaller batches; reduce vegetables; keep sauce minimal.",
+        "notes": "Aim for browned edges and minimal moisture."
+      }
+    },
+    {
+      "id": "variation.wet_tibs_saucy",
+      "label": "Wet tibs (saucy)",
+      "changes": {
+        "add": "Add 120 ml water or stock after spices; simmer 6–10 minutes until slightly saucy.",
+        "notes": "Useful when using tougher cuts like chuck."
+      }
+    },
+    {
+      "id": "variation.no_peppers",
+      "label": "No peppers",
+      "changes": {
+        "veg": "Omit bell pepper and jalapeño; add 50 g more onion instead."
+      }
+    }
+  ],
+
+  "safety": {
+    "cookTemps": {
+      "notes": [
+        "For beef cubes: cook to preference; for food safety, sear thoroughly and ensure surfaces are browned.",
+        "If using lamb: same approach; ensure thorough sear."
+      ]
+    },
+    "storage": {
+      "fridgeDays": 3,
+      "freezerMonths": 0,
+      "notes": [
+        "Best fresh; leftovers reheat well in a skillet with a splash of water.",
+        "Not ideal for freezing due to texture changes."
+      ]
+    }
+  },
+
+  "storage": {
+    "fridge": {
+      "duration": "up to 3 days",
+      "notes": "Reheat in a skillet on medium with a small splash of water; avoid microwaving too long (toughens meat)."
+    }
+  },
+
+  "pairings": {
+    "serveWith": [
+      { "id": "dish.ethiopian.injera", "label": "Injera" },
+      { "id": "dish.ethiopian.misir_wot", "label": "Misir wat (lentils)" },
+      { "id": "dish.ethiopian.gomen", "label": "Gomen (greens)" }
+    ],
+    "condiments": [
+      { "id": "condiment.awaze", "label": "Awaze (berbere paste) — optional" }
+    ]
+  },
+
+  "planner": {
+    "prepTasks": [
+      { "task": "Cube beef and pat dry", "timeMins": 6 },
+      { "task": "Slice onions and peppers", "timeMins": 6 },
+      { "task": "Mince garlic/ginger and measure spices", "timeMins": 4 }
+    ],
+    "leftoversPlan": [
+      "Day 2: Reheat and serve with eggs for a quick breakfast hash.",
+      "Day 2: Chop leftovers and fold into a rice bowl with greens."
+    ]
+  },
+
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Prep and season the meat",
+      "activeMins": 8,
+      "handsOffMins": 0,
+      "instructions": [
+        "Cut beef into 2–3 cm bite-size cubes.",
+        "Pat dry thoroughly with paper towels (dry meat browns better).",
+        "Season with about half the salt and (optional) black pepper."
+      ],
+      "checks": ["Meat is cubed, dried, and lightly seasoned."]
+    },
+    {
+      "id": "step_02",
+      "title": "Preheat skillet and sear in batches",
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "instructions": [
+        "Heat a heavy skillet over medium-high to high heat until very hot.",
+        "Add neutral oil.",
+        "Sear beef in 2 batches so the pan is not crowded; spread meat in a single layer.",
+        "Brown 2–3 minutes per side (or until edges are well seared). Transfer browned meat to a plate."
+      ],
+      "timers": [{ "label": "Batch sear", "minutes": 8 }],
+      "checks": ["Meat has browned edges; pan is not flooded with liquid."]
+    },
+    {
+      "id": "step_03",
+      "title": "Sauté onions and peppers",
+      "activeMins": 6,
+      "handsOffMins": 2,
+      "instructions": [
+        "Reduce heat to medium.",
+        "Add sliced onions (and bell pepper/jalapeño if using).",
+        "Sauté 3–5 minutes until onions soften and pick up browned bits from the pan."
+      ],
+      "timers": [{ "label": "Veg sauté", "minutes": 5 }],
+      "checks": ["Onions softened; fond is lifted into the vegetables."]
+    },
+    {
+      "id": "step_04",
+      "title": "Add aromatics and bloom spices",
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "instructions": [
+        "Add garlic (and ginger if using). Cook 30–60 seconds until fragrant.",
+        "Add berbere (and mitmita if using). Stir constantly for 20–40 seconds to bloom without burning."
+      ],
+      "timers": [{ "label": "Bloom spices", "minutes": 1 }],
+      "checks": ["Spices smell fragrant; none are scorched."]
+    },
+    {
+      "id": "step_05",
+      "title": "Return meat and finish cooking",
+      "activeMins": 6,
+      "handsOffMins": 3,
+      "instructions": [
+        "Return the browned beef (and any juices) to the skillet. Toss to coat.",
+        "Cook 2–5 minutes until beef reaches your preferred doneness and everything is well coated.",
+        "Taste and adjust salt."
+      ],
+      "timers": [{ "label": "Finish", "minutes": 4 }],
+      "checks": ["Meat is hot, coated, and cooked to preference."]
+    },
+    {
+      "id": "step_06",
+      "title": "Optional finishes and serve",
+      "activeMins": 2,
+      "handsOffMins": 0,
+      "instructions": [
+        "Optional: stir in niter kibbeh off heat for extra aroma and richness.",
+        "Optional: squeeze a little lemon juice to brighten.",
+        "Garnish with cilantro if desired and serve immediately with injera."
+      ],
+      "checks": ["Tibs are glossy, aromatic, and ready to serve."]
+    }
+  ],
+
+  "adaptations": [
+    {
+      "id": "adapt.reduce_heat",
+      "kind": "adjust",
+      "when": { "heatPreference": "mild" },
+      "change": {
+        "notes": "Use 6–8 g berbere, omit mitmita, and add peppers only if desired."
+      }
+    },
+    {
+      "id": "adapt.no_dairy",
+      "kind": "swap",
+      "when": { "avoidAllergens": ["dairy"] },
+      "change": {
+        "from": "fat.niter_kibbeh",
+        "to": "fat.neutral_oil",
+        "notes": "Skip niter kibbeh/ghee; finish with lemon instead."
+      }
+    },
+    {
+      "id": "adapt_weeknight_fast",
+      "kind": "adjust",
+      "when": { "timeBudgetMins": 25 },
+      "change": {
+        "notes": "Use tender beef (sirloin/ribeye), skip peppers, and reduce onion quantity to 150 g."
+      }
+    }
+  ],
+
+  "compat": {
+    "cuisineId": "cuisines.ethiopian",
+    "dishId": "dish.ethiopian.tibs",
+    "aliases": [
+      "tibs",
+      "siga tibs",
+      "dereq tibs",
+      "ethiopian sautéed beef",
+      "ethiopian sautéed meat"
+    ],
+    "ingredientIdHints": [
+      "protein.beef",
+      "protein.lamb",
+      "spice.berbere",
+      "spice.mitmita",
+      "aromatic.onion",
+      "aromatic.garlic"
+    ],
+    "equipmentIdHints": ["tool.heavy_skillet"],
+    "methodIdHints": ["method.high_heat_sear", "method.saute"]
+  }
+}

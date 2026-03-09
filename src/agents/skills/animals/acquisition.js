@@ -29,10 +29,10 @@
  */
 
 import { db } from "../../../services/db";
-import { emitEvent } from "../../../services/eventBus";
-import { familyFundMode } from "../../../services/featureFlags";
-import { HubPacketFormatter } from "../../../services/hub/HubPacketFormatter";
-import { FamilyFundConnector } from "../../../services/hub/FamilyFundConnector";
+import { emitEvent } from "../../../services/events/eventBus";
+import { familyFundMode } from "../../../config/featureFlags";
+import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
+import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
 
 /* -------------------------------------------------------------------------- */
 /* Typedefs                                                                   */
@@ -525,15 +525,11 @@ function buildBalancedActions(herd, goals, context) {
       whenPhase: blockers.length ? "next-season" : "now",
       reason:
         "Acquire additional breeding females to meet minimum herd reproduction capacity.",
-      estCostUsd: estimateCostUsd(
-        species,
-        "purchase",
-        femaleDeficit,
-        context
-      ),
+      estCostUsd: estimateCostUsd(species, "purchase", femaleDeficit, context),
       blockers,
       meta: {
-        notes: "Prefer sound feet, udder/teat structure, and parasite resilience.",
+        notes:
+          "Prefer sound feet, udder/teat structure, and parasite resilience.",
       },
     });
   }
@@ -669,8 +665,11 @@ export async function planAnimalAcquisition(
   context,
   options = {}
 ) {
-  const { eventSource = "animals", nowTs = Date.now(), chosenStrategyByPlanId =
-    {} } = options;
+  const {
+    eventSource = "animals",
+    nowTs = Date.now(),
+    chosenStrategyByPlanId = {},
+  } = options;
 
   if (!goals || !goals.species) {
     throw new Error("planAnimalAcquisition: goals.species is required.");
@@ -685,11 +684,7 @@ export async function planAnimalAcquisition(
   });
 
   const actions = buildBalancedActions(herd || [], goals, context || {});
-  const strategyVariants = buildStrategyVariants(
-    actions,
-    goals,
-    context || {}
-  );
+  const strategyVariants = buildStrategyVariants(actions, goals, context || {});
 
   const planId = `acq_${species}_${Math.floor(nowTs / 1000)}`;
   const resumeStrategyId = chosenStrategyByPlanId[planId];
@@ -703,9 +698,9 @@ export async function planAnimalAcquisition(
   const notes = [];
 
   notes.push(
-    `Species: ${species}. Current herd: ${herd.filter(
-      (h) => h.species === species
-    ).length} animals; target total: ${goals.targetTotal}.`
+    `Species: ${species}. Current herd: ${
+      herd.filter((h) => h.species === species).length
+    } animals; target total: ${goals.targetTotal}.`
   );
 
   if (goals.budgetUsd) {
@@ -776,10 +771,14 @@ export async function planAndStoreAnimalAcquisition(
   if (db && db.animalsAcquisitionPlans && db.animalsAcquisitionPlans.put) {
     try {
       await db.animalsAcquisitionPlans.put(plan);
-      emit("animals.acquisition.plan.stored", options.eventSource || "animals", {
-        planId: plan.id,
-        species: plan.species,
-      });
+      emit(
+        "animals.acquisition.plan.stored",
+        options.eventSource || "animals",
+        {
+          planId: plan.id,
+          species: plan.species,
+        }
+      );
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(

@@ -1,0 +1,1497 @@
+{
+  "$schema": "../../../schemas/dishes.catalog.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "notes": [
+    "Herb & Garlic is treated as an overlay cuisine: aromatic garlic + fresh herbs + citrus + olive oil.",
+    "Dish IDs, tags, and indexes are normalized for deterministic planner/search behavior."
+  ],
+
+  "meta": {
+    "id": "cuisines.herb_garlic.dishes",
+    "type": "dishes_catalog",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Herb & Garlic • Dishes Catalog",
+    "cuisineId": "cuisines.herb_garlic",
+    "status": "active",
+    "description": "Canonical browse + planner dish definitions for the Herb & Garlic overlay cuisine. Emphasizes garlic, fresh herbs, citrus, olive oil, and flexible pairings across proteins, vegetables, grains, and pasta.",
+    "createdAt": "2026-01-19T00:00:00.000Z",
+    "updatedAt": "2026-01-19T00:00:00.000Z",
+    "author": "ssa.catalogs"
+  },
+
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true
+  },
+
+  "dishes": [
+    {
+      "id": "herb_garlic.lemon_garlic_roast_chicken",
+      "label": "Lemon-Garlic Roast Chicken (Herb & Garlic)",
+      "aka": ["Garlic Herb Roast Chicken", "Lemony Garlic Roast Chicken"],
+      "subprofiles": ["cuisines.herb_garlic"],
+      "category": "main",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 20, "totalMins": 90, "handsOffMins": 70 },
+      "servingStyles": ["family_style", "plated"],
+      "mealArchetypes": ["archetype.roast_meat", "archetype.weeknight_roast"],
+      "signals": {
+        "batchFriendly": "yes",
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "stock_only"
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ing.chicken_whole"],
+          "chooseOne": true
+        },
+        {
+          "role": "herb",
+          "items": ["ing.parsley", "ing.rosemary", "ing.thyme", "ing.oregano"],
+          "chooseOne": false
+        },
+        { "role": "aromatic", "items": ["ing.garlic"], "chooseOne": true },
+        { "role": "acid", "items": ["ing.lemon"], "chooseOne": true },
+        { "role": "fat", "items": ["ing.olive_oil"], "chooseOne": true }
+      ],
+      "techniques": ["technique.roast", "technique.marinade", "technique.rest"],
+      "equipmentRecommended": ["equip.thermometer", "equip.kitchen_twine"],
+      "equipmentMinimum": [
+        "equip.oven",
+        "equip.roasting_pan",
+        "equip.knife",
+        "equip.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ing.chicken_whole",
+        "ing.garlic",
+        "ing.lemon",
+        "ing.olive_oil",
+        "ing.salt",
+        "ing.black_pepper",
+        "ing.rosemary",
+        "ing.thyme"
+      ],
+      "allergens": [],
+      "dietFlags": [
+        "diet.gluten_free",
+        "diet.dairy_free",
+        "diet.keto_friendly"
+      ],
+      "pairingHints": {
+        "sides": [
+          "herb_garlic.garlic_herb_roasted_potatoes",
+          "herb_garlic.lemon_garlic_green_beans"
+        ],
+        "sauces": ["herb_garlic.garlic_herb_yogurt_sauce"],
+        "notes": ["Use pan drippings + lemon to finish as a quick pan sauce."]
+      },
+      "variations": [
+        {
+          "id": "herb_garlic.lemon_garlic_roast_chicken.spatchcock",
+          "label": "Spatchcock for Faster Roast",
+          "when": { "timeBudget": "tight", "needCrispSkin": true },
+          "adapt": {
+            "activeMinsDelta": 5,
+            "totalMinsDelta": -25,
+            "handsOffMinsDelta": -25
+          }
+        },
+        {
+          "id": "herb_garlic.lemon_garlic_roast_chicken.thighs",
+          "label": "Bone-In Thighs Instead of Whole Bird",
+          "when": { "portionPreference": "dark_meat" },
+          "adapt": {
+            "ingredientsSwap": {
+              "ing.chicken_whole": "ing.chicken_thighs_bone_in"
+            },
+            "totalMinsDelta": -20
+          }
+        }
+      ],
+      "plannerTags": [
+        "herb_garlic",
+        "garlic_forward",
+        "lemony",
+        "weeknight",
+        "batch_friendly",
+        "leftovers",
+        "gluten_free",
+        "dairy_free",
+        "keto_friendly"
+      ]
+    },
+
+    {
+      "id": "herb_garlic.sheet_pan_lemon_garlic_chicken_veg",
+      "label": "Sheet-Pan Lemon-Garlic Chicken & Vegetables",
+      "aka": ["Sheet Pan Garlic Herb Chicken", "One-Pan Lemon Garlic Chicken"],
+      "subprofiles": ["cuisines.herb_garlic"],
+      "category": "main",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 15, "totalMins": 45, "handsOffMins": 30 },
+      "servingStyles": ["family_style", "meal_prep"],
+      "mealArchetypes": ["archetype.sheet_pan", "archetype.protein_plus_veg"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ing.chicken_thighs_bone_in", "ing.chicken_breast"],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "items": [
+            "ing.zucchini",
+            "ing.bell_pepper",
+            "ing.red_onion",
+            "ing.broccoli"
+          ],
+          "chooseOne": false
+        },
+        { "role": "aromatic", "items": ["ing.garlic"], "chooseOne": true },
+        { "role": "acid", "items": ["ing.lemon"], "chooseOne": true },
+        { "role": "fat", "items": ["ing.olive_oil"], "chooseOne": true },
+        {
+          "role": "herb",
+          "items": ["ing.oregano", "ing.thyme", "ing.parsley"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "technique.roast",
+        "technique.sheet_pan",
+        "technique.toss"
+      ],
+      "equipmentRecommended": ["equip.tongs"],
+      "equipmentMinimum": [
+        "equip.oven",
+        "equip.sheet_pan",
+        "equip.knife",
+        "equip.cutting_board",
+        "equip.mixing_bowl"
+      ],
+      "ingredientsCore": [
+        "ing.garlic",
+        "ing.lemon",
+        "ing.olive_oil",
+        "ing.salt",
+        "ing.black_pepper",
+        "ing.oregano"
+      ],
+      "allergens": [],
+      "dietFlags": [
+        "diet.gluten_free",
+        "diet.dairy_free",
+        "diet.keto_friendly"
+      ],
+      "pairingHints": {
+        "serve_with": [
+          "herb_garlic.mediterranean_herb_garlic_rice_pilaf",
+          "herb_garlic.lemon_herb_vinaigrette"
+        ],
+        "notes": ["Add chickpeas to make it more filling without extra pans."]
+      },
+      "variations": [
+        {
+          "id": "herb_garlic.sheet_pan_lemon_garlic_chicken_veg.add_chickpeas",
+          "label": "Add Chickpeas for Extra Bulk",
+          "when": { "needMoreCalories": true, "panSpaceAvailable": true },
+          "adapt": {
+            "addIngredients": ["ing.chickpeas_canned_drained"],
+            "totalMinsDelta": 0
+          }
+        }
+      ],
+      "plannerTags": [
+        "herb_garlic",
+        "garlic_forward",
+        "lemony",
+        "weeknight",
+        "one_pan",
+        "meal_prep",
+        "gluten_free",
+        "dairy_free"
+      ]
+    },
+
+    {
+      "id": "herb_garlic.garlic_herb_salmon",
+      "label": "Garlic-Herb Salmon with Lemon",
+      "aka": ["Lemon Garlic Salmon", "Herb Garlic Baked Salmon"],
+      "subprofiles": ["cuisines.herb_garlic"],
+      "category": "main",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 10, "totalMins": 25, "handsOffMins": 15 },
+      "servingStyles": ["plated", "family_style"],
+      "mealArchetypes": ["archetype.seafood", "archetype.quick_bake"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ing.salmon_fillet"],
+          "chooseOne": true
+        },
+        { "role": "aromatic", "items": ["ing.garlic"], "chooseOne": true },
+        { "role": "acid", "items": ["ing.lemon"], "chooseOne": true },
+        {
+          "role": "fat",
+          "items": ["ing.olive_oil", "ing.butter"],
+          "chooseOne": true
+        },
+        {
+          "role": "herb",
+          "items": ["ing.dill", "ing.parsley", "ing.basil"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["technique.bake", "technique.pan_sauce_optional"],
+      "equipmentRecommended": ["equip.thermometer"],
+      "equipmentMinimum": [
+        "equip.oven",
+        "equip.sheet_pan",
+        "equip.knife",
+        "equip.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ing.salmon_fillet",
+        "ing.garlic",
+        "ing.lemon",
+        "ing.olive_oil",
+        "ing.salt",
+        "ing.black_pepper"
+      ],
+      "allergens": ["allergen.fish"],
+      "dietFlags": [
+        "diet.gluten_free",
+        "diet.keto_friendly",
+        "diet.pescatarian"
+      ],
+      "pairingHints": {
+        "sides": [
+          "herb_garlic.lemon_garlic_green_beans",
+          "herb_garlic.garlic_herb_roasted_potatoes"
+        ],
+        "notes": ["Finish with lemon zest + chopped herbs for maximum aroma."]
+      },
+      "plannerTags": [
+        "herb_garlic",
+        "garlic_forward",
+        "lemony",
+        "weeknight",
+        "pescatarian",
+        "gluten_free",
+        "keto_friendly"
+      ]
+    },
+
+    {
+      "id": "herb_garlic.shrimp_scampi_orzo",
+      "label": "Shrimp Scampi-Style Orzo (Herb & Garlic)",
+      "aka": ["Shrimp Scampi Orzo", "Garlic Lemon Shrimp Orzo"],
+      "subprofiles": ["cuisines.herb_garlic"],
+      "category": "main",
+      "difficulty": 3,
+      "heatTypical": 0,
+      "time": { "activeMins": 20, "totalMins": 35, "handsOffMins": 10 },
+      "servingStyles": ["bowl", "plated", "family_style"],
+      "mealArchetypes": ["archetype.pasta_rice_hybrid", "archetype.seafood"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        { "role": "protein", "items": ["ing.shrimp"], "chooseOne": true },
+        { "role": "starch", "items": ["ing.orzo"], "chooseOne": true },
+        { "role": "aromatic", "items": ["ing.garlic"], "chooseOne": true },
+        { "role": "acid", "items": ["ing.lemon"], "chooseOne": true },
+        {
+          "role": "fat",
+          "items": ["ing.olive_oil", "ing.butter"],
+          "chooseOne": true
+        },
+        { "role": "herb", "items": ["ing.parsley"], "chooseOne": true }
+      ],
+      "techniques": [
+        "technique.saute",
+        "technique.pan_sear",
+        "technique.simmer"
+      ],
+      "equipmentRecommended": ["equip.microplane_zester"],
+      "equipmentMinimum": [
+        "equip.skillet",
+        "equip.saucepan",
+        "equip.knife",
+        "equip.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ing.shrimp",
+        "ing.orzo",
+        "ing.garlic",
+        "ing.lemon",
+        "ing.olive_oil",
+        "ing.salt",
+        "ing.black_pepper",
+        "ing.parsley"
+      ],
+      "allergens": ["allergen.shellfish", "allergen.gluten"],
+      "dietFlags": ["diet.pescatarian"],
+      "pairingHints": {
+        "serve_with": ["herb_garlic.lemon_herb_vinaigrette"],
+        "notes": [
+          "Optional: deglaze with broth instead of wine for a family-friendly scampi profile."
+        ]
+      },
+      "plannerTags": [
+        "herb_garlic",
+        "garlic_forward",
+        "lemony",
+        "weeknight",
+        "pescatarian"
+      ]
+    },
+
+    {
+      "id": "herb_garlic.aglio_olio_herbs",
+      "label": "Aglio e Olio with Fresh Herbs (Herb & Garlic)",
+      "aka": ["Garlic Olive Oil Pasta", "Herb Garlic Pasta"],
+      "subprofiles": ["cuisines.herb_garlic"],
+      "category": "main",
+      "difficulty": 2,
+      "heatTypical": 1,
+      "time": { "activeMins": 15, "totalMins": 25, "handsOffMins": 10 },
+      "servingStyles": ["family_style", "plated"],
+      "mealArchetypes": ["archetype.pasta_quick", "archetype.pantry_friendly"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "starch",
+          "items": ["ing.pasta_spaghetti"],
+          "chooseOne": true
+        },
+        { "role": "aromatic", "items": ["ing.garlic"], "chooseOne": true },
+        { "role": "fat", "items": ["ing.olive_oil"], "chooseOne": true },
+        {
+          "role": "herb",
+          "items": ["ing.parsley", "ing.basil"],
+          "chooseOne": true
+        },
+        { "role": "acid", "items": ["ing.lemon"], "chooseOne": false }
+      ],
+      "techniques": ["technique.boil", "technique.saute", "technique.emulsify"],
+      "equipmentRecommended": ["equip.microplane_zester"],
+      "equipmentMinimum": [
+        "equip.stock_pot",
+        "equip.skillet",
+        "equip.colander",
+        "equip.knife",
+        "equip.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ing.pasta_spaghetti",
+        "ing.garlic",
+        "ing.olive_oil",
+        "ing.salt",
+        "ing.black_pepper",
+        "ing.parsley"
+      ],
+      "allergens": ["allergen.gluten"],
+      "dietFlags": ["diet.vegetarian", "diet.vegan"],
+      "pairingHints": {
+        "add_ons": [
+          "ing.parmesan",
+          "ing.shrimp",
+          "ing.chicken_breast",
+          "ing.spinach"
+        ],
+        "notes": ["Use pasta water to emulsify into a glossy garlic-oil sauce."]
+      },
+      "plannerTags": [
+        "herb_garlic",
+        "garlic_forward",
+        "weeknight",
+        "vegetarian",
+        "vegan"
+      ]
+    },
+
+    {
+      "id": "herb_garlic.garlic_herb_roasted_potatoes",
+      "label": "Garlic-Herb Roasted Potatoes",
+      "aka": ["Herb Roasted Potatoes", "Lemon Garlic Potatoes"],
+      "subprofiles": ["cuisines.herb_garlic"],
+      "category": "side",
+      "difficulty": 1,
+      "heatTypical": 0,
+      "time": { "activeMins": 10, "totalMins": 45, "handsOffMins": 35 },
+      "servingStyles": ["family_style", "meal_prep"],
+      "mealArchetypes": ["archetype.veg_side", "archetype.roasted_starch"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        { "role": "starch", "items": ["ing.potatoes"], "chooseOne": true },
+        { "role": "aromatic", "items": ["ing.garlic"], "chooseOne": true },
+        { "role": "fat", "items": ["ing.olive_oil"], "chooseOne": true },
+        {
+          "role": "herb",
+          "items": ["ing.rosemary", "ing.thyme", "ing.oregano"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["technique.roast", "technique.toss"],
+      "equipmentRecommended": ["equip.parchment_paper"],
+      "equipmentMinimum": [
+        "equip.oven",
+        "equip.sheet_pan",
+        "equip.knife",
+        "equip.cutting_board",
+        "equip.mixing_bowl"
+      ],
+      "ingredientsCore": [
+        "ing.potatoes",
+        "ing.garlic",
+        "ing.olive_oil",
+        "ing.salt",
+        "ing.black_pepper",
+        "ing.rosemary"
+      ],
+      "allergens": [],
+      "dietFlags": [
+        "diet.gluten_free",
+        "diet.dairy_free",
+        "diet.vegetarian",
+        "diet.vegan"
+      ],
+      "pairingHints": {
+        "serve_with": [
+          "herb_garlic.lemon_garlic_roast_chicken",
+          "herb_garlic.garlic_herb_salmon"
+        ]
+      },
+      "plannerTags": [
+        "herb_garlic",
+        "garlic_forward",
+        "batch_friendly",
+        "weeknight",
+        "vegetarian",
+        "vegan",
+        "gluten_free",
+        "dairy_free"
+      ]
+    },
+
+    {
+      "id": "herb_garlic.lemon_garlic_green_beans",
+      "label": "Lemon-Garlic Green Beans (Herb & Garlic)",
+      "aka": ["Garlic Green Beans", "Lemony Garlic Beans"],
+      "subprofiles": ["cuisines.herb_garlic"],
+      "category": "side",
+      "difficulty": 1,
+      "heatTypical": 0,
+      "time": { "activeMins": 10, "totalMins": 15, "handsOffMins": 5 },
+      "servingStyles": ["family_style"],
+      "mealArchetypes": ["archetype.veg_side", "archetype.quick_saute"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        { "role": "veg", "items": ["ing.green_beans"], "chooseOne": true },
+        { "role": "aromatic", "items": ["ing.garlic"], "chooseOne": true },
+        { "role": "acid", "items": ["ing.lemon"], "chooseOne": true },
+        { "role": "fat", "items": ["ing.olive_oil"], "chooseOne": true },
+        { "role": "herb", "items": ["ing.parsley"], "chooseOne": false }
+      ],
+      "techniques": ["technique.saute", "technique.steam_optional"],
+      "equipmentRecommended": ["equip.lid_for_skillet"],
+      "equipmentMinimum": [
+        "equip.skillet",
+        "equip.knife",
+        "equip.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ing.green_beans",
+        "ing.garlic",
+        "ing.lemon",
+        "ing.olive_oil",
+        "ing.salt",
+        "ing.black_pepper"
+      ],
+      "allergens": [],
+      "dietFlags": [
+        "diet.gluten_free",
+        "diet.dairy_free",
+        "diet.vegetarian",
+        "diet.vegan"
+      ],
+      "pairingHints": {
+        "serve_with": [
+          "herb_garlic.garlic_herb_salmon",
+          "herb_garlic.lemon_garlic_roast_chicken"
+        ]
+      },
+      "plannerTags": [
+        "herb_garlic",
+        "garlic_forward",
+        "lemony",
+        "weeknight",
+        "vegetarian",
+        "vegan",
+        "gluten_free",
+        "dairy_free"
+      ]
+    },
+
+    {
+      "id": "herb_garlic.garlic_herb_mushroom_saute",
+      "label": "Garlic-Herb Sautéed Mushrooms",
+      "aka": [
+        "Garlic Butter Mushrooms (Herb & Garlic)",
+        "Herb Garlic Mushrooms"
+      ],
+      "subprofiles": ["cuisines.herb_garlic"],
+      "category": "side",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 12, "totalMins": 18, "handsOffMins": 6 },
+      "servingStyles": ["family_style", "plated"],
+      "mealArchetypes": ["archetype.veg_side", "archetype.sauteed_veg"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        { "role": "veg", "items": ["ing.mushrooms"], "chooseOne": true },
+        { "role": "aromatic", "items": ["ing.garlic"], "chooseOne": true },
+        {
+          "role": "fat",
+          "items": ["ing.olive_oil", "ing.butter"],
+          "chooseOne": true
+        },
+        {
+          "role": "herb",
+          "items": ["ing.thyme", "ing.parsley"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["technique.saute", "technique.deglaze_optional"],
+      "equipmentRecommended": [],
+      "equipmentMinimum": [
+        "equip.skillet",
+        "equip.knife",
+        "equip.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ing.mushrooms",
+        "ing.garlic",
+        "ing.olive_oil",
+        "ing.salt",
+        "ing.black_pepper",
+        "ing.thyme"
+      ],
+      "allergens": ["allergen.dairy"],
+      "dietFlags": ["diet.gluten_free", "diet.vegetarian"],
+      "pairingHints": {
+        "serve_with": [
+          "herb_garlic.lemon_garlic_roast_chicken",
+          "herb_garlic.aglio_olio_herbs"
+        ]
+      },
+      "plannerTags": [
+        "herb_garlic",
+        "garlic_forward",
+        "weeknight",
+        "vegetarian",
+        "gluten_free"
+      ]
+    },
+
+    {
+      "id": "herb_garlic.garlic_herb_chickpea_salad",
+      "label": "Garlic-Herb Chickpea Salad with Lemon",
+      "aka": ["Lemony Chickpea Herb Salad", "Herb Garlic Chickpea Bowl"],
+      "subprofiles": ["cuisines.herb_garlic"],
+      "category": "salad",
+      "difficulty": 1,
+      "heatTypical": 0,
+      "time": { "activeMins": 15, "totalMins": 15, "handsOffMins": 0 },
+      "servingStyles": ["bowl", "meal_prep", "family_style"],
+      "mealArchetypes": [
+        "archetype.salad",
+        "archetype.pantry_friendly",
+        "archetype.protein_plant"
+      ],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ing.chickpeas_canned_drained"],
+          "chooseOne": true
+        },
+        { "role": "aromatic", "items": ["ing.garlic"], "chooseOne": true },
+        { "role": "acid", "items": ["ing.lemon"], "chooseOne": true },
+        { "role": "fat", "items": ["ing.olive_oil"], "chooseOne": true },
+        {
+          "role": "herb",
+          "items": ["ing.parsley", "ing.basil", "ing.oregano"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["technique.assemble", "technique.macerate_optional"],
+      "equipmentRecommended": ["equip.microplane_zester"],
+      "equipmentMinimum": [
+        "equip.knife",
+        "equip.cutting_board",
+        "equip.mixing_bowl"
+      ],
+      "ingredientsCore": [
+        "ing.chickpeas_canned_drained",
+        "ing.garlic",
+        "ing.lemon",
+        "ing.olive_oil",
+        "ing.salt",
+        "ing.black_pepper",
+        "ing.parsley"
+      ],
+      "allergens": [],
+      "dietFlags": [
+        "diet.gluten_free",
+        "diet.dairy_free",
+        "diet.vegetarian",
+        "diet.vegan"
+      ],
+      "pairingHints": {
+        "serve_with": ["herb_garlic.lemon_herb_vinaigrette"],
+        "notes": [
+          "Add diced cucumber + tomatoes for a bright Mediterranean direction."
+        ]
+      },
+      "plannerTags": [
+        "herb_garlic",
+        "garlic_forward",
+        "lemony",
+        "batch_friendly",
+        "meal_prep",
+        "vegetarian",
+        "vegan",
+        "gluten_free",
+        "dairy_free"
+      ]
+    },
+
+    {
+      "id": "herb_garlic.mediterranean_herb_garlic_rice_pilaf",
+      "label": "Mediterranean Herb-Garlic Rice Pilaf",
+      "aka": ["Herb Garlic Rice", "Lemon Herb Rice Pilaf"],
+      "subprofiles": ["cuisines.herb_garlic"],
+      "category": "side",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 10, "totalMins": 30, "handsOffMins": 20 },
+      "servingStyles": ["family_style", "meal_prep"],
+      "mealArchetypes": ["archetype.rice_pilaf", "archetype.pantry_friendly"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "portionable"
+      },
+      "coreComponents": [
+        {
+          "role": "starch",
+          "items": ["ing.rice_long_grain", "ing.rice_basmati"],
+          "chooseOne": true
+        },
+        { "role": "aromatic", "items": ["ing.garlic"], "chooseOne": true },
+        { "role": "fat", "items": ["ing.olive_oil"], "chooseOne": true },
+        {
+          "role": "herb",
+          "items": ["ing.parsley", "ing.dill", "ing.oregano"],
+          "chooseOne": true
+        },
+        { "role": "acid", "items": ["ing.lemon"], "chooseOne": false }
+      ],
+      "techniques": ["technique.saute", "technique.simmer", "technique.rest"],
+      "equipmentRecommended": [],
+      "equipmentMinimum": [
+        "equip.saucepan",
+        "equip.knife",
+        "equip.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ing.rice_long_grain",
+        "ing.garlic",
+        "ing.olive_oil",
+        "ing.salt",
+        "ing.black_pepper",
+        "ing.parsley"
+      ],
+      "allergens": [],
+      "dietFlags": [
+        "diet.gluten_free",
+        "diet.dairy_free",
+        "diet.vegetarian",
+        "diet.vegan"
+      ],
+      "pairingHints": {
+        "serve_with": [
+          "herb_garlic.garlic_herb_salmon",
+          "herb_garlic.sheet_pan_lemon_garlic_chicken_veg"
+        ]
+      },
+      "plannerTags": [
+        "herb_garlic",
+        "garlic_forward",
+        "batch_friendly",
+        "weeknight",
+        "meal_prep",
+        "vegetarian",
+        "vegan",
+        "gluten_free",
+        "dairy_free"
+      ]
+    },
+
+    {
+      "id": "herb_garlic.garlic_herb_yogurt_sauce",
+      "label": "Garlic-Herb Yogurt Sauce (Creamy, Bright)",
+      "aka": ["Herb Garlic Yogurt Dip", "Lemon Herb Yogurt Sauce"],
+      "subprofiles": ["cuisines.herb_garlic"],
+      "category": "sauce",
+      "difficulty": 1,
+      "heatTypical": 0,
+      "time": { "activeMins": 8, "totalMins": 10, "handsOffMins": 2 },
+      "servingStyles": ["dipping", "drizzle"],
+      "mealArchetypes": ["archetype.sauce", "archetype.condiment"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "base",
+          "items": ["ing.yogurt_greek_plain"],
+          "chooseOne": true
+        },
+        { "role": "aromatic", "items": ["ing.garlic"], "chooseOne": true },
+        {
+          "role": "herb",
+          "items": ["ing.dill", "ing.parsley", "ing.mint"],
+          "chooseOne": true
+        },
+        { "role": "acid", "items": ["ing.lemon"], "chooseOne": true },
+        {
+          "role": "seasoning",
+          "items": ["ing.salt", "ing.black_pepper"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["technique.mix", "technique.rest_optional"],
+      "equipmentRecommended": ["equip.microplane_zester"],
+      "equipmentMinimum": [
+        "equip.mixing_bowl",
+        "equip.whisk",
+        "equip.knife",
+        "equip.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ing.yogurt_greek_plain",
+        "ing.garlic",
+        "ing.lemon",
+        "ing.salt",
+        "ing.black_pepper",
+        "ing.parsley"
+      ],
+      "allergens": ["allergen.dairy"],
+      "dietFlags": ["diet.gluten_free", "diet.vegetarian"],
+      "pairingHints": {
+        "best_with": [
+          "herb_garlic.garlic_herb_grilled_lamb_chops",
+          "herb_garlic.sheet_pan_lemon_garlic_chicken_veg"
+        ],
+        "notes": ["Also works as a sandwich spread or grain-bowl drizzle."]
+      },
+      "plannerTags": [
+        "herb_garlic",
+        "garlic_forward",
+        "lemony",
+        "batch_friendly",
+        "condiment",
+        "gluten_free",
+        "vegetarian"
+      ]
+    },
+
+    {
+      "id": "herb_garlic.lemon_herb_vinaigrette",
+      "label": "Lemon-Herb Vinaigrette (Garlic Optional)",
+      "aka": ["Lemon Herb Dressing", "Herb Garlic Vinaigrette"],
+      "subprofiles": ["cuisines.herb_garlic"],
+      "category": "dressing",
+      "difficulty": 1,
+      "heatTypical": 0,
+      "time": { "activeMins": 6, "totalMins": 6, "handsOffMins": 0 },
+      "servingStyles": ["drizzle"],
+      "mealArchetypes": ["archetype.dressing", "archetype.condiment"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        { "role": "acid", "items": ["ing.lemon"], "chooseOne": true },
+        { "role": "fat", "items": ["ing.olive_oil"], "chooseOne": true },
+        {
+          "role": "herb",
+          "items": ["ing.parsley", "ing.basil", "ing.oregano"],
+          "chooseOne": true
+        },
+        { "role": "aromatic", "items": ["ing.garlic"], "chooseOne": false },
+        {
+          "role": "seasoning",
+          "items": ["ing.salt", "ing.black_pepper"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": ["technique.emulsify", "technique.whisk"],
+      "equipmentRecommended": ["equip.mason_jar"],
+      "equipmentMinimum": [
+        "equip.mixing_bowl",
+        "equip.whisk",
+        "equip.knife",
+        "equip.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ing.lemon",
+        "ing.olive_oil",
+        "ing.salt",
+        "ing.black_pepper",
+        "ing.parsley"
+      ],
+      "allergens": [],
+      "dietFlags": [
+        "diet.gluten_free",
+        "diet.dairy_free",
+        "diet.vegetarian",
+        "diet.vegan"
+      ],
+      "pairingHints": {
+        "best_with": ["herb_garlic.garlic_herb_chickpea_salad"]
+      },
+      "plannerTags": [
+        "herb_garlic",
+        "lemony",
+        "batch_friendly",
+        "condiment",
+        "vegetarian",
+        "vegan",
+        "gluten_free",
+        "dairy_free"
+      ]
+    },
+
+    {
+      "id": "herb_garlic.lemony_garlic_lentil_soup",
+      "label": "Lemony Garlic Lentil Soup (Herb & Garlic)",
+      "aka": ["Garlic Herb Lentil Soup", "Lemon Lentil Soup"],
+      "subprofiles": ["cuisines.herb_garlic"],
+      "category": "soup",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 15, "totalMins": 50, "handsOffMins": 35 },
+      "servingStyles": ["bowl", "family_style", "meal_prep"],
+      "mealArchetypes": [
+        "archetype.soup_stew",
+        "archetype.pantry_friendly",
+        "archetype.protein_plant"
+      ],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        { "role": "protein", "items": ["ing.lentils"], "chooseOne": true },
+        {
+          "role": "aromatic",
+          "items": ["ing.garlic", "ing.onion"],
+          "chooseOne": false
+        },
+        { "role": "acid", "items": ["ing.lemon"], "chooseOne": true },
+        { "role": "fat", "items": ["ing.olive_oil"], "chooseOne": true },
+        {
+          "role": "herb",
+          "items": ["ing.parsley", "ing.thyme"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["technique.saute", "technique.simmer"],
+      "equipmentRecommended": ["equip.immersion_blender"],
+      "equipmentMinimum": [
+        "equip.stock_pot",
+        "equip.knife",
+        "equip.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ing.lentils",
+        "ing.garlic",
+        "ing.lemon",
+        "ing.olive_oil",
+        "ing.salt",
+        "ing.black_pepper",
+        "ing.thyme"
+      ],
+      "allergens": [],
+      "dietFlags": [
+        "diet.gluten_free",
+        "diet.dairy_free",
+        "diet.vegetarian",
+        "diet.vegan"
+      ],
+      "pairingHints": {
+        "serve_with": ["herb_garlic.garlic_herb_flatbread_wrap"]
+      },
+      "plannerTags": [
+        "herb_garlic",
+        "garlic_forward",
+        "lemony",
+        "batch_friendly",
+        "meal_prep",
+        "freezer_friendly",
+        "vegetarian",
+        "vegan",
+        "gluten_free",
+        "dairy_free"
+      ]
+    },
+
+    {
+      "id": "herb_garlic.garlic_herb_grilled_lamb_chops",
+      "label": "Garlic-Herb Grilled Lamb Chops",
+      "aka": ["Herb Garlic Lamb Chops", "Lemon Garlic Lamb Chops"],
+      "subprofiles": ["cuisines.herb_garlic"],
+      "category": "main",
+      "difficulty": 3,
+      "heatTypical": 1,
+      "time": { "activeMins": 15, "totalMins": 35, "handsOffMins": 20 },
+      "servingStyles": ["plated", "family_style"],
+      "mealArchetypes": ["archetype.grill", "archetype.quick_protein"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        { "role": "protein", "items": ["ing.lamb_chops"], "chooseOne": true },
+        { "role": "aromatic", "items": ["ing.garlic"], "chooseOne": true },
+        { "role": "acid", "items": ["ing.lemon"], "chooseOne": true },
+        { "role": "fat", "items": ["ing.olive_oil"], "chooseOne": true },
+        {
+          "role": "herb",
+          "items": ["ing.rosemary", "ing.thyme", "ing.oregano"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["technique.marinade", "technique.grill", "technique.rest"],
+      "equipmentRecommended": ["equip.thermometer", "equip.tongs"],
+      "equipmentMinimum": [
+        "equip.grill_or_grill_pan",
+        "equip.knife",
+        "equip.cutting_board"
+      ],
+      "ingredientsCore": [
+        "ing.lamb_chops",
+        "ing.garlic",
+        "ing.lemon",
+        "ing.olive_oil",
+        "ing.salt",
+        "ing.black_pepper",
+        "ing.rosemary"
+      ],
+      "allergens": [],
+      "dietFlags": [
+        "diet.gluten_free",
+        "diet.dairy_free",
+        "diet.keto_friendly"
+      ],
+      "pairingHints": {
+        "sides": [
+          "herb_garlic.garlic_herb_roasted_potatoes",
+          "herb_garlic.lemon_garlic_green_beans"
+        ],
+        "sauces": ["herb_garlic.garlic_herb_yogurt_sauce"]
+      },
+      "plannerTags": [
+        "herb_garlic",
+        "garlic_forward",
+        "lemony",
+        "weeknight",
+        "gluten_free",
+        "dairy_free",
+        "keto_friendly"
+      ]
+    },
+
+    {
+      "id": "herb_garlic.garlic_herb_flatbread_wrap",
+      "label": "Garlic-Herb Flatbread Wrap (Chicken or Chickpeas)",
+      "aka": ["Herb Garlic Wrap", "Lemon Herb Wrap"],
+      "subprofiles": ["cuisines.herb_garlic"],
+      "category": "handheld",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 15, "totalMins": 20, "handsOffMins": 5 },
+      "servingStyles": ["handheld", "meal_prep"],
+      "mealArchetypes": [
+        "archetype.handheld_wrap",
+        "archetype.leftovers_transform"
+      ],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "carrier",
+          "items": ["ing.flatbread", "ing.pita"],
+          "chooseOne": true
+        },
+        {
+          "role": "protein",
+          "items": ["ing.chicken_cooked", "ing.chickpeas_canned_drained"],
+          "chooseOne": true
+        },
+        {
+          "role": "sauce",
+          "items": ["herb_garlic.garlic_herb_yogurt_sauce"],
+          "chooseOne": true
+        },
+        {
+          "role": "veg",
+          "items": ["ing.lettuce", "ing.cucumber", "ing.tomatoes"],
+          "chooseOne": false
+        },
+        { "role": "acid", "items": ["ing.lemon"], "chooseOne": false },
+        { "role": "herb", "items": ["ing.parsley"], "chooseOne": false }
+      ],
+      "techniques": ["technique.assemble"],
+      "equipmentRecommended": [],
+      "equipmentMinimum": ["equip.knife", "equip.cutting_board"],
+      "ingredientsCore": [
+        "ing.flatbread",
+        "ing.garlic",
+        "ing.lemon",
+        "ing.olive_oil",
+        "ing.parsley"
+      ],
+      "allergens": ["allergen.gluten", "allergen.dairy"],
+      "dietFlags": [],
+      "pairingHints": {
+        "notes": [
+          "Great for repurposing roast chicken leftovers into a next-day handheld meal."
+        ]
+      },
+      "plannerTags": [
+        "herb_garlic",
+        "garlic_forward",
+        "lemony",
+        "meal_prep",
+        "batch_friendly",
+        "weeknight"
+      ]
+    }
+  ],
+
+  "indexes": {
+    "byCuisine": {
+      "cuisines.herb_garlic": [
+        "herb_garlic.lemon_garlic_roast_chicken",
+        "herb_garlic.sheet_pan_lemon_garlic_chicken_veg",
+        "herb_garlic.garlic_herb_salmon",
+        "herb_garlic.shrimp_scampi_orzo",
+        "herb_garlic.aglio_olio_herbs",
+        "herb_garlic.garlic_herb_roasted_potatoes",
+        "herb_garlic.lemon_garlic_green_beans",
+        "herb_garlic.garlic_herb_mushroom_saute",
+        "herb_garlic.garlic_herb_chickpea_salad",
+        "herb_garlic.mediterranean_herb_garlic_rice_pilaf",
+        "herb_garlic.garlic_herb_yogurt_sauce",
+        "herb_garlic.lemon_herb_vinaigrette",
+        "herb_garlic.lemony_garlic_lentil_soup",
+        "herb_garlic.garlic_herb_grilled_lamb_chops",
+        "herb_garlic.garlic_herb_flatbread_wrap"
+      ]
+    },
+
+    "byArchetype": {
+      "archetype.roast_meat": ["herb_garlic.lemon_garlic_roast_chicken"],
+      "archetype.weeknight_roast": ["herb_garlic.lemon_garlic_roast_chicken"],
+      "archetype.sheet_pan": ["herb_garlic.sheet_pan_lemon_garlic_chicken_veg"],
+      "archetype.protein_plus_veg": [
+        "herb_garlic.sheet_pan_lemon_garlic_chicken_veg"
+      ],
+      "archetype.seafood": [
+        "herb_garlic.garlic_herb_salmon",
+        "herb_garlic.shrimp_scampi_orzo"
+      ],
+      "archetype.quick_bake": ["herb_garlic.garlic_herb_salmon"],
+      "archetype.pasta_rice_hybrid": ["herb_garlic.shrimp_scampi_orzo"],
+      "archetype.pasta_quick": ["herb_garlic.aglio_olio_herbs"],
+      "archetype.pantry_friendly": [
+        "herb_garlic.aglio_olio_herbs",
+        "herb_garlic.garlic_herb_chickpea_salad",
+        "herb_garlic.mediterranean_herb_garlic_rice_pilaf",
+        "herb_garlic.lemony_garlic_lentil_soup"
+      ],
+      "archetype.veg_side": [
+        "herb_garlic.garlic_herb_roasted_potatoes",
+        "herb_garlic.lemon_garlic_green_beans",
+        "herb_garlic.garlic_herb_mushroom_saute"
+      ],
+      "archetype.roasted_starch": ["herb_garlic.garlic_herb_roasted_potatoes"],
+      "archetype.quick_saute": ["herb_garlic.lemon_garlic_green_beans"],
+      "archetype.sauteed_veg": ["herb_garlic.garlic_herb_mushroom_saute"],
+      "archetype.salad": ["herb_garlic.garlic_herb_chickpea_salad"],
+      "archetype.protein_plant": [
+        "herb_garlic.garlic_herb_chickpea_salad",
+        "herb_garlic.lemony_garlic_lentil_soup"
+      ],
+      "archetype.rice_pilaf": [
+        "herb_garlic.mediterranean_herb_garlic_rice_pilaf"
+      ],
+      "archetype.sauce": ["herb_garlic.garlic_herb_yogurt_sauce"],
+      "archetype.dressing": ["herb_garlic.lemon_herb_vinaigrette"],
+      "archetype.condiment": [
+        "herb_garlic.garlic_herb_yogurt_sauce",
+        "herb_garlic.lemon_herb_vinaigrette"
+      ],
+      "archetype.soup_stew": ["herb_garlic.lemony_garlic_lentil_soup"],
+      "archetype.grill": ["herb_garlic.garlic_herb_grilled_lamb_chops"],
+      "archetype.quick_protein": ["herb_garlic.garlic_herb_grilled_lamb_chops"],
+      "archetype.handheld_wrap": ["herb_garlic.garlic_herb_flatbread_wrap"],
+      "archetype.leftovers_transform": [
+        "herb_garlic.garlic_herb_flatbread_wrap"
+      ]
+    },
+
+    "aliasIndex": {
+      "lemon garlic roast chicken": "herb_garlic.lemon_garlic_roast_chicken",
+      "garlic herb roast chicken": "herb_garlic.lemon_garlic_roast_chicken",
+      "sheet pan garlic herb chicken": "herb_garlic.sheet_pan_lemon_garlic_chicken_veg",
+      "one pan lemon garlic chicken": "herb_garlic.sheet_pan_lemon_garlic_chicken_veg",
+      "lemon garlic salmon": "herb_garlic.garlic_herb_salmon",
+      "shrimp scampi orzo": "herb_garlic.shrimp_scampi_orzo",
+      "garlic olive oil pasta": "herb_garlic.aglio_olio_herbs",
+      "aglio e olio": "herb_garlic.aglio_olio_herbs",
+      "garlic herb roasted potatoes": "herb_garlic.garlic_herb_roasted_potatoes",
+      "garlic green beans": "herb_garlic.lemon_garlic_green_beans",
+      "garlic herb mushrooms": "herb_garlic.garlic_herb_mushroom_saute",
+      "chickpea herb salad": "herb_garlic.garlic_herb_chickpea_salad",
+      "herb garlic rice": "herb_garlic.mediterranean_herb_garlic_rice_pilaf",
+      "garlic herb yogurt sauce": "herb_garlic.garlic_herb_yogurt_sauce",
+      "lemon herb vinaigrette": "herb_garlic.lemon_herb_vinaigrette",
+      "lemon garlic lentil soup": "herb_garlic.lemony_garlic_lentil_soup",
+      "garlic herb lamb chops": "herb_garlic.garlic_herb_grilled_lamb_chops",
+      "herb garlic wrap": "herb_garlic.garlic_herb_flatbread_wrap"
+    },
+
+    "keywordIndex": {
+      "roast": [
+        "herb_garlic.lemon_garlic_roast_chicken",
+        "herb_garlic.garlic_herb_roasted_potatoes"
+      ],
+      "sheet pan": ["herb_garlic.sheet_pan_lemon_garlic_chicken_veg"],
+      "salmon": ["herb_garlic.garlic_herb_salmon"],
+      "shrimp": ["herb_garlic.shrimp_scampi_orzo"],
+      "scampi": ["herb_garlic.shrimp_scampi_orzo"],
+      "orzo": ["herb_garlic.shrimp_scampi_orzo"],
+      "pasta": ["herb_garlic.aglio_olio_herbs"],
+      "aglio": ["herb_garlic.aglio_olio_herbs"],
+      "olio": ["herb_garlic.aglio_olio_herbs"],
+      "potatoes": ["herb_garlic.garlic_herb_roasted_potatoes"],
+      "green beans": ["herb_garlic.lemon_garlic_green_beans"],
+      "mushrooms": ["herb_garlic.garlic_herb_mushroom_saute"],
+      "chickpeas": ["herb_garlic.garlic_herb_chickpea_salad"],
+      "rice": ["herb_garlic.mediterranean_herb_garlic_rice_pilaf"],
+      "vinaigrette": ["herb_garlic.lemon_herb_vinaigrette"],
+      "lentil": ["herb_garlic.lemony_garlic_lentil_soup"],
+      "lamb": ["herb_garlic.garlic_herb_grilled_lamb_chops"],
+      "wrap": ["herb_garlic.garlic_herb_flatbread_wrap"]
+    },
+
+    "tagIndex": {
+      "herb_garlic": [
+        "herb_garlic.lemon_garlic_roast_chicken",
+        "herb_garlic.sheet_pan_lemon_garlic_chicken_veg",
+        "herb_garlic.garlic_herb_salmon",
+        "herb_garlic.shrimp_scampi_orzo",
+        "herb_garlic.aglio_olio_herbs",
+        "herb_garlic.garlic_herb_roasted_potatoes",
+        "herb_garlic.lemon_garlic_green_beans",
+        "herb_garlic.garlic_herb_mushroom_saute",
+        "herb_garlic.garlic_herb_chickpea_salad",
+        "herb_garlic.mediterranean_herb_garlic_rice_pilaf",
+        "herb_garlic.garlic_herb_yogurt_sauce",
+        "herb_garlic.lemon_herb_vinaigrette",
+        "herb_garlic.lemony_garlic_lentil_soup",
+        "herb_garlic.garlic_herb_grilled_lamb_chops",
+        "herb_garlic.garlic_herb_flatbread_wrap"
+      ],
+      "garlic_forward": [
+        "herb_garlic.lemon_garlic_roast_chicken",
+        "herb_garlic.sheet_pan_lemon_garlic_chicken_veg",
+        "herb_garlic.garlic_herb_salmon",
+        "herb_garlic.shrimp_scampi_orzo",
+        "herb_garlic.aglio_olio_herbs",
+        "herb_garlic.garlic_herb_roasted_potatoes",
+        "herb_garlic.lemon_garlic_green_beans",
+        "herb_garlic.garlic_herb_mushroom_saute",
+        "herb_garlic.garlic_herb_chickpea_salad",
+        "herb_garlic.mediterranean_herb_garlic_rice_pilaf",
+        "herb_garlic.garlic_herb_yogurt_sauce",
+        "herb_garlic.lemony_garlic_lentil_soup",
+        "herb_garlic.garlic_herb_grilled_lamb_chops",
+        "herb_garlic.garlic_herb_flatbread_wrap"
+      ],
+      "lemony": [
+        "herb_garlic.lemon_garlic_roast_chicken",
+        "herb_garlic.sheet_pan_lemon_garlic_chicken_veg",
+        "herb_garlic.garlic_herb_salmon",
+        "herb_garlic.shrimp_scampi_orzo",
+        "herb_garlic.lemon_garlic_green_beans",
+        "herb_garlic.garlic_herb_chickpea_salad",
+        "herb_garlic.garlic_herb_yogurt_sauce",
+        "herb_garlic.lemon_herb_vinaigrette",
+        "herb_garlic.lemony_garlic_lentil_soup",
+        "herb_garlic.garlic_herb_grilled_lamb_chops",
+        "herb_garlic.garlic_herb_flatbread_wrap"
+      ],
+      "weeknight": [
+        "herb_garlic.lemon_garlic_roast_chicken",
+        "herb_garlic.sheet_pan_lemon_garlic_chicken_veg",
+        "herb_garlic.garlic_herb_salmon",
+        "herb_garlic.shrimp_scampi_orzo",
+        "herb_garlic.aglio_olio_herbs",
+        "herb_garlic.garlic_herb_roasted_potatoes",
+        "herb_garlic.lemon_garlic_green_beans",
+        "herb_garlic.garlic_herb_mushroom_saute",
+        "herb_garlic.garlic_herb_chickpea_salad",
+        "herb_garlic.mediterranean_herb_garlic_rice_pilaf",
+        "herb_garlic.garlic_herb_yogurt_sauce",
+        "herb_garlic.lemon_herb_vinaigrette",
+        "herb_garlic.lemony_garlic_lentil_soup",
+        "herb_garlic.garlic_herb_grilled_lamb_chops",
+        "herb_garlic.garlic_herb_flatbread_wrap"
+      ],
+      "batch_friendly": [
+        "herb_garlic.lemon_garlic_roast_chicken",
+        "herb_garlic.sheet_pan_lemon_garlic_chicken_veg",
+        "herb_garlic.garlic_herb_roasted_potatoes",
+        "herb_garlic.garlic_herb_chickpea_salad",
+        "herb_garlic.mediterranean_herb_garlic_rice_pilaf",
+        "herb_garlic.garlic_herb_yogurt_sauce",
+        "herb_garlic.lemon_herb_vinaigrette",
+        "herb_garlic.lemony_garlic_lentil_soup",
+        "herb_garlic.garlic_herb_flatbread_wrap"
+      ],
+      "meal_prep": [
+        "herb_garlic.sheet_pan_lemon_garlic_chicken_veg",
+        "herb_garlic.garlic_herb_roasted_potatoes",
+        "herb_garlic.garlic_herb_chickpea_salad",
+        "herb_garlic.mediterranean_herb_garlic_rice_pilaf",
+        "herb_garlic.lemony_garlic_lentil_soup",
+        "herb_garlic.garlic_herb_flatbread_wrap"
+      ],
+      "freezer_friendly": ["herb_garlic.lemony_garlic_lentil_soup"],
+      "vegetarian": [
+        "herb_garlic.aglio_olio_herbs",
+        "herb_garlic.garlic_herb_roasted_potatoes",
+        "herb_garlic.lemon_garlic_green_beans",
+        "herb_garlic.garlic_herb_mushroom_saute",
+        "herb_garlic.garlic_herb_chickpea_salad",
+        "herb_garlic.mediterranean_herb_garlic_rice_pilaf",
+        "herb_garlic.garlic_herb_yogurt_sauce",
+        "herb_garlic.lemon_herb_vinaigrette",
+        "herb_garlic.lemony_garlic_lentil_soup"
+      ],
+      "vegan": [
+        "herb_garlic.aglio_olio_herbs",
+        "herb_garlic.garlic_herb_roasted_potatoes",
+        "herb_garlic.lemon_garlic_green_beans",
+        "herb_garlic.garlic_herb_chickpea_salad",
+        "herb_garlic.mediterranean_herb_garlic_rice_pilaf",
+        "herb_garlic.lemon_herb_vinaigrette",
+        "herb_garlic.lemony_garlic_lentil_soup"
+      ],
+      "gluten_free": [
+        "herb_garlic.lemon_garlic_roast_chicken",
+        "herb_garlic.sheet_pan_lemon_garlic_chicken_veg",
+        "herb_garlic.garlic_herb_salmon",
+        "herb_garlic.garlic_herb_roasted_potatoes",
+        "herb_garlic.lemon_garlic_green_beans",
+        "herb_garlic.garlic_herb_mushroom_saute",
+        "herb_garlic.garlic_herb_chickpea_salad",
+        "herb_garlic.mediterranean_herb_garlic_rice_pilaf",
+        "herb_garlic.garlic_herb_yogurt_sauce",
+        "herb_garlic.lemon_herb_vinaigrette",
+        "herb_garlic.lemony_garlic_lentil_soup",
+        "herb_garlic.garlic_herb_grilled_lamb_chops"
+      ],
+      "dairy_free": [
+        "herb_garlic.lemon_garlic_roast_chicken",
+        "herb_garlic.sheet_pan_lemon_garlic_chicken_veg",
+        "herb_garlic.garlic_herb_roasted_potatoes",
+        "herb_garlic.lemon_garlic_green_beans",
+        "herb_garlic.garlic_herb_chickpea_salad",
+        "herb_garlic.mediterranean_herb_garlic_rice_pilaf",
+        "herb_garlic.lemon_herb_vinaigrette",
+        "herb_garlic.lemony_garlic_lentil_soup",
+        "herb_garlic.garlic_herb_grilled_lamb_chops"
+      ],
+      "keto_friendly": [
+        "herb_garlic.lemon_garlic_roast_chicken",
+        "herb_garlic.sheet_pan_lemon_garlic_chicken_veg",
+        "herb_garlic.garlic_herb_salmon",
+        "herb_garlic.garlic_herb_grilled_lamb_chops"
+      ],
+      "pescatarian": [
+        "herb_garlic.garlic_herb_salmon",
+        "herb_garlic.shrimp_scampi_orzo"
+      ]
+    },
+
+    "bySubprofile": {
+      "cuisines.herb_garlic": [
+        "herb_garlic.lemon_garlic_roast_chicken",
+        "herb_garlic.sheet_pan_lemon_garlic_chicken_veg",
+        "herb_garlic.garlic_herb_salmon",
+        "herb_garlic.shrimp_scampi_orzo",
+        "herb_garlic.aglio_olio_herbs",
+        "herb_garlic.garlic_herb_roasted_potatoes",
+        "herb_garlic.lemon_garlic_green_beans",
+        "herb_garlic.garlic_herb_mushroom_saute",
+        "herb_garlic.garlic_herb_chickpea_salad",
+        "herb_garlic.mediterranean_herb_garlic_rice_pilaf",
+        "herb_garlic.garlic_herb_yogurt_sauce",
+        "herb_garlic.lemon_herb_vinaigrette",
+        "herb_garlic.lemony_garlic_lentil_soup",
+        "herb_garlic.garlic_herb_grilled_lamb_chops",
+        "herb_garlic.garlic_herb_flatbread_wrap"
+      ]
+    },
+
+    "byCategory": {
+      "main": [
+        "herb_garlic.lemon_garlic_roast_chicken",
+        "herb_garlic.sheet_pan_lemon_garlic_chicken_veg",
+        "herb_garlic.garlic_herb_salmon",
+        "herb_garlic.shrimp_scampi_orzo",
+        "herb_garlic.aglio_olio_herbs",
+        "herb_garlic.garlic_herb_grilled_lamb_chops"
+      ],
+      "side": [
+        "herb_garlic.garlic_herb_roasted_potatoes",
+        "herb_garlic.lemon_garlic_green_beans",
+        "herb_garlic.garlic_herb_mushroom_saute",
+        "herb_garlic.mediterranean_herb_garlic_rice_pilaf"
+      ],
+      "salad": ["herb_garlic.garlic_herb_chickpea_salad"],
+      "sauce": ["herb_garlic.garlic_herb_yogurt_sauce"],
+      "dressing": ["herb_garlic.lemon_herb_vinaigrette"],
+      "soup": ["herb_garlic.lemony_garlic_lentil_soup"],
+      "handheld": ["herb_garlic.garlic_herb_flatbread_wrap"]
+    }
+  },
+
+  "description": "Dish browse + planner catalog for the Herb & Garlic overlay cuisine.",
+  "tags": [
+    "cuisines.herb_garlic",
+    "catalog.dishes",
+    "profile.overlay",
+    "garlic_forward",
+    "herb_forward"
+  ],
+  "source": {
+    "curation": "ssa",
+    "intent": "canonical_defaults"
+  },
+  "defaults": {
+    "cuisineId": "cuisines.herb_garlic"
+  },
+  "groups": [
+    {
+      "id": "group.weeknight_core",
+      "label": "Weeknight Core",
+      "dishIds": [
+        "herb_garlic.sheet_pan_lemon_garlic_chicken_veg",
+        "herb_garlic.garlic_herb_salmon",
+        "herb_garlic.aglio_olio_herbs",
+        "herb_garlic.garlic_herb_chickpea_salad",
+        "herb_garlic.lemony_garlic_lentil_soup"
+      ]
+    },
+    {
+      "id": "group.sides_condiments",
+      "label": "Sides & Condiments",
+      "dishIds": [
+        "herb_garlic.garlic_herb_roasted_potatoes",
+        "herb_garlic.lemon_garlic_green_beans",
+        "herb_garlic.garlic_herb_mushroom_saute",
+        "herb_garlic.mediterranean_herb_garlic_rice_pilaf",
+        "herb_garlic.garlic_herb_yogurt_sauce",
+        "herb_garlic.lemon_herb_vinaigrette"
+      ]
+    }
+  ],
+  "index": {
+    "primary": "indexes"
+  }
+}

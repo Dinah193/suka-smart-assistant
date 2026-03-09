@@ -1,0 +1,390 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.ethiopian.recipes.gomen",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Ethiopian Gomen (Collard Greens)",
+    "subtitle": "Slow-sautéed collards with ginger, garlic, and gentle warm spice—classic side for injera and stews.",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalog",
+      "notes": [
+        "Canonical SSA gomen built for deterministic planning: simple ingredients, clear steps, and adaptable spice levels.",
+        "This version is berbere-optional (many homes keep gomen mild alongside spicy wats).",
+        "For best texture: strip tough stems, slice thin, and steam-sauté before adding fat."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "Ethiopian",
+    "category": "side",
+    "mealArchetypes": ["vegetable_side", "greens", "injera_side", "stew_side"],
+    "servingStyles": ["family_style", "platters", "injera_platter"],
+    "plannerTags": [
+      "cuisine.ethiopian",
+      "dish.ethiopian.gomen",
+      "side",
+      "greens",
+      "vegetable",
+      "dairy_free_optional",
+      "weeknight.friendly",
+      "batch.friendly",
+      "leftovers.good"
+    ]
+  },
+
+  "summary": "Gomen is a classic Ethiopian collard greens side, gently cooked with onions, garlic, and ginger, often finished with niter kibbeh or neutral oil.",
+
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 1, "unit": "cup" },
+    "notes": "Serves 6 as a side on an injera platter."
+  },
+
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 25,
+    "totalMins": 45
+  },
+
+  "difficulty": "beginner",
+
+  "signals": {
+    "batchFriendly": "medium",
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": "limited",
+    "vegetableForward": true
+  },
+
+  "tasteProfile": {
+    "heat": "low_to_medium",
+    "sweetness": "low",
+    "sourness": "low",
+    "umami": "medium",
+    "aroma": ["ginger", "garlic", "soft_onion", "warm_spice"],
+    "texture": ["tender_greens", "silky"],
+    "finish": ["savory", "clean", "gentle_warmth"]
+  },
+
+  "equipment": {
+    "required": [
+      {
+        "id": "tool.large_skillet_or_pot",
+        "label": "Large skillet or pot with lid",
+        "required": true
+      },
+      { "id": "tool.knife", "label": "Chef’s knife", "required": true },
+      { "id": "tool.cutting_board", "label": "Cutting board", "required": true }
+    ],
+    "recommended": [
+      "tool.kitchen_scale",
+      "tool.tongs",
+      "tool.microplane",
+      "tool.splatter_screen"
+    ],
+    "optional": [
+      {
+        "id": "tool.salad_spinner",
+        "label": "Salad spinner",
+        "required": false,
+        "notes": "Helps dry washed greens quickly for cleaner sautéing."
+      }
+    ]
+  },
+
+  "dietFlags": ["gluten_free", "vegetarian", "vegan_option"],
+  "allergens": {
+    "mayContain": ["allergen.dairy"],
+    "notes": [
+      "Dairy only if using niter kibbeh (spiced clarified butter). Use oil for dairy-free/vegan."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "greens.collard",
+      "label": "Collard greens, stems removed, thinly sliced",
+      "role": "main",
+      "amount": { "value": 900, "unit": "g" },
+      "notes": [
+        "Sub: kale, chard, or cabbage (adjust cook time).",
+        "Slice thin for faster, more even cooking."
+      ]
+    },
+    {
+      "id": "vegetable.onion",
+      "label": "Yellow onion, finely diced",
+      "role": "aromatic",
+      "amount": { "value": 250, "unit": "g" }
+    },
+    {
+      "id": "vegetable.garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 18, "unit": "g" },
+      "notes": "About 5–6 cloves."
+    },
+    {
+      "id": "vegetable.ginger",
+      "label": "Fresh ginger, grated or minced",
+      "role": "aromatic",
+      "amount": { "value": 15, "unit": "g" }
+    },
+
+    {
+      "id": "fat.niter_kibbeh",
+      "label": "Niter kibbeh (Ethiopian spiced clarified butter)",
+      "role": "fat",
+      "amount": { "value": 30, "unit": "g" },
+      "optional": true,
+      "notes": [
+        "Classic flavor. If unavailable, use olive oil or neutral oil.",
+        "If using salted niter kibbeh, reduce added salt."
+      ]
+    },
+    {
+      "id": "oil.olive",
+      "label": "Olive oil (or neutral oil)",
+      "role": "fat",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": [
+        "Use this if skipping niter kibbeh, or split the fat between oil + niter kibbeh."
+      ]
+    },
+
+    {
+      "id": "spice.kosseret",
+      "label": "Kosseret (Ethiopian herb) or dried oregano",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": "Kosseret is traditional; oregano is a workable substitute."
+    },
+    {
+      "id": "spice.cardamom",
+      "label": "Ground cardamom (pinch)",
+      "role": "spice",
+      "amount": { "value": 0.25, "unit": "tsp" },
+      "optional": true,
+      "notes": "Very subtle—optional background warmth."
+    },
+    {
+      "id": "spice.berbere",
+      "label": "Berbere spice blend (optional)",
+      "role": "heat",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": [
+        "Many gomen versions are mild; add berbere if you want a warmer, spicier side."
+      ]
+    },
+
+    {
+      "id": "salt.kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "Adjust to taste; greens vary in bitterness."
+    },
+    {
+      "id": "pepper.black",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+
+    {
+      "id": "liquid.water",
+      "label": "Water",
+      "role": "steam",
+      "amount": { "value": 120, "unit": "ml" },
+      "notes": [
+        "Used to steam-sauté the greens so they soften without scorching.",
+        "If greens are very wet after washing, reduce added water."
+      ]
+    },
+    {
+      "id": "acid.lemon",
+      "label": "Lemon juice (optional, to brighten)",
+      "role": "finish",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true
+    }
+  ],
+
+  "methods": ["method.saute", "method.steam_braise", "method.reduce"],
+
+  "notes": [
+    "Avoid high heat early—onions should soften and sweeten without browning heavily.",
+    "Steam first, then finish in fat: this keeps greens tender and prevents a greasy sauce.",
+    "Gomen thickens as it cools; reheat gently with a splash of water."
+  ],
+
+  "variations": [
+    {
+      "id": "variation.cabbage_gomen",
+      "label": "Cabbage-style (quick)",
+      "changes": {
+        "swap": "Use 700–800 g shredded cabbage instead of collards.",
+        "time": "Steam-braise 8–12 minutes instead of 20–25."
+      }
+    },
+    {
+      "id": "variation.gomen_with_potato",
+      "label": "Gomen with potatoes",
+      "changes": {
+        "add": "Add 300 g diced Yukon gold potatoes; parboil 6–8 min first, then add during steaming stage.",
+        "note": "Increase salt slightly and add 60–120 ml more water as needed."
+      }
+    },
+    {
+      "id": "variation.spicy_gomen",
+      "label": "Spicy gomen",
+      "changes": {
+        "add": "Use 1–2 tbsp berbere and add a pinch more black pepper.",
+        "note": "Bloom berbere in the fat for 30 seconds before adding onions."
+      }
+    }
+  ],
+
+  "storage": {
+    "fridge": {
+      "duration": "up to 4 days",
+      "notes": [
+        "Cool quickly, store airtight, reheat gently with a splash of water."
+      ]
+    },
+    "freezer": {
+      "duration": "up to 2 months",
+      "notes": [
+        "Texture softens after freezing. Best if you plan to use as a stew-side rather than a crisp vegetable."
+      ]
+    }
+  },
+
+  "pairings": {
+    "classic": [
+      "dish.ethiopian.injera",
+      "dish.ethiopian.doro_wat",
+      "dish.ethiopian.misir_wat",
+      "dish.ethiopian.shiro",
+      "dish.ethiopian.tibs"
+    ],
+    "also_good_with": ["rice", "flatbread", "roasted_meats", "lentils"]
+  },
+
+  "compat": {
+    "cuisineId": "cuisines.ethiopian",
+    "dishId": "dish.ethiopian.gomen",
+    "aliases": [
+      "gomen",
+      "ethiopian collard greens",
+      "collard greens ethiopian style"
+    ],
+    "ingredientIdHints": [
+      "greens.collard",
+      "vegetable.onion",
+      "vegetable.garlic",
+      "vegetable.ginger"
+    ],
+    "methodIdHints": ["method.steam_braise", "method.saute"],
+    "plannerTags": ["side", "greens", "vegetable"]
+  },
+
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Prep the greens",
+      "domain": "prep",
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "instructions": [
+        "Wash collard greens thoroughly and dry (a little moisture is fine).",
+        "Strip leaves from thick stems and discard or save stems for stock.",
+        "Stack leaves, roll into a tight bundle, and slice thin ribbons."
+      ],
+      "checks": [
+        "Greens are stemmed and sliced into thin ribbons for even cooking."
+      ]
+    },
+    {
+      "id": "step_02",
+      "title": "Sweat onions (start the flavor base)",
+      "domain": "stovetop",
+      "activeMins": 6,
+      "handsOffMins": 6,
+      "instructions": [
+        "Heat a large skillet/pot over medium heat.",
+        "Add oil (and niter kibbeh if using).",
+        "Add diced onion and a small pinch of salt; cook 8–10 minutes, stirring occasionally, until soft and translucent."
+      ],
+      "timers": [{ "label": "Sweat onions", "minutes": 10 }],
+      "checks": ["Onions are softened (not deeply browned)."]
+    },
+    {
+      "id": "step_03",
+      "title": "Add garlic and ginger (and optional spices)",
+      "domain": "stovetop",
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "instructions": [
+        "Add minced garlic and grated ginger; stir 30–60 seconds until fragrant.",
+        "If using berbere, add it now and stir 30 seconds to bloom.",
+        "Add kosseret/oregano and optional cardamom."
+      ],
+      "checks": ["Aromatics smell fragrant; nothing is burning."]
+    },
+    {
+      "id": "step_04",
+      "title": "Steam-braise the greens until tender",
+      "domain": "stovetop",
+      "activeMins": 8,
+      "handsOffMins": 20,
+      "instructions": [
+        "Add sliced collards in handfuls, stirring as they wilt.",
+        "Add water, cover with a lid, and reduce heat to medium-low.",
+        "Cook 18–25 minutes, stirring every 5 minutes, until greens are tender.",
+        "If the pan gets dry before greens are tender, add 2–4 tbsp water as needed."
+      ],
+      "timers": [{ "label": "Steam-braise greens", "minutes": 20 }],
+      "checks": [
+        "Greens are tender and evenly seasoned; no scorching on the bottom."
+      ]
+    },
+    {
+      "id": "step_05",
+      "title": "Reduce, season, and finish",
+      "domain": "stovetop",
+      "activeMins": 5,
+      "handsOffMins": 2,
+      "instructions": [
+        "Remove the lid and cook 2–5 minutes to reduce any excess liquid (greens should be moist but not soupy).",
+        "Season with remaining salt and optional black pepper to taste.",
+        "Optional: stir in lemon juice off heat to brighten."
+      ],
+      "timers": [{ "label": "Reduce and finish", "minutes": 3 }],
+      "checks": [
+        "Greens are moist, not watery; flavor is savory with gentle warmth."
+      ]
+    },
+    {
+      "id": "step_06",
+      "title": "Serve",
+      "domain": "serve",
+      "activeMins": 1,
+      "handsOffMins": 0,
+      "instructions": [
+        "Serve warm as part of an injera platter alongside wats, lentils, and salads.",
+        "Store leftovers airtight; reheat gently with a splash of water if needed."
+      ]
+    }
+  ]
+}

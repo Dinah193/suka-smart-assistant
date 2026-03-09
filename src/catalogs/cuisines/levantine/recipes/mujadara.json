@@ -1,0 +1,268 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-20T00:00:00.000Z",
+
+  "meta": {
+    "id": "recipes.levantine.mujadara",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Mujadara (Lentils & Rice with Caramelized Onions)",
+    "description": "Classic Levantine comfort dish of lentils and rice topped with deeply caramelized onions. Naturally vegan, pantry-friendly, and excellent for meal prep.",
+    "tags": [
+      "cuisine.levantine",
+      "dish.staple",
+      "mealprep.friendly",
+      "budget.friendly",
+      "vegan",
+      "one_pot",
+      "weeknight.friendly"
+    ]
+  },
+
+  "summary": "Mujadara is a classic Levantine dish made by cooking lentils and rice together and finishing with a generous layer of deeply caramelized onions. The key is patience on the onions (low/medium heat, steady stirring) to develop sweetness and a slightly crisp edge. Resting the pot after cooking helps the grains finish steaming for a fluffy texture.",
+
+  "yields": {
+    "servings": 6,
+    "makes": "About 6 cups"
+  },
+
+  "timing": {
+    "activeMins": 25,
+    "totalMins": 60,
+    "notes": "Most active time is caramelizing onions; the rice/lentils cook mostly unattended."
+  },
+
+  "diet": {
+    "tags": ["vegan", "vegetarian", "dairy_free", "egg_free", "nut_free"],
+    "notes": "If serving with yogurt, the dish becomes vegetarian (not vegan)."
+  },
+
+  "methods": ["simmer", "steam", "caramelize"],
+
+  "compat": {
+    "kitchenCapabilitiesAnyOf": ["stovetop", "electric_stovetop", "induction"],
+    "notes": "Best on stovetop using a heavy-bottom pot for even heat."
+  },
+
+  "allergens": [],
+
+  "safety": {
+    "foodSafetyNotes": [
+      "Cool leftovers quickly and refrigerate within 2 hours.",
+      "Reheat until steaming hot throughout; add a splash of water if needed to loosen."
+    ]
+  },
+
+  "ingredientGroups": [
+    {
+      "id": "group.base",
+      "label": "Mujadara base",
+      "ingredientIds": [
+        "ing.lentils_brown_or_green",
+        "ing.rice_long_grain",
+        "ing.onion_yellow",
+        "ing.olive_oil",
+        "ing.cumin_ground",
+        "ing.allspice_ground_optional",
+        "ing.cinnamon_ground_optional",
+        "ing.bay_leaf_optional",
+        "ing.salt_kosher",
+        "ing.black_pepper",
+        "ing.water_or_stock"
+      ]
+    },
+    {
+      "id": "group.serving_optional",
+      "label": "To serve (optional)",
+      "ingredientIds": [
+        "ing.lemon_wedges",
+        "ing.parsley_optional",
+        "ing.yogurt_optional",
+        "ing.cucumber_tomato_salad_optional"
+      ]
+    }
+  ],
+
+  "ingredients": [
+    {
+      "id": "ing.lentils_brown_or_green",
+      "label": "Brown or green lentils",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "Do not use red lentils (they break down too much)."
+    },
+    {
+      "id": "ing.rice_long_grain",
+      "label": "Long-grain rice (basmati preferred)",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "Rinse until water runs mostly clear."
+    },
+    {
+      "id": "ing.onion_yellow",
+      "label": "Yellow onions, thinly sliced",
+      "amount": { "value": 450, "unit": "g" },
+      "notes": "About 3 medium onions. Slice evenly for consistent caramelization."
+    },
+    {
+      "id": "ing.olive_oil",
+      "label": "Olive oil",
+      "amount": { "value": 60, "unit": "ml" },
+      "notes": "Use more if needed during onion caramelization."
+    },
+    {
+      "id": "ing.cumin_ground",
+      "label": "Ground cumin",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1 tsp."
+    },
+    {
+      "id": "ing.allspice_ground_optional",
+      "label": "Ground allspice (optional)",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "About 1/2 tsp."
+    },
+    {
+      "id": "ing.cinnamon_ground_optional",
+      "label": "Ground cinnamon (optional)",
+      "amount": { "value": 0.5, "unit": "g" },
+      "notes": "About 1/4 tsp."
+    },
+    {
+      "id": "ing.bay_leaf_optional",
+      "label": "Bay leaf (optional)",
+      "amount": { "value": 1, "unit": "count" }
+    },
+    {
+      "id": "ing.salt_kosher",
+      "label": "Kosher salt",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": "Start here; adjust to taste."
+    },
+    {
+      "id": "ing.black_pepper",
+      "label": "Ground black pepper",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1 tsp."
+    },
+    {
+      "id": "ing.water_or_stock",
+      "label": "Water or vegetable stock",
+      "amount": { "value": 900, "unit": "ml" },
+      "notes": "Approximate; adjust slightly based on pot/heat and rice brand."
+    },
+
+    {
+      "id": "ing.lemon_wedges",
+      "label": "Lemon wedges",
+      "amount": { "value": 1, "unit": "count" },
+      "notes": "Optional for serving."
+    },
+    {
+      "id": "ing.parsley_optional",
+      "label": "Fresh parsley, chopped",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": "Optional garnish."
+    },
+    {
+      "id": "ing.yogurt_optional",
+      "label": "Plain yogurt",
+      "amount": { "value": 180, "unit": "g" },
+      "notes": "Optional topping (makes the dish vegetarian, not vegan)."
+    },
+    {
+      "id": "ing.cucumber_tomato_salad_optional",
+      "label": "Cucumber-tomato salad",
+      "amount": { "value": 300, "unit": "g" },
+      "notes": "Optional side."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.rinse",
+      "title": "Rinse lentils and rice",
+      "instructions": [
+        "Rinse lentils in a fine strainer until the water runs mostly clear; pick out any small stones.",
+        "Rinse rice until the water runs mostly clear; drain well."
+      ]
+    },
+    {
+      "id": "step.caramelize_onions",
+      "title": "Caramelize the onions",
+      "instructions": [
+        "Heat olive oil in a wide, heavy-bottom pot over medium heat.",
+        "Add sliced onions and a pinch of the salt. Cook, stirring often, until softened and turning golden.",
+        "Reduce heat to medium-low and continue cooking 20–30 minutes, stirring regularly, until deep brown and sweet with some crisp edges.",
+        "If onions threaten to burn, lower heat and add 1–2 Tbsp water to loosen browned bits; scrape the pot and keep going."
+      ],
+      "timers": [
+        {
+          "id": "timer.onions_soften",
+          "label": "Soften onions",
+          "minutes": 10
+        },
+        {
+          "id": "timer.onions_caramelize",
+          "label": "Caramelize onions",
+          "minutes": 25
+        }
+      ]
+    },
+    {
+      "id": "step.reserve_onions",
+      "title": "Reserve most onions for topping",
+      "instructions": [
+        "Scoop out about 2/3 of the onions (including some of the oil) and set aside for topping.",
+        "Leave the remaining onions in the pot to flavor the rice and lentils."
+      ]
+    },
+    {
+      "id": "step.parcook_lentils",
+      "title": "Par-cook the lentils",
+      "instructions": [
+        "Add lentils to the pot with the remaining onions.",
+        "Add about 600 ml of the water/stock (reserve the rest for later) and bring to a steady simmer.",
+        "Simmer 10–12 minutes until lentils are partially tender (not fully soft)."
+      ],
+      "timers": [
+        {
+          "id": "timer.lentils_parcook",
+          "label": "Par-cook lentils",
+          "minutes": 11
+        }
+      ]
+    },
+    {
+      "id": "step.add_rice_spices",
+      "title": "Add rice and spices, then simmer",
+      "instructions": [
+        "Stir in rinsed rice, cumin, allspice (optional), cinnamon (optional), bay leaf (optional), remaining salt, and black pepper.",
+        "Add the remaining 300 ml water/stock (more if needed so liquid sits just above the grains by about 1/4 inch / 6 mm).",
+        "Bring back to a gentle simmer, then cover tightly and reduce heat to low.",
+        "Cook 15–18 minutes, until rice is tender and liquid is absorbed."
+      ],
+      "timers": [
+        { "id": "timer.simmer", "label": "Covered simmer", "minutes": 17 }
+      ]
+    },
+    {
+      "id": "step.rest_fluff",
+      "title": "Rest and fluff",
+      "instructions": [
+        "Turn off heat and keep covered 10 minutes to steam-finish.",
+        "Remove bay leaf (if used). Fluff gently with a fork."
+      ],
+      "timers": [{ "id": "timer.rest", "label": "Rest/steam", "minutes": 10 }]
+    },
+    {
+      "id": "step.serve",
+      "title": "Serve with caramelized onions",
+      "instructions": [
+        "Top generously with the reserved caramelized onions.",
+        "Serve with lemon wedges and chopped parsley (optional).",
+        "Optional: add a spoon of yogurt on top or serve with a cucumber-tomato salad."
+      ]
+    }
+  ]
+}

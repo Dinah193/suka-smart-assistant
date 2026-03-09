@@ -24,7 +24,7 @@
 // Optional soft import of the shared event bus
 let eventBus = null;
 try {
-  eventBus = require("@/services/eventBus")?.default;
+  eventBus = require("@/services/events/eventBus")?.default;
 } catch {}
 
 /** Emit SSA-shaped envelopes safely (never crash the app) */
@@ -160,7 +160,8 @@ async function seedBaselines(db) {
       feature: "quiet.friction",
       value: 0.05,
       confidence: 0.5,
-      notes: "Adds 5% duration in quiet hours by default (UI is dim, haptics off).",
+      notes:
+        "Adds 5% duration in quiet hours by default (UI is dim, haptics off).",
     },
   ];
 
@@ -210,23 +211,25 @@ async function applyMigration(db) {
   const version = nextSchemaVersion(db);
   const stores = getStoreDefinitions();
 
-  db.version(version).stores(stores).upgrade(async (tx) => {
-    // Record migration metadata if a meta table exists
-    try {
-      const meta = tx.table("meta");
-      if (meta) {
-        await meta.put({
-          key: "migration.002",
-          value: {
-            appliedAt: new Date().toISOString(),
-            stores,
-          },
-        });
+  db.version(version)
+    .stores(stores)
+    .upgrade(async (tx) => {
+      // Record migration metadata if a meta table exists
+      try {
+        const meta = tx.table("meta");
+        if (meta) {
+          await meta.put({
+            key: "migration.002",
+            value: {
+              appliedAt: new Date().toISOString(),
+              stores,
+            },
+          });
+        }
+      } catch {
+        /* meta not guaranteed */
       }
-    } catch {
-      /* meta not guaranteed */
-    }
-  });
+    });
 
   await db.open().catch((err) => {
     console.error("[SSA] Migration 002 open failed:", err);

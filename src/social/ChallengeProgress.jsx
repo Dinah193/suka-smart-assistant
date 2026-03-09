@@ -42,10 +42,30 @@ async function safeImportMany(paths = []) {
 
 // Fallback templates so the UI is never empty
 const FALLBACK_TASKS = [
-  { id: "kitchen-counters", title: "Wipe kitchen counters", zone: "Kitchen", points: 10 },
-  { id: "living-sweep", title: "Sweep living room", zone: "Living", points: 10 },
-  { id: "bathroom-disinfect", title: "Disinfect bathroom surfaces", zone: "Bath", points: 15 },
-  { id: "pantry-organize", title: "Quickly organize pantry (5m)", zone: "Pantry", points: 8 },
+  {
+    id: "kitchen-counters",
+    title: "Wipe kitchen counters",
+    zone: "Kitchen",
+    points: 10,
+  },
+  {
+    id: "living-sweep",
+    title: "Sweep living room",
+    zone: "Living",
+    points: 10,
+  },
+  {
+    id: "bathroom-disinfect",
+    title: "Disinfect bathroom surfaces",
+    zone: "Bath",
+    points: 15,
+  },
+  {
+    id: "pantry-organize",
+    title: "Quickly organize pantry (5m)",
+    zone: "Pantry",
+    points: 8,
+  },
 ];
 
 const STORAGE_KEY = "suka.challenge.v2";
@@ -73,7 +93,9 @@ function readLocal() {
   }
 }
 function writeLocal(data) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {}
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch {}
 }
 
 function levelFromPoints(points) {
@@ -81,7 +103,10 @@ function levelFromPoints(points) {
   for (let i = 0; i < POINTS_LEVELS.length; i++) {
     if (points >= POINTS_LEVELS[i]) lvl = i + 1;
   }
-  return { level: lvl, nextAt: POINTS_LEVELS[lvl] ?? (POINTS_LEVELS.at(-1) + 250) };
+  return {
+    level: lvl,
+    nextAt: POINTS_LEVELS[lvl] ?? POINTS_LEVELS.at(-1) + 250,
+  };
 }
 
 function formatStreak(n) {
@@ -104,15 +129,32 @@ function isSabbath(now, settings, sabbathFn) {
     if (typeof sabbathFn === "function") {
       const win = sabbathFn(now);
       if (win?.startISO && win?.endISO) {
-        const s = new Date(win.startISO), e = new Date(win.endISO);
+        const s = new Date(win.startISO),
+          e = new Date(win.endISO);
         return now >= s && now < e;
       }
     }
   } catch {}
   // Approx Fri 18:00 -> Sat 18:00
   const day = now.getDay();
-  const fri18 = new Date(now.getFullYear(), now.getMonth(), now.getDate() + ((5 - day + 7) % 7), 18, 0, 0, 0);
-  const sat18 = new Date(now.getFullYear(), now.getMonth(), now.getDate() + ((6 - day + 7) % 7), 18, 0, 0, 0);
+  const fri18 = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + ((5 - day + 7) % 7),
+    18,
+    0,
+    0,
+    0
+  );
+  const sat18 = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + ((6 - day + 7) % 7),
+    18,
+    0,
+    0,
+    0
+  );
   return now >= fri18 && now < sat18;
 }
 
@@ -120,9 +162,17 @@ function isSabbath(now, settings, sabbathFn) {
    Data loaders (Dexie, Settings, Agent, Socket)
 ----------------------------------------------*/
 async function loadSettings() {
-  const Settings = await safeImportMany(["@/store/SettingsStore.js", "@/store/SettingsStore"]);
+  const Settings = await safeImportMany([
+    "@/store/SettingsStore.js",
+    "@/store/SettingsStore",
+  ]);
   const get = async (k, d) => {
-    try { const v = await Settings?.get?.(k); return v ?? d; } catch { return d; }
+    try {
+      const v = await Settings?.get?.(k);
+      return v ?? d;
+    } catch {
+      return d;
+    }
   };
   return {
     units: await get("units.system", "us"),
@@ -137,16 +187,25 @@ async function loadDexie() {
 }
 
 async function loadCleaningAgent() {
-  return await safeImportMany(["@/agents/cleaningAgent.js", "@/agents/cleaningAgent"]);
+  return await safeImportMany([
+    "@/agents/cleaningShim.js",
+    "@/agents/cleaningAgent",
+  ]);
 }
 
 async function loadSocket() {
-  const sock = await safeImportMany(["@/server/services/socket.js", "@/server/services/socket"]);
+  const sock = await safeImportMany([
+    "@/server/services/socket.js",
+    "@/server/services/socket",
+  ]);
   return sock?.socket || sock?.getSocket?.() || null;
 }
 
 async function loadOntology() {
-  const ont = await safeImportMany(["@/shared/ontology.js", "@/shared/ontology"]);
+  const ont = await safeImportMany([
+    "@/shared/ontology.js",
+    "@/shared/ontology",
+  ]);
   return ont || {};
 }
 
@@ -161,7 +220,10 @@ export default function ChallengeProgress() {
   const [levelInfo, setLevelInfo] = useState(() => levelFromPoints(0));
   const [showReward, setShowReward] = useState(false);
   const [sessionId, setSessionId] = useState(null);
-  const [settings, setSettings] = useState({ quietHours: { start: 21, end: 7 }, sabbath: { avoid: true } });
+  const [settings, setSettings] = useState({
+    quietHours: { start: 21, end: 7 },
+    sabbath: { avoid: true },
+  });
 
   const socketRef = useRef(null);
   const dexieRef = useRef(null);
@@ -204,7 +266,13 @@ export default function ChallengeProgress() {
         });
         const list = normalizeTasks(suggested?.tasks) || FALLBACK_TASKS;
         setTasks(list);
-        await persistState(DexieDB, { tasks: list, completed: [], points: 0, streak: 0, sessionId: null });
+        await persistState(DexieDB, {
+          tasks: list,
+          completed: [],
+          points: 0,
+          streak: 0,
+          sessionId: null,
+        });
       }
 
       // Wire socket listener for external updates (optional)
@@ -218,7 +286,9 @@ export default function ChallengeProgress() {
         });
       }
     })();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   // Compute progress
@@ -251,14 +321,25 @@ export default function ChallengeProgress() {
   useEffect(() => {
     clearTimeout(persistTimer.current);
     persistTimer.current = setTimeout(() => {
-      persistState(dexieRef.current, { tasks, completed, points, streak, sessionId });
+      persistState(dexieRef.current, {
+        tasks,
+        completed,
+        points,
+        streak,
+        sessionId,
+      });
     }, 300);
     return () => clearTimeout(persistTimer.current);
   }, [tasks, completed, points, streak, sessionId]);
 
   // Emit lightweight “progress” event (orchestrator can listen)
   useEffect(() => {
-    const detail = { progress, tasks: tasks.length, done: completed.length, at: nowISO() };
+    const detail = {
+      progress,
+      tasks: tasks.length,
+      done: completed.length,
+      at: nowISO(),
+    };
     try {
       window.dispatchEvent?.(new CustomEvent("challenge:progress", { detail }));
     } catch {}
@@ -268,7 +349,9 @@ export default function ChallengeProgress() {
   // Toggle task complete
   const toggleTask = (taskId) => {
     setCompleted((prev) => {
-      const next = prev.includes(taskId) ? prev.filter((id) => id !== taskId) : [...prev, taskId];
+      const next = prev.includes(taskId)
+        ? prev.filter((id) => id !== taskId)
+        : [...prev, taskId];
       // points logic
       if (!prev.includes(taskId)) {
         const pts = tasks.find((t) => t.id === taskId)?.points || 5;
@@ -298,7 +381,10 @@ export default function ChallengeProgress() {
         recipes: [], // not used for cleaning; the service can ignore
       });
       setSessionId(res?.id || null);
-      socketRef.current?.emit?.("SESSION.STARTED.CLEANING", { sessionId: res?.id, at: nowISO() });
+      socketRef.current?.emit?.("SESSION.STARTED.CLEANING", {
+        sessionId: res?.id,
+        at: nowISO(),
+      });
     }
   };
 
@@ -329,8 +415,16 @@ export default function ChallengeProgress() {
     } else {
       const prev = new Date(lastDay);
       // If yesterday -> increment; if today -> keep; else reset
-      const dPrev = new Date(prev.getFullYear(), prev.getMonth(), prev.getDate());
-      const dToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const dPrev = new Date(
+        prev.getFullYear(),
+        prev.getMonth(),
+        prev.getDate()
+      );
+      const dToday = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate()
+      );
       const diff = Math.round((dToday - dPrev) / 86400000);
       if (diff === 1) setStreak((s) => s + 1);
       else if (diff > 1) setStreak(1);
@@ -339,7 +433,9 @@ export default function ChallengeProgress() {
   };
 
   // UI sections
-  const progressText = `${completed.length}/${tasks.length} done • Level ${levelInfo.level} • ${formatStreak(streak)}`;
+  const progressText = `${completed.length}/${tasks.length} done • Level ${
+    levelInfo.level
+  } • ${formatStreak(streak)}`;
   const nextTarget = levelInfo.nextAt;
   const toNext = Math.max(0, (nextTarget ?? 0) - points);
 
@@ -347,7 +443,9 @@ export default function ChallengeProgress() {
     <div className="flex h-full min-h-[70vh] bg-stone-50 rounded-xl border border-stone-200 overflow-hidden">
       {/* Sidebar */}
       <aside className="w-72 bg-amber-50 p-5 border-r border-amber-200">
-        <h2 className="text-lg font-semibold text-amber-800 mb-3">🧼 Cleaning Challenge</h2>
+        <h2 className="text-lg font-semibold text-amber-800 mb-3">
+          🧼 Cleaning Challenge
+        </h2>
         <div className="text-sm text-amber-900/80 space-y-2">
           <div className="flex items-center justify-between">
             <span>Points</span>
@@ -373,7 +471,11 @@ export default function ChallengeProgress() {
             onClick={startSession}
             className="w-full rounded-xl bg-amber-600 hover:bg-amber-700 text-white py-2 text-sm shadow transition"
             disabled={!!sessionId}
-            title={sessionId ? "Session already running" : "Start a focused cleaning session"}
+            title={
+              sessionId
+                ? "Session already running"
+                : "Start a focused cleaning session"
+            }
           >
             {sessionId ? "Session Running…" : "Start Session"}
           </button>
@@ -387,16 +489,18 @@ export default function ChallengeProgress() {
         </div>
 
         <div className="mt-6 text-xs text-stone-600 leading-relaxed">
-          • Quiet hours: {settings?.quietHours?.start ?? 21}:00—{settings?.quietHours?.end ?? 7}:00
-          <br />
-          • Sabbath avoidance: {settings?.sabbath?.avoid ? "On" : "Off"}
+          • Quiet hours: {settings?.quietHours?.start ?? 21}:00—
+          {settings?.quietHours?.end ?? 7}:00
+          <br />• Sabbath avoidance: {settings?.sabbath?.avoid ? "On" : "Off"}
         </div>
       </aside>
 
       {/* Main */}
       <main className="flex-1 p-6 overflow-y-auto">
         <div className="flex items-center justify-between gap-4">
-          <h1 className="text-2xl font-semibold text-stone-800">Today’s Tasks</h1>
+          <h1 className="text-2xl font-semibold text-stone-800">
+            Today’s Tasks
+          </h1>
           <div className="text-sm text-stone-600">{progressText}</div>
         </div>
 
@@ -407,7 +511,9 @@ export default function ChallengeProgress() {
         <div className="mt-6">
           <Checklist
             tasks={tasks.map((t) => t.title)}
-            completedTasks={completed.map((id) => tasks.find((t) => t.id === id)?.title).filter(Boolean)}
+            completedTasks={completed
+              .map((id) => tasks.find((t) => t.id === id)?.title)
+              .filter(Boolean)}
             toggleTask={(title) => {
               const task = tasks.find((t) => t.title === title);
               if (task) toggleTask(task.id);
@@ -458,7 +564,10 @@ async function restoreState(DexieDB) {
   try {
     const db = DexieDB;
     const todayISO = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
-    const sessions = await db?.workerSessions?.where?.("role")?.equals?.("cleaner")?.toArray?.();
+    const sessions = await db?.workerSessions
+      ?.where?.("role")
+      ?.equals?.("cleaner")
+      ?.toArray?.();
     const latest = (sessions || [])
       .filter((s) => s?.date >= todayISO)
       .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
@@ -479,13 +588,20 @@ async function restoreState(DexieDB) {
 
 async function persistState(DexieDB, patch) {
   const current = readLocal() || {};
-  const next = typeof patch === "function" ? patch(current) : { ...current, ...patch, at: nowISO() };
+  const next =
+    typeof patch === "function"
+      ? patch(current)
+      : { ...current, ...patch, at: nowISO() };
 
   // Write Dexie
   try {
     const db = DexieDB;
     if (db?.userMeta?.put) {
-      await db.userMeta.put({ key: STORAGE_KEY, value: next, updatedAt: nowISO() });
+      await db.userMeta.put({
+        key: STORAGE_KEY,
+        value: next,
+        updatedAt: nowISO(),
+      });
     }
   } catch {}
   writeLocal(next);

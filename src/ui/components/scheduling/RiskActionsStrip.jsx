@@ -1,12 +1,18 @@
 // File: C:\Users\larho\suka-smart-assistant\src\ui\components\scheduling\RiskActionsStrip.jsx
-import React, { useEffect, useMemo, useReducer, useRef, useCallback } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useCallback,
+} from "react";
 import PropTypes from "prop-types";
 
 // 🔌 Shared services (assumed to exist per project conventions)
-import eventBus from "../../../services/eventBus";
+import eventBus from "../../../services/events/eventBus";
 import featureFlags from "../../../config/featureFlags";
-import HubPacketFormatter from "../../../hub/HubPacketFormatter";
-import FamilyFundConnector from "../../../hub/FamilyFundConnector";
+import HubPacketFormatter from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 
 /**
  * RiskActionsStrip
@@ -43,13 +49,13 @@ import FamilyFundConnector from "../../../hub/FamilyFundConnector";
 const SOURCE = "ui.RiskActionsStrip";
 
 const OVERRUN_EVENTS = [
-  "session.task.overrun",     // {sessionId, taskId, plannedMs, elapsedMs, deltaMs, domain}
-  "timer.overrun",            // {timerId, label, plannedMs, elapsedMs, deltaMs, sessionId?, taskId?, domain?}
-  "schedule.overrun.detected" // {scheduleId, itemId, plannedStart, plannedEnd, now, deltaMs, domain}
+  "session.task.overrun", // {sessionId, taskId, plannedMs, elapsedMs, deltaMs, domain}
+  "timer.overrun", // {timerId, label, plannedMs, elapsedMs, deltaMs, sessionId?, taskId?, domain?}
+  "schedule.overrun.detected", // {scheduleId, itemId, plannedStart, plannedEnd, now, deltaMs, domain}
 ];
 
 const AUTO_DISMISS_MS = 15000; // default window before collapsing an overrun card
-const MAX_VISIBLE = 3;         // keep the strip compact
+const MAX_VISIBLE = 3; // keep the strip compact
 
 const nowISO = () => new Date().toISOString();
 
@@ -342,12 +348,19 @@ export default function RiskActionsStrip({
         const formatted = normalizeOverrunEvent(evt, e);
         if (!formatted) return;
         dispatch({ type: "ADD_OR_UPDATE", item: formatted });
-        announceLive(`${formatted.title}: running late by ${formatMs(formatted.deltaMs)}`);
+        announceLive(
+          `${formatted.title}: running late by ${formatMs(formatted.deltaMs)}`
+        );
       })
     );
-    return () => unsubscribers.forEach((off) => {
-      try { off?.(); } catch { /* noop */ }
-    });
+    return () =>
+      unsubscribers.forEach((off) => {
+        try {
+          off?.();
+        } catch {
+          /* noop */
+        }
+      });
   }, []);
 
   // Controlled injection hook
@@ -485,8 +498,12 @@ function OverrunCard({ item, actions, onDismiss }) {
   const { title, detail, deltaMs, domain } = item;
 
   // Intent grouping for button order
-  const primary = actions.filter((a) => ["adjust", "autofit"].includes(a.intent));
-  const secondary = actions.filter((a) => ["reschedule", "split", "skip"].includes(a.intent));
+  const primary = actions.filter((a) =>
+    ["adjust", "autofit"].includes(a.intent)
+  );
+  const secondary = actions.filter((a) =>
+    ["reschedule", "split", "skip"].includes(a.intent)
+  );
   const utility = actions.filter((a) => a.intent === "pause");
 
   return (
@@ -497,7 +514,9 @@ function OverrunCard({ item, actions, onDismiss }) {
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-sm font-medium text-amber-900 truncate">{title}</div>
+          <div className="text-sm font-medium text-amber-900 truncate">
+            {title}
+          </div>
           <div className="text-xs text-amber-800/80 mt-0.5 line-clamp-2">
             {detail || "This step is taking longer than expected."}
           </div>
@@ -608,7 +627,11 @@ function normalizeOverrunEvent(evtType, e) {
     // Human title/detail
     const title =
       data?.label ||
-      (data?.taskId ? `Task ${data.taskId}` : data?.itemId ? `Item ${data.itemId}` : "Late step");
+      (data?.taskId
+        ? `Task ${data.taskId}`
+        : data?.itemId
+        ? `Item ${data.itemId}`
+        : "Late step");
 
     const planned = safeNumber(data?.plannedMs ?? 0, 0);
     const elapsed = safeNumber(data?.elapsedMs ?? 0, 0);

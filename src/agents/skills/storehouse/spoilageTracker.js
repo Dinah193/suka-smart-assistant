@@ -29,7 +29,7 @@
  *     modal root + wake-lock/notifications handled elsewhere.
  */
 
-import { emit } from "@/services/eventBus";
+import { emit } from "@/services/events/eventBus";
 
 /* -------------------------------------------------------------------------- */
 /*                              Dexie DB soft import                          */
@@ -45,11 +45,7 @@ async function getDb() {
   if (_dbPromise) return _dbPromise;
 
   _dbPromise = (async () => {
-    const candidates = [
-      "@/services/db",
-      "@/db",
-      "@/data/db",
-    ];
+    const candidates = ["@/services/db", "@/db", "@/data/db"];
 
     for (const path of candidates) {
       try {
@@ -61,7 +57,9 @@ async function getDb() {
       }
     }
 
-    console.warn("[storehouse.spoilageTracker] Dexie DB not found; spoilage logging disabled.");
+    console.warn(
+      "[storehouse.spoilageTracker] Dexie DB not found; spoilage logging disabled."
+    );
     return null;
   })();
 
@@ -132,7 +130,9 @@ async function getSpoilageEventsTable() {
     if (table && typeof table.add === "function") return table;
   }
 
-  console.warn("[storehouse.spoilageTracker] No spoilage events table found; logging disabled.");
+  console.warn(
+    "[storehouse.spoilageTracker] No spoilage events table found; logging disabled."
+  );
   return null;
 }
 
@@ -316,7 +316,11 @@ export async function logSpoilageEvents(items = [], options = {}) {
       await table.add(row);
       count += 1;
     } catch (err) {
-      console.warn("[storehouse.spoilageTracker] failed to log spoilage row:", err, row);
+      console.warn(
+        "[storehouse.spoilageTracker] failed to log spoilage row:",
+        err,
+        row
+      );
     }
   }
 
@@ -382,18 +386,16 @@ export function buildUseNowSteps(expiringItems = [], options = {}) {
     const qty = item.quantity ?? item.qty ?? null;
     const unit = item.unit || null;
 
-    const qtyLabel =
-      qty != null ? `${qty}${unit ? " " + unit : ""}` : null;
+    const qtyLabel = qty != null ? `${qty}${unit ? " " + unit : ""}` : null;
 
     const expiryLabel = expiry
-      ? `Expires in ${expiresInDays != null ? `${expiresInDays} day(s)` : "soon"} (on ${expiry.toLocaleDateString()}).`
+      ? `Expires in ${
+          expiresInDays != null ? `${expiresInDays} day(s)` : "soon"
+        } (on ${expiry.toLocaleDateString()}).`
       : "No expiry date recorded (treat as priority item).";
 
     const title = `${labelPrefix} ${name}`;
-    const descParts = [
-      qtyLabel ? `Amount: ${qtyLabel}.` : "",
-      expiryLabel,
-    ];
+    const descParts = [qtyLabel ? `Amount: ${qtyLabel}.` : "", expiryLabel];
 
     const desc = descParts.filter(Boolean).join(" ");
 

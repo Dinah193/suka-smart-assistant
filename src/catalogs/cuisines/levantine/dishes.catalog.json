@@ -1,0 +1,1672 @@
+{
+  "$schema": "../../../schemas/dishes.catalog.schema.json",
+  "schemaVersion": "1.0.1",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "notes": [
+    "SSA canonical dishes catalog for Levantine cuisine browse + planner seeding.",
+    "Dish entries are DishV2 (strict) to support planner signals, component roles, and indexing.",
+    "Signals strictness: weeknightPossible and leftoversGood must be boolean (schema)."
+  ],
+  "meta": {
+    "id": "cuisines.levantine.dishes",
+    "type": "dishes_catalog",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Levantine • Dishes Catalog",
+    "cuisineId": "cuisines.levantine",
+    "status": "canonical",
+    "description": "Canonical Levantine dish entries used for planner building blocks, browse/search, and normalization-friendly lookup.",
+    "version": "1.0.1",
+    "author": "ssa.catalogs",
+    "createdAt": "2026-01-19T00:00:00.000Z",
+    "updatedAt": "2026-01-19T00:00:00.000Z",
+    "notes": [
+      "Includes common Levantine staples spanning mezze, soups, stews, grills, rice dishes, breads, and desserts."
+    ]
+  },
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true
+  },
+  "dishes": [
+    {
+      "id": "dish.levantine.hummus",
+      "label": "Hummus",
+      "aka": ["Hummus bi tahini", "Chickpea tahini dip"],
+      "subprofiles": ["levantine.levant", "levantine.mezzes"],
+      "category": "mezze",
+      "difficulty": 1,
+      "heatTypical": 0,
+      "time": { "activeMins": 15, "totalMins": 15, "handsOffMins": 0 },
+      "servingStyles": ["snacks", "bowls", "street_food", "family_style"],
+      "mealArchetypes": ["archetype.dip_spread", "archetype.meze_plate"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "limited"
+      },
+      "coreComponents": [
+        {
+          "role": "legume",
+          "items": ["ingredient.chickpeas"],
+          "chooseOne": false
+        },
+        {
+          "role": "fat",
+          "items": ["ingredient.tahini", "ingredient.olive_oil"],
+          "chooseOne": false
+        },
+        {
+          "role": "acid",
+          "items": ["ingredient.lemon_juice"],
+          "chooseOne": false
+        },
+        {
+          "role": "aromatic",
+          "items": ["ingredient.garlic"],
+          "chooseOne": false
+        },
+        {
+          "role": "spice",
+          "items": ["ingredient.cumin_ground"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "technique.blend",
+        "technique.emulsify",
+        "technique.season"
+      ],
+      "equipmentRecommended": [
+        "equipment.food_processor",
+        "equipment.blender",
+        "equipment.citrus_juicer"
+      ],
+      "equipmentMinimum": ["equipment.bowl", "equipment.spoon"],
+      "ingredientsCore": [
+        "ingredient.chickpeas",
+        "ingredient.tahini",
+        "ingredient.lemon_juice",
+        "ingredient.garlic",
+        "ingredient.olive_oil",
+        "ingredient.salt"
+      ],
+      "allergens": ["allergen.sesame"],
+      "dietFlags": ["diet.vegetarian", "diet.vegan", "diet.gluten_free"],
+      "pairingHints": {
+        "serveWith": [
+          "dish.levantine.pita",
+          "dish.levantine.fattoush",
+          "dish.levantine.tabouleh"
+        ],
+        "topWith": [
+          "ingredient.sumac",
+          "ingredient.paprika",
+          "ingredient.olive_oil",
+          "ingredient.chickpeas"
+        ]
+      },
+      "variations": [
+        {
+          "id": "variant.hummus.roasted_red_pepper",
+          "label": "Roasted Red Pepper Hummus",
+          "when": { "likes": ["flavor.sweet_balance"] },
+          "adapt": { "add": ["ingredient.roasted_red_pepper"] }
+        },
+        {
+          "id": "variant.hummus.herb",
+          "label": "Herb Hummus",
+          "when": { "has": ["ingredient.parsley", "ingredient.cilantro"] },
+          "adapt": { "add": ["ingredient.parsley"] }
+        }
+      ],
+      "plannerTags": [
+        "cuisine.levantine",
+        "mezze",
+        "dip",
+        "batch_friendly",
+        "vegetarian"
+      ]
+    },
+
+    {
+      "id": "dish.levantine.baba_ganoush",
+      "label": "Baba Ganoush",
+      "aka": ["Baba ghanouj", "Roasted eggplant tahini dip"],
+      "subprofiles": ["levantine.levant", "levantine.mezzes"],
+      "category": "mezze",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 20, "totalMins": 70, "handsOffMins": 50 },
+      "servingStyles": ["snacks", "bowls", "family_style"],
+      "mealArchetypes": ["archetype.dip_spread", "archetype.meze_plate"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        { "role": "veg", "items": ["ingredient.eggplant"], "chooseOne": false },
+        {
+          "role": "fat",
+          "items": ["ingredient.tahini", "ingredient.olive_oil"],
+          "chooseOne": false
+        },
+        {
+          "role": "acid",
+          "items": ["ingredient.lemon_juice"],
+          "chooseOne": false
+        },
+        {
+          "role": "aromatic",
+          "items": ["ingredient.garlic"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "technique.roast",
+        "technique.char",
+        "technique.blend",
+        "technique.season"
+      ],
+      "equipmentRecommended": [
+        "equipment.oven",
+        "equipment.baking_sheet",
+        "equipment.food_processor"
+      ],
+      "equipmentMinimum": [
+        "equipment.oven",
+        "equipment.knife",
+        "equipment.board",
+        "equipment.bowl"
+      ],
+      "ingredientsCore": [
+        "ingredient.eggplant",
+        "ingredient.tahini",
+        "ingredient.lemon_juice",
+        "ingredient.garlic",
+        "ingredient.olive_oil",
+        "ingredient.salt"
+      ],
+      "allergens": ["allergen.sesame"],
+      "dietFlags": ["diet.vegetarian", "diet.vegan", "diet.gluten_free"],
+      "pairingHints": {
+        "serveWith": ["dish.levantine.pita", "dish.levantine.lavash"]
+      },
+      "variations": [
+        {
+          "id": "variant.baba_ganoush.smoky",
+          "label": "Extra Smoky (open-flame char)",
+          "when": {
+            "hasEquipment": ["equipment.gas_burner", "equipment.grill"]
+          },
+          "adapt": { "method": "char_over_flame" }
+        }
+      ],
+      "plannerTags": [
+        "cuisine.levantine",
+        "mezze",
+        "dip",
+        "vegetarian",
+        "make_ahead"
+      ]
+    },
+
+    {
+      "id": "dish.levantine.tabouleh",
+      "label": "Tabouleh",
+      "aka": ["Tabbouleh", "Parsley salad"],
+      "subprofiles": ["levantine.levant", "levantine.salads"],
+      "category": "salad",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 25, "totalMins": 35, "handsOffMins": 10 },
+      "servingStyles": ["family_style", "bowls", "plates"],
+      "mealArchetypes": ["archetype.salad_side", "archetype.meze_plate"],
+      "signals": {
+        "batchFriendly": "small_batch",
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "greens",
+          "items": ["ingredient.parsley"],
+          "chooseOne": false
+        },
+        {
+          "role": "veg",
+          "items": ["ingredient.tomato", "ingredient.cucumber"],
+          "chooseOne": false
+        },
+        { "role": "grain", "items": ["ingredient.bulgur"], "chooseOne": true },
+        {
+          "role": "acid",
+          "items": ["ingredient.lemon_juice"],
+          "chooseOne": false
+        },
+        { "role": "fat", "items": ["ingredient.olive_oil"], "chooseOne": false }
+      ],
+      "techniques": [
+        "technique.chop_fine",
+        "technique.toss",
+        "technique.hydrate"
+      ],
+      "equipmentRecommended": [
+        "equipment.chef_knife",
+        "equipment.board",
+        "equipment.salad_bowl"
+      ],
+      "equipmentMinimum": [
+        "equipment.knife",
+        "equipment.board",
+        "equipment.bowl"
+      ],
+      "ingredientsCore": [
+        "ingredient.parsley",
+        "ingredient.tomato",
+        "ingredient.cucumber",
+        "ingredient.bulgur",
+        "ingredient.lemon_juice",
+        "ingredient.olive_oil",
+        "ingredient.salt",
+        "ingredient.mint"
+      ],
+      "allergens": ["allergen.gluten"],
+      "dietFlags": ["diet.vegetarian", "diet.vegan"],
+      "pairingHints": {
+        "serveWith": [
+          "dish.levantine.hummus",
+          "dish.levantine.shawarma_chicken"
+        ]
+      },
+      "variations": [
+        {
+          "id": "variant.tabouleh.quinoa",
+          "label": "Quinoa Tabouleh (gluten-free)",
+          "when": { "avoid": ["allergen.gluten"] },
+          "adapt": {
+            "swap": { "ingredient.bulgur": "ingredient.quinoa_cooked" }
+          }
+        }
+      ],
+      "plannerTags": [
+        "cuisine.levantine",
+        "salad",
+        "mezze",
+        "fresh",
+        "weeknight"
+      ]
+    },
+
+    {
+      "id": "dish.levantine.fattoush",
+      "label": "Fattoush",
+      "aka": ["Fattoush salad", "Pita bread salad"],
+      "subprofiles": ["levantine.levant", "levantine.salads"],
+      "category": "salad",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 20, "totalMins": 20, "handsOffMins": 0 },
+      "servingStyles": ["family_style", "bowls"],
+      "mealArchetypes": ["archetype.salad_side", "archetype.meze_plate"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "veg",
+          "items": [
+            "ingredient.romaine",
+            "ingredient.tomato",
+            "ingredient.cucumber"
+          ],
+          "chooseOne": false
+        },
+        { "role": "starch", "items": ["ingredient.pita"], "chooseOne": false },
+        {
+          "role": "acid",
+          "items": ["ingredient.lemon_juice", "ingredient.sumac"],
+          "chooseOne": false
+        },
+        { "role": "fat", "items": ["ingredient.olive_oil"], "chooseOne": false }
+      ],
+      "techniques": ["technique.toss", "technique.toast", "technique.chop"],
+      "equipmentRecommended": ["equipment.skilet", "equipment.salad_bowl"],
+      "equipmentMinimum": [
+        "equipment.bowl",
+        "equipment.knife",
+        "equipment.board"
+      ],
+      "ingredientsCore": [
+        "ingredient.romaine",
+        "ingredient.tomato",
+        "ingredient.cucumber",
+        "ingredient.pita",
+        "ingredient.lemon_juice",
+        "ingredient.olive_oil",
+        "ingredient.sumac",
+        "ingredient.salt"
+      ],
+      "allergens": ["allergen.gluten"],
+      "dietFlags": ["diet.vegetarian"],
+      "pairingHints": {
+        "serveWith": ["dish.levantine.kofte", "dish.levantine.shish_tawook"]
+      },
+      "plannerTags": ["cuisine.levantine", "salad", "fresh", "mezze", "quick"]
+    },
+
+    {
+      "id": "dish.levantine.lentil_soup",
+      "label": "Levantine Lentil Soup",
+      "aka": ["Shorbet adas", "Lentil cumin soup"],
+      "subprofiles": ["levantine.levant", "levantine.soups"],
+      "category": "soup",
+      "difficulty": 2,
+      "heatTypical": 1,
+      "time": { "activeMins": 15, "totalMins": 50, "handsOffMins": 35 },
+      "servingStyles": ["one_pot", "bowls", "family_style"],
+      "mealArchetypes": ["archetype.soup_stew", "archetype.weeknight_bowl"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "legume",
+          "items": ["ingredient.lentils_brown", "ingredient.lentils_red"],
+          "chooseOne": true
+        },
+        {
+          "role": "aromatic",
+          "items": ["ingredient.onion", "ingredient.garlic"],
+          "chooseOne": false
+        },
+        {
+          "role": "spice",
+          "items": ["ingredient.cumin_ground"],
+          "chooseOne": false
+        },
+        {
+          "role": "acid",
+          "items": ["ingredient.lemon_juice"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "technique.saute",
+        "technique.simmer",
+        "technique.blend_optional"
+      ],
+      "equipmentRecommended": ["equipment.pot", "equipment.immersion_blender"],
+      "equipmentMinimum": ["equipment.pot", "equipment.stove"],
+      "ingredientsCore": [
+        "ingredient.lentils_red",
+        "ingredient.onion",
+        "ingredient.garlic",
+        "ingredient.cumin_ground",
+        "ingredient.olive_oil",
+        "ingredient.salt",
+        "ingredient.lemon_juice"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.vegetarian", "diet.vegan", "diet.gluten_free"],
+      "pairingHints": {
+        "serveWith": ["dish.levantine.pita", "dish.levantine.mujaddara"]
+      },
+      "plannerTags": [
+        "cuisine.levantine",
+        "soup",
+        "batch_friendly",
+        "freezer_friendly",
+        "weeknight"
+      ]
+    },
+
+    {
+      "id": "dish.levantine.mujaddara",
+      "label": "Mujaddara",
+      "aka": ["Mujadara", "Lentils and rice with caramelized onions"],
+      "subprofiles": ["levantine.levant", "levantine.staples"],
+      "category": "rice_dish",
+      "difficulty": 3,
+      "heatTypical": 0,
+      "time": { "activeMins": 25, "totalMins": 75, "handsOffMins": 50 },
+      "servingStyles": ["family_style", "bowls", "one_pot"],
+      "mealArchetypes": [
+        "archetype.stew_and_starch",
+        "archetype.veg_protein_bowl"
+      ],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "legume",
+          "items": ["ingredient.lentils_brown"],
+          "chooseOne": false
+        },
+        {
+          "role": "starch",
+          "items": ["ingredient.rice_long_grain", "ingredient.bulgur"],
+          "chooseOne": true
+        },
+        {
+          "role": "aromatic",
+          "items": ["ingredient.onion"],
+          "chooseOne": false
+        },
+        {
+          "role": "spice",
+          "items": ["ingredient.cumin_ground"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "technique.caramelize",
+        "technique.simmer",
+        "technique.rest"
+      ],
+      "equipmentRecommended": ["equipment.pot", "equipment.skilet"],
+      "equipmentMinimum": ["equipment.pot", "equipment.stove"],
+      "ingredientsCore": [
+        "ingredient.lentils_brown",
+        "ingredient.rice_long_grain",
+        "ingredient.onion",
+        "ingredient.olive_oil",
+        "ingredient.salt",
+        "ingredient.cumin_ground"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.vegetarian", "diet.vegan", "diet.gluten_free"],
+      "pairingHints": {
+        "serveWith": ["dish.levantine.labneh", "dish.levantine.fattoush"]
+      },
+      "plannerTags": [
+        "cuisine.levantine",
+        "rice",
+        "lentils",
+        "batch_friendly",
+        "freezer_friendly"
+      ]
+    },
+
+    {
+      "id": "dish.levantine.falafel",
+      "label": "Falafel",
+      "aka": ["Ta'amiya", "Chickpea fritters"],
+      "subprofiles": ["levantine.levant", "levantine.street_food"],
+      "category": "street_food",
+      "difficulty": 3,
+      "heatTypical": 1,
+      "time": { "activeMins": 35, "totalMins": 70, "handsOffMins": 35 },
+      "servingStyles": ["street_food", "snacks", "plates", "bowls"],
+      "mealArchetypes": ["archetype.fried_fritter", "archetype.sandwich_wrap"],
+      "signals": {
+        "batchFriendly": "mix_freezes",
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": "par_fry_or_mix"
+      },
+      "coreComponents": [
+        {
+          "role": "legume",
+          "items": ["ingredient.chickpeas"],
+          "chooseOne": false
+        },
+        {
+          "role": "aromatic",
+          "items": ["ingredient.onion", "ingredient.garlic"],
+          "chooseOne": false
+        },
+        {
+          "role": "greens",
+          "items": ["ingredient.parsley", "ingredient.cilantro"],
+          "chooseOne": true
+        },
+        {
+          "role": "spice",
+          "items": ["ingredient.cumin_ground", "ingredient.coriander_ground"],
+          "chooseOne": false
+        },
+        {
+          "role": "fat",
+          "items": ["ingredient.frying_oil"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "technique.soak",
+        "technique.grind",
+        "technique.fry",
+        "technique.bake_optional"
+      ],
+      "equipmentRecommended": [
+        "equipment.food_processor",
+        "equipment.deep_pot",
+        "equipment.thermometer"
+      ],
+      "equipmentMinimum": [
+        "equipment.pot",
+        "equipment.stove",
+        "equipment.slotted_spoon"
+      ],
+      "ingredientsCore": [
+        "ingredient.chickpeas",
+        "ingredient.onion",
+        "ingredient.garlic",
+        "ingredient.parsley",
+        "ingredient.cumin_ground",
+        "ingredient.coriander_ground",
+        "ingredient.salt",
+        "ingredient.frying_oil"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.vegetarian", "diet.vegan"],
+      "pairingHints": {
+        "serveWith": [
+          "dish.levantine.tahini_sauce",
+          "dish.levantine.pita",
+          "dish.levantine.pickles"
+        ]
+      },
+      "variations": [
+        {
+          "id": "variant.falafel.baked",
+          "label": "Oven-baked Falafel",
+          "when": { "avoid": ["method.deep_fry"] },
+          "adapt": {
+            "method": "bake",
+            "notes": "Brush with oil and bake until crisp; flip once."
+          }
+        }
+      ],
+      "plannerTags": [
+        "cuisine.levantine",
+        "falafel",
+        "street_food",
+        "vegetarian",
+        "make_ahead"
+      ]
+    },
+
+    {
+      "id": "dish.levantine.shawarma_chicken",
+      "label": "Chicken Shawarma",
+      "aka": ["Shawarma djaj", "Spiced roasted chicken"],
+      "subprofiles": ["levantine.levant", "levantine.grills"],
+      "category": "protein_main",
+      "difficulty": 3,
+      "heatTypical": 2,
+      "time": { "activeMins": 20, "totalMins": 80, "handsOffMins": 60 },
+      "servingStyles": ["street_food", "plates", "family_style", "bowls"],
+      "mealArchetypes": [
+        "archetype.grill_roast_protein",
+        "archetype.sandwich_wrap"
+      ],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": "marinated_raw"
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredient.chicken_thighs", "ingredient.chicken_breast"],
+          "chooseOne": true
+        },
+        {
+          "role": "spice",
+          "items": [
+            "ingredient.cumin_ground",
+            "ingredient.coriander_ground",
+            "ingredient.paprika"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "acid",
+          "items": ["ingredient.lemon_juice", "ingredient.vinegar"],
+          "chooseOne": true
+        },
+        {
+          "role": "fat",
+          "items": ["ingredient.olive_oil", "ingredient.yogurt_plain"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "technique.marinate",
+        "technique.roast",
+        "technique.grill_optional",
+        "technique.slice_thin"
+      ],
+      "equipmentRecommended": [
+        "equipment.oven",
+        "equipment.baking_sheet",
+        "equipment.cast_iron_skilet"
+      ],
+      "equipmentMinimum": [
+        "equipment.oven",
+        "equipment.knife",
+        "equipment.board"
+      ],
+      "ingredientsCore": [
+        "ingredient.chicken_thighs",
+        "ingredient.cumin_ground",
+        "ingredient.coriander_ground",
+        "ingredient.paprika",
+        "ingredient.garlic",
+        "ingredient.lemon_juice",
+        "ingredient.olive_oil",
+        "ingredient.salt"
+      ],
+      "allergens": ["allergen.dairy"],
+      "dietFlags": ["diet.gluten_free"],
+      "pairingHints": {
+        "serveWith": [
+          "dish.levantine.toum",
+          "dish.levantine.pita",
+          "dish.levantine.fattoush"
+        ]
+      },
+      "plannerTags": [
+        "cuisine.levantine",
+        "chicken",
+        "shawarma",
+        "weeknight",
+        "batch_friendly"
+      ]
+    },
+
+    {
+      "id": "dish.levantine.kofte",
+      "label": "Kofta (Kefta) Kebabs",
+      "aka": ["Kofta", "Kefta", "Ground meat kebabs"],
+      "subprofiles": ["levantine.levant", "levantine.grills"],
+      "category": "protein_main",
+      "difficulty": 3,
+      "heatTypical": 1,
+      "time": { "activeMins": 25, "totalMins": 40, "handsOffMins": 15 },
+      "servingStyles": ["grill_and_sides", "family_style", "plates"],
+      "mealArchetypes": [
+        "archetype.grill_roast_protein",
+        "archetype.kebab_plate"
+      ],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": "shape_and_freeze_raw"
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredient.ground_lamb", "ingredient.ground_beef"],
+          "chooseOne": true
+        },
+        {
+          "role": "aromatic",
+          "items": [
+            "ingredient.onion",
+            "ingredient.garlic",
+            "ingredient.parsley"
+          ],
+          "chooseOne": false
+        },
+        {
+          "role": "spice",
+          "items": ["ingredient.allspice_ground", "ingredient.cumin_ground"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "technique.mix",
+        "technique.shape",
+        "technique.grill",
+        "technique.pan_sear_optional"
+      ],
+      "equipmentRecommended": [
+        "equipment.grill",
+        "equipment.skewers",
+        "equipment.cast_iron_skilet"
+      ],
+      "equipmentMinimum": [
+        "equipment.skilet",
+        "equipment.stove",
+        "equipment.bowl"
+      ],
+      "ingredientsCore": [
+        "ingredient.ground_lamb",
+        "ingredient.onion",
+        "ingredient.garlic",
+        "ingredient.parsley",
+        "ingredient.salt",
+        "ingredient.black_pepper"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.gluten_free", "diet.keto_friendly"],
+      "pairingHints": {
+        "serveWith": [
+          "dish.levantine.rice_pilaf",
+          "dish.levantine.yogurt_cucumber_sauce",
+          "dish.levantine.tomato_cucumber_salad"
+        ]
+      },
+      "plannerTags": [
+        "cuisine.levantine",
+        "kebab",
+        "grill",
+        "protein",
+        "freezer_friendly"
+      ]
+    },
+
+    {
+      "id": "dish.levantine.shish_tawook",
+      "label": "Shish Tawook",
+      "aka": ["Shish taouk", "Yogurt-garlic chicken skewers"],
+      "subprofiles": ["levantine.levant", "levantine.grills"],
+      "category": "protein_main",
+      "difficulty": 3,
+      "heatTypical": 1,
+      "time": { "activeMins": 20, "totalMins": 70, "handsOffMins": 50 },
+      "servingStyles": ["grill_and_sides", "plates", "family_style"],
+      "mealArchetypes": [
+        "archetype.grill_roast_protein",
+        "archetype.kebab_plate"
+      ],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": "marinated_raw"
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredient.chicken_breast", "ingredient.chicken_thighs"],
+          "chooseOne": true
+        },
+        {
+          "role": "fat",
+          "items": ["ingredient.yogurt_plain"],
+          "chooseOne": false
+        },
+        {
+          "role": "acid",
+          "items": ["ingredient.lemon_juice"],
+          "chooseOne": false
+        },
+        {
+          "role": "aromatic",
+          "items": ["ingredient.garlic"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "technique.marinate",
+        "technique.skewer",
+        "technique.grill"
+      ],
+      "equipmentRecommended": ["equipment.grill", "equipment.skewers"],
+      "equipmentMinimum": ["equipment.skewers", "equipment.skilet"],
+      "ingredientsCore": [
+        "ingredient.chicken_breast",
+        "ingredient.yogurt_plain",
+        "ingredient.garlic",
+        "ingredient.lemon_juice",
+        "ingredient.olive_oil",
+        "ingredient.salt"
+      ],
+      "allergens": ["allergen.dairy"],
+      "dietFlags": ["diet.gluten_free"],
+      "pairingHints": {
+        "serveWith": [
+          "dish.levantine.toum",
+          "dish.levantine.pita",
+          "dish.levantine.fattoush"
+        ]
+      },
+      "plannerTags": [
+        "cuisine.levantine",
+        "chicken",
+        "grill",
+        "kebab",
+        "make_ahead"
+      ]
+    },
+
+    {
+      "id": "dish.levantine.rice_pilaf",
+      "label": "Levantine Rice Pilaf",
+      "aka": ["Rice with vermicelli", "Riz bi sha'riyeh"],
+      "subprofiles": ["levantine.levant", "levantine.staples"],
+      "category": "starch_side",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 10, "totalMins": 30, "handsOffMins": 20 },
+      "servingStyles": ["family_style", "plates"],
+      "mealArchetypes": ["archetype.starch_side", "archetype.grill_plate"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "starch",
+          "items": ["ingredient.rice_long_grain"],
+          "chooseOne": false
+        },
+        {
+          "role": "starch",
+          "items": ["ingredient.vermicelli"],
+          "chooseOne": true
+        },
+        {
+          "role": "fat",
+          "items": ["ingredient.butter", "ingredient.olive_oil"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["technique.toast", "technique.simmer", "technique.rest"],
+      "equipmentRecommended": ["equipment.pot", "equipment.lid"],
+      "equipmentMinimum": ["equipment.pot", "equipment.stove"],
+      "ingredientsCore": [
+        "ingredient.rice_long_grain",
+        "ingredient.vermicelli",
+        "ingredient.salt"
+      ],
+      "allergens": ["allergen.gluten", "allergen.dairy"],
+      "dietFlags": ["diet.vegetarian"],
+      "pairingHints": {
+        "serveWith": ["dish.levantine.kofte", "dish.levantine.shawarma_chicken"]
+      },
+      "plannerTags": [
+        "cuisine.levantine",
+        "rice",
+        "starch",
+        "side",
+        "weeknight"
+      ]
+    },
+
+    {
+      "id": "dish.levantine.pita",
+      "label": "Pita Bread",
+      "aka": ["Arabic bread", "Pocket bread"],
+      "subprofiles": ["levantine.levant", "levantine.breads"],
+      "category": "bread",
+      "difficulty": 3,
+      "heatTypical": 0,
+      "time": { "activeMins": 25, "totalMins": 120, "handsOffMins": 95 },
+      "servingStyles": ["family_style", "street_food", "snacks"],
+      "mealArchetypes": ["archetype.bread_flatbread"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "grain",
+          "items": ["ingredient.wheat_flour"],
+          "chooseOne": false
+        },
+        { "role": "yeast", "items": ["ingredient.yeast"], "chooseOne": false },
+        { "role": "fat", "items": ["ingredient.olive_oil"], "chooseOne": true }
+      ],
+      "techniques": [
+        "technique.mix",
+        "technique.knead",
+        "technique.proof",
+        "technique.bake_hot"
+      ],
+      "equipmentRecommended": [
+        "equipment.stand_mixer",
+        "equipment.baking_stone",
+        "equipment.oven"
+      ],
+      "equipmentMinimum": ["equipment.oven", "equipment.baking_sheet"],
+      "ingredientsCore": [
+        "ingredient.wheat_flour",
+        "ingredient.yeast",
+        "ingredient.salt",
+        "ingredient.water"
+      ],
+      "allergens": ["allergen.gluten"],
+      "dietFlags": ["diet.vegetarian", "diet.vegan"],
+      "pairingHints": {
+        "serveWith": [
+          "dish.levantine.hummus",
+          "dish.levantine.baba_ganoush",
+          "dish.levantine.falafel"
+        ]
+      },
+      "plannerTags": [
+        "cuisine.levantine",
+        "bread",
+        "staple",
+        "freezer_friendly"
+      ]
+    },
+
+    {
+      "id": "dish.levantine.labneh",
+      "label": "Labneh",
+      "aka": ["Strained yogurt", "Yogurt cheese"],
+      "subprofiles": ["levantine.levant", "levantine.mezzes"],
+      "category": "mezze",
+      "difficulty": 1,
+      "heatTypical": 0,
+      "time": { "activeMins": 5, "totalMins": 720, "handsOffMins": 715 },
+      "servingStyles": ["snacks", "bowls", "family_style"],
+      "mealArchetypes": [
+        "archetype.dip_spread",
+        "archetype.breakfast_plate",
+        "archetype.meze_plate"
+      ],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "dairy",
+          "items": ["ingredient.yogurt_plain"],
+          "chooseOne": false
+        },
+        { "role": "fat", "items": ["ingredient.olive_oil"], "chooseOne": true },
+        { "role": "spice", "items": ["ingredient.zaatar"], "chooseOne": true }
+      ],
+      "techniques": ["technique.strain", "technique.season"],
+      "equipmentRecommended": [
+        "equipment.cheesecloth",
+        "equipment.fine_mesh_sieve"
+      ],
+      "equipmentMinimum": ["equipment.bowl"],
+      "ingredientsCore": ["ingredient.yogurt_plain", "ingredient.salt"],
+      "allergens": ["allergen.dairy"],
+      "dietFlags": ["diet.vegetarian", "diet.gluten_free"],
+      "pairingHints": {
+        "serveWith": [
+          "dish.levantine.pita",
+          "dish.levantine.tomato_cucumber_salad"
+        ]
+      },
+      "plannerTags": ["cuisine.levantine", "mezze", "breakfast", "make_ahead"]
+    },
+
+    {
+      "id": "dish.levantine.toum",
+      "label": "Toum (Garlic Sauce)",
+      "aka": ["Lebanese garlic sauce"],
+      "subprofiles": ["levantine.levant", "levantine.condiments"],
+      "category": "condiment",
+      "difficulty": 2,
+      "heatTypical": 0,
+      "time": { "activeMins": 15, "totalMins": 15, "handsOffMins": 0 },
+      "servingStyles": ["snacks", "bowls", "family_style"],
+      "mealArchetypes": ["archetype.condiment_sauce"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "aromatic",
+          "items": ["ingredient.garlic"],
+          "chooseOne": false
+        },
+        {
+          "role": "fat",
+          "items": ["ingredient.neutral_oil"],
+          "chooseOne": false
+        },
+        {
+          "role": "acid",
+          "items": ["ingredient.lemon_juice"],
+          "chooseOne": false
+        }
+      ],
+      "techniques": [
+        "technique.emulsify",
+        "technique.blend",
+        "technique.season"
+      ],
+      "equipmentRecommended": ["equipment.food_processor", "equipment.blender"],
+      "equipmentMinimum": ["equipment.bowl", "equipment.whisk"],
+      "ingredientsCore": [
+        "ingredient.garlic",
+        "ingredient.neutral_oil",
+        "ingredient.lemon_juice",
+        "ingredient.salt"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.vegan", "diet.gluten_free"],
+      "pairingHints": {
+        "serveWith": [
+          "dish.levantine.shawarma_chicken",
+          "dish.levantine.shish_tawook"
+        ]
+      },
+      "plannerTags": [
+        "cuisine.levantine",
+        "sauce",
+        "condiment",
+        "garlic",
+        "batch_friendly"
+      ]
+    },
+
+    {
+      "id": "dish.levantine.tomato_cucumber_salad",
+      "label": "Tomato Cucumber Salad",
+      "aka": ["Israeli salad", "Salatat banadura wa khiyar"],
+      "subprofiles": ["levantine.levant", "levantine.salads"],
+      "category": "salad",
+      "difficulty": 1,
+      "heatTypical": 0,
+      "time": { "activeMins": 10, "totalMins": 10, "handsOffMins": 0 },
+      "servingStyles": ["family_style", "bowls"],
+      "mealArchetypes": ["archetype.salad_side", "archetype.breakfast_plate"],
+      "signals": {
+        "batchFriendly": false,
+        "weeknightPossible": true,
+        "leftoversGood": false,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        {
+          "role": "veg",
+          "items": ["ingredient.tomato", "ingredient.cucumber"],
+          "chooseOne": false
+        },
+        {
+          "role": "acid",
+          "items": ["ingredient.lemon_juice"],
+          "chooseOne": true
+        },
+        { "role": "fat", "items": ["ingredient.olive_oil"], "chooseOne": true }
+      ],
+      "techniques": ["technique.chop", "technique.toss", "technique.season"],
+      "equipmentRecommended": ["equipment.chef_knife", "equipment.board"],
+      "equipmentMinimum": [
+        "equipment.knife",
+        "equipment.board",
+        "equipment.bowl"
+      ],
+      "ingredientsCore": [
+        "ingredient.tomato",
+        "ingredient.cucumber",
+        "ingredient.salt"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.vegan", "diet.vegetarian", "diet.gluten_free"],
+      "pairingHints": {
+        "serveWith": [
+          "dish.levantine.labneh",
+          "dish.levantine.pita",
+          "dish.levantine.kofte"
+        ]
+      },
+      "plannerTags": [
+        "cuisine.levantine",
+        "salad",
+        "quick",
+        "fresh",
+        "weeknight"
+      ]
+    },
+
+    {
+      "id": "dish.levantine.kibbeh_baked",
+      "label": "Baked Kibbeh",
+      "aka": ["Kibbeh bil sanieh", "Baked bulgur and meat pie"],
+      "subprofiles": ["levantine.levant", "levantine.mains"],
+      "category": "main",
+      "difficulty": 4,
+      "heatTypical": 1,
+      "time": { "activeMins": 45, "totalMins": 90, "handsOffMins": 45 },
+      "servingStyles": ["family_style", "plated_meals"],
+      "mealArchetypes": ["archetype.baked_main", "archetype.stew_and_starch"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": true
+      },
+      "coreComponents": [
+        {
+          "role": "grain",
+          "items": ["ingredient.bulgur_fine"],
+          "chooseOne": false
+        },
+        {
+          "role": "protein",
+          "items": ["ingredient.ground_lamb", "ingredient.ground_beef"],
+          "chooseOne": true
+        },
+        {
+          "role": "aromatic",
+          "items": ["ingredient.onion"],
+          "chooseOne": false
+        },
+        {
+          "role": "spice",
+          "items": ["ingredient.allspice_ground", "ingredient.cinnamon_ground"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "technique.soak",
+        "technique.mix",
+        "technique.layer",
+        "technique.bake"
+      ],
+      "equipmentRecommended": [
+        "equipment.baking_dish",
+        "equipment.food_processor"
+      ],
+      "equipmentMinimum": ["equipment.oven", "equipment.baking_dish"],
+      "ingredientsCore": [
+        "ingredient.bulgur_fine",
+        "ingredient.ground_lamb",
+        "ingredient.onion",
+        "ingredient.salt"
+      ],
+      "allergens": ["allergen.gluten"],
+      "dietFlags": [],
+      "pairingHints": {
+        "serveWith": [
+          "dish.levantine.fattoush",
+          "dish.levantine.yogurt_cucumber_sauce"
+        ]
+      },
+      "plannerTags": [
+        "cuisine.levantine",
+        "kibbeh",
+        "baked",
+        "make_ahead",
+        "freezer_friendly"
+      ]
+    },
+
+    {
+      "id": "dish.levantine.mansaf_like_lamb_rice",
+      "label": "Lamb Rice Platter (Levant-style)",
+      "aka": ["Lamb over rice with yogurt sauce", "Mansaf-inspired platter"],
+      "subprofiles": ["levantine.levant", "levantine.feasts"],
+      "category": "main",
+      "difficulty": 4,
+      "heatTypical": 1,
+      "time": { "activeMins": 35, "totalMins": 140, "handsOffMins": 105 },
+      "servingStyles": ["holiday_feasts", "family_style", "plated_meals"],
+      "mealArchetypes": [
+        "archetype.feast_platter",
+        "archetype.stew_and_starch"
+      ],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": "components_separate"
+      },
+      "coreComponents": [
+        {
+          "role": "protein",
+          "items": ["ingredient.lamb_shanks", "ingredient.lamb_shoulder"],
+          "chooseOne": true
+        },
+        {
+          "role": "starch",
+          "items": ["ingredient.rice_long_grain"],
+          "chooseOne": false
+        },
+        {
+          "role": "dairy",
+          "items": ["ingredient.yogurt_plain"],
+          "chooseOne": true
+        },
+        {
+          "role": "spice",
+          "items": ["ingredient.allspice_ground", "ingredient.cardamom_ground"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": [
+        "technique.braise",
+        "technique.simmer",
+        "technique.rice_pilaf",
+        "technique.assemble_platter"
+      ],
+      "equipmentRecommended": [
+        "equipment.dutch_oven",
+        "equipment.pot",
+        "equipment.roasting_pan"
+      ],
+      "equipmentMinimum": ["equipment.pot", "equipment.stove"],
+      "ingredientsCore": [
+        "ingredient.lamb_shoulder",
+        "ingredient.rice_long_grain",
+        "ingredient.onion",
+        "ingredient.salt"
+      ],
+      "allergens": ["allergen.dairy"],
+      "dietFlags": ["diet.gluten_free"],
+      "pairingHints": {
+        "serveWith": [
+          "dish.levantine.tomato_cucumber_salad",
+          "dish.levantine.pickles"
+        ]
+      },
+      "plannerTags": [
+        "cuisine.levantine",
+        "lamb",
+        "feast",
+        "platter",
+        "make_ahead"
+      ]
+    },
+
+    {
+      "id": "dish.levantine.baklava",
+      "label": "Baklava",
+      "aka": ["Nut and honey pastry", "Baklawa"],
+      "subprofiles": ["levantine.levant", "levantine.desserts"],
+      "category": "dessert",
+      "difficulty": 4,
+      "heatTypical": 0,
+      "time": { "activeMins": 40, "totalMins": 120, "handsOffMins": 80 },
+      "servingStyles": ["snacks", "holiday_feasts", "family_style"],
+      "mealArchetypes": ["archetype.dessert_pastry"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": false,
+        "leftoversGood": true,
+        "freezerFriendly": "bake_then_freeze"
+      },
+      "coreComponents": [
+        {
+          "role": "grain",
+          "items": ["ingredient.phyllo_dough"],
+          "chooseOne": false
+        },
+        {
+          "role": "fat",
+          "items": ["ingredient.butter", "ingredient.ghee"],
+          "chooseOne": true
+        },
+        {
+          "role": "nuts",
+          "items": ["ingredient.walnuts", "ingredient.pistachios"],
+          "chooseOne": true
+        },
+        {
+          "role": "sweetener",
+          "items": ["ingredient.honey", "ingredient.sugar"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["technique.layer", "technique.bake", "technique.syrup"],
+      "equipmentRecommended": ["equipment.baking_dish", "equipment.saucepan"],
+      "equipmentMinimum": ["equipment.oven", "equipment.baking_dish"],
+      "ingredientsCore": [
+        "ingredient.phyllo_dough",
+        "ingredient.butter",
+        "ingredient.walnuts",
+        "ingredient.honey"
+      ],
+      "allergens": ["allergen.gluten", "allergen.dairy", "allergen.tree_nuts"],
+      "dietFlags": ["diet.vegetarian"],
+      "pairingHints": { "serveWith": ["dish.levantine.mint_tea"] },
+      "plannerTags": [
+        "cuisine.levantine",
+        "dessert",
+        "pastry",
+        "holiday",
+        "nuts"
+      ]
+    },
+
+    {
+      "id": "dish.levantine.mint_tea",
+      "label": "Mint Tea",
+      "aka": ["Nana tea", "Fresh mint tea"],
+      "subprofiles": ["levantine.levant", "levantine.drinks"],
+      "category": "drink",
+      "difficulty": 1,
+      "heatTypical": 0,
+      "time": { "activeMins": 5, "totalMins": 10, "handsOffMins": 5 },
+      "servingStyles": ["snacks", "family_style", "holiday_feasts"],
+      "mealArchetypes": ["archetype.beverage"],
+      "signals": {
+        "batchFriendly": true,
+        "weeknightPossible": true,
+        "leftoversGood": true,
+        "freezerFriendly": false
+      },
+      "coreComponents": [
+        { "role": "herb", "items": ["ingredient.mint"], "chooseOne": false },
+        {
+          "role": "base",
+          "items": ["ingredient.black_tea"],
+          "chooseOne": true
+        },
+        {
+          "role": "sweetener",
+          "items": ["ingredient.sugar", "ingredient.honey"],
+          "chooseOne": true
+        }
+      ],
+      "techniques": ["technique.steep", "technique.strain_optional"],
+      "equipmentRecommended": ["equipment.kettle", "equipment.teapot"],
+      "equipmentMinimum": ["equipment.pot"],
+      "ingredientsCore": [
+        "ingredient.mint",
+        "ingredient.black_tea",
+        "ingredient.water"
+      ],
+      "allergens": [],
+      "dietFlags": ["diet.vegan", "diet.gluten_free"],
+      "pairingHints": {
+        "serveWith": ["dish.levantine.baklava", "dish.levantine.maamoul"]
+      },
+      "plannerTags": ["cuisine.levantine", "drink", "tea", "mint", "quick"]
+    }
+  ],
+  "indexes": {
+    "byCuisine": {
+      "cuisines.levantine": [
+        "dish.levantine.hummus",
+        "dish.levantine.baba_ganoush",
+        "dish.levantine.tabouleh",
+        "dish.levantine.fattoush",
+        "dish.levantine.lentil_soup",
+        "dish.levantine.mujaddara",
+        "dish.levantine.falafel",
+        "dish.levantine.shawarma_chicken",
+        "dish.levantine.kofte",
+        "dish.levantine.shish_tawook",
+        "dish.levantine.rice_pilaf",
+        "dish.levantine.pita",
+        "dish.levantine.labneh",
+        "dish.levantine.toum",
+        "dish.levantine.tomato_cucumber_salad",
+        "dish.levantine.kibbeh_baked",
+        "dish.levantine.mansaf_like_lamb_rice",
+        "dish.levantine.baklava",
+        "dish.levantine.mint_tea"
+      ]
+    },
+    "byArchetype": {
+      "archetype.meze_plate": [
+        "dish.levantine.hummus",
+        "dish.levantine.baba_ganoush",
+        "dish.levantine.tabouleh",
+        "dish.levantine.fattoush",
+        "dish.levantine.labneh"
+      ],
+      "archetype.soup_stew": ["dish.levantine.lentil_soup"],
+      "archetype.veg_protein_bowl": ["dish.levantine.mujaddara"],
+      "archetype.fried_fritter": ["dish.levantine.falafel"],
+      "archetype.sandwich_wrap": [
+        "dish.levantine.falafel",
+        "dish.levantine.shawarma_chicken"
+      ],
+      "archetype.kebab_plate": [
+        "dish.levantine.kofte",
+        "dish.levantine.shish_tawook"
+      ],
+      "archetype.starch_side": ["dish.levantine.rice_pilaf"],
+      "archetype.bread_flatbread": ["dish.levantine.pita"],
+      "archetype.condiment_sauce": ["dish.levantine.toum"],
+      "archetype.dessert_pastry": ["dish.levantine.baklava"],
+      "archetype.beverage": ["dish.levantine.mint_tea"]
+    },
+    "aliasIndex": {
+      "hummus": "dish.levantine.hummus",
+      "hummus bi tahini": "dish.levantine.hummus",
+      "baba ganoush": "dish.levantine.baba_ganoush",
+      "baba ghanouj": "dish.levantine.baba_ganoush",
+      "tabouleh": "dish.levantine.tabouleh",
+      "tabbouleh": "dish.levantine.tabouleh",
+      "fattoush": "dish.levantine.fattoush",
+      "shorbet adas": "dish.levantine.lentil_soup",
+      "mujaddara": "dish.levantine.mujaddara",
+      "mujadara": "dish.levantine.mujaddara",
+      "falafel": "dish.levantine.falafel",
+      "toum": "dish.levantine.toum",
+      "garlic sauce": "dish.levantine.toum",
+      "pita": "dish.levantine.pita",
+      "labneh": "dish.levantine.labneh",
+      "baklava": "dish.levantine.baklava",
+      "mint tea": "dish.levantine.mint_tea",
+      "shish tawook": "dish.levantine.shish_tawook",
+      "shish taouk": "dish.levantine.shish_tawook",
+      "chicken shawarma": "dish.levantine.shawarma_chicken",
+      "kofta": "dish.levantine.kofte",
+      "kefta": "dish.levantine.kofte",
+      "israeli salad": "dish.levantine.tomato_cucumber_salad",
+      "tomato cucumber salad": "dish.levantine.tomato_cucumber_salad",
+      "kibbeh": "dish.levantine.kibbeh_baked",
+      "baked kibbeh": "dish.levantine.kibbeh_baked"
+    },
+    "keywordIndex": {
+      "mezze": [
+        "dish.levantine.hummus",
+        "dish.levantine.baba_ganoush",
+        "dish.levantine.tabouleh",
+        "dish.levantine.fattoush",
+        "dish.levantine.labneh"
+      ],
+      "salad": [
+        "dish.levantine.tabouleh",
+        "dish.levantine.fattoush",
+        "dish.levantine.tomato_cucumber_salad"
+      ],
+      "lentils": ["dish.levantine.lentil_soup", "dish.levantine.mujaddara"],
+      "chickpeas": ["dish.levantine.hummus", "dish.levantine.falafel"],
+      "garlic": [
+        "dish.levantine.toum",
+        "dish.levantine.shawarma_chicken",
+        "dish.levantine.shish_tawook"
+      ],
+      "grill": ["dish.levantine.kofte", "dish.levantine.shish_tawook"],
+      "rice": [
+        "dish.levantine.mujaddara",
+        "dish.levantine.rice_pilaf",
+        "dish.levantine.mansaf_like_lamb_rice"
+      ],
+      "dessert": ["dish.levantine.baklava"],
+      "tea": ["dish.levantine.mint_tea"]
+    },
+    "tagIndex": {
+      "cuisine.levantine": [
+        "dish.levantine.hummus",
+        "dish.levantine.baba_ganoush",
+        "dish.levantine.tabouleh",
+        "dish.levantine.fattoush",
+        "dish.levantine.lentil_soup",
+        "dish.levantine.mujaddara",
+        "dish.levantine.falafel",
+        "dish.levantine.shawarma_chicken",
+        "dish.levantine.kofte",
+        "dish.levantine.shish_tawook",
+        "dish.levantine.rice_pilaf",
+        "dish.levantine.pita",
+        "dish.levantine.labneh",
+        "dish.levantine.toum",
+        "dish.levantine.tomato_cucumber_salad",
+        "dish.levantine.kibbeh_baked",
+        "dish.levantine.mansaf_like_lamb_rice",
+        "dish.levantine.baklava",
+        "dish.levantine.mint_tea"
+      ],
+      "mezze": [
+        "dish.levantine.hummus",
+        "dish.levantine.baba_ganoush",
+        "dish.levantine.tabouleh",
+        "dish.levantine.fattoush",
+        "dish.levantine.labneh"
+      ],
+      "salad": [
+        "dish.levantine.tabouleh",
+        "dish.levantine.fattoush",
+        "dish.levantine.tomato_cucumber_salad"
+      ],
+      "soup": ["dish.levantine.lentil_soup"],
+      "street_food": [
+        "dish.levantine.falafel",
+        "dish.levantine.shawarma_chicken"
+      ],
+      "kebab": ["dish.levantine.kofte", "dish.levantine.shish_tawook"],
+      "dessert": ["dish.levantine.baklava"],
+      "drink": ["dish.levantine.mint_tea"],
+      "batch_friendly": [
+        "dish.levantine.hummus",
+        "dish.levantine.baba_ganoush",
+        "dish.levantine.lentil_soup",
+        "dish.levantine.mujaddara",
+        "dish.levantine.shawarma_chicken",
+        "dish.levantine.kofte",
+        "dish.levantine.shish_tawook",
+        "dish.levantine.rice_pilaf",
+        "dish.levantine.pita",
+        "dish.levantine.labneh",
+        "dish.levantine.toum",
+        "dish.levantine.kibbeh_baked",
+        "dish.levantine.baklava",
+        "dish.levantine.mint_tea"
+      ],
+      "freezer_friendly": [
+        "dish.levantine.lentil_soup",
+        "dish.levantine.mujaddara",
+        "dish.levantine.kofte",
+        "dish.levantine.rice_pilaf",
+        "dish.levantine.pita",
+        "dish.levantine.kibbeh_baked",
+        "dish.levantine.baklava"
+      ],
+      "weeknight": [
+        "dish.levantine.hummus",
+        "dish.levantine.tabouleh",
+        "dish.levantine.fattoush",
+        "dish.levantine.lentil_soup",
+        "dish.levantine.rice_pilaf",
+        "dish.levantine.tomato_cucumber_salad",
+        "dish.levantine.kofte",
+        "dish.levantine.labneh",
+        "dish.levantine.toum",
+        "dish.levantine.mint_tea"
+      ],
+      "vegetarian": [
+        "dish.levantine.hummus",
+        "dish.levantine.baba_ganoush",
+        "dish.levantine.tabouleh",
+        "dish.levantine.fattoush",
+        "dish.levantine.lentil_soup",
+        "dish.levantine.mujaddara",
+        "dish.levantine.falafel",
+        "dish.levantine.pita",
+        "dish.levantine.labneh",
+        "dish.levantine.baklava"
+      ],
+      "vegan": [
+        "dish.levantine.hummus",
+        "dish.levantine.baba_ganoush",
+        "dish.levantine.lentil_soup",
+        "dish.levantine.mujaddara",
+        "dish.levantine.falafel",
+        "dish.levantine.toum",
+        "dish.levantine.tomato_cucumber_salad",
+        "dish.levantine.mint_tea"
+      ]
+    }
+  },
+  "description": "Levantine canonical dishes catalog for SSA planners and browse UI.",
+  "tags": ["cuisine.levantine", "catalog.dishes", "canonical"],
+  "source": {
+    "curation": "ssa.catalogs",
+    "notes": "Dish names and typical roles reflect common Levantine patterns; variations are represented via variations/subprofiles."
+  },
+  "defaults": {
+    "cuisineId": "cuisines.levantine",
+    "locale": "en-US"
+  },
+  "groups": [
+    {
+      "id": "group.levantine.mezze",
+      "label": "Mezze",
+      "items": [
+        "dish.levantine.hummus",
+        "dish.levantine.baba_ganoush",
+        "dish.levantine.labneh",
+        "dish.levantine.toum"
+      ]
+    },
+    {
+      "id": "group.levantine.salads",
+      "label": "Salads",
+      "items": [
+        "dish.levantine.tabouleh",
+        "dish.levantine.fattoush",
+        "dish.levantine.tomato_cucumber_salad"
+      ]
+    },
+    {
+      "id": "group.levantine.mains",
+      "label": "Mains",
+      "items": [
+        "dish.levantine.shawarma_chicken",
+        "dish.levantine.kofte",
+        "dish.levantine.shish_tawook",
+        "dish.levantine.kibbeh_baked",
+        "dish.levantine.mansaf_like_lamb_rice"
+      ]
+    },
+    {
+      "id": "group.levantine.staples",
+      "label": "Staples",
+      "items": [
+        "dish.levantine.rice_pilaf",
+        "dish.levantine.pita",
+        "dish.levantine.mujaddara",
+        "dish.levantine.lentil_soup",
+        "dish.levantine.falafel"
+      ]
+    },
+    {
+      "id": "group.levantine.sweets_drinks",
+      "label": "Sweets & Drinks",
+      "items": ["dish.levantine.baklava", "dish.levantine.mint_tea"]
+    }
+  ],
+  "index": {
+    "primaryCuisine": "cuisines.levantine",
+    "entryCount": 19
+  }
+}

@@ -1,0 +1,474 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:35:00Z",
+  "meta": {
+    "id": "cuisines.japanese.recipes.tonkatsu",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Tonkatsu (Japanese Breaded Pork Cutlet)",
+    "subtitle": "Crispy panko-crusted pork cutlet with shredded cabbage + tonkatsu-style sauce",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa-core",
+      "notes": [
+        "Canonical SSA catalog recipe.",
+        "Deterministic: includes pan-fry default and oven/air-fryer adaptations.",
+        "Includes oil safety, doneness targets, and make-ahead notes."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "japanese",
+    "category": "fried_cutlet",
+    "mealArchetypes": ["plates", "plated_meals", "bowls"],
+    "servingStyles": ["plates", "family_style"],
+    "plannerTags": [
+      "cuisine.japanese",
+      "dish.tonkatsu",
+      "course.main",
+      "crispy",
+      "panko",
+      "weeknight.friendly",
+      "kid.friendly"
+    ]
+  },
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 1, "unit": "cutlet" },
+    "notes": "Serves 4 with cabbage + sauce; scale as needed."
+  },
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 10,
+    "totalMins": 35
+  },
+  "difficulty": "intermediate",
+  "signals": {
+    "batchFriendly": "some",
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": "breaded_raw",
+    "notes": "Breaded raw cutlets freeze well. Fried cutlets re-crisp best in oven/air fryer."
+  },
+  "tasteProfile": {
+    "sweet": 2,
+    "salty": 2,
+    "umami": 2,
+    "acid": 1,
+    "heat": 0,
+    "balanceNotes": "Crisp savory pork + tangy-sweet tonkatsu sauce + fresh cabbage."
+  },
+  "equipment": {
+    "minimum": [
+      "cutting_board",
+      "chef_knife",
+      "measuring_spoons",
+      "mixing_bowls",
+      "tongs",
+      "skillet_or_dutch_oven",
+      "instant_read_thermometer"
+    ],
+    "recommended": [
+      "wire_rack",
+      "sheet_pan",
+      "shallow_dredge_trays",
+      "kitchen_scale",
+      "splatter_screen"
+    ]
+  },
+  "dietFlags": [],
+  "allergens": {
+    "mayContain": ["gluten", "egg", "soy"],
+    "commonTriggers": ["panko", "flour", "egg_wash", "sauce_optional_soy"],
+    "notes": [
+      "For gluten-free: use GF flour + GF panko/cracker crumbs and verify sauce ingredients.",
+      "For egg-free: use aquafaba or buttermilk substitute for dredge (results vary)."
+    ]
+  },
+  "ingredients": [
+    {
+      "id": "pork_loin_chops",
+      "label": "Boneless pork loin chops (or pork cutlets), 1/2–3/4 inch thick",
+      "role": "protein",
+      "amount": { "value": 600, "unit": "g" },
+      "notes": "About 4 pieces (5–6 oz each). Pork tenderloin slices also work."
+    },
+    {
+      "id": "salt",
+      "label": "Fine salt",
+      "role": "seasoning",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "About 1 tsp; adjust to taste."
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": "Optional but recommended."
+    },
+    {
+      "id": "all_purpose_flour",
+      "label": "All-purpose flour",
+      "role": "thickener",
+      "amount": { "value": 60, "unit": "g" },
+      "notes": "About 1/2 cup for dredging."
+    },
+    {
+      "id": "eggs",
+      "label": "Eggs",
+      "role": "binder",
+      "amount": { "value": 2, "unit": "each" },
+      "notes": "Beat well for egg wash."
+    },
+    {
+      "id": "panko_breadcrumbs",
+      "label": "Panko breadcrumbs",
+      "role": "coating",
+      "amount": { "value": 120, "unit": "g" },
+      "notes": "About 2 cups; use fresh, dry panko for best crunch."
+    },
+    {
+      "id": "neutral_oil_for_frying",
+      "label": "Neutral oil (canola, peanut, or sunflower) for frying",
+      "role": "fat",
+      "amount": { "value": 750, "unit": "ml" },
+      "notes": "Depth depends on pan; aim for 1/2–3/4 inch oil for shallow-fry."
+    },
+
+    {
+      "id": "green_cabbage",
+      "label": "Green cabbage, very finely shredded",
+      "role": "side",
+      "amount": { "value": 350, "unit": "g" },
+      "optional": true,
+      "notes": "Classic tonkatsu side; soak in cold water briefly for extra crispness."
+    },
+    {
+      "id": "lemon_wedges",
+      "label": "Lemon wedges",
+      "role": "garnish",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    },
+
+    {
+      "id": "tonkatsu_sauce",
+      "label": "Tonkatsu sauce (store-bought)",
+      "role": "sauce",
+      "amount": { "value": 120, "unit": "ml" },
+      "optional": true,
+      "notes": "About 1/2 cup; serve for dipping or drizzling."
+    },
+
+    {
+      "id": "ketchup",
+      "label": "Ketchup",
+      "role": "sauce",
+      "amount": { "value": 60, "unit": "ml" },
+      "optional": true,
+      "notes": "For quick DIY tonkatsu-style sauce."
+    },
+    {
+      "id": "worcestershire_sauce",
+      "label": "Worcestershire sauce",
+      "role": "sauce",
+      "amount": { "value": 30, "unit": "ml" },
+      "optional": true,
+      "notes": "For quick DIY tonkatsu-style sauce."
+    },
+    {
+      "id": "soy_sauce",
+      "label": "Soy sauce",
+      "role": "sauce",
+      "amount": { "value": 10, "unit": "ml" },
+      "optional": true,
+      "notes": "Optional; adds depth to DIY sauce."
+    },
+    {
+      "id": "sugar",
+      "label": "Sugar",
+      "role": "seasoning",
+      "amount": { "value": 10, "unit": "g" },
+      "optional": true,
+      "notes": "About 2 tsp; adjust to taste for DIY sauce."
+    },
+    {
+      "id": "garlic_powder",
+      "label": "Garlic powder",
+      "role": "spice",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "optional": true,
+      "notes": "Optional for DIY sauce."
+    },
+    {
+      "id": "ginger_powder",
+      "label": "Ginger powder",
+      "role": "spice",
+      "amount": { "value": 0.25, "unit": "tsp" },
+      "optional": true,
+      "notes": "Optional for DIY sauce."
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_prep_pork",
+      "title": "Prep and season the pork",
+      "activeMins": 8,
+      "handsOffMins": 0,
+      "instructions": [
+        "Pat pork dry. If chops have a fat cap or connective strip, make a few small snips along the edge to prevent curling.",
+        "If thicker than ~3/4 inch, gently pound to an even thickness (about 1/2–3/4 inch).",
+        "Season both sides with salt and pepper."
+      ],
+      "checks": [
+        "Even thickness",
+        "Edges snipped to prevent curl",
+        "Seasoned evenly"
+      ]
+    },
+    {
+      "id": "step_02_setup_dredge",
+      "title": "Set up dredging station",
+      "activeMins": 4,
+      "handsOffMins": 0,
+      "instructions": [
+        "Place flour in a shallow dish.",
+        "Beat eggs in a second shallow dish.",
+        "Place panko in a third dish; fluff with fingers for an airy crust."
+      ],
+      "checks": ["Three stations ready: flour → egg → panko"]
+    },
+    {
+      "id": "step_03_bread_cutlets",
+      "title": "Bread the cutlets",
+      "activeMins": 8,
+      "handsOffMins": 0,
+      "instructions": [
+        "Dredge each cutlet in flour, shaking off excess.",
+        "Dip into beaten egg, letting excess drip off.",
+        "Press into panko firmly so crumbs adhere; coat both sides and edges.",
+        "Place breaded cutlets on a rack or plate while oil heats."
+      ],
+      "checks": ["Cutlets fully coated", "Crumbs adhered well", "No bald spots"]
+    },
+    {
+      "id": "step_04_heat_oil",
+      "title": "Heat oil for shallow-frying",
+      "activeMins": 3,
+      "handsOffMins": 5,
+      "instructions": [
+        "Add oil to a heavy skillet/dutch oven to reach 1/2–3/4 inch depth.",
+        "Heat to about 340–350°F (170–175°C). Use a thermometer if possible.",
+        "If no thermometer: drop in a few panko crumbs—should sizzle immediately and turn light golden within ~15–20 seconds."
+      ],
+      "timers": [{ "label": "Oil preheat (approx)", "minutes": 5 }],
+      "checks": ["Oil at frying temp", "Panko test sizzles + browns gently"]
+    },
+    {
+      "id": "step_05_fry_cutlets",
+      "title": "Fry until golden and cooked through",
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "instructions": [
+        "Fry 1–2 cutlets at a time to avoid cooling the oil.",
+        "Cook ~3–4 minutes per side (depending on thickness) until deep golden brown.",
+        "Transfer to a wire rack to drain (avoid paper towels if you want maximum crispness).",
+        "Check doneness: pork should reach 145°F (63°C) in the thickest part, then rest 3 minutes."
+      ],
+      "timers": [
+        { "label": "Fry side 1 (estimate)", "minutes": 4 },
+        { "label": "Fry side 2 (estimate)", "minutes": 4 },
+        { "label": "Rest after frying", "minutes": 3 }
+      ],
+      "checks": [
+        "Deep golden crust",
+        "Internal temp 145°F/63°C",
+        "Rested 3 minutes"
+      ]
+    },
+    {
+      "id": "step_06_make_quick_sauce_optional",
+      "title": "Optional: quick tonkatsu-style sauce",
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "instructions": [
+        "If not using store-bought sauce, whisk ketchup + Worcestershire + sugar.",
+        "Optional: add soy sauce, garlic powder, and ginger powder to taste.",
+        "Adjust sweetness/tang: add sugar for sweeter, Worcestershire for more tang."
+      ],
+      "checks": ["Sauce balanced to taste"]
+    },
+    {
+      "id": "step_07_serve",
+      "title": "Slice and serve",
+      "activeMins": 2,
+      "handsOffMins": 0,
+      "instructions": [
+        "Slice cutlets into strips (classic presentation).",
+        "Serve with shredded cabbage and tonkatsu sauce for dipping/drizzling.",
+        "Optional: add lemon wedge, rice, and miso soup for a full set meal."
+      ],
+      "checks": ["Cutlets sliced cleanly", "Sauce + cabbage ready"]
+    }
+  ],
+  "pairings": {
+    "serveWith": [
+      { "id": "steamed_rice", "label": "Steamed rice" },
+      { "id": "miso_soup", "label": "Miso soup" },
+      { "id": "tsukemono", "label": "Japanese pickles (tsukemono)" },
+      { "id": "cabbage_salad", "label": "Shredded cabbage salad" }
+    ],
+    "notes": "Tonkatsu is rich and crispy; pair with light soup, pickles, and fresh cabbage."
+  },
+  "storage": {
+    "refrigerator": {
+      "duration": "3 days",
+      "notes": [
+        "Store cutlets on paper towel-lined container to reduce sogginess.",
+        "Re-crisp in 375°F oven 8–12 minutes on a rack, or air-fryer 6–8 minutes."
+      ]
+    },
+    "freezer": {
+      "duration": "2 months",
+      "notes": [
+        "Best method: freeze breaded raw cutlets on a tray, then bag.",
+        "Cook from frozen: air fryer 375°F ~14–18 minutes, flipping halfway; or oven 400°F ~18–25 minutes, until 145°F internal."
+      ]
+    }
+  },
+  "planner": {
+    "mealRole": "main",
+    "weeknightNotes": "Bread earlier in the day; fry right before serving. Or air-fry for lower mess.",
+    "shoppingSignals": [
+      "pork_loin_chops",
+      "panko_breadcrumbs",
+      "eggs",
+      "cabbage_optional",
+      "tonkatsu_sauce_optional"
+    ]
+  },
+  "keywords": [
+    "tonkatsu",
+    "panko pork cutlet",
+    "japanese cutlet",
+    "katsu",
+    "pork katsu"
+  ],
+  "tags": [
+    "cuisine.japanese",
+    "dish.tonkatsu",
+    "course.main",
+    "crispy",
+    "panko",
+    "weeknight.friendly",
+    "kid.friendly"
+  ],
+  "notes": [
+    "Oil safety: never fill pan more than halfway with oil; keep children/pets away; do not add wet food to hot oil.",
+    "For extra crispness: rest breaded cutlets 5–10 minutes before frying so coating hydrates and adheres better.",
+    "Avoid overcrowding—oil temp drops cause greasy crust."
+  ],
+  "variations": [
+    {
+      "id": "var_air_fryer",
+      "label": "Air Fryer Tonkatsu",
+      "when": { "equipment": "air_fryer" },
+      "adapt": {
+        "notes": [
+          "Preheat air fryer to 375°F (190°C). Spray cutlets lightly with oil.",
+          "Cook 10–14 minutes (fresh) flipping halfway, until golden and 145°F internal.",
+          "For deeper color, mist with oil again after flipping."
+        ]
+      }
+    },
+    {
+      "id": "var_oven_baked",
+      "label": "Oven-Baked Tonkatsu",
+      "when": { "equipment": "oven" },
+      "adapt": {
+        "notes": [
+          "Toast panko on a sheet pan at 350°F for 3–5 minutes until pale golden (optional but helps browning).",
+          "Bake breaded cutlets on a rack at 425°F (220°C) for 15–20 minutes, flipping once, until 145°F internal."
+        ]
+      }
+    },
+    {
+      "id": "var_chicken_katsu",
+      "label": "Chicken Katsu Swap",
+      "when": { "protein": "chicken" },
+      "adapt": {
+        "notes": [
+          "Use chicken cutlets/thigh cutlets. Fry similarly; cook to 165°F (74°C) internal.",
+          "Sauce and cabbage pair the same."
+        ]
+      }
+    }
+  ],
+  "summary": "Crispy Japanese panko-breaded pork cutlets (tonkatsu) served with shredded cabbage and tangy-sweet sauce. Includes shallow-fry, oven, and air-fryer options plus doneness targets.",
+  "safety": {
+    "foodSafety": [
+      "Use a thermometer for doneness: pork 145°F (63°C) then rest 3 minutes.",
+      "Hot oil burns fast—use long tongs and avoid overcrowding.",
+      "Keep breaded cutlets dry; moisture causes oil splatter."
+    ],
+    "allergenNotes": [
+      "Contains gluten (panko/flour) and egg; sauce may include soy/gluten.",
+      "Use GF alternatives and verify labels if needed."
+    ]
+  },
+  "ingredientGroups": [
+    {
+      "id": "grp_cutlet",
+      "label": "Cutlet + Coating",
+      "items": [
+        "pork_loin_chops",
+        "salt",
+        "black_pepper",
+        "all_purpose_flour",
+        "eggs",
+        "panko_breadcrumbs",
+        "neutral_oil_for_frying"
+      ]
+    },
+    {
+      "id": "grp_sides",
+      "label": "Sides (optional)",
+      "items": ["green_cabbage", "lemon_wedges"]
+    },
+    {
+      "id": "grp_sauce",
+      "label": "Sauce (choose one)",
+      "items": [
+        "tonkatsu_sauce",
+        "ketchup",
+        "worcestershire_sauce",
+        "soy_sauce",
+        "sugar",
+        "garlic_powder",
+        "ginger_powder"
+      ]
+    }
+  ],
+  "methods": [
+    "dredge_flour_egg_panko",
+    "shallow_fry",
+    "rest_meat",
+    "slice_for_serving"
+  ],
+  "compat": {
+    "cuisineId": "cuisines.japanese",
+    "dishId": "cuisines.japanese.dishes.tonkatsu",
+    "aliases": ["katsu", "pork katsu", "panko pork cutlet", "tonkatsu pork"],
+    "searchBoost": [
+      "tonkatsu",
+      "katsu",
+      "panko",
+      "cutlet",
+      "crispy pork",
+      "tonkatsu sauce"
+    ]
+  }
+}

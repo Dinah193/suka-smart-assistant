@@ -27,10 +27,10 @@
 // - Consistent payload shape: { type, ts, source, data }.
 //
 // ASSUMED / SOFT-DEPS (we guard require() so the file still works):
-// - src/services/eventBus.js
+// - src/services/events/eventBus.js
 // - src/config/featureFlags.json
-// - src/services/HubPacketFormatter.js → formatAnimalSessionForHub
-// - src/services/FamilyFundConnector.js
+// - src/services/hub/HubPacketFormatter.js → formatAnimalSessionForHub
+// - src/services/hub/FamilyFundConnector.js
 // - src/services/animals/AnimalSessionStore.js → save(session), markExecuted(sessionId, actuals)
 // - src/services/animals/AnimalYieldCurveService.js → getCurveFor(speciesOrBreed)
 // - src/services/animals/AnimalCutPlanner.js → planCutsFromCurve(curve, options)
@@ -45,10 +45,10 @@
 // - This is the ANIMAL mirror of your CleaningSessionEngine and GardenSessionEngine.
 // - It is written to drop straight into your event-driven SSA runtime.
 
-import eventBus from "../../services/eventBus";
-import featureFlags from "../../config/featureFlags.json";
-import { formatAnimalSessionForHub } from "../../services/HubPacketFormatter";
-import FamilyFundConnector from "../../services/FamilyFundConnector";
+import eventBus from "../../services/events/eventBus";
+import featureFlags from "@/config/featureFlags.json";
+import { formatAnimalSessionForHub } from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 
 let AnimalSessionStore = null;
 let AnimalYieldCurveService = null;
@@ -177,7 +177,10 @@ const AnimalSessionEngine = {
    */
   async onSessionExecuted(sessionId, actuals = {}) {
     let session = null;
-    if (AnimalSessionStore && typeof AnimalSessionStore.markExecuted === "function") {
+    if (
+      AnimalSessionStore &&
+      typeof AnimalSessionStore.markExecuted === "function"
+    ) {
       session = await AnimalSessionStore.markExecuted(sessionId, actuals);
     }
 
@@ -189,7 +192,10 @@ const AnimalSessionEngine = {
     await exportToHubIfEnabled(baseEvt);
 
     // 1. If we have butchered animals → inventory.updated
-    if (Array.isArray(actuals.animalsButchered) && actuals.animalsButchered.length) {
+    if (
+      Array.isArray(actuals.animalsButchered) &&
+      actuals.animalsButchered.length
+    ) {
       const invDeltas = [];
       actuals.animalsButchered.forEach((ab) => {
         // parts might already be computed (preferred)
@@ -250,7 +256,10 @@ const AnimalSessionEngine = {
     }
 
     // 4. If user wants immediate preservation → preservation.request
-    if (Array.isArray(actuals.animalsButchered) && actuals.animalsButchered.some((ab) => ab.requestPreservation)) {
+    if (
+      Array.isArray(actuals.animalsButchered) &&
+      actuals.animalsButchered.some((ab) => ab.requestPreservation)
+    ) {
       const presEvt = emitEvent("preservation.request", {
         sourceSessionId: sessionId,
         reason: "fresh-butchery",
@@ -316,7 +325,10 @@ async function buildAnimalSessionFromItems(items, ctx = {}) {
   const supplies = collectSuppliesFromTasks(tasks);
   const equipment = collectEquipmentFromTasks(tasks);
 
-  const totalDuration = tasks.reduce((sum, t) => sum + (Number(t.duration) || 10), 0);
+  const totalDuration = tasks.reduce(
+    (sum, t) => sum + (Number(t.duration) || 10),
+    0
+  );
 
   const session = {
     id,
@@ -394,7 +406,9 @@ async function buildButcheryTasks(items, attachCuts) {
     tasks.push({
       id: makeId("animalTask"),
       order: 999, // at the end
-      label: `Butcher ${it.qty || 1} × ${it.species || "animal"}${it.breed ? " (" + it.breed + ")" : ""}`,
+      label: `Butcher ${it.qty || 1} × ${it.species || "animal"}${
+        it.breed ? " (" + it.breed + ")" : ""
+      }`,
       type: "butchery",
       pen: it.pen || "Butchery / Quarantine",
       species: it.species,
@@ -418,13 +432,19 @@ async function buildCutPlanForAnimal(it) {
   if (!AnimalYieldCurveService && !AnimalCutPlanner) return null;
   try {
     let curve = null;
-    if (AnimalYieldCurveService && typeof AnimalYieldCurveService.getCurveFor === "function") {
+    if (
+      AnimalYieldCurveService &&
+      typeof AnimalYieldCurveService.getCurveFor === "function"
+    ) {
       curve = await AnimalYieldCurveService.getCurveFor({
         species: it.species,
         breed: it.breed,
       });
     }
-    if (AnimalCutPlanner && typeof AnimalCutPlanner.planCutsFromCurve === "function") {
+    if (
+      AnimalCutPlanner &&
+      typeof AnimalCutPlanner.planCutsFromCurve === "function"
+    ) {
       return await AnimalCutPlanner.planCutsFromCurve(curve, {
         qty: it.qty || 1,
         species: it.species,
@@ -539,7 +559,9 @@ function normalizeImportToAnimalItem(imp) {
 }
 
 function buildCareLabel(it, care) {
-  return `${care.type || "care"}: ${it.species || "animal"}${it.breed ? " (" + it.breed + ")" : ""}`;
+  return `${care.type || "care"}: ${it.species || "animal"}${
+    it.breed ? " (" + it.breed + ")" : ""
+  }`;
 }
 
 function estimateCareDuration(type, qty = 1) {
@@ -552,7 +574,11 @@ function estimateCareDuration(type, qty = 1) {
 
 function estimateButcheryDuration(it) {
   const species = (it.species || "").toLowerCase();
-  if (species.includes("chicken") || species.includes("duck") || species.includes("turkey")) {
+  if (
+    species.includes("chicken") ||
+    species.includes("duck") ||
+    species.includes("turkey")
+  ) {
     return 25; // small livestock
   }
   if (species.includes("goat") || species.includes("sheep")) {
@@ -566,7 +592,8 @@ function estimateButcheryDuration(it) {
 
 function guessSuppliesFromCare(care, it) {
   if (!care) return [];
-  if (care.type === "feed") return [{ name: "feed mix (general)", qty: it.qty || 1, unit: "scoop" }];
+  if (care.type === "feed")
+    return [{ name: "feed mix (general)", qty: it.qty || 1, unit: "scoop" }];
   if (care.type === "water") return []; // not tracked
   if (care.type === "clean-coop" || care.type === "clean-stall") {
     return [{ name: "bedding / litter", qty: 1, unit: "bag" }];
@@ -579,7 +606,8 @@ function guessSuppliesFromCare(care, it) {
 
 function guessEquipmentFromCare(care, it) {
   if (!care) return [];
-  if (care.type === "clean-coop" || care.type === "clean-stall") return ["shovel", "rake", "sanitizer"];
+  if (care.type === "clean-coop" || care.type === "clean-stall")
+    return ["shovel", "rake", "sanitizer"];
   if (care.type === "feed" || care.type === "water") return ["feed-bucket"];
   if (care.type === "rotate-pasture") return ["gate-keys"];
   if (care.type === "vaccinate") return ["medical-kit"];
@@ -649,7 +677,10 @@ async function persistSession(session) {
       await AnimalSessionStore.save(session);
       return session;
     } catch (e) {
-      console.warn("[AnimalSessionEngine] persistSession failed, returning in-memory session", e);
+      console.warn(
+        "[AnimalSessionEngine] persistSession failed, returning in-memory session",
+        e
+      );
       return session;
     }
   }

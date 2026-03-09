@@ -1,0 +1,522 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.french_country.recipes.roast_chicken",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "French Country Roast Chicken",
+    "subtitle": "Herb-butter (or olive oil) roast with pan jus; crisp skin, juicy meat.",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa.cuisines.french_country",
+      "notes": [
+        "Canonical SSA recipe: stable ids, deterministic steps, adapter-friendly timers and checks.",
+        "Designed for standard home ovens; optional cast-iron or roasting pan workflows included."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.french_country",
+    "category": "main",
+    "mealArchetypes": [
+      "archetype.roast_and_sides",
+      "archetype.protein_centerpiece"
+    ],
+    "servingStyles": ["family_style", "plated_meals"],
+    "plannerTags": [
+      "cuisine.french_country",
+      "method.roast",
+      "pattern.pan_jus",
+      "weeknight.friendly",
+      "leftovers.friendly",
+      "batch.friendly",
+      "protein.poultry",
+      "comfort_food"
+    ]
+  },
+
+  "summary": "A classic French country roast chicken: dry-brined for flavor, roasted hot for crisp skin, then finished with a quick pan jus. Great for leftovers (salads, sandwiches, soup).",
+
+  "yield": {
+    "servings": 4,
+    "notes": "1 whole chicken serves 4 (or 2 with generous leftovers)."
+  },
+
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 70,
+    "totalMins": 95
+  },
+
+  "difficulty": "beginner",
+
+  "signals": {
+    "batchFriendly": true,
+    "leftoversGood": true,
+    "freezerFriendly": "good",
+    "weeknightPossible": true,
+    "notes": [
+      "Active time is mostly prep + basting/monitoring.",
+      "Hands-off time depends on bird size and oven accuracy."
+    ]
+  },
+
+  "tasteProfile": {
+    "saltiness": 3,
+    "sourness": 1,
+    "sweetness": 0,
+    "umami": 3,
+    "heat": 0,
+    "herbaceous": 3,
+    "richness": 3,
+    "notes": [
+      "Herb-forward, savory, classic pan jus.",
+      "Optional lemon adds brightness (still low acid overall)."
+    ]
+  },
+
+  "equipment": {
+    "recommended": [
+      "equipment.roasting_pan",
+      "equipment.thermometer_instant",
+      "equipment.wire_rack",
+      "equipment.kitchen_twine"
+    ],
+    "minimum": [
+      "equipment.oven",
+      "equipment.sheet_pan",
+      "equipment.thermometer_instant",
+      "equipment.knife",
+      "equipment.cutting_board"
+    ],
+    "optional": [
+      {
+        "id": "equipment.dutch_oven",
+        "label": "Dutch oven / cocotte",
+        "required": false,
+        "notes": "Great for self-basting; produces rich drippings."
+      },
+      {
+        "id": "equipment.cast_iron_skillet",
+        "label": "Cast-iron skillet",
+        "required": false,
+        "notes": "Nice for smaller birds; encourages browning."
+      }
+    ]
+  },
+
+  "dietFlags": ["diet.gluten_free", "diet.keto_friendly", "diet.low_carb"],
+
+  "allergens": ["allergen.dairy"],
+
+  "ingredients": [
+    {
+      "id": "ingredient.whole_chicken",
+      "label": "Whole chicken",
+      "role": "protein",
+      "amount": { "value": 1, "unit": "each" },
+      "notes": [
+        "3.5–4.5 lb / 1.6–2.0 kg works well.",
+        "If larger than ~5 lb, extend roast time; rely on internal temp."
+      ]
+    },
+    {
+      "id": "ingredient.kosher_salt",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": [
+        "About 1.5–2 tsp Diamond Crystal; adjust if using fine salt.",
+        "This amount is for dry-brine on a ~4 lb bird."
+      ]
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.butter_unsalted",
+      "label": "Unsalted butter, softened",
+      "role": "fat",
+      "amount": { "value": 4, "unit": "tbsp" },
+      "notes": [
+        "Optional substitution: use olive oil for dairy-free (see variations)."
+      ]
+    },
+    {
+      "id": "ingredient.olive_oil",
+      "label": "Olive oil",
+      "role": "fat",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "notes": [
+        "Use with butter for spreadability, or replace butter entirely for dairy-free."
+      ]
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic",
+      "role": "aromatic",
+      "amount": { "value": 4, "unit": "cloves" },
+      "notes": "2 cloves minced for herb butter; 2 cloves left whole for cavity (optional)."
+    },
+    {
+      "id": "ingredient.thyme",
+      "label": "Fresh thyme",
+      "role": "herb",
+      "amount": { "value": 6, "unit": "sprigs" },
+      "notes": "Or 1 tsp dried thyme if needed."
+    },
+    {
+      "id": "ingredient.rosemary",
+      "label": "Fresh rosemary",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "notes": ["Chopped (or 1 tsp dried). Optional but classic."],
+      "optional": true
+    },
+    {
+      "id": "ingredient.parsley",
+      "label": "Fresh parsley",
+      "role": "herb",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "notes": "Chopped; optional garnish and for herb butter.",
+      "optional": true
+    },
+    {
+      "id": "ingredient.lemon",
+      "label": "Lemon",
+      "role": "acid",
+      "amount": { "value": 1, "unit": "each" },
+      "notes": "Halved; for cavity + finishing (optional but recommended).",
+      "optional": true
+    },
+    {
+      "id": "ingredient.onion_yellow",
+      "label": "Yellow onion",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "each" },
+      "notes": "Quartered; forms a flavorful roasting bed."
+    },
+    {
+      "id": "ingredient.carrots",
+      "label": "Carrots",
+      "role": "vegetable",
+      "amount": { "value": 2, "unit": "each" },
+      "notes": "Rough chunks; optional but helps pan drippings.",
+      "optional": true
+    },
+    {
+      "id": "ingredient.celery",
+      "label": "Celery stalks",
+      "role": "vegetable",
+      "amount": { "value": 2, "unit": "each" },
+      "notes": "Rough chunks; optional but helps pan drippings.",
+      "optional": true
+    },
+    {
+      "id": "ingredient.white_wine_dry",
+      "label": "Dry white wine",
+      "role": "deglaze",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "notes": "For pan jus. Substitute stock if preferred.",
+      "optional": true
+    },
+    {
+      "id": "ingredient.chicken_stock",
+      "label": "Chicken stock",
+      "role": "deglaze",
+      "amount": { "value": 1, "unit": "cup" },
+      "notes": "For pan jus (or use instead of wine)."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_dry_brine_optional",
+      "title": "Dry-brine (best) or season right before roasting",
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "instructions": [
+        "Pat the chicken very dry with paper towels (inside and out).",
+        "Season all over with kosher salt and black pepper, including the cavity.",
+        "For best results: place uncovered on a rack over a tray and refrigerate 8–24 hours to dry-brine (crisper skin, deeper seasoning).",
+        "If short on time: proceed immediately—just be extra thorough with drying the skin."
+      ],
+      "checks": [
+        "Skin looks dry (not wet/shiny).",
+        "Salt distributed evenly—avoid clumps."
+      ]
+    },
+    {
+      "id": "step_02_preheat_and_pan_setup",
+      "title": "Preheat oven and set up the roasting pan",
+      "activeMins": 5,
+      "handsOffMins": 15,
+      "instructions": [
+        "Heat oven to 425°F (220°C).",
+        "Add onion (and optional carrot/celery) to the roasting pan to form a bed.",
+        "If using a rack: set it over the vegetables. If not, place the chicken directly on the vegetables."
+      ],
+      "temperature": {
+        "type": "oven",
+        "value": 425,
+        "unit": "F",
+        "notes": "High heat helps crisp skin; you may lower later depending on browning."
+      },
+      "timers": [{ "label": "Oven preheat", "minutes": 15 }]
+    },
+    {
+      "id": "step_03_make_herb_butter",
+      "title": "Make herb butter (or oil rub)",
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "instructions": [
+        "In a small bowl, mash softened butter with olive oil, minced garlic, chopped thyme leaves, and optional rosemary/parsley.",
+        "If dairy-free: use only olive oil and herbs/garlic (skip butter)."
+      ],
+      "checks": [
+        "Mixture is spreadable (not hard).",
+        "Garlic is minced fine so it won’t burn on the skin."
+      ]
+    },
+    {
+      "id": "step_04_truss_and_season",
+      "title": "Truss and flavor the cavity",
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "instructions": [
+        "Optional but helpful: tuck wing tips behind the back.",
+        "Stuff cavity with 2 whole garlic cloves, thyme sprigs, and optional lemon halves.",
+        "Tie legs loosely with kitchen twine (or simply cross legs).",
+        "Rub herb butter (or oil) all over the skin. If you can, gently loosen skin over the breast and smear a bit under the skin for extra flavor."
+      ],
+      "checks": [
+        "Wings are tucked so they won’t burn.",
+        "Rub covers breast, thighs, and legs evenly."
+      ]
+    },
+    {
+      "id": "step_05_roast_high_then_finish",
+      "title": "Roast until golden and cooked through",
+      "activeMins": 5,
+      "handsOffMins": 55,
+      "instructions": [
+        "Place chicken breast-side up on rack/vegetables.",
+        "Roast at 425°F (220°C) for 20 minutes to set the skin.",
+        "Reduce oven to 375°F (190°C) and continue roasting until done.",
+        "Start checking temperature at 45 minutes total cook time for smaller birds; most 4 lb birds take ~60–75 minutes total.",
+        "Chicken is done when thickest part of breast reaches 160–165°F (71–74°C) and thigh reaches 170–175°F (77–79°C)."
+      ],
+      "temperature": {
+        "type": "oven_sequence",
+        "notes": "425°F for 20 min, then 375°F until done."
+      },
+      "timers": [
+        { "label": "High-heat start", "minutes": 20 },
+        { "label": "Roast finish (estimate)", "minutes": 45 }
+      ],
+      "checks": [
+        "Skin is deep golden (not pale).",
+        "Juices run mostly clear at the thigh joint.",
+        "Thermometer confirms safe internal temps."
+      ]
+    },
+    {
+      "id": "step_06_rest",
+      "title": "Rest the chicken (don’t skip)",
+      "activeMins": 2,
+      "handsOffMins": 15,
+      "instructions": [
+        "Transfer chicken to a cutting board.",
+        "Tent loosely with foil and rest 10–20 minutes before carving.",
+        "Resting finishes carryover cooking and keeps juices in the meat."
+      ],
+      "timers": [{ "label": "Rest", "minutes": 15 }],
+      "checks": ["Rested at least 10 minutes before slicing breast."]
+    },
+    {
+      "id": "step_07_pan_jus",
+      "title": "Make quick pan jus (optional but recommended)",
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "instructions": [
+        "Pour off excess fat from the roasting pan, leaving browned bits and 1–2 tbsp fat behind.",
+        "Place pan over medium heat (or scrape everything into a saucepan).",
+        "Deglaze with wine (if using) and reduce by about half, scraping up browned bits.",
+        "Add chicken stock and simmer 3–5 minutes until slightly reduced.",
+        "Taste and adjust: add a squeeze of lemon (optional), a pinch of salt, and pepper.",
+        "Optional: whisk in a small knob of butter off heat for shine (skip if dairy-free).",
+        "Strain if you want a smoother jus."
+      ],
+      "timers": [{ "label": "Jus reduce", "minutes": 6 }],
+      "checks": [
+        "Jus tastes savory and balanced (not overly salty).",
+        "No burnt bits—scrape only the browned fond, not black scorch."
+      ]
+    },
+    {
+      "id": "step_08_carve_and_serve",
+      "title": "Carve and serve",
+      "activeMins": 8,
+      "handsOffMins": 0,
+      "instructions": [
+        "Remove twine and discard cavity aromatics.",
+        "Carve legs/thighs first, then slice breast against the grain.",
+        "Serve with pan jus and a simple side (roasted vegetables, salad, potatoes, or bread)."
+      ],
+      "checks": [
+        "Breast sliced across grain for tenderness.",
+        "Pieces arranged for family-style serving."
+      ]
+    }
+  ],
+
+  "methods": ["method.roast", "method.deglaze", "method.reduce"],
+
+  "pairings": {
+    "sides": [
+      "dishes.french_country.potato_gratin_dauphinois",
+      "dishes.french_country.green_salad_vinaigrette",
+      "dishes.french_country.roasted_root_vegetables"
+    ],
+    "sauces": ["component.pan_jus", "component.herb_butter"],
+    "notes": [
+      "Classic: roast chicken + simple salad with vinaigrette.",
+      "Also great with lentils or a rustic vegetable soup."
+    ]
+  },
+
+  "storage": {
+    "refrigerate": {
+      "maxDays": 4,
+      "notes": [
+        "Cool leftovers promptly (within 2 hours).",
+        "Store meat in an airtight container; keep jus separate if possible."
+      ]
+    },
+    "freeze": {
+      "maxMonths": 3,
+      "notes": [
+        "Freeze picked meat in portions for soup, pot pie, or quick meals.",
+        "Freeze carcass for stock (best within 1–2 days)."
+      ]
+    },
+    "reheat": {
+      "notes": [
+        "Best: rewarm gently in a covered pan with a splash of stock/jus.",
+        "Avoid overheating breast meat; aim for just-hot."
+      ]
+    }
+  },
+
+  "safety": {
+    "core": [
+      "Use a thermometer: breast 160–165°F; thigh 170–175°F.",
+      "Avoid cross-contamination: separate board/knife or wash thoroughly after raw poultry.",
+      "Chill leftovers quickly and reheat to steaming hot."
+    ],
+    "allergenNotes": [
+      "Contains dairy if butter is used. Use olive oil to make dairy-free."
+    ]
+  },
+
+  "notes": [
+    "If skin browns too fast: tent breast loosely with foil for the last 15–20 minutes.",
+    "If you want extra-crisp skin: air-dry uncovered overnight (dry-brine) and keep the chicken elevated on a rack.",
+    "Optional add-on: scatter small potatoes around the pan; toss in drippings mid-roast."
+  ],
+
+  "variations": [
+    {
+      "id": "variation.dairy_free",
+      "label": "Dairy-free roast chicken",
+      "when": { "dietaryPrefs": ["diet.dairy_free"] },
+      "adapt": {
+        "replaceIngredients": [
+          {
+            "from": "ingredient.butter_unsalted",
+            "to": ["ingredient.olive_oil"],
+            "notes": "Use 2–3 tbsp olive oil plus herbs/garlic; finish jus without butter."
+          }
+        ]
+      }
+    },
+    {
+      "id": "variation.dutch_oven",
+      "label": "Dutch oven / cocotte method",
+      "when": { "hasEquipment": ["equipment.dutch_oven"] },
+      "adapt": {
+        "notes": [
+          "Preheat dutch oven 10 minutes, add aromatics, place chicken inside uncovered.",
+          "Roast uncovered for browning; cover loosely if drippings risk burning."
+        ]
+      }
+    },
+    {
+      "id": "variation.herbes_de_provence",
+      "label": "Herbes de Provence profile",
+      "when": { "availableIngredientIds": ["ingredient.herbes_de_provence"] },
+      "adapt": {
+        "notes": ["Use 1–2 tsp herbes de Provence in place of separate herbs."]
+      }
+    }
+  ],
+
+  "planner": {
+    "leftovers": {
+      "remixIdeas": [
+        "Chicken salad with mustard vinaigrette",
+        "French-style chicken soup (stock from carcass)",
+        "Sandwiches on crusty bread with pan jus"
+      ]
+    },
+    "shopping": {
+      "pantryFirst": [
+        "ingredient.kosher_salt",
+        "ingredient.black_pepper",
+        "ingredient.olive_oil"
+      ],
+      "niceToHave": [
+        "ingredient.thyme",
+        "ingredient.rosemary",
+        "ingredient.lemon",
+        "ingredient.white_wine_dry"
+      ]
+    }
+  },
+
+  "compat": {
+    "cuisineId": "cuisines.french_country",
+    "dishId": "dishes.french_country.roast_chicken",
+    "search": {
+      "aliases": [
+        "roast chicken",
+        "french roast chicken",
+        "herb roast chicken",
+        "poulet roti",
+        "poulet rôti"
+      ],
+      "keywords": [
+        "poulet roti",
+        "pan jus",
+        "herb butter",
+        "dry brine",
+        "crisp skin",
+        "sunday roast"
+      ]
+    },
+    "normalization": {
+      "recommendedIdCase": "lower",
+      "ingredientIdStyle": "ingredient.*",
+      "methodIdStyle": "method.*",
+      "equipmentIdStyle": "equipment.*"
+    }
+  }
+}

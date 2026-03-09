@@ -1,0 +1,652 @@
+{
+  "$schema": "../../../schemas/ruleset.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "kind": "cuisine_ruleset",
+  "meta": {
+    "id": "cuisines.ethiopian.ruleset",
+    "type": "cuisine_ruleset",
+    "label": "Ethiopian • Cuisine Ruleset",
+    "cuisineId": "cuisines.ethiopian",
+    "status": "canonical",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Catalog",
+      "notes": [
+        "Deterministic adaptation rules for Ethiopian flavor + dish identity.",
+        "Use with RecipeAdapterService / planner scoring."
+      ]
+    }
+  },
+  "scope": {
+    "kind": "cuisine",
+    "cuisineId": "cuisines.ethiopian",
+    "locales": ["en-US"]
+  },
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true,
+    "tokens": {
+      "stopWords": [
+        "ethiopian",
+        "habesha",
+        "style",
+        "traditional",
+        "authentic",
+        "homemade",
+        "wat",
+        "wot",
+        "stew",
+        "sauce"
+      ]
+    },
+    "ingredientAliases": {
+      "spice.berbere": [
+        "berbere",
+        "berebere",
+        "berberi",
+        "berbere spice",
+        "berbere seasoning",
+        "ethiopian berbere"
+      ],
+      "spice.mitmita": [
+        "mitmita",
+        "mitmita spice",
+        "ethiopian chili powder",
+        "ethiopian hot spice"
+      ],
+      "fat.niter_kibbeh": [
+        "niter kibbeh",
+        "niterkibbeh",
+        "niter-kibbeh",
+        "spiced clarified butter",
+        "ethiopian spiced butter"
+      ],
+      "starch.injera_teff": [
+        "injera",
+        "teff injera",
+        "injera bread",
+        "injera flatbread",
+        "teff flatbread"
+      ],
+      "blend.shiro_powder": [
+        "shiro",
+        "shiro powder",
+        "shiro flour",
+        "shiro mix",
+        "chickpea stew mix"
+      ],
+      "legume.red_lentils": [
+        "red lentils",
+        "masoor dal",
+        "masoor",
+        "lentils red"
+      ],
+      "legume.split_peas": ["split peas", "yellow split peas", "split pea"],
+      "produce.kale_or_collards": [
+        "collard greens",
+        "collards",
+        "kale",
+        "mustard greens (as substitute)"
+      ],
+      "produce.cabbage": ["cabbage", "green cabbage", "savoy cabbage"],
+      "produce.tomato": ["tomato", "tomatoes", "roma tomato", "vine tomato"],
+      "aromatic.onion": [
+        "onion",
+        "yellow onion",
+        "white onion",
+        "red onion (ok)"
+      ],
+      "aromatic.garlic": ["garlic", "fresh garlic", "garlic cloves"],
+      "aromatic.ginger": ["ginger", "fresh ginger"],
+      "umami.tomato_paste": ["tomato paste", "paste tomato"],
+      "acid.lemon": ["lemon", "lemon juice"],
+      "acid.vinegar": ["vinegar", "white vinegar", "apple cider vinegar"],
+      "salt.kosher": ["salt", "kosher salt", "sea salt"]
+    },
+    "dishAliases": {
+      "dish.ethiopian.doro_wot": [
+        "doro wot",
+        "doro wat",
+        "ethiopian chicken stew",
+        "spicy chicken stew"
+      ],
+      "dish.ethiopian.misir_wot": [
+        "misir wot",
+        "misir wat",
+        "red lentil stew",
+        "berbere lentils"
+      ],
+      "dish.ethiopian.shiro": [
+        "shiro",
+        "shiro wat",
+        "shiro wot",
+        "chickpea stew"
+      ],
+      "dish.ethiopian.kik_alicha": [
+        "kik alicha",
+        "alicha kik",
+        "split pea stew",
+        "yellow split pea stew"
+      ],
+      "dish.ethiopian.siga_wot": [
+        "siga wot",
+        "siga wat",
+        "ethiopian beef stew",
+        "berbere beef stew"
+      ],
+      "dish.ethiopian.tibs": [
+        "tibs",
+        "ethiopian tibs",
+        "sauteed beef",
+        "sauteed meat"
+      ],
+      "dish.ethiopian.gomen": ["gomen", "ethiopian greens", "garlic greens"],
+      "dish.ethiopian.atkilt": [
+        "atkilt",
+        "atkilt wat",
+        "ethiopian cabbage",
+        "cabbage potato carrot"
+      ],
+      "dish.ethiopian.timatem_salad": [
+        "timatem salad",
+        "ethiopian tomato salad",
+        "tomato onion salad"
+      ],
+      "condiment.awaze": [
+        "awaze",
+        "awaze sauce",
+        "berbere paste",
+        "spicy berbere dip"
+      ]
+    },
+    "equipmentAliases": {
+      "tool.dutch_oven": ["dutch oven", "heavy pot", "cocotte"],
+      "tool.heavy_pot": ["heavy pot", "stockpot", "stew pot"],
+      "tool.cast_iron_skillet": ["cast iron skillet", "cast iron pan"],
+      "tool.skillet": ["skillet", "frying pan", "saute pan"],
+      "tool.whisk": ["whisk"],
+      "tool.immersion_blender": ["immersion blender", "stick blender"],
+      "tool.blender": ["blender"],
+      "tool.griddle": [
+        "griddle",
+        "flat top",
+        "crepe pan",
+        "nonstick skillet (for injera)"
+      ]
+    },
+    "methodAliases": {
+      "method.onion_reduction": [
+        "onion reduction",
+        "slow cooked onions",
+        "caramelize onions",
+        "reduce onions"
+      ],
+      "method.bloom_spices_in_fat": [
+        "bloom spices",
+        "toast spices in oil",
+        "fry spices",
+        "temper spices"
+      ],
+      "method.simmer": ["simmer", "slow simmer", "gentle boil"],
+      "method.braise": ["braise", "slow cook"],
+      "method.saute": ["saute", "pan saute"],
+      "method.high_heat_sear": ["sear", "high heat sear"],
+      "method.whisk_thickening": [
+        "whisk in flour",
+        "thicken by whisking",
+        "whisk to thicken"
+      ]
+    }
+  },
+  "globals": {
+    "cuisine": {
+      "id": "cuisines.ethiopian",
+      "signatureTags": ["cuisine.ethiopian", "region.horn_of_africa"],
+      "defaultHeatBand": "medium",
+      "typicalServingModel": "injera_platter"
+    },
+    "planner": {
+      "defaultServingStyles": ["family_style", "stew_and_starch"],
+      "batchBias": "high",
+      "leftoversBias": "high"
+    },
+    "adapter": {
+      "defaultFatPreferred": [
+        "fat.niter_kibbeh",
+        "fat.ghee",
+        "fat.neutral_oil"
+      ],
+      "defaultAromatics": [
+        "aromatic.onion",
+        "aromatic.garlic",
+        "aromatic.ginger"
+      ],
+      "defaultSpiceCore": ["spice.berbere"],
+      "condimentBoost": ["condiment.awaze"],
+      "basePreference": ["starch.injera_teff", "starch.rice"]
+    }
+  },
+  "rules": [
+    {
+      "id": "eth.identity.tag_base",
+      "enabled": true,
+      "priority": 10,
+      "title": "Tag Ethiopian cuisine when explicitly selected",
+      "description": "If evaluation context includes the cuisine id, tag results as Ethiopian.",
+      "tags": ["identity", "cuisine"],
+      "source": "SSA Catalog",
+      "stopOnMatch": false,
+      "when": {
+        "type": "eq",
+        "path": "$.cuisine.id",
+        "value": "cuisines.ethiopian"
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "cuisine.ethiopian" },
+          { "type": "addTag", "value": "region.horn_of_africa" }
+        ]
+      }
+    },
+    {
+      "id": "eth.identity.by_dish_ids",
+      "enabled": true,
+      "priority": 20,
+      "title": "Recognize Ethiopian dishes by canonical dish ids",
+      "description": "If recipe/dish id matches Ethiopian canonical dish ids, tag as Ethiopian and boost score.",
+      "tags": ["identity", "dish"],
+      "source": "SSA Catalog",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "$.dish.ids",
+        "values": [
+          "dish.ethiopian.injera_platter",
+          "dish.ethiopian.doro_wot",
+          "dish.ethiopian.misir_wot",
+          "dish.ethiopian.shiro",
+          "dish.ethiopian.kik_alicha",
+          "dish.ethiopian.siga_wot",
+          "dish.ethiopian.tibs",
+          "dish.ethiopian.gomen",
+          "dish.ethiopian.atkilt",
+          "dish.ethiopian.timatem_salad",
+          "condiment.awaze"
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "cuisine.ethiopian" },
+          { "type": "scoreAdjust", "scoreDelta": 0.35 }
+        ]
+      }
+    },
+    {
+      "id": "eth.identity.by_title_alias",
+      "enabled": true,
+      "priority": 30,
+      "title": "Recognize Ethiopian dishes by title/alias match",
+      "description": "Match common Ethiopian dish names in title. Uses regex on normalized title field.",
+      "tags": ["identity", "regex"],
+      "source": "SSA Catalog",
+      "stopOnMatch": false,
+      "when": {
+        "type": "matches",
+        "path": "$.recipe.title",
+        "regex": "(^|\\b)(injera|doro\\s*(wot|wat)|misir\\s*(wot|wat)|shiro|kik\\s*alicha|alicha\\s*kik|siga\\s*(wot|wat)|tibs|gomen|atkilt|timatem\\s*salad|awaze)(\\b|$)"
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "cuisine.ethiopian" },
+          { "type": "scoreAdjust", "scoreDelta": 0.2 }
+        ]
+      }
+    },
+    {
+      "id": "eth.signature.flavor_core",
+      "enabled": true,
+      "priority": 40,
+      "title": "Boost Ethiopian identity when signature ingredients appear",
+      "description": "Berbere + onion/garlic/ginger and/or niter kibbeh strongly suggests Ethiopian wot/tibs patterns.",
+      "tags": ["flavor", "signature"],
+      "source": "SSA Catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.ingredients.ids",
+            "values": ["spice.berbere"]
+          },
+          {
+            "type": "intersects",
+            "path": "$.ingredients.ids",
+            "values": ["aromatic.onion", "aromatic.garlic", "aromatic.ginger"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "signature.berbere" },
+          { "type": "scoreAdjust", "scoreDelta": 0.25 }
+        ]
+      }
+    },
+    {
+      "id": "eth.signature.niter_kibbeh",
+      "enabled": true,
+      "priority": 45,
+      "title": "Boost when niter kibbeh appears",
+      "description": "Spiced clarified butter is a strong Ethiopian signal; also tags dairy allergen.",
+      "tags": ["flavor", "fat", "allergen"],
+      "source": "SSA Catalog",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "$.ingredients.ids",
+        "values": ["fat.niter_kibbeh"]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "signature.niter_kibbeh" },
+          { "type": "addTag", "value": "allergen.dairy" },
+          { "type": "scoreAdjust", "scoreDelta": 0.15 }
+        ]
+      }
+    },
+    {
+      "id": "eth.pattern.wot_onion_reduction",
+      "enabled": true,
+      "priority": 60,
+      "title": "Wot pattern: onion reduction + berbere + fat",
+      "description": "If method hints indicate onion reduction and spice blooming, tag as wot-style stew and boost.",
+      "tags": ["pattern", "wot"],
+      "source": "SSA Catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.methods.ids",
+            "values": ["method.onion_reduction"]
+          },
+          {
+            "type": "intersects",
+            "path": "$.methods.ids",
+            "values": ["method.bloom_spices_in_fat"]
+          },
+          {
+            "type": "intersects",
+            "path": "$.ingredients.ids",
+            "values": ["spice.berbere"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "style.wot" },
+          { "type": "addTag", "value": "serving.stew_and_starch" },
+          { "type": "scoreAdjust", "scoreDelta": 0.2 }
+        ]
+      }
+    },
+    {
+      "id": "eth.planner.batch_bias_for_stews",
+      "enabled": true,
+      "priority": 70,
+      "title": "Planner bias: stews are batch-friendly and leftover-friendly",
+      "description": "If dish category indicates stew or method includes simmer/braise, add planner tags used by meal planner UI.",
+      "tags": ["planner", "signals"],
+      "source": "SSA Catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          { "type": "hasTag", "value": "style.wot" },
+          {
+            "type": "intersects",
+            "path": "$.methods.ids",
+            "values": ["method.simmer", "method.braise"]
+          },
+          {
+            "type": "intersects",
+            "path": "$.dish.categories",
+            "values": ["stew", "legume_stew"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "planner.batch_friendly" },
+          { "type": "addTag", "value": "planner.leftovers_good" },
+          { "type": "set", "path": "$.signals.batchFriendly", "value": true },
+          { "type": "set", "path": "$.signals.leftoversGood", "value": true }
+        ]
+      }
+    },
+    {
+      "id": "eth.serving.injera_default",
+      "enabled": true,
+      "priority": 80,
+      "title": "Default serving base: injera when present",
+      "description": "If injera/teff is present or requested, set serving base hint to injera.",
+      "tags": ["serving", "base"],
+      "source": "SSA Catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.ingredients.ids",
+            "values": ["starch.injera_teff"]
+          },
+          {
+            "type": "intersects",
+            "path": "$.requested.baseIds",
+            "values": ["starch.injera_teff"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.serving.baseId",
+            "value": "starch.injera_teff"
+          },
+          { "type": "addTag", "value": "serving.injera" }
+        ]
+      }
+    },
+    {
+      "id": "eth.serving.rice_fallback",
+      "enabled": true,
+      "priority": 85,
+      "title": "Fallback serving base: rice when injera missing",
+      "description": "If Ethiopian dish is detected but injera is missing/unavailable, suggest rice as deterministic fallback.",
+      "tags": ["serving", "fallback"],
+      "source": "SSA Catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "hasTag", "value": "cuisine.ethiopian" },
+          { "type": "eq", "path": "$.inventory.hasInjera", "value": false }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.serving.fallbackBaseId",
+            "value": "starch.rice"
+          },
+          { "type": "addTag", "value": "serving.rice_fallback" }
+        ]
+      }
+    },
+    {
+      "id": "eth.adapter.dairy_free_niter_kibbeh_sub",
+      "enabled": true,
+      "priority": 90,
+      "title": "Adaptation: dairy-free swap for niter kibbeh",
+      "description": "If user avoids dairy and recipe uses niter kibbeh, swap to neutral oil and emit an adaptation event.",
+      "tags": ["adapter", "allergen", "dairy_free"],
+      "source": "SSA Catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.userPrefs.avoidAllergens.dairy",
+            "value": true
+          },
+          {
+            "type": "intersects",
+            "path": "$.ingredients.ids",
+            "values": ["fat.niter_kibbeh"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "adapt.dairy_free" },
+          {
+            "type": "set",
+            "path": "$.adapter.swaps.fat.niter_kibbeh",
+            "value": "fat.neutral_oil"
+          },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ssa.recipe.adapted",
+              "payload": {
+                "reason": "dairy_free",
+                "swap": { "from": "fat.niter_kibbeh", "to": "fat.neutral_oil" },
+                "cuisineId": "cuisines.ethiopian"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "eth.adapter.no_dutch_oven_braise_to_simmer",
+      "enabled": true,
+      "priority": 95,
+      "title": "Adaptation: if no dutch oven, braise in heavy pot",
+      "description": "If recipe expects dutch oven but user lacks it, ensure heavy pot is allowed and tag adaptation.",
+      "tags": ["adapter", "equipment"],
+      "source": "SSA Catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.kitchen.has.tool.dutch_oven",
+            "value": false
+          },
+          {
+            "type": "intersects",
+            "path": "$.equipment.required",
+            "values": ["tool.dutch_oven"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "adapt.no_dutch_oven" },
+          {
+            "type": "set",
+            "path": "$.equipment.substitutions.tool.dutch_oven",
+            "value": "tool.heavy_pot"
+          },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ssa.recipe.adapted",
+              "payload": {
+                "reason": "equipment_substitution",
+                "swap": { "from": "tool.dutch_oven", "to": "tool.heavy_pot" },
+                "cuisineId": "cuisines.ethiopian"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "eth.planner.score_weeknight_quick_sides",
+      "enabled": true,
+      "priority": 110,
+      "title": "Weeknight scoring: quick sides and tibs get a boost",
+      "description": "If cook time is short or dish is tibs/side, increase planner score for weeknight selection.",
+      "tags": ["planner", "weeknight"],
+      "source": "SSA Catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "lt",
+            "path": "$.time.totalMins",
+            "value": 45.0001
+          },
+          {
+            "type": "intersects",
+            "path": "$.dish.ids",
+            "values": [
+              "dish.ethiopian.tibs",
+              "dish.ethiopian.gomen",
+              "dish.ethiopian.atkilt",
+              "dish.ethiopian.timatem_salad"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 0.15 },
+          { "type": "addTag", "value": "planner.weeknight_good" }
+        ]
+      }
+    },
+    {
+      "id": "eth.safety.eggs_in_doro_wot",
+      "enabled": true,
+      "priority": 140,
+      "title": "Safety/allergen: doro wot often includes eggs",
+      "description": "If dish is doro wot, tag eggs allergen unless explicitly absent.",
+      "tags": ["safety", "allergen"],
+      "source": "SSA Catalog",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.dish.ids",
+            "values": ["dish.ethiopian.doro_wot"]
+          },
+          { "type": "eq", "path": "$.ingredients.flags.noEggs", "value": false }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "allergen.eggs" },
+          { "type": "set", "path": "$.allergens.includesEggs", "value": true }
+        ]
+      }
+    }
+  ]
+}

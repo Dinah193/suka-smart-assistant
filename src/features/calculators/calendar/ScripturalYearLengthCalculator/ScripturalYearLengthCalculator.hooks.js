@@ -27,8 +27,11 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
-import { emit as emitEvent, subscribe as subscribeToEventBus } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import {
+  emit as emitEvent,
+  subscribe as subscribeToEventBus,
+} from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -37,8 +40,8 @@ import { familyFundMode } from "@/services/featureFlags";
 const safeSubscribe =
   typeof subscribeToEventBus === "function"
     ? subscribeToEventBus
-    // Fallback no-op subscription if subscribe is not yet implemented.
-    : () => () => {};
+    : // Fallback no-op subscription if subscribe is not yet implemented.
+      () => () => {};
 
 /**
  * Derive simple season buckets from an ordered list of scriptural months.
@@ -265,7 +268,10 @@ export function useScripturalYearForGarden(year) {
    */
   const nextGardenWindows = useMemo(() => {
     const sowing = [...seasonBuckets.spring];
-    const harvest = [...seasonBuckets.earlyHarvest, ...seasonBuckets.lateHarvest];
+    const harvest = [
+      ...seasonBuckets.earlyHarvest,
+      ...seasonBuckets.lateHarvest,
+    ];
     const storage = [...seasonBuckets.storageRest];
 
     return {

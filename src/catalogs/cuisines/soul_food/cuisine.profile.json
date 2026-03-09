@@ -1,0 +1,458 @@
+{
+  "$schema": "../../../schemas/cuisine.profile.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-16T00:00:00.000Z",
+
+  "meta": {
+    "id": "soul_food",
+    "type": "cuisine_profile",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Soul Food",
+    "subtitle": "Black American home-cooking traditions: slow-simmered greens, deep-fried classics, smothered gravies, cornbread, beans, BBQ, and celebratory spreads",
+    "originRegions": ["United States (Black American culinary traditions)"],
+    "source": {
+      "kind": "curated",
+      "author": "SSA Canonical Catalog",
+      "attribution": "Curated profile capturing widely recognized soul food patterns, pantry, techniques, meal archetypes, and seasonings for planning/adaptation in SSA.",
+      "url": null
+    }
+  },
+
+  "identity": {
+    "family": "american_regional",
+    "tags": [
+      "black_american",
+      "southern",
+      "home_cooking",
+      "comfort_food",
+      "holiday_feasts",
+      "church_suppers",
+      "smothered",
+      "fried",
+      "slow_simmered"
+    ],
+    "subprofiles": [
+      "deep_south",
+      "coastal_lowcountry",
+      "delta",
+      "mid_atlantic_soul",
+      "midwest_soul",
+      "texas_gulf_soul"
+    ]
+  },
+
+  "planning": {
+    "defaultMealSlots": ["breakfast", "lunch", "dinner"],
+    "defaultServingStyles": ["family_style", "buffet_spread", "plated_meals"],
+    "commonPlates": [
+      "protein_plus_two_sides",
+      "smothered_protein_plus_starch",
+      "fried_protein_plus_starch_plus_pickle",
+      "beans_plus_rice_or_bread",
+      "greens_plus_smoked_meat_plus_cornbread"
+    ],
+    "rotationGuidance": {
+      "weeklyRhythm": [
+        {
+          "label": "Sunday dinner / gathering",
+          "notes": "Bigger cook: roast, fried chicken, oxtails, smothered pork chops; multiple sides; dessert."
+        },
+        {
+          "label": "Midweek comfort",
+          "notes": "Smothered chicken, meatloaf, beans, spaghetti, fish fry night depending on household."
+        },
+        {
+          "label": "Friday fish / quick fry",
+          "notes": "Catfish/whiting/tilapia, fries, slaw; or shrimp/seafood boil in coastal subprofiles."
+        }
+      ],
+      "batchFriendlyCore": true,
+      "leftoversStrategy": [
+        "Greens and beans improve overnight; reheat gently.",
+        "Make extra cornbread for crumbling into buttermilk or as stuffing base.",
+        "Use leftover smoked turkey/ham hock for beans, greens, soups."
+      ]
+    }
+  },
+
+  "flavorSystem": {
+    "signatureAromatics": [
+      "onion",
+      "garlic",
+      "celery",
+      "bell_pepper",
+      "green_onion"
+    ],
+    "signatureHerbs": ["thyme", "bay_leaf", "parsley"],
+    "signatureSpices": [
+      "black_pepper",
+      "paprika",
+      "cayenne",
+      "chili_powder",
+      "mustard_powder"
+    ],
+    "signatureSeasoningBlends": [
+      "seasoned_salt",
+      "cajun_or_creole_seasoning_optional",
+      "lemon_pepper_optional"
+    ],
+    "signatureUmami": [
+      "smoked_turkey",
+      "ham_hock",
+      "bacon",
+      "pan_drippings",
+      "broth_stock"
+    ],
+    "signatureAcids": ["apple_cider_vinegar", "hot_sauce", "lemon"],
+    "signatureSweeteners": [
+      "brown_sugar",
+      "molasses_optional",
+      "honey_optional"
+    ],
+    "heatDefaults": {
+      "typical": 2,
+      "scale": { "min": 0, "max": 5 },
+      "notes": "Heat is usually optional/controlled (hot sauce at table). Some regional subprofiles skew hotter (Gulf/Creole-influenced)."
+    },
+    "saltDefaults": {
+      "typical": 3,
+      "scale": { "min": 0, "max": 5 },
+      "notes": "Saltiness depends on smoked meats and seasoning blends; plan for low-sodium variants."
+    },
+    "textureDefaults": [
+      "crispy_fried",
+      "creamy_starchy_sides",
+      "silky_gravy",
+      "slow_simmered_tender_greens",
+      "sticky_glazed_bbq"
+    ]
+  },
+
+  "pantry": {
+    "coreStaples": {
+      "oils_fats": [
+        "neutral_oil",
+        "vegetable_shortening_optional",
+        "butter",
+        "lard_optional"
+      ],
+      "grains_bread": [
+        "cornmeal",
+        "all_purpose_flour",
+        "white_rice",
+        "macaroni",
+        "bread_for_dressing_optional",
+        "grits_optional"
+      ],
+      "legumes": [
+        "black_eyed_peas",
+        "pinto_beans",
+        "kidney_beans_optional",
+        "butter_beans_optional"
+      ],
+      "vegetables": [
+        "collard_greens",
+        "mustard_greens_optional",
+        "turnip_greens_optional",
+        "cabbage",
+        "sweet_potatoes",
+        "potatoes",
+        "okra_optional",
+        "corn"
+      ],
+      "proteins": [
+        "chicken",
+        "pork_chops",
+        "ground_beef_or_turkey",
+        "catfish_or_whiting",
+        "smoked_turkey",
+        "ham_hock_optional"
+      ],
+      "condiments": [
+        "hot_sauce",
+        "yellow_mustard",
+        "mayonnaise",
+        "bbq_sauce_optional",
+        "pickle_relish_optional",
+        "vinegar"
+      ],
+      "baking": [
+        "baking_powder",
+        "baking_soda",
+        "yeast_optional",
+        "sugar",
+        "vanilla_optional"
+      ]
+    },
+    "optionalRegionalStaples": {
+      "lowcountry": [
+        "shrimp",
+        "crab",
+        "stone_ground_grits",
+        "benne_sesame_optional"
+      ],
+      "delta": ["catfish", "cornbread_dressing", "sweet_potato_pie"],
+      "texas_gulf": [
+        "brisket_optional",
+        "smoked_sausage_optional",
+        "spicy_bbq_sauces_optional"
+      ]
+    }
+  },
+
+  "techniques": {
+    "coreTechniques": [
+      {
+        "id": "smothering",
+        "label": "Smothering",
+        "notes": "Pan-browned protein finished in onion-rich gravy (often flour-thickened)."
+      },
+      {
+        "id": "deep_frying",
+        "label": "Deep frying / shallow frying",
+        "notes": "Seasoned flour/cornmeal dredge; crisp crust; hot sauce at table."
+      },
+      {
+        "id": "slow_simmered_greens",
+        "label": "Slow-simmered greens",
+        "notes": "Greens cooked with smoked meat, onion, garlic, and vinegar/hot sauce; pot liquor prized."
+      },
+      {
+        "id": "braising_stews",
+        "label": "Braising & stews",
+        "notes": "Oxtails, short ribs, chicken, turkey wings—low and slow for tenderness."
+      },
+      {
+        "id": "baking_cornbread",
+        "label": "Cornbread baking",
+        "notes": "Skillet cornbread; sweet vs savory varies by household."
+      },
+      {
+        "id": "roux_gravy",
+        "label": "Roux/gravy thickening",
+        "notes": "Flour + fat to thicken pan drippings into gravy; careful seasoning."
+      },
+      {
+        "id": "barbecue_smoke",
+        "label": "BBQ & smoke (optional)",
+        "notes": "Pit/cookout styles; regional sauce preferences; often event-focused."
+      }
+    ],
+    "equipmentAffinity": {
+      "highValue": [
+        "cast_iron_skillet",
+        "heavy_pot_or_dutch_oven",
+        "sheet_pan",
+        "deep_fryer_or_high_sided_pot",
+        "instant_read_thermometer"
+      ],
+      "optionalConvenience": [
+        "slow_cooker",
+        "pressure_cooker",
+        "air_fryer",
+        "stand_mixer_optional"
+      ]
+    }
+  },
+
+  "dietaryAdaptation": {
+    "commonConstraints": [
+      "low_sodium",
+      "gluten_free",
+      "dairy_free",
+      "pork_free",
+      "vegetarian",
+      "plant_forward"
+    ],
+    "adaptationRules": [
+      {
+        "id": "pork_free_greens",
+        "label": "Pork-free greens",
+        "when": { "excludeIngredientsAny": ["pork", "bacon", "ham_hock"] },
+        "do": {
+          "useInstead": [
+            "smoked_turkey",
+            "smoked_chicken",
+            "mushroom_umami",
+            "smoked_paprika"
+          ],
+          "notes": "Replace ham hock/bacon with smoked turkey leg/wing; add smoked paprika for depth."
+        }
+      },
+      {
+        "id": "low_sodium_base",
+        "label": "Low-sodium baseline",
+        "when": { "dietAny": ["low_sodium"] },
+        "do": {
+          "reduce": ["seasoned_salt", "bouillon", "soy_sauce_optional"],
+          "increase": ["acid_finish", "herbs", "aromatics"],
+          "notes": "Use unsalted stock; finish with vinegar/lemon/hot sauce for perceived saltiness."
+        }
+      },
+      {
+        "id": "gluten_free_frying",
+        "label": "Gluten-free frying dredge",
+        "when": { "dietAny": ["gluten_free"] },
+        "do": {
+          "swap": [
+            { "from": "all_purpose_flour", "to": "rice_flour_or_gf_blend" },
+            { "from": "regular_breading", "to": "cornmeal_or_gf_crumbs" }
+          ],
+          "notes": "Cornmeal works well for fish; rice flour yields crisp chicken skin."
+        }
+      },
+      {
+        "id": "dairy_free_sides",
+        "label": "Dairy-free sides",
+        "when": { "dietAny": ["dairy_free"] },
+        "do": {
+          "swap": [
+            { "from": "butter", "to": "neutral_oil_or_plant_butter" },
+            { "from": "milk", "to": "oat_milk_or_almond_milk" }
+          ],
+          "notes": "Use plant fats in cornbread and mashed sides; check margarine labels."
+        }
+      },
+      {
+        "id": "plant_forward_plate",
+        "label": "Plant-forward soul plate",
+        "when": { "dietAny": ["vegetarian", "plant_forward"] },
+        "do": {
+          "prioritizeDishes": [
+            "beans_and_rice",
+            "greens_without_meat",
+            "cabbage_sides",
+            "sweet_potato",
+            "cornbread",
+            "okra_tomato_stew_optional"
+          ],
+          "notes": "Use mushrooms + smoked paprika + onion/garlic for 'meaty' depth; serve with cornbread."
+        }
+      }
+    ]
+  },
+
+  "substitutionGuidance": {
+    "proteinSubstitutions": [
+      {
+        "for": "fried_chicken",
+        "options": [
+          "air_fryer_fried_chicken_style",
+          "oven_fried_chicken",
+          "fried_turkey_cutlets"
+        ],
+        "notes": "Use seasoning + dredge patterns; ensure internal temp targets."
+      },
+      {
+        "for": "smoked_meat_for_greens",
+        "options": [
+          "smoked_turkey",
+          "smoked_chicken",
+          "smoked_sausage_optional"
+        ],
+        "notes": "Choose based on pork-free needs; keep salt under control."
+      }
+    ],
+    "sideSubstitutions": [
+      {
+        "for": "mac_and_cheese",
+        "options": ["baked_mac_and_cheese", "stovetop_mac", "dairy_free_mac"],
+        "notes": "Baked is classic for gatherings; stovetop for weeknights."
+      },
+      {
+        "for": "cornbread",
+        "options": [
+          "skillet_cornbread",
+          "cornbread_muffins",
+          "hot_water_cornbread_optional"
+        ],
+        "notes": "Skillet cornbread is most archetypal; muffins are portable for meal prep."
+      }
+    ],
+    "thickenerSubstitutions": [
+      {
+        "for": "gravy_thickener",
+        "options": [
+          "flour_roux",
+          "cornstarch_slurry",
+          "arrowroot_slurry_optional"
+        ],
+        "notes": "Cornstarch is GF; flour roux is traditional."
+      }
+    ]
+  },
+
+  "qualityAndSafety": {
+    "donenessTargets": [
+      {
+        "item": "chicken_dark_meat",
+        "target": { "f": 175, "c": 79 },
+        "notes": "Dark meat is forgiving; higher temp yields tender bite and safer reheats."
+      },
+      {
+        "item": "chicken_breast",
+        "target": { "f": 165, "c": 74 },
+        "notes": "Avoid overcooking; rest before slicing."
+      },
+      {
+        "item": "fried_fish",
+        "target": { "f": 145, "c": 63 },
+        "notes": "Cook until opaque and flakes; avoid long holds."
+      },
+      {
+        "item": "braised_oxtails",
+        "target": { "f": 195, "c": 91 },
+        "notes": "Tenderness comes from collagen breakdown; cook until fork-tender."
+      }
+    ],
+    "holdingAndReheat": {
+      "fridgeDaysTypical": 4,
+      "freezerMonthsTypical": 3,
+      "reheatNotes": "Reheat gravies and braises to steaming hot; add splash of stock/water to loosen."
+    }
+  },
+
+  "canonicalDishIds": {
+    "mains": [
+      "soul_food.fried_chicken",
+      "soul_food.smothered_pork_chops",
+      "soul_food.smothered_chicken",
+      "soul_food.oxtails_gravy",
+      "soul_food.bbq_chicken",
+      "soul_food.catfish_fry",
+      "soul_food.meatloaf"
+    ],
+    "sides": [
+      "soul_food.mac_and_cheese",
+      "soul_food.collard_greens",
+      "soul_food.cabbage",
+      "soul_food.candied_yams",
+      "soul_food.potato_salad",
+      "soul_food.green_beans",
+      "soul_food.black_eyed_peas",
+      "soul_food.rice",
+      "soul_food.cornbread"
+    ],
+    "desserts": [
+      "soul_food.sweet_potato_pie",
+      "soul_food.peach_cobbler",
+      "soul_food.banana_pudding",
+      "soul_food.pound_cake_optional"
+    ],
+    "condiments": [
+      "soul_food.hot_sauce_table",
+      "soul_food.vinegar_pepper_sauce_optional",
+      "soul_food.bbq_sauce_optional"
+    ]
+  },
+
+  "ui": {
+    "colorHints": {
+      "primary": "deep_brown",
+      "secondary": "corn_gold",
+      "accent": "collard_green"
+    },
+    "iconHints": ["skillet", "steam_pot", "cornbread", "hot_sauce", "smoke"]
+  }
+}

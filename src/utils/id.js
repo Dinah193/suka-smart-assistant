@@ -26,7 +26,7 @@
   let eventBus = { emit: () => {} };
   try {
     // Prefer your shared event bus if available
-    const eb = require("@/services/eventBus");
+    const eb = require("@/services/events/eventBus");
     eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
   } catch (_e) {}
 
@@ -67,7 +67,7 @@
     const mulberry32 = (t) => {
       return function () {
         t |= 0;
-        t = (t + 0x6D2B79F5) | 0;
+        t = (t + 0x6d2b79f5) | 0;
         let r = Math.imul(t ^ (t >>> 15), 1 | t);
         r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
         return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
@@ -321,7 +321,14 @@
       tsHint = parseInt(tHex, 16);
     }
 
-    return { prefix, raw, kind, isUUID, isULID, tsHint: Number.isFinite(tsHint) ? tsHint : null };
+    return {
+      prefix,
+      raw,
+      kind,
+      isUUID,
+      isULID,
+      tsHint: Number.isFinite(tsHint) ? tsHint : null,
+    };
   }
 
   /* ------------------------------- ensureId --------------------------------- */
@@ -352,7 +359,9 @@
         // Deterministic for user-saved favorites (stable across devices)
         raw = fromContent(deterministicKey ?? obj, NS.FAVORITE);
       } else {
-        const strat = strategy || (type === "session" || type === "schedule" ? "v7" : "short");
+        const strat =
+          strategy ||
+          (type === "session" || type === "schedule" ? "v7" : "short");
         if (strat === "v7") raw = v7();
         else if (strat === "ulid") raw = ulid();
         else if (strat === "v4") raw = v4();
@@ -366,7 +375,8 @@
     if (obj.id && obj.id !== id) {
       eventBus.emit("id:collision", { previous: obj.id, next: id, type });
       analytics.track("id_collision", { type, previous: obj.id, next: id });
-      if (logger && logger.warn) logger.warn("[id] Collision/override detected", obj.id, "->", id);
+      if (logger && logger.warn)
+        logger.warn("[id] Collision/override detected", obj.id, "->", id);
     } else {
       eventBus.emit("id:generated", { id, type, strategy: strategy || "auto" });
     }

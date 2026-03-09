@@ -17,7 +17,13 @@ import { addDays, startOfWeek, format, isSameDay } from "date-fns";
 \***********************************/
 const classNames = (...xs) => xs.filter(Boolean).join(" ");
 
-function Button({ variant = "default", size = "md", className, children, ...props }) {
+function Button({
+  variant = "default",
+  size = "md",
+  className,
+  children,
+  ...props
+}) {
   const variants = {
     default: "bg-blue-600 text-white hover:bg-blue-700",
     outline: "border border-gray-300 hover:bg-gray-50",
@@ -42,13 +48,23 @@ function Button({ variant = "default", size = "md", className, children, ...prop
 }
 
 function Card({ className, children }) {
-  return <div className={classNames("rounded-xl border bg-white shadow-sm", className)}>{children}</div>;
+  return (
+    <div
+      className={classNames("rounded-xl border bg-white shadow-sm", className)}
+    >
+      {children}
+    </div>
+  );
 }
 function CardHeader({ className, children }) {
   return <div className={classNames("px-4 pt-4", className)}>{children}</div>;
 }
 function CardTitle({ className, children }) {
-  return <div className={classNames("text-lg font-semibold", className)}>{children}</div>;
+  return (
+    <div className={classNames("text-lg font-semibold", className)}>
+      {children}
+    </div>
+  );
 }
 function CardContent({ className, children }) {
   return <div className={classNames("px-4 pb-4", className)}>{children}</div>;
@@ -61,7 +77,14 @@ function Badge({ variant = "default", className, children, ...props }) {
     warn: "bg-amber-500/90 text-black",
   };
   return (
-    <span className={classNames("inline-flex items-center rounded px-2 py-0.5 text-xs", variants[variant], className)} {...props}>
+    <span
+      className={classNames(
+        "inline-flex items-center rounded px-2 py-0.5 text-xs",
+        variants[variant],
+        className
+      )}
+      {...props}
+    >
       {children}
     </span>
   );
@@ -91,9 +114,14 @@ function useToast() {
   const ToastViewport = () => (
     <div className="fixed right-4 top-4 z-50 flex max-w-sm flex-col gap-2">
       {toasts.map((t) => (
-        <div key={t.id} className="rounded-md border border-gray-200 bg-white p-3 shadow">
+        <div
+          key={t.id}
+          className="rounded-md border border-gray-200 bg-white p-3 shadow"
+        >
           <div className="text-sm font-medium">{t.title}</div>
-          {t.description && <div className="mt-0.5 text-xs text-gray-600">{t.description}</div>}
+          {t.description && (
+            <div className="mt-0.5 text-xs text-gray-600">{t.description}</div>
+          )}
           {t.action && <div className="mt-2">{t.action}</div>}
         </div>
       ))}
@@ -110,7 +138,7 @@ let off = () => {};
 let emit = () => {};
 try {
   // If your real bus exists, use it; else fall back to local micro-bus.
-  const bus = require("@/services/eventBus");
+  const bus = require("@/services/events/eventBus");
   on = bus.on || on;
   off = bus.off || off;
   emit = bus.emit || emit;
@@ -124,7 +152,8 @@ try {
   off = (event, handler) => {
     listeners[event] = (listeners[event] || []).filter((fn) => fn !== handler);
   };
-  emit = (event, payload) => (listeners[event] || []).forEach((fn) => fn(payload));
+  emit = (event, payload) =>
+    (listeners[event] || []).forEach((fn) => fn(payload));
 }
 
 /*********************************\
@@ -176,13 +205,15 @@ const MEAL_SLOTS = [
 const PERIODS = [
   { key: "week", label: "Week", days: 7 },
   { key: "2w", label: "2 Weeks", days: 14 },
-  { key: "month", label: "Month", days: "month-full" },   // FULL calendar weeks
-  { key: "quarter", label: "Quarter", days: "quarter" },  // TRUE calendar quarter
+  { key: "month", label: "Month", days: "month-full" }, // FULL calendar weeks
+  { key: "quarter", label: "Quarter", days: "quarter" }, // TRUE calendar quarter
   { key: "custom", label: "Custom", days: "custom" },
 ];
 
 // Helpers for month/quarter
-function lastDayOfMonth(y, m) { return new Date(y, m + 1, 0); }
+function lastDayOfMonth(y, m) {
+  return new Date(y, m + 1, 0);
+}
 function quarterStart(date) {
   const m = date.getMonth();
   const qStart = Math.floor(m / 3) * 3;
@@ -203,14 +234,16 @@ function enumerateDates(anchor, period, customRange) {
     const start = startOfWeek(first, { weekStartsOn: 0 }); // Sun
     const endPad = addDays(last, (6 - last.getDay() + 7) % 7); // to Sat
     const dates = [];
-    for (let d = new Date(start); d <= endPad; d = addDays(d, 1)) dates.push(new Date(d));
+    for (let d = new Date(start); d <= endPad; d = addDays(d, 1))
+      dates.push(new Date(d));
     return dates;
   }
   if (period === "quarter") {
     const start = quarterStart(anchor);
     const end = quarterEnd(anchor);
     const dates = [];
-    for (let d = new Date(start); d <= end; d = addDays(d, 1)) dates.push(new Date(d));
+    for (let d = new Date(start); d <= end; d = addDays(d, 1))
+      dates.push(new Date(d));
     return dates;
   }
   if (typeof period === "number") {
@@ -233,7 +266,10 @@ function makeEmptyRange(anchor, period, customRange) {
 }
 
 function computeWeekMacrosFromWeek(week) {
-  let protein = 0, carbs = 0, fat = 0, kcal = 0;
+  let protein = 0,
+    carbs = 0,
+    fat = 0,
+    kcal = 0;
   Object.values(week?.days || {}).forEach((day) => {
     Object.values(day).forEach((arr) => {
       arr.forEach((m) => {
@@ -282,9 +318,21 @@ function MacrosBar({ macros }) {
         <span>{Math.round(Math.min(100, p + c + f))}%</span>
       </div>
       <div className="flex h-2 w-full overflow-hidden rounded bg-gray-200">
-        <div title={`Protein ${p}%`} style={{ width: `${p}%` }} className="h-full bg-gray-900" />
-        <div title={`Carb ${c}%`} style={{ width: `${c}%` }} className="h-full bg-gray-500" />
-        <div title={`Fat ${f}%`} style={{ width: `${f}%` }} className="h-full bg-gray-300" />
+        <div
+          title={`Protein ${p}%`}
+          style={{ width: `${p}%` }}
+          className="h-full bg-gray-900"
+        />
+        <div
+          title={`Carb ${c}%`}
+          style={{ width: `${c}%` }}
+          className="h-full bg-gray-500"
+        />
+        <div
+          title={`Fat ${f}%`}
+          style={{ width: `${f}%` }}
+          className="h-full bg-gray-300"
+        />
       </div>
       <div className="flex gap-3 text-xs text-gray-600">
         <span>P {p}%</span>
@@ -320,24 +368,40 @@ function DayCell({ date, meals, onAdd, onRemove }) {
                   <span className="text-base">{icon}</span>
                   <span className="text-xs font-medium">{label}</span>
                 </div>
-                <Button variant="ghost" size="icon" aria-label={`Add ${label}`} onClick={() => onAdd(date, key)}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={`Add ${label}`}
+                  onClick={() => onAdd(date, key)}
+                >
                   +
                 </Button>
               </div>
 
               {items.length === 0 && (
-                <div className="text-xs text-gray-500">Empty — click + to add</div>
+                <div className="text-xs text-gray-500">
+                  Empty — click + to add
+                </div>
               )}
 
               {items.map((m) => (
-                <div key={m.id} className="mb-1 flex items-center justify-between rounded bg-gray-100 p-2">
+                <div
+                  key={m.id}
+                  className="mb-1 flex items-center justify-between rounded bg-gray-100 p-2"
+                >
                   <div className="flex flex-col">
                     <span className="text-xs font-medium">{m.title}</span>
                     <span className="text-[10px] text-gray-500">
-                      {(m.kcal ?? "")} kcal{m.tags?.length ? ` • ${m.tags.join(" · ")}` : ""}
+                      {m.kcal ?? ""} kcal
+                      {m.tags?.length ? ` • ${m.tags.join(" · ")}` : ""}
                     </span>
                   </div>
-                  <Button variant="ghost" size="icon" aria-label="Remove meal" onClick={() => onRemove(date, key, m)}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Remove meal"
+                    onClick={() => onRemove(date, key, m)}
+                  >
                     ↩
                   </Button>
                 </div>
@@ -356,15 +420,18 @@ function DayCell({ date, meals, onAdd, onRemove }) {
 export default function CalendarPreview() {
   const today = new Date();
   const [periodKey, setPeriodKey] = useState("week"); // week | 2w | month | quarter | custom
-  const [customStart, setCustomStart] = useState("");  // yyyy-MM-dd
+  const [customStart, setCustomStart] = useState(""); // yyyy-MM-dd
   const [customEnd, setCustomEnd] = useState("");
   const [anchor, setAnchor] = useState(startOfWeek(today, { weekStartsOn: 0 }));
-  const [compact, setCompact] = useState(false);       // NEW: condensed list view
-  const [mode, setMode] = useState("auto");            // auto | manual
+  const [compact, setCompact] = useState(false); // NEW: condensed list view
+  const [mode, setMode] = useState("auto"); // auto | manual
   const [query, setQuery] = useState("");
   const { toast, ToastViewport } = useToast();
 
-  const periodSpec = useMemo(() => PERIODS.find((p) => p.key === periodKey)?.days, [periodKey]);
+  const periodSpec = useMemo(
+    () => PERIODS.find((p) => p.key === periodKey)?.days,
+    [periodKey]
+  );
 
   // Build custom date list if needed
   const customDates = useMemo(() => {
@@ -373,11 +440,14 @@ export default function CalendarPreview() {
     const end = new Date(customEnd);
     if (isNaN(start) || isNaN(end) || start > end) return [];
     const out = [];
-    for (let d = new Date(start); d <= end; d = addDays(d, 1)) out.push(new Date(d));
+    for (let d = new Date(start); d <= end; d = addDays(d, 1))
+      out.push(new Date(d));
     return out;
   }, [periodSpec, customStart, customEnd]);
 
-  const [plan, setPlan] = useState(() => makeEmptyRange(anchor, periodSpec, customDates));
+  const [plan, setPlan] = useState(() =>
+    makeEmptyRange(anchor, periodSpec, customDates)
+  );
   const [loading, setLoading] = useState(false);
 
   // Rebuild when anchor/period/custom changes
@@ -390,8 +460,16 @@ export default function CalendarPreview() {
     setPlan((prev) => {
       const key = format(date, "yyyy-MM-dd");
       const copy = structuredClone(prev);
-      copy.days[key] = copy.days[key] || { breakfast: [], lunch: [], dinner: [], snack: [] };
-      const newMeal = { id: `m_${Math.random().toString(36).slice(2)}`, ...meal };
+      copy.days[key] = copy.days[key] || {
+        breakfast: [],
+        lunch: [],
+        dinner: [],
+        snack: [],
+      };
+      const newMeal = {
+        id: `m_${Math.random().toString(36).slice(2)}`,
+        ...meal,
+      };
       copy.days[key][slot] = [...(copy.days[key][slot] || []), newMeal];
       return copy;
     });
@@ -401,7 +479,9 @@ export default function CalendarPreview() {
     setPlan((prev) => {
       const key = format(date, "yyyy-MM-dd");
       const copy = structuredClone(prev);
-      copy.days[key][slot] = (copy.days[key][slot] || []).filter((m) => m.id !== id);
+      copy.days[key][slot] = (copy.days[key][slot] || []).filter(
+        (m) => m.id !== id
+      );
       return copy;
     });
   }, []);
@@ -435,7 +515,12 @@ export default function CalendarPreview() {
     const unsubs = [
       on("recipe.consolidated", () => setPlan((w) => structuredClone(w))),
       on("inventory.updated", () => setPlan((w) => structuredClone(w))),
-      on("calendar.synced", () => toast({ title: "Calendar synced", description: "Meals are now on your calendar." })),
+      on("calendar.synced", () =>
+        toast({
+          title: "Calendar synced",
+          description: "Meals are now on your calendar.",
+        })
+      ),
       on("preferences.changed", () => setPlan((w) => structuredClone(w))),
     ].filter(Boolean);
     return () => unsubs.forEach((fn) => fn && fn());
@@ -445,7 +530,11 @@ export default function CalendarPreview() {
   const handleGenerate = useCallback(async () => {
     const guarded = await sabbathGuard();
     if (!guarded.ok) {
-      toast({ title: "Sabbath mode", description: guarded.reason, action: <span className="text-xs">OK</span> });
+      toast({
+        title: "Sabbath mode",
+        description: guarded.reason,
+        action: <span className="text-xs">OK</span>,
+      });
       return;
     }
     try {
@@ -456,10 +545,38 @@ export default function CalendarPreview() {
       });
       const auto = makeEmptyRange(anchor, periodSpec, customDates);
       const demoMeals = [
-        { title: "Oatmeal & Berries", protein: 12, carbs: 38, fat: 5, kcal: 280, tags: ["veg"] },
-        { title: "Chicken Salad", protein: 30, carbs: 10, fat: 14, kcal: 330, tags: ["gluten-free"] },
-        { title: "Lamb Doner Bowl", protein: 34, carbs: 42, fat: 18, kcal: 520, tags: ["fusion"] },
-        { title: "Greek Yogurt", protein: 17, carbs: 8, fat: 4, kcal: 150, tags: ["snack"] },
+        {
+          title: "Oatmeal & Berries",
+          protein: 12,
+          carbs: 38,
+          fat: 5,
+          kcal: 280,
+          tags: ["veg"],
+        },
+        {
+          title: "Chicken Salad",
+          protein: 30,
+          carbs: 10,
+          fat: 14,
+          kcal: 330,
+          tags: ["gluten-free"],
+        },
+        {
+          title: "Lamb Doner Bowl",
+          protein: 34,
+          carbs: 42,
+          fat: 18,
+          kcal: 520,
+          tags: ["fusion"],
+        },
+        {
+          title: "Greek Yogurt",
+          protein: 17,
+          carbs: 8,
+          fat: 4,
+          kcal: 150,
+          tags: ["snack"],
+        },
       ];
       Object.keys(auto.days).forEach((key, i) => {
         auto.days[key].breakfast.push({ id: `m_b_${i}`, ...demoMeals[0] });
@@ -468,14 +585,32 @@ export default function CalendarPreview() {
         auto.days[key].snack.push({ id: `m_s_${i}`, ...demoMeals[3] });
       });
       replacePlan(auto);
-      emit("mealplan.draft.created", { weekStart: anchor, draftId, period: periodKey, customStart, customEnd });
+      emit("mealplan.draft.created", {
+        weekStart: anchor,
+        draftId,
+        period: periodKey,
+        customStart,
+        customEnd,
+      });
       const label = PERIODS.find((p) => p.key === periodKey)?.label || "Period";
-      toast({ title: "Draft generated", description: `Auto plan for ${label}.` });
+      toast({
+        title: "Draft generated",
+        description: `Auto plan for ${label}.`,
+      });
       setMode("auto");
     } finally {
       setLoading(false);
     }
-  }, [anchor, periodKey, periodSpec, customDates, customStart, customEnd, replacePlan, toast]);
+  }, [
+    anchor,
+    periodKey,
+    periodSpec,
+    customDates,
+    customStart,
+    customEnd,
+    replacePlan,
+    toast,
+  ]);
 
   // Sync
   const handleSync = useCallback(async () => {
@@ -493,11 +628,20 @@ export default function CalendarPreview() {
         title: "Synced to Calendar",
         description: `${res?.count ?? 0} events created.`,
         action: (
-          <Button variant="secondary" size="sm" onClick={async () => {
-            await automation.calendar.revertMealPlanWeek({ weekStart: anchor });
-            replacePlan(prev);
-            toast({ title: "Sync reverted", description: "Calendar events removed." });
-          }}>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={async () => {
+              await automation.calendar.revertMealPlanWeek({
+                weekStart: anchor,
+              });
+              replacePlan(prev);
+              toast({
+                title: "Sync reverted",
+                description: "Calendar events removed.",
+              });
+            }}
+          >
             Undo
           </Button>
         ),
@@ -511,9 +655,19 @@ export default function CalendarPreview() {
   const handleAddMeal = useCallback(
     (date, slot) => {
       setMode("manual");
-      const title = typeof window !== "undefined" ? window.prompt(`Add a ${slot} title:`) : "Custom Meal";
+      const title =
+        typeof window !== "undefined"
+          ? window.prompt(`Add a ${slot} title:`)
+          : "Custom Meal";
       if (!title) return;
-      const meal = { title, protein: 10, carbs: 20, fat: 10, kcal: 240, tags: ["custom"] };
+      const meal = {
+        title,
+        protein: 10,
+        carbs: 20,
+        fat: 10,
+        kcal: 240,
+        tags: ["custom"],
+      };
       const optimisticId = Math.random().toString(36).slice(2);
       addMeal({ date, slot, meal: { id: optimisticId, ...meal } });
       toast({
@@ -540,7 +694,11 @@ export default function CalendarPreview() {
         title: "Meal removed",
         description: `${meal.title} removed.`,
         action: (
-          <Button variant="secondary" size="sm" onClick={() => addMeal({ date, slot, meal })}>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => addMeal({ date, slot, meal })}
+          >
             Undo
           </Button>
         ),
@@ -551,27 +709,38 @@ export default function CalendarPreview() {
 
   // NBA
   const nextBestAction = useMemo(() => {
-    const hasAny = Object.values(plan.days).some((d) => MEAL_SLOTS.some((s) => (d[s.key] || []).length));
+    const hasAny = Object.values(plan.days).some((d) =>
+      MEAL_SLOTS.some((s) => (d[s.key] || []).length)
+    );
     if (!hasAny) return { label: "Generate plan", action: handleGenerate };
     return { label: "Sync to calendar", action: handleSync };
   }, [plan, handleGenerate, handleSync]);
 
   // Period navigation
   const goPrev = () => {
-    if (periodSpec === "month-full") setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() - 1, 1));
-    else if (periodSpec === "quarter") setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() - 3, 1));
-    else if (typeof periodSpec === "number") setAnchor(addDays(anchor, -periodSpec));
+    if (periodSpec === "month-full")
+      setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() - 1, 1));
+    else if (periodSpec === "quarter")
+      setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() - 3, 1));
+    else if (typeof periodSpec === "number")
+      setAnchor(addDays(anchor, -periodSpec));
     else setAnchor(addDays(anchor, -7));
   };
   const goNext = () => {
-    if (periodSpec === "month-full") setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() + 1, 1));
-    else if (periodSpec === "quarter") setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() + 3, 1));
-    else if (typeof periodSpec === "number") setAnchor(addDays(anchor, periodSpec));
+    if (periodSpec === "month-full")
+      setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() + 1, 1));
+    else if (periodSpec === "quarter")
+      setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() + 3, 1));
+    else if (typeof periodSpec === "number")
+      setAnchor(addDays(anchor, periodSpec));
     else setAnchor(addDays(anchor, 7));
   };
 
   // Sorted date keys for rendering
-  const sortedKeys = useMemo(() => Object.keys(visibleMeals?.days || {}).sort(), [visibleMeals]);
+  const sortedKeys = useMemo(
+    () => Object.keys(visibleMeals?.days || {}).sort(),
+    [visibleMeals]
+  );
 
   const isSabbath = typeof window !== "undefined" && !!window.__SABBATH__;
 
@@ -584,16 +753,37 @@ export default function CalendarPreview() {
         <div className="flex items-center gap-2">
           <div className="h-5 w-5 rounded bg-gray-900" />
           <h2 className="text-xl font-semibold">Meal Calendar Preview</h2>
-          <Badge variant={mode === "auto" ? "default" : "secondary"} className="ml-1">
+          <Badge
+            variant={mode === "auto" ? "default" : "secondary"}
+            className="ml-1"
+          >
             {mode === "auto" ? "auto" : "manual"}
           </Badge>
-          {isSabbath && <Badge variant="warn" className="ml-2">Sabbath mode</Badge>}
+          {isSabbath && (
+            <Badge variant="warn" className="ml-2">
+              Sabbath mode
+            </Badge>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon" onClick={goPrev} aria-label="Previous period">←</Button>
-            <Button variant="ghost" size="icon" onClick={goNext} aria-label="Next period">→</Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={goPrev}
+              aria-label="Previous period"
+            >
+              ←
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={goNext}
+              aria-label="Next period"
+            >
+              →
+            </Button>
           </div>
 
           <div className="hidden items-center gap-2 md:flex">
@@ -604,15 +794,25 @@ export default function CalendarPreview() {
               onChange={(e) => setPeriodKey(e.target.value)}
             >
               {PERIODS.map((p) => (
-                <option key={p.key} value={p.key}>{p.label}</option>
+                <option key={p.key} value={p.key}>
+                  {p.label}
+                </option>
               ))}
             </select>
 
             {periodKey === "custom" && (
               <div className="flex items-center gap-2">
-                <Input type="date" value={customStart} onChange={(e) => setCustomStart(e.target.value)} />
+                <Input
+                  type="date"
+                  value={customStart}
+                  onChange={(e) => setCustomStart(e.target.value)}
+                />
                 <span className="text-sm text-gray-500">to</span>
-                <Input type="date" value={customEnd} onChange={(e) => setCustomEnd(e.target.value)} />
+                <Input
+                  type="date"
+                  value={customEnd}
+                  onChange={(e) => setCustomEnd(e.target.value)}
+                />
               </div>
             )}
 
@@ -622,7 +822,11 @@ export default function CalendarPreview() {
               onChange={(e) => setQuery(e.target.value)}
               className="h-9 w-48"
             />
-            <Button variant="outline" size="sm" onClick={() => emit("ui.panel.open", { id: "NutritionPanel" })}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => emit("ui.panel.open", { id: "NutritionPanel" })}
+            >
               Options
             </Button>
             <Button
@@ -644,16 +848,47 @@ export default function CalendarPreview() {
         <Button onClick={handleGenerate} disabled={loading || isSabbath}>
           {loading ? "Generating…" : "Generate Plan (Auto)"}
         </Button>
-        <Button variant="outline" onClick={() => setMode("manual")}>+ Add Meals (Manual)</Button>
-        <Button variant="secondary" onClick={handleSync} disabled={loading || isSabbath}>Sync to Calendar</Button>
-        <Button variant="ghost" onClick={() => emit("sharing.plan.open", { weekStart: anchor, period: periodKey, customStart, customEnd })}>
+        <Button variant="outline" onClick={() => setMode("manual")}>
+          + Add Meals (Manual)
+        </Button>
+        <Button
+          variant="secondary"
+          onClick={handleSync}
+          disabled={loading || isSabbath}
+        >
+          Sync to Calendar
+        </Button>
+        <Button
+          variant="ghost"
+          onClick={() =>
+            emit("sharing.plan.open", {
+              weekStart: anchor,
+              period: periodKey,
+              customStart,
+              customEnd,
+            })
+          }
+        >
           Share / Co-Plan
         </Button>
-        <Button variant="ghost" onClick={() => emit("plan.export.requested", { anchor, periodKey, customStart, customEnd })}>
+        <Button
+          variant="ghost"
+          onClick={() =>
+            emit("plan.export.requested", {
+              anchor,
+              periodKey,
+              customStart,
+              customEnd,
+            })
+          }
+        >
           Export
         </Button>
         {nextBestAction && (
-          <Badge className="ml-auto cursor-pointer" onClick={nextBestAction.action}>
+          <Badge
+            className="ml-auto cursor-pointer"
+            onClick={nextBestAction.action}
+          >
             {nextBestAction.label}
           </Badge>
         )}
@@ -672,7 +907,12 @@ export default function CalendarPreview() {
                   const meals = visibleMeals?.days?.[key];
                   return (
                     <div key={key} className="min-h-[360px]">
-                      <DayCell date={date} meals={meals} onAdd={handleAddMeal} onRemove={handleRemoveMeal} />
+                      <DayCell
+                        date={date}
+                        meals={meals}
+                        onAdd={handleAddMeal}
+                        onRemove={handleRemoveMeal}
+                      />
                     </div>
                   );
                 })}
@@ -684,30 +924,53 @@ export default function CalendarPreview() {
                   const [y, m, d] = key.split("-").map((n) => parseInt(n, 10));
                   const date = new Date(y, m - 1, d);
                   const meals = visibleMeals?.days?.[key] || {};
-                  const hasAny = MEAL_SLOTS.some((s) => (meals[s.key] || []).length);
+                  const hasAny = MEAL_SLOTS.some(
+                    (s) => (meals[s.key] || []).length
+                  );
                   return (
                     <div key={key} className="py-3">
                       <div className="mb-1 flex items-center justify-between">
-                        <div className="text-sm font-semibold">{format(date, "EEE, MMM d")}</div>
+                        <div className="text-sm font-semibold">
+                          {format(date, "EEE, MMM d")}
+                        </div>
                         <div className="flex items-center gap-2">
-                          {isSameDay(date, new Date()) && <Badge variant="outline">Today</Badge>}
-                          <Button variant="outline" size="sm" onClick={() => handleAddMeal(date, "dinner")}>+ Quick Add</Button>
+                          {isSameDay(date, new Date()) && (
+                            <Badge variant="outline">Today</Badge>
+                          )}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleAddMeal(date, "dinner")}
+                          >
+                            + Quick Add
+                          </Button>
                         </div>
                       </div>
-                      {!hasAny && <div className="text-xs text-gray-500">No meals — Quick Add to start.</div>}
+                      {!hasAny && (
+                        <div className="text-xs text-gray-500">
+                          No meals — Quick Add to start.
+                        </div>
+                      )}
                       {MEAL_SLOTS.map(({ key: slotKey, label }) => {
                         const items = meals[slotKey] || [];
                         if (!items.length) return null;
                         return (
                           <div key={slotKey} className="ml-1">
-                            <div className="text-[11px] font-semibold text-gray-600">{label}</div>
+                            <div className="text-[11px] font-semibold text-gray-600">
+                              {label}
+                            </div>
                             <ul className="mt-1 grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
                               {items.map((m) => (
-                                <li key={m.id} className="flex items-center justify-between rounded border px-2 py-1 text-xs">
+                                <li
+                                  key={m.id}
+                                  className="flex items-center justify-between rounded border px-2 py-1 text-xs"
+                                >
                                   <span className="truncate">{m.title}</span>
                                   <button
                                     className="ml-2 text-gray-500 hover:text-gray-800"
-                                    onClick={() => handleRemoveMeal(date, slotKey, m)}
+                                    onClick={() =>
+                                      handleRemoveMeal(date, slotKey, m)
+                                    }
                                     aria-label="Remove"
                                     title="Remove"
                                   >
@@ -753,7 +1016,14 @@ export default function CalendarPreview() {
                 <Button
                   size="sm"
                   className="w-full"
-                  onClick={() => emit("grocerylist.requested", { anchor, periodKey, customStart, customEnd })}
+                  onClick={() =>
+                    emit("grocerylist.requested", {
+                      anchor,
+                      periodKey,
+                      customStart,
+                      customEnd,
+                    })
+                  }
                 >
                   Generate Grocery List
                 </Button>
@@ -765,13 +1035,24 @@ export default function CalendarPreview() {
                 <CardTitle className="text-sm">Tips</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-sm text-gray-600">
-                <p>Month view shows a <strong>full calendar</strong> (padded to whole weeks). Quarter is a <strong>true quarter</strong>.</p>
-                <p>Use <em>Compact View</em> for quick review or printing.</p>
+                <p>
+                  Month view shows a <strong>full calendar</strong> (padded to
+                  whole weeks). Quarter is a <strong>true quarter</strong>.
+                </p>
+                <p>
+                  Use <em>Compact View</em> for quick review or printing.
+                </p>
                 <Button
                   variant="outline"
                   size="sm"
                   className="w-full"
-                  onClick={() => emit("household.rhythm.apply.requested", { scope: "mealplan", anchor, periodKey })}
+                  onClick={() =>
+                    emit("household.rhythm.apply.requested", {
+                      scope: "mealplan",
+                      anchor,
+                      periodKey,
+                    })
+                  }
                 >
                   Apply Household Rhythm
                 </Button>
@@ -783,15 +1064,21 @@ export default function CalendarPreview() {
 
       {/* Empty state */}
       {(() => {
-        const hasAny = Object.values(plan.days).some((d) => MEAL_SLOTS.some((s) => (d[s.key] || []).length));
+        const hasAny = Object.values(plan.days).some((d) =>
+          MEAL_SLOTS.some((s) => (d[s.key] || []).length)
+        );
         if (hasAny) return null;
         return (
           <Card className="border-dashed">
             <CardContent className="py-10 text-center text-gray-600">
               <p>No meals planned for this period yet.</p>
               <div className="mt-4 flex items-center justify-center gap-2">
-                <Button onClick={handleGenerate} disabled={isSabbath}>Generate a draft</Button>
-                <Button variant="outline" onClick={() => setMode("manual")}>Plan manually</Button>
+                <Button onClick={handleGenerate} disabled={isSabbath}>
+                  Generate a draft
+                </Button>
+                <Button variant="outline" onClick={() => setMode("manual")}>
+                  Plan manually
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -815,7 +1102,16 @@ export default function CalendarPreview() {
   };
 
   // Test 1: macros should sum to ~100
-  const week = { days: { "2025-01-01": { breakfast: [{ protein: 10, carbs: 20, fat: 30, kcal: 400 }], lunch: [], dinner: [], snack: [] } } };
+  const week = {
+    days: {
+      "2025-01-01": {
+        breakfast: [{ protein: 10, carbs: 20, fat: 30, kcal: 400 }],
+        lunch: [],
+        dinner: [],
+        snack: [],
+      },
+    },
+  };
   const m = computeWeekMacrosFromWeek(week);
   const sumPct = Math.round(m.proteinPct + m.carbPct + m.fatPct);
   expect(sumPct === 100, `Macros sum to ~100 (got ${sumPct})`);
@@ -832,14 +1128,22 @@ export default function CalendarPreview() {
   // Test 2c: FULL month (June 2025 starts Sun and has 30 days → 5 full weeks = 35 days)
   const june = new Date(2025, 5, 10);
   const rM = makeEmptyRange(june, "month-full");
-  expect(Object.keys(rM.days).length === 35, "June 2025 full calendar is 35 days");
+  expect(
+    Object.keys(rM.days).length === 35,
+    "June 2025 full calendar is 35 days"
+  );
 
   // Test 2d: TRUE quarter Q1 2025 = Jan 1 .. Mar 31 = 90 days
   const q1 = makeEmptyRange(new Date(2025, 0, 15), "quarter");
   expect(Object.keys(q1.days).length === 90, "Q1 2025 has 90 days");
 
   // Test 2e: Custom range inclusive count (Mar 1–Mar 03 = 3)
-  const cStart = new Date(2025, 2, 1), cEnd = new Date(2025, 2, 3);
-  const cR = makeEmptyRange(new Date(2025, 2, 1), "custom", [cStart, new Date(2025, 2, 2), cEnd]);
+  const cStart = new Date(2025, 2, 1),
+    cEnd = new Date(2025, 2, 3);
+  const cR = makeEmptyRange(new Date(2025, 2, 1), "custom", [
+    cStart,
+    new Date(2025, 2, 2),
+    cEnd,
+  ]);
   expect(Object.keys(cR.days).length === 3, "Custom inclusive 3 days");
 })();

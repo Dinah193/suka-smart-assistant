@@ -1,0 +1,1188 @@
+{
+  "$schema": "../../../schemas/cuisine.profile.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-21T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.korean",
+    "type": "cuisine_profile",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Korean",
+    "name": "Korean",
+    "shortName": "Korean",
+    "subtitle": "Bold, fermented, savory-spicy cuisine built around rice, soups/stews, barbecue, and an ecosystem of banchan.",
+    "description": "Korean cooking centers on rice as the base, a frequent soup/stew component, and multiple small sides (banchan). Signature flavors come from fermentation (doenjang, gochujang, ganjang), aromatics (garlic, scallion), toasted sesame, and balanced heat, sweetness, and acidity—often via kimchi and vinegar-based quick pickles.",
+    "originRegions": ["Korean Peninsula"],
+    "regions": ["East Asia"],
+    "primaryCountriesAndIslands": ["South Korea", "North Korea"],
+    "tags": [
+      "cuisine.korean",
+      "region.east_asia",
+      "profile.canonical",
+      "flavor.fermented",
+      "flavor.spicy",
+      "flavor.umami",
+      "pattern.banchan",
+      "pattern.rice_base",
+      "method.grill",
+      "method.braise",
+      "method.ferment"
+    ],
+    "icon": "icon.korean_bowl",
+    "colorHint": "crimson_sesame",
+    "heritageNotes": [
+      "Banchan culture: small sides that rotate across meals, enhancing variety and nutrition.",
+      "Fermented pastes and kimchi anchor the flavor identity and provide pantry resilience.",
+      "Common patterns: rice + soup/stew + banchan; barbecue with leafy wraps and condiments."
+    ],
+    "version": "1.0.0",
+    "author": "ssa.codegen",
+    "createdAt": "2026-01-21T00:00:00.000Z",
+    "updatedAt": "2026-01-21T00:00:00.000Z",
+    "status": "canonical",
+    "source": {
+      "curation": "Canonical SSA cuisine profile",
+      "maintainer": "SSA Catalog Team",
+      "license": "Proprietary",
+      "attribution": "SSA original compilation",
+      "kind": "catalog",
+      "author": "ssa.codegen",
+      "origin": "SSA",
+      "type": "curated",
+      "notes": "IDs in this profile are SSA canonical ingredient/method/equipment identifiers; adapters may map to local catalogs as needed.",
+      "url": null
+    },
+    "family": {
+      "parent": "cuisines.east_asian",
+      "siblings": [
+        "cuisines.japanese",
+        "cuisines.chinese",
+        "cuisines.vietnamese"
+      ],
+      "overlapsWith": [
+        {
+          "id": "cuisines.japanese",
+          "reason": "Shared ingredients such as soy sauce, seaweed, rice, scallion, and grilling; different fermented-paste system and banchan structure."
+        },
+        {
+          "id": "cuisines.chinese",
+          "reason": "Shared stir-fry and noodle techniques; Korean flavor identity leans on gochujang/doenjang/kimchi ecosystem."
+        }
+      ]
+    },
+    "subprofiles": [
+      {
+        "id": "korean.home_cooking",
+        "name": "Home Cooking Core",
+        "signatureNotes": "Rice + soup/stew + rotating banchan; quick stir-fries; simple marinades; pantry-first meals.",
+        "commonSauceBases": [
+          "ingredient.gochujang",
+          "ingredient.doenjang",
+          "ingredient.ganjang",
+          "ingredient.sesame_oil",
+          "ingredient.rice_vinegar"
+        ]
+      },
+      {
+        "id": "korean.bbq",
+        "name": "Korean BBQ & Wraps",
+        "signatureNotes": "Grilled meats with ssam wraps, dipping sauces, pickles, and crisp banchan; strong emphasis on marinades.",
+        "commonSauceBases": [
+          "ingredient.ssamjang",
+          "ingredient.gochujang",
+          "ingredient.garlic",
+          "ingredient.sesame_oil",
+          "ingredient.ganjang"
+        ]
+      },
+      {
+        "id": "korean.soups_stews",
+        "name": "Soups & Stews",
+        "signatureNotes": "Hearty jjigae and guk; anchovy-kelp stocks; tofu and vegetables; fermented paste bases.",
+        "commonSauceBases": [
+          "ingredient.doenjang",
+          "ingredient.gochujang",
+          "ingredient.ganjang",
+          "ingredient.anchovy_stock",
+          "ingredient.kelp_dashi_kombu"
+        ]
+      },
+      {
+        "id": "korean.banchan",
+        "name": "Banchan & Ferments",
+        "signatureNotes": "Kimchi, seasoned greens, quick pickles, marinated sprouts, pan-fried pancakes; make-ahead friendly rotation.",
+        "commonSauceBases": [
+          "ingredient.gochugaru",
+          "ingredient.ganjang",
+          "ingredient.sesame_oil",
+          "ingredient.rice_vinegar"
+        ]
+      }
+    ],
+    "regionHints": ["Korea", "Seoul", "Jeolla", "Gyeongsang", "Gangwon"],
+    "countryHints": ["South Korea", "Korea", "Republic of Korea"]
+  },
+
+  "plannerDefaults": {
+    "servingStyles": ["family_style", "bowls", "plates", "street_food"],
+    "weeknightBias": "High: fast stir-fries, rice cooker base, 1–2 banchan, and a quick soup.",
+    "leftoversStrategy": "batch_and_remix",
+    "batchCookingBias": {
+      "level": "high",
+      "bestBatches": [
+        "dish.kimchi",
+        "dish.pickled_radish",
+        "dish.seasoned_spinach",
+        "dish.bean_sprout_banchan",
+        "dish.bulgogi"
+      ],
+      "notes": "Batch banchan and marinated proteins for fast weeknight assemblies."
+    },
+    "spiceHeatDefault": 3,
+    "saltinessDefault": 3,
+    "sournessDefault": 2,
+    "sweetnessDefault": 2,
+    "umamiDefault": 4,
+    "oilUseDefault": 2,
+    "preferredCookingFats": ["ingredient.neutral_oil", "ingredient.sesame_oil"],
+    "primaryStarches": [
+      "ingredient.japanese_short_grain_rice",
+      "ingredient.korean_rice",
+      "ingredient.sweet_potato_noodles",
+      "ingredient.ramen_noodles"
+    ],
+    "primaryProteins": [
+      "ingredient.pork_belly",
+      "ingredient.beef",
+      "ingredient.chicken",
+      "ingredient.tofu",
+      "ingredient.eggs",
+      "ingredient.fish_cakes",
+      "ingredient.shrimp"
+    ],
+    "defaultMealArchetypes": [
+      "korean.meal.rice_soup_banchan",
+      "korean.meal.bbq_ssam",
+      "korean.meal.noodle_bowl",
+      "korean.meal.stew_set"
+    ],
+    "defaultPlateTemplateIds": ["plate.korean_set_meal"]
+  },
+
+  "flavorSystem": {
+    "signatureNotes": [
+      "Fermented umami base + garlic/scallion aromatics + toasted sesame finish.",
+      "Heat is typically built with gochugaru/gochujang and balanced with mild sweetness (sugar, pear) and acidity (kimchi, vinegar).",
+      "Stocks often use anchovy + kelp for depth; soups/stews are common meal anchors."
+    ],
+    "aromaticsCore": [
+      "ingredient.garlic",
+      "ingredient.scallion",
+      "ingredient.onion",
+      "ingredient.ginger"
+    ],
+    "spiceCore": [
+      "ingredient.gochugaru",
+      "ingredient.black_pepper",
+      "ingredient.sesame_seeds"
+    ],
+    "umamiBuilders": [
+      "ingredient.gochujang",
+      "ingredient.doenjang",
+      "ingredient.ganjang",
+      "ingredient.ssamjang",
+      "ingredient.fish_sauce",
+      "ingredient.shrimp_paste_saeujeot",
+      "ingredient.anchovy_stock"
+    ],
+    "acidOptions": [
+      "ingredient.rice_vinegar",
+      "ingredient.kimchi",
+      "ingredient.lemon_juice"
+    ],
+    "sweetBalanceOptions": [
+      "ingredient.sugar",
+      "ingredient.honey",
+      "ingredient.korean_pear",
+      "ingredient.brown_sugar"
+    ],
+    "heatOptions": [
+      "ingredient.gochugaru",
+      "ingredient.gochujang",
+      "ingredient.fresh_chili"
+    ]
+  },
+
+  "pantryTiers": {
+    "tier0_minimum": {
+      "description": "Get started: rice, soy sauce, sesame, and basic aromatics for simple bowls and stir-fries.",
+      "items": [
+        "ingredient.korean_rice",
+        "ingredient.ganjang",
+        "ingredient.sesame_oil",
+        "ingredient.sesame_seeds",
+        "ingredient.garlic",
+        "ingredient.scallion",
+        "ingredient.neutral_oil"
+      ]
+    },
+    "tier1_core": {
+      "description": "Core fermented identity + banchan basics; enables stews, marinades, and classic flavor profiles.",
+      "items": [
+        "ingredient.gochujang",
+        "ingredient.doenjang",
+        "ingredient.gochugaru",
+        "ingredient.rice_vinegar",
+        "ingredient.kimchi",
+        "ingredient.anchovy_stock",
+        "ingredient.kelp_dashi_kombu"
+      ]
+    },
+    "tier2_traditional": {
+      "description": "Traditional staples and condiments for deeper authenticity and rotation of banchan.",
+      "items": [
+        "ingredient.ssamjang",
+        "ingredient.fish_sauce",
+        "ingredient.shrimp_paste_saeujeot",
+        "ingredient.mirin",
+        "ingredient.korean_radish",
+        "ingredient.napa_cabbage",
+        "ingredient.gim_seaweed"
+      ]
+    },
+    "tier3_specialty": {
+      "description": "Specialty items for street foods, noodles, and advanced dishes.",
+      "items": [
+        "ingredient.gochujang_powder",
+        "ingredient.korean_chili_paste_extra_hot",
+        "ingredient.sweet_potato_noodles",
+        "ingredient.rice_cake_tteok",
+        "ingredient.dried_anchovies",
+        "ingredient.korean_black_beans_chunjang",
+        "ingredient.kimchi_base_seasoning"
+      ]
+    }
+  },
+
+  "techniquesEmphasis": {
+    "primary": [
+      "method.ferment",
+      "method.braise",
+      "method.grill",
+      "method.stir_fry",
+      "method.simmer",
+      "method.quick_pickle"
+    ],
+    "common": [
+      "method.pan_fry",
+      "method.steam",
+      "method.boil",
+      "method.marinate",
+      "method.blanch_and_season"
+    ],
+    "notes": [
+      "Fermentation is central: kimchi and paste-based stews are high-leverage for planners.",
+      "Grilling and ssam wraps use fast assembly: pre-marinated proteins + leafy greens + dips."
+    ]
+  },
+
+  "dishArchetypes": [
+    {
+      "id": "korean.meal.rice_soup_banchan",
+      "label": "Rice + Soup/Stew + Banchan Set",
+      "description": "A typical home meal: rice as base, one soup or stew, and multiple small sides (banchan).",
+      "commonExamples": [
+        "Doenjang jjigae + rice + kimchi + seasoned spinach",
+        "Kimchi jjigae + rice + bean sprouts + pickled radish"
+      ],
+      "defaults": {
+        "starchOptions": ["ingredient.korean_rice"],
+        "stew_baseOptions": [
+          "dish.doenjang_jjigae",
+          "dish.kimchi_jjigae",
+          "dish.seaweed_soup"
+        ],
+        "sideOptions": [
+          "dish.kimchi",
+          "dish.bean_sprout_banchan",
+          "dish.seasoned_spinach",
+          "dish.pickled_radish"
+        ],
+        "garnishOptions": ["ingredient.scallion", "ingredient.sesame_seeds"]
+      }
+    },
+    {
+      "id": "korean.meal.bbq_ssam",
+      "label": "BBQ + Ssam Wraps",
+      "description": "Grilled protein with leafy wraps, dipping sauces, and crisp banchan.",
+      "commonExamples": [
+        "Samgyeopsal + ssamjang + lettuce wraps + pickles",
+        "Bulgogi + perilla leaves + kimchi + rice"
+      ],
+      "defaults": {
+        "proteinOptions": [
+          "ingredient.pork_belly",
+          "ingredient.beef",
+          "ingredient.chicken",
+          "ingredient.tofu"
+        ],
+        "starchOptions": ["ingredient.korean_rice"],
+        "sideOptions": [
+          "dish.kimchi",
+          "dish.pickled_radish",
+          "dish.cucumber_banchan"
+        ],
+        "sauceOptions": ["ingredient.ssamjang", "ingredient.gochujang"],
+        "garnishOptions": [
+          "ingredient.garlic",
+          "ingredient.scallion",
+          "ingredient.sesame_oil"
+        ]
+      }
+    },
+    {
+      "id": "korean.meal.noodle_bowl",
+      "label": "Noodle Bowl / Noodle Stir-Fry",
+      "description": "Comfort noodles either in broth or stir-fried, often with vegetables and a protein.",
+      "commonExamples": [
+        "Japchae",
+        "Ramyeon with egg and scallions",
+        "Jajangmyeon"
+      ],
+      "defaults": {
+        "starchOptions": [
+          "ingredient.sweet_potato_noodles",
+          "ingredient.ramen_noodles"
+        ],
+        "proteinOptions": [
+          "ingredient.beef",
+          "ingredient.chicken",
+          "ingredient.eggs",
+          "ingredient.tofu"
+        ],
+        "vegOptions": [
+          "ingredient.carrot",
+          "ingredient.spinach",
+          "ingredient.mushrooms"
+        ],
+        "sauceOptions": [
+          "ingredient.ganjang",
+          "ingredient.gochujang",
+          "ingredient.chunjang_black_bean_paste"
+        ],
+        "garnishOptions": ["ingredient.sesame_seeds", "ingredient.scallion"]
+      }
+    },
+    {
+      "id": "korean.meal.stew_set",
+      "label": "Hearty Jjigae Set",
+      "description": "A robust stew (jjigae) anchored by paste/kimchi, served with rice and 1–3 quick banchan.",
+      "commonExamples": ["Kimchi jjigae set", "Sundubu jjigae set"],
+      "defaults": {
+        "starchOptions": ["ingredient.korean_rice"],
+        "stew_baseOptions": [
+          "dish.kimchi_jjigae",
+          "dish.sundubu_jjigae",
+          "dish.doenjang_jjigae"
+        ],
+        "sideOptions": [
+          "dish.kimchi",
+          "dish.pickled_radish",
+          "dish.bean_sprout_banchan"
+        ],
+        "garnishOptions": ["ingredient.scallion", "ingredient.sesame_oil"]
+      }
+    }
+  ],
+
+  "ingredientPreferences": {
+    "preferred": [
+      "ingredient.korean_rice",
+      "ingredient.gochujang",
+      "ingredient.doenjang",
+      "ingredient.gochugaru",
+      "ingredient.ganjang",
+      "ingredient.sesame_oil",
+      "ingredient.sesame_seeds",
+      "ingredient.garlic",
+      "ingredient.scallion",
+      "ingredient.kimchi",
+      "ingredient.korean_radish",
+      "ingredient.napa_cabbage"
+    ],
+    "optional_traditional": [
+      "ingredient.shrimp_paste_saeujeot",
+      "ingredient.dried_anchovies",
+      "ingredient.kelp_dashi_kombu",
+      "ingredient.gim_seaweed",
+      "ingredient.korean_pear"
+    ],
+    "avoid_or_limit": [
+      {
+        "id": "ingredient.olive_oil",
+        "label": "Olive oil (for core dishes)",
+        "reason": "Not typical for Korean flavor profiles; neutral oil + sesame oil is more authentic for aroma and finish."
+      }
+    ]
+  },
+
+  "substitutionGuidance": {
+    "proteinSubstitutions": [
+      {
+        "for": "ingredient.pork_belly",
+        "options": [
+          "ingredient.pork_shoulder",
+          "ingredient.chicken_thighs",
+          "ingredient.tofu"
+        ],
+        "notes": "For ssam/BBQ sets, prefer fatty cuts (pork shoulder) or use tofu + strong dipping sauce."
+      },
+      {
+        "for": "ingredient.beef_short_ribs",
+        "options": ["ingredient.beef_chuck", "ingredient.beef_brisket"],
+        "notes": "For braises, use collagen-rich cuts; extend simmer time until tender."
+      }
+    ],
+    "sideSubstitutions": [
+      {
+        "for": "ingredient.napa_cabbage",
+        "options": ["ingredient.green_cabbage"],
+        "notes": "Green cabbage works for quick kimchi-style pickles; fermentation flavor will differ slightly."
+      }
+    ],
+    "thickenerSubstitutions": [
+      {
+        "for": "ingredient.korean_rice_cake_tteok",
+        "options": ["ingredient.gnocchi", "ingredient.rice_noodles"],
+        "notes": "For tteokbokki-like textures, choose chewy substitutes; adjust sauce reduction for cling."
+      }
+    ],
+    "notes": [
+      "If gochugaru is unavailable, use mild red pepper flakes and add a small amount of smoked paprika only when appropriate (not for all dishes).",
+      "If doenjang is missing, miso can approximate umami but is typically sweeter and less pungent; reduce additional sweeteners."
+    ]
+  },
+
+  "mealTemplates": [
+    {
+      "id": "template.korean.weeknight_set_1",
+      "label": "Weeknight Set: Rice + Quick Soup + 2 Banchan",
+      "archetypeId": "korean.meal.rice_soup_banchan",
+      "components": [
+        {
+          "role": "starch",
+          "ingredientIds": ["ingredient.korean_rice"],
+          "chooseOne": false,
+          "notes": "Rice cooker friendly base; make extra for fried rice or bibimbap."
+        },
+        {
+          "role": "stew_base",
+          "ingredientIds": ["dish.doenjang_jjigae", "dish.kimchi_jjigae"],
+          "chooseOne": true,
+          "notes": "Pick one stew; use anchovy-kelp stock if available."
+        },
+        {
+          "role": "side",
+          "ingredientIds": [
+            "dish.kimchi",
+            "dish.bean_sprout_banchan",
+            "dish.seasoned_spinach",
+            "dish.pickled_radish"
+          ],
+          "chooseOne": true,
+          "notes": "Pick 2 banchan total; mix fresh + fermented."
+        },
+        {
+          "role": "garnish",
+          "ingredientIds": [
+            "ingredient.scallion",
+            "ingredient.sesame_seeds",
+            "ingredient.sesame_oil"
+          ],
+          "chooseOne": true,
+          "notes": "Finish for aroma."
+        }
+      ],
+      "prepNotes": [
+        "Keep at least one fermented banchan (kimchi) and one quick banchan in rotation.",
+        "Batch-cook rice; reheat with steam and a splash of water."
+      ]
+    },
+    {
+      "id": "template.korean.bbq_set_1",
+      "label": "BBQ Set: Protein + Wraps + Dips + Pickles",
+      "archetypeId": "korean.meal.bbq_ssam",
+      "components": [
+        {
+          "role": "protein",
+          "ingredientIds": [
+            "dish.bulgogi",
+            "dish.samgyeopsal",
+            "dish.spicy_pork_bulgogi"
+          ],
+          "chooseOne": true,
+          "notes": "Marinate ahead for 30–240 minutes; grill or skillet-sear."
+        },
+        {
+          "role": "greens",
+          "ingredientIds": ["ingredient.lettuce", "ingredient.perilla_leaves"],
+          "chooseOne": true,
+          "notes": "Use crisp greens for wraps."
+        },
+        {
+          "role": "sauce",
+          "ingredientIds": ["ingredient.ssamjang", "ingredient.gochujang"],
+          "chooseOne": true,
+          "notes": "Ssamjang is the classic dip; gochujang can be thinned with vinegar/sugar/sesame oil."
+        },
+        {
+          "role": "side",
+          "ingredientIds": [
+            "dish.pickled_radish",
+            "dish.kimchi",
+            "dish.cucumber_banchan"
+          ],
+          "chooseOne": true,
+          "notes": "Pick 2 sides total for contrast."
+        }
+      ],
+      "prepNotes": [
+        "Slice garlic and scallions ahead; keep sesame oil + salt ready for quick dip.",
+        "Plan rice as optional; wraps can substitute the starch role."
+      ]
+    }
+  ],
+
+  "safetyNotes": [
+    {
+      "id": "safety.korean.fermented_allergens",
+      "label": "Fermented condiments & allergens",
+      "notes": [
+        "Many Korean condiments include soy/wheat (ganjang, gochujang, some doenjang) and seafood (fish sauce, saeujeot).",
+        "For gluten-free needs, prefer certified gluten-free gochujang/ganjang and avoid wheat-based pastes unless labeled."
+      ]
+    },
+    {
+      "id": "safety.korean.bbq_food_safety",
+      "label": "BBQ and leftovers",
+      "notes": [
+        "Cool cooked meats quickly; refrigerate within 2 hours (1 hour in hot environments).",
+        "Reheat leftovers to steaming hot; avoid repeated cooling/reheating cycles."
+      ]
+    }
+  ],
+
+  "searchHints": {
+    "keywords": [
+      "kimchi",
+      "gochujang",
+      "doenjang",
+      "banchan",
+      "bulgogi",
+      "bibimbap",
+      "jjigae",
+      "ramyeon",
+      "tteokbokki",
+      "ssamjang"
+    ],
+    "commonAlternateNames": [
+      "Korean food",
+      "K-food",
+      "Hansik",
+      "Korean BBQ",
+      "Korean home cooking"
+    ]
+  },
+
+  "pantry": {
+    "freshCore": [
+      "ingredient.garlic",
+      "ingredient.scallion",
+      "ingredient.onion",
+      "ingredient.ginger",
+      "ingredient.napa_cabbage",
+      "ingredient.korean_radish"
+    ],
+    "proteinsCommon": [
+      "ingredient.pork_belly",
+      "ingredient.beef",
+      "ingredient.chicken",
+      "ingredient.tofu",
+      "ingredient.eggs"
+    ],
+    "produceCommon": [
+      "ingredient.spinach",
+      "ingredient.carrot",
+      "ingredient.mushrooms",
+      "ingredient.cucumber"
+    ],
+    "availabilityNotes": [
+      {
+        "ingredient": "ingredient.korean_radish",
+        "fallbacks": ["ingredient.daikon"],
+        "note": "Daikon is a strong substitute; Korean radish is often denser and slightly sweeter."
+      },
+      {
+        "ingredient": "ingredient.perilla_leaves",
+        "fallbacks": ["ingredient.lettuce"],
+        "note": "Perilla is distinctive; lettuce works for wraps but flavor differs."
+      },
+      {
+        "ingredient": "ingredient.saeujeot",
+        "fallbacks": ["ingredient.fish_sauce"],
+        "note": "Fish sauce can replace some salty-fermented depth in kimchi seasoning, but use sparingly."
+      }
+    ],
+    "coreStaples": {
+      "fermented": [
+        "ingredient.kimchi",
+        "ingredient.gochujang",
+        "ingredient.doenjang",
+        "ingredient.ganjang"
+      ],
+      "oils_and_seeds": [
+        "ingredient.sesame_oil",
+        "ingredient.sesame_seeds",
+        "ingredient.neutral_oil"
+      ],
+      "acids": ["ingredient.rice_vinegar"],
+      "starches": [
+        "ingredient.korean_rice",
+        "ingredient.sweet_potato_noodles",
+        "ingredient.rice_cake_tteok"
+      ]
+    },
+    "optionalRegionalStaples": {
+      "stocks": ["ingredient.dried_anchovies", "ingredient.kelp_dashi_kombu"],
+      "seaweed": ["ingredient.gim_seaweed", "ingredient.wakame_seaweed"],
+      "noodles": ["ingredient.ramen_noodles", "ingredient.udon_noodles"]
+    }
+  },
+
+  "techniques": {
+    "coreMethods": [
+      "method.ferment",
+      "method.marinate",
+      "method.stir_fry",
+      "method.simmer",
+      "method.braise",
+      "method.grill",
+      "method.quick_pickle",
+      "method.blanch_and_season"
+    ],
+    "hallmarkProcesses": [
+      {
+        "id": "process.korean.banchan_rotation",
+        "name": "Banchan Rotation (Make-ahead system)",
+        "steps": [
+          "method.ferment",
+          "method.quick_pickle",
+          "method.blanch_and_season",
+          "method.marinate"
+        ],
+        "notes": "Maintain 3–6 banchan: 1 fermented (kimchi), 1 pickled, 1 seasoned vegetable, plus optional protein banchan. This unlocks fast set meals."
+      },
+      {
+        "id": "process.korean.anchovy_kelp_stock",
+        "name": "Anchovy-Kelp Stock (Base for soups/stews)",
+        "steps": ["method.simmer"],
+        "notes": "Use dried anchovies + kelp to build umami depth quickly; forms the base for many jjigae and noodle soups."
+      }
+    ],
+    "signatureMethods": [
+      "Build flavor with fermented base (doenjang/gochujang/ganjang) before adding aromatics and finishing with sesame.",
+      "Balance spicy sauces with a small amount of sweetness and vinegar when needed.",
+      "For stews, keep broth punchy; for BBQ, keep dips concentrated."
+    ],
+    "equipmentAffinity": {
+      "equipment.grill_pan": "high",
+      "equipment.cast_iron_skillet": "high",
+      "equipment.rice_cooker": "high",
+      "equipment.lidded_pot": "high",
+      "equipment.mandoline": "medium"
+    }
+  },
+
+  "equipment": {
+    "recommended": [
+      "equipment.rice_cooker",
+      "equipment.cast_iron_skillet",
+      "equipment.grill_pan",
+      "equipment.lidded_pot",
+      "equipment.wok_or_large_skillet",
+      "equipment.fine_mesh_strainer",
+      "equipment.mixing_bowls",
+      "equipment.kitchen_shears",
+      "equipment.fermentation_jar"
+    ],
+    "optionalButHelpful": [
+      "equipment.mandoline",
+      "equipment.korean_bbq_grill",
+      "equipment.stone_pot_dolsot",
+      "equipment.kitchen_scale"
+    ],
+    "notes": [
+      "A rice cooker is the highest-leverage tool for Korean meal rhythms.",
+      "A cast-iron skillet or grill pan supports BBQ-style searing and caramelization."
+    ]
+  },
+
+  "dietAndAllergens": {
+    "commonAllergens": [
+      "allergen.soy",
+      "allergen.wheat",
+      "allergen.sesame",
+      "allergen.shellfish",
+      "allergen.fish",
+      "allergen.egg"
+    ],
+    "dietCompatibility": {
+      "diet.vegetarian": {
+        "notes": "Use vegetarian kimchi and replace anchovy stock with kelp-mushroom stock; verify gochujang/doenjang ingredients."
+      },
+      "diet.vegan": {
+        "notes": "Avoid fish sauce/saeujeot; use kelp, mushroom, and soy-based umami; ensure kimchi is vegan."
+      },
+      "diet.gluten_free": {
+        "notes": "Use certified GF ganjang (tamari-style) and GF gochujang; avoid wheat-containing pastes unless labeled."
+      }
+    }
+  },
+
+  "signatureDishes": {
+    "core": [
+      {
+        "id": "dish.kimchi",
+        "name": "Kimchi",
+        "subprofiles": ["korean.banchan"],
+        "difficulty": "intermediate",
+        "heatTypical": 3,
+        "notes": "Fermented cabbage with gochugaru and aromatics; central to pantry and planner rotation."
+      },
+      {
+        "id": "dish.bibimbap",
+        "name": "Bibimbap",
+        "subprofiles": ["korean.home_cooking"],
+        "difficulty": "intermediate",
+        "heatTypical": 2,
+        "notes": "Rice bowl topped with assorted vegetables and sauce; ideal for remixing banchan."
+      },
+      {
+        "id": "dish.bulgogi",
+        "name": "Bulgogi",
+        "subprofiles": ["korean.bbq"],
+        "difficulty": "beginner",
+        "heatTypical": 1,
+        "notes": "Sweet-savory marinated beef; weeknight friendly when pre-marinated."
+      },
+      {
+        "id": "dish.kimchi_jjigae",
+        "name": "Kimchi Jjigae",
+        "subprofiles": ["korean.soups_stews"],
+        "difficulty": "beginner",
+        "heatTypical": 3,
+        "notes": "Kimchi-based stew often with pork/tofu; high-umami comfort meal."
+      },
+      {
+        "id": "dish.doenjang_jjigae",
+        "name": "Doenjang Jjigae",
+        "subprofiles": ["korean.soups_stews"],
+        "difficulty": "beginner",
+        "heatTypical": 1,
+        "notes": "Soybean paste stew with vegetables and tofu; pantry-driven."
+      },
+      {
+        "id": "dish.japchae",
+        "name": "Japchae",
+        "subprofiles": ["korean.home_cooking"],
+        "difficulty": "intermediate",
+        "heatTypical": 0,
+        "notes": "Sweet potato noodles with vegetables; great for gatherings and leftovers."
+      },
+      {
+        "id": "dish.tteokbokki",
+        "name": "Tteokbokki",
+        "subprofiles": ["korean.home_cooking"],
+        "difficulty": "intermediate",
+        "heatTypical": 4,
+        "notes": "Spicy rice cakes in gochujang sauce; street food classic."
+      }
+    ],
+    "dessertsAndDrinks": [
+      {
+        "id": "dish.sikhye",
+        "name": "Sikhye",
+        "subprofiles": ["korean.home_cooking"],
+        "difficulty": "intermediate",
+        "heatTypical": 0,
+        "notes": "Sweet rice drink; often served chilled."
+      },
+      {
+        "id": "dish.hotteok",
+        "name": "Hotteok",
+        "subprofiles": ["korean.home_cooking"],
+        "difficulty": "intermediate",
+        "heatTypical": 0,
+        "notes": "Sweet filled pancakes; street snack."
+      }
+    ],
+    "examples": [
+      "Rice + soup/stew + banchan set",
+      "BBQ wraps with ssamjang",
+      "Noodle bowl nights (ramyeon/japchae)",
+      "Banchan rotation for weeknights"
+    ],
+    "mealPatterns": [
+      "Rotate banchan weekly; keep kimchi constant.",
+      "Batch marinated proteins; grill/sear fast on demand.",
+      "Use leftover rice for fried rice and bibimbap."
+    ]
+  },
+
+  "pairingRules": {
+    "typicalStarches": [
+      "ingredient.korean_rice",
+      "ingredient.sweet_potato_noodles",
+      "ingredient.rice_cake_tteok"
+    ],
+    "typicalVegSides": [
+      "dish.kimchi",
+      "dish.seasoned_spinach",
+      "dish.bean_sprout_banchan",
+      "dish.pickled_radish",
+      "dish.cucumber_banchan"
+    ],
+    "typicalCondiments": [
+      "ingredient.ssamjang",
+      "ingredient.gochujang",
+      "ingredient.ganjang",
+      "ingredient.sesame_oil"
+    ],
+    "typicalFlavorPairings": [
+      {
+        "with": "ingredient.gochujang",
+        "pair": [
+          "ingredient.rice_vinegar",
+          "ingredient.sugar",
+          "ingredient.sesame_oil"
+        ],
+        "note": "Thin gochujang into a balanced sauce by adding vinegar + a touch of sugar + sesame oil."
+      },
+      {
+        "with": "ingredient.doenjang",
+        "pair": [
+          "ingredient.garlic",
+          "ingredient.scallion",
+          "ingredient.mushrooms"
+        ],
+        "note": "Doenjang stews build depth with aromatics and mushrooms; finish with scallion."
+      }
+    ],
+    "antiPairings": [
+      {
+        "id": "anti.korean.over_sweet",
+        "avoid": ["ingredient.heavy_syrup_sweeteners"],
+        "note": "Korean savory dishes typically use restrained sweetness; avoid making sauces candy-sweet unless dish calls for it."
+      }
+    ]
+  },
+
+  "substitutions": {
+    "ingredientRules": [
+      {
+        "id": "sub.korean.doenjang_to_miso",
+        "whenMissing": ["ingredient.doenjang"],
+        "use": ["ingredient.miso"],
+        "notes": "Miso can stand in for doenjang. It is often milder/sweeter—reduce added sweeteners and adjust salt carefully."
+      },
+      {
+        "id": "sub.korean.gochugaru_to_pepper_flakes",
+        "whenMissing": ["ingredient.gochugaru"],
+        "use": ["ingredient.red_pepper_flakes"],
+        "notes": "Use mild red pepper flakes as a fallback; aim for color and moderate heat. Avoid strong smoke unless appropriate."
+      },
+      {
+        "id": "sub.korean.anchovy_stock_to_kelp_mushroom",
+        "whenMissing": ["ingredient.anchovy_stock"],
+        "use": ["ingredient.kelp_dashi_kombu", "ingredient.mushroom_stock"],
+        "notes": "For vegetarian-friendly soups, kelp + mushroom stock provides umami depth without fish."
+      }
+    ],
+    "methodRules": [
+      {
+        "id": "sub.korean.bbq_no_grill",
+        "whenNoEquipment": [
+          "equipment.korean_bbq_grill",
+          "equipment.outdoor_grill"
+        ],
+        "adapt": "method.sear_and_slice",
+        "notes": "Sear in cast iron or heavy skillet; work in batches for good caramelization."
+      }
+    ],
+    "rules": [
+      {
+        "type": "note",
+        "id": "sub.korean.sesame_finish",
+        "notes": "Use sesame oil as a finishing aroma, not always as the primary cooking fat."
+      }
+    ]
+  },
+
+  "planningHints": {
+    "batchFriendly": [
+      {
+        "id": "batch.korean.kimchi",
+        "name": "Kimchi Batch",
+        "makes": "dish.kimchi",
+        "freezerFriendly": false,
+        "notes": "Fermentation improves flavor over time; keep in fridge and plan to use in stews and fried rice."
+      },
+      {
+        "id": "batch.korean.bulgogi_marinade",
+        "name": "Bulgogi Marinade + Protein Prep",
+        "makes": "dish.bulgogi",
+        "freezerFriendly": true,
+        "notes": "Freeze marinated portions flat; thaw overnight for fast searing."
+      },
+      {
+        "id": "batch.korean.banchan_rotation",
+        "name": "Banchan Rotation Prep",
+        "makes": "dish.banchan_assortment",
+        "freezerFriendly": false,
+        "notes": "Prep 3–6 banchan weekly; rotate greens, sprouts, pickles, and one protein side."
+      }
+    ],
+    "weeknightShortcuts": [
+      "Cook extra rice; reuse for fried rice, bibimbap, or rice porridge.",
+      "Keep ssamjang premixed; it turns grilled proteins into a complete meal quickly.",
+      "Use doenjang + stock + tofu + veggies for a 20–30 minute stew."
+    ],
+    "seasonality": [
+      {
+        "season": "season.winter",
+        "focus": [
+          "dish.kimchi_jjigae",
+          "dish.doenjang_jjigae",
+          "dish.seaweed_soup"
+        ]
+      },
+      {
+        "season": "season.summer",
+        "focus": [
+          "dish.cold_noodles",
+          "dish.cucumber_banchan",
+          "dish.quick_pickles"
+        ]
+      }
+    ]
+  },
+
+  "ui": {
+    "heroSuggestions": [
+      {
+        "title": "Start Here (Korean Weeknight Core)",
+        "items": [
+          "dish.bulgogi",
+          "dish.kimchi_jjigae",
+          "dish.doenjang_jjigae",
+          "dish.bibimbap",
+          "dish.japchae"
+        ]
+      },
+      {
+        "title": "Banchan Rotation",
+        "items": [
+          "dish.kimchi",
+          "dish.seasoned_spinach",
+          "dish.bean_sprout_banchan",
+          "dish.pickled_radish",
+          "dish.cucumber_banchan"
+        ]
+      }
+    ],
+    "searchBoostTerms": [
+      "kimchi",
+      "gochujang",
+      "doenjang",
+      "banchan",
+      "bulgogi",
+      "jjigae",
+      "bibimbap",
+      "ssamjang",
+      "japchae",
+      "tteokbokki"
+    ],
+    "colorHints": {
+      "primary": "crimson",
+      "accent": "sesame_gold",
+      "neutral": "rice_white"
+    },
+    "iconHints": ["icon.korean_bowl", "icon.kimchi_jar", "icon.bbq_grill"]
+  },
+
+  "compat": {
+    "recipeTagDefaults": [
+      "cuisine.korean",
+      "region.east_asia",
+      "flavor.fermented",
+      "flavor.umami",
+      "pattern.banchan",
+      "pattern.rice_base"
+    ],
+    "defaultPlateTemplateIds": ["plate.korean_set_meal"],
+    "notes": [
+      "This profile supports both legacy and modern SSA planners. Use dishArchetypes + mealTemplates for deterministic plan generation.",
+      "If your global ingredient catalog uses different IDs, map via alias tables in your normalization layer."
+    ]
+  },
+
+  "identity": {
+    "pillars": [
+      "Fermented umami condiments",
+      "Banchan ecosystem (small sides)",
+      "Rice base + soup/stew rhythm",
+      "BBQ + ssam wraps",
+      "Toasted sesame finish"
+    ],
+    "signatureIngredients": [
+      "ingredient.gochujang",
+      "ingredient.doenjang",
+      "ingredient.gochugaru",
+      "ingredient.ganjang",
+      "ingredient.kimchi",
+      "ingredient.sesame_oil",
+      "ingredient.sesame_seeds",
+      "ingredient.gim_seaweed"
+    ],
+    "signaturePatterns": [
+      "rice + jjigae + 3 banchan",
+      "grilled protein + ssam + dipping sauce",
+      "banchan rotation as a household system"
+    ]
+  },
+
+  "planning": {
+    "rhythm": {
+      "defaultSetMeal": "korean.meal.rice_soup_banchan",
+      "banchanTargetCount": { "min": 2, "typical": 4, "max": 8 },
+      "makeAheadBias": "high",
+      "leftoverTransforms": [
+        "leftover.rice_to_fried_rice",
+        "leftover.banchan_to_bibimbap",
+        "leftover.kimchi_to_jjigae"
+      ]
+    },
+    "weeknightPlaybook": [
+      "Start rice cooker.",
+      "Pick 1 stew base (doenjang or kimchi).",
+      "Add 2 banchan (1 fermented + 1 fresh/quick).",
+      "Optional: add a quick protein (bulgogi, eggs, tofu)."
+    ]
+  },
+
+  "flavorMatrix": {
+    "balance": {
+      "umami": { "typical": 4, "range": [3, 5] },
+      "heat": { "typical": 3, "range": [0, 5] },
+      "sweet": { "typical": 2, "range": [0, 3] },
+      "acid": { "typical": 2, "range": [0, 4] },
+      "salt": { "typical": 3, "range": [2, 5] }
+    },
+    "finishes": [
+      "ingredient.sesame_oil",
+      "ingredient.scallion",
+      "ingredient.sesame_seeds"
+    ],
+    "stocks": [
+      "ingredient.anchovy_stock",
+      "ingredient.kelp_dashi_kombu",
+      "ingredient.mushroom_stock"
+    ]
+  },
+
+  "staples": {
+    "pantry": [
+      "ingredient.korean_rice",
+      "ingredient.gochujang",
+      "ingredient.doenjang",
+      "ingredient.ganjang",
+      "ingredient.gochugaru",
+      "ingredient.sesame_oil",
+      "ingredient.sesame_seeds",
+      "ingredient.rice_vinegar"
+    ],
+    "fridge": [
+      "ingredient.kimchi",
+      "ingredient.scallion",
+      "ingredient.garlic",
+      "ingredient.ginger"
+    ],
+    "freezer": [
+      "ingredient.sliced_pork_belly",
+      "ingredient.marinated_bulgogi_portions",
+      "ingredient.dumplings_mandu"
+    ]
+  },
+
+  "proteins": {
+    "common": [
+      "ingredient.pork_belly",
+      "ingredient.beef",
+      "ingredient.chicken_thighs",
+      "ingredient.tofu",
+      "ingredient.eggs",
+      "ingredient.shrimp"
+    ],
+    "marinadePatterns": [
+      "ganjang + garlic + sugar + sesame oil",
+      "gochujang + vinegar + sugar + garlic",
+      "doenjang + garlic + scallion (for dips/stews)"
+    ]
+  },
+
+  "carbsAndBases": {
+    "bases": [
+      "ingredient.korean_rice",
+      "ingredient.sweet_potato_noodles",
+      "ingredient.ramen_noodles"
+    ],
+    "stocks": [
+      "ingredient.anchovy_stock",
+      "ingredient.kelp_dashi_kombu",
+      "ingredient.mushroom_stock"
+    ],
+    "quickBases": ["dish.instant_ramyeon_upgrade", "dish.quick_doenjang_soup"]
+  },
+
+  "nutritionBias": {
+    "notes": [
+      "Banchan rotation encourages vegetable variety and fiber.",
+      "Fermented foods can be higher in sodium; planner can balance with low-salt sides and fresh greens.",
+      "Many dishes are high-protein and can be tuned by portioning protein vs. rice."
+    ]
+  },
+
+  "compatibility": {
+    "plannerSignals": [
+      "signal.banchan_rotation",
+      "signal.fermented_base",
+      "signal.rice_base"
+    ],
+    "equipmentCritical": [
+      "equipment.rice_cooker",
+      "equipment.lidded_pot",
+      "equipment.skillet"
+    ],
+    "adapterNotes": [
+      "When adapting recipes, preserve the fermented base (gochujang/doenjang/ganjang) and sesame finish.",
+      "If reducing sodium, prefer using stock/veg volume and acid/heat to maintain perceived intensity."
+    ]
+  },
+
+  "notes": [
+    "This profile intentionally models Korean meal structure (set meals + banchan) for deterministic planning.",
+    "IDs like dish.* and ingredient.* are intended to map to your catalogs; if not present, create alias maps in your normalization layer.",
+    "Keep sweetness restrained in savory dishes unless specifically a sweet-style dish."
+  ]
+}

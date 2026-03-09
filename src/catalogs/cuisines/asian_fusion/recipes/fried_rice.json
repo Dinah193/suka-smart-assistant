@@ -1,0 +1,433 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+
+  "meta": {
+    "id": "recipes.asian_fusion.fried_rice",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Asian Fusion Fried Rice",
+    "subtitle": "Wok-style fried rice with aromatics, egg, and a savory soy-sesame finish.",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalog",
+      "notes": [
+        "Designed for SSA planners: fast weeknight, leftover-friendly, batch-friendly.",
+        "Uses day-old rice for best texture; includes fresh-rice quick-cool fallback."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.asian_fusion",
+    "category": "main",
+    "mealArchetypes": ["archetype.bowls", "archetype.one_pan"],
+    "servingStyles": ["serving.bowls", "serving.family_style"],
+    "plannerTags": [
+      "asian_fusion",
+      "fried_rice",
+      "weeknight",
+      "leftovers",
+      "batch_friendly",
+      "one_pan",
+      "stovetop"
+    ]
+  },
+
+  "summary": "Fast, savory fried rice built on aromatics, egg, and a soy-sesame sauce. Perfect for leftovers and flexible add-ins.",
+
+  "yield": {
+    "servings": 4,
+    "notes": "About 4 bowls (1 to 1.5 cups each), depending on add-ins."
+  },
+
+  "time": {
+    "activeMins": 20,
+    "totalMins": 25,
+    "handsOffMins": 5
+  },
+
+  "difficulty": "beginner",
+
+  "signals": {
+    "weeknightPossible": true,
+    "batchFriendly": true,
+    "leftoversGood": true,
+    "freezerFriendly": "medium",
+    "onePan": true
+  },
+
+  "tasteProfile": {
+    "salty": 3,
+    "sweet": 1,
+    "sour": 0,
+    "spicy": 0,
+    "umami": 4,
+    "aromatics": ["garlic", "ginger", "scallion"],
+    "finish": ["sesame", "green_onion"]
+  },
+
+  "equipment": {
+    "minimum": ["tool.pan_large", "tool.spatula", "tool.knife", "tool.board"],
+    "recommended": [
+      "tool.wok",
+      "tool.rice_cooker",
+      "tool.small_bowl",
+      "tool.whisk"
+    ],
+    "optional": [
+      {
+        "id": "tool.wok_spatula",
+        "label": "Wok spatula (if using a wok)",
+        "required": false,
+        "notes": "Helps toss rice quickly without breaking grains."
+      }
+    ]
+  },
+
+  "dietFlags": ["diet.dairy_free"],
+
+  "allergens": {
+    "contains": ["allergen.soy", "allergen.sesame", "allergen.egg"],
+    "mayContain": [],
+    "notes": [
+      "Use tamari for gluten-free soy sauce, and ensure oyster sauce (if used) is gluten-free."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "rice.cooked_day_old",
+      "label": "Cooked rice, chilled (preferably day-old)",
+      "amount": { "value": 4, "unit": "cups" },
+      "notes": [
+        "Jasmine rice is classic; medium-grain works too.",
+        "If using fresh rice, see Step 1 quick-cool method to prevent mushy fried rice."
+      ]
+    },
+    {
+      "id": "oil.neutral",
+      "label": "Neutral oil (avocado, grapeseed, or canola)",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "egg",
+      "label": "Eggs, beaten",
+      "amount": { "value": 2, "unit": "each" }
+    },
+    {
+      "id": "onion.green",
+      "label": "Green onions, sliced (whites and greens separated)",
+      "amount": { "value": 4, "unit": "each" }
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic, minced",
+      "amount": { "value": 3, "unit": "cloves" }
+    },
+    {
+      "id": "ginger.fresh",
+      "label": "Fresh ginger, finely minced or grated",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "carrot",
+      "label": "Carrot, small dice",
+      "amount": { "value": 0.75, "unit": "cup" }
+    },
+    {
+      "id": "peas",
+      "label": "Frozen peas (no need to thaw)",
+      "amount": { "value": 0.75, "unit": "cup" }
+    },
+    {
+      "id": "soy_sauce",
+      "label": "Soy sauce (or tamari)",
+      "amount": { "value": 3, "unit": "tbsp" },
+      "notes": ["Start with 2 tbsp and adjust at the end to taste."]
+    },
+    {
+      "id": "sesame_oil",
+      "label": "Toasted sesame oil",
+      "amount": { "value": 1.5, "unit": "tsp" },
+      "notes": ["Add at the end for aroma; do not use as the main cooking oil."]
+    },
+    {
+      "id": "vinegar.rice",
+      "label": "Rice vinegar",
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": ["Optional but recommended—adds brightness."]
+    },
+    {
+      "id": "sugar",
+      "label": "Sugar or honey",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "notes": ["Optional—balances salt/umami. Omit if you prefer."]
+    },
+    {
+      "id": "pepper.black",
+      "label": "Black pepper",
+      "amount": { "value": 0.25, "unit": "tsp" }
+    },
+    {
+      "id": "salt",
+      "label": "Kosher salt",
+      "amount": { "value": 0.25, "unit": "tsp" },
+      "notes": [
+        "Optional. Add only after tasting—soy sauce often supplies enough salt."
+      ]
+    },
+
+    {
+      "id": "protein.optional",
+      "label": "Optional protein: cooked chicken, shrimp, tofu, or leftover meat (bite-size)",
+      "amount": { "value": 1.5, "unit": "cups" },
+      "optional": true,
+      "notes": [
+        "If using raw shrimp, cook it first and remove from pan, then add back at the end."
+      ]
+    },
+    {
+      "id": "oyster_sauce.optional",
+      "label": "Optional: oyster sauce (extra savory depth)",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true
+    },
+    {
+      "id": "chili_crisp.optional",
+      "label": "Optional: chili crisp or chili oil (for heat)",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "sesame_seeds.optional",
+      "label": "Optional: toasted sesame seeds",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    }
+  ],
+
+  "ingredientGroups": [
+    {
+      "id": "group.base",
+      "label": "Base + Aromatics",
+      "items": [
+        "rice.cooked_day_old",
+        "oil.neutral",
+        "onion.green",
+        "garlic",
+        "ginger.fresh"
+      ]
+    },
+    {
+      "id": "group.veg",
+      "label": "Vegetables",
+      "items": ["carrot", "peas"]
+    },
+    {
+      "id": "group.sauce",
+      "label": "Sauce + Finish",
+      "items": [
+        "soy_sauce",
+        "sesame_oil",
+        "vinegar.rice",
+        "sugar",
+        "pepper.black",
+        "salt"
+      ]
+    },
+    {
+      "id": "group.optional",
+      "label": "Optional Add-ins",
+      "items": [
+        "protein.optional",
+        "oyster_sauce.optional",
+        "chili_crisp.optional",
+        "sesame_seeds.optional"
+      ]
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.quick_cool_rice",
+      "title": "Prep rice (best texture)",
+      "instructions": [
+        "If using day-old rice: break up clumps with clean hands or a fork so grains separate.",
+        "If using freshly cooked rice: spread hot rice on a wide tray, drizzle 1 tsp neutral oil, and toss lightly. Refrigerate 10–15 minutes until surface is cool and drier to the touch."
+      ],
+      "timers": [{ "label": "Quick-cool (fresh rice only)", "minutes": 15 }],
+      "checks": [
+        "Rice grains should feel separate, not wet or sticky on the surface."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 10
+    },
+    {
+      "id": "step.mix_sauce",
+      "title": "Mix the sauce",
+      "instructions": [
+        "In a small bowl, mix soy sauce, rice vinegar, sugar (if using), black pepper, and oyster sauce (if using).",
+        "Set sesame oil aside to add at the end."
+      ],
+      "activeMins": 2
+    },
+    {
+      "id": "step.scramble_eggs",
+      "title": "Scramble the eggs",
+      "instructions": [
+        "Heat a large skillet or wok over medium-high heat. Add 1 tsp neutral oil.",
+        "Pour in beaten eggs and scramble until just set (soft curds).",
+        "Transfer eggs to a plate."
+      ],
+      "timers": [{ "label": "Eggs", "minutes": 1.5 }],
+      "activeMins": 3
+    },
+    {
+      "id": "step.saute_aromatics_veg",
+      "title": "Sauté aromatics and vegetables",
+      "instructions": [
+        "Add remaining oil to the pan and keep heat at medium-high.",
+        "Add green onion whites, garlic, and ginger. Stir constantly for 20–30 seconds until fragrant.",
+        "Add carrots and stir-fry 2 minutes.",
+        "Add frozen peas and stir-fry 1 minute to heat through."
+      ],
+      "timers": [
+        { "label": "Aromatics", "seconds": 30 },
+        { "label": "Carrots", "minutes": 2 },
+        { "label": "Peas", "minutes": 1 }
+      ],
+      "activeMins": 4,
+      "checks": [
+        "Aromatics should be fragrant, not browned/burnt.",
+        "Carrots should soften slightly but keep some bite."
+      ]
+    },
+    {
+      "id": "step.fry_rice",
+      "title": "Fry the rice",
+      "instructions": [
+        "Add the rice to the pan. Increase heat to high if your stove can handle it without smoking.",
+        "Press and spread rice across the pan so it contacts the hot surface; let it sit 30–45 seconds to dry and toast.",
+        "Toss/stir and repeat once more if you want more toasted flavor."
+      ],
+      "timers": [
+        { "label": "First toast", "seconds": 45 },
+        { "label": "Second toast (optional)", "seconds": 45 }
+      ],
+      "activeMins": 5,
+      "checks": [
+        "Rice should start to smell nutty/toasty and look more separated."
+      ]
+    },
+    {
+      "id": "step.season_and_finish",
+      "title": "Season, add eggs (and protein), and finish",
+      "instructions": [
+        "Pour the sauce mixture around the edges of the pan (it sizzles and reduces), then toss to coat rice evenly.",
+        "Add scrambled eggs back in. Add cooked protein (if using) and toss until hot.",
+        "Turn off heat. Drizzle toasted sesame oil and toss once more.",
+        "Taste and adjust: add a splash more soy sauce for salt, a touch more vinegar for brightness, or a pinch of salt only if needed.",
+        "Top with green onion greens and sesame seeds (optional). Serve immediately."
+      ],
+      "activeMins": 5,
+      "checks": [
+        "Rice should be evenly seasoned, not wet/saucy.",
+        "Egg should be distributed in small curds."
+      ]
+    }
+  ],
+
+  "pairings": {
+    "serveWith": [
+      "dish.miso_soup",
+      "dish.cucumber_salad",
+      "dish.steamed_broccoli",
+      "dish.simple_slaw_sesame"
+    ],
+    "sauceAddOns": [
+      "condiment.chili_crisp",
+      "condiment.sriracha",
+      "condiment.yuzu_mayo"
+    ]
+  },
+
+  "storage": {
+    "refrigerator": {
+      "duration": "4 days",
+      "notes": [
+        "Cool quickly, store in a shallow container.",
+        "Reheat hot (165°F / 74°C) for best safety and texture."
+      ]
+    },
+    "freezer": {
+      "duration": "2 months",
+      "notes": [
+        "Freeze in flat bags for quick thawing; reheat directly from frozen in a covered skillet with a splash of water."
+      ]
+    },
+    "reheat": {
+      "skillet": "Medium-high with 1 tsp oil; spread rice and let steam 1 minute, then toss until hot.",
+      "microwave": "Cover with a damp paper towel; heat in 60-second bursts, stirring between."
+    }
+  },
+
+  "safety": {
+    "notes": [
+      "Rice safety: cooked rice should be cooled quickly and refrigerated within 1 hour if possible.",
+      "Reheat leftovers until steaming hot (165°F / 74°C)."
+    ]
+  },
+
+  "variations": [
+    {
+      "id": "var.garlic_butter_fried_rice",
+      "label": "Garlic-Butter Fried Rice (fusion)",
+      "notes": "Swap 1 tbsp neutral oil for 1 tbsp butter; add at the end with sesame oil."
+    },
+    {
+      "id": "var.spicy_chili_crisp",
+      "label": "Chili Crisp Fried Rice",
+      "notes": "Stir in 1–2 tsp chili crisp at the end; reduce soy sauce slightly to keep salt balanced."
+    },
+    {
+      "id": "var.vegetable_loaded",
+      "label": "Vegetable-Loaded",
+      "notes": "Add diced bell pepper, corn, chopped cabbage, or mushrooms. Cook watery veg (mushrooms) before rice so the pan stays dry."
+    }
+  ],
+
+  "notes": [
+    "Texture rule: keep the pan hot, keep the rice dry, and season at the edges of the pan.",
+    "If the rice gets wet: increase heat, spread it out, and cook 1–2 minutes to drive off moisture.",
+    "Optional protein guideline: add cooked protein after seasoning so it warms through without overcooking."
+  ],
+
+  "methods": ["method.stir_fry", "method.saute", "method.scramble"],
+
+  "compat": {
+    "cuisineId": "cuisines.asian_fusion",
+    "dishId": "dish.fried_rice",
+    "search": {
+      "keywords": [
+        "fried rice",
+        "wok rice",
+        "leftover rice",
+        "soy sesame",
+        "quick dinner",
+        "stir fry rice"
+      ],
+      "aliases": ["house fried rice", "egg fried rice", "vegetable fried rice"]
+    },
+    "planner": {
+      "bestFor": ["weeknight", "leftover_remix", "batch_cooking"],
+      "pairsWellWith": [
+        "dish.steamed_vegetables",
+        "dish.soup_light",
+        "dish.pickled_veg"
+      ]
+    }
+  }
+}

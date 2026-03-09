@@ -52,7 +52,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import * as ImportRouter from "@/features/import/ImportRouter";
 
 // We also assume your ImportRouter file looks up these modules, so we mock them
-vi.mock("@/services/HubPacketFormatter", () => {
+vi.mock("@/services/hub/HubPacketFormatter", () => {
   return {
     default: {
       format: vi.fn((payload) => ({
@@ -63,7 +63,7 @@ vi.mock("@/services/HubPacketFormatter", () => {
   };
 });
 
-vi.mock("@/services/FamilyFundConnector", () => {
+vi.mock("@/services/hub/FamilyFundConnector", () => {
   return {
     default: {
       send: vi.fn(async () => {
@@ -284,8 +284,12 @@ describe("ImportRouter", () => {
     });
 
     // Hub mocks
-    const HubPacketFormatter = (await import("@/services/HubPacketFormatter")).default;
-    const FamilyFundConnector = (await import("@/services/FamilyFundConnector")).default;
+    const HubPacketFormatter = (
+      await import("@/services/hub/HubPacketFormatter")
+    ).default;
+    const FamilyFundConnector = (
+      await import("@/services/hub/FamilyFundConnector")
+    ).default;
 
     expect(HubPacketFormatter.format).toHaveBeenCalled();
     expect(FamilyFundConnector.send).toHaveBeenCalled();
@@ -296,9 +300,17 @@ describe("ImportRouter", () => {
       // router might not export helper, skip
       return;
     }
-    expect(ImportRouter.getDomainFromUrl("https://allrecipes.com/foo")).toBe("recipe");
-    expect(ImportRouter.getDomainFromUrl("https://youtube.com/watch?v=1")).toBe("video");
-    expect(ImportRouter.getDomainFromUrl("https://gardeners.com/seeds/")).toBe("garden");
-    expect(ImportRouter.getDomainFromUrl("https://animals.example.com/butchery")).toBe("animal");
+    expect(ImportRouter.getDomainFromUrl("https://allrecipes.com/foo")).toBe(
+      "recipe"
+    );
+    expect(ImportRouter.getDomainFromUrl("https://youtube.com/watch?v=1")).toBe(
+      "video"
+    );
+    expect(ImportRouter.getDomainFromUrl("https://gardeners.com/seeds/")).toBe(
+      "garden"
+    );
+    expect(
+      ImportRouter.getDomainFromUrl("https://animals.example.com/butchery")
+    ).toBe("animal");
   });
 });

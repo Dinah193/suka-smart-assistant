@@ -21,40 +21,53 @@
 //// Soft/defensive dynamic import /////////////////////////////////////////////
 
 async function softImport(path) {
-  try { return await import(path); } catch { return null; }
+  try {
+    return await import(path);
+  } catch {
+    return null;
+  }
 }
 
 //// Dependencies (populated in start()) ///////////////////////////////////////
 
-let eventBus;                         // required
+let eventBus; // required
 let featureFlags = { familyFundMode: false, nba: { autoSchedule: false } };
 
-let SessionStore;                     // optional: unified store of pending sessions
+let SessionStore; // optional: unified store of pending sessions
 // Expected minimal API if present:
 //   - list({ domains?, state? }): Promise<Array<Session>>
 //   - getById(id): Promise<Session|null>
 //   - update(id, patch): Promise<void>
 
-let HouseholdPrefs;                   // optional: doneness, dietary, anchors, user energy, guards
-let GuardPolicies;                    // optional: quiet hours, sabbath, weather guard evaluation
-let InventoryService;                 // optional: reservation/availability peeks
-let WeatherService;                   // optional: used by guard heuristics (outdoor tasks)
-let CalendarService;                  // optional: busy blocks, available time windows
+let HouseholdPrefs; // optional: doneness, dietary, anchors, user energy, guards
+let GuardPolicies; // optional: quiet hours, sabbath, weather guard evaluation
+let InventoryService; // optional: reservation/availability peeks
+let WeatherService; // optional: used by guard heuristics (outdoor tasks)
+let CalendarService; // optional: busy blocks, available time windows
 
-let HubPacketFormatter;               // optional
-let FamilyFundConnector;              // optional
+let HubPacketFormatter; // optional
+let FamilyFundConnector; // optional
 
 //// Utilities /////////////////////////////////////////////////////////////////
 
 const nowISO = () => new Date().toISOString();
 
 function safeId(prefix = "nba") {
-  if (typeof crypto !== "undefined" && crypto.randomUUID) return `${prefix}_${crypto.randomUUID()}`;
+  if (typeof crypto !== "undefined" && crypto.randomUUID)
+    return `${prefix}_${crypto.randomUUID()}`;
   return `${prefix}_${Math.random().toString(36).slice(2)}_${Date.now()}`;
 }
 
-function sanitize(x) { try { return JSON.parse(JSON.stringify(x)); } catch { return undefined; } }
-function safeError(err) { return { name: err?.name || "Error", message: err?.message || String(err) }; }
+function sanitize(x) {
+  try {
+    return JSON.parse(JSON.stringify(x));
+  } catch {
+    return undefined;
+  }
+}
+function safeError(err) {
+  return { name: err?.name || "Error", message: err?.message || String(err) };
+}
 
 function emit(type, source, data) {
   if (!eventBus?.emit) return;
@@ -64,7 +77,9 @@ function emit(type, source, data) {
 async function exportToHubIfEnabled(payload) {
   try {
     if (!featureFlags?.familyFundMode) return;
-    const packet = HubPacketFormatter?.format?.(payload, { stream: "nextBestAction" });
+    const packet = HubPacketFormatter?.format?.(payload, {
+      stream: "nextBestAction",
+    });
     if (!packet) return;
     await FamilyFundConnector?.send?.(packet);
   } catch {
@@ -83,16 +98,16 @@ const state = {
   config: {
     // Scoring knobs
     baseWeights: {
-      urgency: 0.35,        // window closing soon
-      readiness: 0.25,      // inventory ok, prerequisites met
-      fitWindow: 0.15,      // duration fits the user's available window
-      preference: 0.15,     // household anchors (meal label, protein, routines)
-      rotation: 0.05,       // diversify domains
-      freshness: 0.05,      // recently suggested? de-boost
+      urgency: 0.35, // window closing soon
+      readiness: 0.25, // inventory ok, prerequisites met
+      fitWindow: 0.15, // duration fits the user's available window
+      preference: 0.15, // household anchors (meal label, protein, routines)
+      rotation: 0.05, // diversify domains
+      freshness: 0.05, // recently suggested? de-boost
     },
     // Time
-    debounceMs: 250,        // debounce recomputes on bursts of events
-    lookaheadMinutes: 120,  // plan within next 2 hours by default
+    debounceMs: 250, // debounce recomputes on bursts of events
+    lookaheadMinutes: 120, // plan within next 2 hours by default
     defaultDurationMin: 30,
     // Guards
     enforceGuards: true,
@@ -100,14 +115,14 @@ const state = {
     autoScheduleThreshold: 0.82, // if autoSchedule enabled, schedule when score >= this
     maxAutoSchedulesPerCycle: 2,
     // Domain rotation (optional)
-    rotationDecay: 0.15,    // penalize repeating same domain too often
+    rotationDecay: 0.15, // penalize repeating same domain too often
     // Output
     maxSuggestions: 7,
     includeReasons: true,
   },
   // memory for rotation/freshness
   rotationCounter: new Map(), // domain -> lastSeenIndex
-  suggestionCounter: 0,       // increments each compute
+  suggestionCounter: 0, // increments each compute
 };
 
 let debounceTimer = null;
@@ -122,7 +137,14 @@ async function loadCandidateSessions() {
     try {
       // By default, consider actionable/pending sessions in key domains
       const sessions = await SessionStore.list({
-        domains: ["cooking", "cleaning", "garden", "animal", "preservation", "storehouse"],
+        domains: [
+          "cooking",
+          "cleaning",
+          "garden",
+          "animal",
+          "preservation",
+          "storehouse",
+        ],
         state: ["planned", "created", "ready"], // flexible: adapt to your status names
       });
       return Array.isArray(sessions) ? sessions : [];
@@ -142,22 +164,30 @@ async function loadCandidateSessions() {
  */
 async function buildContext() {
   const now = new Date();
-  const prefs = (HouseholdPrefs?.get?.() || HouseholdPrefs?.getCached?.()) ?? {};
+  const prefs =
+    (HouseholdPrefs?.get?.() || HouseholdPrefs?.getCached?.()) ?? {};
 
   // Calendar availability window (optional)
   let availableWindowMinutes = state.config.lookaheadMinutes;
   if (CalendarService?.nextAvailableWindowMinutes) {
     try {
-      availableWindowMinutes = await CalendarService.nextAvailableWindowMinutes({
-        horizonMinutes: state.config.lookaheadMinutes,
-      }) ?? availableWindowMinutes;
-    } catch {/* noop */}
+      availableWindowMinutes =
+        (await CalendarService.nextAvailableWindowMinutes({
+          horizonMinutes: state.config.lookaheadMinutes,
+        })) ?? availableWindowMinutes;
+    } catch {
+      /* noop */
+    }
   }
 
   // Weather snapshot (optional)
   let weather = null;
   if (WeatherService?.getSnapshot) {
-    try { weather = await WeatherService.getSnapshot(); } catch {/* noop */}
+    try {
+      weather = await WeatherService.getSnapshot();
+    } catch {
+      /* noop */
+    }
   }
 
   // Guard policy computed flags
@@ -166,7 +196,9 @@ async function buildContext() {
     try {
       guardFlags = await GuardPolicies.evaluateNow({ prefs, weather, now });
       // example result: { quiet: true/false, sabbath: true/false, weather: { outdoorOk: boolean } }
-    } catch {/* noop */}
+    } catch {
+      /* noop */
+    }
   }
 
   return {
@@ -210,9 +242,15 @@ function scoreSession(session, ctx) {
   reasons.push({ k: "readiness", v: round2(readiness) });
 
   // Fit to available window: duration vs availableWindowMinutes
-  const estMin = Number(session?.session?.tasks?.reduce((a, t) => a + (Number(t.estimatedMinutes || 0)), 0))
-    || Number(session?.meta?.projection?.estimatedCookMinutes)
-    || state.config.defaultDurationMin;
+  const estMin =
+    Number(
+      session?.session?.tasks?.reduce(
+        (a, t) => a + Number(t.estimatedMinutes || 0),
+        0
+      )
+    ) ||
+    Number(session?.meta?.projection?.estimatedCookMinutes) ||
+    state.config.defaultDurationMin;
   const fitRatio = clamp01(estMin / Math.max(ctx.availableWindowMinutes, 1));
   // Closer to 1 is worse fit; invert
   const fitWindow = clamp01(1 - Math.abs(1 - fitRatio)); // best around equal
@@ -223,12 +261,12 @@ function scoreSession(session, ctx) {
   const anchors = session?.session?.anchors || [];
   const wantMeal = ctx.prefs?.preferredMealLabel;
   if (wantMeal) {
-    const hit = anchors.some(a => a.type === "meal" && a.label === wantMeal);
+    const hit = anchors.some((a) => a.type === "meal" && a.label === wantMeal);
     if (hit) preference += 0.4;
   }
   const routineTags = ctx.prefs?.routineTags || [];
   if (routineTags.length) {
-    const hit = anchors.some(a => routineTags.includes(a.label));
+    const hit = anchors.some((a) => routineTags.includes(a.label));
     if (hit) preference += 0.3;
   }
   preference = clamp01(preference);
@@ -245,7 +283,9 @@ function scoreSession(session, ctx) {
 
   // Freshness: was this suggested very recently?
   let freshness = 1;
-  const recently = state.lastSuggestions.find(s => s.sessionId === session.id);
+  const recently = state.lastSuggestions.find(
+    (s) => s.sessionId === session.id
+  );
   if (recently) {
     freshness -= 0.3; // small de-boost to avoid nagging
   }
@@ -280,16 +320,19 @@ function scoreSession(session, ctx) {
 function guardBlockPenalty(session, ctx) {
   if (!state.config.enforceGuards) return 0;
   const guards = ctx.guardFlags || {};
-  const isOutdoor = session?.meta?.outdoor === true || session?.domain === "garden";
+  const isOutdoor =
+    session?.meta?.outdoor === true || session?.domain === "garden";
 
   // Quiet hours: block noisy tasks (e.g., blender, vacuum, mower)
-  const noisy = session?.meta?.noisy === true || hasAnchor(session, "appliance", "vacuum");
+  const noisy =
+    session?.meta?.noisy === true || hasAnchor(session, "appliance", "vacuum");
   if (guards.quiet && noisy) return 1;
 
   // Sabbath: block work-like tasks if enabled
   if (guards.sabbath && session?.domain !== "cooking") {
     // allow essential cooking with minimal prep; otherwise penalize
-    const cookingEssential = session?.domain === "cooking" && (session?.meta?.essential === true);
+    const cookingEssential =
+      session?.domain === "cooking" && session?.meta?.essential === true;
     if (!cookingEssential) return 1;
   }
 
@@ -302,20 +345,29 @@ function guardBlockPenalty(session, ctx) {
 }
 
 function hasAnchor(session, type, label) {
-  return (session?.session?.anchors || []).some(a => a.type === type && (!label || a.label === label));
+  return (session?.session?.anchors || []).some(
+    (a) => a.type === type && (!label || a.label === label)
+  );
 }
 
-function clamp01(x) { return Math.max(0, Math.min(1, x)); }
-function round2(x) { return Math.round(Number(x) * 100) / 100; }
+function clamp01(x) {
+  return Math.max(0, Math.min(1, x));
+}
+function round2(x) {
+  return Math.round(Number(x) * 100) / 100;
+}
 
 /**
  * Compute suggestions: returns sorted array of { sessionId, domain, title, score, reasons? }
  */
 async function computeSuggestions() {
-  const [ctx, sessions] = await Promise.all([buildContext(), loadCandidateSessions()]);
+  const [ctx, sessions] = await Promise.all([
+    buildContext(),
+    loadCandidateSessions(),
+  ]);
   state.lastContext = ctx;
 
-  const scored = sessions.map(s => {
+  const scored = sessions.map((s) => {
     const { score, reasons } = scoreSession(s, ctx);
     return {
       sessionId: s.id,
@@ -329,7 +381,7 @@ async function computeSuggestions() {
 
   // Sort & take top N
   const sorted = scored
-    .filter(x => x.score > 0)
+    .filter((x) => x.score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, state.config.maxSuggestions);
 
@@ -348,7 +400,8 @@ async function computeSuggestions() {
 async function maybeAutoSchedule(suggestions) {
   if (!featureFlags?.nba?.autoSchedule) return;
 
-  const winners = suggestions.filter(s => s.score >= state.config.autoScheduleThreshold)
+  const winners = suggestions
+    .filter((s) => s.score >= state.config.autoScheduleThreshold)
     .slice(0, state.config.maxAutoSchedulesPerCycle);
 
   for (const win of winners) {
@@ -365,7 +418,11 @@ async function maybeAutoSchedule(suggestions) {
     exportToHubIfEnabled({
       domain: "nba",
       action: "auto_schedule_requests",
-      payload: winners.map(w => ({ sessionId: w.sessionId, domain: w.domain, score: w.score })),
+      payload: winners.map((w) => ({
+        sessionId: w.sessionId,
+        domain: w.domain,
+        score: w.score,
+      })),
     });
   }
 }
@@ -381,7 +438,10 @@ function buildDefaultWindow() {
 function markDirtyAndDebounce() {
   state.dirty = true;
   if (debounceTimer) clearTimeout(debounceTimer);
-  debounceTimer = setTimeout(() => { debounceTimer = null; recomputeNow(); }, state.config.debounceMs);
+  debounceTimer = setTimeout(() => {
+    debounceTimer = null;
+    recomputeNow();
+  }, state.config.debounceMs);
 }
 
 async function recomputeNow() {
@@ -404,11 +464,13 @@ async function recomputeNow() {
       action: "suggestions_updated",
       payload: {
         count: suggestions.length,
-        top: suggestions[0] ? {
-          sessionId: suggestions[0].sessionId,
-          domain: suggestions[0].domain,
-          score: suggestions[0].score,
-        } : null
+        top: suggestions[0]
+          ? {
+              sessionId: suggestions[0].sessionId,
+              domain: suggestions[0].domain,
+              score: suggestions[0].score,
+            }
+          : null,
       },
     });
 
@@ -444,29 +506,19 @@ export async function start(config = {}) {
 
   state.config = { ...state.config, ...config };
 
-  const [
-    evb,
-    ff,
-    sess,
-    prefs,
-    guards,
-    inv,
-    weather,
-    cal,
-    hubFmt,
-    hubConn,
-  ] = await Promise.all([
-    softImport("../services/eventBus.js"),
-    softImport("../config/featureFlags.js"),
-    softImport("../stores/SessionStore.js"),
-    softImport("../services/HouseholdPrefs.js"),
-    softImport("../services/guards/policies.js"),
-    softImport("../domain/inventory/InventoryService.js"),
-    softImport("../services/WeatherService.js"),
-    softImport("../services/CalendarService.js"),
-    softImport("../hub/HubPacketFormatter.js"),
-    softImport("../hub/FamilyFundConnector.js"),
-  ]);
+  const [evb, ff, sess, prefs, guards, inv, weather, cal, hubFmt, hubConn] =
+    await Promise.all([
+      softImport("../services/events/eventBus.js"),
+      softImport("@/config/featureFlags.json"),
+      softImport("../stores/SessionStore.js"),
+      softImport("../services/HouseholdPrefs.js"),
+      softImport("../services/guards/policies.js"),
+      softImport("../domain/inventory/InventoryService.js"),
+      softImport("../services/WeatherService.js"),
+      softImport("../services/CalendarService.js"),
+      softImport("@/services/hub/HubPacketFormatter.js"),
+      softImport("@/services/hub/FamilyFundConnector.js"),
+    ]);
 
   eventBus = evb?.default || evb || eventBus;
   featureFlags = ff?.default || ff || featureFlags;
@@ -480,7 +532,9 @@ export async function start(config = {}) {
   FamilyFundConnector = hubConn?.default || hubConn || FamilyFundConnector;
 
   if (!eventBus?.on || !eventBus?.emit) {
-    throw new Error("nextBestAction requires a functional eventBus with on/emit.");
+    throw new Error(
+      "nextBestAction requires a functional eventBus with on/emit."
+    );
   }
 
   // --- Session creation/update events (multi-domain) ---
@@ -499,7 +553,9 @@ export async function start(config = {}) {
     "preservation.session.updated",
     "storehouse.session.updated",
   ];
-  sessionEvents.forEach(evtName => eventBus.on(evtName, markDirtyAndDebounce));
+  sessionEvents.forEach((evtName) =>
+    eventBus.on(evtName, markDirtyAndDebounce)
+  );
 
   // --- Inventory and shortages ---
   eventBus.on("inventory.updated", markDirtyAndDebounce);
@@ -513,7 +569,10 @@ export async function start(config = {}) {
   eventBus.on("import.parsed", (evt) => {
     const d = evt?.data;
     // If meals/plan or any domain imports, recompute
-    if (d?.domain && (d?.type === "plan" || d?.type === "session" || d?.type === "harvest")) {
+    if (
+      d?.domain &&
+      (d?.type === "plan" || d?.type === "session" || d?.type === "harvest")
+    ) {
       markDirtyAndDebounce();
     }
   });
@@ -524,11 +583,13 @@ export async function start(config = {}) {
     const status = evt?.data?.status;
     const sessionId = evt?.data?.sessionId;
     if (status === "scheduled" && SessionStore?.getById) {
-      SessionStore.getById(sessionId).then((s) => {
-        if (s?.domain) {
-          state.rotationCounter.set(s.domain, state.suggestionCounter);
-        }
-      }).catch(() => {});
+      SessionStore.getById(sessionId)
+        .then((s) => {
+          if (s?.domain) {
+            state.rotationCounter.set(s.domain, state.suggestionCounter);
+          }
+        })
+        .catch(() => {});
     }
     markDirtyAndDebounce();
   });

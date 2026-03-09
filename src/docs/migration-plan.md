@@ -1,6 +1,6 @@
 # SSA Migration Plan — Replacing Old Agents with Shim Modules
 
-_File: `src/docs/migration-plan.md`_  
+_File: `src/docs/migration-plan.md`_
 
 This document outlines a **practical, incremental plan** to migrate from
 the original “AI Agent” architecture to the new **Shim + Orchestrator +
@@ -52,7 +52,7 @@ Characteristics:
   - Validate **delta outputs** against schemas,
   - Return a **clean, typed response** to the caller.
 
-Shims *do not* own:
+Shims _do not_ own:
 
 - Long-lived timers or UI state (that belongs to SessionRunner, pages, hooks),
 - Direct Dexie writes (usually delegated to repositories or orchestrators),
@@ -117,19 +117,18 @@ It consults:
 2. **Create an inventory file**  
    Example: `src/docs/agents-inventory.md` with a table:
 
-   | Agent Name                        | Domain        | Entry File                                    | Used By (UI / Services)                                | Status        |
-   |-----------------------------------|--------------|-----------------------------------------------|--------------------------------------------------------|--------------|
-   | CookingAgent                      | cooking      | `src/agents/CookingAgent.js`                  | `CookingPage`, `BatchPlanner`, `RecipeImport`          | legacy       |
-   | CleaningRoutineAgent              | cleaning     | `src/agents/CleaningRoutineAgent.js`          | `CleaningPage`, `ZonesPlanner`                         | legacy       |
-   | GardenScheduleAgent               | garden       | `src/agents/GardenScheduleAgent.js`           | `GardenPage`, `GardenCalendar`                         | legacy       |
-   | AnimalsButcheryAgent              | animals      | `src/agents/AnimalsButcheryAgent.js`          | `AnimalsPage`, `ButcheryWizard`                        | legacy       |
-   | StorehouseStoragePlannerAgent     | storehouse   | `src/agents/StorehouseStoragePlannerAgent.js` | `StorehousePage`, `StoragePlanner`                     | legacy       |
-   | ShoppingConsolidateListAgent      | shopping     | `src/agents/ShoppingConsolidateListAgent.js`  | `ShoppingPage`, `ListConsolidator`                     | legacy       |
+   | Agent Name                    | Domain     | Entry File                                   | Used By (UI / Services)                       | Status |
+   | ----------------------------- | ---------- | -------------------------------------------- | --------------------------------------------- | ------ |
+   | CookingAgent                  | cooking    | `src/agents/CookingShim.js`                  | `CookingPage`, `BatchPlanner`, `RecipeImport` | legacy |
+   | CleaningRoutineAgent          | cleaning   | `src/agents/CleaningRoutineShim.js`          | `CleaningPage`, `ZonesPlanner`                | legacy |
+   | GardenScheduleAgent           | garden     | `src/agents/GardenScheduleShim.js`           | `GardenPage`, `GardenCalendar`                | legacy |
+   | AnimalsButcheryAgent          | animals    | `src/agents/AnimalsButcheryShim.js`          | `AnimalsPage`, `ButcheryWizard`               | legacy |
+   | StorehouseStoragePlannerAgent | storehouse | `src/agents/StorehouseStoragePlannerShim.js` | `StorehousePage`, `StoragePlanner`            | legacy |
+   | ShoppingConsolidateListAgent  | shopping   | `src/agents/ShoppingConsolidateListShim.js`  | `ShoppingPage`, `ListConsolidator`            | legacy |
 
 3. **Prioritize migration order**
 
    Suggested order:
-
    1. **Shopping / storehouse** (low risk, high user value),
    2. **Cooking** (heavily used; unlocks SessionRunner goodness),
    3. **Cleaning / garden**,
@@ -167,7 +166,7 @@ Pseudocode structure:
 /**
  * src/agents/shims/cooking/sessionComposer.shim.js
  */
-import eventBus from '@/services/eventBus';
+import eventBus from '@/services/events/eventBus';
 import { runOrchestrator } from '@/agents/orchestrator'; // your orchestrator shim
 import reasonerPolicy from '@/config/reasoner.policy.json';
 import orchestratorModes from '@/config/orchestrator.modes.json';
@@ -185,7 +184,7 @@ const SOURCE = 'agents/shims/cooking/sessionComposer';
  * @param {CookingComposeSessionInput} input
  * @returns {Promise<CookingComposeSessionResult>}
  */
-export async function composeCookingSessionShim(input) {
+export async function composecookingSessionShim(input) {
   const ts = new Date().toISOString();
 
   eventBus.emit({
@@ -322,8 +321,8 @@ inside the legacy agent file:
 
 js
 Copy code
-// src/agents/CookingAgent.js
-import { composeCookingSessionShim } from '@/agents/shims/cooking/sessionComposer.shim';
+// src/agents/CookingShim.js
+import { composecookingSessionShim } from '@/agents/shims/cooking/sessionComposer.shim';
 
 /**
  * Legacy wrapper used by existing UI.
@@ -332,7 +331,7 @@ import { composeCookingSessionShim } from '@/agents/shims/cooking/sessionCompose
 export async function CookingAgentComposeSession(legacyInput) {
   // transform legacyInput into the new shim input shape
   const shimInput = legacyToShimInput(legacyInput);
-  const result = await composeCookingSessionShim(shimInput);
+  const result = await composecookingSessionShim(shimInput);
   return shimResultToLegacy(result);
 }
 This lets:
@@ -345,7 +344,7 @@ You reduce risk while still introducing the new architecture.
 
 Later, you can:
 
-Update UI to call composeCookingSessionShim directly,
+Update UI to call composecookingSessionShim directly,
 
 Delete the adapter.
 
@@ -615,3 +614,4 @@ All long-running behavior is resilient to navigation and reloads.
 
 Use this document as the living checklist for completing the migration
 from old agents to the new shim architecture.
+```

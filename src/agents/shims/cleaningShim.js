@@ -1,4 +1,4 @@
-// src/agents/shims/cleaningAgent.js
+// src/agents/shims/cleaningShim.js
 // -----------------------------------------------------------------------------
 // SSA Cleaning Shim
 // - Replaces the old "cleaningAgent" that built 7-day plans locally and
@@ -29,10 +29,10 @@
 //     plus a CleaningAgent class for registries.
 // -----------------------------------------------------------------------------
 
-import { emit } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
-import budget from "@/reasoner/budget.json";
+import budget from "@/reasoner/budget.js";
 import { canInvokeReasoner } from "@/reasoner/gating";
 import { evaluateConfidence } from "@/reasoner/confidence";
 import { selectCleaningContext } from "@/reasoner/selectors";
@@ -45,8 +45,8 @@ import { getSystemPrompt } from "@/reasoner/prompts/system";
 import { buildCleaningPrompt } from "@/reasoner/prompts/templates";
 import { invokeReasoner } from "@/reasoner/core";
 
-import { evaluateGuards } from "@/guards/guardsEvaluate";
-import { composeSessionsFromPlan } from "@/skills/sessions/compose";
+import { evaluateGuards } from "@/agents/skills/sessions/guardsEvaluate";
+import { composeSessionsFromPlan } from "@agents/skills/sessions/compose";
 
 import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
 import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
@@ -109,7 +109,13 @@ function buildErrorResponse(reason, mode = "none", err, debug = []) {
       }
     : { reason };
 
-  return buildShimResponse(false, mode, payload, [{ type: "error", reason }], debug);
+  return buildShimResponse(
+    false,
+    mode,
+    payload,
+    [{ type: "error", reason }],
+    debug
+  );
 }
 
 /**
@@ -122,9 +128,7 @@ function buildErrorResponse(reason, mode = "none", err, debug = []) {
 function enforceBudget(reqLike, debug) {
   const domainBudget =
     (budget &&
-      (budget.cleaning ||
-        budget.household ||
-        budget["cleaning.plan"])) ||
+      (budget.cleaning || budget.household || budget["cleaning.plan"])) ||
     {};
 
   const maxChars = domainBudget.maxChars || 18000;
@@ -357,7 +361,10 @@ export async function invokeShim(req) {
     // -------------------------------------------------
     // 2. Budget + gating
     // -------------------------------------------------
-    const budgetCheck = enforceBudget({ domain, intent, input, runtime }, debug);
+    const budgetCheck = enforceBudget(
+      { domain, intent, input, runtime },
+      debug
+    );
     if (!budgetCheck.ok) {
       warnings.push({
         type: "budget.blocked",
@@ -889,13 +896,28 @@ export class CleaningAgent {
     if (c === "planfromprompt" || c === "plan-from-prompt") {
       return planFromPrompt(normalized, rt);
     }
-    if (c === "buildseasonalroutine" || c === "build-seasonal-routine" || c === "seasonalroutine" || c === "seasonal-routine") {
+    if (
+      c === "buildseasonalroutine" ||
+      c === "build-seasonal-routine" ||
+      c === "seasonalroutine" ||
+      c === "seasonal-routine"
+    ) {
       return buildSeasonalRoutine(normalized, rt);
     }
-    if (c === "buildmonthlyroutine" || c === "build-monthly-routine" || c === "monthlyroutine" || c === "monthly-routine") {
+    if (
+      c === "buildmonthlyroutine" ||
+      c === "build-monthly-routine" ||
+      c === "monthlyroutine" ||
+      c === "monthly-routine"
+    ) {
       return buildMonthlyRoutine(normalized, rt);
     }
-    if (c === "buildcustomroutine" || c === "build-custom-routine" || c === "customroutine" || c === "custom-routine") {
+    if (
+      c === "buildcustomroutine" ||
+      c === "build-custom-routine" ||
+      c === "customroutine" ||
+      c === "custom-routine"
+    ) {
       return buildCustomRoutine(normalized, rt);
     }
 

@@ -1,0 +1,335 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "meta": {
+    "type": "recipe",
+    "id": "desserts.mahogany_cake",
+    "slug": "mahogany_cake",
+    "name": "Mahogany Cake (Southern Chocolate Layer Cake)",
+    "version": "1.0.0",
+    "status": "canonical",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-18T00:00:00.000Z",
+    "updatedAt": "2026-01-18T00:00:00.000Z",
+    "locale": "en-US",
+    "difficulty": "intermediate",
+    "tags": [
+      "dessert",
+      "cake",
+      "mahogany-cake",
+      "southern",
+      "chocolate",
+      "layer-cake",
+      "celebration",
+      "baking",
+      "foundation"
+    ],
+    "allergens": ["wheat", "eggs", "dairy"],
+    "description": "A classic Southern-style mahogany cake: a deep chocolate, tender-but-stackable layer cake with a distinctive dark color and rich cocoa flavor (often associated with old-school community cookbooks). Built as a reliable layer-cake baseline with both all-purpose flour and fresh-milled flour guidance (choose one). Includes a traditional cooked chocolate frosting option (fudge/boiled style) and a simpler buttercream option."
+  },
+  "equipment": [
+    { "id": "oven", "label": "Oven" },
+    { "id": "cake_pan_9in", "label": "Two 9-inch round cake pans" },
+    { "id": "parchment_paper", "label": "Parchment paper" },
+    { "id": "mixing_bowl_large", "label": "Large mixing bowl" },
+    { "id": "mixing_bowl_medium", "label": "Medium mixing bowl" },
+    { "id": "whisk", "label": "Whisk" },
+    { "id": "hand_mixer_or_stand_mixer", "label": "Hand mixer or stand mixer" },
+    { "id": "rubber_spatula", "label": "Rubber spatula" },
+    { "id": "measuring_cups", "label": "Measuring cups/spoons" },
+    { "id": "kitchen_scale", "label": "Kitchen scale (recommended)" },
+    {
+      "id": "saucepan",
+      "label": "Saucepan (for cocoa bloom and/or cooked frosting)"
+    },
+    { "id": "cooling_rack", "label": "Cooling rack" },
+    {
+      "id": "offset_spatula",
+      "label": "Offset spatula (optional)",
+      "optional": true
+    },
+    {
+      "id": "cake_turntable",
+      "label": "Cake turntable (optional)",
+      "optional": true
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "butter_unsalted",
+      "label": "Unsalted butter, softened",
+      "amount": { "value": 170, "unit": "g" },
+      "notes": "About 3/4 cup."
+    },
+    {
+      "id": "oil_neutral",
+      "label": "Neutral oil (canola/avocado/grapeseed)",
+      "amount": { "value": 60, "unit": "ml" },
+      "notes": "About 1/4 cup; helps keep cake moist even when chilled."
+    },
+    {
+      "id": "sugar_granulated",
+      "label": "Granulated sugar",
+      "amount": { "value": 400, "unit": "g" },
+      "notes": "About 2 cups."
+    },
+    {
+      "id": "eggs_large",
+      "label": "Large eggs",
+      "amount": { "value": 3, "unit": "each" },
+      "notes": "Room temperature preferred."
+    },
+    {
+      "id": "vanilla_extract",
+      "label": "Vanilla extract",
+      "amount": { "value": 10, "unit": "ml" },
+      "notes": "About 2 tsp."
+    },
+
+    {
+      "id": "cocoa_powder",
+      "label": "Cocoa powder (natural preferred for classic color; Dutch ok)",
+      "amount": { "value": 75, "unit": "g" },
+      "notes": "About 3/4 cup. Natural cocoa gives a brighter chocolate note."
+    },
+    {
+      "id": "hot_coffee_or_water",
+      "label": "Hot coffee or hot water (for cocoa bloom)",
+      "amount": { "value": 180, "unit": "ml" },
+      "notes": "About 3/4 cup. Coffee deepens chocolate but doesn’t taste like coffee."
+    },
+
+    {
+      "id": "flour_ap_option",
+      "label": "All-purpose flour (Option A — use this OR the fresh-milled option)",
+      "amount": { "value": 310, "unit": "g" },
+      "notes": "About 2 1/2 cups. Weighing is best."
+    },
+    {
+      "id": "flour_freshmilled_option",
+      "label": "Fresh-milled flour, fine-milled (Option B — use this OR the AP option)",
+      "amount": { "value": 310, "unit": "g" },
+      "notes": "Fresh-milled can absorb more and may include more bran; for a smoother crumb, sift out the largest bran. Batter may need 15–45 ml extra buttermilk."
+    },
+
+    {
+      "id": "baking_soda",
+      "label": "Baking soda",
+      "amount": { "value": 5, "unit": "g" },
+      "notes": "About 1 tsp."
+    },
+    {
+      "id": "baking_powder",
+      "label": "Baking powder",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "About 1 1/2 tsp."
+    },
+    {
+      "id": "salt_kosher",
+      "label": "Kosher salt",
+      "amount": { "value": 5, "unit": "g" },
+      "notes": "About 1 tsp."
+    },
+    {
+      "id": "buttermilk",
+      "label": "Buttermilk",
+      "amount": { "value": 360, "unit": "ml" },
+      "notes": "About 1 1/2 cups. Room temp preferred."
+    },
+    {
+      "id": "buttermilk_adjustment_optional",
+      "label": "Extra buttermilk (only if needed for fresh-milled flour batter)",
+      "amount": { "value": 30, "unit": "ml" },
+      "notes": "Add 15 ml at a time if batter is too thick with fresh-milled flour; up to ~45 ml total depending on flour.",
+      "optional": true
+    },
+
+    {
+      "id": "vinegar_optional",
+      "label": "Apple cider vinegar (optional, classic mahogany tang)",
+      "amount": { "value": 5, "unit": "ml" },
+      "notes": "About 1 tsp. Optional; boosts lift with baking soda and adds subtle tang.",
+      "optional": true
+    },
+
+    {
+      "id": "frosting_choice_note",
+      "label": "Frosting choice: cooked chocolate frosting OR chocolate buttercream",
+      "amount": { "value": 1, "unit": "each" },
+      "notes": "Choose one frosting method below; both ingredient sets are included.",
+      "optional": true
+    },
+
+    {
+      "id": "cooked_frosting_sugar",
+      "label": "Granulated sugar (cooked frosting option)",
+      "amount": { "value": 300, "unit": "g" },
+      "notes": "About 1 1/2 cups.",
+      "optional": true
+    },
+    {
+      "id": "cooked_frosting_cocoa",
+      "label": "Cocoa powder (cooked frosting option)",
+      "amount": { "value": 35, "unit": "g" },
+      "notes": "About 1/3 cup.",
+      "optional": true
+    },
+    {
+      "id": "cooked_frosting_milk",
+      "label": "Whole milk (cooked frosting option)",
+      "amount": { "value": 180, "unit": "ml" },
+      "notes": "About 3/4 cup.",
+      "optional": true
+    },
+    {
+      "id": "cooked_frosting_butter",
+      "label": "Unsalted butter (cooked frosting option)",
+      "amount": { "value": 85, "unit": "g" },
+      "notes": "About 6 tbsp.",
+      "optional": true
+    },
+    {
+      "id": "cooked_frosting_vanilla",
+      "label": "Vanilla extract (cooked frosting option)",
+      "amount": { "value": 5, "unit": "ml" },
+      "notes": "About 1 tsp.",
+      "optional": true
+    },
+    {
+      "id": "cooked_frosting_salt",
+      "label": "Pinch of salt (cooked frosting option)",
+      "amount": { "value": 1, "unit": "g" },
+      "optional": true
+    },
+
+    {
+      "id": "buttercream_butter",
+      "label": "Unsalted butter, softened (buttercream option)",
+      "amount": { "value": 226, "unit": "g" },
+      "notes": "About 1 cup / 2 sticks.",
+      "optional": true
+    },
+    {
+      "id": "buttercream_powdered_sugar",
+      "label": "Powdered sugar (buttercream option)",
+      "amount": { "value": 480, "unit": "g" },
+      "notes": "About 4 cups, sifted if lumpy.",
+      "optional": true
+    },
+    {
+      "id": "buttercream_cocoa",
+      "label": "Cocoa powder (buttercream option)",
+      "amount": { "value": 45, "unit": "g" },
+      "notes": "About 1/2 cup.",
+      "optional": true
+    },
+    {
+      "id": "buttercream_milk",
+      "label": "Milk or cream (buttercream option)",
+      "amount": { "value": 45, "unit": "ml" },
+      "notes": "3–4 tbsp, as needed for texture.",
+      "optional": true
+    },
+    {
+      "id": "buttercream_vanilla",
+      "label": "Vanilla extract (buttercream option)",
+      "amount": { "value": 5, "unit": "ml" },
+      "notes": "About 1 tsp.",
+      "optional": true
+    },
+    {
+      "id": "buttercream_salt",
+      "label": "Pinch of salt (buttercream option)",
+      "amount": { "value": 1, "unit": "g" },
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step_01_pan_oven",
+      "title": "Prep pans and oven",
+      "body": "Heat oven to 350°F (175°C). Grease two 9-inch round pans, line bottoms with parchment, then lightly grease parchment and dust with flour (or use baking spray)."
+    },
+    {
+      "id": "step_02_choose_flour",
+      "title": "Choose your flour option",
+      "body": "Use either the all-purpose flour OR the fresh-milled flour (not both). Fresh-milled flour may need extra buttermilk and benefits from a 5–10 minute batter rest after mixing."
+    },
+    {
+      "id": "step_03_bloom_cocoa",
+      "title": "Bloom the cocoa for deep color",
+      "body": "In a bowl or saucepan, whisk cocoa powder into hot coffee/water until smooth and glossy. Let cool slightly (warm is fine). This deepens flavor and helps develop the mahogany tone."
+    },
+    {
+      "id": "step_04_whisk_dry",
+      "title": "Whisk dry ingredients",
+      "body": "In a medium bowl, whisk chosen flour, baking soda, baking powder, and salt."
+    },
+    {
+      "id": "step_05_cream_fat_sugar",
+      "title": "Cream butter and sugar (structure for layers)",
+      "body": "Beat softened butter and sugar on medium-high until light and fluffy, 3–5 minutes. Scrape the bowl. Beat in oil until combined."
+    },
+    {
+      "id": "step_06_add_eggs_vanilla",
+      "title": "Add eggs and vanilla",
+      "body": "Add eggs one at a time, beating until incorporated after each. Mix in vanilla. Scrape bowl."
+    },
+    {
+      "id": "step_07_alternate_wet_dry",
+      "title": "Alternate dry + buttermilk + cocoa",
+      "body": "On low speed, add dry ingredients in 3 additions, alternating with buttermilk in 2 additions, mixing just until combined (dry → buttermilk → dry → buttermilk → dry). Then mix in the bloomed cocoa mixture until uniform. If using vinegar, stir it in at the end."
+    },
+    {
+      "id": "step_08_adjust_freshmilled",
+      "title": "Adjust batter for fresh-milled flour",
+      "body": "If using fresh-milled flour and batter is very thick, add extra buttermilk 15 ml (1 tbsp) at a time until batter is smooth and pourable. Rest batter 5–10 minutes to hydrate, then gently fold once more."
+    },
+    {
+      "id": "step_09_pan_level",
+      "title": "Divide and level",
+      "body": "Divide batter evenly between pans. Smooth tops and tap pans gently to release large bubbles."
+    },
+    {
+      "id": "step_10_bake",
+      "title": "Bake",
+      "body": "Bake 28–36 minutes, or until tops spring back and a toothpick in the center comes out clean or with a few moist crumbs. Rotate pans halfway if needed."
+    },
+    {
+      "id": "step_11_cool",
+      "title": "Cool completely",
+      "body": "Cool in pans 10 minutes, then turn out onto racks, peel parchment, and cool completely before frosting."
+    },
+    {
+      "id": "step_12_frosting_choose",
+      "title": "Choose and make frosting",
+      "body": "Choose either the cooked chocolate frosting (traditional, fudgy) or the chocolate buttercream (simpler, faster). Make frosting while cakes cool."
+    },
+    {
+      "id": "step_13_cooked_frosting",
+      "title": "Cooked chocolate frosting option (traditional)",
+      "body": "In a saucepan, whisk sugar, cocoa, milk, butter, and a pinch of salt. Bring to a gentle boil over medium heat, whisking. Reduce to a steady simmer and cook 3–5 minutes until slightly thickened and glossy. Remove from heat, stir in vanilla, then cool 10–20 minutes until spreadable (it thickens as it cools)."
+    },
+    {
+      "id": "step_14_buttercream_option",
+      "title": "Chocolate buttercream option (simple)",
+      "body": "Beat butter until creamy. Add powdered sugar and cocoa in stages with a pinch of salt, beating on low then medium. Add vanilla and enough milk/cream to reach a smooth, spreadable consistency."
+    },
+    {
+      "id": "step_15_stack_and_frost",
+      "title": "Stack and frost",
+      "body": "Level layers if needed. Place first layer on a plate/board, add frosting, then top with second layer (top-side down for a flatter top). Apply a thin crumb coat, chill 15 minutes, then finish frosting."
+    }
+  ],
+  "notes": [
+    "Mahogany cake character: deep cocoa color and a tender-but-layerable crumb; cocoa bloom + buttermilk + soda helps develop flavor and color.",
+    "Fresh-milled flour: sift out coarse bran for a smoother crumb; batter may need a little extra buttermilk and a short rest.",
+    "Cooked frosting thickens as it cools—spread while still slightly warm for easiest application.",
+    "If you want even darker color, use natural cocoa and hot coffee; Dutch-process cocoa can be darker but may taste smoother/less sharp."
+  ],
+  "storage": {
+    "roomTemp": "Covered: 1 day (cool room).",
+    "refrigerator": "Covered: up to 5 days. Bring to room temp for best texture.",
+    "freezer": "Wrapped unfrosted layers: up to 2 months. Frosting: buttercream freezes well; cooked frosting is best fresh."
+  }
+}

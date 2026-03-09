@@ -39,7 +39,7 @@ let eventBus = {
   on: () => () => {},
 };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -60,7 +60,8 @@ try {
 const nowISO = () => new Date().toISOString();
 const isNum = (v) => typeof v === "number" && Number.isFinite(v);
 const isStr = (v) => typeof v === "string";
-const clone = (obj) => (obj && typeof obj === "object" ? JSON.parse(JSON.stringify(obj)) : obj);
+const clone = (obj) =>
+  obj && typeof obj === "object" ? JSON.parse(JSON.stringify(obj)) : obj;
 
 function emit(type, source, data) {
   eventBus.emit({ type, ts: nowISO(), source, data });
@@ -168,24 +169,52 @@ async function backplanSchedule(tasks = [], links = [], opts = {}) {
 
   // Defensive checks
   if (!dag || !dag.planSchedule) {
-    emit("scheduling.backplan.error", source, { message: "DAG planner unavailable." });
-    return { order: null, schedule: null, criticalPath: [], makespan: 0, graph: null };
+    emit("scheduling.backplan.error", source, {
+      message: "DAG planner unavailable.",
+    });
+    return {
+      order: null,
+      schedule: null,
+      criticalPath: [],
+      makespan: 0,
+      graph: null,
+    };
   }
   const deadlineMs = parseDeadline(deadline);
   if (deadlineMs == null) {
-    emit("scheduling.backplan.error", source, { message: "Invalid or missing deadline." });
-    return { order: null, schedule: null, criticalPath: [], makespan: 0, graph: null };
+    emit("scheduling.backplan.error", source, {
+      message: "Invalid or missing deadline.",
+    });
+    return {
+      order: null,
+      schedule: null,
+      criticalPath: [],
+      makespan: 0,
+      graph: null,
+    };
   }
 
   // Build DAG & compute windows (relative minutes)
   const graph = dag.buildGraph(tasks, links);
   if (!graph.order) {
     // cycle event already emitted
-    emit("scheduling.backplan.error", source, { message: "Cycle detected; cannot backplan." });
-    return { order: null, schedule: null, criticalPath: [], makespan: 0, graph };
+    emit("scheduling.backplan.error", source, {
+      message: "Cycle detected; cannot backplan.",
+    });
+    return {
+      order: null,
+      schedule: null,
+      criticalPath: [],
+      makespan: 0,
+      graph,
+    };
   }
   const { schedule, makespan } = dag.computeTimes(graph.nodesById, graph.order);
-  const criticalPath = dag.findCriticalPath(graph.nodesById, graph.order, schedule);
+  const criticalPath = dag.findCriticalPath(
+    graph.nodesById,
+    graph.order,
+    schedule
+  );
 
   // Anchor plan: planEnd is the given deadline; planStart is deadline - makespan
   const planEndMs = deadlineMs;
@@ -225,7 +254,9 @@ async function backplanSchedule(tasks = [], links = [], opts = {}) {
     planEndISO: toISO(planEndMs),
     anchor: useLatest ? "latest" : "earliest",
     schedule: serializeSchedule(augmented),
-    tzOffsetMinutes: isNum(opts.tzOffsetMinutes) ? opts.tzOffsetMinutes : undefined,
+    tzOffsetMinutes: isNum(opts.tzOffsetMinutes)
+      ? opts.tzOffsetMinutes
+      : undefined,
   };
 
   emit("scheduling.backplan.computed", source, payload);
@@ -263,8 +294,13 @@ function serializeSchedule(schedMap) {
   for (const [id, r] of schedMap) {
     arr.push({
       id,
-      es: r.es, ef: r.ef, ls: r.ls, lf: r.lf, slack: r.slack,
-      level: r.level, critical: r.critical,
+      es: r.es,
+      ef: r.ef,
+      ls: r.ls,
+      lf: r.lf,
+      slack: r.slack,
+      level: r.level,
+      critical: r.critical,
       plannedStartMin: r.plannedStartMin,
       plannedFinishMin: r.plannedFinishMin,
       plannedStartISO: r.plannedStartISO,

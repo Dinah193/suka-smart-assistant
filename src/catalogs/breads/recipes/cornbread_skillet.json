@@ -1,0 +1,323 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00Z",
+
+  "meta": {
+    "id": "breads.cornbread_skillet",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Cast-Iron Skillet Cornbread",
+    "subtitle": "Crisp edges • tender crumb • sweet or savory variants • fresh milled or commercial flour",
+    "source": {
+      "kind": "ssa-canonical",
+      "notes": "Canonical skillet cornbread baked in a preheated cast-iron pan for crisp edges. Supports classic unsweetened Southern style and a sweet variant."
+    }
+  },
+
+  "classification": {
+    "cuisine": "breads",
+    "category": "quick bread",
+    "subprofiles": [
+      "cornbread",
+      "cast-iron",
+      "skillet",
+      "southern",
+      "sweet-optional"
+    ],
+    "mealArchetypes": ["side bread", "breakfast", "snack"],
+    "servingStyles": ["skillet wedges", "squares"],
+    "plannerTags": [
+      "cornbread",
+      "skillet",
+      "cast iron",
+      "quick bread",
+      "sweet optional",
+      "savory"
+    ]
+  },
+
+  "yield": {
+    "servings": 8,
+    "servingSize": { "value": 1, "unit": "wedge" },
+    "notes": "One 10-inch cast-iron skillet or 8x8-inch pan."
+  },
+
+  "time": {
+    "activeMins": 15,
+    "handsOffMins": 25,
+    "totalMins": 40
+  },
+
+  "difficulty": "beginner",
+
+  "equipment": {
+    "minimum": [
+      "10-inch cast-iron skillet (preferred) or baking pan",
+      "mixing bowl",
+      "oven"
+    ],
+    "recommended": [
+      "scale",
+      "whisk",
+      "parchment (if using a pan)",
+      "cooling rack"
+    ],
+    "optional": ["instant-read thermometer (optional)", "pastry brush"]
+  },
+
+  "dietFlags": ["vegetarian"],
+  "allergens": ["milk", "egg", "wheat", "gluten"],
+
+  "signals": {
+    "quickBread": true,
+    "sideBread": true,
+    "castIron": true,
+    "sweetOptional": true,
+    "savoryOptional": true
+  },
+
+  "tasteProfile": {
+    "sweetness": "variable",
+    "saltiness": "moderate",
+    "richness": "medium",
+    "crumb": "tender",
+    "edges": "crisp",
+    "notes": "Corn-forward flavor, crisp buttery edges from the hot skillet, tender interior. Sweet or savory depending on add-ins."
+  },
+
+  "ingredients": [
+    {
+      "id": "cornmeal",
+      "label": "Cornmeal (medium grind preferred; or fresh milled cornmeal—see Fresh-Milled Notes)",
+      "role": "base",
+      "amount": { "value": 180, "unit": "g" },
+      "notes": "Stone-ground gives more flavor; fine grind yields a smoother crumb."
+    },
+    {
+      "id": "flour",
+      "label": "All-purpose flour (optional for tenderness; omit for 100% corn cornbread)",
+      "role": "structure",
+      "amount": { "value": 60, "unit": "g" },
+      "optional": true,
+      "notes": "Southern-style can be all-cornmeal; adding a little flour makes the crumb a bit lighter."
+    },
+    {
+      "id": "baking_powder",
+      "label": "Baking powder",
+      "role": "leavening",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": "About 2 teaspoons."
+    },
+    {
+      "id": "baking_soda",
+      "label": "Baking soda",
+      "role": "leavening",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": "About 1/2 teaspoon. Works with buttermilk for lift and browning."
+    },
+    {
+      "id": "salt",
+      "label": "Fine salt",
+      "role": "seasoning",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "About 1 teaspoon."
+    },
+    {
+      "id": "sugar",
+      "label": "Sugar (optional for sweet cornbread)",
+      "role": "sweetener",
+      "amount": { "value": 25, "unit": "g" },
+      "optional": true,
+      "notes": "0g for classic savory; 25–60g depending on sweetness preference."
+    },
+    {
+      "id": "buttermilk",
+      "label": "Buttermilk (cold or room temp)",
+      "role": "hydration",
+      "amount": { "value": 300, "unit": "g" },
+      "notes": "About 1 1/4 cups. If you don’t have buttermilk, see Variations for substitutes."
+    },
+    {
+      "id": "egg",
+      "label": "Large eggs",
+      "role": "binder",
+      "amount": { "value": 100, "unit": "g" },
+      "notes": "2 large eggs."
+    },
+    {
+      "id": "fat_in_batter",
+      "label": "Melted butter (or neutral oil) for batter",
+      "role": "fat",
+      "amount": { "value": 56, "unit": "g" },
+      "notes": "4 tbsp melted butter. Neutral oil works too."
+    },
+    {
+      "id": "skillet_fat",
+      "label": "Butter (or bacon drippings/neutral oil) for hot skillet",
+      "role": "prep",
+      "amount": { "value": 28, "unit": "g" },
+      "notes": "2 tbsp. This creates the signature crisp crust."
+    },
+    {
+      "id": "addins_jalapeno",
+      "label": "Jalapeño, finely diced (optional)",
+      "role": "add-in",
+      "amount": { "value": 30, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "addins_cheddar",
+      "label": "Shredded cheddar (optional)",
+      "role": "add-in",
+      "amount": { "value": 80, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "addins_corn",
+      "label": "Corn kernels (fresh/frozen/drained canned) (optional)",
+      "role": "add-in",
+      "amount": { "value": 80, "unit": "g" },
+      "optional": true
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Preheat oven and skillet",
+      "instructions": [
+        "Heat oven to 425°F (218°C).",
+        "Place the cast-iron skillet in the oven to preheat for 10 minutes.",
+        "Preheating the skillet is key for crisp edges."
+      ],
+      "handsOffMins": 10,
+      "timers": [{ "label": "Skillet preheat", "mins": 10 }],
+      "temperature": { "type": "oven", "value": 425, "unit": "F" }
+    },
+    {
+      "id": "step_02",
+      "title": "Mix dry ingredients",
+      "instructions": [
+        "In a bowl, whisk cornmeal, flour (if using), baking powder, baking soda, salt, and sugar (if using)."
+      ],
+      "activeMins": 3
+    },
+    {
+      "id": "step_03",
+      "title": "Mix wet ingredients",
+      "instructions": [
+        "In a second bowl (or a well in the dry bowl), whisk buttermilk, eggs, and melted butter/oil until smooth."
+      ],
+      "activeMins": 3
+    },
+    {
+      "id": "step_04",
+      "title": "Combine batter (don’t overmix)",
+      "instructions": [
+        "Pour wet into dry and stir just until combined. A few small lumps are fine.",
+        "If using add-ins (cheddar, jalapeño, corn), fold them in now."
+      ],
+      "activeMins": 3
+    },
+    {
+      "id": "step_05",
+      "title": "Add fat to hot skillet + pour batter",
+      "instructions": [
+        "Carefully remove the hot skillet from the oven.",
+        "Add skillet fat (butter/bacon drippings/oil) and swirl to coat the bottom and sides. It should sizzle.",
+        "Immediately pour batter into the skillet (you should hear a sizzle—this helps crust)."
+      ],
+      "activeMins": 3
+    },
+    {
+      "id": "step_06",
+      "title": "Bake",
+      "instructions": [
+        "Bake 18–24 minutes until golden and set in the center.",
+        "A toothpick should come out clean or with a few moist crumbs.",
+        "Optional doneness check: internal temperature ~200°F (93°C)."
+      ],
+      "handsOffMins": 22,
+      "timers": [{ "label": "Bake (start checking)", "mins": 18 }],
+      "temperature": { "type": "oven", "value": 425, "unit": "F" }
+    },
+    {
+      "id": "step_07",
+      "title": "Cool briefly and serve",
+      "instructions": [
+        "Cool 5–10 minutes before slicing for best structure.",
+        "Serve warm with butter, honey (sweet variant), or alongside beans/greens/chili (savory)."
+      ],
+      "handsOffMins": 8,
+      "timers": [{ "label": "Rest", "mins": 8 }]
+    }
+  ],
+
+  "freshMilledNotes": {
+    "summary": "Fresh milled cornmeal is flavorful but can be coarser and thirstier. Hydration and a short soak can improve tenderness.",
+    "guidelines": [
+      "If milling your own cornmeal, aim for a medium grind. Very coarse meal can taste gritty unless soaked.",
+      "Optional for tenderness: soak cornmeal in the buttermilk for 10–20 minutes before mixing (a quick 'soaker').",
+      "Fresh milled cornmeal can absorb more liquid; if batter looks very thick, add 15–30g extra buttermilk.",
+      "Ifecommended beginner blend: use 60g flour for a lighter crumb; omit flour for a more rustic, all-corn texture."
+    ],
+    "hydrationAdjustment": {
+      "holdBackWaterG": 0,
+      "rangeAddBackG": [0, 30]
+    }
+  },
+
+  "storage": {
+    "counter": "Best same day. Store airtight at room temp up to 1 day; rewarm for best texture.",
+    "fridge": "Up to 4 days airtight. Rewarm in skillet/toaster oven.",
+    "freezer": "Freeze wedges up to 2 months. Thaw and rewarm at 350°F (175°C) 8–12 minutes."
+  },
+
+  "variations": [
+    {
+      "name": "Classic savory Southern (no sugar, bacon drippings)",
+      "change": "Omit sugar entirely. Use bacon drippings for skillet fat (28g).",
+      "notes": "Great with beans, greens, gumbo, or chili."
+    },
+    {
+      "name": "Sweet cornbread",
+      "change": "Use 50–60g sugar. Optionally reduce salt to 5g. Brush top with melted butter after baking.",
+      "notes": "Serve with honey butter."
+    },
+    {
+      "name": "No buttermilk substitute",
+      "change": "Use 300g milk + 15g lemon juice or vinegar. Let sit 5 minutes before mixing.",
+      "notes": "Flavor slightly different, still good lift."
+    },
+    {
+      "name": "Jalapeño-cheddar skillet cornbread",
+      "change": "Fold in 30g jalapeño + 80g cheddar. Optionally add 80g corn kernels.",
+      "notes": "If batter seems too thick, add 10–20g extra buttermilk."
+    },
+    {
+      "name": "100% cornmeal (no flour)",
+      "change": "Omit flour. Consider soaking cornmeal in buttermilk 10–20 minutes before mixing.",
+      "notes": "More rustic texture; still excellent in cast iron."
+    }
+  ],
+
+  "notes": [
+    "Hot skillet fat + immediate batter pour = crisp crust. Don’t let the skillet cool before adding batter.",
+    "Avoid overmixing; quick breads get tough if stirred too much.",
+    "If you want extra crisp edges, bake in cast iron and use butter or drippings as skillet fat."
+  ],
+
+  "links": {
+    "related": [
+      "breads/recipes/buttermilk_biscuits",
+      "breads/recipes/banana_bread"
+    ]
+  },
+
+  "audit": {
+    "tested": true,
+    "testNotes": "Canonical cast-iron cornbread with crisp crust. Supports savory Southern style and sweet variant via optional sugar and add-ins."
+  }
+}

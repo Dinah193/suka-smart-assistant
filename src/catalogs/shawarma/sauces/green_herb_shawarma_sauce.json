@@ -1,0 +1,164 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+  "meta": {
+    "id": "shawarma.sauces.green_herb_shawarma_sauce",
+    "type": "recipe",
+    "domain": "shawarma",
+    "locale": "en-US",
+    "label": "Green Herb Shawarma Sauce",
+    "tags": [
+      "sauce",
+      "shawarma",
+      "condiment",
+      "herb_forward",
+      "garlic_forward",
+      "citrus",
+      "creamy",
+      "no_cook",
+      "batch_friendly",
+      "green_sauce"
+    ],
+    "source": {
+      "curation": "ssa",
+      "author": "SSA Catalog",
+      "notes": "Creamy green herb sauce for shawarma wraps and bowls; bright, garlicky, and lemony."
+    }
+  },
+  "ingredients": [
+    {
+      "id": "ing.greek_yogurt.plain",
+      "label": "Plain Greek yogurt",
+      "amount": { "value": 240, "unit": "g" },
+      "notes": [
+        "Use whole-milk for best body. Sub: plain yogurt (sauce will be thinner)."
+      ]
+    },
+    {
+      "id": "ing.mayonnaise",
+      "label": "Mayonnaise",
+      "amount": { "value": 60, "unit": "g" },
+      "notes": ["Optional but recommended for a richer, clingy sauce."]
+    },
+    {
+      "id": "ing.cilantro",
+      "label": "Fresh cilantro, packed",
+      "amount": { "value": 25, "unit": "g" },
+      "notes": ["About 1 large handful (stems OK)."]
+    },
+    {
+      "id": "ing.parsley",
+      "label": "Fresh parsley, packed",
+      "amount": { "value": 25, "unit": "g" },
+      "notes": ["Flat-leaf preferred; stems OK."]
+    },
+    {
+      "id": "ing.mint",
+      "label": "Fresh mint leaves, packed",
+      "amount": { "value": 5, "unit": "g" },
+      "notes": ["Optional, but makes the sauce extra bright."]
+    },
+    {
+      "id": "ing.green_onion",
+      "label": "Green onion (scallion), sliced",
+      "amount": { "value": 20, "unit": "g" },
+      "notes": ["About 2 stalks."]
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic, grated or pressed",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": ["About 3–4 medium cloves; adjust to taste."]
+    },
+    {
+      "id": "ing.lemon_zest",
+      "label": "Lemon zest",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": ["About 1 tablespoon; optional but highly recommended."]
+    },
+    {
+      "id": "ing.lemon_juice",
+      "label": "Fresh lemon juice",
+      "amount": { "value": 30, "unit": "ml" }
+    },
+    {
+      "id": "ing.olive_oil",
+      "label": "Olive oil",
+      "amount": { "value": 15, "unit": "ml" },
+      "notes": ["Adds silkiness and helps emulsify the herbs into the sauce."]
+    },
+    {
+      "id": "ing.cumin_ground",
+      "label": "Ground cumin",
+      "amount": { "value": 1.5, "unit": "g" },
+      "notes": ["About 1/2 teaspoon; optional but shawarma-friendly."]
+    },
+    {
+      "id": "ing.black_pepper",
+      "label": "Black pepper, freshly ground",
+      "amount": { "value": 0.8, "unit": "g" },
+      "notes": ["About 1/4 teaspoon."]
+    },
+    {
+      "id": "ing.salt.kosher",
+      "label": "Kosher salt",
+      "amount": { "value": 3, "unit": "g" },
+      "notes": ["Start with 1/2 tsp; adjust after resting."]
+    },
+    {
+      "id": "ing.jalapeno",
+      "label": "Jalapeño, seeded (optional)",
+      "amount": { "value": 10, "unit": "g" },
+      "notes": ["Adds gentle heat; omit for mild. Keep seeds for hotter."]
+    },
+    {
+      "id": "ing.water",
+      "label": "Water (as needed)",
+      "amount": { "value": 15, "unit": "ml" },
+      "notes": ["Use only if needed to loosen consistency."]
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.01",
+      "title": "Prep herbs",
+      "instructions": [
+        "Rinse and thoroughly dry herbs (excess water can thin the sauce).",
+        "Roughly chop cilantro, parsley, and mint to help them blend evenly."
+      ]
+    },
+    {
+      "id": "step.02",
+      "title": "Blend",
+      "instructions": [
+        "Add yogurt, mayonnaise, cilantro, parsley, mint, green onion, garlic, lemon zest, lemon juice, olive oil, cumin, black pepper, salt, and optional jalapeño to a blender or food processor.",
+        "Blend until smooth and bright green, scraping down sides as needed."
+      ]
+    },
+    {
+      "id": "step.03",
+      "title": "Adjust texture and seasoning",
+      "instructions": [
+        "If too thick, blend in water 1 teaspoon (5 ml) at a time until it reaches a drizzleable consistency.",
+        "Taste and adjust: more lemon for brightness, more salt for savor, more garlic for punch, or more herbs for a greener profile."
+      ]
+    },
+    {
+      "id": "step.04",
+      "title": "Rest",
+      "instructions": [
+        "Cover and refrigerate for at least 30 minutes so flavors meld and garlic mellows.",
+        "Stir before serving (herb sauces can slightly separate)."
+      ]
+    },
+    {
+      "id": "step.05",
+      "title": "Store",
+      "instructions": [
+        "Store in a sealed container in the refrigerator.",
+        "Best within 3–5 days for brightest color and flavor; usable up to 7 days if kept cold."
+      ]
+    }
+  ]
+}

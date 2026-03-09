@@ -1,0 +1,215 @@
+{
+  "$schema": "../../schemas/catalog.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00Z",
+  "meta": {
+    "id": "breads.catalog",
+    "type": "catalog",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Breads Catalog",
+    "subtitle": "Canonical bread/baking recipes (SSA) — IDs + tags for fast lookup",
+    "source": {
+      "kind": "ssa-canonical",
+      "notes": "Index of bread recipes with tags for filtering/search. Recipe files live under /src/catalogs/breads/recipes."
+    }
+  },
+  "items": [
+    {
+      "id": "breads.sandwich_bread_white",
+      "tags": [
+        "bread",
+        "sandwich",
+        "soft",
+        "loaf",
+        "toast",
+        "everyday",
+        "yeast",
+        "beginner",
+        "fresh-milled-option"
+      ]
+    },
+    {
+      "id": "breads.whole_wheat_sandwich_bread",
+      "tags": [
+        "bread",
+        "sandwich",
+        "whole-wheat",
+        "loaf",
+        "everyday",
+        "yeast",
+        "beginner",
+        "fresh-milled-option",
+        "70-30-option"
+      ]
+    },
+    {
+      "id": "breads.cinnamon_raisin_bread",
+      "tags": [
+        "bread",
+        "sweet-loaf",
+        "cinnamon",
+        "raisins",
+        "breakfast",
+        "toast",
+        "swirl",
+        "intermediate",
+        "fresh-milled-option"
+      ]
+    },
+    {
+      "id": "breads.sourdough_country_loaf",
+      "tags": [
+        "bread",
+        "sourdough",
+        "artisan",
+        "boule",
+        "batard",
+        "crusty",
+        "naturally-leavened",
+        "intermediate",
+        "fresh-milled-option",
+        "cold-ferment"
+      ]
+    },
+    {
+      "id": "breads.no_knead_dutch_oven_bread",
+      "tags": [
+        "bread",
+        "artisan",
+        "no-knead",
+        "dutch-oven",
+        "crusty",
+        "beginner",
+        "minimal-effort",
+        "fresh-milled-option"
+      ]
+    },
+    {
+      "id": "breads.banana_bread",
+      "tags": [
+        "quick-bread",
+        "banana",
+        "sweet",
+        "breakfast",
+        "snack",
+        "loaf",
+        "beginner",
+        "no-yeast"
+      ]
+    },
+    {
+      "id": "breads.buttermilk_biscuits",
+      "tags": [
+        "biscuits",
+        "southern",
+        "flaky",
+        "quick-bread",
+        "beginner",
+        "buttermilk",
+        "side-bread",
+        "fresh-milled-option"
+      ]
+    },
+    {
+      "id": "breads.cornbread_skillet",
+      "tags": [
+        "cornbread",
+        "cast-iron",
+        "quick-bread",
+        "savory",
+        "sweet-optional",
+        "beginner",
+        "side-bread",
+        "fresh-milled-option"
+      ]
+    },
+    {
+      "id": "breads.flatbread_pan_quick",
+      "tags": [
+        "flatbread",
+        "stovetop",
+        "quick",
+        "no-oven-needed",
+        "beginner",
+        "versatile",
+        "fresh-milled-option"
+      ]
+    },
+    {
+      "id": "breads.naan_stovetop",
+      "tags": [
+        "naan",
+        "flatbread",
+        "stovetop",
+        "yeast",
+        "yogurt",
+        "beginner",
+        "curries",
+        "fresh-milled-option"
+      ]
+    },
+    {
+      "id": "breads.french_toast",
+      "tags": [
+        "breakfast",
+        "toast",
+        "custard",
+        "quick",
+        "beginner",
+        "uses-stale-bread"
+      ]
+    },
+    {
+      "id": "breads.brioche",
+      "tags": [
+        "brioche",
+        "enriched",
+        "buttery",
+        "sweet",
+        "loaf",
+        "buns-optional",
+        "advanced",
+        "fresh-milled-option"
+      ]
+    },
+    {
+      "id": "breads.challah",
+      "tags": [
+        "challah",
+        "braided",
+        "enriched",
+        "holiday",
+        "sweet-lean",
+        "intermediate",
+        "fresh-milled-option"
+      ]
+    },
+    {
+      "id": "breads.dinner_rolls",
+      "tags": [
+        "rolls",
+        "soft",
+        "yeast",
+        "side-bread",
+        "beginner",
+        "holiday",
+        "fresh-milled-option"
+      ]
+    },
+    {
+      "id": "breads.focaccia_olive_oil",
+      "tags": [
+        "focaccia",
+        "olive-oil",
+        "pan-bread",
+        "high-hydration",
+        "rosemary",
+        "flaky-salt",
+        "beginner",
+        "fresh-milled-option",
+        "cold-ferment-option"
+      ]
+    }
+  ]
+}

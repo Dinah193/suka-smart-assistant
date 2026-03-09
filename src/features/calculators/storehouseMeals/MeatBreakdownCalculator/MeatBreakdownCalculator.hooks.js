@@ -36,7 +36,7 @@
  */
 
 import { useMemo, useState, useCallback } from "react";
-import { emit } from "@/services/eventBus";
+import { emit } from "@/services/events/eventBus";
 // NOTE: If your Dexie instance is exported from a different path/name,
 // update this import accordingly.
 import { ssaDB } from "@/services/db";
@@ -228,13 +228,7 @@ export function useMeatBreakdownInventorySync(
         },
       });
     }
-  }, [
-    breakdown,
-    summary,
-    inventoryPreview,
-    householdId,
-    createMissingItems,
-  ]);
+  }, [breakdown, summary, inventoryPreview, householdId, createMissingItems]);
 
   return {
     inventoryPreview,
@@ -291,17 +285,19 @@ export function useMeatBreakdownBatchPlanning(
   const proposedSessions = useMemo(() => {
     if (!breakdown || !summary) return [];
 
-    return buildBatchCookingSessions(
-      breakdown,
-      cuts,
-      byproducts,
-      weightUnit,
-      {
-        domain,
-        defaultSourceType,
-      }
-    );
-  }, [breakdown, summary, cuts, byproducts, weightUnit, domain, defaultSourceType]);
+    return buildBatchCookingSessions(breakdown, cuts, byproducts, weightUnit, {
+      domain,
+      defaultSourceType,
+    });
+  }, [
+    breakdown,
+    summary,
+    cuts,
+    byproducts,
+    weightUnit,
+    domain,
+    defaultSourceType,
+  ]);
 
   /**
    * Emit a request for SessionRunner to start the given session.
@@ -310,22 +306,25 @@ export function useMeatBreakdownBatchPlanning(
    *
    * @param {object} session
    */
-  const startBatchSession = useCallback((session) => {
-    if (!session || typeof session !== "object") return;
-    const ts = new Date().toISOString();
+  const startBatchSession = useCallback(
+    (session) => {
+      if (!session || typeof session !== "object") return;
+      const ts = new Date().toISOString();
 
-    emit({
-      type: "session.request.fromMeatBreakdown.batch",
-      ts,
-      source:
-        "features/calculators/storehouseMeals/MeatBreakdownCalculator.hooks",
-      data: {
-        session,
-        breakdownId: breakdown?.metadata?.id || null,
-        species: breakdown?.inputs?.animal?.species || "unknown",
-      },
-    });
-  }, [breakdown]);
+      emit({
+        type: "session.request.fromMeatBreakdown.batch",
+        ts,
+        source:
+          "features/calculators/storehouseMeals/MeatBreakdownCalculator.hooks",
+        data: {
+          session,
+          breakdownId: breakdown?.metadata?.id || null,
+          species: breakdown?.inputs?.animal?.species || "unknown",
+        },
+      });
+    },
+    [breakdown]
+  );
 
   return {
     proposedSessions,
@@ -728,10 +727,7 @@ function buildGroundSession(
   defaultSourceType,
   ts
 ) {
-  const totalWeight = cuts.reduce(
-    (acc, c) => acc + (c.weight || 0),
-    0
-  );
+  const totalWeight = cuts.reduce((acc, c) => acc + (c.weight || 0), 0);
   const title = "Batch: Ground & Sausage Prep";
 
   return {
@@ -807,10 +803,7 @@ function buildStewSession(
   defaultSourceType,
   ts
 ) {
-  const totalWeight = cuts.reduce(
-    (acc, c) => acc + (c.weight || 0),
-    0
-  );
+  const totalWeight = cuts.reduce((acc, c) => acc + (c.weight || 0), 0);
   const title = "Batch: Stew / Curry Prep";
 
   return {
@@ -885,10 +878,7 @@ function buildRoastSession(
   defaultSourceType,
   ts
 ) {
-  const totalWeight = cuts.reduce(
-    (acc, c) => acc + (c.weight || 0),
-    0
-  );
+  const totalWeight = cuts.reduce((acc, c) => acc + (c.weight || 0), 0);
   const title = "Batch: Roasts & Special Cuts Labeling";
 
   return {
@@ -911,8 +901,7 @@ function buildRoastSession(
         metadata: {
           tempTargetF: 40,
           donenessCue: "timer",
-          cueNotes:
-            "Update your storehouse log as you verify each package.",
+          cueNotes: "Update your storehouse log as you verify each package.",
         },
       },
       {
@@ -952,10 +941,7 @@ function buildStockAndOffalSession(
   defaultSourceType,
   ts
 ) {
-  const organWeight = organs.reduce(
-    (acc, bp) => acc + (bp.weight || 0),
-    0
-  );
+  const organWeight = organs.reduce((acc, bp) => acc + (bp.weight || 0), 0);
   const boneWeight = bones.reduce((acc, bp) => acc + (bp.weight || 0), 0);
   const title = "Batch: Broth & Offal Prep";
 

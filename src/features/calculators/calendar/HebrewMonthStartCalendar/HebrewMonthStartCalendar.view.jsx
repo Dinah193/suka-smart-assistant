@@ -21,7 +21,7 @@
 
 import React, { useCallback, useMemo, useState } from "react";
 import runHebrewMonthStartCalendarShim from "./HebrewMonthStartCalendar.shim";
-import { emit } from "@/services/eventBus";
+import { emit } from "@/services/events/eventBus";
 
 /**
  * @typedef {import("./HebrewMonthStartCalendar.shim").ShimRequest} ShimRequest
@@ -45,7 +45,7 @@ export default function HebrewMonthStartCalendarView({
   defaultYear,
   defaultTimezone,
   defaultLocation,
-  onResult
+  onResult,
 }) {
   const now = useMemo(() => new Date(), []);
   const [rulePresetId, setRulePresetId] = useState(
@@ -78,24 +78,25 @@ export default function HebrewMonthStartCalendarView({
       {
         value: "fullMoon",
         label: "Full Moon",
-        description: "Month begins at/near the full moon (SSA default)."
+        description: "Month begins at/near the full moon (SSA default).",
       },
       {
         value: "newMoonAstronomical",
         label: "New Moon (Astronomical)",
-        description: "Month begins at the astronomical new moon conjunction."
+        description: "Month begins at the astronomical new moon conjunction.",
       },
       {
         value: "firstVisibleCrescent",
         label: "First Visible Crescent",
-        description: "Month begins when the first crescent is visible after sunset."
+        description:
+          "Month begins when the first crescent is visible after sunset.",
       },
       {
         value: "noMeridianCrossing",
         label: "Moon Does Not Cross Meridian",
         description:
-          "Month begins if the moon fails to cross the meridian during the night (guard-rail rule)."
-      }
+          "Month begins if the moon fails to cross the meridian during the night (guard-rail rule).",
+      },
     ],
     []
   );
@@ -128,7 +129,7 @@ export default function HebrewMonthStartCalendarView({
         location: {
           lat: parsedLat,
           lon: parsedLon,
-          tz
+          tz,
         },
         gregorianYear: Number(year),
         epochStartDate: epochStartDate || undefined,
@@ -136,8 +137,8 @@ export default function HebrewMonthStartCalendarView({
         options: {
           allowThirteenthMonth: true,
           includeStarCheck: true,
-          maxMonthCount: 13
-        }
+          maxMonthCount: 13,
+        },
       };
 
       /** @type {ShimRequest} */
@@ -148,8 +149,8 @@ export default function HebrewMonthStartCalendarView({
         context: {
           invokedBy: "calendar.ui",
           source: "HebrewMonthStartCalendar.view",
-          debug: false
-        }
+          debug: false,
+        },
       };
 
       const shimResult = await runHebrewMonthStartCalendarShim(shimRequest);
@@ -160,7 +161,7 @@ export default function HebrewMonthStartCalendarView({
         nodeKey: shimRequest.nodeKey,
         inputs,
         outputs: shimResult.outputs,
-        metadata: shimResult.metadata
+        metadata: shimResult.metadata,
       });
 
       if (!shimResult.ok && shimResult.error) {
@@ -172,13 +173,15 @@ export default function HebrewMonthStartCalendarView({
       }
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : "Unexpected error while calculating month starts.";
+        err instanceof Error
+          ? err.message
+          : "Unexpected error while calculating month starts.";
       setLastError(message);
 
       emitSafe("planningGraph.calculator.ui.error", {
         calculatorId: "calendar.hebrewMonthStart",
         nodeKey: "calendar.hebrewMonthStart",
-        error: { message }
+        error: { message },
       });
     } finally {
       setIsLoading(false);
@@ -191,7 +194,7 @@ export default function HebrewMonthStartCalendarView({
     rulePresetId,
     epochStartDate,
     epochEndDate,
-    onResult
+    onResult,
   ]);
 
   const handlePlanSessionsNow = useCallback(() => {
@@ -203,7 +206,7 @@ export default function HebrewMonthStartCalendarView({
       months: result.outputs.months,
       summary: result.outputs.summary,
       calendarRule: result.inputs.rulePresetId,
-      gregorianYear: result.inputs.gregorianYear
+      gregorianYear: result.inputs.gregorianYear,
     });
   }, [result]);
 
@@ -228,8 +231,9 @@ export default function HebrewMonthStartCalendarView({
             Hebrew Month Start Calendar
           </h2>
           <p className="text-sm text-slate-600">
-            Choose a month-start method, set your location, and generate approximated
-            Hebrew month start dates for SSA planning and feast scheduling.
+            Choose a month-start method, set your location, and generate
+            approximated Hebrew month start dates for SSA planning and feast
+            scheduling.
           </p>
         </div>
         <button
@@ -270,11 +274,15 @@ export default function HebrewMonthStartCalendarView({
                     "text-left border rounded-md px-3 py-2 text-xs transition-colors",
                     rulePresetId === rule.value
                       ? "border-emerald-500 bg-emerald-50"
-                      : "border-slate-200 hover:border-emerald-400"
+                      : "border-slate-200 hover:border-emerald-400",
                   ].join(" ")}
                 >
-                  <div className="font-semibold text-slate-900">{rule.label}</div>
-                  <div className="text-[11px] text-slate-600">{rule.description}</div>
+                  <div className="font-semibold text-slate-900">
+                    {rule.label}
+                  </div>
+                  <div className="text-[11px] text-slate-600">
+                    {rule.description}
+                  </div>
                 </button>
               ))}
             </div>
@@ -294,7 +302,8 @@ export default function HebrewMonthStartCalendarView({
               onChange={(e) => setYear(Number(e.target.value) || year)}
             />
             <p className="text-[11px] text-slate-500">
-              This is the Gregorian year whose Hebrew months you want to approximate.
+              This is the Gregorian year whose Hebrew months you want to
+              approximate.
             </p>
           </div>
         </div>
@@ -402,7 +411,8 @@ export default function HebrewMonthStartCalendarView({
           </button>
           {activeRule && (
             <p className="text-[11px] text-slate-500">
-              Using method: <span className="font-semibold">{activeRule.label}</span>
+              Using method:{" "}
+              <span className="font-semibold">{activeRule.label}</span>
             </p>
           )}
         </div>
@@ -439,13 +449,16 @@ export default function HebrewMonthStartCalendarView({
                 2. Generated Hebrew Month Start Summary
               </h3>
               <p className="text-xs text-slate-600">
-                Approximate month starts for the selected year, location, and rule.
+                Approximate month starts for the selected year, location, and
+                rule.
               </p>
             </div>
             {summary && (
               <div className="flex flex-wrap gap-3 text-xs text-slate-800">
                 <div className="flex flex-col">
-                  <span className="text-[11px] text-slate-500">First Month</span>
+                  <span className="text-[11px] text-slate-500">
+                    First Month
+                  </span>
                   <span className="font-semibold">
                     {summary.firstMonthIndex ?? "—"} •{" "}
                     {summary.firstGregorianDate ?? "—"}
@@ -461,11 +474,16 @@ export default function HebrewMonthStartCalendarView({
                 <div className="flex flex-col">
                   <span className="text-[11px] text-slate-500">Rule</span>
                   <span className="font-semibold capitalize">
-                    {(summary.rulePresetId || rulePresetId).replace(/([A-Z])/g, " $1")}
+                    {(summary.rulePresetId || rulePresetId).replace(
+                      /([A-Z])/g,
+                      " $1"
+                    )}
                   </span>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[11px] text-slate-500">Total Months</span>
+                  <span className="text-[11px] text-slate-500">
+                    Total Months
+                  </span>
                   <span className="font-semibold">{months.length}</span>
                 </div>
               </div>
@@ -498,7 +516,9 @@ export default function HebrewMonthStartCalendarView({
                       key={m.monthIndex}
                       className="border-b border-slate-100 hover:bg-slate-50/60"
                     >
-                      <td className="px-3 py-2 text-slate-800">{m.monthIndex}</td>
+                      <td className="px-3 py-2 text-slate-800">
+                        {m.monthIndex}
+                      </td>
                       <td className="px-3 py-2 text-slate-800">
                         {m.gregorianStartDate}
                       </td>
@@ -537,9 +557,10 @@ export default function HebrewMonthStartCalendarView({
               </table>
             </div>
             <div className="px-3 py-2 border-t border-slate-200 text-[11px] text-slate-500">
-              These month starts are approximations for planning and visual calendar
-              building inside SSA. When a full astronomical module is added, this view
-              will automatically benefit without changing the UI.
+              These month starts are approximations for planning and visual
+              calendar building inside SSA. When a full astronomical module is
+              added, this view will automatically benefit without changing the
+              UI.
             </div>
           </div>
         </section>
@@ -560,7 +581,7 @@ function emitSafe(type, data) {
       type,
       ts: new Date().toISOString(),
       source: "features/calculators/calendar/HebrewMonthStartCalendar.view",
-      data
+      data,
     });
   } catch {
     // Never block the UI if telemetry/eventing fails.

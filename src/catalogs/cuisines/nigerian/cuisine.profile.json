@@ -1,0 +1,1245 @@
+{
+  "$schema": "../../../schemas/cuisine.profile.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.nigerian",
+    "type": "cuisine_profile",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Nigerian",
+    "name": "Nigerian",
+    "shortName": "Nigerian",
+    "description": "Bold, aromatic West African cooking centered on pepper bases, onion-forward stews, deep savory umami, and paired starches (swallows, rice, yams). Emphasizes layered cooking: bloom aromatics, build pepper base, fortify with proteins and umami, then balance with leafy greens and bright condiments.",
+    "subtitle": "Pepper bases • Stews & soups • Rice dishes • Swallows • Smoky grilled street foods",
+    "originRegions": ["West Africa"],
+    "regions": ["Nigeria"],
+    "primaryCountriesAndIslands": ["Nigeria"],
+    "tags": [
+      "cuisine.nigerian",
+      "cuisine.west_african",
+      "profile.core",
+      "spice.pepper_forward",
+      "aromatics.onion_forward",
+      "umami.high",
+      "stew_and_starch",
+      "street_food",
+      "batch.friendly"
+    ],
+    "icon": "pepper",
+    "colorHint": "red_orange",
+    "heritageNotes": [
+      "Nigerian cuisine varies widely by region and ethnicity (Yoruba, Igbo, Hausa, Edo, Efik/Ibibio and more). This profile models cross-cutting patterns commonly used in home cooking and diaspora kitchens.",
+      "Many iconic dishes rely on palm oil and dried seafood for signature flavor; this profile provides structured substitutions when those are unavailable."
+    ],
+    "createdAt": "2026-01-19",
+    "updatedAt": "2026-01-19T00:00:00.000Z",
+    "status": "canonical",
+    "source": {
+      "curation": "SSA canonical cuisine profile",
+      "maintainer": "Suka Smart Assistant Catalogs",
+      "license": "proprietary",
+      "attribution": "Structured from common Nigerian home-cooking patterns (pepper base, stew-and-starch pairing, dried seafood umami, greens integration).",
+      "kind": "catalog",
+      "author": "SSA",
+      "origin": "curated",
+      "type": "cuisine_profile",
+      "notes": "This profile is deterministic/planner-oriented: it encodes pantry tiers, dish archetypes, substitutions, and pairing rules for SSA meal planning and recipe adaptation.",
+      "url": null
+    },
+    "family": {
+      "parent": "cuisines.west_african",
+      "siblings": [
+        "cuisines.ghanaian",
+        "cuisines.senegalese",
+        "cuisines.sierra_leonean"
+      ],
+      "overlapsWith": [
+        {
+          "id": "cuisines.caribbean",
+          "reason": "Shared pepper-forward stews, fried plantain, and savory spice layering in diaspora cooking."
+        },
+        {
+          "id": "cuisines.creole",
+          "reason": "Shared stew-building logic (aromatics → fat bloom → sauce base → protein → simmer), though different spice sets."
+        }
+      ]
+    },
+    "subprofiles": [
+      {
+        "id": "cuisines.nigerian.pepper_soup",
+        "name": "Pepper Soup",
+        "signatureNotes": "Clear, aromatic broth with pepper-soup spice blend; often fish or goat; served with yam/plantain or as a restorative soup.",
+        "commonSauceBases": [
+          "base.pepper_soup_broth",
+          "blend.pepper_soup_spice"
+        ]
+      },
+      {
+        "id": "cuisines.nigerian.jollof",
+        "name": "Jollof & Party Rice",
+        "signatureNotes": "Tomato-pepper rice with deep smoky notes (party jollof) and a rich base built from blended peppers, onions, and tomato paste.",
+        "commonSauceBases": [
+          "base.jollof_pepper_tomato",
+          "base.tomato_paste_fry"
+        ]
+      },
+      {
+        "id": "cuisines.nigerian.soups_swallow",
+        "name": "Soups + Swallow Pairing",
+        "signatureNotes": "Thick, intensely flavored soups (egusi, ogbono, okra, efo/vegetable, oha/okazi) designed to be eaten with swallow (pounded yam, eba, fufu).",
+        "commonSauceBases": [
+          "base.pepper_onion_oil",
+          "thickener.egusi",
+          "thickener.ogbono",
+          "thickener.okra"
+        ]
+      },
+      {
+        "id": "cuisines.nigerian.street_food",
+        "name": "Street Foods & Grills",
+        "signatureNotes": "Suya-spiced grills, fried snacks (puff puff, akara), and quick pepper sauces with crisp onions/tomatoes.",
+        "commonSauceBases": [
+          "blend.suya_spice",
+          "condiment.ata_dindin",
+          "condiment.pepper_sauce"
+        ]
+      }
+    ],
+    "regionHints": [
+      "Yoruba (southwest): efo riro, amala + ewedu/gbegiri, obe ata",
+      "Igbo (southeast): oha soup, bitterleaf soup, ofe onugbu",
+      "Efik/Ibibio (south-south): afang/edikang ikong greens, seafood-forward soups",
+      "Hausa/Fulani (north): suya/kilishi, grains, savory stews"
+    ],
+    "countryHints": ["Nigeria"]
+  },
+
+  "tags": [
+    "cuisine.nigerian",
+    "cuisine.west_african",
+    "planner.core",
+    "stew_and_starch",
+    "pepper_forward",
+    "umami_high",
+    "batch_friendly"
+  ],
+
+  "notes": [
+    "IDs in this file follow ^[a-z0-9_.-]+$ to satisfy schema constraints.",
+    "Ingredient/equipment IDs are SSA-canonical placeholders and should map to your ingredient/equipment catalogs (or alias maps) for best results.",
+    "Where multiple real-world names exist (e.g., iru/locust beans, ogiri), this profile uses normalized IDs and lists alternate names in search hints."
+  ],
+
+  "plannerDefaults": {
+    "servingStyles": [
+      "stew_and_starch",
+      "family_style",
+      "one_pot",
+      "street_food",
+      "holiday_feasts"
+    ],
+    "weeknightBias": "Stew bases can be batch-cooked; weeknight meals often remix pre-cooked stew/soup with fresh starch or quick sides.",
+    "leftoversStrategy": "batch_and_remix",
+    "batchCookingBias": {
+      "level": "high",
+      "bestBatches": [
+        "batch.pepper_base",
+        "batch.red_stew_base",
+        "batch.jollof_base",
+        "batch.stock_goat_beef",
+        "batch.suya_spice",
+        "batch.green_soup_base"
+      ],
+      "notes": "Cook pepper base and proteins ahead; finish with greens, okra, or thickener on serving day."
+    },
+    "spiceHeatDefault": 3,
+    "saltinessDefault": 3,
+    "sournessDefault": "low",
+    "sweetnessDefault": "low",
+    "umamiDefault": 4,
+    "oilUseDefault": 3,
+    "preferredCookingFats": [
+      "fat.palm_oil",
+      "fat.peanut_oil",
+      "fat.vegetable_oil",
+      "fat.shea_butter_optional"
+    ],
+    "primaryStarches": [
+      "starch.rice_long_grain",
+      "starch.yam",
+      "starch.plantain",
+      "starch.cassava_gari",
+      "starch.semolina",
+      "starch.cassava_fufu"
+    ],
+    "primaryProteins": [
+      "protein.goat",
+      "protein.beef",
+      "protein.chicken",
+      "protein.fish",
+      "protein.stockfish",
+      "protein.shrimp_dried"
+    ],
+    "defaultMealArchetypes": [
+      "archetype.soup_and_swallow",
+      "archetype.stew_and_rice",
+      "archetype.pepper_soup",
+      "archetype.grilled_suya_and_sides",
+      "archetype.beans_and_fried_plantain",
+      "archetype.breakfast_akara"
+    ],
+    "defaultPlateTemplateIds": [
+      "plate.stew_and_starch",
+      "plate.rice_and_protein",
+      "plate.soup_and_swallow",
+      "plate.street_food_combo"
+    ]
+  },
+
+  "flavorSystem": {
+    "signatureNotes": [
+      "pepper-forward heat with aromatic onions",
+      "deep savory umami from dried seafood/fermented seasoning",
+      "rich red stew base from peppers + tomato + oil bloom",
+      "greens integrated into sauces/soups rather than served plain"
+    ],
+    "aromaticsCore": [
+      "aromatic.onion",
+      "aromatic.garlic",
+      "aromatic.ginger",
+      "aromatic.scallion_optional"
+    ],
+    "spiceCore": [
+      "spice.cayenne_or_scotch_bonnet",
+      "spice.black_pepper",
+      "spice.curry_powder_nigerian",
+      "spice.thyme_dried",
+      "spice.bay_leaf",
+      "spice.smoked_paprika_optional"
+    ],
+    "umamiBuilders": [
+      "umami.crayfish_ground",
+      "umami.iru_locust_beans",
+      "umami.dried_shrimp",
+      "umami.stockfish",
+      "umami.bouillon_powder"
+    ],
+    "acidOptions": [
+      "acid.lime",
+      "acid.lemon",
+      "acid.tamarind_optional",
+      "acid.vinegar_optional"
+    ],
+    "sweetBalanceOptions": [
+      "sweetener.onion_caramelized",
+      "sweetener.roasted_pepper",
+      "sweetener.honey_optional"
+    ],
+    "heatOptions": [
+      "heat.scotch_bonnet",
+      "heat.habanero",
+      "heat.cayenne",
+      "heat.pepper_flakes_optional"
+    ]
+  },
+
+  "pantryTiers": {
+    "tier0_minimum": {
+      "description": "Basic Nigerian-forward cooking without specialty items; relies on onion/pepper base and common oils/spices.",
+      "items": [
+        "aromatic.onion",
+        "aromatic.garlic",
+        "aromatic.ginger",
+        "produce.bell_pepper",
+        "produce.hot_pepper",
+        "produce.tomato",
+        "pantry.tomato_paste",
+        "fat.vegetable_oil",
+        "spice.black_pepper",
+        "spice.thyme_dried",
+        "spice.curry_powder_nigerian",
+        "spice.bay_leaf",
+        "seasoning.salt",
+        "umami.bouillon_powder",
+        "starch.rice_long_grain",
+        "starch.potato_optional",
+        "protein.chicken_or_beef"
+      ]
+    },
+    "tier1_core": {
+      "description": "Core Nigerian pantry for signature flavor: crayfish, palm oil, key thickeners, and basic swallows.",
+      "items": [
+        "fat.palm_oil",
+        "umami.crayfish_ground",
+        "umami.dried_shrimp_optional",
+        "umami.stockfish_optional",
+        "thickener.egusi",
+        "thickener.ogbono_optional",
+        "thickener.okra",
+        "greens.spinach",
+        "greens.ugwu_fluted_pumpkin_optional",
+        "greens.bitterleaf_optional",
+        "starch.cassava_gari",
+        "starch.yam",
+        "starch.plantain",
+        "condiment.pepper_sauce",
+        "condiment.ata_dindin_optional"
+      ]
+    },
+    "tier2_traditional": {
+      "description": "Traditional/regional essentials: iru/locust beans, specialty greens, and spice blends for pepper soup and suya.",
+      "items": [
+        "umami.iru_locust_beans",
+        "umami.ogiri_optional",
+        "greens.uziza_optional",
+        "greens.ohha_optional",
+        "greens.okazi_optional",
+        "blend.pepper_soup_spice",
+        "blend.suya_spice",
+        "nut.peanut_roasted",
+        "seed.ogbono_seed_optional"
+      ]
+    },
+    "tier3_specialty": {
+      "description": "Specialty items for authenticity and regional depth (diaspora availability varies).",
+      "items": [
+        "seasoning.ogiri_okpei_optional",
+        "fish.smoked_catfish",
+        "fish.dried_fish",
+        "spice.uziza_seed_optional",
+        "spice.uda_pod_optional",
+        "spice.ehuru_optional",
+        "spice.atariko_optional",
+        "thickener.achi_optional",
+        "thickener.ofor_optional"
+      ]
+    }
+  },
+
+  "techniquesEmphasis": {
+    "primary": [
+      "method.pepper_base_blend",
+      "method.oil_bloom_aromatics",
+      "method.red_stew_simmer",
+      "method.one_pot_rice",
+      "method.soup_thickening",
+      "method.greens_finish",
+      "method.grill_or_roast",
+      "method.fry_shallow"
+    ],
+    "common": [
+      "method.stock_building",
+      "method.reduce_sauce",
+      "method.smoke_or_char",
+      "method.parboil_rice_optional",
+      "method.quick_pepper_sauce"
+    ],
+    "notes": [
+      "Many dishes start with blended peppers + onion (pepper base) cooked in oil until reduced and sweetened.",
+      "Palm oil is often bloomed with aromatics/seasonings; use controlled heat to avoid scorching.",
+      "Greens are frequently added near the end to preserve color/texture."
+    ]
+  },
+
+  "dishArchetypes": [
+    {
+      "id": "archetype.soup_and_swallow",
+      "label": "Soup + Swallow",
+      "description": "Thick, intensely flavored soup designed to be eaten with swallow (eba, pounded yam, semo, fufu).",
+      "commonExamples": [
+        "egusi soup + eba",
+        "ogbono soup + pounded yam",
+        "okra soup + fufu",
+        "efo riro + amala"
+      ],
+      "defaults": {
+        "baseOptions": [
+          "base.pepper_onion_oil",
+          "base.red_stew_base",
+          "base.green_soup_base"
+        ],
+        "thickenerOptions": [
+          "thickener.egusi",
+          "thickener.ogbono",
+          "thickener.okra"
+        ],
+        "proteinOptions": [
+          "protein.goat",
+          "protein.beef",
+          "protein.chicken",
+          "protein.fish",
+          "protein.stockfish"
+        ],
+        "greensOptions": [
+          "greens.spinach",
+          "greens.ugwu_fluted_pumpkin",
+          "greens.bitterleaf",
+          "greens.okazi"
+        ],
+        "garnishOptions": [
+          "garnish.sliced_onion_optional",
+          "garnish.fresh_hot_pepper_optional"
+        ],
+        "pairings": [
+          "starch.cassava_gari",
+          "starch.yam",
+          "starch.semolina",
+          "starch.cassava_fufu"
+        ]
+      }
+    },
+    {
+      "id": "archetype.stew_and_rice",
+      "label": "Stew + Rice",
+      "description": "Reduced pepper-tomato stew served with plain rice or integrated into jollof-style rice.",
+      "commonExamples": [
+        "red stew + white rice",
+        "jollof rice (party style)",
+        "fried rice Nigerian-style"
+      ],
+      "defaults": {
+        "baseOptions": [
+          "base.red_stew_base",
+          "base.jollof_pepper_tomato",
+          "base.tomato_paste_fry"
+        ],
+        "proteinOptions": [
+          "protein.chicken",
+          "protein.beef",
+          "protein.fish",
+          "protein.goat_optional"
+        ],
+        "riceOptions": ["starch.rice_long_grain"],
+        "sideOptions": [
+          "side.fried_plantain",
+          "side.salad_simple",
+          "side.moin_moin_optional"
+        ],
+        "garnishOptions": [
+          "garnish.sliced_onion_optional",
+          "garnish.fresh_herbs_optional"
+        ]
+      }
+    },
+    {
+      "id": "archetype.pepper_soup",
+      "label": "Pepper Soup",
+      "description": "Clear, aromatic, spicy broth using pepper soup spice blend; commonly goat, fish, or chicken.",
+      "commonExamples": [
+        "goat pepper soup",
+        "catfish pepper soup",
+        "chicken pepper soup"
+      ],
+      "defaults": {
+        "baseOptions": ["base.pepper_soup_broth"],
+        "proteinOptions": ["protein.goat", "protein.fish", "protein.chicken"],
+        "sideOptions": [
+          "side.boiled_yam_optional",
+          "side.boiled_plantain_optional"
+        ],
+        "garnishOptions": [
+          "garnish.uziza_leaf_optional",
+          "garnish.scallion_optional"
+        ],
+        "pairings": ["condiment.lime_wedges"]
+      }
+    },
+    {
+      "id": "archetype.grilled_suya_and_sides",
+      "label": "Suya + Sides",
+      "description": "Suya-spiced grilled meats (or oven-roasted) served with onions, tomatoes, and quick pepper sauces.",
+      "commonExamples": [
+        "beef suya + onions",
+        "chicken suya + pepper sauce",
+        "kilishi-style spice rub"
+      ],
+      "defaults": {
+        "proteinOptions": [
+          "protein.beef",
+          "protein.chicken",
+          "protein.goat_optional"
+        ],
+        "sauceOptions": [
+          "condiment.pepper_sauce",
+          "condiment.ata_dindin_optional"
+        ],
+        "sideOptions": [
+          "side.sliced_onion_tomato",
+          "side.cucumber_optional",
+          "side.fried_plantain_optional"
+        ],
+        "garnishOptions": [
+          "garnish.crushed_peanut_optional",
+          "garnish.lime_wedges_optional"
+        ]
+      }
+    },
+    {
+      "id": "archetype.beans_and_fried_plantain",
+      "label": "Beans + Fried Plantain",
+      "description": "Beans cooked with aromatics and oil served alongside sweet fried plantain; often with pepper sauce.",
+      "commonExamples": ["ewa riro + dodo", "beans porridge + plantain"],
+      "defaults": {
+        "legumeOptions": ["legume.black_eyed_peas", "legume.brown_beans"],
+        "sideOptions": ["side.fried_plantain", "side.pepper_sauce"],
+        "garnishOptions": ["garnish.sliced_onion_optional"]
+      }
+    },
+    {
+      "id": "archetype.breakfast_akara",
+      "label": "Akara Breakfast",
+      "description": "Fried bean cakes with pepper and onion; eaten for breakfast or snacks.",
+      "commonExamples": ["akara + pap (ogi)", "akara + bread"],
+      "defaults": {
+        "baseOptions": ["base.bean_batter"],
+        "sideOptions": ["side.ogi_pap_optional", "side.bread_optional"],
+        "garnishOptions": ["garnish.pepper_sauce_optional"]
+      }
+    }
+  ],
+
+  "ingredientPreferences": {
+    "preferred": [
+      "aromatic.onion",
+      "produce.hot_pepper",
+      "produce.bell_pepper",
+      "pantry.tomato_paste",
+      "fat.palm_oil",
+      "umami.crayfish_ground",
+      "umami.iru_locust_beans",
+      "greens.spinach",
+      "greens.ugwu_fluted_pumpkin",
+      "thickener.egusi",
+      "thickener.okra",
+      "protein.goat",
+      "protein.beef",
+      "protein.chicken",
+      "protein.fish"
+    ],
+    "optional_traditional": [
+      "umami.stockfish",
+      "umami.dried_shrimp",
+      "greens.bitterleaf",
+      "greens.okazi",
+      "thickener.ogbono",
+      "blend.pepper_soup_spice",
+      "blend.suya_spice"
+    ],
+    "avoid_or_limit": [
+      {
+        "id": "avoid.sugar_high",
+        "label": "High added sugar",
+        "reason": "Most Nigerian stews/soups are savory; sweetness comes primarily from reduced peppers and onions."
+      },
+      {
+        "id": "avoid.dairy_heavy",
+        "label": "Heavy dairy",
+        "reason": "Not typical in core Nigerian stew/soup patterns (though modern fusion exists)."
+      }
+    ]
+  },
+
+  "substitutionGuidance": {
+    "proteinSubstitutions": [
+      {
+        "for": "protein.goat",
+        "options": ["protein.beef", "protein.lamb", "protein.chicken_thighs"],
+        "notes": "Goat can be swapped with beef/lamb for similar stew depth; chicken cooks faster and yields a lighter broth."
+      },
+      {
+        "for": "protein.stockfish",
+        "options": [
+          "protein.smoked_fish",
+          "protein.dried_fish",
+          "protein.shrimp_dried"
+        ],
+        "notes": "Stockfish can be hard to find; smoked/dried fish or dried shrimp provide similar savory backbone."
+      }
+    ],
+    "sideSubstitutions": [
+      {
+        "for": "starch.cassava_gari",
+        "options": ["starch.semolina", "starch.cassava_fufu", "starch.yam"],
+        "notes": "If eba (gari) is unavailable, semo or fufu-style swallows work; boiled/pounded yam is a common swap."
+      },
+      {
+        "for": "starch.yam",
+        "options": [
+          "starch.plantain",
+          "starch.potato",
+          "starch.rice_long_grain"
+        ],
+        "notes": "Yam can be substituted with plantain or potatoes for boil/roast sides; rice for stew pairing."
+      }
+    ],
+    "thickenerSubstitutions": [
+      {
+        "for": "thickener.egusi",
+        "options": [
+          "thickener.ground_pumpkin_seed",
+          "thickener.achi_optional",
+          "thickener.ofor_optional"
+        ],
+        "notes": "Egusi is a ground seed thickener; ground pumpkin seed can approximate body; regional thickeners also work."
+      },
+      {
+        "for": "thickener.ogbono",
+        "options": ["thickener.okra", "thickener.achi_optional"],
+        "notes": "Ogbono adds slick viscosity; okra can mimic viscosity, though flavor differs."
+      }
+    ],
+    "notes": [
+      "Palm oil substitutes: peanut/vegetable oil plus a small amount of smoked paprika can hint at color/smoke; flavor will differ.",
+      "Crayfish substitutes: dried shrimp powder or a small amount of fish sauce can provide umami (use sparingly)."
+    ]
+  },
+
+  "mealTemplates": [
+    {
+      "id": "template.egusi_swallow",
+      "label": "Egusi-style soup + swallow",
+      "archetypeId": "archetype.soup_and_swallow",
+      "components": [
+        {
+          "role": "stew_base",
+          "ingredientIds": ["base.pepper_onion_oil", "base.red_stew_base"],
+          "chooseOne": true,
+          "notes": "Pepper-onion oil base is common; some households start from red stew base."
+        },
+        {
+          "role": "thickener",
+          "ingredientIds": ["thickener.egusi"],
+          "chooseOne": false
+        },
+        {
+          "role": "protein",
+          "ingredientIds": [
+            "protein.goat",
+            "protein.beef",
+            "protein.chicken",
+            "protein.fish",
+            "protein.stockfish"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "greens",
+          "ingredientIds": ["greens.spinach", "greens.ugwu_fluted_pumpkin"],
+          "chooseOne": true
+        },
+        {
+          "role": "starch",
+          "ingredientIds": [
+            "starch.cassava_gari",
+            "starch.yam",
+            "starch.semolina",
+            "starch.cassava_fufu"
+          ],
+          "chooseOne": true
+        }
+      ],
+      "prepNotes": [
+        "Make pepper base and protein stock ahead for fast weeknight finish.",
+        "Add greens at the end to preserve color and freshness."
+      ]
+    },
+    {
+      "id": "template.jollof_party",
+      "label": "Jollof rice (party-style) + protein + plantain",
+      "archetypeId": "archetype.stew_and_rice",
+      "components": [
+        {
+          "role": "base",
+          "ingredientIds": [
+            "base.jollof_pepper_tomato",
+            "base.tomato_paste_fry"
+          ],
+          "chooseOne": false,
+          "notes": "Jollof typically uses both a pepper-tomato blend and fried tomato paste."
+        },
+        {
+          "role": "starch",
+          "ingredientIds": ["starch.rice_long_grain"],
+          "chooseOne": false
+        },
+        {
+          "role": "protein",
+          "ingredientIds": [
+            "protein.chicken",
+            "protein.beef",
+            "protein.fish_smoked_optional"
+          ],
+          "chooseOne": true
+        },
+        {
+          "role": "side",
+          "ingredientIds": ["side.fried_plantain", "side.salad_simple"],
+          "chooseOne": false
+        }
+      ],
+      "prepNotes": [
+        "For smoky party notes: finish in oven and allow slight bottom caramelization (controlled).",
+        "Batch the pepper blend and freeze in portions."
+      ]
+    }
+  ],
+
+  "safetyNotes": [
+    {
+      "id": "safety.dried_seafood_allergen",
+      "label": "Dried seafood allergens",
+      "notes": [
+        "Crayfish, dried shrimp, and stockfish are common allergen triggers; tag dishes clearly when serving groups.",
+        "Substitute with non-seafood umami (mushroom powder or extra meat stock) if needed."
+      ]
+    },
+    {
+      "id": "safety.palm_oil_handling",
+      "label": "Palm oil heating",
+      "notes": [
+        "Do not overheat palm oil to smoking; keep medium heat and stir aromatics to prevent scorching.",
+        "If palm oil smells burnt, discard and restart to avoid bitterness."
+      ]
+    },
+    {
+      "id": "safety.pepper_fumes",
+      "label": "Pepper fumes",
+      "notes": [
+        "Blending or frying hot peppers can irritate eyes/throat; ventilate and consider gloves.",
+        "For kid-friendly meals, keep heat add-ons on the side."
+      ]
+    }
+  ],
+
+  "searchHints": {
+    "keywords": [
+      "nigerian",
+      "west african",
+      "pepper soup",
+      "jollof",
+      "red stew",
+      "egusi",
+      "ogbono",
+      "okra soup",
+      "efo riro",
+      "suya",
+      "ewa riro",
+      "dodo",
+      "moin moin",
+      "akara"
+    ],
+    "commonAlternateNames": [
+      "obe ata",
+      "ata dindin",
+      "ofe",
+      "swallow",
+      "eba",
+      "semo",
+      "fufu",
+      "pounded yam",
+      "ugwu",
+      "locust beans (iru)"
+    ]
+  },
+
+  "pantry": {
+    "freshCore": [
+      "aromatic.onion",
+      "produce.hot_pepper",
+      "produce.bell_pepper",
+      "produce.tomato",
+      "aromatic.garlic",
+      "aromatic.ginger"
+    ],
+    "proteinsCommon": [
+      "protein.goat",
+      "protein.beef",
+      "protein.chicken",
+      "protein.fish",
+      "protein.stockfish_optional"
+    ],
+    "produceCommon": [
+      "produce.plantain",
+      "produce.yam",
+      "greens.spinach",
+      "greens.ugwu_optional",
+      "produce.onion_red_optional"
+    ],
+    "availabilityNotes": [
+      {
+        "ingredient": "fat.palm_oil",
+        "fallbacks": ["fat.peanut_oil", "fat.vegetable_oil"],
+        "note": "Palm oil is signature; if unavailable use a neutral oil and lean more on crayfish/stock for depth."
+      },
+      {
+        "ingredient": "umami.crayfish_ground",
+        "fallbacks": [
+          "umami.dried_shrimp",
+          "umami.fish_sauce_optional",
+          "umami.mushroom_powder_optional"
+        ],
+        "note": "Crayfish powder is common; dried shrimp powder or a tiny amount of fish sauce can approximate umami."
+      },
+      {
+        "ingredient": "greens.ugwu_fluted_pumpkin",
+        "fallbacks": [
+          "greens.spinach",
+          "greens.kale_optional",
+          "greens.collards_optional"
+        ],
+        "note": "Ugu (fluted pumpkin) is a signature green; spinach is the best mainstream substitute."
+      }
+    ],
+    "staples": {
+      "oils": ["fat.palm_oil", "fat.peanut_oil", "fat.vegetable_oil"],
+      "umami": [
+        "umami.crayfish_ground",
+        "umami.iru_locust_beans_optional",
+        "umami.bouillon_powder"
+      ],
+      "thickeners": [
+        "thickener.egusi",
+        "thickener.okra",
+        "thickener.ogbono_optional"
+      ],
+      "bases": [
+        "base.pepper_onion_oil",
+        "base.red_stew_base",
+        "base.jollof_pepper_tomato"
+      ],
+      "starches": [
+        "starch.rice_long_grain",
+        "starch.cassava_gari",
+        "starch.yam",
+        "starch.plantain"
+      ],
+      "spices": [
+        "spice.curry_powder_nigerian",
+        "spice.thyme_dried",
+        "spice.bay_leaf",
+        "spice.black_pepper"
+      ]
+    },
+    "coreStaples": {
+      "minimum": [
+        "aromatic.onion",
+        "produce.hot_pepper",
+        "produce.tomato",
+        "fat.vegetable_oil",
+        "seasoning.salt"
+      ],
+      "core": [
+        "pantry.tomato_paste",
+        "spice.thyme_dried",
+        "spice.curry_powder_nigerian",
+        "umami.bouillon_powder"
+      ],
+      "traditional": [
+        "fat.palm_oil",
+        "umami.crayfish_ground",
+        "thickener.egusi"
+      ]
+    },
+    "optionalRegionalStaples": {
+      "north": ["blend.suya_spice", "nut.peanut_roasted"],
+      "southeast": [
+        "greens.ohha_optional",
+        "greens.okazi_optional",
+        "thickener.achi_optional"
+      ],
+      "south_south": [
+        "fish.dried_fish",
+        "fish.smoked_catfish",
+        "greens.afang_optional"
+      ]
+    }
+  },
+
+  "techniques": {
+    "coreMethods": [
+      "method.pepper_base_blend",
+      "method.reduce_pepper_base",
+      "method.oil_bloom_aromatics",
+      "method.stock_building",
+      "method.soup_thickening",
+      "method.one_pot_rice",
+      "method.greens_finish",
+      "method.fry_shallow",
+      "method.grill_or_roast"
+    ],
+    "hallmarkProcesses": [
+      {
+        "id": "process.pepper_base",
+        "name": "Pepper base reduction",
+        "steps": [
+          "method.pepper_base_blend",
+          "method.oil_bloom_aromatics",
+          "method.reduce_pepper_base"
+        ],
+        "notes": "Blend peppers + onion, then cook down in oil until reduced, sweeter, and less raw."
+      },
+      {
+        "id": "process.red_stew",
+        "name": "Nigerian red stew build",
+        "steps": [
+          "method.oil_bloom_aromatics",
+          "method.tomato_paste_fry",
+          "method.red_stew_simmer",
+          "method.reduce_sauce"
+        ],
+        "notes": "Fry tomato paste, add pepper base, simmer with proteins/stock until oil separates slightly and stew is thick."
+      },
+      {
+        "id": "process.greens_finish",
+        "name": "Greens finish (efo-style)",
+        "steps": ["method.red_stew_simmer", "method.greens_finish"],
+        "notes": "Add greens near end to keep bright color and fresh bite."
+      }
+    ],
+    "equipmentAffinity": {
+      "bestForStews": [
+        "equipment.heavy_pot",
+        "equipment.wooden_spoon",
+        "equipment.blender"
+      ],
+      "bestForJollof": ["equipment.dutch_oven", "equipment.oven_optional"],
+      "bestForSuya": [
+        "equipment.grill_optional",
+        "equipment.oven",
+        "equipment.sheet_pan",
+        "equipment.wire_rack_optional"
+      ]
+    },
+    "signatureMethods": [
+      "Reduce pepper base until raw bite is gone and sweetness emerges.",
+      "Fry tomato paste briefly to remove raw metallic taste before adding liquids.",
+      "Finish greens late; avoid overcooking leafy vegetables."
+    ]
+  },
+
+  "equipment": {
+    "recommended": [
+      "equipment.heavy_pot",
+      "equipment.dutch_oven",
+      "equipment.blender",
+      "equipment.sheet_pan",
+      "equipment.chef_knife",
+      "equipment.cutting_board",
+      "equipment.ladle"
+    ],
+    "optionalButHelpful": [
+      "equipment.oven",
+      "equipment.grill",
+      "equipment.instant_read_thermometer",
+      "equipment.food_processor_optional"
+    ],
+    "notes": [
+      "A blender is highly recommended for pepper bases and jollof sauce.",
+      "A heavy-bottom pot reduces scorching during long simmer and reduction."
+    ]
+  },
+
+  "dietAndAllergens": {
+    "commonAllergens": [
+      "allergen.fish",
+      "allergen.shellfish",
+      "allergen.peanut_optional",
+      "allergen.gluten_optional"
+    ],
+    "dietCompatibility": {
+      "diet.low_carb": {
+        "compatible": true,
+        "notes": "Favor soups/greens/proteins; replace swallows with cauliflower fufu or extra vegetables where desired."
+      },
+      "diet.dairy_free": {
+        "compatible": true,
+        "notes": "Most traditional dishes are dairy-light; watch modern fusion sauces."
+      },
+      "diet.gluten_free": {
+        "compatible": true,
+        "notes": "Many swallows are naturally gluten-free; verify semolina/wheat-based options and bouillon ingredients."
+      }
+    }
+  },
+
+  "signatureDishes": {
+    "core": [
+      {
+        "id": "dish.jollof_rice",
+        "name": "Jollof Rice",
+        "subprofiles": ["cuisines.nigerian.jollof"],
+        "difficulty": "intermediate",
+        "heatTypical": 2,
+        "notes": "Tomato-pepper rice; party-style often has smoky notes."
+      },
+      {
+        "id": "dish.red_stew",
+        "name": "Nigerian Red Stew",
+        "subprofiles": [],
+        "difficulty": "intermediate",
+        "heatTypical": 2,
+        "notes": "Pepper-tomato base reduced in oil; served with rice, yam, plantain, or used to build other dishes."
+      },
+      {
+        "id": "dish.egusi_soup",
+        "name": "Egusi Soup",
+        "subprofiles": ["cuisines.nigerian.soups_swallow"],
+        "difficulty": "advanced",
+        "heatTypical": 2,
+        "notes": "Ground seed thickener with pepper base, proteins, and greens."
+      },
+      {
+        "id": "dish.pepper_soup_goat",
+        "name": "Goat Pepper Soup",
+        "subprofiles": ["cuisines.nigerian.pepper_soup"],
+        "difficulty": "intermediate",
+        "heatTypical": 3,
+        "notes": "Aromatic, restorative soup using pepper soup spice blend."
+      },
+      {
+        "id": "dish.suya",
+        "name": "Suya",
+        "subprofiles": ["cuisines.nigerian.street_food"],
+        "difficulty": "intermediate",
+        "heatTypical": 3,
+        "notes": "Spiced grilled meat with peanut-based suya spice; served with onions and pepper sauce."
+      }
+    ],
+    "dessertsAndDrinks": [
+      {
+        "id": "dish.zobo",
+        "name": "Zobo (Hibiscus Drink)",
+        "subprofiles": [],
+        "difficulty": "beginner",
+        "heatTypical": 0,
+        "notes": "Hibiscus drink often with ginger and citrus."
+      },
+      {
+        "id": "dish.puff_puff",
+        "name": "Puff Puff",
+        "subprofiles": ["cuisines.nigerian.street_food"],
+        "difficulty": "intermediate",
+        "heatTypical": 0,
+        "notes": "Fried dough snack; sweetness level varies by household."
+      }
+    ]
+  },
+
+  "pairingRules": {
+    "typicalStarches": [
+      "starch.cassava_gari",
+      "starch.yam",
+      "starch.rice_long_grain",
+      "starch.plantain",
+      "starch.semolina"
+    ],
+    "typicalVegSides": [
+      "side.salad_simple",
+      "side.stewed_greens",
+      "side.cabbage_carrot_salad_optional"
+    ],
+    "typicalCondiments": [
+      "condiment.pepper_sauce",
+      "condiment.ata_dindin_optional",
+      "condiment.lime_wedges_optional"
+    ],
+    "typicalFlavorPairings": [
+      {
+        "with": "blend.suya_spice",
+        "pair": [
+          "side.sliced_onion_tomato",
+          "condiment.pepper_sauce",
+          "condiment.lime_wedges_optional"
+        ],
+        "note": "Suya is commonly served with raw onions/tomatoes and pepper sauce; citrus brightens richness."
+      },
+      {
+        "with": "thickener.egusi",
+        "pair": [
+          "umami.crayfish_ground",
+          "umami.stockfish_optional",
+          "greens.spinach",
+          "greens.ugwu_fluted_pumpkin_optional"
+        ],
+        "note": "Egusi soups lean on dried seafood umami and greens for balance."
+      }
+    ],
+    "antiPairings": [
+      {
+        "id": "anti.dairy_heavy_with_red_stew",
+        "avoid": ["ingredient.heavy_cream_optional"],
+        "note": "Heavy dairy can dull pepper base brightness; use small yogurt/creamy elements only in modern fusion contexts."
+      }
+    ]
+  },
+
+  "substitutions": {
+    "ingredientRules": [
+      {
+        "id": "sub.palm_oil_to_neutral_oil",
+        "whenMissing": ["fat.palm_oil"],
+        "use": ["fat.peanut_oil", "fat.vegetable_oil"],
+        "notes": "Palm oil adds signature color/flavor; neutral oils work but reduce 'authentic' signal. Consider smoked fish or paprika for depth."
+      },
+      {
+        "id": "sub.crayfish_to_dried_shrimp",
+        "whenMissing": ["umami.crayfish_ground"],
+        "use": [
+          "umami.dried_shrimp",
+          "umami.fish_sauce_optional",
+          "umami.mushroom_powder_optional"
+        ],
+        "notes": "Use fish sauce sparingly; dried shrimp powder is closest."
+      },
+      {
+        "id": "sub.ugwu_to_spinach",
+        "whenMissing": ["greens.ugwu_fluted_pumpkin"],
+        "use": ["greens.spinach", "greens.kale_optional"],
+        "notes": "Spinach is the most common diaspora substitute; add in the last minutes to avoid mush."
+      },
+      {
+        "id": "sub.scotch_bonnet_to_habanero",
+        "whenMissing": ["produce.scotch_bonnet_optional"],
+        "use": ["produce.habanero", "produce.serrano_optional"],
+        "notes": "Habanero approximates scotch bonnet heat/aroma; serrano is milder."
+      }
+    ],
+    "methodRules": [
+      {
+        "id": "method.suya_without_grill",
+        "whenNoEquipment": ["equipment.grill"],
+        "adapt": "method.oven_roast_high_heat",
+        "notes": "Use a wire rack on a sheet pan at high heat; finish under broiler for char."
+      },
+      {
+        "id": "method.pepper_base_without_blender",
+        "whenNoEquipment": ["equipment.blender"],
+        "adapt": "method.fine_chop_and_crush",
+        "notes": "Finely chop peppers/onion/tomato; cook longer to break down; texture will be chunkier but still flavorful."
+      }
+    ]
+  },
+
+  "planningHints": {
+    "batchFriendly": [
+      {
+        "id": "batch.pepper_base",
+        "name": "Pepper base (blended peppers + onion) — reduced",
+        "makes": "base.pepper_base_reduced",
+        "freezerFriendly": true,
+        "notes": "Freeze in 1-cup portions; foundation for red stew, jollof, and many soups."
+      },
+      {
+        "id": "batch.red_stew_base",
+        "name": "Red stew base (tomato paste + pepper base) — reduced",
+        "makes": "base.red_stew_base",
+        "freezerFriendly": true,
+        "notes": "Batch once; remix throughout the week with different proteins and sides."
+      },
+      {
+        "id": "batch.jollof_base",
+        "name": "Jollof sauce base (pepper-tomato) — reduced",
+        "makes": "base.jollof_pepper_tomato",
+        "freezerFriendly": true,
+        "notes": "Use for jollof rice, party rice, or as a stew starter."
+      },
+      {
+        "id": "batch.stock_goat_beef",
+        "name": "Goat/Beef stock with aromatics",
+        "makes": "base.meat_stock",
+        "freezerFriendly": true,
+        "notes": "Portion and freeze; speeds up egusi/okra/vegetable soups and deepens flavor."
+      }
+    ],
+    "weeknightShortcuts": [
+      "Use frozen reduced pepper base + pre-cooked protein to finish a stew in 20–25 minutes.",
+      "Cook rice in one pot while stew reheats; fry plantain in a quick pan as a side.",
+      "Add greens at the end (3–5 minutes) to keep bright color and reduce overcooking."
+    ],
+    "seasonality": [
+      {
+        "season": "season.rainy",
+        "focus": [
+          "greens.ugwu_fluted_pumpkin_optional",
+          "greens.okazi_optional",
+          "produce.okra"
+        ]
+      },
+      {
+        "season": "season.dry",
+        "focus": [
+          "fish.dried_fish_optional",
+          "pantry.tomato_paste",
+          "thickener.egusi"
+        ]
+      }
+    ]
+  },
+
+  "ui": {
+    "heroSuggestions": [
+      {
+        "title": "Start here: core Nigerian staples",
+        "items": [
+          "base.red_stew_base",
+          "base.jollof_pepper_tomato",
+          "thickener.egusi",
+          "fat.palm_oil",
+          "umami.crayfish_ground",
+          "blend.suya_spice"
+        ]
+      },
+      {
+        "title": "Weeknight rotations",
+        "items": [
+          "dish.red_stew",
+          "dish.jollof_rice",
+          "dish.pepper_soup_goat",
+          "dish.suya",
+          "dish.egusi_soup"
+        ]
+      }
+    ],
+    "searchBoostTerms": [
+      "jollof",
+      "egusi",
+      "pepper soup",
+      "suya",
+      "efo riro",
+      "ogbono",
+      "okra soup",
+      "swallow",
+      "eba",
+      "pounded yam",
+      "dodo"
+    ],
+    "colorHints": {
+      "primary": "red_orange",
+      "accent": "deep_green",
+      "secondary": "gold"
+    },
+    "iconHints": ["icon.pepper", "icon.pot", "icon.fire", "icon.mortar_pestle"]
+  },
+
+  "compat": {
+    "recipeTagDefaults": [
+      "cuisine.nigerian",
+      "cuisine.west_african",
+      "pepper_forward",
+      "umami_high",
+      "stew_and_starch",
+      "batch_friendly"
+    ],
+    "defaultPlateTemplateIds": [
+      "plate.stew_and_starch",
+      "plate.soup_and_swallow",
+      "plate.rice_and_protein"
+    ],
+    "notes": [
+      "Use normalization/aliasing in cuisine rulesets to map local ingredient names (ugwu/ugu, iru, ogbono, etc.) to these IDs.",
+      "This profile is designed to support SSA planners, recipe adaptation, and pantry tier suggestions."
+    ]
+  }
+}

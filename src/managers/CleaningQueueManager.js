@@ -35,7 +35,8 @@ import DexieDB from "../db";
 
 const DOMAIN = "cleaning";
 const NOW = () => new Date();
-const iso = (d) => (d instanceof Date ? d.toISOString() : new Date(d || Date.now()).toISOString());
+const iso = (d) =>
+  d instanceof Date ? d.toISOString() : new Date(d || Date.now()).toISOString();
 const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 const addMinutes = (d, m) => new Date(d.getTime() + m * 60000);
 const addDays = (d, n) => new Date(d.getTime() + n * 86400000);
@@ -43,7 +44,7 @@ const addDays = (d, n) => new Date(d.getTime() + n * 86400000);
 /* --------------------------------- Optional deps --------------------------- */
 let eventBus = { emit: () => {}, on: () => {}, off: () => {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch (_) {}
 
@@ -110,7 +111,10 @@ async function loadHouseSettings() {
  */
 async function loadFavoriteHints() {
   try {
-    const all = await (DexieDB.favoritePlans?.where?.("domain")?.equals?.(DOMAIN)?.toArray?.() ??
+    const all = await (DexieDB.favoritePlans
+      ?.where?.("domain")
+      ?.equals?.(DOMAIN)
+      ?.toArray?.() ??
       DexieDB.favoritePlans?.toArray?.() ??
       []);
     const hints = {};
@@ -118,7 +122,10 @@ async function loadFavoriteHints() {
       if (fav?.domain !== DOMAIN) continue;
       const map = fav?.meta?.hints || {};
       for (const k of Object.keys(map)) {
-        hints[k.toLowerCase()] = { ...(hints[k.toLowerCase()] || {}), ...map[k] };
+        hints[k.toLowerCase()] = {
+          ...(hints[k.toLowerCase()] || {}),
+          ...map[k],
+        };
       }
     }
     return hints;
@@ -135,17 +142,24 @@ function daysSince(isoStr) {
 }
 function toDowIndex(day) {
   if (typeof day === "number") return clamp(day, 0, 6);
-  const map = { sun:0, mon:1, tue:2, wed:3, thu:4, fri:5, sat:6 };
-  return map[String(day || "").slice(0,3).toLowerCase()];
+  const map = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
+  return map[
+    String(day || "")
+      .slice(0, 3)
+      .toLowerCase()
+  ];
 }
 function inQuietHours(date, quiet) {
   if (!quiet?.start || !quiet?.end) return false;
   const toMin = (t) => {
-    const [h, m] = String(t).split(":").map((x)=>parseInt(x||"0",10));
-    return h*60+(m||0);
+    const [h, m] = String(t)
+      .split(":")
+      .map((x) => parseInt(x || "0", 10));
+    return h * 60 + (m || 0);
   };
-  const cur = date.getHours()*60 + date.getMinutes();
-  const s = toMin(quiet.start), e = toMin(quiet.end);
+  const cur = date.getHours() * 60 + date.getMinutes();
+  const s = toMin(quiet.start),
+    e = toMin(quiet.end);
   // if window crosses midnight (e < s)
   if (e < s) return cur >= s || cur < e;
   return cur >= s && cur < e;
@@ -153,18 +167,30 @@ function inQuietHours(date, quiet) {
 function inISOWindow(date, win) {
   if (!win?.startISO || !win?.endISO) return false;
   const t = date.getTime();
-  return t >= new Date(win.startISO).getTime() && t <= new Date(win.endISO).getTime();
+  return (
+    t >= new Date(win.startISO).getTime() && t <= new Date(win.endISO).getTime()
+  );
 }
 
 /* --------------------------------- Priority -------------------------------- */
-function priorityScore({ overdueDays, dirtinessScore=0, allergen, blockedBySupplies }) {
+function priorityScore({
+  overdueDays,
+  dirtinessScore = 0,
+  allergen,
+  blockedBySupplies,
+}) {
   // Base on overdue & room dirtiness
   let base =
-    (overdueDays > 21 ? 60 : overdueDays > 14 ? 45 : overdueDays > 7 ? 30 : 10) +
-    Math.round(clamp(dirtinessScore, 0, 100) * 0.25);
+    (overdueDays > 21
+      ? 60
+      : overdueDays > 14
+      ? 45
+      : overdueDays > 7
+      ? 30
+      : 10) + Math.round(clamp(dirtinessScore, 0, 100) * 0.25);
 
-  if (allergen) base += 15;           // allergies bump
-  if (blockedBySupplies) base -= 20;  // can't do it now
+  if (allergen) base += 15; // allergies bump
+  if (blockedBySupplies) base -= 20; // can't do it now
 
   base = clamp(base, 1, 100);
   let label = "low";
@@ -189,9 +215,13 @@ function iconFor(entry) {
 
 /* --------------------------------- Supplies -------------------------------- */
 function needsSuppliesFor(room, tagsNeeded = []) {
-  return async (supplies=[]) => {
-    const reqs = tagsNeeded.length ? supplies.filter(s => (s.tags||[]).some(t=>tagsNeeded.includes(t))) : [];
-    const missing = reqs.filter(s => (s.quantity ?? 0) <= (s.threshold ?? 0));
+  return async (supplies = []) => {
+    const reqs = tagsNeeded.length
+      ? supplies.filter((s) =>
+          (s.tags || []).some((t) => tagsNeeded.includes(t))
+        )
+      : [];
+    const missing = reqs.filter((s) => (s.quantity ?? 0) <= (s.threshold ?? 0));
     return { required: reqs, missing };
   };
 }
@@ -207,24 +237,33 @@ function buildRoomTask(room, ctx, favoriteHints, supplyCheck, supplies) {
 
   // Suggested sequence: favorites > smart default
   const fav = favoriteHints[(room.name || "").toLowerCase()] || {};
-  const sequence = Array.isArray(fav.sequence) && fav.sequence.length
-    ? fav.sequence
-    : room.meta?.highTouch
+  const sequence =
+    Array.isArray(fav.sequence) && fav.sequence.length
+      ? fav.sequence
+      : room.meta?.highTouch
       ? ["Declutter", "Disinfect high-touch", "Dust", "Vacuum", "Mop"]
       : ["Declutter", "Dust", "Vacuum", "Mop"];
 
-  const estMinutes = fav.estMinutesOverride ||
-    (15 + (sequence.includes("Mop") ? 10 : 0) + (sequence.includes("Disinfect high-touch") ? 8 : 0));
+  const estMinutes =
+    fav.estMinutesOverride ||
+    15 +
+      (sequence.includes("Mop") ? 10 : 0) +
+      (sequence.includes("Disinfect high-touch") ? 8 : 0);
 
   // Supplies
-  const tagsByRoom = /bath/i.test(room.name || "") ? ["bathroom","disinfectant","tool:brush"]
-                    : /kitchen/i.test(room.name || "") ? ["kitchen","disinfectant","tool:mop"]
-                    : ["cleaning","tool:vacuum"];
-  const supplyTags = (fav.requiredSupplies && fav.requiredSupplies.length)
-    ? fav.requiredSupplies
-    : tagsByRoom;
+  const tagsByRoom = /bath/i.test(room.name || "")
+    ? ["bathroom", "disinfectant", "tool:brush"]
+    : /kitchen/i.test(room.name || "")
+    ? ["kitchen", "disinfectant", "tool:mop"]
+    : ["cleaning", "tool:vacuum"];
+  const supplyTags =
+    fav.requiredSupplies && fav.requiredSupplies.length
+      ? fav.requiredSupplies
+      : tagsByRoom;
 
-  const missingInfo = (supplyCheck ? supplyCheck(supplies) : needsSuppliesFor(room, supplyTags)(supplies));
+  const missingInfo = supplyCheck
+    ? supplyCheck(supplies)
+    : needsSuppliesFor(room, supplyTags)(supplies);
   // support both direct and curried forms
   const requiredSupplies = missingInfo.required || [];
   const missingSupplies = missingInfo.missing || [];
@@ -235,7 +274,7 @@ function buildRoomTask(room, ctx, favoriteHints, supplyCheck, supplies) {
     overdueDays,
     dirtinessScore: room.dirtinessScore || 0,
     allergen,
-    blockedBySupplies
+    blockedBySupplies,
   });
 
   // When to do: aim for next non-quiet hour, outside sabbath, prefer favored day/time
@@ -248,14 +287,18 @@ function buildRoomTask(room, ctx, favoriteHints, supplyCheck, supplies) {
     due = addDays(due, delta);
   }
   // preferred window or default morning window
-  const [startH, startM] = (preferredWin?.start || "09:00").split(":").map(x=>parseInt(x,10));
-  due.setHours(startH||9, startM||0, 0, 0);
+  const [startH, startM] = (preferredWin?.start || "09:00")
+    .split(":")
+    .map((x) => parseInt(x, 10));
+  due.setHours(startH || 9, startM || 0, 0, 0);
 
   // respect quiet hours
   if (ctx.quietHours && inQuietHours(due, ctx.quietHours)) {
     // push to end of quiet window
-    const [qhEndH, qhEndM] = (ctx.quietHours.end || "07:00").split(":").map(x=>parseInt(x,10));
-    due.setHours(qhEndH||7, qhEndM||0, 0, 0);
+    const [qhEndH, qhEndM] = (ctx.quietHours.end || "07:00")
+      .split(":")
+      .map((x) => parseInt(x, 10));
+    due.setHours(qhEndH || 7, qhEndM || 0, 0, 0);
   }
   // respect sabbath window
   if (ctx.sabbathWindow && inISOWindow(due, ctx.sabbathWindow)) {
@@ -263,7 +306,10 @@ function buildRoomTask(room, ctx, favoriteHints, supplyCheck, supplies) {
     due = new Date(ctx.sabbathWindow.endISO);
   }
   // safety/policy pause windows (optional)
-  if (pausePolicies?.shouldPause && pausePolicies.shouldPause({ domain: DOMAIN, when: due })) {
+  if (
+    pausePolicies?.shouldPause &&
+    pausePolicies.shouldPause({ domain: DOMAIN, when: due })
+  ) {
     // push an hour (or let your policy return a new time)
     due = addMinutes(due, 60);
   }
@@ -284,14 +330,20 @@ function buildRoomTask(room, ctx, favoriteHints, supplyCheck, supplies) {
     dueISO: iso(due),
     estMinutes,
     supplies: {
-      required: requiredSupplies.map(s=>({ id:s.id, name:s.name })),
-      missing:  missingSupplies.map(s=>({ id:s.id, name:s.name })),
+      required: requiredSupplies.map((s) => ({ id: s.id, name: s.name })),
+      missing: missingSupplies.map((s) => ({ id: s.id, name: s.name })),
     },
     ui: {
       intent: "clean-room",
       deepLink,
       followups: missingSupplies.length
-        ? [{ action: "openShoppingList", target: "CleaningSupplies", data: missingSupplies.map(s=>s.name) }]
+        ? [
+            {
+              action: "openShoppingList",
+              target: "CleaningSupplies",
+              data: missingSupplies.map((s) => s.name),
+            },
+          ]
         : [],
     },
     speak: `Cleaning reminder: ${task}.`,
@@ -314,8 +366,9 @@ const CleaningQueueManager = {
       includeBlocked = true,
     } = opts;
 
-    const { quietHours, sabbathWindow, householdPolicy } = await loadHouseSettings();
-    const favoriteHints = useFavorites ? (await loadFavoriteHints()) : {};
+    const { quietHours, sabbathWindow, householdPolicy } =
+      await loadHouseSettings();
+    const favoriteHints = useFavorites ? await loadFavoriteHints() : {};
     const [rooms, supplies] = await Promise.all([
       DexieDB.rooms?.toArray?.() ?? [],
       DexieDB.supplies?.toArray?.() ?? [],
@@ -340,8 +393,9 @@ const CleaningQueueManager = {
       // Emit shortages for cleaning supplies tied to this room
       if (emitEvents && blocked) {
         for (const miss of entry.supplies.missing) {
-          const raw = supplies.find(s => s.id === miss.id);
-          const belowRatio = (raw?.quantity ?? 0) / Math.max(1, raw?.threshold ?? 1);
+          const raw = supplies.find((s) => s.id === miss.id);
+          const belowRatio =
+            (raw?.quantity ?? 0) / Math.max(1, raw?.threshold ?? 1);
           eventBus.emit("inventory.shortage.detected", {
             domain: DOMAIN,
             item: {
@@ -362,7 +416,8 @@ const CleaningQueueManager = {
 
     // Sort: priority desc, due asc
     queue.sort((a, b) => {
-      if ((b.priorityScore || 0) !== (a.priorityScore || 0)) return (b.priorityScore || 0) - (a.priorityScore || 0);
+      if ((b.priorityScore || 0) !== (a.priorityScore || 0))
+        return (b.priorityScore || 0) - (a.priorityScore || 0);
       return new Date(a.dueISO || 0) - new Date(b.dueISO || 0);
     });
 
@@ -397,7 +452,7 @@ const CleaningQueueManager = {
       dueISO: e.dueISO,
       estMinutes: e.estMinutes,
       deepLink: e.ui?.deepLink || null,
-      blockers: (e.supplies?.missing || []).map(x => x.name),
+      blockers: (e.supplies?.missing || []).map((x) => x.name),
       cta: [
         { action: "saveAsPlan", label: "Save as Plan", id: e.id },
         { action: "saveAsFavorite", label: "⭐ Favorite", id: e.id },
@@ -424,7 +479,9 @@ const CleaningQueueManager = {
       id: `${e.id}:${e.dueISO || "soon"}`,
       title: `${iconFor(e)} ${e.task}`,
       start: e.dueISO || iso(NOW()),
-      end: iso(addMinutes(new Date(e.dueISO || Date.now()), e.estMinutes || 20)),
+      end: iso(
+        addMinutes(new Date(e.dueISO || Date.now()), e.estMinutes || 20)
+      ),
       metadata: {
         source: "cleaning-queue",
         priority: e.priority,
@@ -436,7 +493,12 @@ const CleaningQueueManager = {
 
   async writeCalendar(opts = {}) {
     const events = await this.getCalendarEvents(opts);
-    if (!calendarSync?.writeEvents) return { ok: false, reason: "calendarSync not present", eventsCount: events.length };
+    if (!calendarSync?.writeEvents)
+      return {
+        ok: false,
+        reason: "calendarSync not present",
+        eventsCount: events.length,
+      };
     try {
       await calendarSync.writeEvents(events, { domain: DOMAIN });
       return { ok: true, eventsCount: events.length };
@@ -485,8 +547,8 @@ const CleaningQueueManager = {
         estMinutes: e.estMinutes,
         priority: e.priority,
         meta: {
-          suppliesMissing: (e.supplies?.missing || []).map(x=>x.name),
-          suppliesRequired: (e.supplies?.required || []).map(x=>x.name),
+          suppliesMissing: (e.supplies?.missing || []).map((x) => x.name),
+          suppliesRequired: (e.supplies?.required || []).map((x) => x.name),
         },
       })),
       meta: {
@@ -501,7 +563,10 @@ const CleaningQueueManager = {
         await PlanStorageRouter.save(plan, { favorite, ...exportOpts });
         return true;
       } catch (err) {
-        console.warn("[CleaningQueueManager] PlanStorageRouter.save failed:", err);
+        console.warn(
+          "[CleaningQueueManager] PlanStorageRouter.save failed:",
+          err
+        );
         return false;
       }
     };
@@ -522,10 +587,15 @@ const CleaningQueueManager = {
                 acc[k].sequence = it.sequence;
                 // store a gentle preferred window of the due time
                 const d = new Date(it.dueISO || Date.now());
-                const h = d.getHours().toString().padStart(2,"0");
-                const m = d.getMinutes().toString().padStart(2,"0");
+                const h = d.getHours().toString().padStart(2, "0");
+                const m = d.getMinutes().toString().padStart(2, "0");
                 acc[k].preferredDay = d.getDay();
-                acc[k].preferredWindow = { start: `${h}:${m}`, end: `${clamp(h*1+2,0,23).toString().padStart(2,"0")}:${m}` };
+                acc[k].preferredWindow = {
+                  start: `${h}:${m}`,
+                  end: `${clamp(h * 1 + 2, 0, 23)
+                    .toString()
+                    .padStart(2, "0")}:${m}`,
+                };
                 return acc;
               }, {}),
             },
@@ -552,9 +622,18 @@ const CleaningQueueManager = {
       eventBus.emit("prep.tasks.requested", {
         domain: DOMAIN,
         tasks: plan.items.map((it) => ({
-          id: it.id, name: it.room, task: it.task, dueISO: it.dueISO, estMinutes: it.estMinutes, priority: it.priority
+          id: it.id,
+          name: it.room,
+          task: it.task,
+          dueISO: it.dueISO,
+          estMinutes: it.estMinutes,
+          priority: it.priority,
         })),
-        meta: { planId: plan.id, title: plan.title, source: "CleaningQueueManager.saveQueueAsPlan" },
+        meta: {
+          planId: plan.id,
+          title: plan.title,
+          source: "CleaningQueueManager.saveQueueAsPlan",
+        },
       });
     } catch (_) {}
 
@@ -562,7 +641,12 @@ const CleaningQueueManager = {
       automation?.nudge?.({
         scope: DOMAIN,
         kind: "plan_saved",
-        payload: { planId: plan.id, favorite, items: plan.items.length, title: plan.title },
+        payload: {
+          planId: plan.id,
+          favorite,
+          items: plan.items.length,
+          title: plan.title,
+        },
       });
     } catch (_) {}
 
@@ -587,10 +671,15 @@ const CleaningQueueManager = {
             sequence: e.sequence,
             preferredDay: when.getDay(),
             preferredWindow: {
-              start: `${String(when.getHours()).padStart(2,"0")}:${String(when.getMinutes()).padStart(2,"0")}`,
-              end:   `${String(clamp(when.getHours()+2,0,23)).padStart(2,"0")}:${String(when.getMinutes()).padStart(2,"0")}`,
+              start: `${String(when.getHours()).padStart(2, "0")}:${String(
+                when.getMinutes()
+              ).padStart(2, "0")}`,
+              end: `${String(clamp(when.getHours() + 2, 0, 23)).padStart(
+                2,
+                "0"
+              )}:${String(when.getMinutes()).padStart(2, "0")}`,
             },
-            requiredSupplies: (e.supplies?.required || []).map(x=>x.name),
+            requiredSupplies: (e.supplies?.required || []).map((x) => x.name),
             estMinutesOverride: e.estMinutes,
           },
         },
@@ -604,7 +693,9 @@ const CleaningQueueManager = {
           dueISO: e.dueISO,
           estMinutes: e.estMinutes,
           priority: e.priority,
-          meta: { requiredSupplies: (e.supplies?.required || []).map(x=>x.name) },
+          meta: {
+            requiredSupplies: (e.supplies?.required || []).map((x) => x.name),
+          },
         },
       ],
     };

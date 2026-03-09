@@ -1,6 +1,12 @@
 /* eslint-disable no-console */
 // C:\Users\larho\suka-smart-assistant\src\features\events\EventCatalog.jsx
-import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
 
 /**
  * EventCatalog.jsx
@@ -10,7 +16,7 @@ import React, { useEffect, useMemo, useRef, useState, useCallback } from "react"
  *
  * PIPELINE CONTEXT
  * - IMPORTS → INTELLIGENCE → AUTOMATION → (optional) HUB EXPORT
- * - This component listens to the shared eventBus (src/services/eventBus.js),
+ * - This component listens to the shared eventBus (src/services/events/eventBus.js),
  *   validates/normalizes events into a consistent shape, renders them with
  *   filters, and (optionally) can emit test events.
  * - When events represent state-changing actions (inventory/storehouse/sessions),
@@ -40,7 +46,9 @@ let eventBus = null;
 try {
   // Expected to expose: on(typeOrWildcard, handler) and emit(event)
   // and ideally onAny(handler) for wildcard listening (we'll feature-detect).
-  eventBus = require("@/services/eventBus").default ?? require("@/services/eventBus");
+  eventBus =
+    require("@/services/events/eventBus").default ??
+    require("@/services/events/eventBus");
 } catch (e) {
   // Leave null; UI will degrade gracefully.
 }
@@ -76,9 +84,11 @@ function ensureISO(ts) {
 
 function nanoid(len = 12) {
   // Small, dependency-free ID (not cryptographically strong)
-  const alphabet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const alphabet =
+    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
   let out = "";
-  for (let i = 0; i < len; i++) out += alphabet[Math.floor(Math.random() * alphabet.length)];
+  for (let i = 0; i < len; i++)
+    out += alphabet[Math.floor(Math.random() * alphabet.length)];
   return out;
 }
 
@@ -94,7 +104,10 @@ function normalizeEvent(evt) {
     id: evt.id || `${evt.type}:${evt.ts || NOW_ISO()}:${nanoid(6)}`,
     type: String(evt.type),
     ts: ensureISO(evt.ts),
-    source: typeof evt.source === "string" && evt.source.trim() ? evt.source : "unknown",
+    source:
+      typeof evt.source === "string" && evt.source.trim()
+        ? evt.source
+        : "unknown",
     data: typeof evt.data === "object" && evt.data !== null ? evt.data : {},
     __raw: evt,
   };
@@ -241,20 +254,26 @@ const DefaultRow = React.memo(function DefaultRow({ e }) {
     <div className="rounded-2xl border p-3 md:p-4 mb-3 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="text-xs px-2 py-1 rounded-full border">{e.type}</span>
+          <span className="text-xs px-2 py-1 rounded-full border">
+            {e.type}
+          </span>
           <span className="text-xs text-neutral-500">{e.source}</span>
         </div>
-        <time className="text-xs tabular-nums text-neutral-600">{new Date(e.ts).toLocaleString()}</time>
+        <time className="text-xs tabular-nums text-neutral-600">
+          {new Date(e.ts).toLocaleString()}
+        </time>
       </div>
       {e.data && Object.keys(e.data).length > 0 ? (
         <pre className="mt-2 text-xs overflow-auto max-h-48 rounded-lg bg-neutral-50 p-2 dark:bg-neutral-900">
-{JSON.stringify(e.data, null, 2)}
+          {JSON.stringify(e.data, null, 2)}
         </pre>
       ) : null}
       <details className="mt-2">
-        <summary className="text-xs text-neutral-600 cursor-pointer">Raw</summary>
+        <summary className="text-xs text-neutral-600 cursor-pointer">
+          Raw
+        </summary>
         <pre className="mt-1 text-[11px] overflow-auto max-h-48 rounded-lg bg-neutral-50 p-2 dark:bg-neutral-900">
-{JSON.stringify(e.__raw, null, 2)}
+          {JSON.stringify(e.__raw, null, 2)}
         </pre>
       </details>
     </div>
@@ -305,8 +324,9 @@ export default function EventCatalog() {
 
       if (q) {
         const needle = q.toLowerCase();
-        const hay =
-          `${e.type} ${e.source} ${e.ts} ${JSON.stringify(e.data ?? {})}`.toLowerCase();
+        const hay = `${e.type} ${e.source} ${e.ts} ${JSON.stringify(
+          e.data ?? {}
+        )}`.toLowerCase();
         if (!hay.includes(needle)) return false;
       }
 
@@ -335,7 +355,10 @@ export default function EventCatalog() {
         try {
           eventBus.emit(test);
         } catch (e) {
-          console.warn("[EventCatalog] Bus emit failed; falling back to local append", e);
+          console.warn(
+            "[EventCatalog] Bus emit failed; falling back to local append",
+            e
+          );
           appendEvent(test);
         }
       } else {
@@ -349,7 +372,7 @@ export default function EventCatalog() {
     <div className="text-sm text-neutral-600 border rounded-2xl p-6 text-center">
       {eventBus
         ? "No events yet. Trigger an action in SSA or emit a test event below."
-        : "eventBus not available. Ensure '@/services/eventBus' is exported. You can still emit local test events below."}
+        : "eventBus not available. Ensure '@/services/events/eventBus' is exported. You can still emit local test events below."}
     </div>
   );
 
@@ -358,11 +381,13 @@ export default function EventCatalog() {
       <header className="mb-4 md:mb-6">
         <h1 className="text-xl md:text-2xl font-semibold">Event Catalog</h1>
         <p className="text-sm text-neutral-600">
-          Live view of SSA&apos;s event pipeline — imports → intelligence → automation → (optional) hub export.
+          Live view of SSA&apos;s event pipeline — imports → intelligence →
+          automation → (optional) hub export.
         </p>
         {!eventBus && (
           <div className="mt-3 text-xs border border-amber-300 bg-amber-50 text-amber-800 rounded-lg p-2">
-            ⚠️ eventBus not detected. The catalog will still capture locally emitted test events.
+            ⚠️ eventBus not detected. The catalog will still capture locally
+            emitted test events.
           </div>
         )}
       </header>

@@ -1,0 +1,620 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://suka-smart-assistant.local/schemas/estimators/food_security_defaults.schema.json",
+  "title": "SSA • Estimators • Food Security Defaults Schema",
+  "description": "Schema for SSA baseline assumptions used by FoodSecurityEstimator when users have not customized settings. Ensures deterministic, explainable, versioned food security math (meals/day, portions/person, nutrition coverage, household size fallback, shelf-life by class, and coverage confidence weighting).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "$id",
+    "schemaVersion",
+    "updatedAt",
+    "meta",
+    "defaults",
+    "profiles"
+  ],
+
+  "properties": {
+    "$schema": { "type": "string", "minLength": 1 },
+    "$id": { "type": "string", "minLength": 1 },
+
+    "schemaVersion": {
+      "type": "string",
+      "description": "Schema document version (not the data file version).",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+    },
+
+    "updatedAt": { "type": "string", "format": "date-time" },
+
+    "meta": { "$ref": "#/$defs/Meta" },
+
+    "notes": {
+      "description": "Optional maintainer/audit notes.",
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+
+    "defaults": { "$ref": "#/$defs/GlobalDefaults" },
+
+    "profiles": {
+      "description": "One or more named profiles (e.g., default / conservative / active / regional variants). Engines select a profile deterministically.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/Profile" }
+    },
+
+    "index": {
+      "description": "Optional precomputed lookup index for runtime selection (kept permissive).",
+      "type": "object",
+      "additionalProperties": true,
+      "default": {}
+    }
+  },
+
+  "$defs": {
+    "Id": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 160,
+      "pattern": "^[a-z0-9_\\.\\-]+$"
+    },
+
+    "Tag": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 80,
+      "pattern": "^[a-z0-9_\\.\\-]+$"
+    },
+
+    "Locale": { "type": "string", "minLength": 2, "maxLength": 35 },
+
+    "Meta": {
+      "description": "Schema document metadata (transparent provenance).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "domain", "label", "status", "source"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "type": { "type": "string", "const": "schema" },
+        "domain": { "type": "string", "const": "estimators" },
+        "label": { "type": "string", "minLength": 1 },
+        "status": {
+          "type": "string",
+          "enum": ["canonical", "draft", "experimental", "deprecated"]
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "name"],
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": ["catalog", "user", "import", "generated"]
+            },
+            "name": { "type": "string", "minLength": 1 },
+            "notes": {
+              "type": "array",
+              "items": { "type": "string" },
+              "default": []
+            }
+          }
+        }
+      }
+    },
+
+    "GlobalDefaults": {
+      "description": "Global defaults that apply unless overridden in a profile.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "locale",
+        "units",
+        "transparency",
+        "fallbackHouseholdSize",
+        "coverageOutputs"
+      ],
+      "properties": {
+        "locale": { "$ref": "#/$defs/Locale", "default": "en-US" },
+
+        "units": {
+          "description": "Unit conventions for estimation and display.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["energyUnit", "massUnit", "volumeUnit"],
+          "properties": {
+            "energyUnit": {
+              "type": "string",
+              "enum": ["kcal"],
+              "default": "kcal"
+            },
+            "massUnit": {
+              "type": "string",
+              "enum": ["g", "kg"],
+              "default": "g"
+            },
+            "volumeUnit": {
+              "type": "string",
+              "enum": ["ml", "l"],
+              "default": "ml"
+            }
+          }
+        },
+
+        "transparency": {
+          "description": "Controls for rendering explainable assumptions in UI.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["showAssumptionsByDefault", "requireProfileRationale"],
+          "properties": {
+            "showAssumptionsByDefault": { "type": "boolean", "default": true },
+            "requireProfileRationale": { "type": "boolean", "default": true },
+            "allowUserOverride": { "type": "boolean", "default": true }
+          }
+        },
+
+        "fallbackHouseholdSize": {
+          "description": "Used when user household roster is unknown.",
+          "type": "integer",
+          "minimum": 1,
+          "default": 4
+        },
+
+        "coverageOutputs": {
+          "description": "Which outputs are expected for UI messaging.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["daysOfFood", "mealsOfFood", "confidenceScore"],
+          "properties": {
+            "daysOfFood": { "type": "boolean", "default": true },
+            "mealsOfFood": { "type": "boolean", "default": true },
+            "confidenceScore": { "type": "boolean", "default": true },
+            "nutritionCoverage": { "type": "boolean", "default": true }
+          }
+        }
+      }
+    },
+
+    "ProfileSelector": {
+      "description": "Hints for choosing a profile (deterministic selection by engine).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "locales": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Locale" },
+          "default": []
+        },
+        "regions": {
+          "description": "Optional region tags (kept deterministic).",
+          "type": "array",
+          "items": { "$ref": "#/$defs/Tag" },
+          "default": []
+        },
+        "cultures": {
+          "description": "Optional culture tags (e.g., culture.aai).",
+          "type": "array",
+          "items": { "$ref": "#/$defs/Tag" },
+          "default": []
+        },
+        "segments": {
+          "description": "Optional segment tags (e.g., household.large_family, activity.high).",
+          "type": "array",
+          "items": { "$ref": "#/$defs/Tag" },
+          "default": []
+        }
+      }
+    },
+
+    "MealsAndPortions": {
+      "description": "Default meal cadence and portion assumptions per person.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mealsPerDay",
+        "portionsPerMealPerPerson",
+        "snackPortionsPerDayPerPerson"
+      ],
+      "properties": {
+        "mealsPerDay": {
+          "description": "Default meals per person per day used for coverage calculations.",
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 6,
+          "default": 2.5
+        },
+        "portionsPerMealPerPerson": {
+          "description": "Portions per meal per person (1.0 = standard).",
+          "type": "number",
+          "minimum": 0.25,
+          "maximum": 3,
+          "default": 1
+        },
+        "snackPortionsPerDayPerPerson": {
+          "description": "Optional snack portions per day per person, separate from mealsPerDay.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 6,
+          "default": 0.5
+        },
+        "portionSizeNotes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        }
+      }
+    },
+
+    "NutritionCoverage": {
+      "description": "Baseline calorie and macro coverage assumptions used when item nutrition is missing/partial.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "targetKcalPerPersonPerDay",
+        "coverageMode",
+        "macroTargets",
+        "fallbackCoverageWeights"
+      ],
+      "properties": {
+        "targetKcalPerPersonPerDay": {
+          "description": "Default kcal target per person per day used for days-of-food when calories are available or estimated.",
+          "type": "integer",
+          "minimum": 800,
+          "maximum": 5000,
+          "default": 2200
+        },
+
+        "coverageMode": {
+          "description": "How coverage is computed when some nutrition data is missing.",
+          "type": "string",
+          "enum": ["calories_only", "calories_plus_macros", "macro_weighted"],
+          "default": "calories_plus_macros"
+        },
+
+        "macroTargets": {
+          "description": "Default daily macro targets per person (grams). Used for optional macro coverage scoring.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["proteinG", "carbG", "fatG", "fiberG"],
+          "properties": {
+            "proteinG": {
+              "type": "integer",
+              "minimum": 20,
+              "maximum": 250,
+              "default": 90
+            },
+            "carbG": {
+              "type": "integer",
+              "minimum": 50,
+              "maximum": 600,
+              "default": 250
+            },
+            "fatG": {
+              "type": "integer",
+              "minimum": 10,
+              "maximum": 250,
+              "default": 75
+            },
+            "fiberG": {
+              "type": "integer",
+              "minimum": 10,
+              "maximum": 80,
+              "default": 28
+            }
+          }
+        },
+
+        "fallbackCoverageWeights": {
+          "description": "When nutrition is incomplete, these weights determine how coverage confidence is computed.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "knownCaloriesWeight",
+            "knownMacrosWeight",
+            "tagInferredWeight"
+          ],
+          "properties": {
+            "knownCaloriesWeight": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.6
+            },
+            "knownMacrosWeight": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.3
+            },
+            "tagInferredWeight": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.1
+            }
+          }
+        },
+
+        "notes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        }
+      }
+    },
+
+    "ShelfLifeClass": {
+      "description": "Shelf-life assumptions for a food class used to discount coverage over time.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "classId",
+        "label",
+        "defaultShelfLifeDays",
+        "spoilageCurve",
+        "appliesToTagsAny"
+      ],
+      "properties": {
+        "classId": { "$ref": "#/$defs/Id" },
+        "label": { "type": "string", "minLength": 1 },
+
+        "defaultShelfLifeDays": {
+          "description": "Default shelf-life in days under typical storage for this class.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 36500
+        },
+
+        "spoilageCurve": {
+          "description": "How to discount usability as time progresses. Engines interpret this deterministically.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "usableAtStart", "usableAtEnd"],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["linear", "step", "exponential"],
+              "default": "linear"
+            },
+            "usableAtStart": {
+              "description": "Usability multiplier at day 0 (typically 1.0).",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2,
+              "default": 1
+            },
+            "usableAtEnd": {
+              "description": "Usability multiplier at defaultShelfLifeDays (typically 0.0).",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2,
+              "default": 0
+            },
+            "halfLifeDays": {
+              "description": "Used only for exponential curves.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 36500
+            },
+            "steps": {
+              "description": "Used only for step curves. Array of {day, usable} sorted by day ascending.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["day", "usable"],
+                "properties": {
+                  "day": { "type": "integer", "minimum": 0, "maximum": 36500 },
+                  "usable": { "type": "number", "minimum": 0, "maximum": 2 }
+                }
+              },
+              "default": []
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": { "type": { "const": "exponential" } },
+                "required": ["type"]
+              },
+              "then": { "required": ["halfLifeDays"] }
+            },
+            {
+              "if": {
+                "properties": { "type": { "const": "step" } },
+                "required": ["type"]
+              },
+              "then": { "required": ["steps"] }
+            }
+          ]
+        },
+
+        "appliesToTagsAny": {
+          "description": "Inventory item tags that map into this shelf-life class (any match).",
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/Tag" }
+        },
+
+        "notes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        }
+      }
+    },
+
+    "CoverageConfidence": {
+      "description": "Weights to compute a confidence score for the 'days of food' estimate.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["weights", "thresholds", "explanations"],
+      "properties": {
+        "weights": {
+          "description": "How much each signal contributes to confidence. Engine should normalize as needed.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "hasNutritionData",
+            "hasUnitAmounts",
+            "hasDates",
+            "hasStorageLocations",
+            "hasCategoryTags"
+          ],
+          "properties": {
+            "hasNutritionData": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.35
+            },
+            "hasUnitAmounts": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.25
+            },
+            "hasDates": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.2
+            },
+            "hasStorageLocations": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.1
+            },
+            "hasCategoryTags": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.1
+            }
+          }
+        },
+
+        "thresholds": {
+          "description": "Default thresholds for mapping numeric confidence (0..1) to labels/badges.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["low", "medium", "high"],
+          "properties": {
+            "low": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.35
+            },
+            "medium": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.65
+            },
+            "high": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.85
+            }
+          }
+        },
+
+        "explanations": {
+          "description": "UI text fragments for explainability.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["low", "medium", "high"],
+          "properties": {
+            "low": { "type": "string", "minLength": 10 },
+            "medium": { "type": "string", "minLength": 10 },
+            "high": { "type": "string", "minLength": 10 }
+          }
+        }
+      }
+    },
+
+    "Profile": {
+      "description": "A selectable baseline profile for food security calculations.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "label",
+        "status",
+        "selector",
+        "householdSizeFallback",
+        "mealsAndPortions",
+        "nutritionCoverage",
+        "shelfLifeClasses",
+        "coverageConfidence",
+        "rationale",
+        "tags"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "label": { "type": "string", "minLength": 1 },
+        "status": {
+          "type": "string",
+          "enum": ["canonical", "draft", "experimental", "deprecated"]
+        },
+
+        "selector": { "$ref": "#/$defs/ProfileSelector" },
+
+        "tags": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Tag" },
+          "default": []
+        },
+
+        "householdSizeFallback": {
+          "description": "Profile-specific household size fallback (overrides global fallbackHouseholdSize).",
+          "type": "integer",
+          "minimum": 1
+        },
+
+        "mealsAndPortions": { "$ref": "#/$defs/MealsAndPortions" },
+
+        "nutritionCoverage": { "$ref": "#/$defs/NutritionCoverage" },
+
+        "shelfLifeClasses": {
+          "description": "Shelf-life assumptions by food class used for time-discounting coverage.",
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/ShelfLifeClass" }
+        },
+
+        "coverageConfidence": { "$ref": "#/$defs/CoverageConfidence" },
+
+        "rationale": {
+          "description": "Human-readable explanation of this profile’s assumptions for UI and audit trails.",
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 3000
+        },
+
+        "audit": {
+          "description": "Optional audit metadata to support versioned improvements and defensibility.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "assumptionFamily": { "type": "string", "minLength": 1 },
+            "createdBy": { "type": "string", "minLength": 1 },
+            "createdAt": { "type": "string", "format": "date-time" },
+            "updatedBy": { "type": "string", "minLength": 1 },
+            "updatedAt": { "type": "string", "format": "date-time" },
+            "references": {
+              "type": "array",
+              "items": { "type": "string" },
+              "default": []
+            }
+          },
+          "default": {}
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,378 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://suka-smart-assistant.local/schemas/estimators/estimator_baseline.schema.json",
+  "title": "SSA • Estimators • Baseline Inputs Schema",
+  "description": "Defines optional user-supplied baseline inputs when they choose to customize estimates (food security + cost delta). Validates overrides, prevents partial/inconsistent inputs, and allows graceful fallback to defaults.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "$id",
+    "schemaVersion",
+    "updatedAt",
+    "meta",
+    "baseline"
+  ],
+
+  "properties": {
+    "$schema": { "type": "string", "minLength": 1 },
+    "$id": { "type": "string", "minLength": 1 },
+
+    "schemaVersion": {
+      "type": "string",
+      "description": "Schema document version (not the data file version).",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+    },
+
+    "updatedAt": { "type": "string", "format": "date-time" },
+
+    "meta": { "$ref": "#/$defs/Meta" },
+
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+
+    "baseline": { "$ref": "#/$defs/Baseline" }
+  },
+
+  "$defs": {
+    "Id": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 200,
+      "pattern": "^[a-z0-9_\\.\\-]+$"
+    },
+
+    "Tag": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 80,
+      "pattern": "^[a-z0-9_\\.\\-]+$"
+    },
+
+    "Locale": { "type": "string", "minLength": 2, "maxLength": 35 },
+
+    "Currency": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 3,
+      "default": "USD"
+    },
+
+    "Money": {
+      "description": "Money amounts used for baseline spending inputs.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["currency", "value"],
+      "properties": {
+        "currency": { "$ref": "#/$defs/Currency" },
+        "value": { "type": "number", "minimum": 0 }
+      }
+    },
+
+    "Meta": {
+      "description": "Schema document metadata (not the user's baseline record metadata).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "domain", "label", "status", "source"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "type": { "type": "string", "const": "schema" },
+        "domain": { "type": "string", "const": "estimators" },
+        "label": { "type": "string", "minLength": 1 },
+        "status": {
+          "type": "string",
+          "enum": ["canonical", "draft", "experimental", "deprecated"]
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "name"],
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": ["catalog", "user", "import", "generated"]
+            },
+            "name": { "type": "string", "minLength": 1 },
+            "notes": {
+              "type": "array",
+              "items": { "type": "string" },
+              "default": []
+            }
+          }
+        }
+      }
+    },
+
+    "Baseline": {
+      "description": "Optional user-supplied baseline inputs. Fields are optional so users can override only what they know; engines should merge these with defaults deterministically.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "createdAt",
+        "updatedAt",
+        "locale",
+        "currency",
+        "inputs"
+      ],
+      "properties": {
+        "id": {
+          "description": "Stable id for this baseline record (SSA-safe).",
+          "$ref": "#/$defs/Id"
+        },
+
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+
+        "locale": { "$ref": "#/$defs/Locale" },
+        "currency": { "$ref": "#/$defs/Currency" },
+
+        "inputs": { "$ref": "#/$defs/BaselineInputs" },
+
+        "constraints": {
+          "description": "Optional guardrails the UI can enforce (kept permissive).",
+          "type": "object",
+          "additionalProperties": true,
+          "default": {}
+        },
+
+        "tags": {
+          "description": "Optional tags for scenario grouping/search (e.g., 'whatif', 'baseline.2026').",
+          "type": "array",
+          "items": { "$ref": "#/$defs/Tag" },
+          "default": []
+        }
+      }
+    },
+
+    "BaselineInputs": {
+      "description": "User overrides. Each field is optional; estimator engines must merge missing values from their defaults catalogs. If a user provides a grouped override, minimal consistency is enforced.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "household": { "$ref": "#/$defs/HouseholdOverride" },
+
+        "meals": { "$ref": "#/$defs/MealsOverride" },
+
+        "spend": { "$ref": "#/$defs/SpendOverride" },
+
+        "eatingOut": { "$ref": "#/$defs/EatingOutOverride" },
+
+        "diet": { "$ref": "#/$defs/DietOverride" },
+
+        "region": { "$ref": "#/$defs/RegionOverride" },
+
+        "notes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        }
+      }
+    },
+
+    "HouseholdOverride": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "size": {
+          "description": "Household size override. Used by both estimators.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "members": {
+          "description": "Optional per-member detail to support portion logic (can be omitted).",
+          "type": "array",
+          "items": { "$ref": "#/$defs/HouseholdMember" },
+          "default": []
+        }
+      }
+    },
+
+    "HouseholdMember": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "role"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Id" },
+        "role": {
+          "description": "High-level role used for portion assumptions (adult/child/etc.).",
+          "type": "string",
+          "enum": ["adult", "child", "senior", "infant", "unknown"]
+        },
+        "notes": { "type": "string" }
+      }
+    },
+
+    "MealsOverride": {
+      "description": "Meal cadence overrides used to estimate required meals/coverage and cost.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mealsPerDay": {
+          "description": "Optional override; if provided, must be consistent with mealsPerWeek when both are present.",
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 10
+        },
+        "mealsPerWeek": {
+          "description": "Optional override used by cost delta and coverage rollups.",
+          "type": "number",
+          "minimum": 1,
+          "maximum": 200
+        },
+        "includeSnacksAsMeals": {
+          "description": "If true, snacks may count as fractional meals in some estimators (engine-specific).",
+          "type": "boolean",
+          "default": false
+        },
+        "portionModel": {
+          "description": "Optional portion model hint for estimators (kept stable, extendable).",
+          "type": "string",
+          "enum": ["standard", "light", "athletic", "custom"],
+          "default": "standard"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["mealsPerDay", "mealsPerWeek"]
+          },
+          "then": {
+            "properties": {
+              "mealsPerWeek": {
+                "description": "When both are set, mealsPerWeek should be close to mealsPerDay*7. Engines should still tolerate minor differences.",
+                "type": "number",
+                "minimum": 1,
+                "maximum": 200
+              }
+            }
+          }
+        }
+      ]
+    },
+
+    "SpendOverride": {
+      "description": "Baseline grocery spend used for cost delta computations.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "grocerySpendPerWeek": {
+          "description": "User-stated grocery spend per week.",
+          "$ref": "#/$defs/Money"
+        },
+        "grocerySpendPerMonth": {
+          "description": "User-stated grocery spend per month (optional alternative input).",
+          "$ref": "#/$defs/Money"
+        },
+        "groceryCostPerMeal": {
+          "description": "Direct override if user knows their average grocery cost per meal.",
+          "$ref": "#/$defs/Money"
+        },
+        "assumptions": {
+          "description": "Optional notes about what the spend includes (household supplies, bulk stock-up, etc.).",
+          "type": "object",
+          "additionalProperties": true,
+          "default": {}
+        }
+      },
+      "oneOf": [
+        { "required": ["grocerySpendPerWeek"] },
+        { "required": ["grocerySpendPerMonth"] },
+        { "required": ["groceryCostPerMeal"] },
+        {
+          "description": "Allow empty object (user hasn't provided spend overrides).",
+          "maxProperties": 0
+        }
+      ]
+    },
+
+    "EatingOutOverride": {
+      "description": "Eating-out frequency and spend used for replacement savings math.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mealsOutPerWeek": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 200
+        },
+        "mealsOutPerMonth": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 800
+        },
+        "avgCostPerMealOut": { "$ref": "#/$defs/Money" },
+        "includeDeliveryFees": {
+          "type": "boolean",
+          "default": true
+        },
+        "deliveryFeePerOrder": {
+          "description": "Optional typical delivery fee used if includeDeliveryFees is true.",
+          "$ref": "#/$defs/Money"
+        }
+      }
+    },
+
+    "DietOverride": {
+      "description": "Dietary exclusions and constraints that affect cost assumptions and substitute choices.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "exclusions": {
+          "description": "Deterministic exclusion tags/ids (SSA tag style).",
+          "type": "array",
+          "items": { "$ref": "#/$defs/Tag" },
+          "default": []
+        },
+        "allergenAvoidance": {
+          "description": "Allergen ids/tags that should be treated as avoided for cost/availability adjustments.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/Id" },
+          "default": []
+        },
+        "notes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        }
+      }
+    },
+
+    "RegionOverride": {
+      "description": "Optional regional modifier for cost assumptions. Can be a simple multiplier or a structured object.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "regionCode": {
+          "description": "Optional region identifier (state, metro, custom).",
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "costModifier": {
+          "description": "Multiplier applied to baseline costs (e.g., 1.12 = 12% higher than neutral).",
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 3
+        },
+        "confidence": {
+          "description": "User or system confidence in the regional modifier (0..1).",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.6
+        },
+        "source": {
+          "description": "Optional provenance for the modifier (user-provided, system-derived, etc.).",
+          "type": "string",
+          "enum": ["user", "system", "import", "unknown"],
+          "default": "user"
+        }
+      }
+    }
+  }
+}

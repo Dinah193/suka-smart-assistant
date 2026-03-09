@@ -1,0 +1,443 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+
+  "meta": {
+    "id": "recipes.asian_fusion.sweet_chili_chicken",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Sweet Chili Chicken",
+    "subtitle": "Sticky-sweet, tangy, gently spicy chicken with garlic and ginger (weeknight-friendly).",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalog",
+      "notes": [
+        "Built for SSA: deterministic, scalable, and adaptable to thighs or breast, skillet or wok.",
+        "Sauce is a simple sweet-chili style glaze using pantry ingredients; can be made gluten-free with tamari."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.asian_fusion",
+    "category": "main",
+    "mealArchetypes": [
+      "archetype.stir_fry",
+      "archetype.bowls",
+      "archetype.skewers_optional"
+    ],
+    "servingStyles": ["serving.bowls", "serving.family_style"],
+    "plannerTags": [
+      "asian_fusion",
+      "sweet_chili",
+      "sticky_glaze",
+      "chicken",
+      "weeknight",
+      "one_pan",
+      "batch_friendly",
+      "kid_friendly_optional"
+    ]
+  },
+
+  "summary": "Crisp-tender chicken pieces coated in a sweet chili glaze with garlic, ginger, lime, and a glossy finish. Serve over rice, noodles, or alongside stir-fried vegetables.",
+
+  "yield": {
+    "servings": 4,
+    "notes": "4 bowls with rice or 3 large portions."
+  },
+
+  "time": {
+    "activeMins": 22,
+    "totalMins": 28,
+    "handsOffMins": 6
+  },
+
+  "difficulty": "beginner",
+
+  "signals": {
+    "weeknightPossible": true,
+    "batchFriendly": true,
+    "leftoversGood": true,
+    "freezerFriendly": "medium",
+    "onePan": true
+  },
+
+  "tasteProfile": {
+    "salty": 2,
+    "sweet": 3,
+    "sour": 2,
+    "spicy": 2,
+    "umami": 2,
+    "signature": ["sweet_chili", "garlic", "ginger", "lime"],
+    "finish": ["sesame_optional", "scallions_optional", "lime_optional"]
+  },
+
+  "equipment": {
+    "minimum": [
+      "tool.pan_large",
+      "tool.knife",
+      "tool.board",
+      "tool.tongs",
+      "tool.small_bowl"
+    ],
+    "recommended": [
+      "tool.wok",
+      "tool.whisk",
+      "tool.microplane",
+      "tool.instant_read_thermometer"
+    ],
+    "optional": [
+      {
+        "id": "tool.air_fryer",
+        "label": "Air fryer",
+        "required": false,
+        "notes": "Optional alternate method for crisp chicken before tossing in sauce."
+      }
+    ]
+  },
+
+  "dietFlags": ["diet.dairy_free"],
+
+  "allergens": {
+    "contains": [
+      "allergen.soy_optional",
+      "allergen.sesame_optional",
+      "allergen.wheat_optional"
+    ],
+    "notes": [
+      "Use tamari for gluten-free soy; verify chili sauce and vinegar labels.",
+      "Cornstarch is naturally gluten-free, but check for cross-contact if needed."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "chicken",
+      "label": "Boneless skinless chicken thighs or breast, cut into 1-inch pieces",
+      "amount": { "value": 1.5, "unit": "lb" },
+      "notes": [
+        "Thighs stay juicier and are more forgiving; breast cooks faster—avoid overcooking."
+      ]
+    },
+    {
+      "id": "salt",
+      "label": "Kosher salt",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "pepper",
+      "label": "Black pepper",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "cornstarch",
+      "label": "Cornstarch (for light coating)",
+      "amount": { "value": 3, "unit": "tbsp" },
+      "notes": [
+        "Creates a thin crisp exterior that helps sauce cling. Substitute arrowroot 1:1 if needed."
+      ]
+    },
+    {
+      "id": "oil.neutral",
+      "label": "Neutral oil (avocado, grapeseed, or canola)",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+
+    {
+      "id": "garlic",
+      "label": "Garlic, minced",
+      "amount": { "value": 3, "unit": "cloves" }
+    },
+    {
+      "id": "ginger.fresh",
+      "label": "Fresh ginger, grated or minced",
+      "amount": { "value": 1, "unit": "tbsp" }
+    },
+
+    {
+      "id": "sweet_chili_sauce",
+      "label": "Sweet chili sauce",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "notes": [
+        "If you don’t have sweet chili sauce, use the DIY variation below (honey + vinegar + chili + garlic)."
+      ]
+    },
+    {
+      "id": "soy_sauce",
+      "label": "Soy sauce (or tamari)",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true,
+      "notes": ["Optional but recommended for depth/umami."]
+    },
+    {
+      "id": "vinegar.rice",
+      "label": "Rice vinegar (or apple cider vinegar)",
+      "amount": { "value": 1.5, "unit": "tbsp" }
+    },
+    {
+      "id": "lime",
+      "label": "Lime juice (about 1 lime)",
+      "amount": { "value": 1.5, "unit": "tbsp" },
+      "optional": true,
+      "notes": [
+        "Optional, but brightens the glaze. Add to taste at the end if preferred."
+      ]
+    },
+    {
+      "id": "water",
+      "label": "Water",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true,
+      "notes": ["Use only if sauce is too thick to coat evenly."]
+    },
+
+    {
+      "id": "red_pepper_flakes",
+      "label": "Red pepper flakes (optional heat boost)",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "sesame_oil",
+      "label": "Toasted sesame oil (optional finish)",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "scallions",
+      "label": "Green onions, sliced (optional garnish)",
+      "amount": { "value": 2, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "sesame_seeds",
+      "label": "Toasted sesame seeds (optional garnish)",
+      "amount": { "value": 2, "unit": "tsp" },
+      "optional": true
+    }
+  ],
+
+  "ingredientGroups": [
+    {
+      "id": "group.chicken",
+      "label": "Chicken",
+      "items": ["chicken", "salt", "pepper", "cornstarch", "oil.neutral"]
+    },
+    {
+      "id": "group.aromatics",
+      "label": "Aromatics",
+      "items": ["garlic", "ginger.fresh"]
+    },
+    {
+      "id": "group.sauce",
+      "label": "Glaze",
+      "items": [
+        "sweet_chili_sauce",
+        "soy_sauce",
+        "vinegar.rice",
+        "lime",
+        "water",
+        "red_pepper_flakes"
+      ]
+    },
+    {
+      "id": "group.finish",
+      "label": "Finish (Optional)",
+      "items": ["sesame_oil", "scallions", "sesame_seeds"]
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.prep",
+      "title": "Season and coat chicken",
+      "instructions": [
+        "Pat chicken dry (helps browning).",
+        "Season chicken with salt and pepper.",
+        "Sprinkle cornstarch over chicken and toss until lightly coated (no thick paste; just a dusting)."
+      ],
+      "checks": ["Chicken should be lightly coated and not wet/clumpy."],
+      "activeMins": 5
+    },
+    {
+      "id": "step.sauce",
+      "title": "Mix glaze",
+      "instructions": [
+        "In a bowl, whisk sweet chili sauce, rice vinegar, and soy sauce (if using).",
+        "Stir in lime juice (optional) and red pepper flakes (optional).",
+        "Set aside."
+      ],
+      "checks": [
+        "Glaze should taste sweet-tangy; adjust with vinegar for more tang or chili for more heat."
+      ],
+      "activeMins": 2
+    },
+    {
+      "id": "step.sear",
+      "title": "Sear chicken",
+      "instructions": [
+        "Heat a large skillet or wok over medium-high heat until hot.",
+        "Add neutral oil.",
+        "Add chicken in a single layer (work in two batches if needed).",
+        "Sear 3–4 minutes undisturbed until browned, then flip and cook 2–3 minutes more until nearly cooked through."
+      ],
+      "timers": [
+        { "label": "First side sear", "minutes": 4 },
+        { "label": "Second side sear", "minutes": 3 }
+      ],
+      "checks": [
+        "Chicken should be browned and nearly cooked through.",
+        "If using a thermometer: aim for ~155–160°F here; it will finish in sauce."
+      ],
+      "activeMins": 8,
+      "handsOffMins": 3
+    },
+    {
+      "id": "step.aromatics",
+      "title": "Add garlic and ginger",
+      "instructions": [
+        "Reduce heat to medium.",
+        "Push chicken to the edges; add garlic and ginger to the center.",
+        "Stir 20–30 seconds until fragrant (avoid burning), then toss with chicken."
+      ],
+      "timers": [{ "label": "Bloom aromatics", "seconds": 25 }],
+      "checks": ["Aromatics should be fragrant, not browned."],
+      "activeMins": 2
+    },
+    {
+      "id": "step.glaze",
+      "title": "Glaze and reduce",
+      "instructions": [
+        "Pour glaze into the pan and toss chicken to coat.",
+        "Simmer 2–4 minutes, tossing frequently, until sauce thickens and clings to chicken.",
+        "If sauce becomes too thick, add 1–2 tbsp water to loosen."
+      ],
+      "timers": [{ "label": "Reduce glaze", "minutes": 3 }],
+      "checks": [
+        "Sauce should coat chicken in a glossy layer.",
+        "Chicken should reach 165°F internal temperature before serving."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 2
+    },
+    {
+      "id": "step.finish",
+      "title": "Finish and serve",
+      "instructions": [
+        "Turn off heat and drizzle toasted sesame oil (optional).",
+        "Taste and adjust: add a squeeze of lime or a splash of vinegar for brightness, or a pinch of salt if needed.",
+        "Garnish with scallions and sesame seeds (optional).",
+        "Serve over rice or noodles, or with stir-fried vegetables."
+      ],
+      "activeMins": 2
+    }
+  ],
+
+  "pairings": {
+    "serveWith": [
+      "recipes.asian_fusion.fried_rice",
+      "recipes.asian_fusion.stir_fry_vegetables",
+      "recipes.asian_fusion.noodle_stir_fry"
+    ],
+    "bases": [
+      "dish.steamed_rice",
+      "dish.jasmine_rice",
+      "dish.rice_noodles_optional"
+    ],
+    "vegSides": [
+      "dish.cucumber_salad_optional",
+      "dish.quick_pickled_veg_optional"
+    ],
+    "sauces": ["condiment.chili_crisp_optional", "condiment.sriracha_optional"]
+  },
+
+  "planner": {
+    "bestFor": ["weeknight", "family_style", "meal_prep"],
+    "scaling": {
+      "notes": [
+        "For double batches, sear chicken in two rounds to maintain browning.",
+        "Glaze reduces quickly; keep heat moderate to prevent scorching sugars."
+      ]
+    }
+  },
+
+  "storage": {
+    "refrigerator": {
+      "duration": "3–4 days",
+      "notes": ["Sauce will thicken when cold; reheat with a splash of water."]
+    },
+    "freezer": {
+      "duration": "2 months",
+      "notes": [
+        "Freeze in sauce for best texture. Thaw overnight in fridge before reheating."
+      ]
+    },
+    "reheat": {
+      "skillet": "Medium heat, 4–6 minutes; add 1–2 tbsp water and stir until glossy again.",
+      "microwave": "Cover; 60–90 seconds, stir, then 45–60 seconds more with a splash of water."
+    }
+  },
+
+  "safety": {
+    "notes": [
+      "Cook chicken to 165°F internal temperature.",
+      "Avoid burning garlic/ginger; sugars in sweet chili sauce can scorch quickly."
+    ]
+  },
+
+  "variations": [
+    {
+      "id": "var.diy_sweet_chili",
+      "label": "DIY Sweet-Chili Glaze (No bottled sauce)",
+      "notes": "Replace sweet chili sauce with: 3 tbsp honey (or brown sugar) + 2 tbsp vinegar + 2 tbsp water + 1–2 tsp chili flakes + 1 tbsp ketchup (optional). Simmer to thicken."
+    },
+    {
+      "id": "var.orange_sweet_chili",
+      "label": "Orange Sweet Chili Chicken",
+      "notes": "Add 2 tbsp orange juice + 1 tsp orange zest to the glaze; reduce slightly longer for a sticky finish."
+    },
+    {
+      "id": "var.crispy_airfryer",
+      "label": "Crispy Air Fryer + Toss",
+      "notes": "Air fry coated chicken at 400°F for 10–12 minutes, shaking halfway, then toss in warmed glaze in a skillet for 1–2 minutes."
+    }
+  ],
+
+  "notes": [
+    "For less heat, choose a mild sweet chili sauce and skip red pepper flakes.",
+    "For more heat, add chili crisp at the end or increase flakes.",
+    "If you want extra crunch, add quick-seared bell peppers or onions before glazing."
+  ],
+
+  "methods": ["method.sear", "method.glaze", "method.reduce"],
+
+  "compat": {
+    "cuisineId": "cuisines.asian_fusion",
+    "dishId": "dish.sweet_chili_chicken",
+    "search": {
+      "keywords": [
+        "sweet chili chicken",
+        "sticky chicken",
+        "weeknight chicken glaze",
+        "sweet and spicy chicken"
+      ],
+      "aliases": ["thai-style sweet chili chicken", "sticky chili chicken"]
+    },
+    "planner": {
+      "pairsWellWith": [
+        "dish.steamed_rice",
+        "dish.fried_rice",
+        "dish.stir_fry_vegetables"
+      ],
+      "inventorySignals": [
+        "ingredient.chicken",
+        "ingredient.garlic",
+        "ingredient.ginger_fresh",
+        "ingredient.soy_sauce_optional",
+        "ingredient.sweet_chili_sauce"
+      ]
+    }
+  }
+}

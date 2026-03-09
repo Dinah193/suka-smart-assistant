@@ -34,10 +34,10 @@
 // This is a *logic* module, not a React component.
 // -----------------------------------------------------------------------------
 
-import eventBus from "../../services/eventBus";
-import featureFlags from "../../config/featureFlags.json";
-import { formatInventoryUpdateForHub } from "../../services/HubPacketFormatter";
-import FamilyFundConnector from "../../services/FamilyFundConnector";
+import eventBus from "../../services/events/eventBus";
+import featureFlags from "@/config/featureFlags.json";
+import { formatInventoryUpdateForHub } from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 
 let InventoryService = null;
 let InventoryStore = null;
@@ -88,7 +88,9 @@ const InventorySessionEngine = {
     const current = await loadInventorySafe();
 
     // 2. apply each delta → build updated items
-    const updatedItems = applyDeltasToInventory(current, deltas, { allowNegative });
+    const updatedItems = applyDeltasToInventory(current, deltas, {
+      allowNegative,
+    });
 
     // 3. persist updated items back
     await persistInventorySafe(updatedItems);
@@ -122,7 +124,9 @@ const InventorySessionEngine = {
    */
   async generateRestockSession(lowItems, options = {}) {
     if (!Array.isArray(lowItems) || !lowItems.length) {
-      console.warn("[InventorySessionEngine] generateRestockSession: no low items");
+      console.warn(
+        "[InventorySessionEngine] generateRestockSession: no low items"
+      );
       return null;
     }
 
@@ -184,7 +188,9 @@ const InventorySessionEngine = {
       .filter(Boolean);
 
     if (!deltas.length) {
-      console.warn("[InventorySessionEngine] processImportAsInventory: nothing to convert");
+      console.warn(
+        "[InventorySessionEngine] processImportAsInventory: nothing to convert"
+      );
       return;
     }
 
@@ -200,7 +206,8 @@ const InventorySessionEngine = {
    * @param {Object} options
    */
   async detectShortages(items, options = {}) {
-    const base = Array.isArray(items) && items.length ? items : await loadInventorySafe();
+    const base =
+      Array.isArray(items) && items.length ? items : await loadInventorySafe();
     const shortages = detectShortagesFromItems(base);
     if (!shortages.length) return;
     const evt = emitEvent("inventory.shortage.detected", {
@@ -425,7 +432,10 @@ async function persistInventorySafe(items) {
       await InventoryService.bulkReplace(items);
       return;
     } catch (e) {
-      console.warn("[InventorySessionEngine] InventoryService.bulkReplace failed", e);
+      console.warn(
+        "[InventorySessionEngine] InventoryService.bulkReplace failed",
+        e
+      );
     }
   }
   if (InventoryStore && typeof InventoryStore.bulkReplace === "function") {
@@ -433,7 +443,10 @@ async function persistInventorySafe(items) {
       await InventoryStore.bulkReplace(items);
       return;
     } catch (e) {
-      console.warn("[InventorySessionEngine] InventoryStore.bulkReplace failed", e);
+      console.warn(
+        "[InventorySessionEngine] InventoryStore.bulkReplace failed",
+        e
+      );
     }
   }
 }
@@ -447,7 +460,10 @@ async function loadInventorySafe() {
       const data = await InventoryService.getAll();
       return Array.isArray(data) ? data : [];
     } catch (e) {
-      console.warn("[InventorySessionEngine] InventoryService.getAll failed", e);
+      console.warn(
+        "[InventorySessionEngine] InventoryService.getAll failed",
+        e
+      );
     }
   }
   if (InventoryStore && typeof InventoryStore.getAll === "function") {
@@ -498,7 +514,9 @@ async function exportToHubIfEnabled(evtPayload) {
 // -----------------------------------------------------------------------------
 
 function makeInventoryKey(name, location) {
-  return `${(name || "").toLowerCase()}|${(location || "Pantry").toLowerCase()}`;
+  return `${(name || "").toLowerCase()}|${(
+    location || "Pantry"
+  ).toLowerCase()}`;
 }
 
 function buildRestockLabel(item, target) {

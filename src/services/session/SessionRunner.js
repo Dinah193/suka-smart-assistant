@@ -28,12 +28,16 @@
 
 /* eslint-disable no-console */
 
-import { emit as busEmit, on as busOn, off as busOff } from "../events/eventBus.js";
+import {
+  emit as busEmit,
+  on as busOn,
+  off as busOff,
+} from "../events/eventBus.js";
 import { db } from "@/db";
 
-import HubPacketFormatter from "../hub/HubPacketFormatter.js";
+import HubPacketFormatter from "@services/hub/HubPacketFormatter.js";
 import FamilyFundConnector from "../hub/FamilyFundConnector.js";
-import featureFlags from "../../config/featureFlags.json";
+import featureFlags from "@/config/featureFlags.json";
 
 /* -------------------------------------------------------------------------- */
 /* Constants & module-scoped state                                            */

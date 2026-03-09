@@ -23,7 +23,7 @@
  * - They do not mutate the graph or the index.
  */
 
-import eventBus from "@/services/eventBus";
+import eventBus from "@/services/events/eventBus";
 import {
   getIndexedPlanningGraph,
   getSuccessors,

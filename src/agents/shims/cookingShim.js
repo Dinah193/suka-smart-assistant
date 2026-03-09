@@ -43,10 +43,10 @@
 // handled by the Reasoner + downstream automation, not in the shim.
 // -----------------------------------------------------------------------------
 
-import { emit } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
-import budget from "@/reasoner/budget.json";
+import budget from "@/reasoner/budget.js";
 import { canInvokeReasoner } from "@/reasoner/gating";
 import { evaluateConfidence } from "@/reasoner/confidence";
 import { selectCookingContext } from "@/reasoner/selectors";
@@ -59,8 +59,8 @@ import { getSystemPrompt } from "@/reasoner/prompts/system";
 import { buildCookingPrompt } from "@/reasoner/prompts/templates";
 import { invokeReasoner } from "@/reasoner/core";
 
-import { evaluateGuards } from "@/guards/guardsEvaluate";
-import { composeSessionsFromPlan } from "@/skills/sessions/compose";
+import { evaluateGuards } from "@/agents/skills/sessions/guardsEvaluate";
+import { composeSessionsFromPlan } from "@agents/skills/sessions/compose";
 
 import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
 import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
@@ -125,7 +125,13 @@ function buildErrorResponse(reason, mode = "none", err, debug = []) {
       : {}),
   };
 
-  return buildShimResponse(false, mode, payload, [{ type: "error", reason }], debug);
+  return buildShimResponse(
+    false,
+    mode,
+    payload,
+    [{ type: "error", reason }],
+    debug
+  );
 }
 
 /**
@@ -137,7 +143,8 @@ function buildErrorResponse(reason, mode = "none", err, debug = []) {
  */
 function enforceBudget(reqLike, debug) {
   const domainBudget =
-    (budget && (budget.cooking || budget.cookingAgent || budget.household)) || {};
+    (budget && (budget.cooking || budget.cookingAgent || budget.household)) ||
+    {};
 
   const maxChars = domainBudget.maxChars || 25000;
   const serializedInput = JSON.stringify(reqLike.input || {});
@@ -174,7 +181,9 @@ function resolveShimMode(req, context) {
       context,
       runtime: req.runtime || {},
       source: SHIM_SOURCE,
-    }) || req.intent || "cooking.suggestMeals"
+    }) ||
+    req.intent ||
+    "cooking.suggestMeals"
   );
 }
 
@@ -341,7 +350,10 @@ export async function invokeShim(req) {
     // -------------------------------------------------
     // 2. Budget + gating
     // -------------------------------------------------
-    const budgetCheck = enforceBudget({ domain, intent, input, runtime }, debug);
+    const budgetCheck = enforceBudget(
+      { domain, intent, input, runtime },
+      debug
+    );
     if (!budgetCheck.ok) {
       warnings.push({
         type: "budget.blocked",
@@ -629,7 +641,11 @@ export async function invokeShim(req) {
     // -------------------------------------------------
     // 11. Compose sessions (optional)
     // -------------------------------------------------
-    const sessions = await maybeComposeSessions(normalized, { domain, intent, input, runtime }, debug);
+    const sessions = await maybeComposeSessions(
+      normalized,
+      { domain, intent, input, runtime },
+      debug
+    );
 
     // Session lifecycle events (session.started / step.changed / etc.)
     // are emitted by the SessionRunner when those sessions execute,
@@ -654,7 +670,12 @@ export async function invokeShim(req) {
     // -------------------------------------------------
     // 13. Optional Hub export
     // -------------------------------------------------
-    await maybeExportToHub(sessions, normalized, { domain, intent, input, runtime }, debug);
+    await maybeExportToHub(
+      sessions,
+      normalized,
+      { domain, intent, input, runtime },
+      debug
+    );
 
     // -------------------------------------------------
     // 14. Final response

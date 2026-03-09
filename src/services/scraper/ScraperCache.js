@@ -30,7 +30,7 @@
  * - All I/O wrapped in try/catch; on failure, falls back to in-memory cache only.
  */
 
-import eventBus from '../eventBus.js';
+import eventBus from "../events/eventBus.js";
 
 // Optional imports; degrade gracefully if absent
 let ImportCacheService = null;
@@ -40,19 +40,19 @@ let FamilyFundConnector = null;
 
 (async () => {
   try {
-    const mod = await import('../imports/ImportCacheService.js');
+    const mod = await import("../imports/ImportCacheService.js");
     ImportCacheService = mod.default || mod;
   } catch {}
   try {
-    const mod = await import('../../config/featureFlags.js');
+    const mod = await import("@/config/featureFlags.json");
     featureFlags = mod.default || mod || featureFlags;
   } catch {}
   try {
-    const mod = await import('../../hub/HubPacketFormatter.js');
+    const mod = await import("@/services/hub/HubPacketFormatter.js");
     HubPacketFormatter = mod.default || mod;
   } catch {}
   try {
-    const mod = await import('../../hub/FamilyFundConnector.js');
+    const mod = await import("@/services/hub/FamilyFundConnector.js");
     FamilyFundConnector = mod.default || mod;
   } catch {}
 })();
@@ -61,15 +61,16 @@ let FamilyFundConnector = null;
  * Utilities
  * ------------------------------------------------------------------------- */
 
-const SOURCE = 'ScraperCache';
+const SOURCE = "ScraperCache";
 const nowISO = () => new Date().toISOString();
-const emit = (type, data) => eventBus.emit({ type, ts: nowISO(), source: SOURCE, data });
+const emit = (type, data) =>
+  eventBus.emit({ type, ts: nowISO(), source: SOURCE, data });
 
-const isStr = (v) => typeof v === 'string';
+const isStr = (v) => typeof v === "string";
 const arr = (v) => (Array.isArray(v) ? v : v == null ? [] : [v]);
 
 // Small, fast FNV-1a hash for stable fingerprints
-function fnv1a(str = '') {
+function fnv1a(str = "") {
   let h = 2166136261 >>> 0;
   for (let i = 0; i < str.length; i++) {
     h ^= str.charCodeAt(i);
@@ -86,10 +87,13 @@ function stableJson(obj) {
 function normalizeUrl(url) {
   try {
     const u = new URL(url);
-    u.hash = '';
+    u.hash = "";
     // Normalize default ports
-    if ((u.protocol === 'http:' && u.port === '80') || (u.protocol === 'https:' && u.port === '443')) {
-      u.port = '';
+    if (
+      (u.protocol === "http:" && u.port === "80") ||
+      (u.protocol === "https:" && u.port === "443")
+    ) {
+      u.port = "";
     }
     return u.toString();
   } catch {
@@ -101,7 +105,7 @@ function hostname(url) {
   try {
     return new URL(url).hostname.toLowerCase();
   } catch {
-    return '';
+    return "";
   }
 }
 
@@ -111,14 +115,17 @@ function hostname(url) {
  */
 export function computeFingerprint(payload = {}) {
   const basis = {
-    url: normalizeUrl(payload.url || ''),
+    url: normalizeUrl(payload.url || ""),
     meta: {
-      title: payload.meta?.title || '',
-      description: payload.meta?.description || '',
+      title: payload.meta?.title || "",
+      description: payload.meta?.description || "",
     },
-    mainText: (payload.main?.text || '').replace(/\s+/g, ' ').trim().slice(0, 200000), // cap to keep hashing cheap
+    mainText: (payload.main?.text || "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 200000), // cap to keep hashing cheap
     tables: (arr(payload.tables) || []).map((t) => ({
-      name: t.name || '',
+      name: t.name || "",
       // use header names and a few first rows to detect schema/data changes
       columns: arr(t.columns).slice(0, 50),
       rowsHead: arr(t.rows).slice(0, 25),
@@ -126,7 +133,7 @@ export function computeFingerprint(payload = {}) {
     jsonldCount: arr(payload.jsonld).length,
     imagesCount: arr(payload.images).length,
     linksCount: arr(payload.links).length,
-    enrichmentKind: payload.enrichment?.kind || '',
+    enrichmentKind: payload.enrichment?.kind || "",
   };
   return fnv1a(stableJson(basis));
 }
@@ -197,7 +204,7 @@ function pruneIfNeeded() {
     lru.delete(firstKey);
     removed++;
   }
-  if (removed) emit('cache.scrape.pruned', { removed });
+  if (removed) emit("cache.scrape.pruned", { removed });
   return removed;
 }
 
@@ -267,8 +274,8 @@ export async function shouldFetch(url, opts = {}) {
   const entry = await get(key);
 
   if (!entry) {
-    emit('cache.scrape.miss', { url: key, reason: 'no-entry' });
-    return { decision: 'fetch', headers: {} };
+    emit("cache.scrape.miss", { url: key, reason: "no-entry" });
+    return { decision: "fetch", headers: {} };
   }
 
   // TTL freshness check
@@ -276,22 +283,23 @@ export async function shouldFetch(url, opts = {}) {
   const ttlMs = ttlFor(key, entry.tags.size ? entry.tags : tags);
 
   if (age < ttlMs) {
-    emit('cache.scrape.hit', { url: key, policy: 'fresh' });
-    return { decision: 'skip', reason: 'fresh' };
+    emit("cache.scrape.hit", { url: key, policy: "fresh" });
+    return { decision: "skip", reason: "fresh" };
   }
 
   // Stale: attempt conditional GET if we have validators
   const headers = {};
-  if (entry.etag) headers['If-None-Match'] = entry.etag;
-  if (entry.lastModified) headers['If-Modified-Since'] = new Date(entry.lastModified).toUTCString();
+  if (entry.etag) headers["If-None-Match"] = entry.etag;
+  if (entry.lastModified)
+    headers["If-Modified-Since"] = new Date(entry.lastModified).toUTCString();
 
-  if (headers['If-None-Match'] || headers['If-Modified-Since']) {
-    emit('cache.scrape.conditional', { url: key });
-    return { decision: 'conditional', headers };
+  if (headers["If-None-Match"] || headers["If-Modified-Since"]) {
+    emit("cache.scrape.conditional", { url: key });
+    return { decision: "conditional", headers };
   }
 
-  emit('cache.scrape.hit', { url: key, policy: 'stale' });
-  return { decision: 'fetch', headers: {} };
+  emit("cache.scrape.hit", { url: key, policy: "stale" });
+  return { decision: "fetch", headers: {} };
 }
 
 /**
@@ -301,8 +309,9 @@ export async function prepareConditionalHeaders(url) {
   const entry = await get(url);
   if (!entry) return {};
   const headers = {};
-  if (entry.etag) headers['If-None-Match'] = entry.etag;
-  if (entry.lastModified) headers['If-Modified-Since'] = new Date(entry.lastModified).toUTCString();
+  if (entry.etag) headers["If-None-Match"] = entry.etag;
+  if (entry.lastModified)
+    headers["If-Modified-Since"] = new Date(entry.lastModified).toUTCString();
   return headers;
 }
 
@@ -317,11 +326,16 @@ export async function prepareConditionalHeaders(url) {
  * - If status === 304, fingerprint does not change.
  * - If status is 2xx with payload, fingerprint recomputed.
  */
-export async function noteResponse(url, responseMeta = {}, payload = null, opts = {}) {
+export async function noteResponse(
+  url,
+  responseMeta = {},
+  payload = null,
+  opts = {}
+) {
   const key = normalizeUrl(url);
   const existing = (await get(key)) || {
     url: key,
-    fingerprint: '',
+    fingerprint: "",
     etag: undefined,
     lastModified: undefined,
     fetchedAt: 0,
@@ -345,12 +359,19 @@ export async function noteResponse(url, responseMeta = {}, payload = null, opts 
 
   // Update validators and timestamps
   if (isStr(responseMeta.etag)) existing.etag = responseMeta.etag;
-  if (isStr(responseMeta.lastModified) || Number.isFinite(responseMeta.lastModified)) {
+  if (
+    isStr(responseMeta.lastModified) ||
+    Number.isFinite(responseMeta.lastModified)
+  ) {
     // store numeric ms
     const ms = Number(responseMeta.lastModified);
-    existing.lastModified = Number.isFinite(ms) ? ms : Date.parse(responseMeta.lastModified);
+    existing.lastModified = Number.isFinite(ms)
+      ? ms
+      : Date.parse(responseMeta.lastModified);
   }
-  existing.fetchedAt = responseMeta.fetchedAt ? Date.parse(responseMeta.fetchedAt) : Date.now();
+  existing.fetchedAt = responseMeta.fetchedAt
+    ? Date.parse(responseMeta.fetchedAt)
+    : Date.now();
   if (opts.tags) {
     for (const t of arr(opts.tags)) existing.tags.add(t);
   }
@@ -374,7 +395,7 @@ export async function noteResponse(url, responseMeta = {}, payload = null, opts 
     // ignore persistence errors
   }
 
-  emit('cache.scrape.updated', {
+  emit("cache.scrape.updated", {
     url: key,
     fingerprintChanged,
     etag: existing.etag || null,
@@ -410,7 +431,8 @@ export async function invalidate(url) {
   const key = normalizeUrl(url);
   lru.delete(key);
   try {
-    if (ImportCacheService?.deleteMeta) await ImportCacheService.deleteMeta(key);
+    if (ImportCacheService?.deleteMeta)
+      await ImportCacheService.deleteMeta(key);
   } catch {}
 }
 

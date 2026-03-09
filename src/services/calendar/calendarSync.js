@@ -16,25 +16,37 @@
 
 let eventBus = { on() {}, off() {}, emit() {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
-} catch (_e) { /* no-op */ }
+} catch (_e) {
+  /* no-op */
+}
 
 let timeMath = null;
 try {
   timeMath = require("@/services/session/utils/timeMath.js");
   timeMath = (timeMath && (timeMath.default || timeMath)) || null;
-} catch (_e) { /* no-op */ }
+} catch (_e) {
+  /* no-op */
+}
 
 let debugMod = null;
 try {
   debugMod = require("@/services/session/utils/scheduleDebug.js");
   debugMod = (debugMod && (debugMod.default || debugMod)) || null;
-} catch (_e) { /* no-op */ }
+} catch (_e) {
+  /* no-op */
+}
 
-const d = debugMod?.withDomain ? debugMod.withDomain("calendar") : {
-  debug() {}, info() {}, warn() {}, error() {}, trace() {}
-};
+const d = debugMod?.withDomain
+  ? debugMod.withDomain("calendar")
+  : {
+      debug() {},
+      info() {},
+      warn() {},
+      error() {},
+      trace() {},
+    };
 
 const isBrowser = typeof window !== "undefined";
 const now = () => Date.now();
@@ -67,7 +79,7 @@ const LocalAdapter = {
     // Emits a request for UI to offer connecting a real calendar
     eventBus.emit?.("calendar.write.requested", { input, provider: "local" });
     d.debug("local:upsert", input);
-    return { id: `local_${Math.floor(Math.random()*1e9).toString(36)}` };
+    return { id: `local_${Math.floor(Math.random() * 1e9).toString(36)}` };
   },
   async deleteEvent(id) {
     d.debug("local:delete", { id });
@@ -75,8 +87,10 @@ const LocalAdapter = {
   },
   async batchUpsert(inputs) {
     d.debug("local:batch", { n: inputs?.length || 0 });
-    return (inputs || []).map(() => ({ id: `local_${Math.floor(Math.random()*1e9).toString(36)}` }));
-  }
+    return (inputs || []).map(() => ({
+      id: `local_${Math.floor(Math.random() * 1e9).toString(36)}`,
+    }));
+  },
 };
 
 /* -------------------------------- Google Adapter ----------------------------- */
@@ -87,15 +101,25 @@ const LocalAdapter = {
 const GoogleAdapter = {
   kind: "google",
   _calendarId: "primary",
-  setCalendarId(id) { this._calendarId = id || "primary"; },
+  setCalendarId(id) {
+    this._calendarId = id || "primary";
+  },
 
-  _g() { try { return isBrowser ? window.gapi : null; } catch (_e) { return null; } },
+  _g() {
+    try {
+      return isBrowser ? window.gapi : null;
+    } catch (_e) {
+      return null;
+    }
+  },
   _authed() {
     const g = this._g();
     try {
       // Best effort check
       return !!(g && g.client && g.client.calendar);
-    } catch (_e) { return false; }
+    } catch (_e) {
+      return false;
+    }
   },
 
   async upsertEvent(input) {
@@ -109,12 +133,12 @@ const GoogleAdapter = {
         resp = await g.client.calendar.events.update({
           calendarId: this._calendarId,
           eventId: input.providerId,
-          resource
+          resource,
         });
       } else {
         resp = await g.client.calendar.events.insert({
           calendarId: this._calendarId,
-          resource
+          resource,
         });
       }
       const { id, htmlLink } = resp.result || {};
@@ -130,7 +154,10 @@ const GoogleAdapter = {
     if (!this._authed()) return LocalAdapter.deleteEvent(id);
     const g = this._g();
     try {
-      await g.client.calendar.events.delete({ calendarId: this._calendarId, eventId: id });
+      await g.client.calendar.events.delete({
+        calendarId: this._calendarId,
+        eventId: id,
+      });
       d.info("google:delete:ok", { id });
     } catch (err) {
       d.warn("google:delete:fail", { id, error: String(err?.message || err) });
@@ -145,20 +172,21 @@ const GoogleAdapter = {
       out.push(await this.upsertEvent(i));
     }
     return out;
-  }
+  },
 };
 
 function toGoogleResource(input) {
   const start = new Date(input.startTs).toISOString();
-  const end   = new Date(input.endTs).toISOString();
+  const end = new Date(input.endTs).toISOString();
   return {
     summary: input.title,
     description: input.description || "",
     start: { dateTime: start },
-    end:   { dateTime: end },
+    end: { dateTime: end },
     location: input.location || undefined,
     colorId: input.colorId || undefined,
-    transparency: input.transparency === "transparent" ? "transparent" : "opaque",
+    transparency:
+      input.transparency === "transparent" ? "transparent" : "opaque",
     reminders: input.reminders || { useDefault: true },
   };
 }
@@ -166,13 +194,13 @@ function toGoogleResource(input) {
 /* --------------------------------- State/Queue ------------------------------- */
 const STATE = {
   enabled: true,
-  provider: LocalAdapter,    // default until setProvider("google") etc.
+  provider: LocalAdapter, // default until setProvider("google") etc.
   calendarId: "primary",
-  queue: new Map(),          // sessionId -> eventInput
-  mapping: new Map(),        // sessionId -> { providerId, lastWriteTs }
+  queue: new Map(), // sessionId -> eventInput
+  mapping: new Map(), // sessionId -> { providerId, lastWriteTs }
   flushHandle: null,
-  flushDelayMs: 800,         // debounce
-  defaultDomain: "meals",    // used in titles if missing
+  flushDelayMs: 800, // debounce
+  defaultDomain: "meals", // used in titles if missing
 };
 
 /* --------------------------------- Utilities -------------------------------- */
@@ -182,7 +210,7 @@ function ensureTimeMath() {
 }
 
 function humanize(ms) {
-  if (!timeMath?.humanize) return `${Math.round(ms/1000)}s`;
+  if (!timeMath?.humanize) return `${Math.round(ms / 1000)}s`;
   return timeMath.humanize(ms, { style: "short", maxUnits: 2 });
 }
 
@@ -190,7 +218,10 @@ function sessionToEventTitle(session) {
   const domain = session?.domain || STATE.defaultDomain;
   const base = session?.title || session?.name || "Timed Session";
   const snap = snapshot(session);
-  const pct = Math.max(0, Math.min(100, Math.round((snap?.progress || 0) * 100)));
+  const pct = Math.max(
+    0,
+    Math.min(100, Math.round((snap?.progress || 0) * 100))
+  );
   const left = humanize(snap?.remainingMs || 0);
   // Format like top productivity apps: terse, useful
   return `${base} — ${pct}% • ${left} left (${domain})`;
@@ -203,8 +234,10 @@ function sessionToEventDescription(session) {
   if (s.notes) parts.push(s.notes);
   parts.push(`Started: ${new Date(s.startedAt).toLocaleString()}`);
   if (s.targetMs) parts.push(`Target: ${humanize(s.targetMs)}`);
-  if (snap?.elapsedMs != null) parts.push(`Elapsed: ${humanize(snap.elapsedMs)}`);
-  if (Array.isArray(s.pauses) && s.pauses.length) parts.push(`Pauses: ${s.pauses.length}`);
+  if (snap?.elapsedMs != null)
+    parts.push(`Elapsed: ${humanize(snap.elapsedMs)}`);
+  if (Array.isArray(s.pauses) && s.pauses.length)
+    parts.push(`Pauses: ${s.pauses.length}`);
   if (s.recipe) parts.push(`Recipe: ${s.recipe}`);
   if (s.location) parts.push(`Location: ${s.location}`);
   return parts.join("\n");
@@ -233,7 +266,10 @@ function buildEventInput(session, prevProviderId) {
   const snap = snapshot(s);
 
   const startTs = s.startedAt || now();
-  const estimatedEndTs = clampEnd(startTs, (s.startedAt || now()) + (s.targetMs || 0));
+  const estimatedEndTs = clampEnd(
+    startTs,
+    (s.startedAt || now()) + (s.targetMs || 0)
+  );
   const effectiveEndTs = snap?.complete ? now() : estimatedEndTs;
 
   return {
@@ -264,7 +300,10 @@ function setProvider(kind, options = {}) {
   } else {
     STATE.provider = LocalAdapter;
   }
-  d.info("provider:set", { kind: STATE.provider.kind, calendarId: options.calendarId || "primary" });
+  d.info("provider:set", {
+    kind: STATE.provider.kind,
+    calendarId: options.calendarId || "primary",
+  });
 }
 
 function getMapping(sessionId) {
@@ -296,11 +335,19 @@ async function removeSession(sessionId) {
       await STATE.provider.deleteEvent(mapping.providerId);
       STATE.mapping.delete(sessionId);
       d.info("delete:ok", { sessionId, providerId: mapping.providerId });
-      eventBus.emit?.("calendar.write.ok", { op: "delete", sessionId, providerId: mapping.providerId });
+      eventBus.emit?.("calendar.write.ok", {
+        op: "delete",
+        sessionId,
+        providerId: mapping.providerId,
+      });
     }
   } catch (err) {
     d.warn("delete:fail", { sessionId, error: String(err?.message || err) });
-    eventBus.emit?.("calendar.write.fail", { op: "delete", sessionId, error: String(err?.message || err) });
+    eventBus.emit?.("calendar.write.fail", {
+      op: "delete",
+      sessionId,
+      error: String(err?.message || err),
+    });
   }
 }
 
@@ -317,7 +364,10 @@ async function flushQueue() {
   STATE.queue.clear();
   const inputs = items.map(([, ev]) => ev);
 
-  eventBus.emit?.("calendar.write.requested", { count: inputs.length, provider: STATE.provider.kind });
+  eventBus.emit?.("calendar.write.requested", {
+    count: inputs.length,
+    provider: STATE.provider.kind,
+  });
 
   try {
     const results = await STATE.provider.batchUpsert(inputs);
@@ -328,10 +378,16 @@ async function flushQueue() {
       if (providerId) setMapping(sessionId, providerId);
       d.info("upsert:ok", { sessionId, providerId });
     }
-    eventBus.emit?.("calendar.write.ok", { op: "batchUpsert", count: inputs.length });
+    eventBus.emit?.("calendar.write.ok", {
+      op: "batchUpsert",
+      count: inputs.length,
+    });
   } catch (err) {
     d.error("upsert:fail", { error: String(err?.message || err) });
-    eventBus.emit?.("calendar.write.fail", { op: "batchUpsert", error: String(err?.message || err) });
+    eventBus.emit?.("calendar.write.fail", {
+      op: "batchUpsert",
+      error: String(err?.message || err),
+    });
     // On failure, re-queue once (best effort) in 10s
     for (const [sid, ev] of items) STATE.queue.set(sid, ev);
     clearTimeout(STATE.flushHandle);
@@ -376,7 +432,7 @@ function attachBus() {
   eventBus.on("session.ended", async (s) => {
     d.info("evt:ended", { id: s?.id });
     // finalize event end time to now
-    const final = { ...s, targetMs: (s?.startedAt ? (now() - s.startedAt) : 0) };
+    const final = { ...s, targetMs: s?.startedAt ? now() - s.startedAt : 0 };
     queueUpsert(final);
     requestFlush();
   });
@@ -386,8 +442,12 @@ function attachBus() {
 /**
  * Generates an ICS string from a list of sessions; useful if no provider connected.
  */
-function toICSLine(s) { return s.replace(/\n/g, "\\n").replace(/,/g, "\\,"); }
-function pad(n) { return String(n).padStart(2, "0"); }
+function toICSLine(s) {
+  return s.replace(/\n/g, "\\n").replace(/,/g, "\\,");
+}
+function pad(n) {
+  return String(n).padStart(2, "0");
+}
 function fmtICS(ts) {
   const dte = new Date(ts);
   const y = dte.getUTCFullYear();
@@ -400,13 +460,22 @@ function fmtICS(ts) {
 }
 
 function exportICS(sessions = []) {
-  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Suka Smart Assistant//EN"];
+  const lines = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Suka Smart Assistant//EN",
+  ];
   for (const s of sessions) {
     const title = sessionToEventTitle(s);
     const desc = sessionToEventDescription(s);
     const startTs = s?.startedAt || now();
-    const endTs = clampEnd(startTs, (s?.startedAt || now()) + (s?.targetMs || 0));
-    const uid = `suka-${s?.id || Math.floor(Math.random()*1e9).toString(36)}@suka`;
+    const endTs = clampEnd(
+      startTs,
+      (s?.startedAt || now()) + (s?.targetMs || 0)
+    );
+    const uid = `suka-${
+      s?.id || Math.floor(Math.random() * 1e9).toString(36)
+    }@suka`;
 
     lines.push("BEGIN:VEVENT");
     lines.push(`UID:${uid}`);
@@ -425,9 +494,13 @@ function exportICS(sessions = []) {
 /* ---------------------------------- Init ------------------------------------ */
 function init(options = {}) {
   if (options.enabled != null) setEnabled(!!options.enabled);
-  if (options.provider) setProvider(options.provider, { calendarId: options.calendarId });
+  if (options.provider)
+    setProvider(options.provider, { calendarId: options.calendarId });
   attachBus();
-  d.info("initialized", { enabled: STATE.enabled, provider: STATE.provider.kind });
+  d.info("initialized", {
+    enabled: STATE.enabled,
+    provider: STATE.provider.kind,
+  });
 }
 
 /* ---------------------------------- API ------------------------------------- */
@@ -442,6 +515,16 @@ const calendarSync = {
   // internal/testing
   _state: STATE,
 };
+
+/**
+ * Named export for modules that import:
+ *   import { CalendarSync } from "@/services/calendar/CalendarSync"
+ * or:
+ *   import { CalendarSync } from "@/services/calendar/calendarSync"
+ *
+ * Keep default export intact (back-compat), but provide the named export alias.
+ */
+export const CalendarSync = calendarSync;
 
 export default calendarSync;
 

@@ -1,0 +1,673 @@
+{
+  "$schema": "../../schemas/farm_to_table/units.catalog.schema.json",
+  "catalogId": "farm_to_table.units",
+  "version": "1.0.0",
+  "generatedAt": "2026-01-10T02:43:12Z",
+  "notes": [
+    "Unit definitions for SSA Farm-to-Table planning, shopping, inventory, recipes, and preservation.",
+    "All conversions are deterministic and intended for internal calculations; UI formatting can be customized per household settings.",
+    "Mass/volume conversions for kitchen units assume water-equivalent density ONLY when explicitly using 'volume_to_mass_assumption=water'. Ingredient-specific density belongs in ingredient/recipe catalogs."
+  ],
+  "enums": {
+    "dimensions": [
+      "mass",
+      "volume",
+      "count",
+      "length",
+      "time",
+      "temperature",
+      "energy"
+    ],
+    "systems": ["metric", "us_customary", "imperial", "kitchen", "unitless"],
+    "roundingModes": ["nearest", "up", "down", "bankers"],
+    "displayContexts": [
+      "recipe",
+      "inventory",
+      "shopping",
+      "preservation",
+      "planner",
+      "nutrition"
+    ]
+  },
+  "defaults": {
+    "displayContext": "recipe",
+    "locale": "en-US",
+    "preferredSystemsByDimension": {
+      "mass": ["us_customary", "metric"],
+      "volume": ["us_customary", "metric"],
+      "count": ["unitless"],
+      "length": ["us_customary", "metric"],
+      "time": ["unitless"],
+      "temperature": ["us_customary", "metric"],
+      "energy": ["metric"]
+    }
+  },
+  "dimensions": {
+    "mass": {
+      "baseUnit": "g"
+    },
+    "volume": {
+      "baseUnit": "ml"
+    },
+    "count": {
+      "baseUnit": "each"
+    },
+    "length": {
+      "baseUnit": "mm"
+    },
+    "time": {
+      "baseUnit": "s"
+    },
+    "temperature": {
+      "baseUnit": "c"
+    },
+    "energy": {
+      "baseUnit": "kcal"
+    }
+  },
+  "units": [
+    {
+      "id": "g",
+      "label": "Gram",
+      "symbol": "g",
+      "dimension": "mass",
+      "system": "metric",
+      "toBase": 1,
+      "increment": 1,
+      "notes": "",
+      "sortOrder": 10
+    },
+    {
+      "id": "kg",
+      "label": "Kilogram",
+      "symbol": "kg",
+      "dimension": "mass",
+      "system": "metric",
+      "toBase": 1000,
+      "increment": 0.001,
+      "notes": "",
+      "sortOrder": 11
+    },
+    {
+      "id": "mg",
+      "label": "Milligram",
+      "symbol": "mg",
+      "dimension": "mass",
+      "system": "metric",
+      "toBase": 0.001,
+      "increment": 1,
+      "notes": "",
+      "sortOrder": 12
+    },
+    {
+      "id": "oz",
+      "label": "Ounce",
+      "symbol": "oz",
+      "dimension": "mass",
+      "system": "us_customary",
+      "toBase": 28.349523125,
+      "increment": 0.1,
+      "notes": "",
+      "sortOrder": 20
+    },
+    {
+      "id": "lb",
+      "label": "Pound",
+      "symbol": "lb",
+      "dimension": "mass",
+      "system": "us_customary",
+      "toBase": 453.59237,
+      "increment": 0.01,
+      "notes": "",
+      "sortOrder": 21
+    },
+    {
+      "id": "stick",
+      "label": "Stick (butter)",
+      "symbol": "stick",
+      "dimension": "count",
+      "system": "kitchen",
+      "toBase": 1,
+      "increment": 1,
+      "notes": "A 'stick' is treated as a count unit; mass conversion is ingredient-specific.",
+      "sortOrder": 200
+    },
+    {
+      "id": "ml",
+      "label": "Milliliter",
+      "symbol": "mL",
+      "dimension": "volume",
+      "system": "metric",
+      "toBase": 1,
+      "increment": 1,
+      "notes": "",
+      "sortOrder": 30
+    },
+    {
+      "id": "l",
+      "label": "Liter",
+      "symbol": "L",
+      "dimension": "volume",
+      "system": "metric",
+      "toBase": 1000,
+      "increment": 0.001,
+      "notes": "",
+      "sortOrder": 31
+    },
+    {
+      "id": "tsp",
+      "label": "Teaspoon",
+      "symbol": "tsp",
+      "dimension": "volume",
+      "system": "us_customary",
+      "toBase": 4.92892159375,
+      "increment": 0.25,
+      "notes": "",
+      "sortOrder": 40
+    },
+    {
+      "id": "tbsp",
+      "label": "Tablespoon",
+      "symbol": "tbsp",
+      "dimension": "volume",
+      "system": "us_customary",
+      "toBase": 14.78676478125,
+      "increment": 0.25,
+      "notes": "",
+      "sortOrder": 41
+    },
+    {
+      "id": "floz",
+      "label": "Fluid ounce",
+      "symbol": "fl oz",
+      "dimension": "volume",
+      "system": "us_customary",
+      "toBase": 29.5735295625,
+      "increment": 0.1,
+      "notes": "",
+      "sortOrder": 42
+    },
+    {
+      "id": "cup",
+      "label": "Cup",
+      "symbol": "cup",
+      "dimension": "volume",
+      "system": "us_customary",
+      "toBase": 236.5882365,
+      "increment": 0.125,
+      "notes": "",
+      "sortOrder": 43
+    },
+    {
+      "id": "pt",
+      "label": "Pint",
+      "symbol": "pt",
+      "dimension": "volume",
+      "system": "us_customary",
+      "toBase": 473.176473,
+      "increment": 0.01,
+      "notes": "",
+      "sortOrder": 44
+    },
+    {
+      "id": "qt",
+      "label": "Quart",
+      "symbol": "qt",
+      "dimension": "volume",
+      "system": "us_customary",
+      "toBase": 946.352946,
+      "increment": 0.01,
+      "notes": "",
+      "sortOrder": 45
+    },
+    {
+      "id": "gal",
+      "label": "Gallon",
+      "symbol": "gal",
+      "dimension": "volume",
+      "system": "us_customary",
+      "toBase": 3785.411784,
+      "increment": 0.01,
+      "notes": "",
+      "sortOrder": 46
+    },
+    {
+      "id": "pint_jar",
+      "label": "Pint jar",
+      "symbol": "pt jar",
+      "dimension": "count",
+      "system": "preservation",
+      "toBase": 1,
+      "increment": 1,
+      "notes": "Jar counts; volume handled via jar size metadata elsewhere.",
+      "sortOrder": 300
+    },
+    {
+      "id": "quart_jar",
+      "label": "Quart jar",
+      "symbol": "qt jar",
+      "dimension": "count",
+      "system": "preservation",
+      "toBase": 1,
+      "increment": 1,
+      "notes": "Jar counts; volume handled via jar size metadata elsewhere.",
+      "sortOrder": 301
+    },
+    {
+      "id": "each",
+      "label": "Each",
+      "symbol": "ea",
+      "dimension": "count",
+      "system": "unitless",
+      "toBase": 1,
+      "increment": 1,
+      "notes": "",
+      "sortOrder": 60
+    },
+    {
+      "id": "dozen",
+      "label": "Dozen",
+      "symbol": "doz",
+      "dimension": "count",
+      "system": "us_customary",
+      "toBase": 12,
+      "increment": 1,
+      "notes": "",
+      "sortOrder": 61
+    },
+    {
+      "id": "pair",
+      "label": "Pair",
+      "symbol": "pr",
+      "dimension": "count",
+      "system": "unitless",
+      "toBase": 2,
+      "increment": 1,
+      "notes": "",
+      "sortOrder": 62
+    },
+    {
+      "id": "mm",
+      "label": "Millimeter",
+      "symbol": "mm",
+      "dimension": "length",
+      "system": "metric",
+      "toBase": 1,
+      "increment": 1,
+      "notes": "",
+      "sortOrder": 70
+    },
+    {
+      "id": "cm",
+      "label": "Centimeter",
+      "symbol": "cm",
+      "dimension": "length",
+      "system": "metric",
+      "toBase": 10,
+      "increment": 0.1,
+      "notes": "",
+      "sortOrder": 71
+    },
+    {
+      "id": "m",
+      "label": "Meter",
+      "symbol": "m",
+      "dimension": "length",
+      "system": "metric",
+      "toBase": 1000,
+      "increment": 0.001,
+      "notes": "",
+      "sortOrder": 72
+    },
+    {
+      "id": "in",
+      "label": "Inch",
+      "symbol": "in",
+      "dimension": "length",
+      "system": "us_customary",
+      "toBase": 25.4,
+      "increment": 0.1,
+      "notes": "",
+      "sortOrder": 80
+    },
+    {
+      "id": "ft",
+      "label": "Foot",
+      "symbol": "ft",
+      "dimension": "length",
+      "system": "us_customary",
+      "toBase": 304.8,
+      "increment": 0.01,
+      "notes": "",
+      "sortOrder": 81
+    },
+    {
+      "id": "yd",
+      "label": "Yard",
+      "symbol": "yd",
+      "dimension": "length",
+      "system": "us_customary",
+      "toBase": 914.4,
+      "increment": 0.01,
+      "notes": "",
+      "sortOrder": 82
+    },
+    {
+      "id": "s",
+      "label": "Second",
+      "symbol": "s",
+      "dimension": "time",
+      "system": "unitless",
+      "toBase": 1,
+      "increment": 1,
+      "notes": "",
+      "sortOrder": 90
+    },
+    {
+      "id": "min",
+      "label": "Minute",
+      "symbol": "min",
+      "dimension": "time",
+      "system": "unitless",
+      "toBase": 60,
+      "increment": 1,
+      "notes": "",
+      "sortOrder": 91
+    },
+    {
+      "id": "hr",
+      "label": "Hour",
+      "symbol": "hr",
+      "dimension": "time",
+      "system": "unitless",
+      "toBase": 3600,
+      "increment": 0.25,
+      "notes": "",
+      "sortOrder": 92
+    },
+    {
+      "id": "day",
+      "label": "Day",
+      "symbol": "day",
+      "dimension": "time",
+      "system": "unitless",
+      "toBase": 86400,
+      "increment": 1,
+      "notes": "",
+      "sortOrder": 93
+    },
+    {
+      "id": "wk",
+      "label": "Week",
+      "symbol": "wk",
+      "dimension": "time",
+      "system": "unitless",
+      "toBase": 604800,
+      "increment": 1,
+      "notes": "",
+      "sortOrder": 94
+    },
+    {
+      "id": "c",
+      "label": "Celsius",
+      "symbol": "°C",
+      "dimension": "temperature",
+      "system": "metric",
+      "toBase": 1,
+      "increment": 0.5,
+      "notes": "Affine unit; toBase is identity for °C.",
+      "sortOrder": 100
+    },
+    {
+      "id": "f",
+      "label": "Fahrenheit",
+      "symbol": "°F",
+      "dimension": "temperature",
+      "system": "us_customary",
+      "toBase": 1,
+      "increment": 1,
+      "notes": "Affine unit; conversion uses formula.",
+      "sortOrder": 101
+    },
+    {
+      "id": "kcal",
+      "label": "Kilocalorie",
+      "symbol": "kcal",
+      "dimension": "energy",
+      "system": "metric",
+      "toBase": 1,
+      "increment": 1,
+      "notes": "",
+      "sortOrder": 110
+    },
+    {
+      "id": "kj",
+      "label": "Kilojoule",
+      "symbol": "kJ",
+      "dimension": "energy",
+      "system": "metric",
+      "toBase": 0.239005736,
+      "increment": 1,
+      "notes": "1 kJ = 0.239005736 kcal",
+      "sortOrder": 111
+    }
+  ],
+  "aliases": [
+    { "alias": "gram", "unitId": "g", "notes": "" },
+    { "alias": "grams", "unitId": "g", "notes": "" },
+    { "alias": "kilogram", "unitId": "kg", "notes": "" },
+    { "alias": "kilograms", "unitId": "kg", "notes": "" },
+    { "alias": "ounce", "unitId": "oz", "notes": "" },
+    { "alias": "ounces", "unitId": "oz", "notes": "" },
+    { "alias": "oz.", "unitId": "oz", "notes": "" },
+    { "alias": "pound", "unitId": "lb", "notes": "" },
+    { "alias": "pounds", "unitId": "lb", "notes": "" },
+    { "alias": "lb.", "unitId": "lb", "notes": "" },
+    { "alias": "milliliter", "unitId": "ml", "notes": "" },
+    { "alias": "milliliters", "unitId": "ml", "notes": "" },
+    { "alias": "ml.", "unitId": "ml", "notes": "" },
+    { "alias": "liter", "unitId": "l", "notes": "" },
+    { "alias": "liters", "unitId": "l", "notes": "" },
+    { "alias": "l.", "unitId": "l", "notes": "" },
+    { "alias": "teaspoon", "unitId": "tsp", "notes": "" },
+    { "alias": "teaspoons", "unitId": "tsp", "notes": "" },
+    { "alias": "tsp.", "unitId": "tsp", "notes": "" },
+    { "alias": "tablespoon", "unitId": "tbsp", "notes": "" },
+    { "alias": "tablespoons", "unitId": "tbsp", "notes": "" },
+    { "alias": "tbsp.", "unitId": "tbsp", "notes": "" },
+    { "alias": "fluid ounce", "unitId": "floz", "notes": "" },
+    { "alias": "fluid ounces", "unitId": "floz", "notes": "" },
+    { "alias": "fl. oz", "unitId": "floz", "notes": "" },
+    { "alias": "fl oz.", "unitId": "floz", "notes": "" },
+    { "alias": "cups", "unitId": "cup", "notes": "" },
+    { "alias": "c.", "unitId": "cup", "notes": "" },
+    { "alias": "pints", "unitId": "pt", "notes": "" },
+    { "alias": "quarts", "unitId": "qt", "notes": "" },
+    { "alias": "gallons", "unitId": "gal", "notes": "" },
+    { "alias": "each", "unitId": "each", "notes": "" },
+    { "alias": "ea", "unitId": "each", "notes": "" },
+    { "alias": "unit", "unitId": "each", "notes": "" },
+    { "alias": "doz", "unitId": "dozen", "notes": "" },
+    { "alias": "dozen(s)", "unitId": "dozen", "notes": "" },
+    { "alias": "minute", "unitId": "min", "notes": "" },
+    { "alias": "minutes", "unitId": "min", "notes": "" },
+    { "alias": "mins", "unitId": "min", "notes": "" },
+    { "alias": "hour", "unitId": "hr", "notes": "" },
+    { "alias": "hours", "unitId": "hr", "notes": "" },
+    { "alias": "hrs", "unitId": "hr", "notes": "" },
+    { "alias": "day", "unitId": "day", "notes": "" },
+    { "alias": "days", "unitId": "day", "notes": "" },
+    { "alias": "week", "unitId": "wk", "notes": "" },
+    { "alias": "weeks", "unitId": "wk", "notes": "" },
+    { "alias": "celsius", "unitId": "c", "notes": "" },
+    { "alias": "degc", "unitId": "c", "notes": "" },
+    { "alias": "°c", "unitId": "c", "notes": "" },
+    { "alias": "fahrenheit", "unitId": "f", "notes": "" },
+    { "alias": "degf", "unitId": "f", "notes": "" },
+    { "alias": "°f", "unitId": "f", "notes": "" }
+  ],
+  "conversionGroups": [
+    {
+      "id": "group.mass.metric",
+      "label": "Metric mass",
+      "dimension": "mass",
+      "unitIds": ["mg", "g", "kg"],
+      "notes": ""
+    },
+    {
+      "id": "group.mass.us",
+      "label": "US mass",
+      "dimension": "mass",
+      "unitIds": ["oz", "lb"],
+      "notes": ""
+    },
+    {
+      "id": "group.volume.metric",
+      "label": "Metric volume",
+      "dimension": "volume",
+      "unitIds": ["ml", "l"],
+      "notes": ""
+    },
+    {
+      "id": "group.volume.us",
+      "label": "US volume",
+      "dimension": "volume",
+      "unitIds": ["tsp", "tbsp", "floz", "cup", "pt", "qt", "gal"],
+      "notes": ""
+    },
+    {
+      "id": "group.count.basic",
+      "label": "Counts",
+      "dimension": "count",
+      "unitIds": ["each", "dozen", "pair"],
+      "notes": ""
+    },
+    {
+      "id": "group.time.basic",
+      "label": "Time",
+      "dimension": "time",
+      "unitIds": ["s", "min", "hr", "day", "wk"],
+      "notes": ""
+    },
+    {
+      "id": "group.temp.basic",
+      "label": "Temperature",
+      "dimension": "temperature",
+      "unitIds": ["f", "c"],
+      "notes": ""
+    },
+    {
+      "id": "group.energy.basic",
+      "label": "Energy",
+      "dimension": "energy",
+      "unitIds": ["kcal", "kj"],
+      "notes": ""
+    },
+    {
+      "id": "group.length.basic",
+      "label": "Length",
+      "dimension": "length",
+      "unitIds": ["mm", "cm", "m", "in", "ft", "yd"],
+      "notes": ""
+    }
+  ],
+  "formatting": {
+    "defaultPrecisionByDimension": {
+      "mass": 0,
+      "volume": 0,
+      "count": 0,
+      "length": 0,
+      "time": 0,
+      "temperature": 0,
+      "energy": 0
+    },
+    "defaultRoundingMode": "nearest",
+    "inventoryRounding": {
+      "mass": { "precision": 0, "mode": "nearest" },
+      "volume": { "precision": 0, "mode": "nearest" },
+      "count": { "precision": 0, "mode": "nearest" }
+    },
+    "shoppingRounding": {
+      "mass": { "precision": 0, "mode": "up" },
+      "volume": { "precision": 0, "mode": "up" },
+      "count": { "precision": 0, "mode": "up" }
+    },
+    "recipeRounding": {
+      "mass": { "precision": 0, "mode": "nearest" },
+      "volume": { "precision": 1, "mode": "nearest" },
+      "count": { "precision": 0, "mode": "nearest" }
+    }
+  },
+  "affineConversions": [
+    {
+      "dimension": "temperature",
+      "from": "f",
+      "to": "c",
+      "forwardFormula": "(x - 32) * 5/9",
+      "inverseFormula": "(x * 9/5) + 32",
+      "notes": "Use for display or user input conversion."
+    }
+  ],
+  "preferredDisplayUnits": [
+    {
+      "dimension": "mass",
+      "context": "recipe",
+      "preferred": ["g", "oz", "lb"],
+      "notes": "Recipes often use small weights; allow oz/lb for US."
+    },
+    {
+      "dimension": "mass",
+      "context": "inventory",
+      "preferred": ["lb", "oz", "g", "kg"],
+      "notes": "Inventory in bulk often uses lb/kg."
+    },
+    {
+      "dimension": "volume",
+      "context": "recipe",
+      "preferred": ["tsp", "tbsp", "cup", "ml", "l"],
+      "notes": ""
+    },
+    {
+      "dimension": "volume",
+      "context": "inventory",
+      "preferred": ["qt", "gal", "l"],
+      "notes": ""
+    },
+    {
+      "dimension": "count",
+      "context": "shopping",
+      "preferred": ["each", "dozen"],
+      "notes": ""
+    },
+    {
+      "dimension": "temperature",
+      "context": "recipe",
+      "preferred": ["f", "c"],
+      "notes": ""
+    },
+    {
+      "dimension": "time",
+      "context": "recipe",
+      "preferred": ["min", "hr"],
+      "notes": ""
+    },
+    {
+      "dimension": "energy",
+      "context": "nutrition",
+      "preferred": ["kcal", "kj"],
+      "notes": ""
+    }
+  ],
+  "assumptions": {
+    "volume_to_mass": [
+      {
+        "id": "assumption.water_density",
+        "label": "Water-equivalent density",
+        "dimensionFrom": "volume",
+        "dimensionTo": "mass",
+        "baseRelationship": "1 ml == 1 g",
+        "notes": "Only valid for water-like liquids. Ingredient-specific density should override this."
+      }
+    ]
+  }
+}

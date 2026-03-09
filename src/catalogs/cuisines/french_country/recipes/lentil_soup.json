@@ -1,0 +1,521 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.french_country.recipes.lentil_soup",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "French Country Lentil Soup",
+    "subtitle": "Lentilles-style soup with aromatics, herbs, and optional smoked meat.",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa.cuisines.french_country",
+      "notes": [
+        "Canonical SSA recipe: French-style lentil soup emphasizing aromatics + herbs, with optional ham hock/bacon for smoky depth.",
+        "Designed for batch cooking, leftovers, and freezer storage."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.french_country",
+    "category": "soup",
+    "mealArchetypes": [
+      "archetype.one_pot",
+      "archetype.soup_stew",
+      "archetype.legume_forward"
+    ],
+    "servingStyles": ["family_style", "one_pot", "bowls"],
+    "plannerTags": [
+      "cuisine.french_country",
+      "dish.lentil_soup",
+      "soup",
+      "legume.forward",
+      "method.simmer",
+      "batch.friendly",
+      "freezer.friendly",
+      "leftovers.friendly",
+      "weeknight.friendly"
+    ]
+  },
+
+  "summary": "A hearty French country lentil soup: green lentils simmered with onion, carrot, celery, garlic, thyme, and bay, finished with vinegar and herbs for brightness. Optional smoked meat adds depth.",
+
+  "yield": {
+    "servings": 6,
+    "notes": "Serves 6 as bowls; 8 as a starter. Thickens as it sits."
+  },
+
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 55,
+    "totalMins": 75
+  },
+
+  "difficulty": "beginner",
+
+  "signals": {
+    "batchFriendly": true,
+    "leftoversGood": true,
+    "freezerFriendly": true,
+    "weeknightPossible": true,
+    "notes": [
+      "Flavor improves after resting 15–30 minutes.",
+      "Add vinegar at the end to keep lentils tender and brighten flavor."
+    ]
+  },
+
+  "tasteProfile": {
+    "saltiness": 2,
+    "sourness": 2,
+    "sweetness": 1,
+    "umami": 2,
+    "heat": 0,
+    "herbaceous": 3,
+    "notes": [
+      "Earthy lentils balanced by aromatic mirepoix and bright vinegar finish.",
+      "Optional smoked meat adds savory, smoky depth."
+    ]
+  },
+
+  "equipment": {
+    "recommended": [
+      "equipment.dutch_oven",
+      "equipment.chef_knife",
+      "equipment.cutting_board",
+      "equipment.wooden_spoon",
+      "equipment.ladle"
+    ],
+    "minimum": ["equipment.large_pot_heavy_bottom", "equipment.stove"],
+    "optional": [
+      {
+        "id": "equipment.immersion_blender",
+        "label": "Immersion blender",
+        "required": false,
+        "notes": "Optional: blend a small portion for a creamier body without dairy."
+      }
+    ]
+  },
+
+  "dietFlags": ["diet.vegetarian_optional", "diet.gluten_free"],
+  "allergens": {
+    "common": [],
+    "notes": [
+      "If using butter, contains dairy.",
+      "If using bacon/ham hock, contains pork (omit for dietary restrictions)."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "ingredient.lentils_green",
+      "label": "Green lentils (French green/lentilles du Puy preferred), rinsed",
+      "role": "legume",
+      "amount": { "value": 1.5, "unit": "cup" },
+      "notes": [
+        "Green lentils hold their shape better than red lentils.",
+        "Avoid pre-salted or seasoned lentil packets for best control."
+      ]
+    },
+    {
+      "id": "ingredient.olive_oil",
+      "label": "Olive oil",
+      "role": "fat",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.butter",
+      "label": "Butter (optional for richer flavor)",
+      "role": "fat",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.onion_yellow",
+      "label": "Yellow onion, diced",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "each" }
+    },
+    {
+      "id": "ingredient.carrot",
+      "label": "Carrots, diced",
+      "role": "aromatic",
+      "amount": { "value": 2, "unit": "each" }
+    },
+    {
+      "id": "ingredient.celery",
+      "label": "Celery, diced",
+      "role": "aromatic",
+      "amount": { "value": 2, "unit": "stalks" }
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 4, "unit": "cloves" }
+    },
+    {
+      "id": "ingredient.tomato_paste",
+      "label": "Tomato paste (optional depth)",
+      "role": "umami",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.thyme",
+      "label": "Fresh thyme sprigs (or dried thyme)",
+      "role": "herb",
+      "amount": { "value": 4, "unit": "sprigs" },
+      "notes": ["If using dried thyme: use about 1 tsp."]
+    },
+    {
+      "id": "ingredient.bay_leaf",
+      "label": "Bay leaf",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "each" }
+    },
+    {
+      "id": "ingredient.stock_chicken",
+      "label": "Chicken stock (or vegetable stock for vegetarian)",
+      "role": "liquid",
+      "amount": { "value": 6, "unit": "cup" },
+      "notes": ["Use low-sodium stock when possible; adjust salt at the end."]
+    },
+    {
+      "id": "ingredient.water",
+      "label": "Water (as needed for consistency)",
+      "role": "liquid",
+      "amount": { "value": 2, "unit": "cup" },
+      "optional": true,
+      "notes": ["Add more during simmer if the soup thickens too quickly."]
+    },
+    {
+      "id": "ingredient.ham_hock",
+      "label": "Ham hock or smoked pork shank (optional)",
+      "role": "protein",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": [
+        "Adds smoky depth and collagen-rich body.",
+        "If using, reduce added salt until the end."
+      ]
+    },
+    {
+      "id": "ingredient.bacon",
+      "label": "Bacon, diced (optional alternative to ham hock)",
+      "role": "protein",
+      "amount": { "value": 4, "unit": "oz" },
+      "optional": true,
+      "notes": [
+        "Optional: sauté first and use rendered fat in place of some oil."
+      ]
+    },
+    {
+      "id": "ingredient.kosher_salt",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": ["Start with less if using ham hock/bacon; adjust at the end."]
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 0.75, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.vinegar_red_wine",
+      "label": "Red wine vinegar (or sherry vinegar) for finishing",
+      "role": "acid",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": [
+        "Add gradually and taste; the goal is brightness, not sourness."
+      ]
+    },
+    {
+      "id": "ingredient.parsley",
+      "label": "Fresh parsley, chopped",
+      "role": "garnish",
+      "amount": { "value": 3, "unit": "tbsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.lemon",
+      "label": "Lemon wedges (optional alternative finish)",
+      "role": "acid",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.mustard_dijon",
+      "label": "Dijon mustard (optional swirl for serving)",
+      "role": "condiment",
+      "amount": { "value": 2, "unit": "tsp" },
+      "optional": true,
+      "notes": [
+        "Classic French touch: a small spoonful in the bowl adds tang and depth."
+      ]
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_prep_rinse",
+      "title": "Rinse lentils and prep aromatics",
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "instructions": [
+        "Rinse lentils under cool water and pick out any small stones or debris.",
+        "Dice onion, carrot, and celery. Mince garlic."
+      ],
+      "checks": [
+        "Lentils are rinsed and free of debris.",
+        "Aromatics are evenly diced for even cooking."
+      ]
+    },
+    {
+      "id": "step_02_optional_bacon",
+      "title": "Optional: render bacon for a smoky base",
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "instructions": [
+        "If using bacon, add it to a cold pot and set over medium heat.",
+        "Cook, stirring occasionally, until fat renders and bacon is lightly crisp (4–6 minutes).",
+        "Remove bacon with a slotted spoon; leave 1–2 tbsp fat in the pot (discard excess or save)."
+      ],
+      "timers": [{ "label": "Render bacon", "minutes": 6 }],
+      "checks": ["Bacon is lightly crisp and fat is rendered (not burnt)."]
+    },
+    {
+      "id": "step_03_saute_mirepoix",
+      "title": "Sauté onion, carrot, and celery",
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "instructions": [
+        "Add olive oil (and optional butter) to the pot over medium heat (use bacon fat if rendered).",
+        "Add onion, carrot, and celery with a pinch of salt.",
+        "Cook 8–10 minutes, stirring occasionally, until softened and lightly sweet."
+      ],
+      "timers": [{ "label": "Sauté mirepoix", "minutes": 10 }],
+      "checks": [
+        "Onion is translucent; carrots/celery are softened but not browned heavily."
+      ]
+    },
+    {
+      "id": "step_04_bloom_garlic_tomato_paste",
+      "title": "Bloom garlic and optional tomato paste",
+      "activeMins": 2,
+      "handsOffMins": 0,
+      "instructions": [
+        "Add garlic and stir 30 seconds until fragrant.",
+        "If using tomato paste, stir it in and cook 60 seconds to caramelize slightly."
+      ],
+      "timers": [{ "label": "Bloom + paste", "minutes": 2 }],
+      "checks": [
+        "Garlic is fragrant (not browned).",
+        "Tomato paste darkens slightly and smells sweet."
+      ]
+    },
+    {
+      "id": "step_05_add_lentils_herbs_liquid",
+      "title": "Add lentils, herbs, and stock",
+      "activeMins": 5,
+      "handsOffMins": 0,
+      "instructions": [
+        "Stir in lentils, thyme, and bay leaf.",
+        "Add stock and bring to a gentle boil.",
+        "If using ham hock, add it now."
+      ],
+      "checks": [
+        "Lentils are fully submerged and soup is coming to a gentle boil."
+      ]
+    },
+    {
+      "id": "step_06_simmer",
+      "title": "Simmer until lentils are tender",
+      "activeMins": 3,
+      "handsOffMins": 40,
+      "instructions": [
+        "Reduce heat to low and simmer partially covered 35–45 minutes, stirring occasionally.",
+        "If soup becomes too thick before lentils are tender, add water in 1/2-cup increments.",
+        "Start seasoning with pepper and some salt (use less if ham hock/bacon is used)."
+      ],
+      "timers": [
+        { "label": "Simmer (check at 35 min)", "minutes": 35 },
+        { "label": "Simmer (optional extra)", "minutes": 10 }
+      ],
+      "checks": [
+        "Lentils are tender but not mushy (green lentils hold shape).",
+        "Soup has a cohesive broth and doesn’t scorch on the bottom."
+      ]
+    },
+    {
+      "id": "step_07_finish_meat_optional",
+      "title": "Optional: shred ham hock and return meat",
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "instructions": [
+        "If using ham hock, remove it to a plate and let cool briefly.",
+        "Strip meat from bone, discard skin/fat as desired, chop or shred meat.",
+        "Return meat to the pot. (Return reserved bacon if using.)"
+      ],
+      "checks": ["Meat is bite-size and distributed through the soup."]
+    },
+    {
+      "id": "step_08_adjust_texture_season_finish",
+      "title": "Adjust texture, season fully, and finish with vinegar and herbs",
+      "activeMins": 8,
+      "handsOffMins": 0,
+      "instructions": [
+        "Remove bay leaf and thyme stems (if using fresh sprigs).",
+        "Optional: blend 1–2 cups of soup and return it for a creamier body (or use immersion blender briefly).",
+        "Taste and adjust salt and pepper.",
+        "Stir in red wine vinegar a teaspoon at a time until the flavor brightens.",
+        "Finish with parsley. Serve with optional Dijon in bowls or lemon wedges."
+      ],
+      "timers": [{ "label": "Finish + season", "minutes": 8 }],
+      "checks": [
+        "Soup tastes bright and balanced after vinegar addition.",
+        "Salt is adjusted last (especially important if meat was used)."
+      ]
+    }
+  ],
+
+  "methods": ["method.saute", "method.simmer"],
+
+  "pairings": {
+    "sides": [
+      "dishes.french_country.crusty_bread",
+      "dishes.french_country.green_salad_vinaigrette"
+    ],
+    "notes": [
+      "Serve with crusty bread and a simple salad.",
+      "A small spoon of Dijon in the bowl is a classic French move."
+    ]
+  },
+
+  "storage": {
+    "refrigerate": {
+      "maxDays": 5,
+      "notes": [
+        "Cool quickly and refrigerate within 2 hours.",
+        "Soup thickens; loosen with water/stock when reheating."
+      ]
+    },
+    "freeze": {
+      "maxMonths": 3,
+      "notes": [
+        "Freeze in portions. Thaw overnight in fridge or gently on stovetop.",
+        "Add a splash of vinegar or fresh herbs after reheating to refresh flavor."
+      ]
+    },
+    "reheat": {
+      "notes": [
+        "Reheat gently over medium-low, stirring occasionally to avoid scorching.",
+        "Add water/stock as needed to restore brothiness."
+      ]
+    }
+  },
+
+  "safety": {
+    "core": [
+      "Cool leftovers promptly and refrigerate within 2 hours.",
+      "Bring reheated soup to steaming hot throughout.",
+      "If using ham hock, ensure meat is fully heated before serving."
+    ]
+  },
+
+  "notes": [
+    "Green lentils keep their shape; if using brown lentils, expect a softer texture.",
+    "Avoid adding acidic ingredients (vinegar/lemon) early—acid can slow softening.",
+    "For a vegetarian version, use vegetable stock and add a pinch of smoked paprika (optional) for depth."
+  ],
+
+  "variations": [
+    {
+      "id": "variation.vegetarian",
+      "label": "Vegetarian French lentil soup",
+      "when": { "dietFlags": ["diet.vegetarian", "diet.vegan"] },
+      "adapt": {
+        "notes": [
+          "Use vegetable stock and omit butter (use olive oil only) for vegan.",
+          "Optional: add 1/2 tsp smoked paprika or a splash of soy sauce/tamari for umami."
+        ]
+      }
+    },
+    {
+      "id": "variation.leafy_finish",
+      "label": "Add greens at the end",
+      "when": { "preferences": ["more_greens"] },
+      "adapt": {
+        "notes": [
+          "Stir in chopped kale or spinach during the last 5 minutes of simmering."
+        ]
+      }
+    },
+    {
+      "id": "variation.sausage",
+      "label": "Sausage lentil soup",
+      "when": { "preferences": ["more_protein"] },
+      "adapt": {
+        "notes": [
+          "Brown sliced smoked sausage after sautéing mirepoix; then proceed with lentils and stock."
+        ]
+      }
+    }
+  ],
+
+  "planner": {
+    "leftovers": {
+      "remixIdeas": [
+        "Blend thicker leftovers into a lentil spread for toast",
+        "Serve over rice with a fried egg",
+        "Add extra stock and vegetables for a stretched soup"
+      ]
+    },
+    "shopping": {
+      "pantryFirst": [
+        "ingredient.lentils_green",
+        "ingredient.olive_oil",
+        "ingredient.kosher_salt",
+        "ingredient.black_pepper",
+        "ingredient.bay_leaf"
+      ],
+      "niceToHave": [
+        "ingredient.thyme",
+        "ingredient.vinegar_red_wine",
+        "ingredient.mustard_dijon",
+        "ingredient.parsley"
+      ]
+    }
+  },
+
+  "compat": {
+    "cuisineId": "cuisines.french_country",
+    "dishId": "dishes.french_country.lentil_soup",
+    "search": {
+      "aliases": [
+        "french lentil soup",
+        "lentilles soup",
+        "lentil and vegetable soup"
+      ],
+      "keywords": [
+        "lentils",
+        "mirepoix",
+        "thyme",
+        "bay leaf",
+        "red wine vinegar",
+        "batch soup"
+      ]
+    },
+    "normalization": {
+      "recommendedIdCase": "lower",
+      "ingredientIdStyle": "ingredient.*",
+      "methodIdStyle": "method.*",
+      "equipmentIdStyle": "equipment.*"
+    }
+  }
+}

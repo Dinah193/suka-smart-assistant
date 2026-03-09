@@ -148,7 +148,7 @@ try {
 let featureFlags = { familyFundMode: false };
 try {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const mod = require("@/services/featureFlags");
+  const mod = require("@/config/featureFlags");
   featureFlags = mod.featureFlags || mod.default || featureFlags;
 } catch {}
 

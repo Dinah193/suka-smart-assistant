@@ -34,17 +34,15 @@
 // - Defensive → returns early if data is missing
 //
 // ASSUMPTIONS
-// - src/services/eventBus.js exists
+// - src/services/events/eventBus.js exists
 // - src/config/featureFlags.js exists
 // - src/services/hub/HubPacketFormatter.js & src/services/hub/FamilyFundConnector.js exist
 // - src/knowledge/KnowledgeGraph.js exists (we query it when helpful)
 //
 // -----------------------------------------------------------------------------
 
-
-
-import eventBus from "@/services/eventBus.js";
-import featureFlags from "@/config/featureFlags.js";
+import eventBus from "@/services/events/eventBus.js";
+import featureFlags from "@/config/featureFlags.json";
 import knowledgeGraph from "@/knowledge/KnowledgeGraph.js";
 
 // soft Hub imports (optional)
@@ -247,7 +245,9 @@ class ReverseGeneration {
 
     const suggestions = [];
     const nodes = knowledgeGraph.getAllNodes();
-    const gardenNodes = nodes.filter((n) => n.type === "garden" || n.type === "seed");
+    const gardenNodes = nodes.filter(
+      (n) => n.type === "garden" || n.type === "seed"
+    );
 
     for (const goal of storehouse) {
       // detect low / needs
@@ -292,9 +292,13 @@ class ReverseGeneration {
     }
 
     if (suggestions.length) {
-      emitEvent("reverse-generation.storehouse.suggested", "knowledge:reverse", {
-        count: suggestions.length,
-      });
+      emitEvent(
+        "reverse-generation.storehouse.suggested",
+        "knowledge:reverse",
+        {
+          count: suggestions.length,
+        }
+      );
     }
 
     return suggestions;
@@ -322,7 +326,12 @@ class ReverseGeneration {
 
         // meals that could use this crop
         const matchingRecipes = recipeNodes.filter((r) =>
-          oneOf(cropName, [r.label, ...(this._extractRecipeIngredients(r) || []).map((i) => i.name || i)])
+          oneOf(cropName, [
+            r.label,
+            ...(this._extractRecipeIngredients(r) || []).map(
+              (i) => i.name || i
+            ),
+          ])
         );
 
         for (const r of matchingRecipes) {
@@ -372,7 +381,12 @@ class ReverseGeneration {
     const lower = normStr(cropName);
     if (!lower) return null;
     if (lower.includes("tomato") || lower.includes("pepper")) return "can";
-    if (lower.includes("herb") || lower.includes("greens") || lower.includes("okra")) return "dehydrate";
+    if (
+      lower.includes("herb") ||
+      lower.includes("greens") ||
+      lower.includes("okra")
+    )
+      return "dehydrate";
     if (lower.includes("berry") || lower.includes("fruit")) return "freeze";
     return null;
   }
@@ -400,7 +414,9 @@ class ReverseGeneration {
 
       // if inventory/storehouse is low on this species → suggest breed/acquire
       const invHas = inventory.some((i) => normStr(i.name).includes(species));
-      const storeNeeds = storehouse.some((s) => normStr(s.item).includes(species) && s.status !== "full");
+      const storeNeeds = storehouse.some(
+        (s) => normStr(s.item).includes(species) && s.status !== "full"
+      );
 
       if (!invHas || storeNeeds) {
         suggestions.push({
@@ -418,7 +434,10 @@ class ReverseGeneration {
       }
 
       // if animal has butchery tasks → suggest preservation
-      if (Array.isArray(an.tasks) && an.tasks.some((t) => normStr(t).includes("package"))) {
+      if (
+        Array.isArray(an.tasks) &&
+        an.tasks.some((t) => normStr(t).includes("package"))
+      ) {
         suggestions.push({
           id: `sugg:preserve-meat:${species}:${Date.now().toString(36)}`,
           source: "reverse:animals",
@@ -475,7 +494,15 @@ class ReverseGeneration {
 
       // heuristics
       if (
-        oneOf(name, ["tomato", "pepper", "okra", "greens", "cucumber", "squash", "pumpkin"]) ||
+        oneOf(name, [
+          "tomato",
+          "pepper",
+          "okra",
+          "greens",
+          "cucumber",
+          "squash",
+          "pumpkin",
+        ]) ||
         oneOf(item.category, ["produce", "fresh"])
       ) {
         const method = this._guessPreservationForCrop(name) || "freeze";
@@ -495,9 +522,13 @@ class ReverseGeneration {
     }
 
     if (suggestions.length) {
-      emitEvent("reverse-generation.preservation.suggested", "knowledge:reverse", {
-        count: suggestions.length,
-      });
+      emitEvent(
+        "reverse-generation.preservation.suggested",
+        "knowledge:reverse",
+        {
+          count: suggestions.length,
+        }
+      );
     }
 
     return suggestions;

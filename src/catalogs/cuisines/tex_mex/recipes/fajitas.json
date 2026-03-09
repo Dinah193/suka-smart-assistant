@@ -1,0 +1,536 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "meta": {
+    "id": "recipes.tex_mex.fajitas",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Tex-Mex Fajitas (Chicken or Steak) with Peppers & Onions",
+    "subtitle": "Hot-skillet strips with lime, chili-cumin seasoning, and classic fajita fixings.",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Tex-Mex",
+      "notes": [
+        "Designed for deterministic planning: clear ingredient roles, scalable yields, and optional toppings separated.",
+        "Ingredient IDs are SSA-friendly tokens; align with your canonical ingredient catalog IDs when available."
+      ]
+    }
+  },
+  "classification": {
+    "cuisine": "tex_mex",
+    "category": "main",
+    "mealArchetypes": [
+      "archetype.skillet_meal",
+      "archetype.fajitas",
+      "archetype.protein_plus_veg"
+    ],
+    "servingStyles": ["family_style", "build_your_own"],
+    "plannerTags": [
+      "cuisine.tex_mex",
+      "dish.fajitas",
+      "stovetop.skillet",
+      "weeknight.friendly",
+      "batch.friendly",
+      "leftovers.friendly"
+    ],
+    "subprofiles": ["texmex.classic", "texmex.lime_cumin_chili"]
+  },
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 2, "unit": "tacos" },
+    "notes": "Makes enough filling for ~8 tacos (or 4 hearty bowls)."
+  },
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 15,
+    "totalMins": 40
+  },
+  "difficulty": "beginner",
+  "summary": "Classic Tex-Mex fajitas: marinated chicken (or steak) seared fast with peppers and onions, finished with lime. Serve as tacos, bowls, or on a sizzling platter with warm tortillas and toppings.",
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": "protein only",
+    "heatTypical": 2,
+    "kidFriendly": true,
+    "messLevel": "medium"
+  },
+  "tasteProfile": {
+    "salt": 3,
+    "acid": 3,
+    "sweet": 2,
+    "heat": 2,
+    "umami": 2,
+    "notes": [
+      "lime_forward",
+      "cumin_chili",
+      "charred_edges",
+      "savory_peppers_onions"
+    ]
+  },
+  "equipment": {
+    "minimum": [
+      "equipment.skillet",
+      "equipment.knife",
+      "equipment.cutting_board",
+      "equipment.measuring_spoons",
+      "equipment.measuring_cups",
+      "equipment.tongs",
+      "equipment.mixing_bowl"
+    ],
+    "recommended": [
+      "equipment.cast_iron_skillet",
+      "equipment.griddle",
+      "equipment.instant_read_thermometer",
+      "equipment.sheet_pan",
+      "equipment.foil"
+    ],
+    "optional": [
+      {
+        "id": "equipment.oven",
+        "label": "Oven",
+        "required": false,
+        "notes": "Useful for warming tortillas or holding cooked components warm."
+      }
+    ]
+  },
+  "dietFlags": ["diet.omnivore"],
+  "allergens": ["allergen.gluten_optional"],
+  "ingredientGroups": [
+    {
+      "id": "group.marinade",
+      "label": "Marinade / seasoning",
+      "items": [
+        "ingredient.oil_neutral",
+        "ingredient.lime",
+        "ingredient.garlic",
+        "ingredient.chili_powder",
+        "ingredient.cumin",
+        "ingredient.paprika_smoked",
+        "ingredient.oregano_dried",
+        "ingredient.salt_kosher",
+        "ingredient.black_pepper",
+        "ingredient.brown_sugar"
+      ]
+    },
+    {
+      "id": "group.fajita_fill",
+      "label": "Fajita filling",
+      "items": [
+        "ingredient.chicken.thighs_or_breast",
+        "ingredient.steak.skirt_or_flank",
+        "ingredient.bell_pepper_mixed",
+        "ingredient.onion.white",
+        "ingredient.jalapeno",
+        "ingredient.cilantro"
+      ]
+    },
+    {
+      "id": "group.serving",
+      "label": "Serving & toppings (optional)",
+      "items": [
+        "ingredient.tortilla.flour",
+        "ingredient.tortilla.corn",
+        "ingredient.sour_cream",
+        "ingredient.cheese.monterey_jack",
+        "ingredient.cheese.cheddar",
+        "ingredient.salsa",
+        "ingredient.guacamole",
+        "ingredient.lime",
+        "ingredient.hot_sauce"
+      ]
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "ingredient.oil_neutral",
+      "label": "Neutral oil (avocado/canola/vegetable), divided",
+      "role": "fat",
+      "amount": { "value": 3, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.lime",
+      "label": "Lime (juice + wedges for serving)",
+      "role": "acid",
+      "amount": { "value": 2, "unit": "each" },
+      "notes": "About 3–4 tbsp juice total."
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 3, "unit": "cloves" }
+    },
+    {
+      "id": "ingredient.chili_powder",
+      "label": "Chili powder",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.cumin",
+      "label": "Ground cumin",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.paprika_smoked",
+      "label": "Smoked paprika (or regular paprika)",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.oregano_dried",
+      "label": "Dried oregano",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.salt_kosher",
+      "label": "Kosher salt, divided",
+      "role": "seasoning",
+      "amount": { "value": 1.5, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.brown_sugar",
+      "label": "Brown sugar (optional, helps browning)",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+
+    {
+      "id": "ingredient.chicken.thighs_or_breast",
+      "label": "Boneless skinless chicken thighs (or breasts), sliced into strips",
+      "role": "protein",
+      "amount": { "value": 1.5, "unit": "lb" },
+      "notes": "Thighs stay juicier; breasts cook faster and can dry if overcooked.",
+      "optional": true
+    },
+    {
+      "id": "ingredient.steak.skirt_or_flank",
+      "label": "Skirt steak or flank steak, sliced against the grain",
+      "role": "protein",
+      "amount": { "value": 1.5, "unit": "lb" },
+      "notes": "Use instead of chicken (choose one protein).",
+      "optional": true
+    },
+
+    {
+      "id": "ingredient.bell_pepper_mixed",
+      "label": "Bell peppers (mixed colors), thinly sliced",
+      "role": "vegetable",
+      "amount": { "value": 3, "unit": "each" }
+    },
+    {
+      "id": "ingredient.onion.white",
+      "label": "White or yellow onion, thinly sliced",
+      "role": "vegetable",
+      "amount": { "value": 1, "unit": "each" }
+    },
+    {
+      "id": "ingredient.jalapeno",
+      "label": "Jalapeño, thinly sliced (optional)",
+      "role": "heat",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": "Remove seeds for milder heat."
+    },
+    {
+      "id": "ingredient.cilantro",
+      "label": "Cilantro, chopped (optional)",
+      "role": "garnish",
+      "amount": { "value": 0.25, "unit": "cup" },
+      "optional": true
+    },
+
+    {
+      "id": "ingredient.tortilla.flour",
+      "label": "Flour tortillas (optional, for serving)",
+      "role": "starch",
+      "amount": { "value": 8, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.tortilla.corn",
+      "label": "Corn tortillas (optional, for serving)",
+      "role": "starch",
+      "amount": { "value": 8, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.sour_cream",
+      "label": "Sour cream (optional, for serving)",
+      "role": "topping",
+      "amount": { "value": 0.5, "unit": "cup" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.cheese.monterey_jack",
+      "label": "Monterey Jack cheese, shredded (optional)",
+      "role": "topping",
+      "amount": { "value": 1, "unit": "cup" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.cheese.cheddar",
+      "label": "Cheddar cheese, shredded (optional)",
+      "role": "topping",
+      "amount": { "value": 1, "unit": "cup" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.salsa",
+      "label": "Salsa (optional, for serving)",
+      "role": "topping",
+      "amount": { "value": 0.75, "unit": "cup" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.guacamole",
+      "label": "Guacamole (optional, for serving)",
+      "role": "topping",
+      "amount": { "value": 0.75, "unit": "cup" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.hot_sauce",
+      "label": "Hot sauce (optional, for serving)",
+      "role": "topping",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.mix_marinade",
+      "title": "Mix marinade / seasoning",
+      "activeMins": 5,
+      "instructions": [
+        "In a bowl, mix: 2 tbsp oil, juice of 1 lime (about 2 tbsp), garlic, chili powder, cumin, paprika (optional), oregano (optional), 1 tsp salt, pepper, and brown sugar (optional).",
+        "Reserve remaining lime for finishing/serving."
+      ],
+      "checks": ["Seasoning smells chili-cumin forward and slightly tangy"]
+    },
+    {
+      "id": "step.marinade_protein",
+      "title": "Marinate protein (quick)",
+      "activeMins": 3,
+      "handsOffMins": 15,
+      "instructions": [
+        "Choose ONE: chicken strips or steak strips.",
+        "Toss protein with the marinade until evenly coated.",
+        "Let rest 15 minutes at room temp (or refrigerate up to 8 hours)."
+      ],
+      "timers": [{ "label": "Quick marinade", "minutes": 15 }],
+      "checks": [
+        "Protein evenly coated",
+        "If using steak, slice across the grain for tenderness"
+      ]
+    },
+    {
+      "id": "step.prep_veg",
+      "title": "Slice peppers and onions",
+      "activeMins": 7,
+      "instructions": [
+        "Slice bell peppers and onion into thin strips for fast cooking.",
+        "Slice jalapeño if using.",
+        "Keep vegetables separate from the protein so they sear properly."
+      ]
+    },
+    {
+      "id": "step.sear_veg",
+      "title": "Sear peppers and onions",
+      "activeMins": 8,
+      "instructions": [
+        "Heat a large skillet (preferably cast iron) over medium-high until hot.",
+        "Add 1 tbsp oil. Add peppers and onions (and jalapeño if using).",
+        "Cook, stirring occasionally, until softened with browned edges (6–8 minutes).",
+        "Season with a pinch of salt, then transfer vegetables to a plate."
+      ],
+      "timers": [{ "label": "Sear vegetables", "minutes": 7 }],
+      "checks": [
+        "Veg has charred edges (some browning is good)",
+        "Veg still has slight bite (not mushy)"
+      ]
+    },
+    {
+      "id": "step.sear_protein",
+      "title": "Sear protein quickly",
+      "activeMins": 8,
+      "instructions": [
+        "Return skillet to high heat. Add a small splash of oil if dry.",
+        "Add marinated protein in a single layer (work in batches if needed).",
+        "Sear without moving for 1–2 minutes to develop browning, then toss and continue until cooked through."
+      ],
+      "timers": [{ "label": "Sear protein", "minutes": 6 }],
+      "checks": [
+        "Good browning on some pieces",
+        "No steaming—cook in batches if the pan is crowded"
+      ]
+    },
+    {
+      "id": "step.finish",
+      "title": "Combine, finish with lime, and serve",
+      "activeMins": 5,
+      "instructions": [
+        "Return cooked vegetables to the skillet with the protein and toss to combine.",
+        "Squeeze remaining lime over the fajitas and taste. Add salt if needed.",
+        "Optional: sprinkle cilantro.",
+        "Serve in warm tortillas or as bowls. Offer toppings: salsa, sour cream, cheese, guacamole, hot sauce."
+      ],
+      "checks": [
+        "Final flavor pops with lime",
+        "Seasoning tastes balanced (salt + acid + chili/cumin)"
+      ]
+    }
+  ],
+  "methods": [
+    "method.mix",
+    "method.marinade",
+    "method.sear",
+    "method.saute",
+    "method.toss"
+  ],
+  "pairings": {
+    "suggestedSides": [
+      "texmex.rice.spanish_rice",
+      "texmex.beans.refried",
+      "texmex.salad.cabbage_lime"
+    ],
+    "condiments": [
+      "condiment.salsa",
+      "condiment.pickled_jalapenos",
+      "condiment.hot_sauce"
+    ]
+  },
+  "storage": {
+    "fridge": {
+      "duration": "3-4 days",
+      "notes": [
+        "Store fajita filling separate from tortillas/toppings for best texture.",
+        "Reheat in a hot skillet to bring back a little char."
+      ]
+    },
+    "freezer": {
+      "duration": "2-3 months",
+      "notes": [
+        "Freeze cooked protein (and veggies if desired) in a flat bag for quick thawing.",
+        "Veg texture softens after freezing; best to freeze protein only if picky about texture."
+      ]
+    },
+    "reheat": [
+      "Skillet: medium-high with a splash of water or oil, 3–5 minutes.",
+      "Microwave: cover and heat in 60-second bursts; finish in skillet for better texture (optional)."
+    ]
+  },
+  "safety": {
+    "notes": [
+      "Chicken: cook to 165°F / 74°C.",
+      "Steak: cook to preferred doneness; for food safety, surface should be well seared.",
+      "Reheat leftovers to 165°F / 74°C."
+    ]
+  },
+  "planner": {
+    "batchPrep": [
+      "Pre-slice peppers/onions and store in fridge up to 3 days.",
+      "Pre-mix fajita seasoning (dry) as a jarred blend for faster weeknights."
+    ],
+    "leftovers": {
+      "remixIdeas": [
+        "Fajita quesadillas",
+        "Fajita rice bowls",
+        "Fajita omelet or breakfast tacos",
+        "Loaded nachos"
+      ]
+    }
+  },
+  "variations": [
+    {
+      "id": "variation.sheet_pan",
+      "label": "Sheet-pan fajitas (hands-off)",
+      "when": { "method": "sheet_pan" },
+      "adapt": {
+        "notes": [
+          "Heat oven to 425°F. Toss peppers/onions and marinated protein with oil on a sheet pan.",
+          "Bake 18–22 minutes, stirring once halfway. Finish with lime."
+        ]
+      }
+    },
+    {
+      "id": "variation.veggie_only",
+      "label": "Vegetarian fajitas",
+      "when": { "diet": "vegetarian" },
+      "adapt": {
+        "notes": [
+          "Swap protein for sliced portobello mushrooms (12 oz) and/or drained black beans (2 cups).",
+          "Sear mushrooms well to drive off moisture; season to taste and finish with lime."
+        ]
+      }
+    },
+    {
+      "id": "variation.spicy",
+      "label": "Spicier fajitas",
+      "when": { "preference": "spicy" },
+      "adapt": {
+        "notes": [
+          "Add 1/4–1/2 tsp cayenne to the marinade and include jalapeño (or serrano).",
+          "Serve with a smoky chipotle hot sauce."
+        ]
+      }
+    }
+  ],
+  "compat": {
+    "cuisineId": "cuisines.tex_mex",
+    "recipeTagDefaults": [
+      "cuisine.tex_mex",
+      "dish.fajitas",
+      "stovetop.skillet"
+    ],
+    "ingredientIds": [
+      "ingredient.oil_neutral",
+      "ingredient.lime",
+      "ingredient.garlic",
+      "ingredient.chili_powder",
+      "ingredient.cumin",
+      "ingredient.bell_pepper_mixed",
+      "ingredient.onion.white",
+      "ingredient.chicken.thighs_or_breast",
+      "ingredient.steak.skirt_or_flank"
+    ],
+    "methodIds": [
+      "method.mix",
+      "method.marinade",
+      "method.sear",
+      "method.saute",
+      "method.toss"
+    ],
+    "equipmentIds": [
+      "equipment.skillet",
+      "equipment.tongs",
+      "equipment.knife",
+      "equipment.cutting_board"
+    ],
+    "search": {
+      "keywords": [
+        "fajitas",
+        "tex-mex fajitas",
+        "chicken fajitas",
+        "steak fajitas",
+        "peppers and onions"
+      ],
+      "aliases": ["skillet fajitas", "sizzling fajitas", "build-your-own tacos"]
+    }
+  }
+}

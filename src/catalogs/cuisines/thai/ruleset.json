@@ -1,0 +1,678 @@
+{
+  "$schema": "../../../schemas/ruleset.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-21T00:00:00.000Z",
+  "kind": "cuisine_ruleset",
+  "meta": {
+    "id": "cuisines.thai.ruleset",
+    "type": "cuisine_ruleset",
+    "label": "Thai • Cuisine Ruleset",
+    "cuisineId": "cuisines.thai",
+    "status": "canonical",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Thai Catalog",
+      "notes": [
+        "Deterministic Thai adapters and planner hints (no AI).",
+        "Focus: heat control, fish sauce vs soy, curry paste handling, coconut milk, noodle/rice pairing, allergen-aware swaps."
+      ]
+    }
+  },
+  "scope": {
+    "kind": "cuisine",
+    "cuisineId": "cuisines.thai",
+    "locales": ["en-US"]
+  },
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true,
+    "tokens": {
+      "stopWords": ["a", "an", "the", "and", "or", "with", "of", "style"]
+    },
+    "ingredientAliases": {
+      "ingredient.kefir_lime_leaf": [
+        "kaffir lime leaf",
+        "makrut lime leaf",
+        "makrut leaves",
+        "lime leaves"
+      ],
+      "ingredient.galangal": ["galangal root", "kha", "thai ginger"],
+      "ingredient.lemongrass": ["lemon grass", "citronella stalks"],
+      "ingredient.fish_sauce": ["nam pla", "nuoc mam", "fish sauce"],
+      "ingredient.soy_sauce_light": ["light soy sauce", "thin soy sauce"],
+      "ingredient.thai_black_soy_sauce": ["black soy sauce", "sweet black soy"],
+      "ingredient.oyster_sauce": ["oyster sauce"],
+      "ingredient.tamarind_paste": [
+        "tamarind",
+        "tamarind concentrate",
+        "tamarind pulp"
+      ],
+      "ingredient.palm_sugar": ["palm sugar", "coconut sugar"],
+      "ingredient.sticky_rice": ["glutinous rice", "sweet rice"],
+      "ingredient.jasmine_rice": ["thai jasmine rice", "hom mali"],
+      "ingredient.rice_noodles": ["rice sticks", "thin rice noodles"],
+      "ingredient.wide_rice_noodles": ["sen yai", "wide rice noodles"],
+      "ingredient.thai_basil": ["thai basil"],
+      "ingredient.holy_basil": ["holy basil", "kaprao", "krapow"],
+      "ingredient.chinese_broccoli": ["gai lan", "gailan", "chinese kale"],
+      "ingredient.roasted_rice_powder": ["khao khua", "toasted rice powder"],
+      "ingredient.chile_fresh": [
+        "thai chilies",
+        "bird's eye chilies",
+        "bird eye chili",
+        "fresh chilies"
+      ],
+      "ingredient.chile_flakes": ["crushed chili", "red chili flakes"]
+    },
+    "dishAliases": {
+      "thai.pad_thai": ["pad thai", "phat thai"],
+      "thai.pad_see_ew": ["pad see ew", "phat si-io", "pad si ew"],
+      "thai.pad_kee_mao": ["pad kee mao", "drunken noodles", "pad ki mao"],
+      "thai.pad_krapow_gai": [
+        "pad krapow",
+        "pad kra pao",
+        "basil chicken",
+        "kaprao"
+      ],
+      "thai.khao_pad": ["khao pad", "thai fried rice", "khao phat"],
+      "thai.tom_yum_goong": ["tom yum", "tom yum goong", "tom yum shrimp"],
+      "thai.tom_kha_gai": ["tom kha", "tom kha gai"],
+      "thai.som_tam": ["som tam", "green papaya salad"],
+      "thai.larb_gai": ["larb", "laab", "larb gai", "laab gai"],
+      "thai.green_curry": ["green curry", "gaeng keow wan"],
+      "thai.red_curry": ["red curry", "gaeng phet"],
+      "thai.panang_curry": ["panang", "phanaeng"],
+      "thai.massaman_curry": ["massaman", "gaeng massaman"],
+      "thai.mango_sticky_rice": ["mango sticky rice", "khao niew mamuang"],
+      "thai.thai_iced_tea": ["thai iced tea", "cha yen"]
+    },
+    "equipmentAliases": {
+      "equipment.wok": ["wok", "carbon steel wok"],
+      "equipment.skillet": ["skillet", "frying pan", "saute pan"],
+      "equipment.pot": ["pot", "saucepan", "stockpot"],
+      "equipment.mortar_pestle": ["mortar and pestle", "mortar & pestle"],
+      "equipment.rice_cooker": ["rice cooker"],
+      "equipment.grill": ["grill", "charcoal grill", "gas grill"],
+      "equipment.grill_pan": ["grill pan"],
+      "equipment.dutch_oven": ["dutch oven", "heavy pot"],
+      "equipment.steamer_basket": ["steamer basket", "bamboo steamer"],
+      "equipment.colander": ["colander", "strainer"]
+    },
+    "methodAliases": {
+      "method.stir_fry": ["stir-fry", "stir fry", "wok fry"],
+      "method.curry_simmer": ["curry simmer", "simmer curry"],
+      "method.soup_simmer": ["simmer soup", "soup simmer"],
+      "method.fry_aromatics": ["fry aromatics", "bloom paste"],
+      "method.grill": ["grill", "broil", "chargrill"],
+      "method.marinade": ["marinate", "marinade"],
+      "method.steam": ["steam", "steaming"],
+      "method.reduce_sauce": ["reduce", "reduce sauce"],
+      "method.assemble": ["assemble", "roll"],
+      "method.toss_salad": ["toss", "mix"],
+      "method.pound_paste": ["pound", "pound paste"]
+    }
+  },
+  "globals": {
+    "flavorModel": {
+      "thai": {
+        "pillars": ["salty", "sour", "sweet", "spicy", "aromatic"],
+        "commonBalancers": {
+          "salty": [
+            "ingredient.fish_sauce",
+            "ingredient.soy_sauce_light",
+            "ingredient.salt"
+          ],
+          "sour": [
+            "ingredient.lime_juice",
+            "ingredient.tamarind_paste",
+            "ingredient.rice_vinegar"
+          ],
+          "sweet": ["ingredient.palm_sugar", "ingredient.sugar"],
+          "spicy": [
+            "ingredient.chile_fresh",
+            "ingredient.chile_flakes",
+            "ingredient.chili_paste"
+          ],
+          "aromatic": [
+            "ingredient.garlic",
+            "ingredient.lemongrass",
+            "ingredient.galangal",
+            "ingredient.kefir_lime_leaf",
+            "ingredient.cilantro"
+          ]
+        }
+      }
+    },
+    "plannerDefaults": {
+      "preferredRice": "ingredient.jasmine_rice",
+      "preferredNoodle": "ingredient.rice_noodles",
+      "defaultHeatTarget": 2,
+      "acidFinishPreferred": "ingredient.lime_juice",
+      "umamiPreference": [
+        "ingredient.fish_sauce",
+        "ingredient.oyster_sauce",
+        "ingredient.soy_sauce_light"
+      ]
+    }
+  },
+  "rules": [
+    {
+      "id": "thai.tag.base_thai",
+      "enabled": true,
+      "priority": 10,
+      "title": "Always tag Thai cuisine context",
+      "description": "Adds a cuisine tag for all Thai-scoped evaluations.",
+      "tags": ["tagging", "cuisine"],
+      "source": "SSA Thai ruleset",
+      "stopOnMatch": false,
+      "when": { "type": "exists", "path": "$.meta.cuisineId" },
+      "then": { "actions": [{ "type": "addTag", "value": "cuisine.thai" }] }
+    },
+
+    {
+      "id": "thai.heat.normalize_to_0_5",
+      "enabled": true,
+      "priority": 20,
+      "title": "Normalize heat target to 0–5",
+      "description": "Clamps user/provider heat target to the Thai scale used by dishes catalog.",
+      "tags": ["heat", "normalization"],
+      "source": "SSA Thai ruleset",
+      "stopOnMatch": false,
+      "when": { "type": "exists", "path": "$.preferences.heatTarget" },
+      "then": {
+        "actions": [
+          { "type": "set", "path": "$.preferences.heatTarget", "value": 2 }
+        ]
+      }
+    },
+
+    {
+      "id": "thai.allergen.fish_sauce_swap",
+      "enabled": true,
+      "priority": 100,
+      "title": "Fish allergy: avoid fish sauce + shrimp paste",
+      "description": "If fish allergy is present, prefer soy + salt + acid to approximate salinity. Emits an event for the UI adapter to explain the change.",
+      "tags": ["allergen", "substitution", "fish"],
+      "source": "SSA Thai ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.allergens",
+            "values": ["allergen.fish"]
+          },
+          {
+            "type": "intersects",
+            "path": "$.diet.allergens",
+            "values": ["allergen.fish"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "avoid.fish_sauce" },
+          {
+            "type": "set",
+            "path": "$.substitutions.ingredient.fish_sauce",
+            "value": {
+              "use": ["ingredient.soy_sauce_light"],
+              "notes": ["Add salt to taste; finish with lime for brightness."]
+            }
+          },
+          {
+            "type": "set",
+            "path": "$.substitutions.ingredient.shrimp_paste",
+            "value": {
+              "use": ["ingredient.miso_paste"],
+              "notes": ["If miso not allowed, skip and boost aromatics + soy."]
+            }
+          },
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ruleset.applied",
+              "payload": {
+                "rulesetId": "cuisines.thai.ruleset",
+                "ruleId": "thai.allergen.fish_sauce_swap",
+                "message": "Fish allergy detected: fish sauce / shrimp paste flagged; soy-based swap suggested."
+              }
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "thai.allergen.shellfish_avoid",
+      "enabled": true,
+      "priority": 110,
+      "title": "Shellfish allergy: avoid shrimp/oyster sauce",
+      "description": "Flags shellfish-derived ingredients; suggests soy or mushroom-based umami.",
+      "tags": ["allergen", "shellfish", "substitution"],
+      "source": "SSA Thai ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.allergens",
+            "values": ["allergen.shellfish"]
+          },
+          {
+            "type": "intersects",
+            "path": "$.diet.allergens",
+            "values": ["allergen.shellfish"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "avoid.shellfish" },
+          {
+            "type": "set",
+            "path": "$.substitutions.ingredient.oyster_sauce",
+            "value": {
+              "use": [
+                "ingredient.soy_sauce_light",
+                "ingredient.mushroom_seasoning"
+              ],
+              "notes": ["Use a touch of sugar to round; keep salt moderate."]
+            }
+          },
+          {
+            "type": "set",
+            "path": "$.substitutions.ingredient.shrimp",
+            "value": {
+              "use": ["ingredient.chicken", "ingredient.tofu_firm"],
+              "notes": [
+                "Pick protein by dish; keep lime + herbs to retain Thai profile."
+              ]
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "thai.allergen.peanut_swap",
+      "enabled": true,
+      "priority": 120,
+      "title": "Peanut allergy: replace peanuts/peanut sauce",
+      "description": "Swaps peanuts with sesame/pumpkin seeds and peanut sauce with sunflower/SESAME-based sauce where possible.",
+      "tags": ["allergen", "peanut", "substitution"],
+      "source": "SSA Thai ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.allergens",
+            "values": ["allergen.peanut"]
+          },
+          {
+            "type": "intersects",
+            "path": "$.diet.allergens",
+            "values": ["allergen.peanut"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "avoid.peanut" },
+          {
+            "type": "set",
+            "path": "$.substitutions.ingredient.peanuts",
+            "value": {
+              "use": ["ingredient.toasted_sesame", "ingredient.pumpkin_seeds"],
+              "notes": ["Keep crunch; add a pinch of salt."]
+            }
+          },
+          {
+            "type": "set",
+            "path": "$.substitutions.component.thai.satay_peanut_sauce",
+            "value": {
+              "use": ["thai.satay_sunflower_sauce"],
+              "notes": ["Use sunflower butter + coconut milk + lime + chili."]
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "thai.diet.vegan_defaults",
+      "enabled": true,
+      "priority": 130,
+      "title": "Vegan mode: prefer soy + mushrooms, avoid fish sauce, egg, dairy",
+      "description": "Sets deterministic preference hints for adapters when vegan diet flag is present.",
+      "tags": ["diet", "vegan", "preference"],
+      "source": "SSA Thai ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.diet.flags",
+            "values": ["diet.vegan"]
+          },
+          {
+            "type": "intersects",
+            "path": "$.preferences.dietFlags",
+            "values": ["diet.vegan"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "diet.vegan" },
+          {
+            "type": "set",
+            "path": "$.preferences.umamiBase",
+            "value": [
+              "ingredient.soy_sauce_light",
+              "ingredient.mushroom_seasoning",
+              "ingredient.miso_paste"
+            ]
+          },
+          {
+            "type": "set",
+            "path": "$.preferences.avoidIngredients",
+            "value": [
+              "ingredient.fish_sauce",
+              "ingredient.oyster_sauce",
+              "ingredient.egg",
+              "ingredient.condensed_milk"
+            ]
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "thai.curry.paste_blooming",
+      "enabled": true,
+      "priority": 200,
+      "title": "Curry paste technique: bloom in fat before coconut milk",
+      "description": "If dish is curry and paste is present, set an adapter hint to bloom paste for flavor.",
+      "tags": ["technique", "curry"],
+      "source": "SSA Thai ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "hasTag", "value": "category.curry" },
+          { "type": "exists", "path": "$.ingredients" }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "technique.bloom_curry_paste" },
+          {
+            "type": "set",
+            "path": "$.adapterHints.curry.bloomPaste",
+            "value": true
+          },
+          {
+            "type": "set",
+            "path": "$.adapterHints.curry.bloomPasteNotes",
+            "value": "Fry curry paste in oil or thick coconut cream until fragrant before adding remaining coconut milk/stock."
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "thai.noodles.rice_noodle_handling",
+      "enabled": true,
+      "priority": 210,
+      "title": "Rice noodles: soak/soften, don't overboil",
+      "description": "Adds cooking hint for rice noodles in stir-fries to reduce breakage and mush.",
+      "tags": ["technique", "noodles"],
+      "source": "SSA Thai ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          { "type": "hasTag", "value": "category.noodles" },
+          {
+            "type": "matches",
+            "path": "$.dishId",
+            "regex": "pad_thai|pad_see_ew|pad_kee_mao|khao_soi"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "technique.rice_noodle_soak" },
+          {
+            "type": "set",
+            "path": "$.adapterHints.noodles.prep",
+            "value": "Soak rice noodles in warm water until pliable; finish in wok with sauce. Avoid hard boiling unless package requires."
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "thai.balance.finish_with_acid",
+      "enabled": true,
+      "priority": 220,
+      "title": "Thai balance: finish with acid (lime/tamarind) if missing",
+      "description": "If dish is Thai and lacks a sour component, add a hint to finish with lime/tamarind to taste.",
+      "tags": ["flavor", "balance"],
+      "source": "SSA Thai ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "hasTag", "value": "cuisine.thai" },
+          {
+            "op": "not",
+            "conditions": [
+              {
+                "type": "intersects",
+                "path": "$.ingredientsCore",
+                "values": [
+                  "ingredient.lime_juice",
+                  "ingredient.lime",
+                  "ingredient.tamarind_paste"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "hint.finish_with_lime" },
+          {
+            "type": "set",
+            "path": "$.adapterHints.balance.finishAcid",
+            "value": "Taste at end; add lime juice (or tamarind for Pad Thai) to brighten and balance sweetness/salt."
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "thai.equipment.no_wok_ok",
+      "enabled": true,
+      "priority": 300,
+      "title": "No wok available: allow skillet high-heat workflow",
+      "description": "If user lacks a wok, the adapter should use a wide skillet, cook in batches, and avoid steaming.",
+      "tags": ["equipment", "adapter"],
+      "source": "SSA Thai ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "hasTag", "value": "cuisine.thai" },
+          {
+            "type": "intersects",
+            "path": "$.kitchen.equipmentMissing",
+            "values": ["equipment.wok"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "adapter.use_skillet_for_wok" },
+          {
+            "type": "set",
+            "path": "$.adapterHints.equipment.wokFallback",
+            "value": "Use a wide skillet; preheat until very hot; cook protein/veg in batches; return everything to finish with sauce."
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "thai.equipment.no_mortar_pestle",
+      "enabled": true,
+      "priority": 310,
+      "title": "No mortar & pestle: use food processor or smash-mince",
+      "description": "For Som Tam / curry pastes / aromatics, provides deterministic alternatives.",
+      "tags": ["equipment", "adapter"],
+      "source": "SSA Thai ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "hasTag", "value": "cuisine.thai" },
+          {
+            "type": "intersects",
+            "path": "$.kitchen.equipmentMissing",
+            "values": ["equipment.mortar_pestle"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "adapter.no_mortar_pestle" },
+          {
+            "type": "set",
+            "path": "$.adapterHints.equipment.mortarFallback",
+            "value": "Use food processor (short pulses) or finely mince + smash with knife side; keep texture for Som Tam."
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "thai.dish.classify_category_tags",
+      "enabled": true,
+      "priority": 400,
+      "title": "Category tags from known Thai dish ids",
+      "description": "Adds deterministic category tags the rules engine can rely on.",
+      "tags": ["tagging", "category"],
+      "source": "SSA Thai ruleset",
+      "stopOnMatch": false,
+      "when": { "type": "exists", "path": "$.dishId" },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.tagging.categoryMap",
+            "value": {
+              "thai.green_curry": "category.curry",
+              "thai.red_curry": "category.curry",
+              "thai.panang_curry": "category.curry",
+              "thai.massaman_curry": "category.curry",
+              "thai.khao_soi": "category.soup",
+              "thai.tom_yum_goong": "category.soup",
+              "thai.tom_kha_gai": "category.soup",
+              "thai.pad_thai": "category.noodles",
+              "thai.pad_see_ew": "category.noodles",
+              "thai.pad_kee_mao": "category.noodles",
+              "thai.som_tam": "category.salad",
+              "thai.larb_gai": "category.salad"
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "thai.planner.weeknight_scoring",
+      "enabled": true,
+      "priority": 500,
+      "title": "Planner scoring: boost weeknight-friendly Thai dishes",
+      "description": "If user indicates weeknight mode, boost common fast dishes.",
+      "tags": ["planner", "scoring"],
+      "source": "SSA Thai ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          { "type": "eq", "path": "$.planner.mode", "value": "weeknight" },
+          { "type": "hasTag", "value": "planner.weeknight" }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "planner.bias.weeknight" },
+          { "type": "scoreAdjust", "scoreDelta": 0.25 }
+        ]
+      }
+    },
+
+    {
+      "id": "thai.planner.batch_scoring",
+      "enabled": true,
+      "priority": 510,
+      "title": "Planner scoring: boost batch-friendly Thai curries/stir-fries",
+      "description": "If user indicates batch mode, boost curry/stir-fry bases.",
+      "tags": ["planner", "scoring"],
+      "source": "SSA Thai ruleset",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          { "type": "eq", "path": "$.planner.mode", "value": "batch" },
+          { "type": "hasTag", "value": "planner.batch" }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "planner.bias.batch" },
+          { "type": "scoreAdjust", "scoreDelta": 0.35 }
+        ]
+      }
+    },
+
+    {
+      "id": "thai.emit.adapter_summary",
+      "enabled": true,
+      "priority": 900,
+      "title": "Emit adapter summary event (if adapter context exists)",
+      "description": "A single place for the UI to subscribe and show a brief Thai-specific adaptation summary.",
+      "tags": ["events", "ui"],
+      "source": "SSA Thai ruleset",
+      "stopOnMatch": false,
+      "when": { "type": "exists", "path": "$.adapterHints" },
+      "then": {
+        "actions": [
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "cuisine.thai.adapterHints.updated",
+              "payload": {
+                "cuisineId": "cuisines.thai",
+                "summary": "Thai rules applied (balance/heat/equipment/allergen hints)."
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

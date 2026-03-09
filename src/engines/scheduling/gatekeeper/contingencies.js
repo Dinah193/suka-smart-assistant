@@ -36,7 +36,7 @@ let eventBus = {
   on: () => () => {},
 };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -67,13 +67,15 @@ const MEM_PLANS = new Map(); // planId -> snapshot (same shape as compilePlan sn
 const nowISO = () => new Date().toISOString();
 const isNum = (v) => typeof v === "number" && Number.isFinite(v);
 const isStr = (v) => typeof v === "string";
-const clone = (obj) => (obj && typeof obj === "object" ? JSON.parse(JSON.stringify(obj)) : obj);
+const clone = (obj) =>
+  obj && typeof obj === "object" ? JSON.parse(JSON.stringify(obj)) : obj;
 
 const toMs = (iso) => {
   const t = Date.parse(iso);
   return Number.isFinite(t) ? t : null;
 };
-const addMinutes = (ms, m) => (isNum(ms) && isNum(m) ? ms + Math.round(m * 60000) : null);
+const addMinutes = (ms, m) =>
+  isNum(ms) && isNum(m) ? ms + Math.round(m * 60000) : null;
 const toISO = (ms) => {
   try {
     return new Date(ms).toISOString();
@@ -151,7 +153,9 @@ const STRATEGIES = new Map();
 
 /** Register/replace a domain strategy. */
 function registerDomainStrategy(domain, fn) {
-  const d = String(domain || "").toLowerCase().trim();
+  const d = String(domain || "")
+    .toLowerCase()
+    .trim();
   if (!d || typeof fn !== "function") return false;
   STRATEGIES.set(d, fn);
   return true;
@@ -190,7 +194,9 @@ registerDomainStrategy("generic", function genericStrategy(ctx) {
   const scheduleMap = indexSchedule(ctx.schedule || []);
   const windowsById = new Map((ctx.windows || []).map((w) => [w.id, w]));
   const blocked = new Set(
-    ctx.issues.filter((i) => i.severity === "blocker" && i.scope === "window").map((i) => i.windowId)
+    ctx.issues
+      .filter((i) => i.severity === "blocker" && i.scope === "window")
+      .map((i) => i.windowId)
   );
 
   for (const w of ctx.windows) {
@@ -217,7 +223,7 @@ registerDomainStrategy("generic", function genericStrategy(ctx) {
         x.id !== w.id &&
         !blocked.has(x.id) &&
         (x.domain || "generic") === (w.domain || "generic") &&
-        Math.abs(((toMs(x.endISO) - toMs(x.startISO)) / 60000) - wDur) <= 15
+        Math.abs((toMs(x.endISO) - toMs(x.startISO)) / 60000 - wDur) <= 15
     );
 
     if (candidates.length) {
@@ -244,7 +250,8 @@ registerDomainStrategy("generic", function genericStrategy(ctx) {
         targetId: w.id,
         domain: w.domain || "generic",
         value: { reason: "Blocked and low priority" },
-        rationale: "Cancel low-priority window to protect the rest of the plan.",
+        rationale:
+          "Cancel low-priority window to protect the rest of the plan.",
         requiresUserConfirm: true,
         score: 10,
       });
@@ -262,7 +269,9 @@ registerDomainStrategy("generic", function genericStrategy(ctx) {
  */
 registerDomainStrategy("cooking", function cookingStrategy(ctx) {
   const patches = [];
-  const allergyIssues = ctx.issues.filter((i) => i.domain === "cooking" && i.code === "DIET_ALLERGY");
+  const allergyIssues = ctx.issues.filter(
+    (i) => i.domain === "cooking" && i.code === "DIET_ALLERGY"
+  );
 
   for (const issue of allergyIssues) {
     const w = ctx.windows.find((x) => x.id === issue.windowId);
@@ -293,7 +302,9 @@ registerDomainStrategy("cooking", function cookingStrategy(ctx) {
   }
 
   // Quick-thaw suggestion for sessions starting within 2h and tagged with "frozen"
-  for (const w of ctx.windows.filter((x) => (x.domain || "generic") === "cooking")) {
+  for (const w of ctx.windows.filter(
+    (x) => (x.domain || "generic") === "cooking"
+  )) {
     const startsInMin = Math.round((toMs(w.startISO) - Date.now()) / 60000);
     const frozen = (w.tags || []).some((t) => /frozen/i.test(String(t)));
     if (frozen && startsInMin <= 120) {
@@ -303,8 +314,12 @@ registerDomainStrategy("cooking", function cookingStrategy(ctx) {
         severity: "mitigation",
         targetId: w.id,
         domain: "cooking",
-        value: { method: "cold-water" /* or "microwave" depending on preference */ , estMinutesPerKg: 30 },
-        rationale: "Quick-thaw recommended due to short horizon; adjust prep timeline.",
+        value: {
+          method: "cold-water" /* or "microwave" depending on preference */,
+          estMinutesPerKg: 30,
+        },
+        rationale:
+          "Quick-thaw recommended due to short horizon; adjust prep timeline.",
         risks: ["Texture variation", "Requires food safety diligence"],
         score: 80,
       });
@@ -312,7 +327,9 @@ registerDomainStrategy("cooking", function cookingStrategy(ctx) {
   }
 
   // Device downgrade: if resource conflicts present for ovens, propose using stovetop/airfryer split
-  const deviceConflicts = (ctx.conflicts || []).filter((c) => c.type === "capacityUnmet");
+  const deviceConflicts = (ctx.conflicts || []).filter(
+    (c) => c.type === "capacityUnmet"
+  );
   for (const c of deviceConflicts) {
     const w = ctx.windows.find((x) => x.id === c.taskId);
     if (!w || (w.domain || "generic") !== "cooking") continue;
@@ -322,8 +339,13 @@ registerDomainStrategy("cooking", function cookingStrategy(ctx) {
       severity: "mitigation",
       targetId: w.id,
       domain: "cooking",
-      value: { method: "device-downgrade", to: "stovetop|airfryer", note: "Modify recipe step to alternate heat source." },
-      rationale: "Oven capacity unavailable; switch to alternate device or split batches.",
+      value: {
+        method: "device-downgrade",
+        to: "stovetop|airfryer",
+        note: "Modify recipe step to alternate heat source.",
+      },
+      rationale:
+        "Oven capacity unavailable; switch to alternate device or split batches.",
       score: 60,
     });
     patches.push({
@@ -347,7 +369,9 @@ registerDomainStrategy("cooking", function cookingStrategy(ctx) {
  */
 registerDomainStrategy("garden", function gardenStrategy(ctx) {
   const patches = [];
-  const rain = ctx.issues.filter((i) => i.domain === "garden" && i.code === "WEATHER_RAIN");
+  const rain = ctx.issues.filter(
+    (i) => i.domain === "garden" && i.code === "WEATHER_RAIN"
+  );
   const scheduleMap = indexSchedule(ctx.schedule || []);
 
   for (const issue of rain) {
@@ -367,7 +391,9 @@ registerDomainStrategy("garden", function gardenStrategy(ctx) {
       });
     }
     // Swap with storehouse indoors
-    const indoor = ctx.windows.find((x) => (x.domain || "generic") === "storehouse");
+    const indoor = ctx.windows.find(
+      (x) => (x.domain || "generic") === "storehouse"
+    );
     if (indoor) {
       patches.push({
         id: `swap-garden-store-${w.id}-${indoor.id}`,
@@ -399,7 +425,8 @@ registerDomainStrategy("garden", function gardenStrategy(ctx) {
  * @returns {Promise<{ planId, patches: Array }>}
  */
 async function proposeContingencies(req = {}) {
-  const source = "engines/scheduling/gatekeeper/contingencies.proposeContingencies";
+  const source =
+    "engines/scheduling/gatekeeper/contingencies.proposeContingencies";
   try {
     const planId = String(req.planId || "").trim() || `ad-hoc-${Date.now()}`;
     const windows = Array.isArray(req.windows) ? req.windows.slice() : [];
@@ -411,7 +438,9 @@ async function proposeContingencies(req = {}) {
     const ctx = { planId, windows, issues, schedule, conflicts, planMeta };
 
     // Domains present
-    const domains = new Set(windows.map((w) => (w.domain || "generic").toLowerCase()));
+    const domains = new Set(
+      windows.map((w) => (w.domain || "generic").toLowerCase())
+    );
     if (!domains.size) domains.add("generic");
 
     // Aggregate patches from each domain + generic
@@ -423,7 +452,9 @@ async function proposeContingencies(req = {}) {
       if (!fn) continue;
       const out = fn(ctx) || [];
       for (const p of out) {
-        const key = `${p.type}|${p.targetId || "-"}|${p.value?.withId || p.value?.ingredient || ""}`;
+        const key = `${p.type}|${p.targetId || "-"}|${
+          p.value?.withId || p.value?.ingredient || ""
+        }`;
         if (seen.has(key)) continue;
         seen.add(key);
         patches.push({
@@ -443,15 +474,23 @@ async function proposeContingencies(req = {}) {
 
     // Sort by score desc then by severity preference
     const sevRank = { mitigation: 3, workaround: 2, warn: 1, info: 0 };
-    patches.sort((a, b) => (b.score - a.score) || ((sevRank[b.severity] || 0) - (sevRank[a.severity] || 0)));
+    patches.sort(
+      (a, b) =>
+        b.score - a.score ||
+        (sevRank[b.severity] || 0) - (sevRank[a.severity] || 0)
+    );
 
     const payload = { planId, count: patches.length, patches };
     emit("scheduling.contingency.proposed", source, payload);
     return { planId, patches };
   } catch (err) {
-    emit("scheduling.contingency.error", "engines/scheduling/gatekeeper/contingencies.proposeContingencies", {
-      message: String(err?.message || err),
-    });
+    emit(
+      "scheduling.contingency.error",
+      "engines/scheduling/gatekeeper/contingencies.proposeContingencies",
+      {
+        message: String(err?.message || err),
+      }
+    );
     return { planId: String(req?.planId || ""), patches: [] };
   }
 }
@@ -474,19 +513,26 @@ async function applyContingency(req = {}) {
     const patch = req.patch || null;
     const resources = Array.isArray(req.resources) ? req.resources.slice() : [];
     if (!planId || !patch) {
-      emit("scheduling.contingency.error", source, { message: "Missing planId or patch." });
+      emit("scheduling.contingency.error", source, {
+        message: "Missing planId or patch.",
+      });
       return { planId, patchId: patch?.id, updated: false };
     }
 
     const snapshot = await store.getPlan(planId);
     if (!snapshot || !Array.isArray(snapshot.windows)) {
-      emit("scheduling.contingency.error", source, { message: "Plan not found.", planId });
+      emit("scheduling.contingency.error", source, {
+        message: "Plan not found.",
+        planId,
+      });
       return { planId, patchId: patch.id, updated: false };
     }
 
     // Clone mutable pieces
     const windows = snapshot.windows.map(clone);
-    const schedule = Array.isArray(snapshot.schedule) ? snapshot.schedule.map(clone) : [];
+    const schedule = Array.isArray(snapshot.schedule)
+      ? snapshot.schedule.map(clone)
+      : [];
     const scheduleIdx = indexSchedule(schedule);
 
     const getWindow = (id) => windows.find((w) => w.id === id);
@@ -517,9 +563,12 @@ async function applyContingency(req = {}) {
         const a = getWindow(patch.targetId);
         const b = getWindow(patch.value?.withId);
         if (!a || !b) break;
-        const aS = a.startISO, aE = a.endISO;
-        a.startISO = b.startISO; a.endISO = b.endISO;
-        b.startISO = aS; b.endISO = aE;
+        const aS = a.startISO,
+          aE = a.endISO;
+        a.startISO = b.startISO;
+        a.endISO = b.endISO;
+        b.startISO = aS;
+        b.endISO = aE;
         changed = true;
         break;
       }
@@ -531,7 +580,9 @@ async function applyContingency(req = {}) {
         if (!ingName || !subName) break;
 
         // Attach/modify substitutions metadata (non-destructive)
-        const subs = Array.isArray(w.substitutions) ? w.substitutions.slice() : [];
+        const subs = Array.isArray(w.substitutions)
+          ? w.substitutions.slice()
+          : [];
         subs.push({ ingredient: ingName, substitute: subName, at: nowISO() });
         w.substitutions = subs;
         changed = true;
@@ -545,7 +596,10 @@ async function applyContingency(req = {}) {
         // Inject a pre-task window just before start
         const startMs = toMs(w.startISO);
         if (startMs == null) break;
-        const dur = Math.max(10, Math.round((w.materials?.meatKg || 1) * estMinPerKg));
+        const dur = Math.max(
+          10,
+          Math.round((w.materials?.meatKg || 1) * estMinPerKg)
+        );
         const thawStart = toISO(addMinutes(startMs, -dur));
         windows.push({
           id: `${w.id}::quickthaw`,
@@ -563,9 +617,14 @@ async function applyContingency(req = {}) {
         const w = getWindow(patch.targetId);
         if (!w) break;
         // Mark as simplified variant (downstream UI/runner can use this)
-        w.variant = { ...(w.variant || {}), simplified: true, note: patch.value?.note || patch.rationale };
+        w.variant = {
+          ...(w.variant || {}),
+          simplified: true,
+          note: patch.value?.note || patch.rationale,
+        };
         // Slightly reduce duration by 10% (best effort)
-        const s = toMs(w.startISO), e = toMs(w.endISO);
+        const s = toMs(w.startISO),
+          e = toMs(w.endISO);
         if (s != null && e != null) {
           const dur = Math.max(1, Math.round((e - s) / 60000));
           const newDur = Math.max(1, Math.round(dur * 0.9));
@@ -579,10 +638,14 @@ async function applyContingency(req = {}) {
         if (!w) break;
         const into = Math.max(2, Number(patch.value?.into || 2));
         const spacing = Math.max(0, Number(patch.value?.spacingMin || 0));
-        const s = toMs(w.startISO), e = toMs(w.endISO);
+        const s = toMs(w.startISO),
+          e = toMs(w.endISO);
         if (s == null || e == null) break;
         const total = Math.max(1, Math.round((e - s) / 60000));
-        const per = Math.max(1, Math.round((total - spacing * (into - 1)) / into));
+        const per = Math.max(
+          1,
+          Math.round((total - spacing * (into - 1)) / into)
+        );
 
         // Remove original and create splits
         const idx = windows.findIndex((x) => x.id === w.id);
@@ -634,13 +697,21 @@ async function applyContingency(req = {}) {
     // Re-allocate resources if allocator is available and we have a catalog
     let reservations = snapshot.reservations || [];
     let conflicts = snapshot.conflicts || [];
-    if (allocator?.reserveResources && Array.isArray(resources) && resources.length) {
+    if (
+      allocator?.reserveResources &&
+      Array.isArray(resources) &&
+      resources.length
+    ) {
       // Release existing reservations for affected tasks in this plan to avoid double-booking
       try {
         if (allocator?.releaseReservations) {
           const affectedIds = deriveAffectedIdsFromPatch(patch);
           if (affectedIds.length) {
-            await allocator.releaseReservations({ planId, taskIds: affectedIds, export: false });
+            await allocator.releaseReservations({
+              planId,
+              taskIds: affectedIds,
+              export: false,
+            });
             // refresh local copy
             const current = await allocator.getReservations?.(planId);
             reservations = Array.isArray(current) ? current : [];
@@ -670,7 +741,13 @@ async function applyContingency(req = {}) {
     };
     await store.putPlan(planId, updated);
 
-    const payload = { planId, patchId: patch.id, changed: true, patch, snapshot: safeSnapshot(updated) };
+    const payload = {
+      planId,
+      patchId: patch.id,
+      changed: true,
+      patch,
+      snapshot: safeSnapshot(updated),
+    };
     emit("scheduling.contingency.applied", source, payload);
 
     if (req.export === true) {
@@ -679,10 +756,18 @@ async function applyContingency(req = {}) {
 
     return { planId, patchId: patch.id, updated: true, snapshot: updated };
   } catch (err) {
-    emit("scheduling.contingency.error", "engines/scheduling/gatekeeper/contingencies.applyContingency", {
-      message: String(err?.message || err),
-    });
-    return { planId: String(req?.planId || ""), patchId: req?.patch?.id, updated: false };
+    emit(
+      "scheduling.contingency.error",
+      "engines/scheduling/gatekeeper/contingencies.applyContingency",
+      {
+        message: String(err?.message || err),
+      }
+    );
+    return {
+      planId: String(req?.planId || ""),
+      patchId: req?.patch?.id,
+      updated: false,
+    };
   }
 }
 
@@ -711,7 +796,12 @@ function safeSnapshot(snap) {
     planId: snap.planId,
     planMeta: snap.planMeta,
     windows: (snap.windows || []).map((w) => ({
-      id: w.id, title: w.title, domain: w.domain, startISO: w.startISO, endISO: w.endISO, priority: w.priority,
+      id: w.id,
+      title: w.title,
+      domain: w.domain,
+      startISO: w.startISO,
+      endISO: w.endISO,
+      priority: w.priority,
     })),
     conflicts: snap.conflicts || [],
     reservations: (snap.reservations || []).slice(0, 50), // cap in event payload

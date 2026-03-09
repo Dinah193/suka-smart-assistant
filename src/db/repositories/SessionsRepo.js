@@ -29,7 +29,7 @@ try {
 
 let eventBus = { emit: () => {}, on: () => () => {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -68,7 +68,9 @@ function uuid() {
     return globalThis?.crypto?.randomUUID?.() || null;
   } catch {}
   // Fallback
-  return `sess_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+  return `sess_${Date.now().toString(36)}_${Math.random()
+    .toString(36)
+    .slice(2, 8)}`;
 }
 
 /** Stable event emitter */
@@ -90,13 +92,21 @@ function emit(type, data) {
  * It checks featureFlags.familyFundMode and sends a best-effort packet.
  */
 async function exportToHubIfEnabled(payload) {
-  if (!featureFlags?.familyFundMode || !HubPacketFormatter || !FamilyFundConnector) return;
+  if (
+    !featureFlags?.familyFundMode ||
+    !HubPacketFormatter ||
+    !FamilyFundConnector
+  )
+    return;
   try {
     const packet = HubPacketFormatter.formatSessionChange?.(payload) || payload;
     await FamilyFundConnector.send?.(packet);
   } catch (err) {
     // Silent fail by design
-    console.warn("[SessionsRepo] Hub export failed (silent):", err?.message || err);
+    console.warn(
+      "[SessionsRepo] Hub export failed (silent):",
+      err?.message || err
+    );
   }
 }
 
@@ -105,7 +115,8 @@ async function exportToHubIfEnabled(payload) {
  * This is intentionally permissive & domain-agnostic but ensures safe defaults.
  */
 function normalizeSession(input = {}) {
-  if (!input || typeof input !== "object") return { ok: false, error: "Invalid session payload." };
+  if (!input || typeof input !== "object")
+    return { ok: false, error: "Invalid session payload." };
 
   const now = isoNow();
   const id = input.id || uuid();
@@ -125,10 +136,21 @@ function normalizeSession(input = {}) {
     title: String(input.title || "").trim() || "Untitled Session",
     status: allowedStatuses.has(input.status) ? input.status : "draft",
     tasks: Array.isArray(input.tasks) ? input.tasks : [], // [{id, title, duration, prerequisites, annotations, ...}]
-    preferences: input.preferences && typeof input.preferences === "object" ? input.preferences : {}, // e.g., doneness, aromatics, etc.
-    schedule: input.schedule && typeof input.schedule === "object" ? input.schedule : {}, // { scheduledFor, duration, recurrence }
-    inventoryEffects: Array.isArray(input.inventoryEffects) ? input.inventoryEffects : [], // [{ itemId, delta, reason }]
-    analytics: input.analytics && typeof input.analytics === "object" ? input.analytics : {}, // any engine hints, scoring
+    preferences:
+      input.preferences && typeof input.preferences === "object"
+        ? input.preferences
+        : {}, // e.g., doneness, aromatics, etc.
+    schedule:
+      input.schedule && typeof input.schedule === "object"
+        ? input.schedule
+        : {}, // { scheduledFor, duration, recurrence }
+    inventoryEffects: Array.isArray(input.inventoryEffects)
+      ? input.inventoryEffects
+      : [], // [{ itemId, delta, reason }]
+    analytics:
+      input.analytics && typeof input.analytics === "object"
+        ? input.analytics
+        : {}, // any engine hints, scoring
     metadata:
       input.metadata && typeof input.metadata === "object"
         ? input.metadata
@@ -204,10 +226,17 @@ const SessionsRepo = {
 
     try {
       const ids = await db.sessions.bulkPut(ready); // returns last key; Dexie 4 returns array; we tolerate both
-      const payload = { action: "bulkCreate", count: ready.length, sessions: ready.map(s => s.id) };
+      const payload = {
+        action: "bulkCreate",
+        count: ready.length,
+        sessions: ready.map((s) => s.id),
+      };
       emit("session.bulk_created", payload);
       await exportToHubIfEnabled(payload);
-      return { ok: true, data: Array.isArray(ids) ? ids : ready.map(s => s.id) };
+      return {
+        ok: true,
+        data: Array.isArray(ids) ? ids : ready.map((s) => s.id),
+      };
     } catch (err) {
       console.error("[SessionsRepo.bulkCreate] failed:", err);
       return { ok: false, error: err?.message || String(err) };
@@ -250,23 +279,27 @@ const SessionsRepo = {
       let coll = db.sessions.toCollection();
 
       if (domain) {
-        coll = coll.and(s => s.domain === domain);
+        coll = coll.and((s) => s.domain === domain);
       }
       if (status) {
         // allow array or string
-        const statuses = Array.isArray(status) ? new Set(status) : new Set([status]);
-        coll = coll.and(s => statuses.has(s.status));
+        const statuses = Array.isArray(status)
+          ? new Set(status)
+          : new Set([status]);
+        coll = coll.and((s) => statuses.has(s.status));
       }
       if (from) {
-        coll = coll.and(s => (s.createdAt || "") >= from);
+        coll = coll.and((s) => (s.createdAt || "") >= from);
       }
       if (to) {
-        coll = coll.and(s => (s.createdAt || "") < to);
+        coll = coll.and((s) => (s.createdAt || "") < to);
       }
 
       // Sorting
       const dir = sortDir === "asc" ? 1 : -1;
-      const items = await coll.sortBy(sortBy).then(arr => (dir === 1 ? arr : arr.reverse()));
+      const items = await coll
+        .sortBy(sortBy)
+        .then((arr) => (dir === 1 ? arr : arr.reverse()));
 
       // Pagination
       const slice = items.slice(offset, offset + limit);
@@ -329,7 +362,11 @@ const SessionsRepo = {
       const merged = { ...current, ...partial, id, updatedAt: isoNow() };
       await db.sessions.put(merged);
 
-      const payload = { action: "patch", session: merged, fields: Object.keys(partial) };
+      const payload = {
+        action: "patch",
+        session: merged,
+        fields: Object.keys(partial),
+      };
       emit("session.patched", payload);
       await exportToHubIfEnabled(payload);
       return { ok: true, data: merged };
@@ -380,7 +417,8 @@ const SessionsRepo = {
    */
   async bulkRemove(ids = []) {
     ensureDB();
-    if (!Array.isArray(ids) || ids.length === 0) return { ok: false, error: "Nothing to remove." };
+    if (!Array.isArray(ids) || ids.length === 0)
+      return { ok: false, error: "Nothing to remove." };
     try {
       await db.sessions.bulkDelete(ids);
       const payload = { action: "bulkDelete", ids };
@@ -400,10 +438,17 @@ const SessionsRepo = {
   async markScheduled(id, scheduledForISO) {
     return this.patch(id, {
       status: "scheduled",
-      schedule: { ...(await db.sessions.get(id)).schedule, scheduledFor: scheduledForISO },
+      schedule: {
+        ...(await db.sessions.get(id)).schedule,
+        scheduledFor: scheduledForISO,
+      },
     }).then((res) => {
       if (res.ok) {
-        const payload = { action: "status.scheduled", id, scheduledFor: scheduledForISO };
+        const payload = {
+          action: "status.scheduled",
+          id,
+          scheduledFor: scheduledForISO,
+        };
         emit("session.scheduled", payload);
         exportToHubIfEnabled(payload);
       }
@@ -423,10 +468,17 @@ const SessionsRepo = {
   },
 
   async markExecuted(id, executedAtISO = isoNow()) {
-    return this.patch(id, { status: "completed", executedAt: executedAtISO }).then((res) => {
+    return this.patch(id, {
+      status: "completed",
+      executedAt: executedAtISO,
+    }).then((res) => {
       if (res.ok) {
         // Note: Downstream may also emit domain-specific events (e.g., meal.executed)
-        const payload = { action: "status.completed", id, executedAt: executedAtISO };
+        const payload = {
+          action: "status.completed",
+          id,
+          executedAt: executedAtISO,
+        };
         emit("session.completed", payload);
         exportToHubIfEnabled(payload);
       }
@@ -435,27 +487,31 @@ const SessionsRepo = {
   },
 
   async cancel(id, reason = null) {
-    return this.patch(id, { status: "canceled", canceledAt: isoNow(), metadata: { reason } }).then(
+    return this.patch(id, {
+      status: "canceled",
+      canceledAt: isoNow(),
+      metadata: { reason },
+    }).then((res) => {
+      if (res.ok) {
+        const payload = { action: "status.canceled", id, reason };
+        emit("session.canceled", payload);
+        exportToHubIfEnabled(payload);
+      }
+      return res;
+    });
+  },
+
+  async archive(id) {
+    return this.patch(id, { status: "archived", archivedAt: isoNow() }).then(
       (res) => {
         if (res.ok) {
-          const payload = { action: "status.canceled", id, reason };
-          emit("session.canceled", payload);
+          const payload = { action: "status.archived", id };
+          emit("session.archived", payload);
           exportToHubIfEnabled(payload);
         }
         return res;
       }
     );
-  },
-
-  async archive(id) {
-    return this.patch(id, { status: "archived", archivedAt: isoNow() }).then((res) => {
-      if (res.ok) {
-        const payload = { action: "status.archived", id };
-        emit("session.archived", payload);
-        exportToHubIfEnabled(payload);
-      }
-      return res;
-    });
   },
 
   /* --------------------------------------------------------------------------
@@ -490,7 +546,10 @@ const SessionsRepo = {
   async recent(limit = 50) {
     ensureDB();
     try {
-      const arr = await db.sessions.toCollection().reverse().sortBy("updatedAt");
+      const arr = await db.sessions
+        .toCollection()
+        .reverse()
+        .sortBy("updatedAt");
       return { ok: true, data: arr.slice(0, limit) };
     } catch (err) {
       console.error("[SessionsRepo.recent] failed:", err);

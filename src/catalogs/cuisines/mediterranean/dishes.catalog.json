@@ -1,0 +1,462 @@
+{
+  "$schema": "../../../schemas/dishes.catalog.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00.000Z",
+  "meta": {
+    "id": "cuisines.mediterranean.dishes",
+    "type": "dishes_catalog",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Mediterranean • Dishes Catalog",
+    "description": "Canonical Mediterranean dish catalog for SSA: dish IDs, tags, roles, and search hints. Used by meal planning, recipe discovery, and cuisine-aware substitutions.",
+    "version": "1.0.0",
+    "status": "canonical",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-18T00:00:00.000Z",
+    "updatedAt": "2026-01-18T00:00:00.000Z"
+  },
+  "items": [
+    {
+      "id": "med_greek_salad",
+      "label": "Greek Salad",
+      "role": "side",
+      "tags": [
+        "mediterranean",
+        "salad",
+        "fresh",
+        "vegetarian",
+        "no_cook",
+        "quick"
+      ],
+      "searchHints": [
+        "horiatiki",
+        "tomato cucumber feta olive",
+        "greek village salad"
+      ]
+    },
+    {
+      "id": "med_tzatziki",
+      "label": "Tzatziki (Yogurt-Cucumber Sauce)",
+      "role": "sauce",
+      "tags": [
+        "mediterranean",
+        "dip",
+        "sauce",
+        "yogurt",
+        "no_cook",
+        "quick",
+        "vegetarian"
+      ],
+      "searchHints": [
+        "tzatziki sauce",
+        "yogurt cucumber garlic",
+        "greek yogurt dip"
+      ]
+    },
+    {
+      "id": "med_hummus",
+      "label": "Hummus",
+      "role": "side",
+      "tags": [
+        "mediterranean",
+        "dip",
+        "legume",
+        "chickpeas",
+        "vegan",
+        "vegetarian",
+        "make_ahead"
+      ],
+      "searchHints": [
+        "chickpea tahini dip",
+        "hummus bi tahina",
+        "garlic lemon chickpeas"
+      ]
+    },
+    {
+      "id": "med_baba_ganoush",
+      "label": "Baba Ganoush (Eggplant Dip)",
+      "role": "side",
+      "tags": [
+        "mediterranean",
+        "dip",
+        "eggplant",
+        "vegan",
+        "vegetarian",
+        "make_ahead"
+      ],
+      "searchHints": ["eggplant tahini dip", "smoky eggplant", "baba ganouj"]
+    },
+    {
+      "id": "med_tabouli",
+      "label": "Tabouli (Herb Salad)",
+      "role": "side",
+      "tags": [
+        "mediterranean",
+        "salad",
+        "fresh",
+        "herb_forward",
+        "vegetarian",
+        "make_ahead"
+      ],
+      "searchHints": ["tabbouleh", "parsley bulgur salad", "lemon herb salad"]
+    },
+    {
+      "id": "med_fattoush",
+      "label": "Fattoush (Pita Salad)",
+      "role": "side",
+      "tags": [
+        "mediterranean",
+        "salad",
+        "fresh",
+        "vegetarian",
+        "pita",
+        "quick"
+      ],
+      "searchHints": ["fattoush salad", "sumac salad", "pita chips salad"]
+    },
+    {
+      "id": "med_shakshuka",
+      "label": "Shakshuka (Eggs in Spiced Tomato Sauce)",
+      "role": "main",
+      "tags": [
+        "mediterranean",
+        "eggs",
+        "tomato",
+        "one_pan",
+        "breakfast",
+        "quick"
+      ],
+      "searchHints": [
+        "eggs in tomato sauce",
+        "shakshouka",
+        "spiced tomato eggs"
+      ]
+    },
+    {
+      "id": "med_lemon_oregano_chicken",
+      "label": "Lemon-Oregano Chicken (Roasted or Grilled)",
+      "role": "main",
+      "tags": [
+        "mediterranean",
+        "chicken",
+        "lemon",
+        "herbs",
+        "roast",
+        "grill",
+        "meal_prep"
+      ],
+      "searchHints": [
+        "greek lemon chicken",
+        "lemon oregano chicken thighs",
+        "roasted greek chicken"
+      ]
+    },
+    {
+      "id": "med_souvlaki_chicken",
+      "label": "Chicken Souvlaki (Skewers)",
+      "role": "main",
+      "tags": ["mediterranean", "chicken", "grill", "street_food", "quick"],
+      "searchHints": [
+        "souvlaki",
+        "greek chicken skewers",
+        "lemon garlic chicken skewers"
+      ]
+    },
+    {
+      "id": "med_kofta_meatballs",
+      "label": "Kofta (Spiced Meatballs or Patties)",
+      "role": "main",
+      "tags": [
+        "mediterranean",
+        "beef",
+        "lamb",
+        "meatballs",
+        "grill",
+        "stovetop"
+      ],
+      "searchHints": ["kefta", "kofta kebab", "spiced lamb patties"]
+    },
+    {
+      "id": "med_baked_fish_herbs",
+      "label": "Baked Fish with Herbs & Lemon",
+      "role": "main",
+      "tags": ["mediterranean", "seafood", "fish", "bake", "quick", "light"],
+      "searchHints": [
+        "baked fish lemon",
+        "fish en papillote",
+        "mediterranean baked cod"
+      ]
+    },
+    {
+      "id": "med_shrimp_garlic_lemon",
+      "label": "Garlic-Lemon Shrimp",
+      "role": "main",
+      "tags": ["mediterranean", "seafood", "shrimp", "quick", "stovetop"],
+      "searchHints": [
+        "garlic shrimp lemon",
+        "shrimp scampi style",
+        "olive oil garlic shrimp"
+      ]
+    },
+    {
+      "id": "med_lentil_soup",
+      "label": "Lentil Soup (Mediterranean Style)",
+      "role": "main",
+      "tags": [
+        "mediterranean",
+        "soup",
+        "lentils",
+        "vegetarian",
+        "vegan_option",
+        "batch_cook"
+      ],
+      "searchHints": [
+        "lentil soup lemon",
+        "mediterranean lentil stew",
+        "lentil soup cumin"
+      ]
+    },
+    {
+      "id": "med_chickpea_stew",
+      "label": "Chickpea Stew (Tomato-Garlic)",
+      "role": "main",
+      "tags": [
+        "mediterranean",
+        "stew",
+        "chickpeas",
+        "vegetarian",
+        "vegan",
+        "batch_cook"
+      ],
+      "searchHints": [
+        "chickpeas in tomato sauce",
+        "spanish garbanzos stew",
+        "chickpea tomato stew"
+      ]
+    },
+    {
+      "id": "med_pasta_aglio_olio",
+      "label": "Pasta Aglio e Olio (Garlic & Olive Oil)",
+      "role": "main",
+      "tags": [
+        "mediterranean",
+        "pasta",
+        "quick",
+        "pantry",
+        "vegetarian",
+        "vegan_option"
+      ],
+      "searchHints": [
+        "aglio e olio",
+        "garlic olive oil pasta",
+        "spaghetti aglio olio"
+      ]
+    },
+    {
+      "id": "med_pasta_pomodoro",
+      "label": "Pasta al Pomodoro (Tomato-Basil)",
+      "role": "main",
+      "tags": ["mediterranean", "pasta", "tomato", "quick", "vegetarian"],
+      "searchHints": [
+        "pomodoro",
+        "tomato basil pasta",
+        "simple tomato sauce pasta"
+      ]
+    },
+    {
+      "id": "med_ratatouille_style",
+      "label": "Ratatouille-Style Vegetable Stew",
+      "role": "main",
+      "tags": [
+        "mediterranean",
+        "vegetables",
+        "stew",
+        "vegan",
+        "vegetarian",
+        "make_ahead"
+      ],
+      "searchHints": [
+        "ratatouille",
+        "eggplant zucchini tomato stew",
+        "provencal vegetable stew"
+      ]
+    },
+    {
+      "id": "med_roasted_veg_sheetpan",
+      "label": "Sheet-Pan Roasted Vegetables (Olive Oil & Herbs)",
+      "role": "side",
+      "tags": [
+        "mediterranean",
+        "vegetables",
+        "roast",
+        "sheet_pan",
+        "meal_prep",
+        "vegan",
+        "vegetarian"
+      ],
+      "searchHints": [
+        "roasted vegetables olive oil",
+        "sheet pan veggies oregano",
+        "mediterranean roasted vegetables"
+      ]
+    },
+    {
+      "id": "med_greek_lemon_potatoes",
+      "label": "Greek Lemon Potatoes",
+      "role": "side",
+      "tags": [
+        "mediterranean",
+        "potatoes",
+        "roast",
+        "lemon",
+        "herbs",
+        "vegetarian"
+      ],
+      "searchHints": [
+        "greek roasted potatoes",
+        "lemon oregano potatoes",
+        "patates lemonates"
+      ]
+    },
+    {
+      "id": "med_couscous_salad",
+      "label": "Couscous Salad (Herbs & Lemon)",
+      "role": "side",
+      "tags": ["mediterranean", "grain", "salad", "make_ahead", "vegetarian"],
+      "searchHints": [
+        "couscous herb salad",
+        "lemon couscous salad",
+        "mediterranean couscous"
+      ]
+    },
+    {
+      "id": "med_bulgur_pilaf",
+      "label": "Bulgur Pilaf (Tomato & Onion)",
+      "role": "side",
+      "tags": [
+        "mediterranean",
+        "grain",
+        "bulgur",
+        "stovetop",
+        "vegetarian",
+        "pantry"
+      ],
+      "searchHints": [
+        "bulgur pilaf tomato",
+        "turkish bulgur pilav",
+        "bulgur with tomato paste"
+      ]
+    }
+  ],
+  "tagIndex": {
+    "mediterranean": {
+      "label": "Mediterranean",
+      "items": [
+        "med_greek_salad",
+        "med_tzatziki",
+        "med_hummus",
+        "med_baba_ganoush",
+        "med_tabouli",
+        "med_fattoush",
+        "med_shakshuka",
+        "med_lemon_oregano_chicken",
+        "med_souvlaki_chicken",
+        "med_kofta_meatballs",
+        "med_baked_fish_herbs",
+        "med_shrimp_garlic_lemon",
+        "med_lentil_soup",
+        "med_chickpea_stew",
+        "med_pasta_aglio_olio",
+        "med_pasta_pomodoro",
+        "med_ratatouille_style",
+        "med_roasted_veg_sheetpan",
+        "med_greek_lemon_potatoes",
+        "med_couscous_salad",
+        "med_bulgur_pilaf"
+      ]
+    },
+    "quick": {
+      "label": "Quick",
+      "items": [
+        "med_greek_salad",
+        "med_tzatziki",
+        "med_fattoush",
+        "med_shakshuka",
+        "med_souvlaki_chicken",
+        "med_baked_fish_herbs",
+        "med_shrimp_garlic_lemon",
+        "med_pasta_aglio_olio",
+        "med_pasta_pomodoro"
+      ]
+    },
+    "make_ahead": {
+      "label": "Make-ahead",
+      "items": [
+        "med_hummus",
+        "med_baba_ganoush",
+        "med_tabouli",
+        "med_lentil_soup",
+        "med_chickpea_stew",
+        "med_ratatouille_style",
+        "med_roasted_veg_sheetpan",
+        "med_couscous_salad"
+      ]
+    },
+    "vegetarian": {
+      "label": "Vegetarian",
+      "items": [
+        "med_greek_salad",
+        "med_tzatziki",
+        "med_hummus",
+        "med_baba_ganoush",
+        "med_tabouli",
+        "med_fattoush",
+        "med_lentil_soup",
+        "med_chickpea_stew",
+        "med_pasta_aglio_olio",
+        "med_pasta_pomodoro",
+        "med_ratatouille_style",
+        "med_roasted_veg_sheetpan",
+        "med_greek_lemon_potatoes",
+        "med_couscous_salad",
+        "med_bulgur_pilaf"
+      ]
+    },
+    "vegan": {
+      "label": "Vegan",
+      "items": [
+        "med_hummus",
+        "med_baba_ganoush",
+        "med_lentil_soup",
+        "med_chickpea_stew",
+        "med_ratatouille_style",
+        "med_roasted_veg_sheetpan"
+      ]
+    },
+    "seafood": {
+      "label": "Seafood",
+      "items": ["med_baked_fish_herbs", "med_shrimp_garlic_lemon"]
+    },
+    "chicken": {
+      "label": "Chicken",
+      "items": ["med_lemon_oregano_chicken", "med_souvlaki_chicken"]
+    },
+    "pasta": {
+      "label": "Pasta",
+      "items": ["med_pasta_aglio_olio", "med_pasta_pomodoro"]
+    },
+    "salad": {
+      "label": "Salad",
+      "items": [
+        "med_greek_salad",
+        "med_tabouli",
+        "med_fattoush",
+        "med_couscous_salad"
+      ]
+    },
+    "stew": {
+      "label": "Stew",
+      "items": ["med_chickpea_stew", "med_ratatouille_style", "med_lentil_soup"]
+    }
+  }
+}

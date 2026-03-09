@@ -1,0 +1,494 @@
+{
+  "$schema": "../../schemas/catalog.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-24T00:00:00.000Z",
+  "meta": {
+    "id": "estimators.food_security_defaults",
+    "type": "catalog",
+    "domain": "estimators",
+    "locale": "en-US",
+    "name": "Food Security Defaults",
+    "label": "Food Security Defaults",
+    "subtitle": "Default targets & assumptions for SSA provisioning/food-security estimators",
+    "source": {
+      "kind": "catalog",
+      "name": "src/catalogs/estimators/food_security_defaults.catalog.json",
+      "notes": [
+        "Deterministic defaults used by SSA estimators (ProvisioningTargetEngine, FoodSecurityEstimator, StorehousePlanner).",
+        "Values are conservative and intended to be user-overridable per household.",
+        "All units are explicit; engines may convert to user-preferred units for UI display."
+      ]
+    }
+  },
+  "scope": {
+    "kind": "global",
+    "module": "estimators.food_security",
+    "locales": ["en-US"]
+  },
+  "defaults": {
+    "currency": "USD",
+    "daysPerMonth": 30,
+    "daysPerYear": 365,
+    "wasteBufferPct": 0.12,
+    "menuVarietyFactor": 1.15,
+    "seasonalityFactor": 1.05,
+    "rounding": {
+      "mode": "ceil",
+      "precision": 0
+    }
+  },
+  "items": [
+    {
+      "id": "foodsec.tier0_minimum_survival",
+      "label": "Tier 0 • Minimum Survival",
+      "group": "tiers",
+      "rank": 0,
+      "status": "active",
+      "tags": [
+        "estimator.food_security",
+        "foodsec.tier.0",
+        "policy.minimum",
+        "planning.emergency",
+        "storage.pantry"
+      ],
+      "refs": {
+        "kind": "food_security_tier"
+      },
+      "profile": {
+        "days": 30,
+        "dailyCaloriesPerAdult": 2000,
+        "dailyCaloriesPerChild": 1600,
+        "proteinTargetGPerAdult": 55,
+        "proteinTargetGPerChild": 35,
+        "fiberTargetGPerAdult": 25,
+        "fiberTargetGPerChild": 18,
+        "waterLitersPerPersonPerDay": 3.0,
+        "mealPattern": "simple",
+        "notes": [
+          "Focus on shelf-stable staples and simple meal prep.",
+          "Assumes limited fresh produce and limited cooking fuel."
+        ]
+      }
+    },
+
+    {
+      "id": "foodsec.tier1_basic_buffer",
+      "label": "Tier 1 • Basic Buffer",
+      "group": "tiers",
+      "rank": 1,
+      "status": "active",
+      "tags": [
+        "estimator.food_security",
+        "foodsec.tier.1",
+        "planning.buffer",
+        "storage.pantry",
+        "weeknight.friendly"
+      ],
+      "refs": {
+        "kind": "food_security_tier"
+      },
+      "profile": {
+        "days": 60,
+        "dailyCaloriesPerAdult": 2100,
+        "dailyCaloriesPerChild": 1700,
+        "proteinTargetGPerAdult": 65,
+        "proteinTargetGPerChild": 40,
+        "fiberTargetGPerAdult": 27,
+        "fiberTargetGPerChild": 20,
+        "waterLitersPerPersonPerDay": 3.0,
+        "mealPattern": "standard",
+        "notes": [
+          "Adds more variety, canned vegetables, and basic freezer items if available.",
+          "Assumes access to a basic stove/oven and some refrigeration."
+        ]
+      }
+    },
+
+    {
+      "id": "foodsec.tier2_sustained_90_days",
+      "label": "Tier 2 • Sustained 90 Days",
+      "group": "tiers",
+      "rank": 2,
+      "status": "active",
+      "tags": [
+        "estimator.food_security",
+        "foodsec.tier.2",
+        "planning.sustained",
+        "storage.pantry",
+        "storage.freezer",
+        "batch.friendly"
+      ],
+      "refs": {
+        "kind": "food_security_tier"
+      },
+      "profile": {
+        "days": 90,
+        "dailyCaloriesPerAdult": 2200,
+        "dailyCaloriesPerChild": 1800,
+        "proteinTargetGPerAdult": 75,
+        "proteinTargetGPerChild": 45,
+        "fiberTargetGPerAdult": 30,
+        "fiberTargetGPerChild": 22,
+        "waterLitersPerPersonPerDay": 3.5,
+        "mealPattern": "batch_cooking",
+        "notes": [
+          "Assumes batch cooking, rotation, and planned use of preserved foods.",
+          "Intended for households practicing pantry/freezer rotation."
+        ]
+      }
+    },
+
+    {
+      "id": "foodsec.tier3_six_months",
+      "label": "Tier 3 • 6 Months",
+      "group": "tiers",
+      "rank": 3,
+      "status": "active",
+      "tags": [
+        "estimator.food_security",
+        "foodsec.tier.3",
+        "planning.long_term",
+        "storage.pantry",
+        "storage.freezer",
+        "storage.root_cellar",
+        "preservation.enabled"
+      ],
+      "refs": {
+        "kind": "food_security_tier"
+      },
+      "profile": {
+        "days": 180,
+        "dailyCaloriesPerAdult": 2250,
+        "dailyCaloriesPerChild": 1850,
+        "proteinTargetGPerAdult": 80,
+        "proteinTargetGPerChild": 50,
+        "fiberTargetGPerAdult": 30,
+        "fiberTargetGPerChild": 22,
+        "waterLitersPerPersonPerDay": 3.5,
+        "mealPattern": "preservation_rotation",
+        "notes": [
+          "Assumes a functioning preservation system (canning/freezing/dehydrating/fermenting).",
+          "Includes seasonal produce storage assumptions and a broader spice/condiment pantry."
+        ]
+      }
+    },
+
+    {
+      "id": "foodsec.tier4_one_year",
+      "label": "Tier 4 • 1 Year",
+      "group": "tiers",
+      "rank": 4,
+      "status": "active",
+      "tags": [
+        "estimator.food_security",
+        "foodsec.tier.4",
+        "planning.resilience",
+        "storage.pantry",
+        "storage.freezer",
+        "storage.root_cellar",
+        "preservation.advanced"
+      ],
+      "refs": {
+        "kind": "food_security_tier"
+      },
+      "profile": {
+        "days": 365,
+        "dailyCaloriesPerAdult": 2300,
+        "dailyCaloriesPerChild": 1900,
+        "proteinTargetGPerAdult": 85,
+        "proteinTargetGPerChild": 55,
+        "fiberTargetGPerAdult": 32,
+        "fiberTargetGPerChild": 24,
+        "waterLitersPerPersonPerDay": 3.5,
+        "mealPattern": "homestead_cycle",
+        "notes": [
+          "Assumes multi-season planning, preservation, and resupply cycles.",
+          "Pairs well with garden/animals integration and bulk purchasing."
+        ]
+      }
+    },
+
+    {
+      "id": "foodsec.macro_defaults.standard",
+      "label": "Macros • Standard Default Split",
+      "group": "macros",
+      "rank": 10,
+      "status": "active",
+      "tags": [
+        "estimator.food_security",
+        "defaults.macros",
+        "nutrition.macros",
+        "profile.standard"
+      ],
+      "refs": {
+        "kind": "macro_profile"
+      },
+      "profile": {
+        "carbPct": 0.45,
+        "proteinPct": 0.25,
+        "fatPct": 0.3,
+        "notes": [
+          "Balanced split for general use.",
+          "Engines should allow household overrides and diet-driven adjustments."
+        ]
+      }
+    },
+
+    {
+      "id": "foodsec.macro_defaults.high_protein",
+      "label": "Macros • Higher Protein",
+      "group": "macros",
+      "rank": 11,
+      "status": "active",
+      "tags": [
+        "estimator.food_security",
+        "defaults.macros",
+        "nutrition.macros",
+        "profile.high_protein"
+      ],
+      "refs": {
+        "kind": "macro_profile"
+      },
+      "profile": {
+        "carbPct": 0.35,
+        "proteinPct": 0.3,
+        "fatPct": 0.35,
+        "notes": [
+          "Useful for satiety and strength-focused households.",
+          "Requires higher protein provisioning and may increase cost."
+        ]
+      }
+    },
+
+    {
+      "id": "foodsec.macro_defaults.lower_carb",
+      "label": "Macros • Lower Carb",
+      "group": "macros",
+      "rank": 12,
+      "status": "active",
+      "tags": [
+        "estimator.food_security",
+        "defaults.macros",
+        "nutrition.macros",
+        "profile.lower_carb"
+      ],
+      "refs": {
+        "kind": "macro_profile"
+      },
+      "profile": {
+        "carbPct": 0.25,
+        "proteinPct": 0.3,
+        "fatPct": 0.45,
+        "notes": [
+          "Lower-carb provisioning increases fats and proteins.",
+          "Ensure fiber sources remain adequate (vegetables, legumes, seeds)."
+        ]
+      }
+    },
+
+    {
+      "id": "foodsec.cost_assumptions.us_baseline_2026",
+      "label": "Cost Assumptions • US Baseline",
+      "group": "costs",
+      "rank": 20,
+      "status": "active",
+      "tags": [
+        "estimator.food_security",
+        "defaults.costs",
+        "locale.en-us",
+        "currency.usd"
+      ],
+      "refs": {
+        "kind": "cost_assumptions"
+      },
+      "profile": {
+        "currency": "USD",
+        "assumptions": {
+          "staplesCostPer1000Calories": 1.75,
+          "proteinCostPer100gProtein": 3.5,
+          "produceCostPerServing": 0.75,
+          "dairyCostPerServing": 0.6,
+          "fatsCostPerTbsp": 0.18
+        },
+        "notes": [
+          "These are placeholder baseline assumptions for estimator calculations.",
+          "Engines should replace/adjust with user-entered prices or local store data when available."
+        ]
+      }
+    },
+
+    {
+      "id": "foodsec.rotation_defaults.pantry_freezer",
+      "label": "Rotation Defaults • Pantry + Freezer",
+      "group": "rotation",
+      "rank": 30,
+      "status": "active",
+      "tags": [
+        "estimator.food_security",
+        "defaults.rotation",
+        "storage.pantry",
+        "storage.freezer",
+        "planner.rotation"
+      ],
+      "refs": {
+        "kind": "rotation_policy"
+      },
+      "profile": {
+        "panicBuyBufferPct": 0.05,
+        "wasteBufferPct": 0.12,
+        "cycle": {
+          "pantryDays": 45,
+          "freezerDays": 60
+        },
+        "restockThresholds": {
+          "pantryPct": 0.35,
+          "freezerPct": 0.3
+        },
+        "notes": [
+          "Restock when pantry hits 35% of target and freezer hits 30% of target.",
+          "Use FIFO rotation; promote near-expiry items into meal plans."
+        ]
+      }
+    },
+
+    {
+      "id": "foodsec.rotation_defaults.root_cellar",
+      "label": "Rotation Defaults • Root Cellar",
+      "group": "rotation",
+      "rank": 31,
+      "status": "active",
+      "tags": [
+        "estimator.food_security",
+        "defaults.rotation",
+        "storage.root_cellar",
+        "planner.rotation"
+      ],
+      "refs": {
+        "kind": "rotation_policy"
+      },
+      "profile": {
+        "wasteBufferPct": 0.1,
+        "cycle": {
+          "rootCellarDays": 90
+        },
+        "restockThresholds": {
+          "rootCellarPct": 0.4
+        },
+        "notes": [
+          "Root cellar targets are seasonal; engines should allow month/season weighting.",
+          "Prioritize durable produce (potatoes, onions, squash) and preserved jars."
+        ]
+      }
+    },
+
+    {
+      "id": "foodsec.assumptions.household_scaling",
+      "label": "Household Scaling • Adult/Child Factors",
+      "group": "assumptions",
+      "rank": 40,
+      "status": "active",
+      "tags": [
+        "estimator.food_security",
+        "defaults.assumptions",
+        "scaling.household"
+      ],
+      "refs": {
+        "kind": "scaling"
+      },
+      "profile": {
+        "adultEquivalent": {
+          "adult": 1.0,
+          "teen": 0.95,
+          "child": 0.8,
+          "toddler": 0.6
+        },
+        "activityMultipliers": {
+          "sedentary": 0.95,
+          "normal": 1.0,
+          "active": 1.1,
+          "very_active": 1.2
+        },
+        "notes": [
+          "Engines can convert household members into adult-equivalent counts for provisioning math.",
+          "Allow overrides per member (activity, special diets, training)."
+        ]
+      }
+    },
+
+    {
+      "id": "foodsec.defaults.sourcing_priorities",
+      "label": "Sourcing Priorities • Baseline",
+      "group": "assumptions",
+      "rank": 41,
+      "status": "active",
+      "tags": [
+        "estimator.food_security",
+        "defaults.sourcing",
+        "farm_to_table.priority"
+      ],
+      "refs": {
+        "kind": "sourcing_priority"
+      },
+      "profile": {
+        "priorityOrder": [
+          "source.garden",
+          "source.animals",
+          "source.preservation",
+          "source.pantry",
+          "source.bulk_store",
+          "source.local_market",
+          "source.grocery",
+          "source.restaurant"
+        ],
+        "weights": {
+          "source.garden": 60,
+          "source.animals": 55,
+          "source.preservation": 45,
+          "source.pantry": 35,
+          "source.bulk_store": 25,
+          "source.local_market": 20,
+          "source.grocery": 10,
+          "source.restaurant": -40
+        },
+        "notes": [
+          "Used as a default scoring preference, not a hard constraint.",
+          "Engines should still respect diet/allergen and readiness constraints above sourcing preferences."
+        ]
+      }
+    },
+
+    {
+      "id": "foodsec.defaults.pantry_staples_mix",
+      "label": "Staples Mix • Baseline Pantry Allocation",
+      "group": "mix",
+      "rank": 50,
+      "status": "active",
+      "tags": [
+        "estimator.food_security",
+        "defaults.staples",
+        "pantry.staples",
+        "mix.targets"
+      ],
+      "refs": {
+        "kind": "staples_mix"
+      },
+      "profile": {
+        "allocationByCaloriesPct": {
+          "grains": 0.35,
+          "legumes": 0.18,
+          "fats": 0.1,
+          "proteins_shelf_stable": 0.12,
+          "vegetables_preserved": 0.1,
+          "fruit_preserved": 0.05,
+          "dairy_shelf_stable": 0.03,
+          "condiments_spices": 0.03,
+          "misc": 0.04
+        },
+        "notes": [
+          "Allocation is a planning heuristic; not a nutrition prescription.",
+          "Engines should adapt based on cuisine preferences, allergies, and cooking style."
+        ]
+      }
+    }
+  ]
+}

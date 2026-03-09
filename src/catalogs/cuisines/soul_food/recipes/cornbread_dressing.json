@@ -1,0 +1,210 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+
+  "meta": {
+    "type": "recipe",
+    "id": "soul_food.cornbread_dressing.v1",
+    "name": "Soul Food Cornbread Dressing",
+    "cuisine": "soul_food",
+    "region": "US_South",
+    "version": "1.0.0",
+    "author": "SSA Canonical Catalog",
+    "createdAt": "2026-01-17",
+    "updatedAt": "2026-01-17",
+    "status": "canonical",
+    "source": {
+      "type": "compiled",
+      "notes": "Canonical SSA soul food baseline. Classic holiday-style cornbread dressing with aromatics, sage, and broth. Supports baked casserole format."
+    },
+    "tags": [
+      "soul_food",
+      "cornbread_dressing",
+      "dressing",
+      "stuffing",
+      "holiday",
+      "thanksgiving",
+      "baked",
+      "casserole"
+    ],
+    "allergens": ["milk", "wheat", "egg"],
+    "dietary": {
+      "halal": true,
+      "kosher_style": false,
+      "gluten_free": false,
+      "dairy_free": false
+    },
+    "summary": "Savory Southern cornbread dressing with sautéed onion/celery, sage, and a moist, tender bake—perfect alongside turkey and gravy.",
+    "difficulty": "medium",
+    "servings": {
+      "count": 12,
+      "unit": "servings"
+    },
+    "yield": "1 (9x13-inch) pan",
+    "timing": {
+      "prepMinutes": 25,
+      "inactiveMinutes": 10,
+      "cookMinutes": 45,
+      "totalMinutes": 80
+    },
+    "equipment": [
+      {
+        "id": "baking_dish_9x13",
+        "label": "9x13-inch baking dish",
+        "required": true
+      },
+      {
+        "id": "large_mixing_bowl",
+        "label": "Large mixing bowl",
+        "required": true
+      },
+      { "id": "skillet", "label": "Skillet", "required": true },
+      { "id": "spatula", "label": "Spatula / wooden spoon", "required": true },
+      {
+        "id": "measuring_cups",
+        "label": "Measuring cups/spoons",
+        "required": false
+      },
+      { "id": "foil", "label": "Aluminum foil (optional)", "required": false }
+    ],
+    "foodSafety": {
+      "minInternalTempF": 165,
+      "notes": [
+        "Egg-based casseroles should reach at least 165°F in the center.",
+        "Cool leftovers quickly and refrigerate within 2 hours."
+      ]
+    }
+  },
+
+  "ingredients": [
+    {
+      "id": "cornbread_crumbs",
+      "label": "Cornbread, crumbled and dried (see note: use day-old or toasted)",
+      "amount": { "value": 10, "unit": "cup" }
+    },
+    {
+      "id": "white_bread_crumbs",
+      "label": "White bread, torn into small pieces and dried (optional but traditional for texture)",
+      "amount": { "value": 4, "unit": "cup" }
+    },
+
+    {
+      "id": "unsalted_butter",
+      "label": "Unsalted butter",
+      "amount": { "value": 8, "unit": "tbsp" }
+    },
+    {
+      "id": "yellow_onion",
+      "label": "Yellow onion, diced",
+      "amount": { "value": 1, "unit": "large" }
+    },
+    {
+      "id": "celery",
+      "label": "Celery, diced",
+      "amount": { "value": 4, "unit": "stalk" }
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic cloves, minced (optional)",
+      "amount": { "value": 2, "unit": "clove" }
+    },
+
+    {
+      "id": "chicken_broth",
+      "label": "Chicken broth (warm), plus more as needed",
+      "amount": { "value": 4.5, "unit": "cup" }
+    },
+
+    {
+      "id": "eggs",
+      "label": "Eggs, beaten",
+      "amount": { "value": 3, "unit": "large" }
+    },
+
+    {
+      "id": "sage_dried",
+      "label": "Dried sage (or 2 tbsp fresh, minced)",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "thyme_dried",
+      "label": "Dried thyme",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "poultry_seasoning",
+      "label": "Poultry seasoning",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper",
+      "amount": { "value": 1.5, "unit": "tsp" }
+    },
+    {
+      "id": "kosher_salt",
+      "label": "Kosher salt (adjust; broth can be salty)",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+
+    {
+      "id": "parsley",
+      "label": "Parsley, chopped (optional)",
+      "amount": { "value": 0.25, "unit": "cup" }
+    },
+
+    {
+      "id": "butter_for_dish",
+      "label": "Butter (for greasing baking dish)",
+      "amount": { "value": 1, "unit": "tbsp" }
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_preheat",
+      "title": "Preheat oven and prep pan",
+      "body": "Preheat oven to 350°F. Grease a 9x13-inch baking dish with butter."
+    },
+    {
+      "id": "step_02_dry_breads",
+      "title": "Dry the breads (if needed)",
+      "body": "If cornbread/bread is fresh, spread crumbles/pieces on a sheet pan and toast at 300°F for 15–25 minutes until dry (not deeply browned). This prevents gummy dressing."
+    },
+    {
+      "id": "step_03_saute_aromatics",
+      "title": "Sauté onion and celery",
+      "body": "Melt butter in a skillet over medium heat. Add onion and celery; cook 8–10 minutes until very soft. Add garlic (optional) and cook 30–60 seconds."
+    },
+    {
+      "id": "step_04_combine_breads",
+      "title": "Combine dried breads",
+      "body": "In a large mixing bowl, combine crumbled cornbread and torn white bread (if using)."
+    },
+    {
+      "id": "step_05_add_aromatics_season",
+      "title": "Add aromatics and seasonings",
+      "body": "Add sautéed onion/celery (with butter) to the bowl. Add sage, thyme, poultry seasoning, black pepper, salt, and parsley (optional). Toss to combine."
+    },
+    {
+      "id": "step_06_add_broth",
+      "title": "Moisten with warm broth",
+      "body": "Pour in 4 cups warm broth and mix. Add more broth 1/4 cup at a time until mixture is very moist but not soupy. It should mound but feel wet; breads will continue to absorb."
+    },
+    {
+      "id": "step_07_add_eggs",
+      "title": "Add eggs (binder)",
+      "body": "Let mixture cool 2–3 minutes if very hot. Stir in beaten eggs until evenly distributed."
+    },
+    {
+      "id": "step_08_bake",
+      "title": "Bake until set and golden",
+      "body": "Spread mixture into prepared baking dish. Bake 35–50 minutes until the center is set and the top is golden. If top browns too quickly, tent loosely with foil."
+    },
+    {
+      "id": "step_09_rest",
+      "title": "Rest, then serve",
+      "body": "Rest 10 minutes before serving. Serve warm with turkey, gravy, collard greens, and other holiday sides."
+    }
+  ]
+}

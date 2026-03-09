@@ -1,0 +1,538 @@
+{
+  "$schema": "../../../schemas/ruleset.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-20T00:00:00.000Z",
+  "kind": "cuisine_ruleset",
+  "meta": {
+    "id": "ruleset.cuisines.indian",
+    "type": "cuisine_ruleset",
+    "label": "Indian Cuisine Ruleset",
+    "cuisineId": "cuisines.indian",
+    "status": "canonical",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA canonical cuisines/indian/ruleset.json",
+      "notes": [
+        "Deterministic planner + adapter rules for Indian cuisine.",
+        "Focus: tagging, weeknight and batch signals, equipment fallbacks, and flavor-identity nudges."
+      ]
+    }
+  },
+  "scope": {
+    "kind": "cuisine",
+    "cuisineId": "cuisines.indian",
+    "locales": ["en-US"]
+  },
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true,
+    "tokens": {
+      "stopWords": [
+        "and",
+        "or",
+        "with",
+        "the",
+        "a",
+        "an",
+        "style",
+        "recipe",
+        "homemade",
+        "authentic"
+      ]
+    },
+    "ingredientAliases": {
+      "ing.ghee": ["ghee", "clarified butter"],
+      "ing.yogurt_plain": ["plain yogurt", "curd", "dahi"],
+      "ing.basmati_rice": ["basmati", "basmati rice"],
+      "ing.curry_leaves": ["curry leaf", "curry leaves", "kadi patta"],
+      "ing.tamarind": ["tamarind", "imli"],
+      "ing.amchur": ["amchur", "dry mango powder"],
+      "ing.kasuri_methi": ["kasuri methi", "dried fenugreek leaves"],
+      "ing.paneer": ["paneer", "indian cottage cheese"],
+      "ing.chickpeas": ["chickpeas", "garbanzo", "chana"],
+      "ing.lentils_red": ["red lentils", "masoor dal", "masoor"],
+      "ing.toor_dal": ["toor dal", "arhar dal", "pigeon peas"],
+      "ing.urad_dal": ["urad dal", "black gram"],
+      "ing.moong_dal": ["moong dal", "mung dal", "split mung beans"],
+      "spice.garam_masala": ["garam masala"],
+      "spice.cumin": ["cumin", "jeera"],
+      "spice.coriander": ["coriander", "dhania"],
+      "spice.turmeric": ["turmeric", "haldi"],
+      "spice.mustard_seed": ["mustard seed", "rai", "sarson"],
+      "spice.kashmiri_chili": [
+        "kashmiri chili",
+        "kashmiri chilli",
+        "kashmiri mirch"
+      ],
+      "blend.sambar_powder": ["sambar powder"],
+      "blend.panch_phoron": ["panch phoron", "panch phoran"],
+      "blend.chaat_masala": ["chaat masala", "chat masala"],
+      "blend.tandoori_masala": ["tandoori masala", "tandoori spice"]
+    },
+    "dishAliases": {
+      "dish.indian.dal_tadka": ["dal tadka", "tadka dal", "tarka dal"],
+      "dish.indian.chana_masala": ["chana masala", "chole", "choley"],
+      "dish.indian.butter_chicken": ["butter chicken", "murgh makhani"],
+      "dish.indian.chicken_tikka_masala": [
+        "chicken tikka masala",
+        "murgh tikka masala"
+      ],
+      "dish.indian.biryani_chicken": ["chicken biryani", "murgh biryani"],
+      "dish.indian.aloo_gobi": ["aloo gobi"],
+      "dish.indian.palak_paneer": ["palak paneer"],
+      "dish.indian.rajma": ["rajma", "rajma masala"]
+    },
+    "equipmentAliases": {
+      "equip.pressure_cooker": [
+        "pressure cooker",
+        "instant pot",
+        "electric pressure cooker"
+      ],
+      "equip.blender": ["blender", "immersion blender", "mixie"],
+      "equip.spice_grinder": ["spice grinder", "coffee grinder"],
+      "equip.tandoor": ["tandoor", "clay oven"]
+    },
+    "methodAliases": {
+      "method.tadka": ["tadka", "tarka", "tempering", "baghar"],
+      "method.bloom_spices": ["bloom spices", "toast spices", "fry spices"],
+      "method.onion_tomato_masala": [
+        "onion tomato masala",
+        "onion-tomato base",
+        "bhuna masala"
+      ],
+      "method.dum": ["dum", "dum cooking", "sealed steam cooking"],
+      "method.yogurt_marinate": ["yogurt marinate", "dahi marinade"]
+    }
+  },
+  "globals": {
+    "planner": {
+      "defaultServingStyles": ["family_style", "stew_and_starch"],
+      "defaultHeatTypical": 2,
+      "defaultBatchBias": "medium",
+      "defaultPlateModel": {
+        "main": "role.curry_or_dal",
+        "starch": "role.rice_or_flatbread",
+        "coolingSide": "role.raita_or_salad",
+        "condiment": "role.pickle_or_chutney"
+      }
+    },
+    "adapter": {
+      "yogurtCurdleGuard": true,
+      "spiceBloomGuard": true,
+      "defaultFinishAcid": [
+        "ing.lemon",
+        "ing.lime",
+        "ing.amchur",
+        "ing.tamarind"
+      ]
+    }
+  },
+  "rules": [
+    {
+      "id": "indian.tag.cuisine_on_match",
+      "enabled": true,
+      "priority": 1000,
+      "title": "Tag Indian cuisine when Indian patterns detected",
+      "description": "Adds cuisine.indian tag when common Indian dish names, masala terms, or hallmark techniques appear.",
+      "tags": ["tagging", "search"],
+      "source": "ssa.catalog.cuisines.indian",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.keywords",
+            "values": [
+              "dal",
+              "tadka",
+              "tarka",
+              "masala",
+              "biryani",
+              "pulao",
+              "sabzi",
+              "raita",
+              "achar",
+              "chutney",
+              "paneer",
+              "sambar",
+              "rasam",
+              "dosa",
+              "idli",
+              "vindaloo",
+              "korma"
+            ]
+          },
+          {
+            "type": "matches",
+            "path": "$.title",
+            "regex": "(?i)\\b(dal|tadka|tarka|masala|biryani|pulao|sabzi|raita|paneer|sambar|rasam|dosa|idli|vindaloo|korma)\\b"
+          },
+          {
+            "type": "intersects",
+            "path": "$.ingredients.ids",
+            "values": [
+              "spice.garam_masala",
+              "spice.turmeric",
+              "spice.cumin",
+              "spice.coriander",
+              "spice.mustard_seed",
+              "ing.curry_leaves",
+              "ing.kasuri_methi",
+              "ing.tamarind"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "cuisine.indian" },
+          { "type": "addTag", "value": "spice.forward" }
+        ]
+      }
+    },
+    {
+      "id": "indian.tag.vegetarian_if_no_meat",
+      "enabled": true,
+      "priority": 900,
+      "title": "Tag vegetarian when no meat/fish detected",
+      "description": "If protein list does not intersect meat/fish ids and contains legumes/veg staples, tag vegetarian-friendly.",
+      "tags": ["tagging", "diet"],
+      "source": "ssa.catalog.cuisines.indian",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.ingredients.ids",
+            "values": [
+              "ing.lentils_red",
+              "ing.toor_dal",
+              "ing.chickpeas",
+              "ing.paneer",
+              "ing.tofu_firm"
+            ]
+          },
+          {
+            "op": "not",
+            "conditions": [
+              {
+                "type": "intersects",
+                "path": "$.ingredients.ids",
+                "values": [
+                  "ing.chicken",
+                  "ing.beef",
+                  "ing.lamb",
+                  "ing.goat",
+                  "ing.fish",
+                  "ing.shrimp",
+                  "ing.pork"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "diet.vegetarian" },
+          { "type": "scoreAdjust", "scoreDelta": 0.15 }
+        ]
+      }
+    },
+    {
+      "id": "indian.tag.vegan_if_no_dairy",
+      "enabled": true,
+      "priority": 880,
+      "title": "Tag vegan when no dairy detected",
+      "description": "If recipe has typical Indian base but lacks dairy ingredients, tag vegan-friendly.",
+      "tags": ["tagging", "diet"],
+      "source": "ssa.catalog.cuisines.indian",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.ingredients.ids",
+            "values": [
+              "spice.turmeric",
+              "spice.cumin",
+              "spice.coriander",
+              "ing.onion",
+              "ing.garlic",
+              "ing.ginger"
+            ]
+          },
+          {
+            "op": "not",
+            "conditions": [
+              {
+                "type": "intersects",
+                "path": "$.ingredients.ids",
+                "values": [
+                  "ing.ghee",
+                  "ing.butter",
+                  "ing.yogurt_plain",
+                  "ing.cream",
+                  "ing.milk"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": { "actions": [{ "type": "addTag", "value": "diet.vegan" }] }
+    },
+    {
+      "id": "indian.weeknight.fast_if_time_under_45",
+      "enabled": true,
+      "priority": 800,
+      "title": "Boost weeknight score when total time <= 45 minutes",
+      "tags": ["planner", "weeknight"],
+      "source": "ssa.catalog.cuisines.indian",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          { "type": "exists", "path": "$.time.totalMins" },
+          { "type": "lte", "path": "$.time.totalMins", "value": 45 }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "weeknight.friendly" },
+          { "type": "scoreAdjust", "scoreDelta": 0.2 }
+        ]
+      }
+    },
+    {
+      "id": "indian.batch.boost_if_leftovers_or_makes_base",
+      "enabled": true,
+      "priority": 780,
+      "title": "Boost batch score for masala base, dal, and curries",
+      "description": "Boost when tags/keywords indicate batchable Indian bases and stews.",
+      "tags": ["planner", "batch"],
+      "source": "ssa.catalog.cuisines.indian",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.tags",
+            "values": ["batch.friendly", "leftovers.good", "freezer.friendly"]
+          },
+          {
+            "type": "intersects",
+            "path": "$.keywords",
+            "values": ["bhuna masala", "onion tomato masala", "dal", "curry"]
+          },
+          {
+            "type": "matches",
+            "path": "$.title",
+            "regex": "(?i)\\b(dal|curry|masala base|bhuna masala)\\b"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "batch.friendly" },
+          { "type": "scoreAdjust", "scoreDelta": 0.15 }
+        ]
+      }
+    },
+    {
+      "id": "indian.equipment.no_pressure_cooker_adjust",
+      "enabled": true,
+      "priority": 650,
+      "title": "If no pressure cooker, reduce weeknight score for dried legumes",
+      "description": "When cooking dried chickpeas or whole dals without pressure cooker, lower weeknight suitability (unless canned/cooked).",
+      "tags": ["equipment", "weeknight"],
+      "source": "ssa.catalog.cuisines.indian",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.ingredients.ids",
+            "values": [
+              "ing.chickpeas_dry",
+              "ing.toor_dal",
+              "ing.urad_dal",
+              "ing.chickpeas"
+            ]
+          },
+          {
+            "op": "not",
+            "conditions": [
+              {
+                "type": "intersects",
+                "path": "$.kitchen.equipmentIds",
+                "values": ["equip.pressure_cooker"]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": -0.15 },
+          {
+            "type": "addTag",
+            "value": "equipment.pressure_cooker_recommended"
+          }
+        ]
+      }
+    },
+    {
+      "id": "indian.adapter.yogurt_temper_guard",
+      "enabled": true,
+      "priority": 600,
+      "title": "Add yogurt curdle guard hints when yogurt present",
+      "tags": ["adapter", "safety"],
+      "source": "ssa.catalog.cuisines.indian",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.ingredients.ids",
+            "values": ["ing.yogurt_plain"]
+          },
+          {
+            "type": "matches",
+            "path": "$.title",
+            "regex": "(?i)\\b(raita|kadhi)\\b"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.adapter.guards.yogurt",
+            "value": {
+              "enabled": true,
+              "notes": [
+                "Lower heat before adding yogurt.",
+                "Temper yogurt with hot sauce liquid before stirring in.",
+                "Prefer full-fat yogurt for stability."
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "indian.adapter.spice_bloom_guard",
+      "enabled": true,
+      "priority": 590,
+      "title": "Add spice bloom guard hints when whole/ground spices present",
+      "tags": ["adapter", "quality"],
+      "source": "ssa.catalog.cuisines.indian",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "$.ingredients.ids",
+        "values": [
+          "spice.cumin",
+          "spice.coriander",
+          "spice.turmeric",
+          "spice.mustard_seed",
+          "spice.cardamom",
+          "spice.clove",
+          "spice.cinnamon",
+          "spice.garam_masala"
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.adapter.guards.spiceBloom",
+            "value": {
+              "enabled": true,
+              "notes": [
+                "Bloom spices briefly in hot fat to release aroma.",
+                "Do not burn spices; reduce heat if they darken too quickly."
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "indian.adapter.add_finish_acid_hint",
+      "enabled": true,
+      "priority": 520,
+      "title": "Suggest finishing acid when dish is rich/creamy",
+      "description": "If cream/ghee/cashew base present, suggest lemon/amchur/tamarind finish for balance.",
+      "tags": ["adapter", "flavor_balance"],
+      "source": "ssa.catalog.cuisines.indian",
+      "stopOnMatch": false,
+      "when": {
+        "type": "intersects",
+        "path": "$.ingredients.ids",
+        "values": [
+          "ing.cream",
+          "ing.ghee",
+          "ing.butter",
+          "ing.cashews",
+          "ing.coconut_milk"
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.adapter.suggestions.finish",
+            "value": {
+              "add": ["ing.lemon", "ing.lime", "ing.amchur", "ing.tamarind"],
+              "notes": [
+                "Add acid at the end to brighten and balance richness.",
+                "Use amchur or lemon for quick lift; tamarind for deeper tang."
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "indian.emit.planner_signal_on_match",
+      "enabled": true,
+      "priority": 300,
+      "title": "Emit planner hint event for Indian cuisine matches",
+      "description": "Optional event emission to SSA event bus for downstream UI badges or explanation panels.",
+      "tags": ["events", "planner"],
+      "source": "ssa.catalog.cuisines.indian",
+      "stopOnMatch": false,
+      "when": {
+        "type": "hasTag",
+        "value": "cuisine.indian"
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ssa.ruleset.matched",
+              "payload": {
+                "rulesetId": "ruleset.cuisines.indian",
+                "tag": "cuisine.indian",
+                "hint": "Indian cuisine patterns detected (masala/tadka/dal)."
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

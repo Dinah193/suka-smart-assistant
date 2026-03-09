@@ -25,7 +25,7 @@ const MODULE_ID = "calendar.ScripturalYearLengthCalculator";
 let eventBusEmit = null;
 try {
   // eslint-disable-next-line global-require
-  const bus = require("@/services/eventBus");
+  const bus = require("@/services/events/eventBus");
   eventBusEmit = typeof bus.emit === "function" ? bus.emit : null;
 } catch {
   eventBusEmit = null;
@@ -110,7 +110,7 @@ async function runScripturalYearLengthCalculator(request) {
       moduleId: MODULE_ID,
       input: null,
       output: null,
-      meta: { startedAt, finishedAt: new Date().toISOString() }
+      meta: { startedAt, finishedAt: new Date().toISOString() },
     };
   }
 
@@ -125,7 +125,7 @@ async function runScripturalYearLengthCalculator(request) {
         moduleId: MODULE_ID,
         input,
         output: null,
-        meta: { startedAt, finishedAt: new Date().toISOString() }
+        meta: { startedAt, finishedAt: new Date().toISOString() },
       };
     }
 
@@ -138,8 +138,8 @@ async function runScripturalYearLengthCalculator(request) {
         input,
         output,
         requestId: request.id || null,
-        source: request.source || null
-      }
+        source: request.source || null,
+      },
     });
 
     return {
@@ -150,8 +150,8 @@ async function runScripturalYearLengthCalculator(request) {
       output,
       meta: {
         startedAt,
-        finishedAt: new Date().toISOString()
-      }
+        finishedAt: new Date().toISOString(),
+      },
     };
   } catch (err) {
     safeEmit("planningGraph.calculator.error", {
@@ -160,8 +160,8 @@ async function runScripturalYearLengthCalculator(request) {
       data: {
         message: err && err.message ? err.message : String(err),
         stack: err && err.stack ? err.stack : null,
-        input
-      }
+        input,
+      },
     });
 
     return {
@@ -170,7 +170,7 @@ async function runScripturalYearLengthCalculator(request) {
       moduleId: MODULE_ID,
       input,
       output: null,
-      meta: { startedAt, finishedAt: new Date().toISOString() }
+      meta: { startedAt, finishedAt: new Date().toISOString() },
     };
   }
 }
@@ -200,7 +200,7 @@ function validateInput(input) {
       "fullMoon",
       "firstVisibleCrescent",
       "conjunction",
-      "moonDoesNotCrossMeridian"
+      "moonDoesNotCrossMeridian",
     ].includes(input.monthStartMethod)
   ) {
     return "INVALID_MONTH_START_METHOD";
@@ -244,7 +244,7 @@ function computeScripturalYearStructure(input) {
     monthStartMethod,
     avivRuleEnabled = true,
     intercalationRule = "auto",
-    baseMonthStartDate
+    baseMonthStartDate,
   } = input;
 
   const baseStart = resolveBaseStartDate(
@@ -286,13 +286,13 @@ function computeScripturalYearStructure(input) {
     anchorDates: {
       yearStart,
       midYearMarker,
-      yearEnd
+      yearEnd,
     },
     meta: {
       computedAt: new Date().toISOString(),
       sourceMonthStartMethod: monthStartMethod,
-      notes: buildNotes(cycleType, intercalationRule, avivRuleEnabled)
-    }
+      notes: buildNotes(cycleType, intercalationRule, avivRuleEnabled),
+    },
   };
 }
 
@@ -362,16 +362,15 @@ function buildSolarMonths(baseStart) {
     const nextMonth = new Date(start.getFullYear(), start.getMonth() + 1, 1);
     const end = new Date(nextMonth.getTime() - 24 * 60 * 60 * 1000); // day before
 
-    const days = Math.round(
-      (end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000)
-    ) + 1;
+    const days =
+      Math.round((end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000)) + 1;
 
     months.push({
       index: i,
       name: `Month ${i}`,
       startDate: toIsoDate(start),
       endDate: toIsoDate(end),
-      days
+      days,
     });
 
     cursor = nextMonth;
@@ -413,7 +412,7 @@ function buildLunarMonths(baseStart, cycleType, isLeapYear) {
       startDate: toIsoDate(start),
       endDate: toIsoDate(end),
       days,
-      isIntercalary
+      isIntercalary,
     });
 
     cursor = new Date(end.getTime() + 24 * 60 * 60 * 1000);
@@ -475,7 +474,7 @@ function buildNotes(cycleType, intercalationRule, avivRuleEnabled) {
   const parts = [
     `cycleType=${cycleType}`,
     `intercalationRule=${intercalationRule}`,
-    `avivRuleEnabled=${avivRuleEnabled}`
+    `avivRuleEnabled=${avivRuleEnabled}`,
   ];
   return parts.join("; ");
 }
@@ -493,7 +492,7 @@ function safeEmit(type, payload) {
       type,
       ts: new Date().toISOString(),
       source: MODULE_ID,
-      data: payload
+      data: payload,
     });
   } catch {
     // swallow – calculators must never crash the app on telemetry failure
@@ -523,6 +522,18 @@ function toIsoDate(d) {
   return `${year}-${month}-${day}`;
 }
 
+/* -----------------------------------------------------------------------------
+ * ✅ ESM NAMED EXPORT (Build fix)
+ * -----------------------------------------------------------------------------
+ * Your view imports:
+ *   import { runScripturalYearLengthCalculator } from "./ScripturalYearLengthCalculator.shim";
+ *
+ * This file was CommonJS-only (module.exports), so Vite/Rollup couldn't see the
+ * named export. We keep the existing module.exports for compatibility AND add
+ * a real ESM named export here.
+ * -------------------------------------------------------------------------- */
+export { runScripturalYearLengthCalculator, MODULE_ID };
+
 module.exports = {
   MODULE_ID,
   runScripturalYearLengthCalculator,
@@ -535,6 +546,6 @@ module.exports = {
     buildSolarMonths,
     buildLunarMonths,
     computeMidYearMarker,
-    buildYearLabel
-  }
+    buildYearLabel,
+  },
 };

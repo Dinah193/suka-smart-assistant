@@ -22,9 +22,9 @@ try {
   createPlanStorageRouter = psr?.createPlanStorageRouter || null;
 } catch (_e) {}
 
-let eventBus = { on(){}, off(){}, emit(){} };
+let eventBus = { on() {}, off() {}, emit() {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch (_e) {}
 
@@ -59,9 +59,17 @@ const IconSave = (p) => (
 );
 
 /* --------------------------------- Helpers -------------------------------- */
-const DOMAINS = ["meals","cleaning","garden","animals","inventory","health"];
+const DOMAINS = [
+  "meals",
+  "cleaning",
+  "garden",
+  "animals",
+  "inventory",
+  "health",
+];
 const cls = (...xs) => xs.filter(Boolean).join(" ");
-const draftKey = (userId, pid) => `suka:drafts:plan:${userId || "anon"}:${pid || "new"}`;
+const draftKey = (userId, pid) =>
+  `suka:drafts:plan:${userId || "anon"}:${pid || "new"}`;
 
 /* ---------------------------- Internal utilities --------------------------- */
 function useDraft(plan, userId) {
@@ -75,14 +83,21 @@ function useDraft(plan, userId) {
     if (!isBrowser) return;
     if (!draft) return;
     const t = setTimeout(() => {
-      try { window.localStorage.setItem(draftKey(userId, plan?.id), JSON.stringify(draft)); } catch (_e) {}
+      try {
+        window.localStorage.setItem(
+          draftKey(userId, plan?.id),
+          JSON.stringify(draft)
+        );
+      } catch (_e) {}
     }, 250);
     return () => clearTimeout(t);
   }, [draft, plan?.id, userId]);
 
   const clearDraft = () => {
     if (!isBrowser) return;
-    try { window.localStorage.removeItem(draftKey(userId, plan?.id)); } catch (_e) {}
+    try {
+      window.localStorage.removeItem(draftKey(userId, plan?.id));
+    } catch (_e) {}
   };
 
   return { draft, setDraft, clearDraft };
@@ -129,13 +144,16 @@ export default function FavoritePlanEditorModal({
   const createdBy = plan?.meta?.createdBy || null;
   const isMine = source === "user" && createdBy === userId;
 
-  const initial = useMemo(() => ({
-    title: plan?.title || "",
-    summary: plan?.summary || "",
-    tags: (plan?.tags || []).slice(0, 20),
-    domain: plan?.domain || domain,
-    planBody: plan?.planBody || {},
-  }), [plan, domain]);
+  const initial = useMemo(
+    () => ({
+      title: plan?.title || "",
+      summary: plan?.summary || "",
+      tags: (plan?.tags || []).slice(0, 20),
+      domain: plan?.domain || domain,
+      planBody: plan?.planBody || {},
+    }),
+    [plan, domain]
+  );
 
   const { draft, setDraft, clearDraft } = useDraft(plan, userId);
   const [form, setForm] = useState(draft || initial);
@@ -155,14 +173,19 @@ export default function FavoritePlanEditorModal({
       try {
         if (!plan?.id) return;
         if (toggleFavorite && get) {
-          const updated = await get({ planId: plan.id, domain: plan.domain || domain });
+          const updated = await get({
+            planId: plan.id,
+            domain: plan.domain || domain,
+          });
           if (alive && updated) setIsFavorite(!!updated.isFavorite);
         } else {
           setIsFavorite(!!plan?.isFavorite);
         }
       } catch (_e) {}
     })();
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [plan?.id]);
 
   // Router fallback when no hook
@@ -176,10 +199,12 @@ export default function FavoritePlanEditorModal({
         if (alive) routerRef.current = r;
       } catch (_e) {}
     })();
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [hasHook, userId]);
 
-  const onEsc = (e) => (e.key === "Escape" && onClose?.());
+  const onEsc = (e) => e.key === "Escape" && onClose?.();
   useEffect(() => {
     if (!open || !isBrowser) return;
     document.addEventListener("keydown", onEsc);
@@ -203,7 +228,12 @@ export default function FavoritePlanEditorModal({
   function requireTitle() {
     const ok = !!(form.title || "").trim();
     if (!ok) {
-      eventBus.emit?.("toast.show", { level: "warning", title: "Add a title", message: "Your plan needs a title.", ts: Date.now() });
+      eventBus.emit?.("toast.show", {
+        level: "warning",
+        title: "Add a title",
+        message: "Your plan needs a title.",
+        ts: Date.now(),
+      });
     }
     return ok;
   }
@@ -225,7 +255,7 @@ export default function FavoritePlanEditorModal({
         userId,
         meta: {
           ...(plan?.meta || {}),
-          source: (isMine && !forceCopy) ? "user" : "user",
+          source: isMine && !forceCopy ? "user" : "user",
           createdBy: userId,
           version: (plan?.meta?.version || 1) + 1,
         },
@@ -252,25 +282,42 @@ export default function FavoritePlanEditorModal({
         const r = routerRef.current;
         if (r?.savePlan) {
           if (isMine && !forceCopy) {
-            saved = await r.savePlan(payload, { scope: "user", userId, overwrite: true });
+            saved = await r.savePlan(payload, {
+              scope: "user",
+              userId,
+              overwrite: true,
+            });
           } else {
             // featured/system → save new copy
-            saved = await r.savePlan({ ...payload, id: undefined }, { scope: "user", userId, favorite: !!fav });
+            saved = await r.savePlan(
+              { ...payload, id: undefined },
+              { scope: "user", userId, favorite: !!fav }
+            );
           }
           if (fav && r?.adapter?.get && r?.adapter?.set) {
             const favKey = `favorites:user:${userId}`;
             const existing = (await r.adapter.get(favKey)) || { byId: {} };
-            existing.byId[payload.id || saved?.id] = { at: Date.now(), domain: payload.domain };
+            existing.byId[payload.id || saved?.id] = {
+              at: Date.now(),
+              domain: payload.domain,
+            };
             await r.adapter.set(favKey, existing);
           }
-          try { r.afterSaveOrchestrate?.(saved); } catch (_e) {}
+          try {
+            r.afterSaveOrchestrate?.(saved);
+          } catch (_e) {}
         }
       }
 
       // optimistic favorite
       if (fav && (favorite || routerRef.current)) {
         try {
-          if (favorite) await favorite({ userId, domain: (saved?.domain || form.domain), planId: saved?.id || plan?.id });
+          if (favorite)
+            await favorite({
+              userId,
+              domain: saved?.domain || form.domain,
+              planId: saved?.id || plan?.id,
+            });
           setIsFavorite(true);
         } catch (_e) {}
       }
@@ -279,7 +326,9 @@ export default function FavoritePlanEditorModal({
       eventBus.emit?.("toast.show", {
         level: "success",
         title: isMine && !forceCopy ? "Plan saved" : "Saved to My Plans",
-        message: fav ? "Saved and added to favorites." : "Your changes are preserved.",
+        message: fav
+          ? "Saved and added to favorites."
+          : "Your changes are preserved.",
         ts: Date.now(),
       });
       automation?.emit?.("nba.signal", {
@@ -292,7 +341,12 @@ export default function FavoritePlanEditorModal({
       onSaved?.(saved || { ...plan, ...payload });
       onClose?.();
     } catch (err) {
-      eventBus.emit?.("toast.show", { level: "error", title: "Could not save", message: String(err?.message || err), ts: Date.now() });
+      eventBus.emit?.("toast.show", {
+        level: "error",
+        title: "Could not save",
+        message: String(err?.message || err),
+        ts: Date.now(),
+      });
     } finally {
       setBusy(false);
     }
@@ -303,8 +357,11 @@ export default function FavoritePlanEditorModal({
     setFavBusy(true);
     try {
       if (toggleFavorite) {
-        await toggleFavorite({ planId: plan?.id, domain: plan?.domain || form.domain || domain });
-        const next = !(isFavorite);
+        await toggleFavorite({
+          planId: plan?.id,
+          domain: plan?.domain || form.domain || domain,
+        });
+        const next = !isFavorite;
         setIsFavorite(next);
         eventBus.emit?.("toast.show", {
           level: "success",
@@ -312,23 +369,38 @@ export default function FavoritePlanEditorModal({
           message: form.title || plan?.title || "Plan",
           ts: Date.now(),
         });
-      } else if (routerRef.current?.adapter?.get && routerRef.current?.adapter?.set && (plan?.id || true)) {
+      } else if (
+        routerRef.current?.adapter?.get &&
+        routerRef.current?.adapter?.set &&
+        (plan?.id || true)
+      ) {
         // If plan isn't persisted yet, doSave then favorite.
         if (!plan?.id) {
           const temp = await doSave({ favorite: false, forceCopy: !isMine });
           if (!temp?.id && !plan?.id) return;
         }
         const favKey = `favorites:user:${userId}`;
-        const current = (await routerRef.current.adapter.get(favKey)) || { byId: {} };
+        const current = (await routerRef.current.adapter.get(favKey)) || {
+          byId: {},
+        };
         const id = plan?.id;
         if (!id) return;
         if (isFavorite) delete current.byId[id];
-        else current.byId[id] = { at: Date.now(), domain: plan?.domain || form.domain || domain };
+        else
+          current.byId[id] = {
+            at: Date.now(),
+            domain: plan?.domain || form.domain || domain,
+          };
         await routerRef.current.adapter.set(favKey, current);
         setIsFavorite(!isFavorite);
       }
     } catch (err) {
-      eventBus.emit?.("toast.show", { level: "error", title: "Favorite failed", message: String(err?.message || err), ts: Date.now() });
+      eventBus.emit?.("toast.show", {
+        level: "error",
+        title: "Favorite failed",
+        message: String(err?.message || err),
+        ts: Date.now(),
+      });
     } finally {
       setFavBusy(false);
     }
@@ -344,7 +416,11 @@ export default function FavoritePlanEditorModal({
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/40" aria-hidden="true" onClick={() => onClose?.()} />
+      <div
+        className="absolute inset-0 bg-black/40"
+        aria-hidden="true"
+        onClick={() => onClose?.()}
+      />
 
       {/* Modal */}
       <div
@@ -356,8 +432,12 @@ export default function FavoritePlanEditorModal({
         {/* Header */}
         <div className="sticky top-0 z-10 bg-white/80 backdrop-blur border-b px-5 py-3 flex items-center justify-between">
           <div className="min-w-0">
-            <div className="text-xs text-gray-500">{mine ? "Your Plan" : "Featured Plan"}</div>
-            <h3 className="text-lg font-semibold truncate">{form.title || "Untitled Plan"}</h3>
+            <div className="text-xs text-gray-500">
+              {mine ? "Your Plan" : "Featured Plan"}
+            </div>
+            <h3 className="text-lg font-semibold truncate">
+              {form.title || "Untitled Plan"}
+            </h3>
           </div>
           <div className="flex items-center gap-2">
             {/* Favorite */}
@@ -365,16 +445,23 @@ export default function FavoritePlanEditorModal({
               type="button"
               onClick={doToggleFavorite}
               disabled={favBusy}
-              aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+              aria-label={
+                isFavorite ? "Remove from favorites" : "Add to favorites"
+              }
               title={isFavorite ? "Remove from favorites" : "Add to favorites"}
               className={cls(
                 "inline-flex items-center justify-center rounded-full border h-10 w-10 transition",
-                isFavorite ? "bg-rose-50 border-rose-200 hover:bg-rose-100" : "bg-white border-gray-200 hover:bg-gray-50"
+                isFavorite
+                  ? "bg-rose-50 border-rose-200 hover:bg-rose-100"
+                  : "bg-white border-gray-200 hover:bg-gray-50"
               )}
             >
               <IconHeart
                 filled={!!isFavorite}
-                className={cls("h-5 w-5", isFavorite ? "fill-rose-600" : "fill-gray-500")}
+                className={cls(
+                  "h-5 w-5",
+                  isFavorite ? "fill-rose-600" : "fill-gray-500"
+                )}
               />
             </button>
 
@@ -403,7 +490,9 @@ export default function FavoritePlanEditorModal({
                 onChange={(e) => update({ domain: e.target.value })}
               >
                 {DOMAINS.map((d) => (
-                  <option key={d} value={d}>{d}</option>
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
                 ))}
               </select>
             </label>
@@ -462,27 +551,42 @@ export default function FavoritePlanEditorModal({
           <div className="lg:col-span-2 space-y-3">
             {showAdvancedJson ? (
               <label className="block">
-                <span className="text-sm font-medium text-gray-700">Plan JSON (advanced)</span>
+                <span className="text-sm font-medium text-gray-700">
+                  Plan JSON (advanced)
+                </span>
                 <textarea
                   className="mt-1 w-full rounded-xl border px-3 py-2 text-sm font-mono"
                   rows={14}
                   value={(() => {
-                    try { return JSON.stringify(form.planBody || {}, null, 2); } catch { return "{}"; }
+                    try {
+                      return JSON.stringify(form.planBody || {}, null, 2);
+                    } catch {
+                      return "{}";
+                    }
                   })()}
                   onChange={(e) => {
-                    try { update({ planBody: JSON.parse(e.target.value) }); }
-                    catch { /* keep invalid until user fixes */ }
+                    try {
+                      update({ planBody: JSON.parse(e.target.value) });
+                    } catch {
+                      /* keep invalid until user fixes */
+                    }
                   }}
                 />
-                <span className="text-xs text-gray-500">Tip: conforms to your domain contracts when available.</span>
+                <span className="text-xs text-gray-500">
+                  Tip: conforms to your domain contracts when available.
+                </span>
               </label>
             ) : (
               <div className="rounded-xl border p-3">
-                <div className="text-sm text-gray-700 font-medium mb-2">Steps / Tasks</div>
+                <div className="text-sm text-gray-700 font-medium mb-2">
+                  Steps / Tasks
+                </div>
                 {/* Minimal step editor without external deps; replace with your richer builder if present */}
                 <SimpleStepsEditor
                   value={form.planBody?.steps || []}
-                  onChange={(steps) => update({ planBody: { ...(form.planBody || {}), steps } })}
+                  onChange={(steps) =>
+                    update({ planBody: { ...(form.planBody || {}), steps } })
+                  }
                 />
               </div>
             )}
@@ -492,7 +596,8 @@ export default function FavoritePlanEditorModal({
         {/* Footer */}
         <div className="sticky bottom-0 bg-white/80 backdrop-blur border-t px-5 py-3 flex flex-wrap gap-2 justify-between">
           <div className="text-xs text-gray-500 self-center">
-            {mine ? "Editing your plan" : "You’re viewing a featured plan"} • Changes are autosaved to a draft locally until you save.
+            {mine ? "Editing your plan" : "You’re viewing a featured plan"} •
+            Changes are autosaved to a draft locally until you save.
           </div>
           <div className="flex items-center gap-2">
             {!mine && (
@@ -538,14 +643,24 @@ function SimpleStepsEditor({ value, onChange }) {
   useEffect(() => setItems(Array.isArray(value) ? value : []), [value]);
 
   const add = () => {
-    const next = [...items, { id: `s_${Math.random().toString(36).slice(2)}`, text: "" }];
-    setItems(next); onChange?.(next);
+    const next = [
+      ...items,
+      { id: `s_${Math.random().toString(36).slice(2)}`, text: "" },
+    ];
+    setItems(next);
+    onChange?.(next);
   };
   const update = (i, text) => {
-    const next = items.slice(); next[i] = { ...(next[i] || {}), text }; setItems(next); onChange?.(next);
+    const next = items.slice();
+    next[i] = { ...(next[i] || {}), text };
+    setItems(next);
+    onChange?.(next);
   };
   const remove = (i) => {
-    const next = items.slice(); next.splice(i, 1); setItems(next); onChange?.(next);
+    const next = items.slice();
+    next.splice(i, 1);
+    setItems(next);
+    onChange?.(next);
   };
 
   return (

@@ -1,5 +1,11 @@
 // C:\Users\larho\suka-smart-assistant\src\pages\MealPlanning\RecipeDeciderPanel.jsx
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { format } from "date-fns";
 
 /**
@@ -20,7 +26,7 @@ import { format } from "date-fns";
  *  - Linear.app keyboard-first feel (quick actions)
  *
  * Soft deps (guarded):
- *  - eventBus "@/services/eventBus"  -> on/off/emit
+ *  - eventBus "@/services/events/eventBus"  -> on/off/emit
  *  - runtime "@/services/automation/runtime" -> record/emitProgress (optional)
  *  - stores "@/store/RecipeStore", "@/store/InventoryStore", "@/store/PreferencesStore"
  *  - nutrition "@/services/nutrition/nutritionEngine"
@@ -30,7 +36,9 @@ import { format } from "date-fns";
 
 /* -------------------------------- Defensive imports -------------------------------- */
 let eventBus = { on: () => {}, off: () => {}, emit: () => {} };
-try { eventBus = require("@/services/eventBus").eventBus || eventBus; } catch {}
+try {
+  eventBus = require("@/services/events/eventBus").eventBus || eventBus;
+} catch {}
 
 let automation = {};
 let emitProgress = () => {};
@@ -41,28 +49,46 @@ try {
 } catch {}
 
 let RecipeStore = {};
-try { RecipeStore = require("@/store/RecipeStore"); } catch {}
+try {
+  RecipeStore = require("@/store/RecipeStore");
+} catch {}
 
 let InventoryStore = {};
-try { InventoryStore = require("@/store/InventoryStore"); } catch {}
+try {
+  InventoryStore = require("@/store/InventoryStore");
+} catch {}
 
 let PreferencesStore = {};
-try { PreferencesStore = require("@/store/PreferencesStore"); } catch {}
+try {
+  PreferencesStore = require("@/store/PreferencesStore");
+} catch {}
 
 let nutritionEngine;
-try { nutritionEngine = require("@/services/nutrition/nutritionEngine"); } catch {}
+try {
+  nutritionEngine = require("@/services/nutrition/nutritionEngine");
+} catch {}
 
 let css = { cx: (...a) => a.filter(Boolean).join(" ") };
-try { css = { cx: require("@/utils/css").classNames || ((...a) => a.filter(Boolean).join(" ")) }; } catch {}
+try {
+  css = {
+    cx:
+      require("@/utils/css").classNames ||
+      ((...a) => a.filter(Boolean).join(" ")),
+  };
+} catch {}
 
 let fmt = {
   duration: (min) => `${Math.round(min)} min`,
   qty: (n) => (Number.isFinite(n) ? Number(n.toFixed(2)) : n),
 };
-try { fmt = { ...fmt, ...(require("@/utils/format")) }; } catch {}
+try {
+  fmt = { ...fmt, ...require("@/utils/format") };
+} catch {}
 
 let useBatchQueue = () => ({ add: () => {} });
-try { useBatchQueue = require("@/context/BatchQueueContext").useBatchQueue; } catch {}
+try {
+  useBatchQueue = require("@/context/BatchQueueContext").useBatchQueue;
+} catch {}
 
 /* -------------------------------- Helpers & guards -------------------------------- */
 const cx = css.cx;
@@ -89,15 +115,51 @@ const getAllRecipes = () => {
   } catch {}
   // fallback demo set
   return [
-    { id: "r1", title: "Oatmeal & Berries", time: 12, rating: 4.6, tags: ["breakfast", "veg"], nutrition: { protein: 12, carbs: 38, fat: 5, calories: 280 }, ingredients: [{ name: "oats", qty: 1, unit: "cup" }] },
-    { id: "r2", title: "Chicken Salad", time: 18, rating: 4.2, tags: ["lunch", "gluten-free"], nutrition: { protein: 30, carbs: 10, fat: 14, calories: 330 }, ingredients: [{ name: "chicken", qty: 300, unit: "g" }] },
-    { id: "r3", title: "Lamb Doner Bowl", time: 35, rating: 4.8, tags: ["dinner", "fusion"], nutrition: { protein: 34, carbs: 42, fat: 18, calories: 520 }, ingredients: [{ name: "lamb", qty: 300, unit: "g" }] },
-    { id: "r4", title: "Greek Yogurt Cup", time: 3, rating: 4.4, tags: ["snack"], nutrition: { protein: 17, carbs: 8, fat: 4, calories: 150 }, ingredients: [{ name: "yogurt", qty: 1, unit: "cup" }] },
+    {
+      id: "r1",
+      title: "Oatmeal & Berries",
+      time: 12,
+      rating: 4.6,
+      tags: ["breakfast", "veg"],
+      nutrition: { protein: 12, carbs: 38, fat: 5, calories: 280 },
+      ingredients: [{ name: "oats", qty: 1, unit: "cup" }],
+    },
+    {
+      id: "r2",
+      title: "Chicken Salad",
+      time: 18,
+      rating: 4.2,
+      tags: ["lunch", "gluten-free"],
+      nutrition: { protein: 30, carbs: 10, fat: 14, calories: 330 },
+      ingredients: [{ name: "chicken", qty: 300, unit: "g" }],
+    },
+    {
+      id: "r3",
+      title: "Lamb Doner Bowl",
+      time: 35,
+      rating: 4.8,
+      tags: ["dinner", "fusion"],
+      nutrition: { protein: 34, carbs: 42, fat: 18, calories: 520 },
+      ingredients: [{ name: "lamb", qty: 300, unit: "g" }],
+    },
+    {
+      id: "r4",
+      title: "Greek Yogurt Cup",
+      time: 3,
+      rating: 4.4,
+      tags: ["snack"],
+      nutrition: { protein: 17, carbs: 8, fat: 4, calories: 150 },
+      ingredients: [{ name: "yogurt", qty: 1, unit: "cup" }],
+    },
   ];
 };
 
 const getPantryCounts = () => {
-  try { return InventoryStore?.getPantry?.() || {}; } catch { return {}; }
+  try {
+    return InventoryStore?.getPantry?.() || {};
+  } catch {
+    return {};
+  }
 };
 
 const normalizeMacros = (n) => {
@@ -164,7 +226,7 @@ const computeScore = (recipe, { prefs, pantry, filters }) => {
     pantry: 0.22,
     time: 0.18,
     tags: 0.14,
-    rating: 0.10,
+    rating: 0.1,
   };
   const s =
     weights.macro * macroScore(recipe, prefs) +
@@ -176,7 +238,13 @@ const computeScore = (recipe, { prefs, pantry, filters }) => {
 };
 
 /* ---------------------------------- UI bits ---------------------------------- */
-const Button = ({ variant = "default", size = "md", className, children, ...props }) => {
+const Button = ({
+  variant = "default",
+  size = "md",
+  className,
+  children,
+  ...props
+}) => {
   const variants = {
     default: "bg-blue-600 text-white hover:bg-blue-700",
     outline: "border border-zinc-300 hover:bg-zinc-50",
@@ -186,21 +254,49 @@ const Button = ({ variant = "default", size = "md", className, children, ...prop
   };
   const sizes = { sm: "h-8 px-2", md: "h-10 px-3", icon: "h-9 w-9 p-0" };
   return (
-    <button className={cx("rounded-md text-sm", variants[variant], sizes[size], className)} {...props}>
+    <button
+      className={cx(
+        "rounded-md text-sm",
+        variants[variant],
+        sizes[size],
+        className
+      )}
+      {...props}
+    >
       {children}
     </button>
   );
 };
-const Input = (p) => <input className={cx("h-9 w-full rounded-md border border-zinc-300 px-3 text-sm")} {...p} />;
-const Select = (p) => (
-  <select className="h-9 w-full rounded-md border border-zinc-300 bg-white px-2 text-sm" {...p} />
+const Input = (p) => (
+  <input
+    className={cx("h-9 w-full rounded-md border border-zinc-300 px-3 text-sm")}
+    {...p}
+  />
 );
-const Card = ({ className, children }) => <div className={cx("rounded-xl border bg-white shadow-sm", className)}>{children}</div>;
-const CardHeader = ({ className, children }) => <div className={cx("px-4 pt-4", className)}>{children}</div>;
-const CardTitle = ({ className, children }) => <div className={cx("text-lg font-semibold", className)}>{children}</div>;
-const CardContent = ({ className, children }) => <div className={cx("px-4 pb-4", className)}>{children}</div>;
+const Select = (p) => (
+  <select
+    className="h-9 w-full rounded-md border border-zinc-300 bg-white px-2 text-sm"
+    {...p}
+  />
+);
+const Card = ({ className, children }) => (
+  <div className={cx("rounded-xl border bg-white shadow-sm", className)}>
+    {children}
+  </div>
+);
+const CardHeader = ({ className, children }) => (
+  <div className={cx("px-4 pt-4", className)}>{children}</div>
+);
+const CardTitle = ({ className, children }) => (
+  <div className={cx("text-lg font-semibold", className)}>{children}</div>
+);
+const CardContent = ({ className, children }) => (
+  <div className={cx("px-4 pb-4", className)}>{children}</div>
+);
 const Badge = ({ children, tone = "zinc" }) => (
-  <span className={`inline-flex items-center rounded px-2 py-0.5 text-xs border border-${tone}-300 bg-${tone}-50 text-${tone}-800`}>
+  <span
+    className={`inline-flex items-center rounded px-2 py-0.5 text-xs border border-${tone}-300 bg-${tone}-50 text-${tone}-800`}
+  >
     {children}
   </span>
 );
@@ -217,7 +313,11 @@ export default function RecipeDeciderPanel({
 
   // prefs + sabbath
   const [prefs, setPrefs] = useState(() => {
-    try { return PreferencesStore?.getPreferences?.() || {}; } catch { return {}; }
+    try {
+      return PreferencesStore?.getPreferences?.() || {};
+    } catch {
+      return {};
+    }
   });
   const isSabbath = sabbathBlocked(prefs);
 
@@ -243,10 +343,14 @@ export default function RecipeDeciderPanel({
   // refresh hooks
   useEffect(() => {
     const refresh = () => {
-      try { setRecipes(getAllRecipes()); } catch {}
+      try {
+        setRecipes(getAllRecipes());
+      } catch {}
     };
     const refreshPrefs = () => {
-      try { setPrefs(PreferencesStore?.getPreferences?.() || {}); } catch {}
+      try {
+        setPrefs(PreferencesStore?.getPreferences?.() || {});
+      } catch {}
     };
     const handlers = [
       ["recipe.vault.updated", refresh],
@@ -288,30 +392,44 @@ export default function RecipeDeciderPanel({
     // tags
     if (filters.tags?.length) {
       const want = new Set(filters.tags.map((t) => `${t}`.toLowerCase()));
-      list = list.filter((r) => (r.tags || []).some((t) => want.has(`${t}`.toLowerCase())));
+      list = list.filter((r) =>
+        (r.tags || []).some((t) => want.has(`${t}`.toLowerCase()))
+      );
     }
 
     // time
-    if (filters.maxTime) list = list.filter((r) => !r.time || r.time <= filters.maxTime);
+    if (filters.maxTime)
+      list = list.filter((r) => !r.time || r.time <= filters.maxTime);
 
     // rating
-    if (filters.minRating > 0) list = list.filter((r) => (Number(r.rating) || 0) >= filters.minRating);
+    if (filters.minRating > 0)
+      list = list.filter((r) => (Number(r.rating) || 0) >= filters.minRating);
 
     // macros
     if (filters.macros?.minProtein) {
-      list = list.filter((r) => (Number(r?.nutrition?.protein) || 0) >= filters.macros.minProtein);
+      list = list.filter(
+        (r) => (Number(r?.nutrition?.protein) || 0) >= filters.macros.minProtein
+      );
     }
     if (filters.macros?.maxCalories) {
-      list = list.filter((r) => (Number(r?.nutrition?.calories) || 0) <= filters.macros.maxCalories);
+      list = list.filter(
+        (r) =>
+          (Number(r?.nutrition?.calories) || 0) <= filters.macros.maxCalories
+      );
     }
 
     // difficulty is optional (if recipes carry it)
     if (filters.difficulty !== "any") {
-      list = list.filter((r) => !r.difficulty || r.difficulty === filters.difficulty);
+      list = list.filter(
+        (r) => !r.difficulty || r.difficulty === filters.difficulty
+      );
     }
 
     // score
-    const scored = list.map((r) => ({ ...r, __score: computeScore(r, { prefs, pantry, filters }) }));
+    const scored = list.map((r) => ({
+      ...r,
+      __score: computeScore(r, { prefs, pantry, filters }),
+    }));
     scored.sort((a, b) => b.__score - a.__score);
     return scored;
   }, [recipes, prefs, pantry, filters, query]);
@@ -321,7 +439,10 @@ export default function RecipeDeciderPanel({
   /* ------------------------------- Actions ------------------------------- */
   const decideForMe = useCallback(() => {
     if (!filtered.length) {
-      setToast({ type: "info", msg: "No matches with current filters. Try widening your search." });
+      setToast({
+        type: "info",
+        msg: "No matches with current filters. Try widening your search.",
+      });
       return;
     }
     const pick = filtered[0];
@@ -332,12 +453,17 @@ export default function RecipeDeciderPanel({
   const addToPlan = useCallback(
     (recipe) => {
       if (isSabbath) {
-        setToast({ type: "warning", msg: "Sabbath hands-off is active. You can review but not schedule tasks." });
+        setToast({
+          type: "warning",
+          msg: "Sabbath hands-off is active. You can review but not schedule tasks.",
+        });
         return;
       }
       const planPayload = {
         at: nowIso(),
-        date: date ? format(date, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
+        date: date
+          ? format(date, "yyyy-MM-dd")
+          : format(new Date(), "yyyy-MM-dd"),
         slot,
         recipe,
       };
@@ -349,7 +475,11 @@ export default function RecipeDeciderPanel({
         actionLabel: "Undo",
         onAction: () => undo(),
       });
-      automation?.record?.("decider.added_to_plan", { recipeId: recipe.id, slot, date: planPayload.date });
+      automation?.record?.("decider.added_to_plan", {
+        recipeId: recipe.id,
+        slot,
+        date: planPayload.date,
+      });
     },
     [date, slot, isSabbath]
   );
@@ -367,10 +497,13 @@ export default function RecipeDeciderPanel({
     [addToBatch]
   );
 
-  const openDetail = (id) => eventBus.emit("ui.open", { panel: "RecipeDetail", id });
+  const openDetail = (id) =>
+    eventBus.emit("ui.open", { panel: "RecipeDetail", id });
 
   const compareToggle = (id) => {
-    setCompare((xs) => (xs.includes(id) ? xs.filter((x) => x !== id) : [...xs, id].slice(0, 4)));
+    setCompare((xs) =>
+      xs.includes(id) ? xs.filter((x) => x !== id) : [...xs, id].slice(0, 4)
+    );
   };
 
   const clearFilters = () => {
@@ -434,7 +567,9 @@ export default function RecipeDeciderPanel({
       />
       <Select
         value={filters.maxTime}
-        onChange={(e) => setFilters((f) => ({ ...f, maxTime: Number(e.target.value) || 0 }))}
+        onChange={(e) =>
+          setFilters((f) => ({ ...f, maxTime: Number(e.target.value) || 0 }))
+        }
         title="Max prep time"
       >
         {[10, 15, 20, 25, 30, 40, 60].map((m) => (
@@ -447,11 +582,23 @@ export default function RecipeDeciderPanel({
         multiple
         value={filters.tags}
         onChange={(e) =>
-          setFilters((f) => ({ ...f, tags: Array.from(e.target.selectedOptions).map((o) => o.value) }))
+          setFilters((f) => ({
+            ...f,
+            tags: Array.from(e.target.selectedOptions).map((o) => o.value),
+          }))
         }
         title="Tags"
       >
-        {["breakfast", "lunch", "dinner", "snack", "veg", "gluten-free", "fusion", "kid-friendly"].map((t) => (
+        {[
+          "breakfast",
+          "lunch",
+          "dinner",
+          "snack",
+          "veg",
+          "gluten-free",
+          "fusion",
+          "kid-friendly",
+        ].map((t) => (
           <option key={t} value={t}>
             {t}
           </option>
@@ -459,7 +606,9 @@ export default function RecipeDeciderPanel({
       </Select>
       <Select
         value={filters.minRating}
-        onChange={(e) => setFilters((f) => ({ ...f, minRating: Number(e.target.value) }))}
+        onChange={(e) =>
+          setFilters((f) => ({ ...f, minRating: Number(e.target.value) }))
+        }
         title="Min rating"
       >
         {[0, 3, 3.5, 4, 4.5].map((r) => (
@@ -470,7 +619,9 @@ export default function RecipeDeciderPanel({
       </Select>
       <Select
         value={filters.difficulty}
-        onChange={(e) => setFilters((f) => ({ ...f, difficulty: e.target.value }))}
+        onChange={(e) =>
+          setFilters((f) => ({ ...f, difficulty: e.target.value }))
+        }
         title="Difficulty"
       >
         {["any", "easy", "moderate", "hard"].map((d) => (
@@ -484,7 +635,12 @@ export default function RecipeDeciderPanel({
         min={0}
         max={200}
         value={filters.macros.minProtein}
-        onChange={(e) => setFilters((f) => ({ ...f, macros: { ...f.macros, minProtein: Number(e.target.value) || 0 } }))}
+        onChange={(e) =>
+          setFilters((f) => ({
+            ...f,
+            macros: { ...f.macros, minProtein: Number(e.target.value) || 0 },
+          }))
+        }
         placeholder="Min protein (g)"
         title="Min protein (g)"
       />
@@ -493,14 +649,23 @@ export default function RecipeDeciderPanel({
         min={0}
         max={2000}
         value={filters.macros.maxCalories}
-        onChange={(e) => setFilters((f) => ({ ...f, macros: { ...f.macros, maxCalories: Number(e.target.value) || 0 } }))}
+        onChange={(e) =>
+          setFilters((f) => ({
+            ...f,
+            macros: { ...f.macros, maxCalories: Number(e.target.value) || 0 },
+          }))
+        }
         placeholder="Max calories"
         title="Max calories"
       />
       <Button variant="outline" onClick={clearFilters}>
         Reset
       </Button>
-      <Button variant="secondary" onClick={decideForMe} title="Decide for me (D)">
+      <Button
+        variant="secondary"
+        onClick={decideForMe}
+        title="Decide for me (D)"
+      >
         Decide for me
       </Button>
       <Button variant="outline" onClick={() => setCompact((v) => !v)}>
@@ -531,14 +696,22 @@ export default function RecipeDeciderPanel({
               <div className="truncate text-sm font-semibold">{r.title}</div>
               {blocked && <Badge tone="amber">shellfish</Badge>}
               <Badge tone="zinc">{r.time ? fmt.duration(r.time) : "—"}</Badge>
-              <Badge tone="zinc">{(r.rating ?? "—")}★</Badge>
+              <Badge tone="zinc">{r.rating ?? "—"}★</Badge>
               <Badge tone="zinc">Score {r.__score}</Badge>
             </div>
-            <div className="mt-1 text-[11px] text-zinc-500">{(r.tags || []).slice(0, 6).join(" • ") || "—"}</div>
-            <div className="mt-2"><MacroPill n={r.nutrition} /></div>
+            <div className="mt-1 text-[11px] text-zinc-500">
+              {(r.tags || []).slice(0, 6).join(" • ") || "—"}
+            </div>
+            <div className="mt-2">
+              <MacroPill n={r.nutrition} />
+            </div>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => openDetail(r.id)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => openDetail(r.id)}
+            >
               View
             </Button>
             <Button variant="outline" size="sm" onClick={() => sendToBatch(r)}>
@@ -555,7 +728,9 @@ export default function RecipeDeciderPanel({
             <button
               className={cx(
                 "rounded-md border px-2 py-1 text-xs",
-                compare.includes(r.id) ? "bg-zinc-900 text-white" : "hover:bg-zinc-100"
+                compare.includes(r.id)
+                  ? "bg-zinc-900 text-white"
+                  : "hover:bg-zinc-100"
               )}
               onClick={() => compareToggle(r.id)}
               title="Compare"
@@ -574,7 +749,9 @@ export default function RecipeDeciderPanel({
     return (
       <div className="rounded-xl border bg-zinc-50 p-3">
         <div className="mb-2 flex items-center justify-between">
-          <div className="text-sm font-semibold">Compare ({selected.length})</div>
+          <div className="text-sm font-semibold">
+            Compare ({selected.length})
+          </div>
           <Button variant="ghost" size="sm" onClick={() => setCompare([])}>
             Clear
           </Button>
@@ -584,17 +761,33 @@ export default function RecipeDeciderPanel({
             <div key={r.id} className="rounded-lg border bg-white p-2">
               <div className="text-xs font-semibold">{r.title}</div>
               <div className="mt-1 text-[11px] text-zinc-600">
-                {r.time ? fmt.duration(r.time) : "—"} • {(r.rating ?? "—")}★ • Score {r.__score}
+                {r.time ? fmt.duration(r.time) : "—"} • {r.rating ?? "—"}★ •
+                Score {r.__score}
               </div>
-              <div className="mt-2"><MacroPill n={r.nutrition} /></div>
+              <div className="mt-2">
+                <MacroPill n={r.nutrition} />
+              </div>
               <div className="mt-2 flex items-center gap-1">
-                <Button variant="outline" size="sm" onClick={() => addToPlan(r)} disabled={isSabbath}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => addToPlan(r)}
+                  disabled={isSabbath}
+                >
                   Plan
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => sendToBatch(r)}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => sendToBatch(r)}
+                >
                   Batch
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => openDetail(r.id)}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => openDetail(r.id)}
+                >
                   View
                 </Button>
               </div>
@@ -621,7 +814,11 @@ export default function RecipeDeciderPanel({
           {isSabbath && <Badge tone="violet">Sabbath hands-off</Badge>}
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => eventBus.emit("ui.open", { panel: "RecipeVault" })}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => eventBus.emit("ui.open", { panel: "RecipeVault" })}
+          >
             Open Recipe Vault
           </Button>
           <Button
@@ -652,14 +849,35 @@ export default function RecipeDeciderPanel({
             <div className="min-w-0">
               <div className="text-sm font-semibold">{topPick.title}</div>
               <div className="mt-1 text-[11px] text-zinc-600">
-                {topPick.time ? fmt.duration(topPick.time) : "—"} • {(topPick.rating ?? "—")}★ • Score {topPick.__score}
+                {topPick.time ? fmt.duration(topPick.time) : "—"} •{" "}
+                {topPick.rating ?? "—"}★ • Score {topPick.__score}
               </div>
-              <div className="mt-2"><MacroPill n={topPick.nutrition} /></div>
+              <div className="mt-2">
+                <MacroPill n={topPick.nutrition} />
+              </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => openDetail(topPick.id)}>View</Button>
-              <Button variant="outline" size="sm" onClick={() => sendToBatch(topPick)}>Batch</Button>
-              <Button size="sm" onClick={() => addToPlan(topPick)} disabled={isSabbath}>Add to Plan</Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => openDetail(topPick.id)}
+              >
+                View
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => sendToBatch(topPick)}
+              >
+                Batch
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => addToPlan(topPick)}
+                disabled={isSabbath}
+              >
+                Add to Plan
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -669,13 +887,20 @@ export default function RecipeDeciderPanel({
       <Card>
         <CardHeader className="flex items-center justify-between py-3">
           <CardTitle className="text-sm">Matches</CardTitle>
-          <div className="text-xs text-zinc-500">{filtered.length} result(s)</div>
+          <div className="text-xs text-zinc-500">
+            {filtered.length} result(s)
+          </div>
         </CardHeader>
         <CardContent>
           {filtered.length === 0 ? (
             <div className="rounded-xl border border-dashed p-6 text-center text-sm text-zinc-600">
               No matches. Try clearing filters or browsing the{" "}
-              <button className="underline" onClick={() => eventBus.emit("ui.open", { panel: "RecipeVault" })}>
+              <button
+                className="underline"
+                onClick={() =>
+                  eventBus.emit("ui.open", { panel: "RecipeVault" })
+                }
+              >
                 Recipe Vault
               </button>
               .
@@ -683,21 +908,47 @@ export default function RecipeDeciderPanel({
           ) : compact ? (
             <ul className="divide-y">
               {filtered.map((r) => (
-                <li key={r.id} className="flex items-center justify-between gap-2 py-2">
+                <li
+                  key={r.id}
+                  className="flex items-center justify-between gap-2 py-2"
+                >
                   <div className="min-w-0">
-                    <div className="truncate text-sm font-medium">{r.title}</div>
+                    <div className="truncate text-sm font-medium">
+                      {r.title}
+                    </div>
                     <div className="text-[11px] text-zinc-500">
-                      {r.time ? fmt.duration(r.time) : "—"} • {(r.rating ?? "—")}★ • Score {r.__score}
+                      {r.time ? fmt.duration(r.time) : "—"} • {r.rating ?? "—"}★
+                      • Score {r.__score}
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => openDetail(r.id)}>View</Button>
-                    <Button variant="outline" size="sm" onClick={() => sendToBatch(r)}>Batch</Button>
-                    <Button size="sm" onClick={() => addToPlan(r)} disabled={isSabbath}>Plan</Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openDetail(r.id)}
+                    >
+                      View
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => sendToBatch(r)}
+                    >
+                      Batch
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => addToPlan(r)}
+                      disabled={isSabbath}
+                    >
+                      Plan
+                    </Button>
                     <button
                       className={cx(
                         "rounded-md border px-2 py-1 text-xs",
-                        compare.includes(r.id) ? "bg-zinc-900 text-white" : "hover:bg-zinc-100"
+                        compare.includes(r.id)
+                          ? "bg-zinc-900 text-white"
+                          : "hover:bg-zinc-100"
                       )}
                       onClick={() => compareToggle(r.id)}
                     >
@@ -709,7 +960,9 @@ export default function RecipeDeciderPanel({
             </ul>
           ) : (
             <ul className="grid grid-cols-1 gap-2">
-              {filtered.map((r) => <RecipeRow key={r.id} r={r} />)}
+              {filtered.map((r) => (
+                <RecipeRow key={r.id} r={r} />
+              ))}
             </ul>
           )}
         </CardContent>
@@ -728,9 +981,16 @@ export default function RecipeDeciderPanel({
   window.__RECIPE_DECIDER_TESTS__ = true;
 
   const expect = (cond, msg) =>
-    cond ? console.log("[RecipeDecider TEST PASS]", msg) : console.error("[RecipeDecider TEST FAIL]", msg);
+    cond
+      ? console.log("[RecipeDecider TEST PASS]", msg)
+      : console.error("[RecipeDecider TEST FAIL]", msg);
 
-  const demo = { nutrition: { protein: 30, carbs: 10, fat: 14, calories: 330 }, time: 20, rating: 4.5, tags: ["lunch"] };
+  const demo = {
+    nutrition: { protein: 30, carbs: 10, fat: 14, calories: 330 },
+    time: 20,
+    rating: 4.5,
+    tags: ["lunch"],
+  };
   const prefs = { targets: { protein: 30, carbs: 20, fat: 15, calories: 500 } };
   const pantry = { chicken: 1, oats: 1 };
   const filters = { maxTime: 25, tags: ["lunch"] };

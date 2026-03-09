@@ -7,7 +7,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
  * Primary Tab: Torah-Aligned Bacon (Torah First)
  * Secondary Tab: Sausages
  *
- * Integrates with: @/agents/sausageAgent.js (planBatch, simulate, commit, undo, listTemplates)
+ * Integrates with: @/agents/sausageShim.js (planBatch, simulate, commit, undo, listTemplates)
  * Event glue: @/services/automation/runtime (on/subscribe + emit)
  *
  * Props:
@@ -32,7 +32,9 @@ const emitDraftApproved = runtime.emitDraftApproved || (() => {});
 let sausageAgent;
 try {
   // eslint-disable-next-line import/no-unresolved
-  sausageAgent = require("@/agents/sausageAgent.js").default || require("@/agents/sausageAgent.js");
+  sausageAgent =
+    require("@/agents/sausageShim.js").default ||
+    require("@/agents/sausageShim.js");
 } catch {
   sausageAgent = null;
 }
@@ -61,13 +63,23 @@ function Chip({ children, tone = "default" }) {
   );
 }
 
-function Button({ children, variant = "primary", size = "md", loading = false, className = "", ...rest }) {
+function Button({
+  children,
+  variant = "primary",
+  size = "md",
+  loading = false,
+  className = "",
+  ...rest
+}) {
   const base =
     "inline-flex items-center justify-center rounded-xl transition focus:outline-none focus:ring-2 focus:ring-offset-2";
   const variants = {
-    primary: "bg-neutral-900 text-white hover:bg-neutral-800 focus:ring-neutral-400",
-    ghost: "bg-transparent text-neutral-800 hover:bg-neutral-100 focus:ring-neutral-300",
-    subtle: "bg-neutral-100 text-neutral-800 hover:bg-neutral-200 focus:ring-neutral-300",
+    primary:
+      "bg-neutral-900 text-white hover:bg-neutral-800 focus:ring-neutral-400",
+    ghost:
+      "bg-transparent text-neutral-800 hover:bg-neutral-100 focus:ring-neutral-300",
+    subtle:
+      "bg-neutral-100 text-neutral-800 hover:bg-neutral-200 focus:ring-neutral-300",
     danger: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-400",
   };
   const sizes = {
@@ -77,7 +89,13 @@ function Button({ children, variant = "primary", size = "md", loading = false, c
   };
   return (
     <button
-      className={classNames(base, variants[variant], sizes[size], loading && "opacity-70 cursor-wait", className)}
+      className={classNames(
+        base,
+        variants[variant],
+        sizes[size],
+        loading && "opacity-70 cursor-wait",
+        className
+      )}
       disabled={loading}
       {...rest}
     >
@@ -91,13 +109,17 @@ function Card({ title, subtitle, right, children, footer }) {
     <div className="rounded-2xl border border-neutral-200 bg-white shadow-sm">
       <div className="flex items-start justify-between gap-3 border-b border-neutral-100 px-4 py-3">
         <div>
-          {title && <h3 className="text-sm font-semibold text-neutral-900">{title}</h3>}
+          {title && (
+            <h3 className="text-sm font-semibold text-neutral-900">{title}</h3>
+          )}
           {subtitle && <p className="text-xs text-neutral-500">{subtitle}</p>}
         </div>
         <div className="flex items-center gap-2">{right}</div>
       </div>
       <div className="p-4">{children}</div>
-      {footer && <div className="border-t border-neutral-100 px-4 py-3">{footer}</div>}
+      {footer && (
+        <div className="border-t border-neutral-100 px-4 py-3">{footer}</div>
+      )}
     </div>
   );
 }
@@ -114,15 +136,23 @@ function Empty({ title, hint, action }) {
 
 /* ------------------------------ Normalizers ------------------------------- */
 // Is this item Torah-Aligned Bacon based on name or kind?
-const isTorahBaconName = (name) => /(^|\s)bac(on)?(\s|$)/i.test(name || "") || /torah[-\s]?aligned\s+bacon/i.test(name || "");
-const isBaconStyleKind = (kind) => String(kind || "").toLowerCase() === "bacon-style";
-const isTorahBaconKind = (kind) => String(kind || "").toLowerCase() === "torah-bacon";
+const isTorahBaconName = (name) =>
+  /(^|\s)bac(on)?(\s|$)/i.test(name || "") ||
+  /torah[-\s]?aligned\s+bacon/i.test(name || "");
+const isBaconStyleKind = (kind) =>
+  String(kind || "").toLowerCase() === "bacon-style";
+const isTorahBaconKind = (kind) =>
+  String(kind || "").toLowerCase() === "torah-bacon";
 
 // Coerce any bacon-ish data to kind="torah-bacon"
 const normalizeKind = (item) => {
   const name = item?.name || "";
   const kind = String(item?.kind || "").toLowerCase();
-  if (isTorahBaconKind(kind) || isTorahBaconName(name) || isBaconStyleKind(kind)) {
+  if (
+    isTorahBaconKind(kind) ||
+    isTorahBaconName(name) ||
+    isBaconStyleKind(kind)
+  ) {
     return { ...item, kind: "torah-bacon" };
   }
   return item;
@@ -131,7 +161,8 @@ const normalizeKind = (item) => {
 // Human-readable kind for chips
 const displayKind = (kind, name) => {
   const k = String(kind || "").toLowerCase();
-  if (isTorahBaconKind(k) || isTorahBaconName(name) || isBaconStyleKind(k)) return "Torah-Aligned Bacon";
+  if (isTorahBaconKind(k) || isTorahBaconName(name) || isBaconStyleKind(k))
+    return "Torah-Aligned Bacon";
   return kind || "coarse";
 };
 
@@ -141,7 +172,9 @@ export default function SausageMakerPanel({
 }) {
   const [activeTab, setActiveTab] = useState("bacon"); // "bacon" | "sausage"
   const [loading, setLoading] = useState(false);
-  const [shellfishAllowed, setShellfishAllowed] = useState(!!household.shellfishAllowed);
+  const [shellfishAllowed, setShellfishAllowed] = useState(
+    !!household.shellfishAllowed
+  );
 
   // Templates fetched from agent (normalized)
   const [templates, setTemplates] = useState([]);
@@ -155,7 +188,9 @@ export default function SausageMakerPanel({
 
   // Household banner text
   const bannerText = useMemo(() => {
-    return `Torah Interpretation Profile: Shellfish ${shellfishAllowed ? "On" : "Off"}  |  click to change`;
+    return `Torah Interpretation Profile: Shellfish ${
+      shellfishAllowed ? "On" : "Off"
+    }  |  click to change`;
   }, [shellfishAllowed]);
 
   // Load templates on mount (normalize kinds)
@@ -186,27 +221,40 @@ export default function SausageMakerPanel({
       onEvent("inventory.updated", () => {
         emitProgress({
           topic: "ui.toast.info",
-          payload: { message: "Inventory changed — consider re-simulating this batch." },
+          payload: {
+            message: "Inventory changed — consider re-simulating this batch.",
+          },
         });
       })
     );
     offs.push(
       onEvent("calendar.synced", () => {
-        emitProgress({ topic: "ui.toast.info", payload: { message: "Calendar synced for your batch holds/tasks." } });
+        emitProgress({
+          topic: "ui.toast.info",
+          payload: { message: "Calendar synced for your batch holds/tasks." },
+        });
       })
     );
     offs.push(
       onEvent("preferences.changed", (prefs) => {
         if (typeof prefs?.shellfishAllowed === "boolean") {
           setShellfishAllowed(!!prefs.shellfishAllowed);
-          emitProgress({ topic: "ui.toast.info", payload: { message: "Household shellfish preference updated here." } });
+          emitProgress({
+            topic: "ui.toast.info",
+            payload: {
+              message: "Household shellfish preference updated here.",
+            },
+          });
         }
       })
     );
     offs.push(
       onEvent("recipes.consolidated", (payload) => {
         if (payload?.count) {
-          emitProgress({ topic: "ui.toast.info", payload: { message: `Recipes consolidated: ${payload.count} new.` } });
+          emitProgress({
+            topic: "ui.toast.info",
+            payload: { message: `Recipes consolidated: ${payload.count} new.` },
+          });
         }
       })
     );
@@ -225,7 +273,9 @@ export default function SausageMakerPanel({
       const torahBacon = isTorahBaconKind(t.kind) || isTorahBaconName(t.name);
       const isShellfish =
         t.ingredients?.some((i) => i.isShellfish) ||
-        /shrimp|prawn|crab|lobster|clam|oyster|scallop|mussel/i.test(t.species || "");
+        /shrimp|prawn|crab|lobster|clam|oyster|scallop|mussel/i.test(
+          t.species || ""
+        );
       if (!shellfishAllowed && isShellfish) return false;
       if (activeTab === "bacon") return torahBacon;
       return !torahBacon;
@@ -245,7 +295,10 @@ export default function SausageMakerPanel({
     if (isShellfish && !shellfishAllowed) {
       emitProgress({
         topic: "ui.toast.warn",
-        payload: { message: "Shellfish is Off in your profile. This item is hidden by default." },
+        payload: {
+          message:
+            "Shellfish is Off in your profile. This item is hidden by default.",
+        },
       });
       return;
     }
@@ -271,7 +324,10 @@ export default function SausageMakerPanel({
           id: s.id,
           name: s.name,
           species: s.species,
-          kind: isTorahBaconKind(s.kind) || isTorahBaconName(s.name) ? "torah-bacon" : (s.kind || "coarse"),
+          kind:
+            isTorahBaconKind(s.kind) || isTorahBaconName(s.name)
+              ? "torah-bacon"
+              : s.kind || "coarse",
           casings: s.casings || undefined,
           targetWeightKg: s.targetWeightKg || undefined,
           cook: s.cook || undefined,
@@ -281,7 +337,10 @@ export default function SausageMakerPanel({
       });
 
       const res = await sausageAgent.actions.planBatch({
-        household: { shellfishAllowed, timezone: household?.timezone || "America/New_York" },
+        household: {
+          shellfishAllowed,
+          timezone: household?.timezone || "America/New_York",
+        },
         recipes,
         options: { whenISO: new Date().toISOString() },
       });
@@ -291,10 +350,15 @@ export default function SausageMakerPanel({
       setCommitResult(null);
       emitProgress({
         topic: "ui.toast.success",
-        payload: { message: "Plan created. Next: Simulate inventory & timing." },
+        payload: {
+          message: "Plan created. Next: Simulate inventory & timing.",
+        },
       });
     } catch (e) {
-      emitProgress({ topic: "ui.toast.error", payload: { message: "Failed to plan batch." } });
+      emitProgress({
+        topic: "ui.toast.error",
+        payload: { message: "Failed to plan batch." },
+      });
     } finally {
       setLoading(false);
     }
@@ -304,11 +368,19 @@ export default function SausageMakerPanel({
     if (!sausageAgent || !planEnvelope?.data?.plan) return;
     setLoading(true);
     try {
-      const res = await sausageAgent.actions.simulate({ plan: planEnvelope.data.plan });
+      const res = await sausageAgent.actions.simulate({
+        plan: planEnvelope.data.plan,
+      });
       setSimulation(res);
-      emitProgress({ topic: "ui.toast.success", payload: { message: "Simulation ready. Review & Commit." } });
+      emitProgress({
+        topic: "ui.toast.success",
+        payload: { message: "Simulation ready. Review & Commit." },
+      });
     } catch {
-      emitProgress({ topic: "ui.toast.error", payload: { message: "Failed to simulate." } });
+      emitProgress({
+        topic: "ui.toast.error",
+        payload: { message: "Failed to simulate." },
+      });
     } finally {
       setLoading(false);
     }
@@ -318,7 +390,9 @@ export default function SausageMakerPanel({
     if (!sausageAgent || !simulation?.data?.commitPacket) return;
     setLoading(true);
     try {
-      const res = await sausageAgent.actions.commit({ commitPacket: simulation.data.commitPacket });
+      const res = await sausageAgent.actions.commit({
+        commitPacket: simulation.data.commitPacket,
+      });
       setCommitResult(res);
       undoTokenRef.current = res?.data?.undoToken || null;
       emitProgress({
@@ -335,7 +409,10 @@ export default function SausageMakerPanel({
         },
       });
     } catch {
-      emitProgress({ topic: "ui.toast.error", payload: { message: "Commit failed." } });
+      emitProgress({
+        topic: "ui.toast.error",
+        payload: { message: "Commit failed." },
+      });
     } finally {
       setLoading(false);
     }
@@ -356,7 +433,10 @@ export default function SausageMakerPanel({
       setPlanEnvelope(null);
       setSelected([]);
     } catch {
-      emitProgress({ topic: "ui.toast.error", payload: { message: "Undo failed." } });
+      emitProgress({
+        topic: "ui.toast.error",
+        payload: { message: "Undo failed." },
+      });
     } finally {
       setLoading(false);
     }
@@ -364,24 +444,41 @@ export default function SausageMakerPanel({
 
   const nextBestAction = useMemo(() => {
     if (!planEnvelope) {
-      return { label: "Plan Batch", onClick: doPlan, disabled: selected.length === 0 };
+      return {
+        label: "Plan Batch",
+        onClick: doPlan,
+        disabled: selected.length === 0,
+      };
     }
     if (!simulation) {
-      return { label: "Simulate", onClick: doSimulate, disabled: !planEnvelope?.data?.plan };
+      return {
+        label: "Simulate",
+        onClick: doSimulate,
+        disabled: !planEnvelope?.data?.plan,
+      };
     }
     if (!commitResult) {
-      return { label: "Commit", onClick: doCommit, disabled: !simulation?.data?.commitPacket };
+      return {
+        label: "Commit",
+        onClick: doCommit,
+        disabled: !simulation?.data?.commitPacket,
+      };
     }
     return {
       label: "Print Labels",
-      onClick: () => emitEvent({ topic: "ui.printLabels", payload: { labels: commitResult?.data?.labels } }),
+      onClick: () =>
+        emitEvent({
+          topic: "ui.printLabels",
+          payload: { labels: commitResult?.data?.labels },
+        }),
     };
   }, [planEnvelope, simulation, commitResult, selected]);
 
   // Labels preview (always “Torah-aligned …”, add Shellfish if included)
   const labelBadges = useMemo(() => {
     const base = ["Torah-aligned (household profile)"];
-    if (hasShellfishInSelection && shellfishAllowed) base.push("Shellfish per household interpretation");
+    if (hasShellfishInSelection && shellfishAllowed)
+      base.push("Shellfish per household interpretation");
     return base;
   }, [hasShellfishInSelection, shellfishAllowed]);
 
@@ -398,7 +495,9 @@ export default function SausageMakerPanel({
           {bannerText}
         </button>
         <div className="flex items-center gap-2">
-          <Chip tone="info">{shellfishAllowed ? "Shellfish: On" : "Shellfish: Off"}</Chip>
+          <Chip tone="info">
+            {shellfishAllowed ? "Shellfish: On" : "Shellfish: Off"}
+          </Chip>
           <Chip tone="success">Sabbath-aware scheduling</Chip>
         </div>
       </div>
@@ -452,7 +551,11 @@ export default function SausageMakerPanel({
         {filteredTemplates.length === 0 ? (
           <Empty
             title="No templates available"
-            hint={shellfishAllowed ? "Try switching tabs or add your own recipe." : "Shellfish Off hides seafood templates."}
+            hint={
+              shellfishAllowed
+                ? "Try switching tabs or add your own recipe."
+                : "Shellfish Off hides seafood templates."
+            }
             action={
               <Button
                 size="sm"
@@ -467,19 +570,33 @@ export default function SausageMakerPanel({
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             {filteredTemplates.map((tpl) => {
               const isShellfish = tpl.ingredients?.some((i) => i.isShellfish);
-              const torahBacon = isTorahBaconKind(tpl.kind) || isTorahBaconName(tpl.name);
+              const torahBacon =
+                isTorahBaconKind(tpl.kind) || isTorahBaconName(tpl.name);
               return (
-                <div key={tpl.id} className="rounded-xl border border-neutral-200 p-3">
+                <div
+                  key={tpl.id}
+                  className="rounded-xl border border-neutral-200 p-3"
+                >
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-sm font-semibold text-neutral-900">{tpl.name}</div>
+                      <div className="text-sm font-semibold text-neutral-900">
+                        {tpl.name}
+                      </div>
                       <div className="mt-1 flex flex-wrap items-center gap-1">
-                        {isShellfish && <Chip tone="warn">Contains Shellfish</Chip>}
-                        {torahBacon && <Chip tone="info">Torah-Aligned Bacon</Chip>}
+                        {isShellfish && (
+                          <Chip tone="warn">Contains Shellfish</Chip>
+                        )}
+                        {torahBacon && (
+                          <Chip tone="info">Torah-Aligned Bacon</Chip>
+                        )}
                         <Chip>Species: {tpl.species || "n/a"}</Chip>
                       </div>
                     </div>
-                    <Button size="sm" variant="primary" onClick={() => addSelected(tpl)}>
+                    <Button
+                      size="sm"
+                      variant="primary"
+                      onClick={() => addSelected(tpl)}
+                    >
                       Select
                     </Button>
                   </div>
@@ -505,10 +622,18 @@ export default function SausageMakerPanel({
               {labelBadges.map((b) => (
                 <Chip key={b}>{b}</Chip>
               ))}
-              <Chip tone="info">Safe handling: chill ≤ 4°C, cook to target temp</Chip>
+              <Chip tone="info">
+                Safe handling: chill ≤ 4°C, cook to target temp
+              </Chip>
             </div>
             <div className="flex items-center gap-2">
-              <Button size="sm" variant="ghost" onClick={doPlan} loading={loading} disabled={selected.length === 0}>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={doPlan}
+                loading={loading}
+                disabled={selected.length === 0}
+              >
                 Plan
               </Button>
               <Button
@@ -538,7 +663,11 @@ export default function SausageMakerPanel({
             title="No recipes selected"
             hint="Pick at least one template or add a custom recipe."
             action={
-              <Button size="sm" variant="primary" onClick={() => emitEvent({ topic: "ui.addRecipe" })}>
+              <Button
+                size="sm"
+                variant="primary"
+                onClick={() => emitEvent({ topic: "ui.addRecipe" })}
+              >
                 Add Recipe
               </Button>
             }
@@ -550,19 +679,32 @@ export default function SausageMakerPanel({
               const isShellfish = s.ingredients?.some((i) => i.isShellfish);
               const kindLabel = displayKind(s.kind, s.name);
               return (
-                <div key={s.id} className="rounded-xl border border-neutral-200 p-3">
+                <div
+                  key={s.id}
+                  className="rounded-xl border border-neutral-200 p-3"
+                >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <div className="text-sm font-semibold text-neutral-900">{s.name}</div>
+                      <div className="text-sm font-semibold text-neutral-900">
+                        {s.name}
+                      </div>
                       <div className="mt-1 flex flex-wrap items-center gap-1">
                         <Chip>Kind: {kindLabel}</Chip>
                         <Chip>Species: {s.species || "n/a"}</Chip>
-                        {isShellfish && shellfishAllowed && <Chip tone="warn">Contains Shellfish</Chip>}
-                        {isShellfish && !shellfishAllowed && <Chip tone="danger">Hidden by profile</Chip>}
+                        {isShellfish && shellfishAllowed && (
+                          <Chip tone="warn">Contains Shellfish</Chip>
+                        )}
+                        {isShellfish && !shellfishAllowed && (
+                          <Chip tone="danger">Hidden by profile</Chip>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => removeSelected(s.id)}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeSelected(s.id)}
+                      >
                         Remove
                       </Button>
                     </div>
@@ -577,7 +719,10 @@ export default function SausageMakerPanel({
       {/* Plan & Schedule Preview */}
       <Card title="Plan Preview" subtitle="Sabbath-aware schedule & steps">
         {!planEnvelope?.data?.plan ? (
-          <Empty title="No plan yet" hint="Click Plan to generate a Sabbath-aware draft." />
+          <Empty
+            title="No plan yet"
+            hint="Click Plan to generate a Sabbath-aware draft."
+          />
         ) : (
           <div className="flex flex-col gap-3">
             {(planEnvelope.data.plan.schedule || []).map((step, idx) => (
@@ -589,7 +734,9 @@ export default function SausageMakerPanel({
                   <Chip tone={step.kind === "hold" ? "info" : "default"}>
                     {step.kind === "hold" ? "Hold" : "Task"}
                   </Chip>
-                  <div className="text-sm font-medium text-neutral-800">{step.name}</div>
+                  <div className="text-sm font-medium text-neutral-800">
+                    {step.name}
+                  </div>
                 </div>
                 <div className="mt-2 flex flex-wrap items-center gap-2 md:mt-0">
                   <Chip>{new Date(step.startISO).toLocaleString()}</Chip>
@@ -605,13 +752,21 @@ export default function SausageMakerPanel({
       </Card>
 
       {/* Simulation Preview */}
-      <Card title="Simulation" subtitle="FEFO inventory deltas, label set, and calendar holds">
+      <Card
+        title="Simulation"
+        subtitle="FEFO inventory deltas, label set, and calendar holds"
+      >
         {!simulation?.data?.commitPacket ? (
-          <Empty title="No simulation yet" hint="Click Simulate to preview inventory and labels." />
+          <Empty
+            title="No simulation yet"
+            hint="Click Simulate to preview inventory and labels."
+          />
         ) : (
           <div className="flex flex-col gap-4">
             <section>
-              <div className="mb-2 text-xs font-semibold uppercase text-neutral-500">Inventory Ops</div>
+              <div className="mb-2 text-xs font-semibold uppercase text-neutral-500">
+                Inventory Ops
+              </div>
               <div className="rounded-lg border border-neutral-200">
                 <table className="w-full text-left text-sm">
                   <thead className="border-b bg-neutral-50 text-xs text-neutral-500">
@@ -630,7 +785,9 @@ export default function SausageMakerPanel({
                         <td className="px-3 py-2">
                           {op.qty} {op.unit}
                         </td>
-                        <td className="px-3 py-2 text-neutral-600">{op.reason}</td>
+                        <td className="px-3 py-2 text-neutral-600">
+                          {op.reason}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -639,7 +796,9 @@ export default function SausageMakerPanel({
             </section>
 
             <section>
-              <div className="mb-2 text-xs font-semibold uppercase text-neutral-500">Labels Preview</div>
+              <div className="mb-2 text-xs font-semibold uppercase text-neutral-500">
+                Labels Preview
+              </div>
               <div className="flex flex-wrap items-center gap-2">
                 {labelBadges.map((b) => (
                   <Chip key={b}>{b}</Chip>
@@ -649,19 +808,30 @@ export default function SausageMakerPanel({
             </section>
 
             <section>
-              <div className="mb-2 text-xs font-semibold uppercase text-neutral-500">Calendar</div>
+              <div className="mb-2 text-xs font-semibold uppercase text-neutral-500">
+                Calendar
+              </div>
               <div className="flex flex-col gap-2">
-                {simulation.data.commitPacket.calendarEvents.slice(0, 5).map((e, i) => (
-                  <div key={i} className="flex flex-wrap items-center gap-2 rounded-lg border border-neutral-200 p-2">
-                    <Chip tone={e.kind === "hold" ? "info" : "default"}>{e.kind}</Chip>
-                    <div className="text-sm">{e.title}</div>
-                    <Chip>{new Date(e.startISO).toLocaleString()}</Chip>
-                    <span className="text-neutral-300">→</span>
-                    <Chip>{new Date(e.endISO).toLocaleString()}</Chip>
-                  </div>
-                ))}
+                {simulation.data.commitPacket.calendarEvents
+                  .slice(0, 5)
+                  .map((e, i) => (
+                    <div
+                      key={i}
+                      className="flex flex-wrap items-center gap-2 rounded-lg border border-neutral-200 p-2"
+                    >
+                      <Chip tone={e.kind === "hold" ? "info" : "default"}>
+                        {e.kind}
+                      </Chip>
+                      <div className="text-sm">{e.title}</div>
+                      <Chip>{new Date(e.startISO).toLocaleString()}</Chip>
+                      <span className="text-neutral-300">→</span>
+                      <Chip>{new Date(e.endISO).toLocaleString()}</Chip>
+                    </div>
+                  ))}
                 {simulation.data.commitPacket.calendarEvents.length > 5 && (
-                  <div className="text-xs text-neutral-500">…and more events scheduled</div>
+                  <div className="text-xs text-neutral-500">
+                    …and more events scheduled
+                  </div>
                 )}
               </div>
             </section>
@@ -673,14 +843,21 @@ export default function SausageMakerPanel({
       <div className="sticky bottom-0 z-10 flex items-center justify-between gap-2 rounded-2xl border border-neutral-200 bg-white/90 p-3 backdrop-blur">
         <div className="flex items-center gap-2">
           {!commitResult?.data?.undoToken ? (
-            <Chip tone="info">Tip: Use Undo after Commit instead of blocking confirmations.</Chip>
+            <Chip tone="info">
+              Tip: Use Undo after Commit instead of blocking confirmations.
+            </Chip>
           ) : (
             <Chip tone="success">Committed — Undo available</Chip>
           )}
         </div>
         <div className="flex items-center gap-2">
           {commitResult?.data?.undoToken && (
-            <Button variant="ghost" size="sm" onClick={doUndo} loading={loading}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={doUndo}
+              loading={loading}
+            >
               Undo
             </Button>
           )}

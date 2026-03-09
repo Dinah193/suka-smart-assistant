@@ -25,7 +25,7 @@ let eventBus = {
 
 try {
   // Soft import to avoid hard coupling during early boot
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -68,7 +68,9 @@ class AwakeManager {
 
     // Wire up visibility listener to re-acquire when tab becomes visible again.
     if (typeof document !== "undefined") {
-      document.addEventListener("visibilitychange", this.#onVisibilityChange, { passive: true });
+      document.addEventListener("visibilitychange", this.#onVisibilityChange, {
+        passive: true,
+      });
     }
   }
 
@@ -214,13 +216,21 @@ class AwakeManager {
   /** Internal: release the wake lock */
   async #release(meta = {}) {
     if (!this.#sentinel) {
-      emit("ui.keepAwake.disabled", { supported: this.#supported, refs: this.#refs, ...meta });
+      emit("ui.keepAwake.disabled", {
+        supported: this.#supported,
+        refs: this.#refs,
+        ...meta,
+      });
       return;
     }
     try {
       await this.#sentinel.release?.();
       this.#sentinel = null;
-      emit("ui.keepAwake.disabled", { supported: this.#supported, refs: this.#refs, ...meta });
+      emit("ui.keepAwake.disabled", {
+        supported: this.#supported,
+        refs: this.#refs,
+        ...meta,
+      });
     } catch (err) {
       emit("ui.keepAwake.error", {
         stage: "release",
@@ -252,7 +262,10 @@ class AwakeManager {
   /** Cleanup listeners (optional; usually not needed for app lifetime singleton) */
   destroy() {
     if (typeof document !== "undefined" && this.#onVisibilityChange) {
-      document.removeEventListener("visibilitychange", this.#onVisibilityChange);
+      document.removeEventListener(
+        "visibilitychange",
+        this.#onVisibilityChange
+      );
     }
   }
 }

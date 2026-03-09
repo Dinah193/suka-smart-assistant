@@ -32,16 +32,23 @@ let eventBus = {
 
 try {
   // Prefer default export, but support named as well
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
-} catch { /* noop for tests or build steps */ }
+} catch {
+  /* noop for tests or build steps */
+}
 
 // Feature flags are optional in this checker; we use them for guard toggles only.
-let featureFlags = { sabbathGuard: false, quietHours: { enabled: false, start: 22, end: 6 } };
+let featureFlags = {
+  sabbathGuard: false,
+  quietHours: { enabled: false, start: 22, end: 6 },
+};
 try {
   const ff = require("@/config/featureFlags");
   featureFlags = ff?.default || ff || featureFlags;
-} catch { /* noop */ }
+} catch {
+  /* noop */
+}
 
 /* ---------------------------------- Types ---------------------------------- */
 /**
@@ -90,7 +97,9 @@ module.exports = {
       const result = await _check(session, options);
 
       eventBus.emit({
-        type: result.feasible ? "scheduling.feasibility.checked" : "scheduling.feasibility.unfeasible",
+        type: result.feasible
+          ? "scheduling.feasibility.checked"
+          : "scheduling.feasibility.unfeasible",
         ts,
         source,
         data: {
@@ -131,9 +140,12 @@ async function _check(session, options) {
   // Defensive input validation
   const errs = [];
   if (!session || typeof session !== "object") errs.push("missing-session");
-  if (!session?.deadlineISO || Number.isNaN(Date.parse(session.deadlineISO))) errs.push("invalid-deadline");
-  if (!Number.isFinite(session?.taskMinutes) || session.taskMinutes <= 0) errs.push("invalid-taskMinutes");
-  if (errs.length) return { feasible: false, reason: `bad-input: ${errs.join(",")}` };
+  if (!session?.deadlineISO || Number.isNaN(Date.parse(session.deadlineISO)))
+    errs.push("invalid-deadline");
+  if (!Number.isFinite(session?.taskMinutes) || session.taskMinutes <= 0)
+    errs.push("invalid-taskMinutes");
+  if (errs.length)
+    return { feasible: false, reason: `bad-input: ${errs.join(",")}` };
 
   // Normalize minutes
   const prep = clampNonNegInt(session.prepMinutes ?? 0);
@@ -145,7 +157,10 @@ async function _check(session, options) {
   const totalMinutes = prep + setup + task + cleanup + buffer;
   if (totalMinutes <= 0) return { feasible: false, reason: "zero-duration" };
 
-  const earliestStart = addMinutes(now, clampNonNegInt(session.earliestStartOffsetMin ?? 0));
+  const earliestStart = addMinutes(
+    now,
+    clampNonNegInt(session.earliestStartOffsetMin ?? 0)
+  );
   const deadline = new Date(session.deadlineISO);
   if (deadline <= earliestStart) {
     return { feasible: false, reason: "deadline-before-earliest-start" };
@@ -154,23 +169,40 @@ async function _check(session, options) {
   // Gather blocked intervals
   const [calendarBlocks, resourceLocks, policyBlocks] = await Promise.all([
     resolveCalendarBlocks(earliestStart, deadline, options),
-    resolveResourceLocks(session.requiredResources || [], earliestStart, deadline, options),
+    resolveResourceLocks(
+      session.requiredResources || [],
+      earliestStart,
+      deadline,
+      options
+    ),
     resolvePolicyBlocks(earliestStart, deadline, session, options),
   ]);
 
   // Domain-specific constraints (extensible)
   const domainAdjustments = [];
-  const domainConstraints = getDomainConstraintsRegistry()[session.domain] || [];
+  const domainConstraints =
+    getDomainConstraintsRegistry()[session.domain] || [];
   for (const fn of domainConstraints) {
     const adj = await fn(session, { earliestStart, deadline });
     if (Array.isArray(adj) && adj.length) domainAdjustments.push(...adj);
   }
 
-  const blocked = mergeIntervals([...calendarBlocks, ...resourceLocks, ...policyBlocks].map(toInterval));
+  const blocked = mergeIntervals(
+    [...calendarBlocks, ...resourceLocks, ...policyBlocks].map(toInterval)
+  );
 
   // Slot search
-  const granularity = Math.max(1, Math.min(60, Math.floor(options.granularityMin ?? 5)));
-  const firstFit = findFirstFitSlot(earliestStart, deadline, blocked, totalMinutes, granularity);
+  const granularity = Math.max(
+    1,
+    Math.min(60, Math.floor(options.granularityMin ?? 5))
+  );
+  const firstFit = findFirstFitSlot(
+    earliestStart,
+    deadline,
+    blocked,
+    totalMinutes,
+    granularity
+  );
 
   if (!firstFit) {
     const reasons = ["no-slot-before-deadline"];
@@ -207,7 +239,10 @@ async function _check(session, options) {
 async function resolveCalendarBlocks(start, end, options) {
   const fetcher = options.fetchCalendarBlocks;
   if (typeof fetcher !== "function") return [];
-  const blocks = await safeCall(async () => await fetcher(start.toISOString(), end.toISOString()), []);
+  const blocks = await safeCall(
+    async () => await fetcher(start.toISOString(), end.toISOString()),
+    []
+  );
   return Array.isArray(blocks) ? blocks : [];
 }
 
@@ -215,7 +250,11 @@ async function resolveResourceLocks(resources, start, end, options) {
   if (!resources?.length) return [];
   const fetcher = options.fetchResourceLocks;
   if (typeof fetcher !== "function") return [];
-  const locks = await safeCall(async () => await fetcher(resources, start.toISOString(), end.toISOString()), []);
+  const locks = await safeCall(
+    async () =>
+      await fetcher(resources, start.toISOString(), end.toISOString()),
+    []
+  );
   return Array.isArray(locks) ? locks : [];
 }
 
@@ -231,7 +270,9 @@ async function resolvePolicyBlocks(start, end, session, options) {
   // Sabbath guard
   const sabbath = normalizeSabbath(options.sabbath, featureFlags.sabbathGuard);
   if (sabbath.enabled) {
-    blocks.push(...await buildSabbathBlocks(start, end, options.fetchAstronomy));
+    blocks.push(
+      ...(await buildSabbathBlocks(start, end, options.fetchAstronomy))
+    );
   }
 
   return blocks;
@@ -250,16 +291,21 @@ function getDomainConstraintsRegistry() {
       // Example: enforce doneness/rest windows or preheat overlap
       async (session) => {
         const adj = [];
-        const needsHighHeat = _hasPreference(session, "cooking.requiresHighHeat");
-        if (needsHighHeat && Array.isArray(session.requiredResources) && !session.requiredResources.includes("range.top")) {
+        const needsHighHeat = _hasPreference(
+          session,
+          "cooking.requiresHighHeat"
+        );
+        if (
+          needsHighHeat &&
+          Array.isArray(session.requiredResources) &&
+          !session.requiredResources.includes("range.top")
+        ) {
           adj.push("add-resource:range.top (high-heat)");
         }
         return adj;
       },
     ],
-    cleaning: [
-      async () => [],
-    ],
+    cleaning: [async () => []],
     garden: [
       // Example: daylight preference
       async (session) => {
@@ -278,12 +324,8 @@ function getDomainConstraintsRegistry() {
         return [];
       },
     ],
-    preservation: [
-      async () => [],
-    ],
-    storehouse: [
-      async () => [],
-    ],
+    preservation: [async () => []],
+    storehouse: [async () => []],
   };
 }
 
@@ -295,7 +337,11 @@ function clampNonNegInt(n) {
 }
 
 async function safeCall(fn, fallback) {
-  try { return await fn(); } catch { return fallback; }
+  try {
+    return await fn();
+  } catch {
+    return fallback;
+  }
 }
 
 function addMinutes(date, min) {
@@ -312,7 +358,12 @@ function toInterval(x) {
 
 function mergeIntervals(intervals) {
   const arr = intervals
-    .filter(iv => iv?.start instanceof Date && iv?.end instanceof Date && iv.end > iv.start)
+    .filter(
+      (iv) =>
+        iv?.start instanceof Date &&
+        iv?.end instanceof Date &&
+        iv.end > iv.start
+    )
     .sort((a, b) => a.start - b.start);
 
   const merged = [];
@@ -321,7 +372,8 @@ function mergeIntervals(intervals) {
       merged.push({ start: new Date(iv.start), end: new Date(iv.end) });
     } else {
       // overlap
-      if (iv.end > merged[merged.length - 1].end) merged[merged.length - 1].end = new Date(iv.end);
+      if (iv.end > merged[merged.length - 1].end)
+        merged[merged.length - 1].end = new Date(iv.end);
     }
   }
   return merged;
@@ -331,7 +383,13 @@ function mergeIntervals(intervals) {
  * Find the first continuous free slot of length `durationMin` between start and deadline,
  * skipping all blocked intervals. Uses a discrete step (granularityMin).
  */
-function findFirstFitSlot(start, deadline, blocked, durationMin, granularityMin) {
+function findFirstFitSlot(
+  start,
+  deadline,
+  blocked,
+  durationMin,
+  granularityMin
+) {
   const durationMs = durationMin * 60 * 1000;
   const stepMs = granularityMin * 60 * 1000;
 
@@ -433,10 +491,11 @@ function buildQuietHourBlocks(start, end, startHr, endHr) {
 }
 
 function normalizeSabbath(opt, flagEnabled) {
-  if (!flagEnabled && !opt?.enabled) return { enabled: false, dayStart: 18, dayEnd: 18 };
+  if (!flagEnabled && !opt?.enabled)
+    return { enabled: false, dayStart: 18, dayEnd: 18 };
   const enabled = opt?.enabled ?? true;
   const dayStart = toHour(opt?.dayStart, 18); // approx "evening"
-  const dayEnd = toHour(opt?.dayEnd, 18);     // approx "evening"
+  const dayEnd = toHour(opt?.dayEnd, 18); // approx "evening"
   return { enabled, dayStart, dayEnd };
 }
 
@@ -458,10 +517,22 @@ async function buildSabbathBlocks(start, end, fetchAstronomy) {
       let startISO, endISO;
 
       if (typeof fetchAstronomy === "function") {
-        const friAstro = await safeCall(async () => await fetchAstronomy(fri), {});
-        const satAstro = await safeCall(async () => await fetchAstronomy(sat), {});
-        startISO = friAstro?.sunsetISO || friAstro?.sundownISO || setHour(fri, 18).toISOString();
-        endISO = satAstro?.sundownISO || satAstro?.sunsetISO || setHour(sat, 18).toISOString();
+        const friAstro = await safeCall(
+          async () => await fetchAstronomy(fri),
+          {}
+        );
+        const satAstro = await safeCall(
+          async () => await fetchAstronomy(sat),
+          {}
+        );
+        startISO =
+          friAstro?.sunsetISO ||
+          friAstro?.sundownISO ||
+          setHour(fri, 18).toISOString();
+        endISO =
+          satAstro?.sundownISO ||
+          satAstro?.sunsetISO ||
+          setHour(sat, 18).toISOString();
       } else {
         startISO = setHour(fri, 18).toISOString();
         endISO = setHour(sat, 18).toISOString();
@@ -489,11 +560,11 @@ function addDays(d, n) {
 }
 function trimBlocksToRange(blocks, start, end) {
   return blocks
-    .map(b => ({
+    .map((b) => ({
       start: b.start < start ? new Date(start) : b.start,
       end: b.end > end ? new Date(end) : b.end,
     }))
-    .filter(b => b.end > b.start);
+    .filter((b) => b.end > b.start);
 }
 
 function _hasPreference(session, key) {

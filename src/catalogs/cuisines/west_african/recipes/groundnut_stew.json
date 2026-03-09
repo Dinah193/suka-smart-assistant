@@ -1,0 +1,467 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-13",
+  "meta": {
+    "id": "recipe.west_african.groundnut_stew",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "cuisineId": "cuisine.west_african",
+    "dishId": "dish.groundnut_soup",
+    "label": "Groundnut Stew",
+    "altLabels": ["Groundnut Soup", "Peanut Stew", "West African Peanut Soup"],
+    "source": "catalog",
+    "author": "SSA Canonical Catalog",
+    "regionHints": [
+      "Ghana",
+      "Senegal",
+      "Sierra Leone",
+      "Liberia",
+      "West Africa"
+    ],
+    "tags": [
+      "west_african",
+      "stew",
+      "soup",
+      "stew_and_starch",
+      "peanut",
+      "one_pot",
+      "batch_friendly",
+      "family_style"
+    ]
+  },
+  "summary": {
+    "oneLine": "A savory peanut-thickened stew with aromatics and optional tomato-pepper base; served with rice, yam, or plantain.",
+    "notes": [
+      "Groundnut stew varies by region (tomato-forward vs onion/ginger-forward). This SSA baseline supports both.",
+      "Use natural peanut butter (no sugar) for a savory profile unless household rules allow otherwise."
+    ]
+  },
+  "yields": {
+    "servings": 6,
+    "servingSizeNote": "Stew servings (served with starch)."
+  },
+  "time": {
+    "totalMinutes": 85,
+    "activeMinutes": 25,
+    "restMinutes": 10
+  },
+  "difficulty": "intermediate",
+  "servingStyles": ["stew_and_starch", "family_style", "one_pot"],
+  "plannerHints": {
+    "batchFriendly": true,
+    "leftoversFriendly": true,
+    "weeknightBias": "high",
+    "mealArchetypeId": "archetype_stew_with_starch"
+  },
+  "nutrition": {
+    "isEstimate": true,
+    "notes": [
+      "Groundnut stew is calorie-dense; SSA nutrition pipeline should compute per-serving from ingredients."
+    ]
+  },
+  "allergens": {
+    "mayContain": ["allergen_peanut"],
+    "commonTriggers": ["peanut", "peanut_butter_optional"],
+    "notes": [
+      "Peanut allergy households should block this dish via ruleset.",
+      "Optional dried fish/crayfish/shrimp may appear in some variants—apply household allergen preferences."
+    ]
+  },
+  "equipment": {
+    "required": [
+      { "id": "pot_lidded", "label": "Lidded pot / Dutch oven", "qty": 1 },
+      { "id": "stove_burner", "label": "Stovetop burner", "qty": 1 },
+      { "id": "knife_chef", "label": "Chef’s knife", "qty": 1 },
+      { "id": "cutting_board", "label": "Cutting board", "qty": 1 },
+      { "id": "spoon_wooden", "label": "Wooden spoon", "qty": 1 },
+      { "id": "measuring_cups", "label": "Measuring cups", "qty": 1 }
+    ],
+    "optional": [
+      { "id": "blender", "label": "Blender", "qty": 1 },
+      { "id": "food_processor", "label": "Food processor", "qty": 1 },
+      { "id": "fine_sieve", "label": "Fine sieve/strainer", "qty": 1 }
+    ]
+  },
+  "ingredients": [
+    {
+      "id": "chicken_generic",
+      "label": "Chicken pieces",
+      "qty": 2,
+      "unit": "lb",
+      "role": "protein",
+      "optional": true,
+      "notes": [
+        "Common baseline protein. Choose ONE primary protein set (chicken OR beef OR goat OR beans)."
+      ]
+    },
+    {
+      "id": "beef_generic",
+      "label": "Beef (stew cuts)",
+      "qty": 1.5,
+      "unit": "lb",
+      "role": "protein",
+      "optional": true
+    },
+    {
+      "id": "goat",
+      "label": "Goat meat",
+      "qty": 1.5,
+      "unit": "lb",
+      "role": "protein",
+      "optional": true
+    },
+    {
+      "id": "beans_black_eyed_pea",
+      "label": "Black-eyed peas (cooked)",
+      "qty": 3,
+      "unit": "cup",
+      "role": "protein",
+      "optional": true,
+      "notes": [
+        "Vegetarian path: use cooked beans and increase stock/seasoning to taste."
+      ]
+    },
+
+    {
+      "id": "onion_yellow",
+      "label": "Yellow onion",
+      "qty": 2,
+      "unit": "count",
+      "role": "aromatic"
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic",
+      "qty": 4,
+      "unit": "clove",
+      "role": "aromatic",
+      "optional": true
+    },
+    {
+      "id": "ginger",
+      "label": "Fresh ginger",
+      "qty": 1,
+      "unit": "tbsp",
+      "role": "aromatic",
+      "optional": true,
+      "notes": ["Grated or chopped."]
+    },
+    {
+      "id": "pepper_hot_scotch_bonnet_optional",
+      "label": "Scotch bonnet (or habanero)",
+      "qty": 1,
+      "unit": "count",
+      "role": "heat",
+      "optional": true,
+      "notes": ["Start with half for medium heat."]
+    },
+
+    {
+      "id": "tomato_optional",
+      "label": "Tomatoes (optional tomato-forward variant)",
+      "qty": 3,
+      "unit": "count",
+      "role": "base",
+      "optional": true
+    },
+    {
+      "id": "tomato_paste",
+      "label": "Tomato paste",
+      "qty": 1,
+      "unit": "tbsp",
+      "role": "base",
+      "optional": true,
+      "notes": ["Optional, helps deepen color if using tomatoes."]
+    },
+    {
+      "id": "pepper_bell",
+      "label": "Red bell pepper",
+      "qty": 1,
+      "unit": "count",
+      "role": "base",
+      "optional": true
+    },
+
+    {
+      "id": "peanut_butter_optional",
+      "label": "Natural peanut butter (unsweetened)",
+      "qty": 1,
+      "unit": "cup",
+      "role": "thickener",
+      "optional": true,
+      "notes": ["If not available, use ground peanuts (see below)."]
+    },
+    {
+      "id": "peanut",
+      "label": "Ground peanuts (or roasted peanuts, blended)",
+      "qty": 1.25,
+      "unit": "cup",
+      "role": "thickener",
+      "optional": true,
+      "notes": [
+        "Use if peanut butter is unavailable. Blend with warm broth to make a smooth slurry."
+      ]
+    },
+
+    {
+      "id": "oil_neutral",
+      "label": "Neutral oil",
+      "qty": 3,
+      "unit": "tbsp",
+      "role": "fat"
+    },
+    {
+      "id": "stock_chicken_or_beef_optional",
+      "label": "Chicken or beef stock",
+      "qty": 5,
+      "unit": "cup",
+      "role": "liquid",
+      "optional": true,
+      "notes": ["If not using stock, use water and adjust seasoning."]
+    },
+    {
+      "id": "water",
+      "label": "Water",
+      "qty": 2,
+      "unit": "cup",
+      "role": "liquid",
+      "notes": [
+        "Total liquid depends on thickness preference and peanut content."
+      ]
+    },
+
+    {
+      "id": "spice_thyme_dried",
+      "label": "Dried thyme",
+      "qty": 1,
+      "unit": "tsp",
+      "role": "spice",
+      "optional": true
+    },
+    {
+      "id": "spice_bay_leaf",
+      "label": "Bay leaf",
+      "qty": 2,
+      "unit": "count",
+      "role": "spice",
+      "optional": true
+    },
+    {
+      "id": "pepper_black",
+      "label": "Black pepper",
+      "qty": 0.5,
+      "unit": "tsp",
+      "role": "spice",
+      "optional": true
+    },
+    {
+      "id": "seasoning_stock_cube_optional",
+      "label": "Stock cube / seasoning cube",
+      "qty": 1,
+      "unit": "count",
+      "role": "umami",
+      "optional": true
+    },
+    {
+      "id": "salt",
+      "label": "Salt",
+      "qty": 2,
+      "unit": "tsp",
+      "role": "seasoning",
+      "notes": ["Start lower if using salted stock/cubes; adjust at end."]
+    },
+
+    {
+      "id": "leafy_greens_spinach",
+      "label": "Spinach (optional)",
+      "qty": 4,
+      "unit": "cup",
+      "role": "greens",
+      "optional": true,
+      "notes": ["Some variants add greens at the end for color and nutrition."]
+    }
+  ],
+  "techniques": [
+    "prep_mise_en_place",
+    "blend_optional",
+    "saute",
+    "reduce",
+    "stew",
+    "season_to_taste",
+    "rest"
+  ],
+  "steps": [
+    {
+      "id": "step.choose_path",
+      "title": "Choose your protein and peanut base",
+      "body": "Choose ONE: chicken OR beef OR goat OR cooked beans. Choose ONE: peanut butter OR ground peanuts. This recipe supports both paths.",
+      "timeMinutes": 2,
+      "timers": [],
+      "hazards": []
+    },
+    {
+      "id": "step.start_protein_broth",
+      "title": "Start protein broth (if using meat)",
+      "body": "If using chicken/beef/goat: season lightly with salt and black pepper. Add to pot with 1 chopped onion, thyme/bay leaf (optional), and enough stock/water to cover. Simmer until tender (chicken 20–30 min; beef/goat 40–60 min). Reserve broth and keep meat in pot.",
+      "timeMinutes": 50,
+      "timers": [
+        { "label": "Simmer meat (chicken)", "seconds": 1500 },
+        { "label": "Simmer meat (beef/goat)", "seconds": 2700 }
+      ],
+      "hazards": []
+    },
+    {
+      "id": "step.make_optional_tomato_base",
+      "title": "Make optional tomato-pepper base (tomato-forward variant)",
+      "body": "If using tomatoes: blend (or finely chop) tomatoes, bell pepper, hot pepper (optional), garlic, ginger, and part of the onion. Set aside.",
+      "timeMinutes": 10,
+      "timers": [{ "label": "Blend base", "seconds": 600 }],
+      "hazards": [
+        {
+          "type": "pepper",
+          "message": "Use gloves when handling very hot peppers; avoid touching eyes/face and ventilate when blending."
+        }
+      ]
+    },
+    {
+      "id": "step.saute_and_reduce",
+      "title": "Sauté aromatics and reduce base",
+      "body": "Heat oil over medium heat. Add remaining chopped onion and sauté 3–5 minutes. If using tomato paste, fry 1–2 minutes. If using tomato base, add it now and simmer uncovered 8–12 minutes to cook down and remove raw taste. If not using tomato base, proceed with sautéed onion/ginger/garlic only.",
+      "timeMinutes": 15,
+      "timers": [
+        { "label": "Sauté onion", "seconds": 240 },
+        { "label": "Reduce base", "seconds": 600 }
+      ],
+      "hazards": [
+        {
+          "type": "splatter",
+          "message": "Pepper-tomato base may splatter; reduce heat and stir carefully."
+        }
+      ]
+    },
+    {
+      "id": "step.build_peanut_slurry",
+      "title": "Build the peanut slurry (prevents splitting)",
+      "body": "In a bowl, whisk peanut butter with 1–2 cups warm broth (or hot water) until smooth. If using ground peanuts, blend them with warm broth into a smooth slurry. This step prevents clumps and splitting.",
+      "timeMinutes": 6,
+      "timers": [{ "label": "Whisk peanut slurry", "seconds": 360 }],
+      "hazards": []
+    },
+    {
+      "id": "step.combine_and_simmer",
+      "title": "Combine and simmer gently",
+      "body": "Add the peanut slurry to the pot, stirring well. Add remaining broth/stock/water to reach a stew consistency. Add seasoning cube (optional), bay leaf (optional), and salt to taste (start conservative). Simmer gently 15–25 minutes, stirring occasionally so the peanut base doesn’t stick. Avoid hard boiling.",
+      "timeMinutes": 25,
+      "timers": [{ "label": "Simmer stew gently", "seconds": 1200 }],
+      "hazards": []
+    },
+    {
+      "id": "step.finish_with_greens_optional",
+      "title": "Finish (optional greens) and rest",
+      "body": "If using spinach, stir in and simmer 2–3 minutes until wilted. Taste and adjust salt/pepper. Rest covered 8–10 minutes to allow body to settle.",
+      "timeMinutes": 10,
+      "timers": [
+        { "label": "Wilt greens", "seconds": 180 },
+        { "label": "Rest", "seconds": 600 }
+      ],
+      "hazards": []
+    }
+  ],
+  "serving": {
+    "suggestions": [
+      "Serve with rice, yam, plantain, or swallow depending on household preference.",
+      "For a complete plate: add a simple salad or sautéed greens."
+    ],
+    "garnishes": ["lime_optional", "pepper_sauce_optional"],
+    "storage": {
+      "refrigeratorDays": 4,
+      "freezerDays": 90,
+      "reheatNotes": [
+        "Reheat gently; peanut stews thicken as they cool. Add a splash of stock/water to loosen.",
+        "Avoid hard boiling to reduce risk of separation."
+      ]
+    }
+  },
+  "adaptation": {
+    "donenessTargets": {
+      "stewTexture": "spoon_coating_smooth",
+      "peanutBase": "no_grainy_clumps_no_split",
+      "heatLevel": "medium_default"
+    },
+    "substitutions": [
+      {
+        "whenMissing": ["peanut_butter_optional"],
+        "useInstead": ["peanut"],
+        "notes": "Blend ground peanuts with warm broth to form a smooth slurry."
+      },
+      {
+        "whenMissing": ["pepper_hot_scotch_bonnet_optional"],
+        "useInstead": ["pepper_hot_habanero", "pepper_red_flakes"],
+        "notes": "Habanero is closest in fruity heat; start small and adjust."
+      },
+      {
+        "whenMissing": ["stock_chicken_or_beef_optional"],
+        "useInstead": ["water"],
+        "notes": "Use more seasoning and simmer longer for depth."
+      }
+    ],
+    "equipmentFallbacks": [
+      {
+        "whenMissing": ["blender"],
+        "doInstead": "Finely chop tomato/pepper/onion and simmer longer. For ground peanuts, whisk vigorously with warm broth until smooth or use a jar shake method."
+      }
+    ],
+    "allergenConsiderations": [
+      {
+        "ifAllergenActive": "peanut",
+        "avoid": ["peanut", "peanut_butter_optional"],
+        "notes": "Peanut allergy active: this dish should be blocked by ruleset (do not plan)."
+      },
+      {
+        "ifAllergenActive": "fish",
+        "avoid": [
+          "fish_dried_smoked_optional",
+          "dried_crayfish_optional",
+          "shrimp_dried_optional"
+        ],
+        "notes": "If adding seafood-based umami builders, omit when fish/shellfish allergens are active."
+      },
+      {
+        "ifAllergenActive": "shellfish",
+        "avoid": ["dried_crayfish_optional", "shrimp_dried_optional"],
+        "notes": "Crayfish/dried shrimp are shellfish triggers."
+      }
+    ]
+  },
+  "qa": {
+    "validators": {
+      "requiresCatalogIngredientIds": true,
+      "requiresTechniqueIds": true,
+      "requiresEquipmentIds": true
+    },
+    "knownGood": [
+      "Peanut base should be smooth and cohesive (no visible oil splitting).",
+      "Stew should simmer gently; hard boiling can cause separation.",
+      "Season broth before final simmer; peanuts mute salt so final adjustment is normal."
+    ],
+    "commonIssues": [
+      {
+        "problem": "Stew separated (oil slick or curdled look)",
+        "likelyCause": "Hard boil after adding peanuts or added peanut paste directly without slurry",
+        "fix": "Keep at gentle simmer; always whisk peanut paste with warm broth first; stir occasionally."
+      },
+      {
+        "problem": "Too thick / sticking to pot",
+        "likelyCause": "Too much peanut relative to liquid or heat too high",
+        "fix": "Add stock/water gradually; reduce heat and stir more often."
+      },
+      {
+        "problem": "Tastes flat",
+        "likelyCause": "Under-seasoned broth or insufficient simmer time",
+        "fix": "Adjust salt carefully; add aromatics/thyme/bay; simmer 10–15 minutes longer at gentle heat."
+      }
+    ]
+  }
+}

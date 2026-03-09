@@ -1,0 +1,481 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.peruvian.recipes.lomo_saltado",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Lomo Saltado (Peruvian Stir-Fried Beef)",
+    "subtitle": "Chifa-style beef + onions + tomatoes with soy-vinegar pan sauce and fries",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalogs",
+      "notes": [
+        "SSA canonical home method: hot pan, quick stir-fry, sauce reduction, fries served alongside or mixed at the end.",
+        "Designed to be adaptable: steak type, fries method (oven/air fryer/frozen), and gluten-free (tamari) option."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "Peruvian",
+    "subprofiles": ["cuisines.peruvian", "style.chifa"],
+    "category": "main",
+    "mealArchetypes": [
+      "meal_archetype.dinner",
+      "meal_archetype.stir_fry",
+      "meal_archetype.protein_centered"
+    ],
+    "servingStyles": ["plates", "family_style"],
+    "plannerTags": [
+      "cuisine.peruvian",
+      "style.chifa",
+      "protein.beef",
+      "technique.stir_fry",
+      "weeknight_friendly",
+      "leftovers_good",
+      "pan_sauce",
+      "serve_with_rice",
+      "serve_with_fries"
+    ]
+  },
+
+  "summary": "Classic Peruvian chifa favorite: seared beef strips tossed with onions and tomatoes, finished with soy + vinegar pan sauce and cilantro. Served with fries and rice.",
+
+  "yield": {
+    "servings": 4,
+    "notes": "Serves 4 with rice + fries; 3 if served alone."
+  },
+
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 20,
+    "totalMins": 45
+  },
+
+  "difficulty": 4,
+
+  "signals": {
+    "batchFriendly": "Sauce components can be prepped ahead; final stir-fry is best fresh.",
+    "leftoversFriendly": true,
+    "weeknightPossible": true,
+    "freezerFriendly": "Freeze cooked beef/veg only if needed; texture is best fresh. Fries should be made fresh."
+  },
+
+  "tasteProfile": {
+    "primary": ["savory", "umami", "tangy", "garlic"],
+    "heat": {
+      "typical": 1,
+      "range": [0, 3],
+      "note": "Ají amarillo is optional; keep mild or boost heat to taste."
+    },
+    "acid": ["vinegar", "lime (optional)"],
+    "aromatics": ["garlic", "red onion", "cilantro"]
+  },
+
+  "equipment": {
+    "minimum": [
+      "equipment.stovetop",
+      "equipment.large_skillet_or_wok",
+      "equipment.knife",
+      "equipment.cutting_board",
+      "equipment.mixing_bowl",
+      "equipment.tongs"
+    ],
+    "recommended": [
+      "equipment.cast_iron_skillet",
+      "equipment.wok",
+      "equipment.instant_read_thermometer",
+      "equipment.air_fryer"
+    ],
+    "optional": [
+      {
+        "id": "equipment.deep_fryer",
+        "label": "Deep fryer",
+        "notes": "Optional for traditional fries; oven or air fryer works well."
+      }
+    ]
+  },
+
+  "dietFlags": ["diet.gluten_optional"],
+  "allergens": {
+    "mayContain": ["allergen.soy"],
+    "notes": [
+      "Contains soy if using soy sauce.",
+      "For gluten-free: use tamari or certified GF soy sauce."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "ingredient.beef_sirloin",
+      "label": "Beef sirloin (or flank/strip steak), sliced into strips",
+      "role": "protein",
+      "amount": { "value": 1.5, "unit": "lb" },
+      "notes": "Slice against the grain into 1/2-inch strips. Pat dry before searing."
+    },
+    {
+      "id": "ingredient.salt_kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 1.25, "unit": "tsp" },
+      "notes": "Adjust based on soy sauce saltiness; season beef lightly, then balance sauce."
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper, freshly ground",
+      "role": "seasoning",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.cumin_ground",
+      "label": "Ground cumin",
+      "role": "spice",
+      "optional": true,
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "notes": "Optional: subtle warmth; not always used, but common in many home versions."
+    },
+
+    {
+      "id": "ingredient.oil_neutral",
+      "label": "Neutral oil (avocado/canola)",
+      "role": "fat",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "notes": "High-heat oil for searing."
+    },
+
+    {
+      "id": "ingredient.red_onion",
+      "label": "Red onion, thick wedges",
+      "role": "vegetable",
+      "amount": { "value": 1, "unit": "large" },
+      "notes": "Cut into 1/2-inch wedges; keep chunky so it stays crisp-tender."
+    },
+    {
+      "id": "ingredient.tomato",
+      "label": "Tomatoes, thick wedges",
+      "role": "vegetable",
+      "amount": { "value": 2, "unit": "medium" },
+      "notes": "Use ripe but firm tomatoes; cut into wedges. Add late to avoid turning mushy."
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic cloves, minced",
+      "role": "aromatic",
+      "amount": { "value": 4, "unit": "cloves" }
+    },
+
+    {
+      "id": "ingredient.soy_sauce",
+      "label": "Soy sauce (or tamari)",
+      "role": "umami",
+      "amount": { "value": 3, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.vinegar_red_wine",
+      "label": "Red wine vinegar (or white vinegar)",
+      "role": "acid",
+      "amount": { "value": 1.5, "unit": "tbsp" },
+      "notes": "Peruvian versions often use vinegar for the signature tang."
+    },
+    {
+      "id": "ingredient.stock_beef_or_chicken",
+      "label": "Beef or chicken stock (or water)",
+      "role": "sauce",
+      "optional": true,
+      "amount": { "value": 2, "unit": "tbsp" },
+      "notes": "Optional: helps build a glossy pan sauce and deglaze."
+    },
+    {
+      "id": "ingredient.sugar",
+      "label": "Sugar (or honey)",
+      "role": "balance",
+      "optional": true,
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": "Optional: balances vinegar sharpness; omit if you prefer tang-forward."
+    },
+
+    {
+      "id": "ingredient.aji_amarillo_paste",
+      "label": "Ají amarillo paste",
+      "role": "heat_optional",
+      "optional": true,
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": "Optional: adds Peruvian chile fruitiness. Increase to 1 tbsp for more heat."
+    },
+
+    {
+      "id": "ingredient.cilantro",
+      "label": "Cilantro, roughly chopped",
+      "role": "herb_finish",
+      "amount": { "value": 0.25, "unit": "cup" }
+    },
+
+    {
+      "id": "ingredient.french_fries",
+      "label": "French fries (fresh or frozen)",
+      "role": "side",
+      "amount": { "value": 1, "unit": "lb" },
+      "notes": "Cook separately: oven, air fryer, or deep fry. Traditional: fries tossed in briefly at the end; for crispness, serve alongside."
+    },
+
+    {
+      "id": "ingredient.rice_cooked",
+      "label": "Cooked white rice, for serving",
+      "role": "starch",
+      "optional": true,
+      "amount": { "value": 4, "unit": "cups" },
+      "notes": "Very common to serve fries + rice together in classic lomo saltado."
+    }
+  ],
+
+  "ingredientGroups": [
+    {
+      "id": "group.beef",
+      "label": "Beef",
+      "items": [
+        "ingredient.beef_sirloin",
+        "ingredient.salt_kosher",
+        "ingredient.black_pepper",
+        "ingredient.cumin_ground"
+      ]
+    },
+    {
+      "id": "group.veg_aromatics",
+      "label": "Vegetables & aromatics",
+      "items": [
+        "ingredient.red_onion",
+        "ingredient.tomato",
+        "ingredient.garlic",
+        "ingredient.cilantro"
+      ]
+    },
+    {
+      "id": "group.sauce",
+      "label": "Sauce",
+      "items": [
+        "ingredient.soy_sauce",
+        "ingredient.vinegar_red_wine",
+        "ingredient.stock_beef_or_chicken",
+        "ingredient.sugar",
+        "ingredient.aji_amarillo_paste"
+      ]
+    },
+    {
+      "id": "group.sides",
+      "label": "Sides",
+      "items": ["ingredient.french_fries", "ingredient.rice_cooked"]
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.001_cook_fries",
+      "title": "Cook the fries first (keep them crisp)",
+      "instructions": [
+        "Cook fries using your preferred method: oven, air fryer, or deep fry.",
+        "Aim for extra crisp so they hold up if you decide to toss them with the stir-fry.",
+        "Hold fries warm while you cook the beef."
+      ],
+      "timers": [
+        { "label": "Oven fries (typical)", "minutes": 20 },
+        { "label": "Air fryer fries (typical)", "minutes": 14 }
+      ],
+      "checks": [
+        "Fries are deeply golden and crisp.",
+        "Fries are held warm (not steaming in a sealed container)."
+      ]
+    },
+    {
+      "id": "step.002_prep_sauce",
+      "title": "Prep the sauce and mise en place",
+      "instructions": [
+        "In a small bowl, mix soy sauce, vinegar, optional stock (or water), optional sugar, and optional ají amarillo paste.",
+        "Cut onion and tomatoes into thick wedges; mince garlic; chop cilantro.",
+        "Pat beef strips dry and season lightly with salt and pepper (and optional cumin)."
+      ],
+      "checks": [
+        "Everything is prepped before heating the pan (stir-fry moves fast).",
+        "Beef is dry on the surface for best sear."
+      ]
+    },
+    {
+      "id": "step.003_sear_beef",
+      "title": "Sear the beef in batches (very hot pan)",
+      "instructions": [
+        "Heat a large skillet or wok over high heat until very hot.",
+        "Add 1 tbsp oil. Sear beef in a single layer (work in 2 batches if needed).",
+        "Cook 45–75 seconds per side until browned but still medium-rare inside; remove to a plate."
+      ],
+      "timers": [{ "label": "Sear per side (estimate)", "seconds": 60 }],
+      "checks": [
+        "Beef is browned on edges, not steamed.",
+        "Beef is removed promptly to avoid overcooking."
+      ]
+    },
+    {
+      "id": "step.004_stir_fry_veg",
+      "title": "Stir-fry onions and aromatics, then add tomatoes",
+      "instructions": [
+        "Reduce heat slightly to medium-high if pan is smoking excessively; keep it hot.",
+        "Add remaining 1 tbsp oil if needed.",
+        "Add onion wedges; stir-fry 1–2 minutes until edges char slightly but onions stay crisp-tender.",
+        "Add garlic and stir 15–20 seconds until fragrant.",
+        "Add tomato wedges and toss 30–45 seconds—just to warm and lightly soften, not break down."
+      ],
+      "timers": [
+        { "label": "Onion stir-fry", "minutes": 2 },
+        { "label": "Garlic bloom", "seconds": 20 },
+        { "label": "Tomato toss", "seconds": 40 }
+      ],
+      "checks": [
+        "Onions still have bite (not fully soft).",
+        "Tomatoes are warmed but hold their shape."
+      ]
+    },
+    {
+      "id": "step.005_sauce_toss_finish",
+      "title": "Deglaze with sauce, return beef, finish with cilantro",
+      "instructions": [
+        "Pour in the sauce mixture; scrape up browned bits (fond) to build flavor.",
+        "Return beef (and any juices) to the pan; toss 30–60 seconds to glaze everything.",
+        "Turn off heat; toss in most of the cilantro."
+      ],
+      "timers": [{ "label": "Final toss after adding sauce", "seconds": 45 }],
+      "checks": [
+        "Sauce lightly coats beef and vegetables (not watery).",
+        "Beef remains tender (not cooked to well-done unless you prefer)."
+      ]
+    },
+    {
+      "id": "step.006_serve_fries_rice",
+      "title": "Serve with fries and rice (two common styles)",
+      "instructions": [
+        "Classic style: pile rice on one side of the plate, lomo saltado on the other, and fries on top or alongside.",
+        "Tossed-fries style (more traditional but less crisp): add fries to the pan for 10–15 seconds and toss to coat lightly, then serve immediately.",
+        "Finish with remaining cilantro and a squeeze of lime if desired."
+      ],
+      "checks": [
+        "If tossing fries, serve immediately to avoid sogginess.",
+        "Taste and adjust: add a splash more vinegar for tang or soy for salt."
+      ]
+    }
+  ],
+
+  "pairings": {
+    "condiments": ["peruvian.aji_verde", "lime_wedges"],
+    "sides": ["white_rice", "salad.simple_lime_onion"],
+    "drinks": ["peruvian.chicha_morada", "sparkling_water_lime"]
+  },
+
+  "storage": {
+    "refrigerate": {
+      "notes": "Store beef/veg separate from fries if possible. Reheat beef/veg quickly in a hot pan.",
+      "duration": "3 days"
+    },
+    "reheat": {
+      "notes": "Reheat stir-fry in a hot skillet 2–3 minutes. Re-crisp fries in air fryer/oven."
+    }
+  },
+
+  "planner": {
+    "prepTasks": [
+      { "task": "Slice beef against the grain", "mins": 5 },
+      { "task": "Cut onion + tomatoes into wedges", "mins": 5 },
+      { "task": "Mix sauce", "mins": 2 },
+      { "task": "Cook fries", "mins": 15 }
+    ],
+    "leftoverUses": [
+      "Beef stir-fry over rice bowl with extra cilantro",
+      "Chifa-style fried rice add-in",
+      "Wraps/tacos with onion + tomato + sauce drizzle"
+    ]
+  },
+
+  "methods": [
+    "technique.stir_fry",
+    "technique.sear",
+    "technique.deglaze",
+    "technique.pan_sauce"
+  ],
+
+  "compat": {
+    "cuisineId": "cuisines.peruvian",
+    "dishId": "peruvian.lomo_saltado",
+    "search": {
+      "aliases": [
+        "lomo saltado",
+        "peruvian stir-fry beef",
+        "chifa beef stir-fry"
+      ],
+      "keywords": [
+        "soy",
+        "vinegar",
+        "red onion",
+        "tomato",
+        "fries",
+        "rice",
+        "wok",
+        "skillet"
+      ]
+    }
+  },
+
+  "notes": [
+    "Key success factor: HOT pan + small batches. Overcrowding steams the beef and vegetables.",
+    "If you want more sauce: add 1–2 tbsp stock/water and reduce briefly; keep the flavor balance soy-forward with vinegar tang.",
+    "For a deeper chifa vibe: add a tiny splash of oyster sauce (not traditional in all versions) or a pinch of MSG—optional."
+  ],
+
+  "variations": [
+    {
+      "id": "variation.chicken_saltado",
+      "label": "Pollo saltado (chicken swap)",
+      "when": { "diet": ["no_beef"] },
+      "adapt": {
+        "notes": [
+          "Use 1.5 lb boneless chicken thighs, sliced.",
+          "Sear until cooked through (165°F / 74°C), then proceed as written."
+        ]
+      }
+    },
+    {
+      "id": "variation.gluten_free",
+      "label": "Gluten-free (tamari)",
+      "when": { "diet": ["gluten_free"] },
+      "adapt": {
+        "notes": [
+          "Use tamari or certified gluten-free soy sauce. Check fries seasoning for gluten-containing additives."
+        ]
+      }
+    },
+    {
+      "id": "variation.extra_heat",
+      "label": "Spicier ají-forward",
+      "when": { "preference": ["spicy"] },
+      "adapt": {
+        "notes": [
+          "Increase ají amarillo paste to 1 tbsp.",
+          "Add thin-sliced fresh chile (jalapeño or serrano) with onions."
+        ]
+      }
+    }
+  ],
+
+  "safety": {
+    "criticalTemps": {
+      "beefServingTempNote": {
+        "value": 0,
+        "unit": "F",
+        "notes": "Beef can be served medium-rare by preference; choose safe sourcing and handling. If you prefer fully cooked, sear longer and toss longer after sauce."
+      }
+    },
+    "notes": [
+      "Use separate cutting board/knife for raw beef and vegetables or wash thoroughly between.",
+      "Cook fries safely per package directions if frozen."
+    ]
+  }
+}

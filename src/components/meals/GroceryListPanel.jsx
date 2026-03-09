@@ -1,18 +1,32 @@
 // src/components/meals/GroceryListPanel.jsx
-import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
 import { automation, emitProgress } from "@/services/automation/runtime";
 import { sabbathGuard } from "@/services/guardrails/sabbathGuard";
 import { classNames as cx } from "@/utils/css";
 import { eventBus } from "@/services/events/eventBus"; // expected simple pub/sub
-import NBAToolbar from "./NBAToolbar.jsx";             // your existing component
-import UndoToast from "./UndoToast.jsx";               // your existing component
+import NBAToolbar from "./NBAToolbar.jsx"; // your existing component
+import UndoToast from "./UndoToast.jsx"; // your existing component
 
 // Optional stores — component works even if these are not present yet.
 let usePreferencesStore, useInventoryStore, useMealPlanStore, useRecipeStore;
-try { usePreferencesStore = require("@/store/PreferencesStore").usePreferencesStore; } catch {}
-try { useInventoryStore = require("@/store/InventoryStore").useInventoryStore; } catch {}
-try { useMealPlanStore  = require("@/store/MealPlanStore").useMealPlanStore; } catch {}
-try { useRecipeStore    = require("@/store/RecipeStore").useRecipeStore; } catch {}
+try {
+  usePreferencesStore = require("@/store/PreferencesStore").usePreferencesStore;
+} catch {}
+try {
+  useInventoryStore = require("@/store/InventoryStore").useInventoryStore;
+} catch {}
+try {
+  useMealPlanStore = require("@/store/MealPlanStore").useMealPlanStore;
+} catch {}
+try {
+  useRecipeStore = require("@/store/RecipeStore").useRecipeStore;
+} catch {}
 
 /* ----------------------------------------------------------------------------
    Types & Helpers
@@ -21,7 +35,11 @@ try { useRecipeStore    = require("@/store/RecipeStore").useRecipeStore; } catch
 /** Normalize an item */
 function normItem(raw) {
   if (!raw) return null;
-  const id = raw.id || `${raw.name || "item"}-${raw.unit || "ea"}-${raw.aisle || "?"}-${Math.random().toString(36).slice(2, 7)}`;
+  const id =
+    raw.id ||
+    `${raw.name || "item"}-${raw.unit || "ea"}-${
+      raw.aisle || "?"
+    }-${Math.random().toString(36).slice(2, 7)}`;
   return {
     id,
     name: (raw.name || "").trim(),
@@ -56,22 +74,32 @@ function diffAgainstInventory(mealItems, inventory) {
     const key = `${(inv.name || "").toLowerCase()}::${inv.unit || "ea"}`;
     invMap.set(key, (invMap.get(key) || 0) + Number(inv.qty ?? 0));
   }
-  return mealItems.map((m) => {
-    const key = `${(m.name || "").toLowerCase()}::${m.unit || "ea"}`;
-    const onHand = invMap.get(key) || 0;
-    const needed = Math.max(0, Number(m.qty || 0) - onHand);
-    return normItem({
-      ...m,
-      qty: needed,
-      fromInventory: onHand > 0 && needed === 0,
-    });
-  }).filter(Boolean);
+  return mealItems
+    .map((m) => {
+      const key = `${(m.name || "").toLowerCase()}::${m.unit || "ea"}`;
+      const onHand = invMap.get(key) || 0;
+      const needed = Math.max(0, Number(m.qty || 0) - onHand);
+      return normItem({
+        ...m,
+        qty: needed,
+        fromInventory: onHand > 0 && needed === 0,
+      });
+    })
+    .filter(Boolean);
 }
 
 /** Basic category sort weight */
 const CAT_WEIGHT = {
-  Produce: 1, Meat: 2, Seafood: 3, Dairy: 4, Bakery: 5, Pantry: 6,
-  Frozen: 7, Beverages: 8, Household: 9, Other: 10,
+  Produce: 1,
+  Meat: 2,
+  Seafood: 3,
+  Dairy: 4,
+  Bakery: 5,
+  Pantry: 6,
+  Frozen: 7,
+  Beverages: 8,
+  Household: 9,
+  Other: 10,
 };
 
 /* ----------------------------------------------------------------------------
@@ -79,25 +107,37 @@ const CAT_WEIGHT = {
 ---------------------------------------------------------------------------- */
 
 export default function GroceryListPanel({
-  weekStartDate,                  // optional: anchor the active week
-  planId,                         // optional: a specific plan to pull from
-  compact = false,                // toggles denser layout
-  defaultGrouping = "category",   // "category" | "aisle" | "store" | "none"
+  weekStartDate, // optional: anchor the active week
+  planId, // optional: a specific plan to pull from
+  compact = false, // toggles denser layout
+  defaultGrouping = "category", // "category" | "aisle" | "store" | "none"
 }) {
   // Stores (fallbacks if not present)
   const prefs = usePreferencesStore?.() || {};
-  const inv   = useInventoryStore?.() || { items: [], decrementMany: () => {}, incrementMany: () => {} };
-  const meal  = useMealPlanStore?.()  || { activeWeek: null, getWeekPlan: () => null, selectedRecipes: [], planItems: [] };
-  const recipes = useRecipeStore?.()  || { getByIds: () => [], findIngredientsForPlan: () => [] };
+  const inv = useInventoryStore?.() || {
+    items: [],
+    decrementMany: () => {},
+    incrementMany: () => {},
+  };
+  const meal = useMealPlanStore?.() || {
+    activeWeek: null,
+    getWeekPlan: () => null,
+    selectedRecipes: [],
+    planItems: [],
+  };
+  const recipes = useRecipeStore?.() || {
+    getByIds: () => [],
+    findIngredientsForPlan: () => [],
+  };
 
   const [groupBy, setGroupBy] = useState(defaultGrouping);
-  const [filter, setFilter]   = useState("");
+  const [filter, setFilter] = useState("");
   const [storeFilter, setStoreFilter] = useState("Any");
   const [showOnlyNeeded, setShowOnlyNeeded] = useState(true); // hide fully covered by inventory
-  const [list, setList] = useState([]);          // canonical grocery list
+  const [list, setList] = useState([]); // canonical grocery list
   const [selected, setSelected] = useState(new Set()); // selected item ids
   const [busy, setBusy] = useState(false);
-  const [toast, setToast] = useState(null);      // { message, actionLabel, onUndo }
+  const [toast, setToast] = useState(null); // { message, actionLabel, onUndo }
 
   const lastActionRef = useRef(null); // for undo payloads
 
@@ -110,9 +150,10 @@ export default function GroceryListPanel({
       ? meal.getWeekPlan?.(planId) || meal.activeWeek || {}
       : meal.activeWeek || {};
 
-    const planItems = Array.isArray(meal.planItems) && meal.planItems.length
-      ? meal.planItems
-      : deriveFromRecipes(meal.selectedRecipes, recipes);
+    const planItems =
+      Array.isArray(meal.planItems) && meal.planItems.length
+        ? meal.planItems
+        : deriveFromRecipes(meal.selectedRecipes, recipes);
 
     // Normalize and merge like items
     return mergeLike(planItems.map(normItem).filter(Boolean));
@@ -121,19 +162,31 @@ export default function GroceryListPanel({
   /* --------------------------------------------
      Inventory-aware “needed” computation
   -------------------------------------------- */
-  const inventoryItems = useMemo(() => (inv.items || []).map((i) => ({
-    name: i.name, qty: Number(i.qty ?? 0), unit: i.unit || "ea", category: i.category || "Other",
-  })), [inv.items]);
+  const inventoryItems = useMemo(
+    () =>
+      (inv.items || []).map((i) => ({
+        name: i.name,
+        qty: Number(i.qty ?? 0),
+        unit: i.unit || "ea",
+        category: i.category || "Other",
+      })),
+    [inv.items]
+  );
 
   const neededList = useMemo(() => {
     const diff = diffAgainstInventory(requiredItems, inventoryItems);
-    const filtered = showOnlyNeeded ? diff.filter((d) => (d.qty || 0) > 0) : diff;
+    const filtered = showOnlyNeeded
+      ? diff.filter((d) => (d.qty || 0) > 0)
+      : diff;
     const afterFilter = filter
-      ? filtered.filter((i) => i.name.toLowerCase().includes(filter.toLowerCase()))
+      ? filtered.filter((i) =>
+          i.name.toLowerCase().includes(filter.toLowerCase())
+        )
       : filtered;
-    const afterStore = storeFilter && storeFilter !== "Any"
-      ? afterFilter.filter((i) => (i.store || "Any") === storeFilter)
-      : afterFilter;
+    const afterStore =
+      storeFilter && storeFilter !== "Any"
+        ? afterFilter.filter((i) => (i.store || "Any") === storeFilter)
+        : afterFilter;
     return mergeLike(afterStore);
   }, [requiredItems, inventoryItems, filter, showOnlyNeeded, storeFilter]);
 
@@ -150,10 +203,20 @@ export default function GroceryListPanel({
      Event glue: respond to plan/inventory changes
   -------------------------------------------- */
   useEffect(() => {
-    const offA = eventBus?.on?.("mealPlan.updated", () => refresh("mealPlan.updated"));
-    const offB = eventBus?.on?.("inventory.updated", () => refresh("inventory.updated"));
-    const offC = eventBus?.on?.("preferences.changed", () => refresh("preferences.changed"));
-    return () => { offA?.(); offB?.(); offC?.(); };
+    const offA = eventBus?.on?.("mealPlan.updated", () =>
+      refresh("mealPlan.updated")
+    );
+    const offB = eventBus?.on?.("inventory.updated", () =>
+      refresh("inventory.updated")
+    );
+    const offC = eventBus?.on?.("preferences.changed", () =>
+      refresh("preferences.changed")
+    );
+    return () => {
+      offA?.();
+      offB?.();
+      offC?.();
+    };
   }, []);
 
   const refresh = useCallback((reason) => {
@@ -172,27 +235,37 @@ export default function GroceryListPanel({
     const groups = new Map();
     for (const it of list) {
       const key =
-        groupBy === "category" ? (it.category || "Other") :
-        groupBy === "aisle"    ? (it.aisle || "Unassigned") :
-        groupBy === "store"    ? (it.store || "Any") :
-        "All";
+        groupBy === "category"
+          ? it.category || "Other"
+          : groupBy === "aisle"
+          ? it.aisle || "Unassigned"
+          : groupBy === "store"
+          ? it.store || "Any"
+          : "All";
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key).push(it);
     }
-    return Array.from(groups.entries()).sort((a, b) => {
-      if (groupBy === "category") return (CAT_WEIGHT[a[0]] || 99) - (CAT_WEIGHT[b[0]] || 99);
-      return a[0].localeCompare(b[0]);
-    }).map(([title, items]) => ({ title, items: sortItems(items, groupBy) }));
+    return Array.from(groups.entries())
+      .sort((a, b) => {
+        if (groupBy === "category")
+          return (CAT_WEIGHT[a[0]] || 99) - (CAT_WEIGHT[b[0]] || 99);
+        return a[0].localeCompare(b[0]);
+      })
+      .map(([title, items]) => ({ title, items: sortItems(items, groupBy) }));
   }, [list, groupBy]);
 
   function sortItems(items, mode) {
     const byName = (a, b) => a.name.localeCompare(b.name);
-    const byCat  = (a, b) => (CAT_WEIGHT[a.category] || 99) - (CAT_WEIGHT[b.category] || 99) || byName(a, b);
-    const byAisle= (a, b) => (a.aisle || "z").localeCompare(b.aisle || "z") || byName(a, b);
-    const byStore= (a, b) => (a.store || "Any").localeCompare(b.store || "Any") || byName(a, b);
+    const byCat = (a, b) =>
+      (CAT_WEIGHT[a.category] || 99) - (CAT_WEIGHT[b.category] || 99) ||
+      byName(a, b);
+    const byAisle = (a, b) =>
+      (a.aisle || "z").localeCompare(b.aisle || "z") || byName(a, b);
+    const byStore = (a, b) =>
+      (a.store || "Any").localeCompare(b.store || "Any") || byName(a, b);
     if (mode === "category") return [...items].sort(byCat);
-    if (mode === "aisle")    return [...items].sort(byAisle);
-    if (mode === "store")    return [...items].sort(byStore);
+    if (mode === "aisle") return [...items].sort(byAisle);
+    if (mode === "store") return [...items].sort(byStore);
     return [...items].sort(byName);
   }
 
@@ -200,21 +273,33 @@ export default function GroceryListPanel({
      Editing
   -------------------------------------------- */
   const updateItem = useCallback((id, patch) => {
-    setList((prev) => prev.map((it) => (it.id === id ? { ...it, ...patch } : it)));
+    setList((prev) =>
+      prev.map((it) => (it.id === id ? { ...it, ...patch } : it))
+    );
   }, []);
-  const removeItem = useCallback((id) => {
-    const prev = list.find((i) => i.id === id);
-    setList((prevList) => prevList.filter((i) => i.id !== id));
-    // enable undo
-    setToast({
-      message: `Removed “${prev?.name || "item"}”`,
-      actionLabel: "Undo",
-      onUndo: () => setList((curr) => [...curr, prev].sort((a, b) => a.name.localeCompare(b.name))),
-    });
-  }, [list]);
+  const removeItem = useCallback(
+    (id) => {
+      const prev = list.find((i) => i.id === id);
+      setList((prevList) => prevList.filter((i) => i.id !== id));
+      // enable undo
+      setToast({
+        message: `Removed “${prev?.name || "item"}”`,
+        actionLabel: "Undo",
+        onUndo: () =>
+          setList((curr) =>
+            [...curr, prev].sort((a, b) => a.name.localeCompare(b.name))
+          ),
+      });
+    },
+    [list]
+  );
 
   const togglePurchased = useCallback((id) => {
-    setList((prev) => prev.map((it) => (it.id === id ? { ...it, purchased: !it.purchased } : it)));
+    setList((prev) =>
+      prev.map((it) =>
+        it.id === id ? { ...it, purchased: !it.purchased } : it
+      )
+    );
   }, []);
 
   /* --------------------------------------------
@@ -234,7 +319,9 @@ export default function GroceryListPanel({
 
   const markSelectedPurchased = () => {
     const ids = new Set(selected);
-    setList((prev) => prev.map((it) => (ids.has(it.id) ? { ...it, purchased: true } : it)));
+    setList((prev) =>
+      prev.map((it) => (ids.has(it.id) ? { ...it, purchased: true } : it))
+    );
     setToast({ message: `Marked ${ids.size} item(s) as purchased` });
     clearSelection();
   };
@@ -258,9 +345,13 @@ export default function GroceryListPanel({
     setBusy(true);
     const fn = async () => {
       // decrementMany expects [{name, qty, unit}]
-      await inv.decrementMany?.(purchased.map((i) => ({ name: i.name, qty: i.qty, unit: i.unit })));
+      await inv.decrementMany?.(
+        purchased.map((i) => ({ name: i.name, qty: i.qty, unit: i.unit }))
+      );
       emitProgress?.("inventory.decrementMany", { count: purchased.length });
-      setToast({ message: `Committed ${purchased.length} item(s) to inventory` });
+      setToast({
+        message: `Committed ${purchased.length} item(s) to inventory`,
+      });
       eventBus?.emit?.("inventory.updated", { reason: "purchases.committed" });
     };
     await sabbathGuard(fn)();
@@ -347,22 +438,30 @@ export default function GroceryListPanel({
   const empty = !list.length;
 
   return (
-    <div className={cx(
-      "rounded-2xl border border-base-200 bg-base-100 shadow-md",
-      compact ? "p-3" : "p-5"
-    )}>
+    <div
+      className={cx(
+        "rounded-2xl border border-base-200 bg-base-100 shadow-md",
+        compact ? "p-3" : "p-5"
+      )}
+    >
       <div className="flex items-start justify-between gap-3 mb-4">
         <div>
           <h2 className="text-xl font-semibold leading-tight">Grocery List</h2>
           <p className="text-sm text-base-content/70">
-            Built from your meal plan and inventory. Edit, group, export, or send to your phone.
+            Built from your meal plan and inventory. Edit, group, export, or
+            send to your phone.
           </p>
         </div>
         <NBAToolbar actions={nbaActions} />
       </div>
 
       {/* Controls */}
-      <div className={cx("flex flex-wrap items-center gap-2 mb-4", compact && "text-sm")}>
+      <div
+        className={cx(
+          "flex flex-wrap items-center gap-2 mb-4",
+          compact && "text-sm"
+        )}
+      >
         <input
           type="text"
           placeholder="Filter items…"
@@ -387,7 +486,11 @@ export default function GroceryListPanel({
           className="select select-sm md:select-md select-bordered"
           title="Filter by store"
         >
-          {stores.map((s) => <option key={s} value={s}>{s}</option>)}
+          {stores.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
         </select>
         <label className="flex items-center gap-2 cursor-pointer">
           <input
@@ -400,8 +503,12 @@ export default function GroceryListPanel({
         </label>
 
         <div className="ml-auto flex items-center gap-2">
-          <button className="btn btn-ghost btn-sm" onClick={selectAll}>Select All</button>
-          <button className="btn btn-ghost btn-sm" onClick={clearSelection}>Clear</button>
+          <button className="btn btn-ghost btn-sm" onClick={selectAll}>
+            Select All
+          </button>
+          <button className="btn btn-ghost btn-sm" onClick={clearSelection}>
+            Clear
+          </button>
           <div className="divider divider-horizontal" />
           <button
             className="btn btn-outline btn-sm"
@@ -421,9 +528,7 @@ export default function GroceryListPanel({
       </div>
 
       {/* Empty State */}
-      {empty && (
-        <EmptyState onGenerate={() => refresh("empty.generate")} />
-      )}
+      {empty && <EmptyState onGenerate={() => refresh("empty.generate")} />}
 
       {/* Groups */}
       {!empty && (
@@ -451,16 +556,29 @@ export default function GroceryListPanel({
       {/* Footer Actions */}
       <div className="mt-6 flex flex-wrap items-center justify-between gap-2">
         <div className="text-sm text-base-content/70">
-          {list.length} item{list.length !== 1 ? "s" : ""} • {Array.from(selected).length} selected
+          {list.length} item{list.length !== 1 ? "s" : ""} •{" "}
+          {Array.from(selected).length} selected
         </div>
         <div className="flex items-center gap-2">
-          <button className="btn btn-outline btn-sm" onClick={exportPDF} disabled={!list.length || busy}>
+          <button
+            className="btn btn-outline btn-sm"
+            onClick={exportPDF}
+            disabled={!list.length || busy}
+          >
             Export PDF
           </button>
-          <button className="btn btn-outline btn-sm" onClick={sendToEmail} disabled={!list.length || busy}>
+          <button
+            className="btn btn-outline btn-sm"
+            onClick={sendToEmail}
+            disabled={!list.length || busy}
+          >
             Send Email
           </button>
-          <button className="btn btn-primary btn-sm" onClick={sendToSMS} disabled={!list.length || busy}>
+          <button
+            className="btn btn-primary btn-sm"
+            onClick={sendToSMS}
+            disabled={!list.length || busy}
+          >
             Send to Mobile
           </button>
         </div>
@@ -471,7 +589,10 @@ export default function GroceryListPanel({
         <UndoToast
           message={toast.message}
           actionLabel={toast.actionLabel}
-          onAction={() => { toast.onUndo?.(); setToast(null); }}
+          onAction={() => {
+            toast.onUndo?.();
+            setToast(null);
+          }}
           onClose={() => setToast(null)}
         />
       )}
@@ -483,11 +604,20 @@ export default function GroceryListPanel({
    Subcomponents
 ---------------------------------------------------------------------------- */
 
-function ItemRow({ item, selected, onToggleSelect, onChange, onRemove, onTogglePurchased }) {
+function ItemRow({
+  item,
+  selected,
+  onToggleSelect,
+  onChange,
+  onRemove,
+  onTogglePurchased,
+}) {
   const [editing, setEditing] = useState(false);
   const [temp, setTemp] = useState(item);
 
-  useEffect(() => { setTemp(item); }, [item]);
+  useEffect(() => {
+    setTemp(item);
+  }, [item]);
 
   const commit = () => {
     onChange(item.id, {
@@ -503,18 +633,28 @@ function ItemRow({ item, selected, onToggleSelect, onChange, onRemove, onToggleP
   };
 
   return (
-    <div className={cx(
-      "rounded-xl border border-base-200 p-3 hover:border-base-300 transition bg-base-100/60",
-      selected && "ring-2 ring-primary/40"
-    )}>
+    <div
+      className={cx(
+        "rounded-xl border border-base-200 p-3 hover:border-base-300 transition bg-base-100/60",
+        selected && "ring-2 ring-primary/40"
+      )}
+    >
       <div className="flex items-start gap-3">
-        <input type="checkbox" className="checkbox checkbox-sm mt-1" checked={selected} onChange={onToggleSelect} />
+        <input
+          type="checkbox"
+          className="checkbox checkbox-sm mt-1"
+          checked={selected}
+          onChange={onToggleSelect}
+        />
         <div className="flex-1">
           <div className="flex items-center justify-between gap-2">
             {!editing ? (
               <div className="flex items-center gap-2">
                 <button
-                  className={cx("btn btn-xs", item.purchased ? "btn-success" : "btn-outline")}
+                  className={cx(
+                    "btn btn-xs",
+                    item.purchased ? "btn-success" : "btn-outline"
+                  )}
                   onClick={() => onTogglePurchased(item.id)}
                   title={item.purchased ? "Purchased" : "Mark as purchased"}
                 >
@@ -522,7 +662,9 @@ function ItemRow({ item, selected, onToggleSelect, onChange, onRemove, onToggleP
                 </button>
                 <div className="font-medium">
                   {item.name}
-                  <span className="ml-1 text-sm text-base-content/70">• {item.qty} {item.unit}</span>
+                  <span className="ml-1 text-sm text-base-content/70">
+                    • {item.qty} {item.unit}
+                  </span>
                 </div>
               </div>
             ) : (
@@ -550,15 +692,37 @@ function ItemRow({ item, selected, onToggleSelect, onChange, onRemove, onToggleP
               {!editing ? (
                 <>
                   {item.fromInventory && (
-                    <span className="badge badge-soft">Covered by Inventory</span>
+                    <span className="badge badge-soft">
+                      Covered by Inventory
+                    </span>
                   )}
-                  <button className="btn btn-ghost btn-xs" onClick={() => setEditing(true)}>Edit</button>
-                  <button className="btn btn-ghost btn-xs text-error" onClick={() => onRemove(item.id)}>Remove</button>
+                  <button
+                    className="btn btn-ghost btn-xs"
+                    onClick={() => setEditing(true)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="btn btn-ghost btn-xs text-error"
+                    onClick={() => onRemove(item.id)}
+                  >
+                    Remove
+                  </button>
                 </>
               ) : (
                 <>
-                  <button className="btn btn-primary btn-xs" onClick={commit}>Save</button>
-                  <button className="btn btn-ghost btn-xs" onClick={() => { setTemp(item); setEditing(false); }}>Cancel</button>
+                  <button className="btn btn-primary btn-xs" onClick={commit}>
+                    Save
+                  </button>
+                  <button
+                    className="btn btn-ghost btn-xs"
+                    onClick={() => {
+                      setTemp(item);
+                      setEditing(false);
+                    }}
+                  >
+                    Cancel
+                  </button>
                 </>
               )}
             </div>
@@ -571,11 +735,26 @@ function ItemRow({ item, selected, onToggleSelect, onChange, onRemove, onToggleP
                 <select
                   className="select select-sm select-bordered"
                   value={temp.category}
-                  onChange={(e) => setTemp({ ...temp, category: e.target.value })}
+                  onChange={(e) =>
+                    setTemp({ ...temp, category: e.target.value })
+                  }
                 >
-                  {["Produce","Meat","Seafood","Dairy","Bakery","Pantry","Frozen","Beverages","Household","Other"].map(c =>
-                    <option key={c} value={c}>{c}</option>
-                  )}
+                  {[
+                    "Produce",
+                    "Meat",
+                    "Seafood",
+                    "Dairy",
+                    "Bakery",
+                    "Pantry",
+                    "Frozen",
+                    "Beverages",
+                    "Household",
+                    "Other",
+                  ].map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
                 </select>
                 <input
                   className="input input-sm input-bordered"
@@ -636,11 +815,19 @@ function EmptyState({ onGenerate }) {
     <div className="rounded-xl border border-dashed border-base-300 p-8 text-center bg-base-100">
       <div className="text-lg font-semibold">No items yet</div>
       <p className="text-sm text-base-content/70 mt-1">
-        Generate a list from your meal plan, or add items manually in the planner.
+        Generate a list from your meal plan, or add items manually in the
+        planner.
       </p>
       <div className="mt-4 flex items-center justify-center gap-2">
-        <button className="btn btn-primary btn-sm" onClick={onGenerate}>Auto-Generate</button>
-        <button className="btn btn-outline btn-sm" onClick={() => { /* optional: open RecipePickerDrawer */ }}>
+        <button className="btn btn-primary btn-sm" onClick={onGenerate}>
+          Auto-Generate
+        </button>
+        <button
+          className="btn btn-outline btn-sm"
+          onClick={() => {
+            /* optional: open RecipePickerDrawer */
+          }}
+        >
           Add from Recipes
         </button>
       </div>
@@ -653,7 +840,12 @@ function EmptyState({ onGenerate }) {
 ---------------------------------------------------------------------------- */
 
 function deriveFromRecipes(selectedRecipes, recipesStore) {
-  if (!Array.isArray(selectedRecipes) || !selectedRecipes.length || !recipesStore?.getByIds) return [];
+  if (
+    !Array.isArray(selectedRecipes) ||
+    !selectedRecipes.length ||
+    !recipesStore?.getByIds
+  )
+    return [];
   const recs = recipesStore.getByIds(selectedRecipes);
   const flat = [];
   for (const r of recs) {

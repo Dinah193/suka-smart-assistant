@@ -1,0 +1,1139 @@
+{
+  "$schema": "../../../schemas/cuisine.profile.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:40:00Z",
+
+  "meta": {
+    "id": "cuisines.italian",
+    "type": "cuisine_profile",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Italian",
+    "name": "Italian",
+    "shortName": "Italian",
+    "subtitle": "Olive oil, garlic, herbs, tomatoes, cheeses, and simple technique-forward cooking",
+    "description": "Italian cuisine in SSA focuses on strong fundamentals: good olive oil, garlic, onions, tomatoes, herbs, cheese, and simple but precise technique. The planner emphasizes weeknight-friendly pasta, sheet-pan proteins, quick sauces, soups, and make-ahead components like marinara, meatballs, and braises that remix well.",
+    "originRegions": ["Italy"],
+    "regions": [
+      "North Italy",
+      "Central Italy",
+      "South Italy",
+      "Sicily",
+      "Sardinia"
+    ],
+    "primaryCountriesAndIslands": ["Italy", "Sicily", "Sardinia"],
+    "tags": [
+      "cuisine.italian",
+      "profile.classic",
+      "olive_oil.forward",
+      "tomato.forward",
+      "herb.forward",
+      "pasta.friendly",
+      "weeknight.friendly",
+      "batch.friendly"
+    ],
+    "status": "canonical",
+    "author": "ssa-core",
+    "createdAt": "2026-01-23",
+    "updatedAt": "2026-01-23T00:40:00Z",
+    "source": {
+      "curation": "SSA canonical profile",
+      "maintainer": "ssa-core",
+      "license": "internal",
+      "attribution": "General Italian culinary canon; profile is an abstraction for deterministic planning.",
+      "kind": "catalog",
+      "author": "ssa-core",
+      "origin": "canonical",
+      "type": "cuisine_profile",
+      "notes": "Designed for deterministic meal planning, substitutions, and pantry tiering."
+    },
+    "family": {
+      "parent": "cuisines.mediterranean",
+      "siblings": ["cuisines.greek", "cuisines.levantine", "cuisines.french"],
+      "overlapsWith": [
+        {
+          "id": "cuisines.mediterranean",
+          "reason": "Shared fats (olive oil), aromatics, vegetables, and lemon/herb finishes."
+        },
+        {
+          "id": "cuisines.french",
+          "reason": "Shared technique discipline and sauces; overlaps in braises and stocks."
+        }
+      ]
+    },
+    "subprofiles": [
+      {
+        "id": "cuisines.italian.subprofile.northern",
+        "name": "Northern Italian",
+        "signatureNotes": "Butter, cream, polenta/risotto, mushrooms, delicate herbs; less tomato dominance.",
+        "commonSauceBases": [
+          "sauce.butter_sage",
+          "sauce.cream_parmesan",
+          "sauce.ragu_northern"
+        ]
+      },
+      {
+        "id": "cuisines.italian.subprofile.central",
+        "name": "Central Italian",
+        "signatureNotes": "Roman pastas, pecorino, pepper, guanciale/pancetta; rustic roasts and legumes.",
+        "commonSauceBases": [
+          "sauce.cacio_e_pepe",
+          "sauce.amatrice_style",
+          "sauce.carbonara_style"
+        ]
+      },
+      {
+        "id": "cuisines.italian.subprofile.southern",
+        "name": "Southern Italian",
+        "signatureNotes": "Tomato, garlic, olive oil, chili, seafood; bright herbs; simple high-impact sauces.",
+        "commonSauceBases": [
+          "sauce.marinara",
+          "sauce.arrabbiata",
+          "sauce.puttanesca_style"
+        ]
+      },
+      {
+        "id": "cuisines.italian.subprofile.sicilian",
+        "name": "Sicilian",
+        "signatureNotes": "Sweet-sour notes, capers/olives, citrus, seafood; pine nuts/raisins appear in some dishes.",
+        "commonSauceBases": [
+          "sauce.sicilian_agrodolce",
+          "sauce.caper_olive_tomato",
+          "sauce.citrus_herb"
+        ]
+      }
+    ],
+    "regionHints": ["Mediterranean", "Southern Europe"],
+    "countryHints": ["Italy"]
+  },
+
+  "notes": [
+    "Use ingredient IDs that already exist in SSA ingredient catalogs; these are common canonical ids used across cuisine profiles.",
+    "This profile supports deterministic weeknight planning: pasta + sauce + protein + veg, soups, sheet pan meals, and braises.",
+    "Cheese is treated as a flavor-builder/umami component; the planner can swap cheeses by role (hard aged vs fresh)."
+  ],
+
+  "plannerDefaults": {
+    "servingStyles": [
+      "plates",
+      "family_style",
+      "bowls",
+      "one_pot",
+      "plated_meals"
+    ],
+    "weeknightBias": "high",
+    "leftoversStrategy": "batch_and_remix",
+    "batchCookingBias": {
+      "level": "high",
+      "bestBatches": [
+        "component.marinara",
+        "component.ragu",
+        "component.meatballs",
+        "component.roasted_vegetables",
+        "component.beans_braised",
+        "component.brodo_stock"
+      ],
+      "notes": "Italian meal planning benefits heavily from a few make-ahead components that remix well."
+    },
+    "spiceHeatDefault": "low",
+    "saltinessDefault": "medium",
+    "sournessDefault": "low",
+    "sweetnessDefault": "low",
+    "umamiDefault": "high",
+    "oilUseDefault": "medium",
+    "preferredCookingFats": ["fat.olive_oil", "fat.butter"],
+    "primaryStarches": [
+      "starch.pasta",
+      "starch.rice_risotto",
+      "starch.bread",
+      "starch.polenta"
+    ],
+    "primaryProteins": [
+      "protein.chicken",
+      "protein.beef",
+      "protein.pork",
+      "protein.sausage",
+      "protein.fish",
+      "protein.shrimp",
+      "protein.beans"
+    ],
+    "defaultMealArchetypes": [
+      "archetype.pasta_sauce_protein",
+      "archetype.sheet_pan_protein_veg",
+      "archetype.soup_bread",
+      "archetype.salad_plus_protein",
+      "archetype.braise_plus_starch"
+    ],
+    "defaultPlateTemplateIds": [
+      "plate.italian.pasta_plate",
+      "plate.italian.protein_veg_starch"
+    ]
+  },
+
+  "flavorSystem": {
+    "signatureNotes": [
+      "Olive oil + garlic + herbs",
+      "Tomato + basil/oregano",
+      "Parmesan/pecorino umami",
+      "Lemon + herb finish (where appropriate)",
+      "Pepper-forward Roman pasta style"
+    ],
+    "aromaticsCore": [
+      "aromatic.garlic",
+      "aromatic.onion",
+      "aromatic.shallot",
+      "aromatic.celery",
+      "aromatic.carrot"
+    ],
+    "spiceCore": ["spice.black_pepper", "spice.red_pepper_flakes"],
+    "umamiBuilders": [
+      "umami.parmesan",
+      "umami.pecorino",
+      "umami.tomato_paste",
+      "umami.anchovy",
+      "umami.mushrooms",
+      "umami.pancetta"
+    ],
+    "acidOptions": [
+      "acid.lemon",
+      "acid.red_wine_vinegar",
+      "acid.balsamic_vinegar",
+      "acid.white_wine"
+    ],
+    "sweetBalanceOptions": [
+      "sweetener.sugar",
+      "sweetener.honey",
+      "sweetener.caramelized_onion"
+    ],
+    "heatOptions": ["spice.red_pepper_flakes", "spice.chili_pepper"]
+  },
+
+  "pantryTiers": {
+    "tier0_minimum": {
+      "description": "Minimum viable Italian weeknight cooking",
+      "items": [
+        "fat.olive_oil",
+        "aromatic.garlic",
+        "aromatic.onion",
+        "spice.black_pepper",
+        "seasoning.salt",
+        "canned.crushed_tomatoes",
+        "tomato.tomato_paste",
+        "herb.dried_oregano",
+        "herb.dried_basil",
+        "starch.pasta",
+        "cheese.parmesan",
+        "acid.red_wine_vinegar"
+      ]
+    },
+    "tier1_core": {
+      "description": "Core pantry to unlock most classics",
+      "items": [
+        "fat.butter",
+        "herb.fresh_basil",
+        "herb.fresh_parsley",
+        "herb.fresh_rosemary",
+        "herb.fresh_thyme",
+        "spice.red_pepper_flakes",
+        "acid.lemon",
+        "wine.white_wine",
+        "wine.red_wine",
+        "stock.chicken_stock",
+        "stock.vegetable_stock",
+        "canned.beans_cannellini",
+        "canned.tuna",
+        "olive.green_olives",
+        "caper.capers",
+        "cheese.pecorino",
+        "bread.breadcrumbs"
+      ]
+    },
+    "tier2_traditional": {
+      "description": "Traditional depth and regional capability",
+      "items": [
+        "cured.pancetta",
+        "cured.prosciutto",
+        "cured.salami",
+        "umami.anchovy",
+        "tomato.sun_dried_tomato",
+        "nut.pine_nuts",
+        "cheese.mozzarella",
+        "cheese.ricotta",
+        "cheese.mascarpone",
+        "grain.arborio_rice",
+        "grain.polenta",
+        "flour.all_purpose_flour",
+        "yeast.active_dry_yeast",
+        "vinegar.balsamic_vinegar",
+        "pepper.black_peppercorns"
+      ]
+    },
+    "tier3_specialty": {
+      "description": "Specialty items for higher fidelity / advanced dishes",
+      "items": [
+        "cheese.grana_padano",
+        "cheese.gorgonzola",
+        "cheese.taleggio",
+        "cheese.burrata",
+        "meat.guanciale",
+        "fish.bottarga",
+        "pasta.00_flour",
+        "pasta.semola_rimacinata",
+        "tomato.san_marzano",
+        "oil.truffle_oil",
+        "vinegar.aged_balsamic",
+        "herb.sage"
+      ]
+    }
+  },
+
+  "techniquesEmphasis": {
+    "primary": [
+      "technique.saute",
+      "technique.simmer",
+      "technique.emulsify_pasta_water",
+      "technique.roast",
+      "technique.braise",
+      "technique.reduce_sauce"
+    ],
+    "common": [
+      "technique.mise_en_place",
+      "technique.deglaze",
+      "technique.finish_with_fat",
+      "technique.finish_with_herbs",
+      "technique.season_in_layers"
+    ],
+    "notes": [
+      "Italian success often depends on timing and emulsification (pasta water + fat + cheese).",
+      "Build sauces with gentle simmering and finish with fresh herbs and/or cheese."
+    ]
+  },
+
+  "dishArchetypes": [
+    {
+      "id": "archetype.pasta_sauce_protein",
+      "label": "Pasta + Sauce + Protein",
+      "description": "A structured weeknight pattern: pasta base + quick sauce + optional protein + veg/salad.",
+      "commonExamples": [
+        "Spaghetti marinara + meatballs",
+        "Pasta al limone + chicken",
+        "Penne arrabbiata + sausage"
+      ],
+      "defaults": {
+        "starchOptions": ["starch.pasta"],
+        "proteinOptions": [
+          "protein.chicken",
+          "protein.sausage",
+          "protein.shrimp",
+          "protein.beans"
+        ],
+        "vegOptions": [
+          "veg.zucchini",
+          "veg.broccoli",
+          "veg.spinach",
+          "veg.mushrooms"
+        ],
+        "sideOptions": ["side.salad_green", "side.garlic_bread"],
+        "sauceOptions": [
+          "sauce.marinara",
+          "sauce.alfredo_style",
+          "sauce.garlic_olive_oil",
+          "sauce.pesto"
+        ],
+        "garnishOptions": [
+          "garnish.parmesan",
+          "garnish.parsley",
+          "garnish.basil",
+          "garnish.lemon_zest"
+        ]
+      }
+    },
+    {
+      "id": "archetype.sheet_pan_protein_veg",
+      "label": "Sheet Pan Protein + Vegetables",
+      "description": "High-heat roast protein and vegetables; finish with lemon, herbs, and olive oil.",
+      "commonExamples": [
+        "Chicken thighs + broccoli",
+        "Sausage + peppers + onions",
+        "Salmon + asparagus"
+      ],
+      "defaults": {
+        "proteinOptions": [
+          "protein.chicken",
+          "protein.sausage",
+          "protein.fish"
+        ],
+        "vegOptions": [
+          "veg.broccoli",
+          "veg.peppers",
+          "veg.onion",
+          "veg.zucchini",
+          "veg.asparagus"
+        ],
+        "starchOptions": ["starch.bread", "starch.potatoes", "starch.polenta"],
+        "garnishOptions": [
+          "garnish.parsley",
+          "garnish.lemon",
+          "garnish.parmesan"
+        ]
+      }
+    },
+    {
+      "id": "archetype.soup_bread",
+      "label": "Soup + Bread",
+      "description": "Comfort pattern: soup (tomato, bean, chicken) paired with crusty bread and salad.",
+      "commonExamples": [
+        "Minestrone",
+        "Pasta e fagioli",
+        "Chicken soup (brodo)"
+      ],
+      "defaults": {
+        "stew_baseOptions": [
+          "dish.minestrone",
+          "dish.pasta_e_fagioli",
+          "dish.tomato_soup_italian"
+        ],
+        "sideOptions": ["side.crusty_bread", "side.salad_green"],
+        "garnishOptions": [
+          "garnish.parmesan",
+          "garnish.olive_oil",
+          "garnish.parsley"
+        ]
+      }
+    },
+    {
+      "id": "archetype.braise_plus_starch",
+      "label": "Braise + Starch",
+      "description": "Slow-cooked meat or beans with a starch (polenta, pasta, bread).",
+      "commonExamples": [
+        "Short rib ragù",
+        "Sausage and peppers braise",
+        "Braised white beans"
+      ],
+      "defaults": {
+        "proteinOptions": ["protein.beef", "protein.pork", "protein.beans"],
+        "starchOptions": ["starch.polenta", "starch.pasta", "starch.bread"],
+        "vegOptions": ["veg.carrot", "veg.celery", "veg.onion", "veg.greens"],
+        "sauceOptions": ["sauce.ragu", "sauce.tomato_braise"]
+      }
+    }
+  ],
+
+  "ingredientPreferences": {
+    "preferred": [
+      "fat.olive_oil",
+      "aromatic.garlic",
+      "aromatic.onion",
+      "tomato.crushed_tomatoes",
+      "tomato.tomato_paste",
+      "herb.basil",
+      "herb.oregano",
+      "herb.parsley",
+      "herb.rosemary",
+      "herb.thyme",
+      "cheese.parmesan",
+      "cheese.pecorino",
+      "grain.pasta",
+      "grain.arborio_rice",
+      "grain.polenta",
+      "protein.chicken",
+      "protein.beef",
+      "protein.pork",
+      "protein.sausage",
+      "protein.fish",
+      "protein.shrimp",
+      "protein.beans"
+    ],
+    "optional_traditional": [
+      "umami.anchovy",
+      "olive.olives",
+      "caper.capers",
+      "cured.pancetta",
+      "cured.prosciutto",
+      "nut.pine_nuts",
+      "cheese.ricotta",
+      "cheese.mozzarella"
+    ],
+    "avoid_or_limit": [
+      {
+        "id": "ingredient.excess_sugar",
+        "label": "Excess sugar in sauces",
+        "reason": "Italian sauces typically rely on tomato quality and slow simmering; use sugar only as a small balance tool when needed."
+      },
+      {
+        "id": "ingredient.heavy_smoke_flavors",
+        "label": "Heavy smoke flavors",
+        "reason": "Not typical across most Italian patterns; keep smoke notes subtle unless explicitly regional/intentional."
+      }
+    ]
+  },
+
+  "substitutionGuidance": {
+    "proteinSubstitutions": [
+      {
+        "for": "protein.chicken",
+        "options": ["protein.turkey", "protein.pork", "protein.beans"],
+        "notes": "Swap by cooking method: roast/saute works for turkey/pork; beans for meatless."
+      },
+      {
+        "for": "protein.sausage",
+        "options": [
+          "protein.ground_pork",
+          "protein.ground_turkey",
+          "protein.beans"
+        ],
+        "notes": "For sausage flavor without sausage: add fennel + garlic + paprika + salt."
+      },
+      {
+        "for": "protein.beef",
+        "options": ["protein.pork", "protein.lamb"],
+        "notes": "Ragù/braises can flex; adjust simmer time to cut."
+      }
+    ],
+    "sideSubstitutions": [
+      {
+        "for": "side.crusty_bread",
+        "options": [
+          "side.garlic_bread",
+          "side.polenta",
+          "side.roasted_potatoes"
+        ],
+        "notes": "Choose by sauce: bread for dipping; polenta for ragù; potatoes for roasts."
+      }
+    ],
+    "thickenerSubstitutions": [
+      {
+        "for": "thickener.flour",
+        "options": [
+          "thickener.cornstarch",
+          "thickener.reduction",
+          "thickener.parmesan"
+        ],
+        "notes": "Italian sauces often thicken via reduction + emulsification rather than starches."
+      }
+    ],
+    "notes": [
+      "Cheese role swap: parmesan ↔ grana padano; pecorino for sharper/saltier. Fresh mozzarella ↔ burrata (richer).",
+      "Acid role swap: lemon ↔ red wine vinegar (use small amounts)."
+    ]
+  },
+
+  "mealTemplates": [
+    {
+      "id": "template.italian.weeknight_pasta",
+      "label": "Weeknight Pasta Plate",
+      "archetypeId": "archetype.pasta_sauce_protein",
+      "components": [
+        {
+          "role": "starch",
+          "ingredientIds": ["starch.pasta"],
+          "chooseOne": false,
+          "notes": "Spaghetti, penne, rigatoni, or whatever is in pantry."
+        },
+        {
+          "role": "sauce",
+          "ingredientIds": [
+            "sauce.marinara",
+            "sauce.garlic_olive_oil",
+            "sauce.pesto"
+          ],
+          "chooseOne": true,
+          "notes": "Pick a sauce base; planner can adapt based on pantry."
+        },
+        {
+          "role": "protein",
+          "ingredientIds": [
+            "protein.chicken",
+            "protein.sausage",
+            "protein.shrimp",
+            "protein.beans"
+          ],
+          "chooseOne": true,
+          "notes": "Optional; choose based on goals and inventory."
+        },
+        {
+          "role": "veg",
+          "ingredientIds": [
+            "veg.spinach",
+            "veg.broccoli",
+            "veg.zucchini",
+            "veg.mushrooms"
+          ],
+          "chooseOne": true,
+          "notes": "Fold into sauce or serve on side."
+        },
+        {
+          "role": "garnish",
+          "ingredientIds": [
+            "garnish.parmesan",
+            "garnish.parsley",
+            "garnish.basil",
+            "garnish.lemon_zest"
+          ],
+          "chooseOne": true,
+          "notes": "Finish matters; add fresh herb/cheese."
+        }
+      ],
+      "prepNotes": [
+        "Salt pasta water generously.",
+        "Reserve pasta water for emulsification.",
+        "Finish pasta in sauce for best texture."
+      ]
+    },
+    {
+      "id": "template.italian.soup_salad_bread",
+      "label": "Soup + Salad + Bread",
+      "archetypeId": "archetype.soup_bread",
+      "components": [
+        {
+          "role": "stew_base",
+          "ingredientIds": [
+            "dish.minestrone",
+            "dish.pasta_e_fagioli",
+            "dish.tomato_soup_italian"
+          ],
+          "chooseOne": true,
+          "notes": "Soup is main; ensure enough protein (beans/meat) if needed."
+        },
+        {
+          "role": "side",
+          "ingredientIds": ["side.crusty_bread", "side.garlic_bread"],
+          "chooseOne": true,
+          "notes": "Bread for dipping; can be omitted for lower-carb."
+        },
+        {
+          "role": "greens",
+          "ingredientIds": ["side.salad_green"],
+          "chooseOne": false,
+          "notes": "Simple greens with vinaigrette."
+        }
+      ],
+      "prepNotes": [
+        "Make soup ahead for best flavor.",
+        "Add greens at the end to avoid overcooking."
+      ]
+    }
+  ],
+
+  "safetyNotes": [
+    {
+      "id": "safety.italian.dairy_allergens",
+      "label": "Dairy & Gluten Awareness",
+      "notes": [
+        "Many Italian patterns use cheese and pasta/bread (dairy + gluten).",
+        "Offer dairy-free swaps (olive oil finishes, nutritional yeast, dairy-free cheese) and gluten-free pasta/breads when needed."
+      ]
+    },
+    {
+      "id": "safety.italian.seafood_handling",
+      "label": "Seafood Handling",
+      "notes": [
+        "Use proper cold chain for fish/shellfish; cook promptly.",
+        "Avoid cross-contamination with ready-to-eat salad components."
+      ]
+    }
+  ],
+
+  "searchHints": {
+    "keywords": [
+      "pasta",
+      "marinara",
+      "ragù",
+      "bolognese",
+      "alfredo",
+      "pesto",
+      "risotto",
+      "polenta",
+      "bruschetta",
+      "caprese",
+      "minestrone"
+    ],
+    "commonAlternateNames": [
+      "ragu",
+      "bolognaise",
+      "brodo",
+      "cacio e pepe",
+      "amatriciana"
+    ]
+  },
+
+  "pantry": {
+    "freshCore": [
+      "fresh.garlic",
+      "fresh.onion",
+      "fresh.lemon",
+      "fresh.basil",
+      "fresh.parsley"
+    ],
+    "proteinsCommon": [
+      "protein.chicken",
+      "protein.sausage",
+      "protein.beef",
+      "protein.pork",
+      "protein.fish",
+      "protein.beans"
+    ],
+    "produceCommon": [
+      "veg.tomatoes",
+      "veg.zucchini",
+      "veg.broccoli",
+      "veg.spinach",
+      "veg.mushrooms",
+      "veg.peppers"
+    ],
+    "availabilityNotes": [
+      {
+        "ingredient": "herb.fresh_basil",
+        "fallbacks": ["herb.dried_basil", "herb.fresh_parsley"],
+        "note": "Fresh basil is ideal for pesto/caprese; dried basil works in simmered sauces."
+      },
+      {
+        "ingredient": "cheese.pecorino",
+        "fallbacks": ["cheese.parmesan", "cheese.grana_padano"],
+        "note": "Pecorino is sharper/saltier; adjust seasoning if swapping."
+      }
+    ],
+    "coreStaples": {
+      "oils_fats": ["fat.olive_oil", "fat.butter"],
+      "tomato_core": ["canned.crushed_tomatoes", "tomato.tomato_paste"],
+      "dry_goods": ["starch.pasta", "grain.arborio_rice", "grain.polenta"],
+      "seasonings": [
+        "seasoning.salt",
+        "spice.black_pepper",
+        "spice.red_pepper_flakes"
+      ],
+      "herbs": ["herb.dried_oregano", "herb.dried_basil"]
+    },
+    "optionalRegionalStaples": {
+      "north": ["cheese.gorgonzola", "cheese.taleggio", "fat.butter"],
+      "central": ["cheese.pecorino", "meat.guanciale"],
+      "south": [
+        "caper.capers",
+        "olive.olives",
+        "umami.anchovy",
+        "spice.red_pepper_flakes"
+      ],
+      "sicily": ["nut.pine_nuts", "vinegar.balsamic_vinegar", "citrus.orange"]
+    }
+  },
+
+  "techniques": {
+    "coreMethods": [
+      "technique.saute",
+      "technique.simmer",
+      "technique.roast",
+      "technique.braise",
+      "technique.deglaze",
+      "technique.emulsify_pasta_water"
+    ],
+    "hallmarkProcesses": [
+      {
+        "id": "process.marinara",
+        "name": "Marinara Base",
+        "steps": [
+          "step.saute_aromatics",
+          "step.add_tomato",
+          "step.simmer",
+          "step.finish_with_basil"
+        ],
+        "notes": "A fast tomato sauce base used across many weeknight dishes."
+      },
+      {
+        "id": "process.ragu",
+        "name": "Ragù / Long-Simmer Sauce",
+        "steps": [
+          "step.brown_meat",
+          "step.deglaze",
+          "step.add_tomato_stock",
+          "step.simmer_long",
+          "step.finish"
+        ],
+        "notes": "Long simmer builds depth; perfect for batch cooking and freezing."
+      },
+      {
+        "id": "process.roman_pasta_emulsion",
+        "name": "Roman Pasta Emulsion (Cacio e Pepe / Carbonara-style)",
+        "steps": [
+          "step.toast_pepper_optional",
+          "step.reserve_pasta_water",
+          "step.emulsify_cheese_fat",
+          "step.finish_off_heat"
+        ],
+        "notes": "Temperature control prevents clumping/scrambling; finish off heat with pasta water."
+      }
+    ],
+    "equipmentAffinity": {
+      "preferred": [
+        "tool.skillet",
+        "tool.stockpot",
+        "tool.sheet_pan",
+        "tool.microplane",
+        "tool.tongs"
+      ],
+      "helpsQuality": [
+        "tool.immersion_blender",
+        "tool.dutch_oven",
+        "tool.thermometer",
+        "tool.food_processor"
+      ]
+    },
+    "signatureMethods": [
+      "Emulsify sauce with pasta water rather than relying on heavy thickeners.",
+      "Finish with fresh herbs and/or grated hard cheese for aroma + umami.",
+      "Sear meats hard for fond; deglaze and simmer to build depth."
+    ]
+  },
+
+  "equipment": {
+    "recommended": [
+      "tool.skillet",
+      "tool.saucepan",
+      "tool.stockpot",
+      "tool.sheet_pan",
+      "tool.dutch_oven",
+      "tool.microplane",
+      "tool.colander",
+      "tool.tongs"
+    ],
+    "optionalButHelpful": [
+      "tool.food_processor",
+      "tool.immersion_blender",
+      "tool.stand_mixer",
+      "tool.pasta_roller"
+    ],
+    "notes": [
+      "Microplane grater supports parmesan/pecorino finishes.",
+      "A dutch oven boosts braises and long-simmer ragù.",
+      "Food processor makes pesto and quick soffritto."
+    ]
+  },
+
+  "dietAndAllergens": {
+    "commonAllergens": [
+      "allergen.gluten",
+      "allergen.dairy",
+      "allergen.egg",
+      "allergen.fish",
+      "allergen.shellfish"
+    ],
+    "dietCompatibility": {
+      "vegetarian": {
+        "level": "high",
+        "notes": "Beans, vegetables, pasta, and soups adapt well; swap meat ragù for mushroom/bean ragù."
+      },
+      "vegan": {
+        "level": "medium",
+        "notes": "Use olive oil finishes; replace cheese with vegan alternatives; choose egg-free pasta."
+      },
+      "gluten_free": {
+        "level": "medium",
+        "notes": "Use GF pasta and verify breadcrumbs/flour. Many sauces remain naturally GF."
+      },
+      "dairy_free": {
+        "level": "medium",
+        "notes": "Replace cheese-based finishes with herb + lemon + olive oil; use dairy-free substitutes."
+      }
+    }
+  },
+
+  "signatureDishes": {
+    "core": [
+      {
+        "id": "dish.spaghetti_marinara",
+        "name": "Spaghetti Marinara",
+        "subprofiles": ["cuisines.italian.subprofile.southern"],
+        "difficulty": "beginner",
+        "heatTypical": 0,
+        "notes": "Tomato-forward weeknight staple; easy to batch marinara."
+      },
+      {
+        "id": "dish.meatballs_marinara",
+        "name": "Meatballs in Marinara",
+        "subprofiles": [
+          "cuisines.italian.subprofile.central",
+          "cuisines.italian.subprofile.southern"
+        ],
+        "difficulty": "intermediate",
+        "heatTypical": 0,
+        "notes": "Batch-friendly; freeze cooked meatballs for quick meals."
+      },
+      {
+        "id": "dish.chicken_parmesan",
+        "name": "Chicken Parmesan",
+        "subprofiles": ["cuisines.italian.subprofile.southern"],
+        "difficulty": "advanced",
+        "heatTypical": 0,
+        "notes": "Breaded cutlet + marinara + cheese; oven adaptation recommended."
+      },
+      {
+        "id": "dish.lasagna",
+        "name": "Lasagna",
+        "subprofiles": ["cuisines.italian.subprofile.central"],
+        "difficulty": "advanced",
+        "heatTypical": 0,
+        "notes": "Classic batch-and-freeze anchor meal."
+      },
+      {
+        "id": "dish.pesto_pasta",
+        "name": "Pesto Pasta",
+        "subprofiles": ["cuisines.italian.subprofile.northern"],
+        "difficulty": "beginner",
+        "heatTypical": 0,
+        "notes": "Fresh basil + nuts + olive oil; great for summer."
+      },
+      {
+        "id": "dish.risotto",
+        "name": "Risotto",
+        "subprofiles": ["cuisines.italian.subprofile.northern"],
+        "difficulty": "advanced",
+        "heatTypical": 0,
+        "notes": "Technique-forward; stock + arborio rice; finish with butter/cheese."
+      },
+      {
+        "id": "dish.minestrone",
+        "name": "Minestrone",
+        "subprofiles": [
+          "cuisines.italian.subprofile.central",
+          "cuisines.italian.subprofile.southern"
+        ],
+        "difficulty": "intermediate",
+        "heatTypical": 0,
+        "notes": "Vegetable + bean soup; excellent leftovers."
+      }
+    ],
+    "dessertsAndDrinks": [
+      {
+        "id": "dish.tiramisu",
+        "name": "Tiramisu",
+        "difficulty": "advanced",
+        "heatTypical": 0,
+        "notes": "Coffee + mascarpone dessert."
+      },
+      {
+        "id": "dish.panna_cotta",
+        "name": "Panna Cotta",
+        "difficulty": "intermediate",
+        "heatTypical": 0,
+        "notes": "Creamy set dessert; fruit compote optional."
+      },
+      {
+        "id": "dish.italian_soda",
+        "name": "Italian Soda",
+        "difficulty": "beginner",
+        "heatTypical": 0,
+        "notes": "Sparkling water + syrup + citrus."
+      }
+    ]
+  },
+
+  "pairingRules": {
+    "typicalStarches": [
+      "starch.pasta",
+      "starch.bread",
+      "starch.polenta",
+      "starch.rice_risotto"
+    ],
+    "typicalVegSides": [
+      "veg.broccoli",
+      "veg.spinach",
+      "veg.zucchini",
+      "veg.salad_greens",
+      "veg.roasted_vegetables"
+    ],
+    "typicalCondiments": [
+      "condiment.parmesan",
+      "condiment.olive_oil",
+      "condiment.red_pepper_flakes",
+      "condiment.balsamic"
+    ],
+    "typicalFlavorPairings": [
+      {
+        "with": "sauce.marinara",
+        "pair": [
+          "herb.basil",
+          "cheese.parmesan",
+          "protein.meatballs",
+          "protein.sausage"
+        ],
+        "note": "Classic tomato pairing; add basil and hard cheese at finish."
+      },
+      {
+        "with": "sauce.pesto",
+        "pair": [
+          "protein.chicken",
+          "protein.shrimp",
+          "veg.green_beans",
+          "veg.potatoes"
+        ],
+        "note": "Pesto often pairs with mild proteins and blanched veg."
+      },
+      {
+        "with": "grain.arborio_rice",
+        "pair": ["umami.mushrooms", "cheese.parmesan", "fat.butter"],
+        "note": "Risotto foundation: stock + butter/cheese finish; mushrooms common."
+      }
+    ],
+    "antiPairings": [
+      {
+        "id": "anti.over_sugar_tomato",
+        "avoid": ["sweetener.sugar_high"],
+        "note": "Avoid heavy sweetness in tomato sauces; use small balance only if needed."
+      }
+    ]
+  },
+
+  "substitutions": {
+    "ingredientRules": [
+      {
+        "id": "sub.cheese.parmesan_to_grana",
+        "replace": ["cheese.parmesan"],
+        "with": ["cheese.grana_padano"],
+        "notes": "Grana Padano is slightly milder; you may add a touch more for same impact."
+      },
+      {
+        "id": "sub.cheese.pecorino_to_parmesan",
+        "replace": ["cheese.pecorino"],
+        "with": ["cheese.parmesan"],
+        "notes": "Parmesan is less salty/sharp; increase pepper or salt slightly if needed."
+      },
+      {
+        "id": "sub.acid.lemon_to_vinegar",
+        "replace": ["acid.lemon"],
+        "with": ["acid.red_wine_vinegar"],
+        "ratio": 0.5,
+        "notes": "Use about half as much vinegar as lemon juice; add gradually."
+      },
+      {
+        "id": "sub.umami.anchovy_optional",
+        "whenMissing": ["umami.anchovy"],
+        "use": ["umami.tomato_paste", "umami.parmesan"],
+        "notes": "Anchovy adds depth; tomato paste + parmesan can approximate umami in sauces."
+      }
+    ],
+    "methodRules": [
+      {
+        "id": "method.no_food_processor_pesto",
+        "whenNoEquipment": ["tool.food_processor", "tool.blender"],
+        "adapt": "technique.mortar_pestle_pesto",
+        "notes": "Make pesto with mortar and pestle: crush garlic + salt, add basil, then nuts, then cheese, then oil."
+      },
+      {
+        "id": "method.no_dutch_oven_braise",
+        "whenNoEquipment": ["tool.dutch_oven"],
+        "adapt": "technique.braise_in_stockpot_or_oven_safe_pot",
+        "notes": "Use heavy stockpot with lid or oven-safe pot; keep simmer gentle and covered."
+      }
+    ]
+  },
+
+  "planningHints": {
+    "batchFriendly": [
+      {
+        "id": "batch.marinara",
+        "name": "Marinara Base",
+        "makes": "component.marinara",
+        "freezerFriendly": true,
+        "notes": "Freeze in 2-cup portions for pasta nights, pizza sauce, or braises."
+      },
+      {
+        "id": "batch.meatballs",
+        "name": "Meatballs",
+        "makes": "component.meatballs",
+        "freezerFriendly": true,
+        "notes": "Bake a tray, cool, and freeze. Reheat in marinara or simmered soups."
+      },
+      {
+        "id": "batch.ragu",
+        "name": "Ragù",
+        "makes": "component.ragu",
+        "freezerFriendly": true,
+        "notes": "Long-simmer sauce improves next day; freeze for lasagna/pasta."
+      },
+      {
+        "id": "batch.roasted_veg",
+        "name": "Roasted Vegetables",
+        "makes": "component.roasted_vegetables",
+        "freezerFriendly": false,
+        "notes": "Use in pasta, salads, omelets, and bowls throughout the week."
+      }
+    ],
+    "weeknightShortcuts": [
+      "Keep marinara or pesto in the fridge/freezer.",
+      "Use sheet pan sausage + peppers as a 30–40 minute anchor meal.",
+      "Cook extra pasta; chill and reheat with sauce for fast lunches (best for short storage).",
+      "Use canned beans for quick protein in soups and salads."
+    ],
+    "seasonality": [
+      {
+        "season": "season.summer",
+        "focus": ["veg.tomatoes", "herb.basil", "veg.zucchini"]
+      },
+      {
+        "season": "season.fall",
+        "focus": ["veg.mushrooms", "veg.squash", "veg.greens"]
+      },
+      {
+        "season": "season.winter",
+        "focus": ["dish.braises", "dish.soups", "grain.polenta"]
+      },
+      {
+        "season": "season.spring",
+        "focus": ["veg.asparagus", "veg.peas", "herb.parsley"]
+      }
+    ]
+  },
+
+  "ui": {
+    "heroSuggestions": [
+      {
+        "title": "Weeknight Italian (Fast Wins)",
+        "items": [
+          "dish.spaghetti_marinara",
+          "dish.pesto_pasta",
+          "dish.sausage_peppers",
+          "dish.minestrone"
+        ]
+      },
+      {
+        "title": "Batch Anchors",
+        "items": [
+          "component.marinara",
+          "component.meatballs",
+          "component.ragu",
+          "component.roasted_vegetables"
+        ]
+      }
+    ],
+    "searchBoostTerms": [
+      "marinara",
+      "ragu",
+      "bolognese",
+      "pesto",
+      "risotto",
+      "polenta",
+      "cacio e pepe",
+      "amatriciana",
+      "caprese",
+      "bruschetta",
+      "lasagna"
+    ],
+    "colorHints": {
+      "primary": "olive_green",
+      "accent": "tomato_red",
+      "neutral": "parmesan_cream"
+    },
+    "iconHints": ["icon.olive_oil", "icon.pasta", "icon.tomato", "icon.basil"]
+  },
+
+  "compat": {
+    "recipeTagDefaults": ["cuisine.italian", "planner.italian.default"],
+    "defaultPlateTemplateIds": [
+      "plate.italian.pasta_plate",
+      "plate.italian.protein_veg_starch"
+    ],
+    "notes": [
+      "Use meta.id as canonical id. Planner may also look at compat.recipeTagDefaults for quick tagging.",
+      "If you maintain a dishes.catalog for Italian, map dish ids used here to canonical dish entries."
+    ]
+  }
+}

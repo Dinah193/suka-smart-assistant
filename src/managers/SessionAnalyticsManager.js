@@ -13,50 +13,80 @@
   const byId = (arr, id) => (arr || []).find((x) => x && x.id === id);
   const noop = () => {};
   const safeJSON = {
-    parse: (s, fallback = null) => { try { return JSON.parse(s); } catch { return fallback; } },
-    stringify: (o) => { try { return JSON.stringify(o); } catch { return "{}"; } },
+    parse: (s, fallback = null) => {
+      try {
+        return JSON.parse(s);
+      } catch {
+        return fallback;
+      }
+    },
+    stringify: (o) => {
+      try {
+        return JSON.stringify(o);
+      } catch {
+        return "{}";
+      }
+    },
   };
 
   /* --------------------------- defensive dependencies ------------------------ */
   let eventBus = { on: noop, off: noop, emit: noop };
   try {
-    const eb = require("@/services/eventBus");
+    const eb = require("@/services/events/eventBus");
     eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
   } catch (_e) {}
 
   let DexieDB = null;
-  try { DexieDB = require("@/db").default || require("@/db"); } catch (_e) {}
+  try {
+    DexieDB = require("@/db").default || require("@/db");
+  } catch (_e) {}
 
   let StabilityScoreEngine = null; // optional
-  try { StabilityScoreEngine = require("@/engines/metrics/stabilityScore").default; } catch (_e) {}
+  try {
+    StabilityScoreEngine = require("@/engines/metrics/stabilityScore").default;
+  } catch (_e) {}
 
   // Favorite plans / Plan storage bridges (defensive)
   let PlanStorageRouter = null;
-  try { PlanStorageRouter = require("@/services/plans/PlanStorageRouter").default; } catch (_e) {}
+  try {
+    PlanStorageRouter = require("@/services/plans/PlanStorageRouter").default;
+  } catch (_e) {}
   let useFavoritePlans = null;
-  try { useFavoritePlans = require("@/hooks/useFavoritePlans").default; } catch (_e) {}
+  try {
+    useFavoritePlans = require("@/hooks/useFavoritePlans").default;
+  } catch (_e) {}
 
   // Optional NBA orchestrator signal bus
   let nba = { push: noop };
-  try { nba = require("@/services/nba/orchestrator").default || nba; } catch (_e) {}
+  try {
+    nba = require("@/services/nba/orchestrator").default || nba;
+  } catch (_e) {}
 
   // Sabbath / policy guards (scores may penalize during active guards)
   let pausePolicies = null;
-  try { pausePolicies = require("@/services/session/policies/pausePolicies").default; } catch (_e) {}
+  try {
+    pausePolicies =
+      require("@/services/session/policies/pausePolicies").default;
+  } catch (_e) {}
 
   // Inventory / offset parser (timestamps for scheduled vs actual)
   let offsetParser = null;
-  try { offsetParser = require("@/services/session/utils/offsetParser").default; } catch (_e) {}
+  try {
+    offsetParser = require("@/services/session/utils/offsetParser").default;
+  } catch (_e) {}
 
   // Calendar sync awareness (for "on-time" score deltas)
   let calendarSync = null;
-  try { calendarSync = require("@/services/calendar/calendarSync").default; } catch (_e) {}
+  try {
+    calendarSync = require("@/services/calendar/calendarSync").default;
+  } catch (_e) {}
 
   /* ------------------------------- state stores ------------------------------ */
   const memory = {
-    sessions: new Map(),      // id -> live SessionState
-    aggregates: {             // rolling aggregates per domain
-      byDomain: {},           // domain -> Aggregate
+    sessions: new Map(), // id -> live SessionState
+    aggregates: {
+      // rolling aggregates per domain
+      byDomain: {}, // domain -> Aggregate
       lastISO: null,
     },
     lastEmit: 0,
@@ -94,7 +124,10 @@
         localStorage.setItem(key, safeJSON.stringify(arr));
       }
     } catch (e) {
-      console.error("[SessionAnalyticsManager] persistSessionSummary failed", e);
+      console.error(
+        "[SessionAnalyticsManager] persistSessionSummary failed",
+        e
+      );
     }
   }
 
@@ -125,7 +158,8 @@
       id,
       domain: payload.domain || "general",
       planId: payload.planId || null,
-      title: payload.title || payload.name || `${payload.domain || "Session"} run`,
+      title:
+        payload.title || payload.name || `${payload.domain || "Session"} run`,
       createdISO: payload.createdISO || toISO(),
       scheduledStartISO: payload.scheduledStartISO || null,
       actualStartISO: null,
@@ -140,7 +174,7 @@
       pauseStart: null,
 
       // steps
-      steps: [],          // {id, title, plannedAt?, startedAt?, endedAt?, durationMs, onTime}
+      steps: [], // {id, title, plannedAt?, startedAt?, endedAt?, durationMs, onTime}
       stepsCompleted: 0,
       stepsTotal: payload.stepsTotal || 0,
       onTimeHits: 0,
@@ -160,7 +194,10 @@
   }
 
   function tickSession(ts, s) {
-    if (!s.lastTick) { s.lastTick = ts; return; }
+    if (!s.lastTick) {
+      s.lastTick = ts;
+      return;
+    }
     const dt = ts - s.lastTick;
     s.lastTick = ts;
     if (s.isPaused) s.pausedMs += dt;
@@ -178,7 +215,7 @@
   }
 
   function summarizeSession(s) {
-    const totalMs = (s.activeMs + s.pausedMs);
+    const totalMs = s.activeMs + s.pausedMs;
     return {
       id: s.id,
       domain: s.domain,
@@ -200,9 +237,11 @@
       guardPauses: s.guardPauses,
       stabilityScoreStart: s.stabilityScoreStart,
       stabilityScoreEnd: s.stabilityScoreEnd,
-      stabilityScoreDelta: (typeof s.stabilityScoreStart === "number" && typeof s.stabilityScoreEnd === "number")
-        ? round2(s.stabilityScoreEnd - s.stabilityScoreStart)
-        : null,
+      stabilityScoreDelta:
+        typeof s.stabilityScoreStart === "number" &&
+        typeof s.stabilityScoreEnd === "number"
+          ? round2(s.stabilityScoreEnd - s.stabilityScoreStart)
+          : null,
       favorited: !!s.favorited,
     };
   }
@@ -214,15 +253,21 @@
     agg.totalDurationMs += summary.durationMs;
     const n = agg.sessions;
     // Running averages
-    agg.avgStepThroughput = round2(((agg.avgStepThroughput * (n - 1)) + summary.stepThroughput) / n);
-    agg.avgOnTimeRate = round2(((agg.avgOnTimeRate * (n - 1)) + summary.onTimeRate) / n);
+    agg.avgStepThroughput = round2(
+      (agg.avgStepThroughput * (n - 1) + summary.stepThroughput) / n
+    );
+    agg.avgOnTimeRate = round2(
+      (agg.avgOnTimeRate * (n - 1) + summary.onTimeRate) / n
+    );
     agg.conflicts += summary.conflicts;
     agg.shortages += summary.shortages;
     agg.guardPauses += summary.guardPauses;
     agg.lastUpdatedISO = toISO();
     // streak heuristic: session within 48h increments streak
     try {
-      const last = memory.aggregates.lastISO ? new Date(memory.aggregates.lastISO).getTime() : 0;
+      const last = memory.aggregates.lastISO
+        ? new Date(memory.aggregates.lastISO).getTime()
+        : 0;
       const diff = new Date(summary.endISO).getTime() - last;
       if (!last || diff <= 1000 * 60 * 60 * 48) agg.streakSessions += 1;
       else agg.streakSessions = 1;
@@ -254,10 +299,14 @@
 
       // Fallback: hook (Zustand) if available
       if (typeof useFavoritePlans === "function") {
-        const { addFavorite } = useFavoritePlans.getState ? useFavoritePlans.getState() : { addFavorite: null };
+        const { addFavorite } = useFavoritePlans.getState
+          ? useFavoritePlans.getState()
+          : { addFavorite: null };
         if (addFavorite) {
           addFavorite({
-            id: sessionSummary.planId || `favorite:${sessionSummary.domain}:${now()}`,
+            id:
+              sessionSummary.planId ||
+              `favorite:${sessionSummary.domain}:${now()}`,
             domain: sessionSummary.domain,
             title: sessionSummary.title,
             meta: {
@@ -276,7 +325,8 @@
       const key = "suka:favorites:plans";
       const prev = safeJSON.parse(localStorage.getItem(key), []);
       prev.push({
-        id: sessionSummary.planId || `favorite:${sessionSummary.domain}:${now()}`,
+        id:
+          sessionSummary.planId || `favorite:${sessionSummary.domain}:${now()}`,
         domain: sessionSummary.domain,
         title: sessionSummary.title,
         meta: {
@@ -290,7 +340,10 @@
       localStorage.setItem(key, safeJSON.stringify(prev));
       return { ok: true, via: "localStorage" };
     } catch (e) {
-      console.error("[SessionAnalyticsManager] favoritePlanFromSession failed", e);
+      console.error(
+        "[SessionAnalyticsManager] favoritePlanFromSession failed",
+        e
+      );
       return { ok: false, error: e?.message || String(e) };
     }
   }
@@ -328,22 +381,51 @@
           rows = safeJSON.parse(localStorage.getItem(key), []);
         }
       } catch (e) {
-        console.error("[SessionAnalyticsManager] exportDomainCSV read failed", e);
+        console.error(
+          "[SessionAnalyticsManager] exportDomainCSV read failed",
+          e
+        );
       }
       const header = [
-        "id","domain","planId","title","createdISO","scheduledStartISO","actualStartISO","endISO",
-        "durationMs","activeMs","pausedMs","stepsCompleted","stepsTotal","stepThroughput",
-        "onTimeRate","conflicts","shortages","guardPauses","stabilityScoreStart","stabilityScoreEnd","stabilityScoreDelta","favorited"
+        "id",
+        "domain",
+        "planId",
+        "title",
+        "createdISO",
+        "scheduledStartISO",
+        "actualStartISO",
+        "endISO",
+        "durationMs",
+        "activeMs",
+        "pausedMs",
+        "stepsCompleted",
+        "stepsTotal",
+        "stepThroughput",
+        "onTimeRate",
+        "conflicts",
+        "shortages",
+        "guardPauses",
+        "stabilityScoreStart",
+        "stabilityScoreEnd",
+        "stabilityScoreDelta",
+        "favorited",
       ];
       const csv = [header.join(",")]
-        .concat(rows.map(r => header.map(h => JSON.stringify(r[h] ?? "")).join(",")))
+        .concat(
+          rows.map((r) =>
+            header.map((h) => JSON.stringify(r[h] ?? "")).join(",")
+          )
+        )
         .join("\n");
 
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
       if (isBrowser) {
         // Emit event so your existing download/cloud bridges can catch & route
         eventBus.emit?.("analytics.export.generated", {
-          domain, kind: "csv", size: blob.size, createdISO: toISO(),
+          domain,
+          kind: "csv",
+          size: blob.size,
+          createdISO: toISO(),
           // Provide a File-like object if your storage bridges need it
           file: blob,
           filename: `session_analytics_${domain}_${Date.now()}.csv`,
@@ -359,9 +441,15 @@
       try {
         if (DexieDB && (DexieDB.analytics || DexieDB.sessionAnalytics)) {
           const table = DexieDB.analytics || DexieDB.sessionAnalytics;
-          rows = await table.where("domain").equals(domain).reverse().sortBy(metric);
+          rows = await table
+            .where("domain")
+            .equals(domain)
+            .reverse()
+            .sortBy(metric);
         } else {
-          rows = (safeJSON.parse(localStorage.getItem(key), []) || []).sort((a, b) => (b[metric] || 0) - (a[metric] || 0));
+          rows = (safeJSON.parse(localStorage.getItem(key), []) || []).sort(
+            (a, b) => (b[metric] || 0) - (a[metric] || 0)
+          );
         }
       } catch (_e) {}
       const best = rows[0];
@@ -396,7 +484,10 @@
       if (!s) return;
       const ts = e.ts || now();
       // throttle
-      if (ts - (memory.lastEmit || 0) < T) { tickSession(ts, s); return; }
+      if (ts - (memory.lastEmit || 0) < T) {
+        tickSession(ts, s);
+        return;
+      }
       tickSession(ts, s);
       memory.lastEmit = ts;
 
@@ -412,9 +503,15 @@
     });
 
     // Compatibility with your general catalog (domain-aware draft/requests)
-    eventBus.on?.("mealplan.draft.requested", (p) => emitDomainIntent("meals", "draft.requested", p));
-    eventBus.on?.("grocerylist.requested", (p) => emitDomainIntent(p?.domain || "meals", "grocery.requested", p));
-    eventBus.on?.("prep.tasks.requested", (p) => emitDomainIntent(p?.domain || "meals", "prep.requested", p));
+    eventBus.on?.("mealplan.draft.requested", (p) =>
+      emitDomainIntent("meals", "draft.requested", p)
+    );
+    eventBus.on?.("grocerylist.requested", (p) =>
+      emitDomainIntent(p?.domain || "meals", "grocery.requested", p)
+    );
+    eventBus.on?.("prep.tasks.requested", (p) =>
+      emitDomainIntent(p?.domain || "meals", "prep.requested", p)
+    );
 
     // Calendar sync improves on-time scoring expectations
     eventBus.on?.("calendar.session.synced", (p) => {
@@ -444,8 +541,11 @@
     memory.sessions.set(s.id, s);
 
     eventBus.emit?.("analytics.session.live", {
-      sessionId: s.id, domain: s.domain, title: s.title,
-      status: "started", tsISO: toISO(),
+      sessionId: s.id,
+      domain: s.domain,
+      title: s.title,
+      status: "started",
+      tsISO: toISO(),
     });
   }
 
@@ -457,12 +557,15 @@
     if (s.isPaused) {
       s.isPaused = false;
       s.pauseReason = null;
-      if (s.pauseStart) s.pausedMs += (ts - s.pauseStart);
+      if (s.pauseStart) s.pausedMs += ts - s.pauseStart;
       s.pauseStart = null;
     }
     s.lastTick = ts;
     eventBus.emit?.("analytics.session.live", {
-      sessionId: s.id, domain: s.domain, status: "resumed", tsISO: toISO(),
+      sessionId: s.id,
+      domain: s.domain,
+      status: "resumed",
+      tsISO: toISO(),
     });
   }
 
@@ -476,14 +579,18 @@
       s.pauseStart = ts;
     }
     eventBus.emit?.("analytics.session.live", {
-      sessionId: s.id, domain: s.domain, status: "paused", reason: s.pauseReason, tsISO: toISO(),
+      sessionId: s.id,
+      domain: s.domain,
+      status: "paused",
+      reason: s.pauseReason,
+      tsISO: toISO(),
     });
   }
 
   async function finalizeSession(s, status = "ended") {
     s.endISO = toISO();
     if (s.isPaused && s.pauseStart) {
-      s.pausedMs += (now() - s.pauseStart);
+      s.pausedMs += now() - s.pauseStart;
       s.isPaused = false;
       s.pauseStart = null;
     }
@@ -558,7 +665,11 @@
     };
     s.steps.push(step);
     eventBus.emit?.("analytics.session.live", {
-      sessionId: s.id, domain: s.domain, status: "step.started", stepId: step.id, tsISO: step.startedAt,
+      sessionId: s.id,
+      domain: s.domain,
+      status: "step.started",
+      stepId: step.id,
+      tsISO: step.startedAt,
     });
   }
 
@@ -570,18 +681,27 @@
 
     const endISO = toISO();
     step.endedAt = endISO;
-    step.durationMs = Math.max(0, new Date(endISO).getTime() - new Date(step.startedAt || endISO).getTime());
+    step.durationMs = Math.max(
+      0,
+      new Date(endISO).getTime() - new Date(step.startedAt || endISO).getTime()
+    );
 
     // On-time test: plannedAt vs startedAt (or endedAt with tolerance)
     if (step.plannedAt && offsetParser?.diffMs) {
-      const deltaMs = Math.abs(offsetParser.diffMs(step.plannedAt, step.startedAt || endISO));
+      const deltaMs = Math.abs(
+        offsetParser.diffMs(step.plannedAt, step.startedAt || endISO)
+      );
       step.onTime = deltaMs <= (payload.onTimeToleranceMs || 120000); // default 2m tolerance
     } else if (typeof payload.onTime === "boolean") {
       step.onTime = payload.onTime;
     } else {
       // Fallback heuristic: if started within 3m of planned or session start
       if (s.scheduledStartISO && step.startedAt) {
-        step.onTime = Math.abs(new Date(step.startedAt).getTime() - new Date(s.scheduledStartISO).getTime()) <= 180000;
+        step.onTime =
+          Math.abs(
+            new Date(step.startedAt).getTime() -
+              new Date(s.scheduledStartISO).getTime()
+          ) <= 180000;
       } else {
         step.onTime = true;
       }
@@ -591,9 +711,16 @@
     if (step.onTime) s.onTimeHits += 1;
 
     eventBus.emit?.("analytics.session.live", {
-      sessionId: s.id, domain: s.domain, status: "step.completed",
-      stepId: step.id, onTime: step.onTime, tsISO: endISO,
-      kpis: { stepThroughput: computeThroughput(s), onTimeRate: computeOnTimeRate(s) },
+      sessionId: s.id,
+      domain: s.domain,
+      status: "step.completed",
+      stepId: step.id,
+      onTime: step.onTime,
+      tsISO: endISO,
+      kpis: {
+        stepThroughput: computeThroughput(s),
+        onTimeRate: computeOnTimeRate(s),
+      },
     });
   }
 
@@ -602,7 +729,11 @@
     if (!s) return;
     s.conflicts += 1;
     eventBus.emit?.("analytics.session.live", {
-      sessionId: s.id, domain: s.domain, status: "conflict", kind: payload.kind || "unknown", tsISO: toISO(),
+      sessionId: s.id,
+      domain: s.domain,
+      status: "conflict",
+      kind: payload.kind || "unknown",
+      tsISO: toISO(),
     });
   }
 
@@ -612,7 +743,11 @@
     if (!s) return;
     s.shortages += 1;
     eventBus.emit?.("analytics.session.live", {
-      sessionId: s.id, domain: s.domain, status: "shortage", itemId: payload.itemId, tsISO: toISO(),
+      sessionId: s.id,
+      domain: s.domain,
+      status: "shortage",
+      itemId: payload.itemId,
+      tsISO: toISO(),
     });
   }
 
@@ -622,10 +757,15 @@
     s.guardPauses += 1;
     // Optional policy-specific penalty to StabilityScore (if your engine supports)
     if (pausePolicies?.penalizeGuardPause && StabilityScoreEngine?.bump) {
-      try { StabilityScoreEngine.bump(-pausePolicies.penalizeGuardPause(s.domain)); } catch (_e) {}
+      try {
+        StabilityScoreEngine.bump(-pausePolicies.penalizeGuardPause(s.domain));
+      } catch (_e) {}
     }
     eventBus.emit?.("analytics.session.live", {
-      sessionId: s.id, domain: s.domain, status: "guard.pause", tsISO: toISO(),
+      sessionId: s.id,
+      domain: s.domain,
+      status: "guard.pause",
+      tsISO: toISO(),
     });
   }
 
@@ -639,9 +779,17 @@
     const res = await favoritePlanFromSession(summary, target);
     if (res?.ok) {
       s.favorited = true;
-      eventBus.emit?.("toast", { kind: "success", message: "Saved as Favorite Plan", tsISO: toISO() });
+      eventBus.emit?.("toast", {
+        kind: "success",
+        message: "Saved as Favorite Plan",
+        tsISO: toISO(),
+      });
     } else {
-      eventBus.emit?.("toast", { kind: "error", message: "Could not save favorite", tsISO: toISO() });
+      eventBus.emit?.("toast", {
+        kind: "error",
+        message: "Could not save favorite",
+        tsISO: toISO(),
+      });
     }
   });
 

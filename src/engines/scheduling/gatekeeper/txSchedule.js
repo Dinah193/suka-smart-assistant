@@ -30,7 +30,7 @@ let eventBus = {
   on: () => () => {},
 };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -114,7 +114,8 @@ function genericRules({ phase, phaseOffsetMin, plan, windows, ctx }) {
     items.push({
       id: `gen-check-inventory-${phaseOffsetMin}`,
       title: "Verify inventory & substitutes",
-      description: "Confirm required items exist or plan substitutes; update storehouse goals if short.",
+      description:
+        "Confirm required items exist or plan substitutes; update storehouse goals if short.",
       domain: "generic",
       severity: "info",
       tags: ["inventory", "storehouse", "check"],
@@ -134,7 +135,8 @@ function genericRules({ phase, phaseOffsetMin, plan, windows, ctx }) {
     items.push({
       id: `gen-brief-household-${phaseOffsetMin}`,
       title: "Brief household",
-      description: "Notify participants of upcoming session; confirm resource availability.",
+      description:
+        "Notify participants of upcoming session; confirm resource availability.",
       domain: "generic",
       severity: "info",
       tags: ["people", "brief"],
@@ -144,7 +146,8 @@ function genericRules({ phase, phaseOffsetMin, plan, windows, ctx }) {
     items.push({
       id: `gen-final-go-no-go-${phaseOffsetMin}`,
       title: "Go/No-Go check",
-      description: "Verify all critical resources are ready; resolve last-minute conflicts.",
+      description:
+        "Verify all critical resources are ready; resolve last-minute conflicts.",
       domain: "generic",
       severity: "critical",
       tags: ["gate", "final"],
@@ -166,8 +169,12 @@ function genericRules({ phase, phaseOffsetMin, plan, windows, ctx }) {
 /** Built-in domain rule sets (lightweight, extendable). */
 function cookingRules({ phase, windows }) {
   const items = [];
-  const cookingWindows = (windows || []).filter((w) => (w.domain || "generic") === "cooking");
-  const hasBoil = cookingWindows.some((w) => /boil|blanch|pasta/i.test(w.title || ""));
+  const cookingWindows = (windows || []).filter(
+    (w) => (w.domain || "generic") === "cooking"
+  );
+  const hasBoil = cookingWindows.some((w) =>
+    /boil|blanch|pasta/i.test(w.title || "")
+  );
   if (phase.label === "T-24h") {
     items.push({
       id: "cook-thaw-if-needed",
@@ -361,7 +368,9 @@ _domainRules.set("storehouse", storehouseRules);
  * @param {(ctx)=>Array} rulesFn
  */
 function registerDomainPhaseRules(domain, rulesFn) {
-  const d = String(domain || "").toLowerCase().trim();
+  const d = String(domain || "")
+    .toLowerCase()
+    .trim();
   if (!d || typeof rulesFn !== "function") return false;
   _domainRules.set(d, rulesFn);
   return true;
@@ -443,7 +452,10 @@ async function createTxSchedule(req = {}) {
     if (!t0ISO) {
       const sorted = windows
         .filter((w) => isStr(w.startISO))
-        .sort((a, b) => (Date.parse(a.startISO) || 0) - (Date.parse(b.startISO) || 0));
+        .sort(
+          (a, b) =>
+            (Date.parse(a.startISO) || 0) - (Date.parse(b.startISO) || 0)
+        );
       t0ISO = sorted[0]?.startISO || nowISO();
     }
     const t0Ms = toEpochMs(t0ISO);
@@ -453,10 +465,20 @@ async function createTxSchedule(req = {}) {
     }
 
     // Phase config
-    const phases = Array.isArray(req.phases) && req.phases.length ? req.phases : DEFAULT_PHASES;
+    const phases =
+      Array.isArray(req.phases) && req.phases.length
+        ? req.phases
+        : DEFAULT_PHASES;
 
     // Build checkpoints
-    const ctxBase = { planId, windows, t0ISO, tzOffsetMinutes: isNum(req.tzOffsetMinutes) ? req.tzOffsetMinutes : undefined };
+    const ctxBase = {
+      planId,
+      windows,
+      t0ISO,
+      tzOffsetMinutes: isNum(req.tzOffsetMinutes)
+        ? req.tzOffsetMinutes
+        : undefined,
+    };
     const checkpoints = [];
 
     for (const phase of phases) {
@@ -465,7 +487,9 @@ async function createTxSchedule(req = {}) {
       const items = [];
 
       // Gather domains present in this plan
-      const domains = new Set((windows || []).map((w) => (w.domain || "generic").toLowerCase()));
+      const domains = new Set(
+        (windows || []).map((w) => (w.domain || "generic").toLowerCase())
+      );
       if (!domains.size) domains.add("generic");
 
       // Domain-specific items
@@ -481,7 +505,9 @@ async function createTxSchedule(req = {}) {
         if (Array.isArray(generated) && generated.length) {
           for (const item of generated) {
             items.push({
-              id: item.id || `${d}-${phase.label}-${Math.random().toString(36).slice(2, 8)}`,
+              id:
+                item.id ||
+                `${d}-${phase.label}-${Math.random().toString(36).slice(2, 8)}`,
               title: item.title || "Checklist item",
               description: item.description || "",
               domain: item.domain || d,
@@ -524,7 +550,13 @@ async function createTxSchedule(req = {}) {
 
     await store.put(planId, snapshot);
 
-    const payload = { planId, t0ISO, phases, checkpoints, planMeta: snapshot.planMeta };
+    const payload = {
+      planId,
+      t0ISO,
+      phases,
+      checkpoints,
+      planMeta: snapshot.planMeta,
+    };
     emit("scheduling.tx.created", source, payload);
 
     if (req.export === true) {
@@ -533,8 +565,17 @@ async function createTxSchedule(req = {}) {
 
     return snapshot;
   } catch (err) {
-    emit("scheduling.tx.error", "engines/scheduling/gatekeeper/txSchedule.createTxSchedule", { message: String(err?.message || err) });
-    return { planId: String(req?.planId || ""), t0ISO: null, phases: [], checkpoints: [] };
+    emit(
+      "scheduling.tx.error",
+      "engines/scheduling/gatekeeper/txSchedule.createTxSchedule",
+      { message: String(err?.message || err) }
+    );
+    return {
+      planId: String(req?.planId || ""),
+      t0ISO: null,
+      phases: [],
+      checkpoints: [],
+    };
   }
 }
 

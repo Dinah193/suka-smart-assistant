@@ -6,22 +6,30 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 let getPriceNormalizerSingleton = null;
 let getPriceComparatorSingleton = null;
 try {
-  ({ getPriceNormalizerSingleton } = require("@/features/scan-compare-trust/services/pricing/PriceNormalizer"));
+  ({
+    getPriceNormalizerSingleton,
+  } = require("@/features/scan-compare-trust/services/pricing/PriceNormalizer"));
 } catch (_) {}
 try {
-  ({ getPriceComparatorSingleton } = require("@/features/scan-compare-trust/services/pricing/PriceComparator"));
+  ({
+    getPriceComparatorSingleton,
+  } = require("@/features/scan-compare-trust/services/pricing/PriceComparator"));
 } catch (_) {}
 
 let eventBus = { emit: () => {}, on: () => () => {} };
 try {
   // eslint-disable-next-line global-require
-  eventBus = require("@/services/eventBus");
+  eventBus = require("@/services/events/eventBus");
 } catch (_) {}
 
 function useServices() {
   return useMemo(() => {
-    const normalizer = getPriceNormalizerSingleton ? getPriceNormalizerSingleton({ eventBus }) : null;
-    const comparator  = getPriceComparatorSingleton  ? getPriceComparatorSingleton({ eventBus })  : null;
+    const normalizer = getPriceNormalizerSingleton
+      ? getPriceNormalizerSingleton({ eventBus })
+      : null;
+    const comparator = getPriceComparatorSingleton
+      ? getPriceComparatorSingleton({ eventBus })
+      : null;
     return { normalizer, comparator };
   }, []);
 }
@@ -45,10 +53,16 @@ export default function PriceUnitsToggle({
 }) {
   const { normalizer, comparator } = useServices();
 
-  const [profile, setProfile] = useState(() => normalizer?.getActiveProfile() || null);
-  const [strategy, setStrategy] = useState(() => comparator?.getActiveProfile?.()?.strategy || "auto");
+  const [profile, setProfile] = useState(
+    () => normalizer?.getActiveProfile() || null
+  );
+  const [strategy, setStrategy] = useState(
+    () => comparator?.getActiveProfile?.()?.strategy || "auto"
+  );
   const [savingFav, setSavingFav] = useState(false);
-  const [favorites, setFavorites] = useState(() => normalizer?.listFavoriteProfiles?.() || []);
+  const [favorites, setFavorites] = useState(
+    () => normalizer?.listFavoriteProfiles?.() || []
+  );
   const fileRef = useRef(null);
 
   // --- bus sync
@@ -77,12 +91,16 @@ export default function PriceUnitsToggle({
         } catch (_) {}
       }),
     ].filter(Boolean);
-    return () => { offs.forEach((off) => off?.()); };
+    return () => {
+      offs.forEach((off) => off?.());
+    };
   }, [normalizer, comparator]);
 
   if (!normalizer || !profile) {
     return (
-      <div className={`rounded-xl border border-gray-200 p-3 text-sm text-gray-500 ${className}`}>
+      <div
+        className={`rounded-xl border border-gray-200 p-3 text-sm text-gray-500 ${className}`}
+      >
         Price unit settings unavailable.
       </div>
     );
@@ -124,20 +142,33 @@ export default function PriceUnitsToggle({
       // comparator may be optional
     }
     // downstream panels can re-rank if they want
-    eventBus.emit?.("pricing:strategy:changed", { strategy: next, ts: Date.now() });
+    eventBus.emit?.("pricing:strategy:changed", {
+      strategy: next,
+      ts: Date.now(),
+    });
   }
 
   async function handleSaveFavorite() {
     try {
       setSavingFav(true);
-      const labelDefault = `${profile.label || "Household"} — ${profile.preferredSystem} • ${profile.showPerHundred.mass ? "per100g" : "g"}/${profile.showPerHundred.volume ? "per100mL" : "mL"}`;
+      const labelDefault = `${profile.label || "Household"} — ${
+        profile.preferredSystem
+      } • ${profile.showPerHundred.mass ? "per100g" : "g"}/${
+        profile.showPerHundred.volume ? "per100mL" : "mL"
+      }`;
       // eslint-disable-next-line no-alert
-      const label = window.prompt("Save favorite as…", labelDefault) || labelDefault;
+      const label =
+        window.prompt("Save favorite as…", labelDefault) || labelDefault;
       const id = normalizer.saveFavoriteProfile(label);
       setFavorites(normalizer.listFavoriteProfiles());
       toast("Favorite saved.");
       // Optional: emit a lightweight bookmark event (mirrors 'save favorite sessions')
-      eventBus.emit?.("favorites:saved", { type: "pricing.normalizer", id, label, ts: Date.now() });
+      eventBus.emit?.("favorites:saved", {
+        type: "pricing.normalizer",
+        id,
+        label,
+        ts: Date.now(),
+      });
     } finally {
       setSavingFav(false);
     }
@@ -168,11 +199,16 @@ export default function PriceUnitsToggle({
   function exportProfile() {
     try {
       const data = normalizer.exportProfile();
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: "application/json",
+      });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${(profile.label || "unit-profile").replace(/\s+/g, "_")}.json`;
+      a.download = `${(profile.label || "unit-profile").replace(
+        /\s+/g,
+        "_"
+      )}.json`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -202,7 +238,8 @@ export default function PriceUnitsToggle({
   }
 
   // ---- render pieces
-  const compactGroup = "inline-flex items-center gap-2 rounded-xl border border-gray-200 p-1";
+  const compactGroup =
+    "inline-flex items-center gap-2 rounded-xl border border-gray-200 p-1";
   const btnBase = "rounded-lg px-2.5 py-1 text-xs font-medium transition";
   const favs = favorites || [];
 
@@ -215,8 +252,13 @@ export default function PriceUnitsToggle({
       {/* header */}
       <div className={`flex items-center justify-between ${compactCls}`}>
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-900">Unit & Strategy</span>
-          <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600" title="Active profile">
+          <span className="text-sm font-medium text-gray-900">
+            Unit & Strategy
+          </span>
+          <span
+            className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600"
+            title="Active profile"
+          >
             {profile.label || "Household Normalization"}
           </span>
         </div>
@@ -270,9 +312,15 @@ export default function PriceUnitsToggle({
       </div>
 
       {/* controls */}
-      <div className={`flex flex-wrap items-center justify-between gap-3 ${compactCls} pt-0`}>
+      <div
+        className={`flex flex-wrap items-center justify-between gap-3 ${compactCls} pt-0`}
+      >
         {/* System selector */}
-        <div className={compactGroup} role="radiogroup" aria-label="Measurement system">
+        <div
+          className={compactGroup}
+          role="radiogroup"
+          aria-label="Measurement system"
+        >
           {["auto", "metric", "imperial"].map((opt) => (
             <button
               key={opt}
@@ -285,7 +333,11 @@ export default function PriceUnitsToggle({
               }`}
               aria-pressed={profile.preferredSystem === opt}
             >
-              {opt === "auto" ? "Auto" : opt === "metric" ? "Metric" : "Imperial"}
+              {opt === "auto"
+                ? "Auto"
+                : opt === "metric"
+                ? "Metric"
+                : "Imperial"}
             </button>
           ))}
         </div>
@@ -294,9 +346,15 @@ export default function PriceUnitsToggle({
         <div className={compactGroup} aria-label="Per-100 display toggles">
           <button
             type="button"
-            onClick={() => updateProfile({ showPerHundred: { mass: !profile.showPerHundred.mass } })}
+            onClick={() =>
+              updateProfile({
+                showPerHundred: { mass: !profile.showPerHundred.mass },
+              })
+            }
             className={`${btnBase} ${
-              profile.showPerHundred.mass ? "bg-emerald-600 text-white" : "text-gray-700 hover:bg-gray-100"
+              profile.showPerHundred.mass
+                ? "bg-emerald-600 text-white"
+                : "text-gray-700 hover:bg-gray-100"
             }`}
             aria-pressed={profile.showPerHundred.mass}
             title="Toggle per-100g vs per-g"
@@ -306,9 +364,15 @@ export default function PriceUnitsToggle({
 
           <button
             type="button"
-            onClick={() => updateProfile({ showPerHundred: { volume: !profile.showPerHundred.volume } })}
+            onClick={() =>
+              updateProfile({
+                showPerHundred: { volume: !profile.showPerHundred.volume },
+              })
+            }
             className={`${btnBase} ${
-              profile.showPerHundred.volume ? "bg-sky-600 text-white" : "text-gray-700 hover:bg-gray-100"
+              profile.showPerHundred.volume
+                ? "bg-sky-600 text-white"
+                : "text-gray-700 hover:bg-gray-100"
             }`}
             aria-pressed={profile.showPerHundred.volume}
             title="Toggle per-100mL vs per-mL"
@@ -326,7 +390,9 @@ export default function PriceUnitsToggle({
                 type="button"
                 onClick={() => updateStrategy(opt)}
                 className={`${btnBase} ${
-                  strategy === opt ? "bg-indigo-600 text-white" : "text-gray-700 hover:bg-gray-100"
+                  strategy === opt
+                    ? "bg-indigo-600 text-white"
+                    : "text-gray-700 hover:bg-gray-100"
                 }`}
                 aria-pressed={strategy === opt}
                 title={`Compare by ${labelForStrategy(opt)}`}
@@ -361,7 +427,10 @@ function FavoriteSelect({ favorites, onApply, onDelete }) {
         <div className="absolute right-0 z-10 mt-1 w-72 rounded-xl border border-gray-200 bg-white p-2 shadow-lg">
           <ul className="max-h-60 overflow-auto text-sm">
             {favorites.map((f) => (
-              <li key={f.id} className="flex items-center justify-between gap-2 rounded-lg px-2 py-1 hover:bg-gray-50">
+              <li
+                key={f.id}
+                className="flex items-center justify-between gap-2 rounded-lg px-2 py-1 hover:bg-gray-50"
+              >
                 <button
                   type="button"
                   onClick={() => onApply?.(f.id)}

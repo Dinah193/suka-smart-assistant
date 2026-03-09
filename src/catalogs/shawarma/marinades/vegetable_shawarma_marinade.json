@@ -1,0 +1,215 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+  "meta": {
+    "id": "shawarma.marinades.vegetable_shawarma_marinade",
+    "type": "recipe",
+    "domain": "shawarma",
+    "locale": "en-US",
+    "label": "Vegetable Shawarma Marinade",
+    "tags": [
+      "marinade",
+      "shawarma",
+      "vegetarian",
+      "vegan",
+      "middle_eastern",
+      "spice_blend",
+      "citrus",
+      "garlic_forward",
+      "herb_forward",
+      "make_ahead",
+      "batch_friendly",
+      "roast",
+      "grill",
+      "stovetop"
+    ],
+    "source": {
+      "curation": "ssa",
+      "author": "SSA Catalog",
+      "notes": "High-impact shawarma-style marinade for vegetables (and mushrooms/tofu): warm spices, garlic, citrus, and herbs."
+    }
+  },
+  "ingredients": [
+    {
+      "id": "ing.olive_oil",
+      "label": "Olive oil",
+      "amount": { "value": 60, "unit": "ml" },
+      "notes": ["About 1/4 cup."]
+    },
+    {
+      "id": "ing.lemon_juice",
+      "label": "Fresh lemon juice",
+      "amount": { "value": 45, "unit": "ml" },
+      "notes": ["About 3 tablespoons."]
+    },
+    {
+      "id": "ing.vinegar.apple_cider",
+      "label": "Apple cider vinegar",
+      "amount": { "value": 15, "unit": "ml" },
+      "notes": ["Sub: red wine vinegar or white vinegar."]
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic, grated or pressed",
+      "amount": { "value": 15, "unit": "g" },
+      "notes": ["About 4–5 medium cloves."]
+    },
+    {
+      "id": "ing.tomato_paste",
+      "label": "Tomato paste",
+      "amount": { "value": 20, "unit": "g" },
+      "notes": [
+        "About 1 tablespoon; optional but recommended for depth and color.",
+        "If avoiding tomato, omit and add +5 ml olive oil."
+      ]
+    },
+    {
+      "id": "ing.cumin_ground",
+      "label": "Ground cumin",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": ["About 2 teaspoons."]
+    },
+    {
+      "id": "ing.coriander_ground",
+      "label": "Ground coriander",
+      "amount": { "value": 4, "unit": "g" },
+      "notes": ["About 1 1/2 teaspoons."]
+    },
+    {
+      "id": "ing.paprika",
+      "label": "Paprika (sweet)",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": ["About 2 teaspoons."]
+    },
+    {
+      "id": "ing.paprika_smoked",
+      "label": "Smoked paprika",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": ["About 1 teaspoon; optional for smoky roast vibe."]
+    },
+    {
+      "id": "ing.turmeric_ground",
+      "label": "Ground turmeric",
+      "amount": { "value": 2.5, "unit": "g" },
+      "notes": ["About 1 teaspoon; color + earthiness."]
+    },
+    {
+      "id": "ing.allspice_ground",
+      "label": "Ground allspice",
+      "amount": { "value": 1.5, "unit": "g" },
+      "notes": ["About 1/2 teaspoon; classic shawarma warmth."]
+    },
+    {
+      "id": "ing.cinnamon_ground",
+      "label": "Ground cinnamon",
+      "amount": { "value": 0.8, "unit": "g" },
+      "notes": ["About 1/4 teaspoon; optional but authentic."]
+    },
+    {
+      "id": "ing.black_pepper",
+      "label": "Black pepper, freshly ground",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": ["About 3/4 teaspoon."]
+    },
+    {
+      "id": "ing.salt.kosher",
+      "label": "Kosher salt",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": [
+        "About 1 1/2 teaspoons. Sized for ~900–1200 g (2–2.5 lb) vegetables.",
+        "If you salt vegetables separately, reduce to 5–6 g."
+      ]
+    },
+    {
+      "id": "ing.oregano_dried",
+      "label": "Dried oregano",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": ["About 1 teaspoon; optional."]
+    },
+    {
+      "id": "ing.thyme_dried",
+      "label": "Dried thyme",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": ["About 1/2 teaspoon; optional."]
+    },
+    {
+      "id": "ing.sumac",
+      "label": "Ground sumac",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": [
+        "About 1 teaspoon; optional but adds bright, tangy shawarma note."
+      ]
+    },
+    {
+      "id": "ing.chili_flakes",
+      "label": "Crushed red pepper flakes",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": ["Optional for heat (about 1/2 teaspoon)."]
+    },
+    {
+      "id": "ing.honey",
+      "label": "Honey (or maple syrup for vegan)",
+      "amount": { "value": 8, "unit": "g" },
+      "notes": [
+        "Optional: improves browning on roasted veggies (about 1 teaspoon).",
+        "Use maple syrup for vegan."
+      ]
+    },
+    {
+      "id": "ing.water",
+      "label": "Water (as needed)",
+      "amount": { "value": 15, "unit": "ml" },
+      "notes": [
+        "Optional: helps disperse tomato paste/spices if the marinade is too thick.",
+        "Add 1 tsp (5 ml) at a time."
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.01",
+      "title": "Whisk the marinade",
+      "instructions": [
+        "In a bowl, whisk olive oil, lemon juice, vinegar, garlic, and tomato paste (if using) until smooth.",
+        "Whisk in all spices, black pepper, salt, optional dried herbs, optional sumac, optional chili flakes, and optional honey/maple.",
+        "If the marinade feels too thick to coat evenly, whisk in a little water (5–15 ml total) until pourable."
+      ]
+    },
+    {
+      "id": "step.02",
+      "title": "What to marinate (suggestions)",
+      "instructions": [
+        "Works especially well with: mushrooms, cauliflower florets, zucchini, eggplant, bell peppers, onions, chickpeas, and tofu/tempeh.",
+        "Cut vegetables into bite-size pieces for even cooking and flavor coverage."
+      ]
+    },
+    {
+      "id": "step.03",
+      "title": "Marinate time",
+      "instructions": [
+        "Toss vegetables thoroughly with marinade in a bowl or zip bag.",
+        "Rest 20–30 minutes at room temperature for quick flavor, or refrigerate 2–8 hours for deeper seasoning.",
+        "If using delicate vegetables (zucchini) or tofu, 30–120 minutes is usually enough."
+      ]
+    },
+    {
+      "id": "step.04",
+      "title": "Cooking guidance (notes)",
+      "instructions": [
+        "Roast: spread on a sheet pan (avoid overcrowding), roast hot (220–240°C / 425–465°F) until browned and tender, flipping once.",
+        "Grill: skewers or grill basket works well; cook over medium-high heat until charred.",
+        "Stovetop: cook in a hot skillet with a thin film of oil until browned, then finish until tender.",
+        "For maximum browning, wipe off excess wet marinade and let surfaces dry slightly before cooking."
+      ]
+    },
+    {
+      "id": "step.05",
+      "title": "Food safety",
+      "instructions": [
+        "If you marinate in the refrigerator, keep vegetables covered and chilled.",
+        "This marinade is vegan-friendly if you use maple syrup instead of honey."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,370 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T01:47:00.000Z",
+
+  "meta": {
+    "id": "cuisines.italian.recipes.carbonara",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Spaghetti alla Carbonara",
+    "subtitle": "Egg-and-cheese emulsion with cured pork and black pepper (no cream)",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa-core",
+      "notes": [
+        "Canonical Roman-style carbonara: eggs + Pecorino Romano (or Pecorino/Parm blend), guanciale (or pancetta), and lots of black pepper.",
+        "No cream. Sauce forms by emulsifying egg/cheese with hot pasta water off heat."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.italian",
+    "subprofiles": ["italian.roman", "italian.weeknight"],
+    "category": "pasta",
+    "mealArchetypes": ["plates", "bowls"],
+    "servingStyles": ["plated_meals", "bowls"],
+    "plannerTags": [
+      "cuisine.italian",
+      "category.pasta",
+      "roman_style",
+      "weeknight.friendly",
+      "quick",
+      "high_protein",
+      "contains_dairy",
+      "contains_egg",
+      "contains_gluten",
+      "pork"
+    ]
+  },
+
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 1, "unit": "bowl" },
+    "notes": "4 generous servings (or 5 smaller)."
+  },
+
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 10,
+    "totalMins": 30
+  },
+
+  "difficulty": "intermediate",
+
+  "signals": {
+    "batchFriendly": "medium",
+    "weeknightPossible": true,
+    "leftoversGood": false,
+    "freezerFriendly": "low",
+    "notes": [
+      "Best eaten immediately; reheating can scramble eggs.",
+      "If you must reheat, use low heat + splash of water, stirring constantly."
+    ]
+  },
+
+  "tasteProfile": {
+    "saltiness": 4,
+    "umami": 5,
+    "sweetness": 0,
+    "sourness": 0,
+    "heat": 0,
+    "oilUse": 2,
+    "notes": [
+      "Saltiness comes from cheese + cured pork; go easy on salting the pasta water.",
+      "Black pepper should be bold and aromatic."
+    ]
+  },
+
+  "equipment": {
+    "recommended": [
+      "tool.stockpot",
+      "tool.large_skillet",
+      "tool.tongs",
+      "tool.mixing_bowl",
+      "tool.whisk",
+      "tool.microplane",
+      "tool.measuring_cups",
+      "tool.measuring_spoons"
+    ],
+    "minimum": [
+      "tool.stockpot",
+      "tool.skillet",
+      "tool.bowl",
+      "tool.fork_or_whisk"
+    ],
+    "optional": [
+      {
+        "id": "tool.instant_read_thermometer",
+        "label": "Instant-read thermometer",
+        "required": false,
+        "notes": "Helpful to keep sauce zone ~65–75°C / 150–170°F (hot enough to thicken, not scramble)."
+      }
+    ]
+  },
+
+  "dietFlags": [],
+  "allergens": ["allergen.gluten", "allergen.egg", "allergen.dairy"],
+
+  "ingredients": [
+    {
+      "id": "pasta.spaghetti",
+      "label": "Spaghetti",
+      "role": "starch",
+      "amount": { "value": 400, "unit": "g" },
+      "notes": "Bucatini also works."
+    },
+    {
+      "id": "protein.guanciale",
+      "label": "Guanciale, cut into lardons",
+      "role": "protein",
+      "amount": { "value": 150, "unit": "g" },
+      "notes": "Best choice. Substitute pancetta if needed."
+    },
+    {
+      "id": "egg.whole",
+      "label": "Large eggs",
+      "role": "binder",
+      "amount": { "value": 2, "unit": "each" }
+    },
+    {
+      "id": "egg.yolk",
+      "label": "Egg yolks",
+      "role": "binder",
+      "amount": { "value": 2, "unit": "each" },
+      "notes": "Extra yolks make the sauce richer and more stable."
+    },
+    {
+      "id": "cheese.pecorino_romano",
+      "label": "Pecorino Romano, finely grated",
+      "role": "umami",
+      "amount": { "value": 80, "unit": "g" },
+      "notes": "Option: blend with Parmigiano-Reggiano if you want it slightly less sharp."
+    },
+    {
+      "id": "pepper.black",
+      "label": "Freshly ground black pepper",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Use more to taste; pepper is signature."
+    },
+    {
+      "id": "salt.kosher",
+      "label": "Kosher salt (for pasta water)",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "tbsp" },
+      "notes": "Adjust based on saltiness of cheese/pork."
+    },
+    {
+      "id": "water.pasta",
+      "label": "Reserved pasta cooking water",
+      "role": "emulsifier",
+      "amount": { "value": 240, "unit": "ml" },
+      "optional": true,
+      "notes": "You may use 60–180 ml (1/4–3/4 cup) depending on consistency."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_mix_egg_cheese",
+      "title": "Make the egg-cheese base",
+      "instructions": [
+        "In a mixing bowl, whisk together whole eggs and yolks until smooth.",
+        "Whisk in most of the grated Pecorino (reserve a handful for serving).",
+        "Add a generous amount of freshly ground black pepper."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 0,
+      "checks": [
+        "Mixture is thick and cohesive (paste-like is okay).",
+        "Pepper aroma is strong."
+      ]
+    },
+    {
+      "id": "step_02_render_guanciale",
+      "title": "Render the guanciale",
+      "instructions": [
+        "Place guanciale in a cold skillet and set over medium-low heat.",
+        "Cook slowly until fat renders and pieces are crisp-golden, 8–12 minutes.",
+        "Turn off heat. Keep the rendered fat in the pan."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 6,
+      "timers": [{ "label": "Render guanciale", "minutes": 10 }],
+      "checks": [
+        "Guanciale is crisp on edges, not burnt.",
+        "Pan has a pool of rendered fat."
+      ]
+    },
+    {
+      "id": "step_03_cook_pasta",
+      "title": "Cook pasta and reserve water",
+      "instructions": [
+        "Bring a large pot of water to a boil; salt it (moderately).",
+        "Cook spaghetti until just al dente (about 1–2 minutes shy of package time).",
+        "Before draining, reserve at least 1 cup (240 ml) of starchy pasta water."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 8,
+      "timers": [{ "label": "Pasta cook (to al dente)", "minutes": 9 }],
+      "checks": [
+        "Pasta is al dente (firm bite).",
+        "Reserved water is cloudy/starchy."
+      ]
+    },
+    {
+      "id": "step_04_emulsify_off_heat",
+      "title": "Emulsify into a glossy sauce (off heat)",
+      "instructions": [
+        "Add drained pasta to the skillet with guanciale and rendered fat (heat OFF). Toss to coat.",
+        "Let the pasta cool for 30–60 seconds (important: too hot can scramble eggs).",
+        "Add a small splash of pasta water (2–3 tbsp) and toss.",
+        "Pour in the egg-cheese mixture while tossing constantly with tongs.",
+        "Add pasta water a little at a time until the sauce turns glossy and clings to the pasta."
+      ],
+      "activeMins": 7,
+      "handsOffMins": 1,
+      "timers": [{ "label": "Cool pasta briefly", "seconds": 45 }],
+      "checks": [
+        "Sauce is glossy and creamy, not clumpy.",
+        "No visible scrambled egg bits."
+      ]
+    },
+    {
+      "id": "step_05_finish_serve",
+      "title": "Finish and serve",
+      "instructions": [
+        "Taste and adjust with more black pepper and a little more cheese if desired.",
+        "Serve immediately with reserved Pecorino on top and extra pepper."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "checks": ["Dish is hot, glossy, and creamy (no cream used)."]
+    }
+  ],
+
+  "safety": {
+    "notes": [
+      "This recipe uses eggs that are gently thickened by hot pasta and residual heat. Use fresh, properly refrigerated eggs.",
+      "If serving to high-risk individuals (pregnant, immunocompromised), consider using pasteurized eggs."
+    ]
+  },
+
+  "storage": {
+    "refrigerate": {
+      "notes": [
+        "Best eaten fresh; refrigerate leftovers up to 2 days.",
+        "Sauce will tighten in the fridge."
+      ]
+    },
+    "reheat": {
+      "notes": [
+        "Reheat gently in a skillet over low heat with a splash of water, stirring constantly.",
+        "Avoid microwaving on high (risk of curdling/scrambling)."
+      ]
+    }
+  },
+
+  "notes": [
+    "No cream: the creamy texture comes from egg + cheese + starchy water emulsion.",
+    "If your sauce is too thick, add more hot pasta water 1 tbsp at a time.",
+    "If sauce looks thin, toss longer; it thickens as the eggs gently set."
+  ],
+
+  "variations": [
+    {
+      "id": "variation_pancetta",
+      "label": "Use pancetta if guanciale is unavailable",
+      "when": { "ingredientMissing": "protein.guanciale" },
+      "adapt": {
+        "notes": [
+          "Swap equal weight pancetta. It’s slightly less rich; add a small drizzle of olive oil if pan seems dry."
+        ],
+        "swapIngredients": [
+          {
+            "from": "protein.guanciale",
+            "to": "protein.pancetta"
+          }
+        ]
+      }
+    },
+    {
+      "id": "variation_pecorino_parm_blend",
+      "label": "Pecorino + Parmigiano blend",
+      "when": { "preference": "less_sharp" },
+      "adapt": {
+        "notes": [
+          "Use 50 g Pecorino + 30 g Parmigiano-Reggiano for a rounder profile."
+        ]
+      }
+    },
+    {
+      "id": "variation_bucatini",
+      "label": "Bucatini carbonara",
+      "when": { "pasta": "bucatini" },
+      "adapt": {
+        "notes": [
+          "Bucatini holds sauce well; cook to al dente and emulsify the same way."
+        ],
+        "swapIngredients": [
+          {
+            "from": "pasta.spaghetti",
+            "to": "pasta.bucatini"
+          }
+        ]
+      }
+    }
+  ],
+
+  "planner": {
+    "roles": [
+      { "role": "starch", "ids": ["pasta.spaghetti"] },
+      { "role": "protein", "ids": ["protein.guanciale"] },
+      { "role": "binder", "ids": ["egg.whole", "egg.yolk"] },
+      { "role": "umami", "ids": ["cheese.pecorino_romano"] },
+      { "role": "spice", "ids": ["pepper.black"] }
+    ],
+    "pairWith": {
+      "sides": [
+        "salad.simple_green",
+        "veg.roasted_broccoli",
+        "veg.sauteed_greens"
+      ],
+      "notes": [
+        "A bright salad balances the richness.",
+        "Keep sides simple; carbonara is the star."
+      ]
+    },
+    "makeAhead": {
+      "notes": [
+        "Prep: grate cheese and cut guanciale ahead.",
+        "Cook pasta and emulsify right before serving."
+      ]
+    }
+  },
+
+  "methods": ["technique.boil", "technique.saute", "technique.emulsify"],
+
+  "compat": {
+    "aliases": [
+      "carbonara",
+      "spaghetti carbonara",
+      "spaghetti alla carbonara",
+      "roman carbonara"
+    ],
+    "keywordBoost": [
+      "guanciale",
+      "pecorino",
+      "egg yolk",
+      "no cream",
+      "emulsion"
+    ],
+    "normalization": {
+      "titleCaseFold": true,
+      "preferredIdCase": "lower"
+    }
+  }
+}

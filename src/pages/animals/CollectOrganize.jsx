@@ -1,6 +1,12 @@
 /* eslint-disable no-console */
 // src/pages/animals/CollectOrganize.jsx
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 /**
  * CollectOrganize — Animals (Care + Butchery)
@@ -23,37 +29,14 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 // ----------------------------
 // Optional external services (safe shims)
 // ----------------------------
-const useSafeEventBus = () => {
-  const [bus, setBus] = useState(null);
-  useEffect(() => {
-    let mounted = true;
-    // Try to dynamically import a shared eventBus if it exists in this project
-    (async () => {
-      try {
-        // Adjust the path if your event bus lives elsewhere; this is try/catch guarded
-        const mod = await import(/* webpackIgnore: true */ "../../services/eventBus.js").catch(() => null);
-        if (mounted && mod?.eventBus) setBus(mod.eventBus);
-      } catch (e) {
-        // Fall through to local shim
-      } finally {
-        if (mounted && !bus) setBus(createLocalBus());
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
-  return bus ?? createLocalBus();
-};
-
 function createLocalBus() {
-  // tiny emitter
   const listeners = {};
   return {
     on(evt, cb) {
       listeners[evt] = listeners[evt] || [];
       listeners[evt].push(cb);
-      return () => (listeners[evt] = (listeners[evt] || []).filter((f) => f !== cb));
+      return () =>
+        (listeners[evt] = (listeners[evt] || []).filter((f) => f !== cb));
     },
     emit(evt, payload) {
       (listeners[evt] || []).forEach((cb) => {
@@ -67,13 +50,48 @@ function createLocalBus() {
   };
 }
 
+const useSafeEventBus = () => {
+  // Stable fallback bus instance
+  const fallbackRef = useRef(null);
+  if (!fallbackRef.current) fallbackRef.current = createLocalBus();
+
+  const [bus, setBus] = useState(() => fallbackRef.current);
+
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      try {
+        // If you keep your event bus elsewhere, adjust this path.
+        const mod = await import(
+          /* webpackIgnore: true */ "../../services/events/eventBus.js"
+        ).catch(() => null);
+
+        if (mounted && mod?.eventBus) {
+          setBus(() => mod.eventBus);
+        }
+      } catch (e) {
+        // stay on fallback bus
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  return bus;
+};
+
 const useSafeNBA = () => {
   const [invoke, setInvoke] = useState(() => () => {});
   useEffect(() => {
     let mounted = true;
     (async () => {
       try {
-        const mod = await import(/* webpackIgnore: true */ "../../services/nbaOrchestrator.js").catch(() => null);
+        const mod = await import(
+          /* webpackIgnore: true */ "../../services/nbaOrchestrator.js"
+        ).catch(() => null);
         if (mounted && mod?.invokeNBA) setInvoke(() => mod.invokeNBA);
       } catch (e) {
         // leave as no-op
@@ -92,17 +110,81 @@ const useSafeNBA = () => {
 const LS_KEY = "animals.collect.draft.v1";
 
 const SPECIES_PRESETS = [
-  { key: "sheep", tags: ["ruminant", "wool", "meat"], vaccines: ["CD/T"], deworm: "quarterly" },
-  { key: "goat", tags: ["ruminant", "milk"], vaccines: ["CD/T"], deworm: "quarterly" },
-  { key: "chicken", tags: ["poultry", "eggs", "meat"], vaccines: ["Marek’s?"], deworm: "semiannual" },
-  { key: "cow", tags: ["ruminant", "milk", "beef"], vaccines: ["7-way? region"], deworm: "quarterly" },
+  {
+    key: "sheep",
+    tags: ["ruminant", "wool", "meat"],
+    vaccines: ["CD/T"],
+    deworm: "quarterly",
+  },
+  {
+    key: "goat",
+    tags: ["ruminant", "milk"],
+    vaccines: ["CD/T"],
+    deworm: "quarterly",
+  },
+  {
+    key: "chicken",
+    tags: ["poultry", "eggs", "meat"],
+    vaccines: ["Marek’s?"],
+    deworm: "semiannual",
+  },
+  {
+    key: "cow",
+    tags: ["ruminant", "milk", "beef"],
+    vaccines: ["7-way? region"],
+    deworm: "quarterly",
+  },
 ];
 
-const PURPOSE_OPTIONS = ["breeding", "milk", "eggs", "meat", "fiber", "guardian", "pet"];
-const STATUS_OPTIONS = ["active", "quarantine", "sold", "butcher-queued", "deceased"];
+const PURPOSE_OPTIONS = [
+  "breeding",
+  "milk",
+  "eggs",
+  "meat",
+  "fiber",
+  "guardian",
+  "pet",
+];
+
+const STATUS_OPTIONS = [
+  "active",
+  "quarantine",
+  "sold",
+  "butcher-queued",
+  "deceased",
+];
 
 function uid(prefix = "a") {
   return `${prefix}_${Math.random().toString(36).slice(2, 9)}`;
+}
+
+function splitTags(raw) {
+  if (!raw) return [];
+  return raw
+    .split(/[,\s]+/)
+    .map((t) => t.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+function scaffoldHealth(species) {
+  const preset = SPECIES_PRESETS.find(
+    (p) => p.key === (species || "").toLowerCase()
+  );
+  return {
+    vaccinePlan: preset?.vaccines || [],
+    dewormPlan: preset?.deworm || "semiannual",
+    nextDue: null,
+    notes: "",
+  };
+}
+
+function inferTagsFromSpecies(animal) {
+  const preset = SPECIES_PRESETS.find(
+    (p) => p.key === (animal.species || "").toLowerCase()
+  );
+  const merged = new Set([...(animal.tags || []), ...(preset?.tags || [])]);
+  if (animal.purpose) merged.add(animal.purpose);
+  return Array.from(merged);
 }
 
 function parseBulk(text) {
@@ -131,7 +213,6 @@ function parseBulk(text) {
           butchery: {},
         };
       }
-      // simple line fallback
       const parts = line.split("|").map((s) => s.trim());
       const [nameGuess, speciesGuess, purposeGuess] = parts;
       return {
@@ -151,33 +232,7 @@ function parseBulk(text) {
     });
 }
 
-function splitTags(raw) {
-  if (!raw) return [];
-  return raw
-    .split(/[,\s]+/)
-    .map((t) => t.trim().toLowerCase())
-    .filter(Boolean);
-}
-
-function scaffoldHealth(species) {
-  const preset = SPECIES_PRESETS.find((p) => p.key === (species || "").toLowerCase());
-  return {
-    vaccinePlan: preset?.vaccines || [],
-    dewormPlan: preset?.deworm || "semiannual",
-    nextDue: null,
-    notes: "",
-  };
-}
-
-function inferTagsFromSpecies(animal) {
-  const preset = SPECIES_PRESETS.find((p) => p.key === (animal.species || "").toLowerCase());
-  const merged = new Set([...(animal.tags || []), ...(preset?.tags || [])]);
-  if (animal.purpose) merged.add(animal.purpose);
-  return Array.from(merged);
-}
-
 function buildRunbook(task) {
-  // Portable runbook structure; compatible with `animalExecutor.toRunbook` if present
   const base = {
     id: uid("runbook"),
     title: task.title || "Animal Task",
@@ -187,6 +242,7 @@ function buildRunbook(task) {
     ppe: task.ppe || ["gloves"],
     sanitize: true,
   };
+
   if (base.kind === "butchery") {
     base.chillChain = { maxMinutesOut: 20, ...(task.chillChain || {}) };
   }
@@ -196,10 +252,11 @@ function buildRunbook(task) {
   return base;
 }
 
-// Attempt to use animalExecutor if present for richer steps
 async function safeAnimalExecutor(task) {
   try {
-    const mod = await import(/* webpackIgnore: true */ "../../adapters/execution/animalExecutor.js").catch(() => null);
+    const mod = await import(
+      /* webpackIgnore: true */ "../../adapters/execution/animalExecutor.js"
+    ).catch(() => null);
     if (mod && typeof mod.toRunbook === "function") {
       return mod.toRunbook(task);
     }
@@ -236,7 +293,9 @@ function Field({ label, children, hint, required }) {
       <div className="text-xs uppercase tracking-wide mb-1 flex items-center gap-2">
         <span>{label}</span>
         {required ? <span className="text-red-500">*</span> : null}
-        {hint ? <span className="text-[10px] text-gray-500">• {hint}</span> : null}
+        {hint ? (
+          <span className="text-[10px] text-gray-500">• {hint}</span>
+        ) : null}
       </div>
       {children}
     </label>
@@ -276,14 +335,16 @@ function Toast({ toast, onUndo, onClose }) {
       {toast.canUndo ? (
         <button
           className="underline text-sm mr-2"
-          onClick={() => {
-            onUndo?.(toast);
-          }}
+          onClick={() => onUndo?.(toast)}
         >
           Undo
         </button>
       ) : null}
-      <button className="opacity-80 hover:opacity-100" aria-label="close" onClick={onClose}>
+      <button
+        className="opacity-80 hover:opacity-100"
+        aria-label="close"
+        onClick={onClose}
+      >
         ×
       </button>
     </div>
@@ -335,6 +396,12 @@ export default function CollectOrganize() {
     );
   }, [filter, rows]);
 
+  const raiseToast = useCallback((title, message, canUndo) => {
+    setToast({ id: uid("t"), title, message, canUndo });
+  }, []);
+
+  const dismissToast = useCallback(() => setToast(null), []);
+
   // Actions
   const addQuick = useCallback(() => {
     const draft = {
@@ -349,7 +416,12 @@ export default function CollectOrganize() {
       status: "active",
       records: { source: {}, docs: [] },
       health: scaffoldHealth(""),
-      butchery: { targetWeight: "", targetDate: "", chillChain: true, cutsIntent: [] },
+      butchery: {
+        targetWeight: "",
+        targetDate: "",
+        chillChain: true,
+        cutsIntent: [],
+      },
     };
     setRows((s) => [draft, ...s]);
   }, []);
@@ -357,31 +429,40 @@ export default function CollectOrganize() {
   const addBulk = useCallback(() => {
     if (!bulkText.trim()) return;
     const parsed = parseBulk(bulkText);
-    // auto-infer tags/species presets
-    const enriched = parsed.map((a) => ({ ...a, tags: inferTagsFromSpecies(a) }));
+    const enriched = parsed.map((a) => ({
+      ...a,
+      tags: inferTagsFromSpecies(a),
+    }));
     setRows((s) => [...enriched, ...s]);
     setBulkText("");
-    raiseToast("Bulk import complete", `${enriched.length} records added. You can now organize & tag.`, false);
-  }, [bulkText]);
+    raiseToast(
+      "Bulk import complete",
+      `${enriched.length} records added. You can now organize & tag.`,
+      false
+    );
+  }, [bulkText, raiseToast]);
 
-  const removeRow = useCallback((id) => {
-    setRows((s) => {
-      const idx = s.findIndex((r) => r.id === id);
-      if (idx === -1) return s;
-      const copy = [...s];
-      const [removed] = copy.splice(idx, 1);
-      lastRemovedRef.current = removed;
-      return copy;
-    });
-    raiseToast("Removed", "Animal removed from draft.", true);
-  }, []);
+  const removeRow = useCallback(
+    (id) => {
+      setRows((s) => {
+        const idx = s.findIndex((r) => r.id === id);
+        if (idx === -1) return s;
+        const copy = [...s];
+        const [removed] = copy.splice(idx, 1);
+        lastRemovedRef.current = removed;
+        return copy;
+      });
+      raiseToast("Removed", "Animal removed from draft.", true);
+    },
+    [raiseToast]
+  );
 
   const undoRemove = useCallback(() => {
     if (!lastRemovedRef.current) return;
     setRows((s) => [lastRemovedRef.current, ...s]);
     lastRemovedRef.current = null;
     dismissToast();
-  }, []);
+  }, [dismissToast]);
 
   const normalizeAll = useCallback(() => {
     setRows((s) =>
@@ -391,19 +472,20 @@ export default function CollectOrganize() {
         health: r.health?.vaccinePlan ? r.health : scaffoldHealth(r.species),
       }))
     );
-    raiseToast("Normalized", "Tags & health scaffold refreshed for all.", false);
-  }, []);
+    raiseToast(
+      "Normalized",
+      "Tags & health scaffold refreshed for all.",
+      false
+    );
+  }, [raiseToast]);
 
   const sendTo = useCallback(
     async (target) => {
-      // Emit events and play nice with optional services.
       const payload = { target, items: rows, at: Date.now(), kind: "animals" };
       eventBus.emit("export.requested", payload);
 
-      // optimistic "success"
       raiseToast("Sent", `Exported ${rows.length} animals to ${target}.`, true);
 
-      // Optional: integrate with NBA
       try {
         invokeNBA?.({
           reason: "animals_export",
@@ -413,17 +495,15 @@ export default function CollectOrganize() {
         // no-op
       }
     },
-    [rows, eventBus, invokeNBA]
+    [rows, eventBus, invokeNBA, raiseToast]
   );
 
   const clearAll = useCallback(() => {
+    // eslint-disable-next-line no-restricted-globals
     if (!confirm("Clear all draft animals? This cannot be undone.")) return;
     setRows([]);
     raiseToast("Cleared", "All draft animals removed.", false);
-  }, []);
-
-  const raiseToast = (title, message, canUndo) => setToast({ id: uid("t"), title, message, canUndo });
-  const dismissToast = () => setToast(null);
+  }, [raiseToast]);
 
   // Runbook preview (batched)
   const [runbooks, setRunbooks] = useState([]);
@@ -431,16 +511,26 @@ export default function CollectOrganize() {
     const tasks = await Promise.all(
       rows.map((r) =>
         safeAnimalExecutor({
-          title: r.status === "butcher-queued" ? `Butchery: ${r.name || r.species || r.id}` : `Care: ${r.name || r.species || r.id}`,
+          title:
+            r.status === "butcher-queued"
+              ? `Butchery: ${r.name || r.species || r.id}`
+              : `Care: ${r.name || r.species || r.id}`,
           kind: r.status === "butcher-queued" ? "butchery" : "care",
           estMinutes: r.status === "butcher-queued" ? 120 : 10,
           flags: r.status === "butcher-queued" ? ["raw-meat", "biohazard"] : [],
-          chillChain: r.status === "butcher-queued" ? { maxMinutesOut: 20 } : undefined,
+          chillChain:
+            r.status === "butcher-queued" ? { maxMinutesOut: 20 } : undefined,
           feed:
             r.status !== "butcher-queued"
-              ? { items: [{ name: "feed", amount: "per ration" }], waterCheck: true }
+              ? {
+                  items: [{ name: "feed", amount: "per ration" }],
+                  waterCheck: true,
+                }
               : undefined,
-          ppe: r.status === "butcher-queued" ? ["gloves", "apron", "face shield"] : ["gloves"],
+          ppe:
+            r.status === "butcher-queued"
+              ? ["gloves", "apron", "face shield"]
+              : ["gloves"],
         })
       )
     );
@@ -449,11 +539,11 @@ export default function CollectOrganize() {
   }, [rows]);
 
   // Inline helpers to update row fields
-  const updateRow = (id, patch) => {
+  const updateRow = useCallback((id, patch) => {
     setRows((s) => s.map((r) => (r.id === id ? { ...r, ...patch } : r)));
-  };
+  }, []);
 
-  const appendTag = (id, tag) => {
+  const appendTag = useCallback((id, tag) => {
     setRows((s) =>
       s.map((r) => {
         if (r.id !== id) return r;
@@ -461,16 +551,16 @@ export default function CollectOrganize() {
         return { ...r, tags: Array.from(next) };
       })
     );
-  };
+  }, []);
 
-  const removeTag = (id, tag) => {
+  const removeTag = useCallback((id, tag) => {
     setRows((s) =>
       s.map((r) => {
         if (r.id !== id) return r;
         return { ...r, tags: (r.tags || []).filter((t) => t !== tag) };
       })
     );
-  };
+  }, []);
 
   // ----------------------------
   // Render
@@ -479,12 +569,15 @@ export default function CollectOrganize() {
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       <header className="mb-4 md:mb-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl md:text-2xl font-semibold">Animals — Collect & Organize</h1>
-          <div className="flex gap-2">
+          <h1 className="text-xl md:text-2xl font-semibold">
+            Animals — Collect & Organize
+          </h1>
+          <div className="flex gap-2 flex-wrap justify-end">
             <button
               onClick={normalizeAll}
               className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50"
               title="Infer tags & health"
+              type="button"
             >
               Normalize
             </button>
@@ -492,6 +585,7 @@ export default function CollectOrganize() {
               onClick={() => sendTo("Inventory")}
               className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50"
               title="Sync to Inventory as live assets or carcass yields"
+              type="button"
             >
               Send → Inventory
             </button>
@@ -499,6 +593,7 @@ export default function CollectOrganize() {
               onClick={() => sendTo("Task Board")}
               className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50"
               title="Create tasks from care/butchery runbooks"
+              type="button"
             >
               Send → Task Board
             </button>
@@ -506,16 +601,21 @@ export default function CollectOrganize() {
               onClick={() => sendTo("Calendar")}
               className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50"
               title="Schedule health & butchery events"
+              type="button"
             >
               Send → Calendar
             </button>
-            <button onClick={clearAll} className="rounded-lg border px-3 py-2 text-sm hover:bg-red-50 text-red-600">
+            <button
+              onClick={clearAll}
+              className="rounded-lg border px-3 py-2 text-sm hover:bg-red-50 text-red-600"
+              type="button"
+            >
               Clear
             </button>
           </div>
         </div>
 
-        <nav className="mt-4 flex gap-2">
+        <nav className="mt-4 flex gap-2 items-center flex-wrap">
           {[
             { k: "collect", t: "Collect" },
             { k: "organize", t: "Organize" },
@@ -526,8 +626,11 @@ export default function CollectOrganize() {
             <button
               key={x.k}
               onClick={() => setTab(x.k)}
+              type="button"
               className={`px-3 py-1.5 rounded-lg text-sm border ${
-                tab === x.k ? "bg-black text-white border-black" : "hover:bg-gray-50"
+                tab === x.k
+                  ? "bg-black text-white border-black"
+                  : "hover:bg-gray-50"
               }`}
             >
               {x.t}
@@ -549,7 +652,11 @@ export default function CollectOrganize() {
           <SectionCard
             title="Quick Add"
             actions={
-              <button onClick={addQuick} className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50">
+              <button
+                onClick={addQuick}
+                className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+                type="button"
+              >
                 + Row
               </button>
             }
@@ -559,24 +666,36 @@ export default function CollectOrganize() {
                 title="No animals in draft yet"
                 subtitle="Start with a quick row or paste a list on the right."
                 action={
-                  <button onClick={addQuick} className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50">
+                  <button
+                    onClick={addQuick}
+                    className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50"
+                    type="button"
+                  >
                     Add a blank row
                   </button>
                 }
               />
             ) : (
-              <AnimalsTable rows={filteredRows} updateRow={updateRow} removeRow={removeRow} appendTag={appendTag} removeTag={removeTag} />
+              <AnimalsTable
+                rows={filteredRows}
+                updateRow={updateRow}
+                removeRow={removeRow}
+                appendTag={appendTag}
+                removeTag={removeTag}
+              />
             )}
           </SectionCard>
 
           <SectionCard
             title="Bulk Paste / Import"
             actions={
-              <>
-                <button onClick={addBulk} className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50">
-                  Parse & Add
-                </button>
-              </>
+              <button
+                onClick={addBulk}
+                className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
+                type="button"
+              >
+                Parse & Add
+              </button>
             }
           >
             <Field
@@ -592,7 +711,8 @@ export default function CollectOrganize() {
               />
             </Field>
             <p className="text-xs text-gray-600">
-              Tip: Species presets auto-infer tags & health plan. You can refine in the Organize tab.
+              Tip: Species presets auto-infer tags & health plan. You can refine
+              in the Organize tab.
             </p>
           </SectionCard>
         </div>
@@ -606,6 +726,7 @@ export default function CollectOrganize() {
               onClick={() => setTab("health")}
               className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
               title="Next: Health schedules"
+              type="button"
             >
               Next → Health
             </button>
@@ -616,7 +737,11 @@ export default function CollectOrganize() {
               title="Nothing to organize"
               subtitle="Add animals in the Collect tab. Bulk paste works great."
               action={
-                <button onClick={() => setTab("collect")} className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50">
+                <button
+                  onClick={() => setTab("collect")}
+                  className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50"
+                  type="button"
+                >
                   Go to Collect
                 </button>
               }
@@ -628,13 +753,16 @@ export default function CollectOrganize() {
                   <div className="flex items-center justify-between mb-2">
                     <input
                       value={r.name || ""}
-                      onChange={(e) => updateRow(r.id, { name: e.target.value })}
+                      onChange={(e) =>
+                        updateRow(r.id, { name: e.target.value })
+                      }
                       placeholder="Name / Tag"
                       className="font-semibold w-48 border rounded-md px-2 py-1"
                     />
                     <button
                       onClick={() => removeRow(r.id)}
                       className="text-red-600 text-sm rounded-lg border px-2 py-1 hover:bg-red-50"
+                      type="button"
                     >
                       Remove
                     </button>
@@ -644,7 +772,9 @@ export default function CollectOrganize() {
                     <Field label="Species" required>
                       <select
                         value={r.species || ""}
-                        onChange={(e) => updateRow(r.id, { species: e.target.value })}
+                        onChange={(e) =>
+                          updateRow(r.id, { species: e.target.value })
+                        }
                         className="w-full border rounded-md px-2 py-1"
                       >
                         <option value="">—</option>
@@ -658,7 +788,9 @@ export default function CollectOrganize() {
                     <Field label="Breed">
                       <input
                         value={r.breed || ""}
-                        onChange={(e) => updateRow(r.id, { breed: e.target.value })}
+                        onChange={(e) =>
+                          updateRow(r.id, { breed: e.target.value })
+                        }
                         className="w-full border rounded-md px-2 py-1"
                         placeholder="e.g., Katahdin"
                       />
@@ -666,7 +798,9 @@ export default function CollectOrganize() {
                     <Field label="Sex">
                       <select
                         value={r.sex || ""}
-                        onChange={(e) => updateRow(r.id, { sex: e.target.value })}
+                        onChange={(e) =>
+                          updateRow(r.id, { sex: e.target.value })
+                        }
                         className="w-full border rounded-md px-2 py-1"
                       >
                         <option value="">—</option>
@@ -679,7 +813,13 @@ export default function CollectOrganize() {
                         type="number"
                         min="0"
                         value={r.ageMonths ?? ""}
-                        onChange={(e) => updateRow(r.id, { ageMonths: e.target.value ? Number(e.target.value) : undefined })}
+                        onChange={(e) =>
+                          updateRow(r.id, {
+                            ageMonths: e.target.value
+                              ? Number(e.target.value)
+                              : undefined,
+                          })
+                        }
                         className="w-full border rounded-md px-2 py-1"
                         placeholder="e.g., 18"
                       />
@@ -687,7 +827,9 @@ export default function CollectOrganize() {
                     <Field label="Purpose">
                       <select
                         value={r.purpose || ""}
-                        onChange={(e) => updateRow(r.id, { purpose: e.target.value })}
+                        onChange={(e) =>
+                          updateRow(r.id, { purpose: e.target.value })
+                        }
                         className="w-full border rounded-md px-2 py-1"
                       >
                         <option value="">—</option>
@@ -701,7 +843,9 @@ export default function CollectOrganize() {
                     <Field label="Status">
                       <select
                         value={r.status || "active"}
-                        onChange={(e) => updateRow(r.id, { status: e.target.value })}
+                        onChange={(e) =>
+                          updateRow(r.id, { status: e.target.value })
+                        }
                         className="w-full border rounded-md px-2 py-1"
                       >
                         {STATUS_OPTIONS.map((s) => (
@@ -726,7 +870,15 @@ export default function CollectOrganize() {
                       <input
                         value={r?.records?.source?.breeder || ""}
                         onChange={(e) =>
-                          updateRow(r.id, { records: { ...r.records, source: { ...(r.records?.source || {}), breeder: e.target.value } } })
+                          updateRow(r.id, {
+                            records: {
+                              ...(r.records || {}),
+                              source: {
+                                ...((r.records || {}).source || {}),
+                                breeder: e.target.value,
+                              },
+                            },
+                          })
                         }
                         className="w-full border rounded-md px-2 py-1"
                         placeholder="Farm or contact"
@@ -736,7 +888,15 @@ export default function CollectOrganize() {
                       <select
                         value={r?.records?.source?.type || ""}
                         onChange={(e) =>
-                          updateRow(r.id, { records: { ...r.records, source: { ...(r.records?.source || {}), type: e.target.value } } })
+                          updateRow(r.id, {
+                            records: {
+                              ...(r.records || {}),
+                              source: {
+                                ...((r.records || {}).source || {}),
+                                type: e.target.value,
+                              },
+                            },
+                          })
                         }
                         className="w-full border rounded-md px-2 py-1"
                       >
@@ -762,6 +922,7 @@ export default function CollectOrganize() {
               onClick={() => setTab("butchery")}
               className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
               title="Next: Butchery"
+              type="button"
             >
               Next → Butchery
             </button>
@@ -772,7 +933,11 @@ export default function CollectOrganize() {
               title="No animals"
               subtitle="Collect & organize first."
               action={
-                <button onClick={() => setTab("collect")} className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50">
+                <button
+                  onClick={() => setTab("collect")}
+                  className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50"
+                  type="button"
+                >
                   Go to Collect
                 </button>
               }
@@ -781,21 +946,37 @@ export default function CollectOrganize() {
             <div className="grid md:grid-cols-2 gap-4">
               {filteredRows.map((r) => (
                 <div key={r.id} className="rounded-xl border p-4">
-                  <div className="font-semibold mb-2">{r.name || r.species || r.id}</div>
+                  <div className="font-semibold mb-2">
+                    {r.name || r.species || r.id}
+                  </div>
+
                   <Field label="Vaccine Plan">
                     <input
                       value={(r.health?.vaccinePlan || []).join(", ")}
                       onChange={(e) =>
-                        updateRow(r.id, { health: { ...(r.health || {}), vaccinePlan: splitTags(e.target.value) } })
+                        updateRow(r.id, {
+                          health: {
+                            ...(r.health || {}),
+                            vaccinePlan: splitTags(e.target.value),
+                          },
+                        })
                       }
                       className="w-full border rounded-md px-2 py-1"
                       placeholder="Comma separated"
                     />
                   </Field>
+
                   <Field label="Deworm Plan">
                     <select
                       value={r.health?.dewormPlan || "semiannual"}
-                      onChange={(e) => updateRow(r.id, { health: { ...(r.health || {}), dewormPlan: e.target.value } })}
+                      onChange={(e) =>
+                        updateRow(r.id, {
+                          health: {
+                            ...(r.health || {}),
+                            dewormPlan: e.target.value,
+                          },
+                        })
+                      }
                       className="w-full border rounded-md px-2 py-1"
                     >
                       <option value="monthly">Monthly</option>
@@ -804,11 +985,19 @@ export default function CollectOrganize() {
                       <option value="annual">Annual</option>
                     </select>
                   </Field>
+
                   <div className="grid grid-cols-2 gap-3">
                     <Field label="Next Due (YYYY-MM-DD)">
                       <input
                         value={r.health?.nextDue || ""}
-                        onChange={(e) => updateRow(r.id, { health: { ...(r.health || {}), nextDue: e.target.value } })}
+                        onChange={(e) =>
+                          updateRow(r.id, {
+                            health: {
+                              ...(r.health || {}),
+                              nextDue: e.target.value,
+                            },
+                          })
+                        }
                         className="w-full border rounded-md px-2 py-1"
                         placeholder="2025-11-10"
                       />
@@ -816,7 +1005,14 @@ export default function CollectOrganize() {
                     <Field label="Notes">
                       <input
                         value={r.health?.notes || ""}
-                        onChange={(e) => updateRow(r.id, { health: { ...(r.health || {}), notes: e.target.value } })}
+                        onChange={(e) =>
+                          updateRow(r.id, {
+                            health: {
+                              ...(r.health || {}),
+                              notes: e.target.value,
+                            },
+                          })
+                        }
                         className="w-full border rounded-md px-2 py-1"
                         placeholder="Observations, reactions, etc."
                       />
@@ -837,6 +1033,7 @@ export default function CollectOrganize() {
               onClick={generateRunbooks}
               className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
               title="Build care/butchery runbooks"
+              type="button"
             >
               Generate Runbooks
             </button>
@@ -847,7 +1044,11 @@ export default function CollectOrganize() {
               title="No animals"
               subtitle="Collect & organize first."
               action={
-                <button onClick={() => setTab("collect")} className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50">
+                <button
+                  onClick={() => setTab("collect")}
+                  className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50"
+                  type="button"
+                >
                   Go to Collect
                 </button>
               }
@@ -857,13 +1058,20 @@ export default function CollectOrganize() {
               {filteredRows.map((r) => (
                 <div key={r.id} className="rounded-xl border p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <div className="font-semibold">{r.name || r.species || r.id}</div>
+                    <div className="font-semibold">
+                      {r.name || r.species || r.id}
+                    </div>
                     <label className="inline-flex items-center gap-2 text-sm">
                       <input
                         type="checkbox"
                         checked={!!r?.butchery?.chillChain}
                         onChange={(e) =>
-                          updateRow(r.id, { butchery: { ...(r.butchery || {}), chillChain: e.target.checked } })
+                          updateRow(r.id, {
+                            butchery: {
+                              ...(r.butchery || {}),
+                              chillChain: e.target.checked,
+                            },
+                          })
                         }
                       />
                       Chill chain
@@ -878,7 +1086,12 @@ export default function CollectOrganize() {
                         value={r?.butchery?.targetWeight ?? ""}
                         onChange={(e) =>
                           updateRow(r.id, {
-                            butchery: { ...(r.butchery || {}), targetWeight: e.target.value ? Number(e.target.value) : "" },
+                            butchery: {
+                              ...(r.butchery || {}),
+                              targetWeight: e.target.value
+                                ? Number(e.target.value)
+                                : "",
+                            },
                           })
                         }
                         className="w-full border rounded-md px-2 py-1"
@@ -888,18 +1101,33 @@ export default function CollectOrganize() {
                     <Field label="Target Date">
                       <input
                         value={r?.butchery?.targetDate || ""}
-                        onChange={(e) => updateRow(r.id, { butchery: { ...(r.butchery || {}), targetDate: e.target.value } })}
+                        onChange={(e) =>
+                          updateRow(r.id, {
+                            butchery: {
+                              ...(r.butchery || {}),
+                              targetDate: e.target.value,
+                            },
+                          })
+                        }
                         className="w-full border rounded-md px-2 py-1"
                         placeholder="YYYY-MM-DD"
                       />
                     </Field>
                   </div>
 
-                  <Field label="Cuts Intent" hint="Comma separated (e.g., chops, roasts, grind, organs)">
+                  <Field
+                    label="Cuts Intent"
+                    hint="Comma separated (e.g., chops, roasts, grind, organs)"
+                  >
                     <input
                       value={(r?.butchery?.cutsIntent || []).join(", ")}
                       onChange={(e) =>
-                        updateRow(r.id, { butchery: { ...(r.butchery || {}), cutsIntent: splitTags(e.target.value) } })
+                        updateRow(r.id, {
+                          butchery: {
+                            ...(r.butchery || {}),
+                            cutsIntent: splitTags(e.target.value),
+                          },
+                        })
                       }
                       className="w-full border rounded-md px-2 py-1"
                       placeholder="chops, roasts, grind, organs"
@@ -911,19 +1139,31 @@ export default function CollectOrganize() {
                       <input
                         type="checkbox"
                         checked={r.status === "butcher-queued"}
-                        onChange={(e) => updateRow(r.id, { status: e.target.checked ? "butcher-queued" : "active" })}
+                        onChange={(e) =>
+                          updateRow(r.id, {
+                            status: e.target.checked
+                              ? "butcher-queued"
+                              : "active",
+                          })
+                        }
                       />
                       Queue for butchery
                     </label>
+
                     <button
                       onClick={() =>
                         invokeNBA?.({
                           reason: "animal_butchery_queue",
-                          context: { id: r.id, species: r.species, targetDate: r?.butchery?.targetDate },
+                          context: {
+                            id: r.id,
+                            species: r.species,
+                            targetDate: r?.butchery?.targetDate,
+                          },
                         })
                       }
                       className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
                       title="Suggest Next Best Action"
+                      type="button"
                     >
                       Suggest NBA
                     </button>
@@ -943,6 +1183,7 @@ export default function CollectOrganize() {
               onClick={() => sendTo("Task Board")}
               className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
               title="Send runbooks to Task Board"
+              type="button"
             >
               Send Runbooks → Task Board
             </button>
@@ -953,7 +1194,11 @@ export default function CollectOrganize() {
               title="No runbooks yet"
               subtitle="Generate from the Butchery tab (also builds Care runbooks for non-queued)."
               action={
-                <button onClick={() => setTab("butchery")} className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50">
+                <button
+                  onClick={() => setTab("butchery")}
+                  className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50"
+                  type="button"
+                >
                   Go to Butchery
                 </button>
               }
@@ -962,9 +1207,12 @@ export default function CollectOrganize() {
             <div className="grid md:grid-cols-2 gap-4">
               {runbooks.map((rb) => (
                 <div key={rb.id} className="rounded-xl border p-4">
-                  <div className="text-sm uppercase tracking-wide text-gray-600 mb-1">{rb.kind}</div>
+                  <div className="text-sm uppercase tracking-wide text-gray-600 mb-1">
+                    {rb.kind}
+                  </div>
                   <div className="font-semibold mb-2">{rb.title}</div>
                   <div className="text-sm mb-2">Est. {rb.estMinutes} min</div>
+
                   {rb.flags?.length ? (
                     <div className="mb-2 flex flex-wrap gap-1">
                       {rb.flags.map((f) => (
@@ -972,14 +1220,23 @@ export default function CollectOrganize() {
                       ))}
                     </div>
                   ) : null}
+
                   {rb.ppe?.length ? (
-                    <div className="text-xs text-gray-700 mb-2">PPE: {rb.ppe.join(", ")}</div>
+                    <div className="text-xs text-gray-700 mb-2">
+                      PPE: {rb.ppe.join(", ")}
+                    </div>
                   ) : null}
+
                   {rb.feed ? (
-                    <div className="text-xs text-gray-700">Feed: water check {rb.feed.waterCheck ? "✓" : "—"}</div>
+                    <div className="text-xs text-gray-700">
+                      Feed: water check {rb.feed.waterCheck ? "✓" : "—"}
+                    </div>
                   ) : null}
+
                   {rb.chillChain ? (
-                    <div className="text-xs text-gray-700">Chill-chain: max {rb.chillChain.maxMinutesOut} min out</div>
+                    <div className="text-xs text-gray-700">
+                      Chill-chain: max {rb.chillChain.maxMinutesOut} min out
+                    </div>
                   ) : null}
                 </div>
               ))}
@@ -1004,7 +1261,17 @@ function AnimalsTable({ rows, updateRow, removeRow, appendTag, removeTag }) {
       <table className="min-w-full text-sm">
         <thead>
           <tr className="text-left border-b">
-            {["Name", "Species", "Breed", "Sex", "Age (m)", "Purpose", "Status", "Tags", ""].map((h) => (
+            {[
+              "Name",
+              "Species",
+              "Breed",
+              "Sex",
+              "Age (m)",
+              "Purpose",
+              "Status",
+              "Tags",
+              "",
+            ].map((h) => (
               <th key={h} className="py-2 pr-3 font-semibold">
                 {h}
               </th>
@@ -1022,6 +1289,7 @@ function AnimalsTable({ rows, updateRow, removeRow, appendTag, removeTag }) {
                   className="w-36 border rounded-md px-2 py-1"
                 />
               </td>
+
               <td className="py-2 pr-3">
                 <input
                   value={r.species || ""}
@@ -1036,6 +1304,7 @@ function AnimalsTable({ rows, updateRow, removeRow, appendTag, removeTag }) {
                   ))}
                 </datalist>
               </td>
+
               <td className="py-2 pr-3">
                 <input
                   value={r.breed || ""}
@@ -1044,6 +1313,7 @@ function AnimalsTable({ rows, updateRow, removeRow, appendTag, removeTag }) {
                   className="w-36 border rounded-md px-2 py-1"
                 />
               </td>
+
               <td className="py-2 pr-3">
                 <select
                   value={r.sex || ""}
@@ -1055,16 +1325,24 @@ function AnimalsTable({ rows, updateRow, removeRow, appendTag, removeTag }) {
                   <option value="f">F</option>
                 </select>
               </td>
+
               <td className="py-2 pr-3">
                 <input
                   type="number"
                   min="0"
                   value={r.ageMonths ?? ""}
-                  onChange={(e) => updateRow(r.id, { ageMonths: e.target.value ? Number(e.target.value) : undefined })}
+                  onChange={(e) =>
+                    updateRow(r.id, {
+                      ageMonths: e.target.value
+                        ? Number(e.target.value)
+                        : undefined,
+                    })
+                  }
                   placeholder="18"
                   className="w-20 border rounded-md px-2 py-1"
                 />
               </td>
+
               <td className="py-2 pr-3">
                 <select
                   value={r.purpose || ""}
@@ -1079,6 +1357,7 @@ function AnimalsTable({ rows, updateRow, removeRow, appendTag, removeTag }) {
                   ))}
                 </select>
               </td>
+
               <td className="py-2 pr-3">
                 <select
                   value={r.status || "active"}
@@ -1092,11 +1371,21 @@ function AnimalsTable({ rows, updateRow, removeRow, appendTag, removeTag }) {
                   ))}
                 </select>
               </td>
+
               <td className="py-2 pr-3">
-                <TagInput value={r.tags || []} onAdd={(t) => appendTag(r.id, t)} onRemove={(t) => removeTag(r.id, t)} />
+                <TagInput
+                  value={r.tags || []}
+                  onAdd={(t) => appendTag(r.id, t)}
+                  onRemove={(t) => removeTag(r.id, t)}
+                />
               </td>
+
               <td className="py-2 pr-3 text-right">
-                <button onClick={() => removeRow(r.id)} className="text-red-600 text-xs rounded-lg border px-2 py-1 hover:bg-red-50">
+                <button
+                  onClick={() => removeRow(r.id)}
+                  className="text-red-600 text-xs rounded-lg border px-2 py-1 hover:bg-red-50"
+                  type="button"
+                >
                   Remove
                 </button>
               </td>
@@ -1110,6 +1399,7 @@ function AnimalsTable({ rows, updateRow, removeRow, appendTag, removeTag }) {
 
 function TagInput({ value, onAdd, onRemove }) {
   const [draft, setDraft] = useState("");
+
   return (
     <div className="flex items-center gap-2 flex-wrap">
       {value.map((t) => (

@@ -49,7 +49,9 @@ async function safeImportMany(paths = []) {
   return null;
 }
 
-function safeNowISO() { return new Date().toISOString(); }
+function safeNowISO() {
+  return new Date().toISOString();
+}
 function clampEnd(startISO, endISO) {
   const s = new Date(startISO);
   const e = endISO ? new Date(endISO) : new Date(s.getTime() + 60 * 60 * 1000);
@@ -58,11 +60,16 @@ function clampEnd(startISO, endISO) {
 
 /** fire-and-forget broadcast (window + optional socket) */
 function broadcast(event, payload) {
-  try { window.dispatchEvent?.(new CustomEvent(event, { detail: payload })); } catch {}
+  try {
+    window.dispatchEvent?.(new CustomEvent(event, { detail: payload }));
+  } catch {}
   // try socket asynchronously; don't block UI
   (async () => {
     try {
-      const sockMod = await safeImportMany(["@/server/services/socket.js","@/server/services/socket"]);
+      const sockMod = await safeImportMany([
+        "@/server/services/socket.js",
+        "@/server/services/socket",
+      ]);
       const s = sockMod?.socket || sockMod?.getSocket?.();
       s?.emit?.(event, payload);
     } catch {}
@@ -73,8 +80,18 @@ function broadcast(event, payload) {
    Settings / Sabbath / Quiet-hours
 ----------------------------------------------*/
 async function loadSettings() {
-  const Settings = await safeImportMany(["@/store/SettingsStore.js", "@/store/SettingsStore"]);
-  const get = async (k, d) => { try { const v = await Settings?.get?.(k); return v ?? d; } catch { return d; } };
+  const Settings = await safeImportMany([
+    "@/store/SettingsStore.js",
+    "@/store/SettingsStore",
+  ]);
+  const get = async (k, d) => {
+    try {
+      const v = await Settings?.get?.(k);
+      return v ?? d;
+    } catch {
+      return d;
+    }
+  };
   return {
     profileKey: await get("profile.key", "standard-home"),
     sabbathAvoid: await get("sabbath.avoidSaturday", true),
@@ -84,14 +101,34 @@ async function loadSettings() {
 
 async function isSabbath(now = new Date()) {
   try {
-    const ont = await safeImportMany(["@/shared/ontology.js", "@/shared/ontology"]);
+    const ont = await safeImportMany([
+      "@/shared/ontology.js",
+      "@/shared/ontology",
+    ]);
     const win = ont?.sabbath?.(now);
-    if (win?.startISO && win?.endISO) return now >= new Date(win.startISO) && now < new Date(win.endISO);
+    if (win?.startISO && win?.endISO)
+      return now >= new Date(win.startISO) && now < new Date(win.endISO);
   } catch {}
   // Fallback (Fri 18:00 → Sat 18:00)
   const day = now.getDay();
-  const fri18 = new Date(now.getFullYear(), now.getMonth(), now.getDate() + ((5 - day + 7) % 7), 18, 0, 0, 0);
-  const sat18 = new Date(now.getFullYear(), now.getMonth(), now.getDate() + ((6 - day + 7) % 7), 18, 0, 0, 0);
+  const fri18 = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + ((5 - day + 7) % 7),
+    18,
+    0,
+    0,
+    0
+  );
+  const sat18 = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + ((6 - day + 7) % 7),
+    18,
+    0,
+    0,
+    0
+  );
   return now >= fri18 && now < sat18;
 }
 
@@ -99,8 +136,24 @@ function getSabbathActiveFlag(whenISO, sabbathAvoid) {
   if (sabbathAvoid === false) return false;
   const d = new Date(whenISO);
   const day = d.getDay();
-  const fri18 = new Date(d.getFullYear(), d.getMonth(), d.getDate() + ((5 - day + 7) % 7), 18, 0, 0, 0);
-  const sat18 = new Date(d.getFullYear(), d.getMonth(), d.getDate() + ((6 - day + 7) % 7), 18, 0, 0, 0);
+  const fri18 = new Date(
+    d.getFullYear(),
+    d.getMonth(),
+    d.getDate() + ((5 - day + 7) % 7),
+    18,
+    0,
+    0,
+    0
+  );
+  const sat18 = new Date(
+    d.getFullYear(),
+    d.getMonth(),
+    d.getDate() + ((6 - day + 7) % 7),
+    18,
+    0,
+    0,
+    0
+  );
   return d >= fri18 && d < sat18;
 }
 
@@ -125,27 +178,40 @@ async function loadPersisted() {
     const doc = await db?.userMeta?.get?.({ key: LSK });
     if (doc?.value) return doc.value;
   } catch {}
-  try { const raw = localStorage.getItem(LSK); return raw ? JSON.parse(raw) : null; } catch { return null; }
+  try {
+    const raw = localStorage.getItem(LSK);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
 }
 
 async function savePersisted(events, meta) {
   const db = await DB();
   const snap = { events, meta, savedAtISO: safeNowISO() };
-  try { await db?.userMeta?.put?.({ key: LSK, value: snap, updatedAt: safeNowISO() }); } catch {}
-  try { localStorage.setItem(LSK, JSON.stringify(snap)); } catch {}
+  try {
+    await db?.userMeta?.put?.({
+      key: LSK,
+      value: snap,
+      updatedAt: safeNowISO(),
+    });
+  } catch {}
+  try {
+    localStorage.setItem(LSK, JSON.stringify(snap));
+  } catch {}
 }
 
 /* ---------------------------------------------
    Colors & Sources
 ----------------------------------------------*/
 const SOURCE_COLOR = {
-  cooking:   "#f97316", // orange-500
-  cleaning:  "#22c55e", // green-500
+  cooking: "#f97316", // orange-500
+  cleaning: "#22c55e", // green-500
   gardening: "#84cc16", // lime-500
-  animals:   "#06b6d4", // cyan-500
+  animals: "#06b6d4", // cyan-500
   inventory: "#a855f7", // purple-500
-  faith:     "#f59e0b", // amber-500
-  general:   "#64748b", // slate-500
+  faith: "#f59e0b", // amber-500
+  general: "#64748b", // slate-500
 };
 
 function normalizeEvent(e) {
@@ -161,8 +227,18 @@ function normalizeEvent(e) {
   const gentle = e.gentle === true;
   const rrule = e.rrule && typeof e.rrule === "object" ? e.rrule : null;
   return {
-    id, title, startISO, endISO, source, color, tags, allDay, essential, gentle,
-    rrule, meta: e.meta || {},
+    id,
+    title,
+    startISO,
+    endISO,
+    source,
+    color,
+    tags,
+    allDay,
+    essential,
+    gentle,
+    rrule,
+    meta: e.meta || {},
     createdAtISO: e.createdAtISO || safeNowISO(),
     updatedAtISO: safeNowISO(),
   };
@@ -187,13 +263,19 @@ function expandRecurrence(ev, rangeStartISO, rangeEndISO, cap = 200) {
   function pushIfInRange(s) {
     const e = new Date(s.getTime() + (baseEnd - baseStart));
     if (e < start || s > end) return;
-    out.push({ ...ev, id: `${ev.id}_${s.toISOString()}`, startISO: s.toISOString(), endISO: e.toISOString() });
+    out.push({
+      ...ev,
+      id: `${ev.id}_${s.toISOString()}`,
+      startISO: s.toISOString(),
+      endISO: e.toISOString(),
+    });
   }
 
   while (count-- > 0) {
     if (until && curStart > until) break;
     pushIfInRange(curStart);
-    if (freq === "WEEKLY") curStart = new Date(curStart.getTime() + interval * 7 * 86400000);
+    if (freq === "WEEKLY")
+      curStart = new Date(curStart.getTime() + interval * 7 * 86400000);
     else curStart = new Date(curStart.getTime() + interval * 86400000);
     if (out.length >= cap) break;
   }
@@ -210,7 +292,9 @@ function toICSDate(dtISO, allDay = false) {
   const m = pad(dt.getUTCMonth() + 1);
   const d = pad(dt.getUTCDate());
   if (allDay) return `${y}${m}${d}`;
-  const hh = pad(dt.getUTCHours()), mm = pad(dt.getUTCMinutes()), ss = pad(dt.getUTCSeconds());
+  const hh = pad(dt.getUTCHours()),
+    mm = pad(dt.getUTCMinutes()),
+    ss = pad(dt.getUTCSeconds());
   return `${y}${m}${d}T${hh}${mm}${ss}Z`;
 }
 
@@ -226,7 +310,9 @@ function buildICS(events = []) {
     if (ev.allDay) {
       lines.push(`DTSTART;VALUE=DATE:${toICSDate(ev.startISO, true)}`);
       const endAll = new Date(new Date(ev.startISO).getTime() + 86400000);
-      lines.push(`DTEND;VALUE=DATE:${toICSDate(ev.endISO || endAll.toISOString(), true)}`);
+      lines.push(
+        `DTEND;VALUE=DATE:${toICSDate(ev.endISO || endAll.toISOString(), true)}`
+      );
     } else {
       lines.push(`DTSTART:${toICSDate(ev.startISO)}`);
       lines.push(`DTEND:${toICSDate(ev.endISO)}`);
@@ -236,12 +322,13 @@ function buildICS(events = []) {
       const parts = [`FREQ=${ev.rrule.freq}`];
       if (ev.rrule.interval) parts.push(`INTERVAL=${ev.rrule.interval}`);
       if (ev.rrule.count) parts.push(`COUNT=${ev.rrule.count}`);
-      if (ev.rrule.untilISO) parts.push(`UNTIL=${toICSDate(ev.rrule.untilISO)}`);
+      if (ev.rrule.untilISO)
+        parts.push(`UNTIL=${toICSDate(ev.rrule.untilISO)}`);
       lines.push(`RRULE:${parts.join(";")}`);
     }
     lines.push("END:VEVENT");
+    lines.push("END:VCALENDAR");
   }
-  lines.push("END:VCALENDAR");
   return lines.join("\r\n");
 }
 
@@ -256,12 +343,19 @@ async function importFromTriggers() {
     ]);
     const ctx = await mod?.default?.();
     const toEvents = [];
-    for (const e of [...(ctx?.pastEvents || []), ...(ctx?.upcomingEvents || [])]) {
+    for (const e of [
+      ...(ctx?.pastEvents || []),
+      ...(ctx?.upcomingEvents || []),
+    ]) {
       toEvents.push({
         id: e.id,
-        title: `${e.type?.toUpperCase?.() || e.role}: ${e.status || "scheduled"}`,
+        title: `${e.type?.toUpperCase?.() || e.role}: ${
+          e.status || "scheduled"
+        }`,
         startISO: e.date,
-        endISO: new Date(new Date(e.date).getTime() + 60 * 60 * 1000).toISOString(),
+        endISO: new Date(
+          new Date(e.date).getTime() + 60 * 60 * 1000
+        ).toISOString(),
         source: e.type || "general",
         color: SOURCE_COLOR[e.type] || undefined,
         tags: ["imported"],
@@ -271,35 +365,52 @@ async function importFromTriggers() {
       });
     }
     return toEvents;
-  } catch { return []; }
+  } catch {
+    return [];
+  }
 }
 
 async function importSessions() {
   // Cooking sessions from cookingBus (active/recent)
   try {
-    const bus = await safeImportMany(["@/services/cookingBus.js", "@/services/cookingBus"]);
+    const bus = await safeImportMany([
+      "@/services/cookingBus.js",
+      "@/services/cookingBus",
+    ]);
     const sessions = (await bus?.listSessions?.({ status: "active" })) || [];
     return sessions.map((s) => ({
       id: `cook_${s.id}`,
       title: s.title || "Cooking Session",
       startISO: s.dateISO || s.createdAt || safeNowISO(),
-      endISO: new Date(new Date(s.dateISO || s.createdAt || Date.now()).getTime() + 2 * 60 * 60 * 1000).toISOString(),
+      endISO: new Date(
+        new Date(s.dateISO || s.createdAt || Date.now()).getTime() +
+          2 * 60 * 60 * 1000
+      ).toISOString(),
       source: "cooking",
       color: SOURCE_COLOR.cooking,
       tags: ["session"],
-      meta: { batch: !!s.batch, recipes: (s.recipes || []).map((r) => r.title) },
+      meta: {
+        batch: !!s.batch,
+        recipes: (s.recipes || []).map((r) => r.title),
+      },
       essential: true,
       gentle: false,
     }));
-  } catch { return []; }
+  } catch {
+    return [];
+  }
 }
 
 /* ---------------------------------------------
    Store
 ----------------------------------------------*/
 export const useHouseholdCalendar = create((set, get) => ({
-  events: [],                  // normalized events
-  meta: { lastUpdatedISO: null, profileKey: "standard-home", sabbathAvoid: true },
+  events: [], // normalized events
+  meta: {
+    lastUpdatedISO: null,
+    profileKey: "standard-home",
+    sabbathAvoid: true,
+  },
 
   /* ---------- lifecycle ---------- */
   hydrate: async () => {
@@ -308,19 +419,42 @@ export const useHouseholdCalendar = create((set, get) => ({
     if (snap?.events) {
       set({
         events: snap.events,
-        meta: { ...(get().meta), ...(snap.meta || {}), profileKey: settings.profileKey, sabbathAvoid: settings.sabbathAvoid },
+        meta: {
+          ...get().meta,
+          ...(snap.meta || {}),
+          profileKey: settings.profileKey,
+          sabbathAvoid: settings.sabbathAvoid,
+        },
       });
     } else {
-      set({ meta: { ...(get().meta), profileKey: settings.profileKey, sabbathAvoid: settings.sabbathAvoid } });
+      set({
+        meta: {
+          ...get().meta,
+          profileKey: settings.profileKey,
+          sabbathAvoid: settings.sabbathAvoid,
+        },
+      });
     }
   },
 
   importDomainEvents: async () => {
-    const [fromTriggers, fromSessions] = await Promise.all([importFromTriggers(), importSessions()]);
-    const merged = [...get().events, ...fromTriggers.map(normalizeEvent), ...fromSessions.map(normalizeEvent)];
-    set({ events: dedupeById(merged), meta: { ...(get().meta), lastUpdatedISO: safeNowISO() } });
+    const [fromTriggers, fromSessions] = await Promise.all([
+      importFromTriggers(),
+      importSessions(),
+    ]);
+    const merged = [
+      ...get().events,
+      ...fromTriggers.map(normalizeEvent),
+      ...fromSessions.map(normalizeEvent),
+    ];
+    set({
+      events: dedupeById(merged),
+      meta: { ...get().meta, lastUpdatedISO: safeNowISO() },
+    });
     savePersisted(get().events, get().meta).catch(() => {});
-    broadcast("calendar:imported", { added: fromTriggers.length + fromSessions.length });
+    broadcast("calendar:imported", {
+      added: fromTriggers.length + fromSessions.length,
+    });
   },
 
   /* ---------- CRUD ---------- */
@@ -328,7 +462,7 @@ export const useHouseholdCalendar = create((set, get) => ({
     const ev = normalizeEvent(event);
     set((state) => ({
       events: dedupeById([...state.events, ev]),
-      meta: { ...(get().meta), lastUpdatedISO: safeNowISO() },
+      meta: { ...get().meta, lastUpdatedISO: safeNowISO() },
     }));
     savePersisted(get().events, get().meta).catch(() => {});
     broadcast("calendar:added", { id: ev.id, source: ev.source });
@@ -340,9 +474,17 @@ export const useHouseholdCalendar = create((set, get) => ({
     const updatedAt = safeNowISO();
     set((state) => ({
       events: state.events.map((e) =>
-        e.id === uid ? normalizeEvent({ ...e, ...updates, id: e.id, createdAtISO: e.createdAtISO, updatedAtISO: updatedAt }) : e
+        e.id === uid
+          ? normalizeEvent({
+              ...e,
+              ...updates,
+              id: e.id,
+              createdAtISO: e.createdAtISO,
+              updatedAtISO: updatedAt,
+            })
+          : e
       ),
-      meta: { ...(get().meta), lastUpdatedISO: updatedAt },
+      meta: { ...get().meta, lastUpdatedISO: updatedAt },
     }));
     savePersisted(get().events, get().meta).catch(() => {});
     broadcast("calendar:updated", { id: uid });
@@ -352,24 +494,38 @@ export const useHouseholdCalendar = create((set, get) => ({
     const uid = String(id);
     set((state) => ({
       events: state.events.filter((e) => e.id !== uid),
-      meta: { ...(get().meta), lastUpdatedISO: safeNowISO() },
+      meta: { ...get().meta, lastUpdatedISO: safeNowISO() },
     }));
     savePersisted(get().events, get().meta).catch(() => {});
     broadcast("calendar:removed", { id: uid });
   },
 
   /* ---------- querying ---------- */
-  getEventsBySource: (source) => get().events.filter((e) => e.source === source),
+  getEventsBySource: (source) =>
+    get().events.filter((e) => e.source === source),
 
-  getEventsInRange: ({ startISO, endISO, expandRecurrences = true, respectSabbath = true }) => {
+  getEventsInRange: ({
+    startISO,
+    endISO,
+    expandRecurrences = true,
+    respectSabbath = true,
+  }) => {
     const settings = get().meta;
-    const sISO = startISO || new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
-    const eISO = endISO || new Date(new Date().setHours(23, 59, 59, 999)).toISOString();
+    const sISO =
+      startISO || new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
+    const eISO =
+      endISO || new Date(new Date().setHours(23, 59, 59, 999)).toISOString();
 
-    const intersects = (e) => !(new Date(e.endISO) < new Date(sISO) || new Date(e.startISO) > new Date(eISO));
+    const intersects = (e) =>
+      !(
+        new Date(e.endISO) < new Date(sISO) ||
+        new Date(e.startISO) > new Date(eISO)
+      );
     const base = get().events.filter(intersects);
 
-    const expanded = expandRecurrences ? base.flatMap((e) => expandRecurrence(e, sISO, eISO)) : base;
+    const expanded = expandRecurrences
+      ? base.flatMap((e) => expandRecurrence(e, sISO, eISO))
+      : base;
 
     if (!respectSabbath) return expanded;
 
@@ -383,7 +539,9 @@ export const useHouseholdCalendar = create((set, get) => ({
   getEventsOnDate: (dateISO) => {
     const d = new Date(dateISO || new Date());
     const startISO = new Date(d.setHours(0, 0, 0, 0)).toISOString();
-    const endISO = new Date(new Date(startISO).setHours(23, 59, 59, 999)).toISOString();
+    const endISO = new Date(
+      new Date(startISO).setHours(23, 59, 59, 999)
+    ).toISOString();
     return get().getEventsInRange({ startISO, endISO });
   },
 
@@ -398,15 +556,19 @@ export const useHouseholdCalendar = create((set, get) => ({
     const normalized = events.map(normalizeEvent);
     set((state) => ({
       events: dedupeById([...state.events, ...normalized]),
-      meta: { ...(get().meta), lastUpdatedISO: safeNowISO() },
+      meta: { ...get().meta, lastUpdatedISO: safeNowISO() },
     }));
     savePersisted(get().events, get().meta).catch(() => {});
   },
 
   exportICS: ({ rangeStartISO, rangeEndISO } = {}) => {
     const events = get().getEventsInRange({
-      startISO: rangeStartISO || new Date(new Date().setDate(new Date().getDate() - 7)).toISOString(),
-      endISO: rangeEndISO || new Date(new Date().setDate(new Date().getDate() + 30)).toISOString(),
+      startISO:
+        rangeStartISO ||
+        new Date(new Date().setDate(new Date().getDate() - 7)).toISOString(),
+      endISO:
+        rangeEndISO ||
+        new Date(new Date().setDate(new Date().getDate() + 30)).toISOString(),
       expandRecurrences: true,
       respectSabbath: false, // export everything
     });
@@ -414,20 +576,44 @@ export const useHouseholdCalendar = create((set, get) => ({
   },
 
   /* ---------- convenience: domain event builders ---------- */
-  scheduleMeal: ({ title = "Meal", whenISO, durationMin = 60, essential = true } = {}) => {
+  scheduleMeal: ({
+    title = "Meal",
+    whenISO,
+    durationMin = 60,
+    essential = true,
+  } = {}) => {
     const startISO = whenISO || safeNowISO();
-    const endISO = new Date(new Date(startISO).getTime() + durationMin * 60000).toISOString();
-    return get().addEvent({ title, startISO, endISO, source: "cooking", essential });
+    const endISO = new Date(
+      new Date(startISO).getTime() + durationMin * 60000
+    ).toISOString();
+    return get().addEvent({
+      title,
+      startISO,
+      endISO,
+      source: "cooking",
+      essential,
+    });
   },
 
-  scheduleCleaning: async ({ title = "Cleaning", whenISO, durationMin = 45, gentleIfSabbath = true } = {}) => {
+  scheduleCleaning: async ({
+    title = "Cleaning",
+    whenISO,
+    durationMin = 45,
+    gentleIfSabbath = true,
+  } = {}) => {
     const settings = await loadSettings();
-    const sabbath = settings.sabbathAvoid !== false && (await isSabbath(new Date(whenISO || Date.now())));
+    const sabbath =
+      settings.sabbathAvoid !== false &&
+      (await isSabbath(new Date(whenISO || Date.now())));
     const startISO = whenISO || safeNowISO();
-    const endISO = new Date(new Date(startISO).getTime() + durationMin * 60000).toISOString();
+    const endISO = new Date(
+      new Date(startISO).getTime() + durationMin * 60000
+    ).toISOString();
     return get().addEvent({
       title: sabbath && gentleIfSabbath ? `${title} (gentle)` : title,
-      startISO, endISO, source: "cleaning",
+      startISO,
+      endISO,
+      source: "cleaning",
       essential: false,
       gentle: sabbath && gentleIfSabbath,
     });
@@ -451,11 +637,16 @@ export const useHouseholdCalendar = create((set, get) => ({
 function dedupeById(arr = []) {
   const seen = new Map();
   for (const e of arr) {
-    if (!seen.has(e.id) || new Date(e.updatedAtISO || 0) > new Date(seen.get(e.id).updatedAtISO || 0)) {
+    if (
+      !seen.has(e.id) ||
+      new Date(e.updatedAtISO || 0) > new Date(seen.get(e.id).updatedAtISO || 0)
+    ) {
       seen.set(e.id, e);
     }
   }
-  return Array.from(seen.values()).sort((a, b) => new Date(a.startISO) - new Date(b.startISO));
+  return Array.from(seen.values()).sort(
+    (a, b) => new Date(a.startISO) - new Date(b.startISO)
+  );
 }
 
 /* ---------------------------------------------
@@ -463,3 +654,8 @@ function dedupeById(arr = []) {
 ----------------------------------------------*/
 useHouseholdCalendar.getState().hydrate?.();
 useHouseholdCalendar.getState().importDomainEvents?.();
+
+/* -------------------------------------------------------------------------- */
+/* ✅ Named export required by src/ai/context/index.js                         */
+/* -------------------------------------------------------------------------- */
+export const HouseholdCalendarStore = useHouseholdCalendar;

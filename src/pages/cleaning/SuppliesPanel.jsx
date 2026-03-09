@@ -15,7 +15,7 @@ import { format } from "date-fns";
 // -------------------- Defensive service/context imports --------------------
 let eventBus;
 try {
-  eventBus = require("../../services/eventBus").default;
+  eventBus = require("../../services/events/eventBus").default;
 } catch {
   eventBus = {
     emit: (...args) => console.debug("[SuppliesPanel:eventBus.emit]", ...args),
@@ -44,7 +44,8 @@ try {
 
 let IngredientSourceMap; // garden/animal/bulk linkage (optional)
 try {
-  IngredientSourceMap = require("../../app/utils/ingredientSourceMap").INGREDIENT_SOURCES;
+  IngredientSourceMap =
+    require("../../app/utils/ingredientSourceMap").INGREDIENT_SOURCES;
 } catch {
   IngredientSourceMap = {};
 }
@@ -54,19 +55,28 @@ let AisleService = {
   // getAisle(name, store) -> {id, label}
   getAisle: (name, store) => {
     const n = String(name || "").toLowerCase();
-    if (/detergent|bleach|clean/i.test(n)) return { id: "cleaning", label: "Cleaning" };
-    if (/soap|shampoo|tooth/i.test(n)) return { id: "hygiene", label: "Personal Care" };
-    if (/feed|grain|hay|pellet/i.test(n)) return { id: "animal", label: "Animal Feed" };
-    if (/seed|soil|mulch|fertil/i.test(n)) return { id: "garden", label: "Garden" };
+    if (/detergent|bleach|clean/i.test(n))
+      return { id: "cleaning", label: "Cleaning" };
+    if (/soap|shampoo|tooth/i.test(n))
+      return { id: "hygiene", label: "Personal Care" };
+    if (/feed|grain|hay|pellet/i.test(n))
+      return { id: "animal", label: "Animal Feed" };
+    if (/seed|soil|mulch|fertil/i.test(n))
+      return { id: "garden", label: "Garden" };
     if (/meat|lamb|beef|chicken/i.test(n)) return { id: "meat", label: "Meat" };
-    if (/flour|grain|rice|wheat/i.test(n)) return { id: "grains", label: "Grains" };
-    if (/milk|cheese|egg|butter/i.test(n)) return { id: "dairy", label: "Dairy" };
+    if (/flour|grain|rice|wheat/i.test(n))
+      return { id: "grains", label: "Grains" };
+    if (/milk|cheese|egg|butter/i.test(n))
+      return { id: "dairy", label: "Dairy" };
     return { id: "general", label: "General" };
   },
 };
 
 // -------------------- Helpers --------------------
-const withinSabbath = (now = new Date(), window = { startDow: 5, startHour: 18, endDow: 6, endHour: 19 }) => {
+const withinSabbath = (
+  now = new Date(),
+  window = { startDow: 5, startHour: 18, endDow: 6, endHour: 19 }
+) => {
   const dow = now.getDay(); // 0 Sun..6 Sat
   const hr = now.getHours();
   if (dow === window.startDow && hr >= window.startHour) return true;
@@ -79,7 +89,9 @@ const domains = ["pantry", "cleaning", "hygiene", "animal", "garden", "other"];
 function asKey(i) {
   // dedupe key: prefer sku; else normalized name+unit
   if (i.sku) return `sku:${i.sku}`;
-  return `nu:${String(i.name || "").trim().toLowerCase()}|${i.unit || ""}`;
+  return `nu:${String(i.name || "")
+    .trim()
+    .toLowerCase()}|${i.unit || ""}`;
 }
 
 function collapseDuplicates(items) {
@@ -97,7 +109,9 @@ function collapseDuplicates(items) {
       // Prefer most specific store; merge tags/substitutions
       store: it.store || prev.store,
       tags: Array.from(new Set([...(prev.tags || []), ...(it.tags || [])])),
-      substitutions: Array.from(new Set([...(prev.substitutions || []), ...(it.substitutions || [])])),
+      substitutions: Array.from(
+        new Set([...(prev.substitutions || []), ...(it.substitutions || [])])
+      ),
     });
   }
   return Array.from(map.values());
@@ -167,7 +181,9 @@ export default function SuppliesPanel({
   } = React.useContext(SettingsContext);
   const { recordMilestone } = useMilestoneState();
 
-  const [store, setStore] = useState(defaultStore || ctxDefaultStore || "Sam's Club");
+  const [store, setStore] = useState(
+    defaultStore || ctxDefaultStore || "Sam's Club"
+  );
   const [includeHave, setIncludeHave] = useState(false);
   const [collapse, setCollapse] = useState(true);
   const [query, setQuery] = useState("");
@@ -220,13 +236,18 @@ export default function SuppliesPanel({
 
   // Filter by domain
   const domainFiltered = useMemo(() => {
-    return (listWithHave || []).filter((i) => domainFilter.has(i.domain || "other"));
+    return (listWithHave || []).filter((i) =>
+      domainFilter.has(i.domain || "other")
+    );
   }, [listWithHave, domainFilter]);
 
   // Store filter (show all, but highlight preferred store)
   const storeAdjusted = useMemo(() => {
     // We keep items even if their preferredStore != current store; UI shows a “swap store” chip.
-    return domainFiltered.map((i) => ({ ...i, preferredStore: i.store || store }));
+    return domainFiltered.map((i) => ({
+      ...i,
+      preferredStore: i.store || store,
+    }));
   }, [domainFiltered, store]);
 
   // Search
@@ -283,7 +304,10 @@ export default function SuppliesPanel({
 
   const clearSelection = () => setSelected(new Set());
 
-  const disabledBySabbath = sabbathGuard && blockCommerceDuringSabbath && withinSabbath(new Date(), sabbathWindow);
+  const disabledBySabbath =
+    sabbathGuard &&
+    blockCommerceDuringSabbath &&
+    withinSabbath(new Date(), sabbathWindow);
 
   const addSelectedToGrocery = () => {
     const items = [];
@@ -313,9 +337,16 @@ export default function SuppliesPanel({
     if (onAddToGrocery) {
       onAddToGrocery(items, { store });
     } else {
-      eventBus.emit("grocery.addItems", { items, store, at: new Date().toISOString() });
+      eventBus.emit("grocery.addItems", {
+        items,
+        store,
+        at: new Date().toISOString(),
+      });
     }
-    recordMilestone?.({ key: "supplies_added_to_grocery", meta: { count: items.length, store } });
+    recordMilestone?.({
+      key: "supplies_added_to_grocery",
+      meta: { count: items.length, store },
+    });
     clearSelection();
   };
 
@@ -333,9 +364,12 @@ export default function SuppliesPanel({
     <div className="w-full max-w-7xl mx-auto p-4 sm:p-6">
       <header className="flex items-end justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Supplies & Shortages</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Supplies & Shortages
+          </h1>
           <p className="text-gray-600">
-            Review shortages across pantry, cleaning, hygiene, animal, and garden. Add to Grocery or jump there.
+            Review shortages across pantry, cleaning, hygiene, animal, and
+            garden. Add to Grocery or jump there.
           </p>
         </div>
 
@@ -347,7 +381,9 @@ export default function SuppliesPanel({
               placeholder="Search items, tags, SKU…"
               className="w-64 rounded-xl border px-3 py-2 text-sm"
             />
-            <span className="absolute right-2 top-2 text-xs text-gray-400">/</span>
+            <span className="absolute right-2 top-2 text-xs text-gray-400">
+              /
+            </span>
           </div>
 
           <select
@@ -393,7 +429,9 @@ export default function SuppliesPanel({
               }
               className={[
                 "rounded-full border px-3 py-1.5 text-sm",
-                on ? "bg-gray-900 text-white border-black" : "bg-white hover:bg-gray-50",
+                on
+                  ? "bg-gray-900 text-white border-black"
+                  : "bg-white hover:bg-gray-50",
               ].join(" ")}
             >
               {d}
@@ -402,11 +440,19 @@ export default function SuppliesPanel({
         })}
 
         <label className="ml-auto flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={collapse} onChange={(e) => setCollapse(e.target.checked)} />
+          <input
+            type="checkbox"
+            checked={collapse}
+            onChange={(e) => setCollapse(e.target.checked)}
+          />
           Collapse duplicates
         </label>
         <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={includeHave} onChange={(e) => setIncludeHave(e.target.checked)} />
+          <input
+            type="checkbox"
+            checked={includeHave}
+            onChange={(e) => setIncludeHave(e.target.checked)}
+          />
           Include “have”
         </label>
       </div>
@@ -453,15 +499,21 @@ export default function SuppliesPanel({
           <div className="lg:col-span-2">
             <div className="rounded-2xl border border-dashed p-10 text-center text-gray-600">
               <div className="text-lg font-semibold">No shortages found.</div>
-              <div className="mt-1">Everything looks stocked based on your thresholds.</div>
+              <div className="mt-1">
+                Everything looks stocked based on your thresholds.
+              </div>
             </div>
           </div>
         ) : (
           aisles.map(([aisleName, items]) => (
             <section key={aisleName} className="rounded-2xl border p-4">
               <div className="mb-2 flex items-baseline justify-between">
-                <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider">{aisleName}</h2>
-                <span className="text-xs text-gray-400">{items.length} item{items.length !== 1 ? "s" : ""}</span>
+                <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider">
+                  {aisleName}
+                </h2>
+                <span className="text-xs text-gray-400">
+                  {items.length} item{items.length !== 1 ? "s" : ""}
+                </span>
               </div>
 
               <ul className="grid gap-3">
@@ -471,12 +523,20 @@ export default function SuppliesPanel({
                   const [qty, setQty] = useQtyState(id, i.qty);
 
                   return (
-                    <li key={id} className="rounded-xl border p-3 bg-white shadow-sm">
+                    <li
+                      key={id}
+                      className="rounded-xl border p-3 bg-white shadow-sm"
+                    >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <h3 className="font-semibold text-gray-900 truncate">
-                              {i.name} {i.isHave ? <span className="ml-2 text-xs text-gray-400">(have)</span> : null}
+                              {i.name}{" "}
+                              {i.isHave ? (
+                                <span className="ml-2 text-xs text-gray-400">
+                                  (have)
+                                </span>
+                              ) : null}
                             </h3>
                             {i.domain ? (
                               <span className="inline-flex items-center rounded-full bg-gray-100 text-gray-700 border border-gray-200 px-2 py-0.5 text-xs">
@@ -535,7 +595,11 @@ export default function SuppliesPanel({
                             <div className="flex items-center gap-1">
                               <button
                                 type="button"
-                                onClick={() => setQty((v) => Math.max(0, Number(v) - stepForUnit(i.unit)))}
+                                onClick={() =>
+                                  setQty((v) =>
+                                    Math.max(0, Number(v) - stepForUnit(i.unit))
+                                  )
+                                }
                                 className="rounded-md border px-2 py-1 text-sm bg-white hover:bg-gray-50"
                                 title="Decrease"
                               >
@@ -546,13 +610,17 @@ export default function SuppliesPanel({
                                 min={0}
                                 step={stepForUnit(i.unit)}
                                 value={qty}
-                                onChange={(e) => setQty(sanitizeNum(e.target.value))}
+                                onChange={(e) =>
+                                  setQty(sanitizeNum(e.target.value))
+                                }
                                 className="w-16 rounded-md border px-2 py-1 text-sm text-right"
                                 aria-label="Quantity"
                               />
                               <button
                                 type="button"
-                                onClick={() => setQty((v) => Number(v) + stepForUnit(i.unit))}
+                                onClick={() =>
+                                  setQty((v) => Number(v) + stepForUnit(i.unit))
+                                }
                                 className="rounded-md border px-2 py-1 text-sm bg-white hover:bg-gray-50"
                                 title="Increase"
                               >
@@ -566,14 +634,22 @@ export default function SuppliesPanel({
                               type="button"
                               onClick={() => {
                                 const item = { ...i, qty };
-                                if (onAddToGrocery) onAddToGrocery([item], { store });
-                                else eventBus.emit("grocery.addItems", { items: [item], store });
+                                if (onAddToGrocery)
+                                  onAddToGrocery([item], { store });
+                                else
+                                  eventBus.emit("grocery.addItems", {
+                                    items: [item],
+                                    store,
+                                  });
                                 setSelected((prev) => {
                                   const n = new Set(prev);
                                   n.delete(id);
                                   return n;
                                 });
-                                recordMilestone?.({ key: "supply_added_single", meta: { name: i.name, qty, store } });
+                                recordMilestone?.({
+                                  key: "supply_added_single",
+                                  meta: { name: i.name, qty, store },
+                                });
                               }}
                               className={[
                                 "rounded-xl px-3 py-1.5 text-sm border",
@@ -595,7 +671,9 @@ export default function SuppliesPanel({
                       </div>
 
                       {/* Substitutions */}
-                      {!i.isHave && Array.isArray(i.substitutions) && i.substitutions.length ? (
+                      {!i.isHave &&
+                      Array.isArray(i.substitutions) &&
+                      i.substitutions.length ? (
                         <div className="mt-2 text-xs text-gray-600">
                           <span className="font-medium">Subs:</span>{" "}
                           {i.substitutions.map((s, idx) => (
@@ -662,7 +740,9 @@ export default function SuppliesPanel({
 
 // -------------------- Local state for qty per-line --------------------
 function useQtyState(lineId, initial) {
-  const ref = useRef(typeof initial === "number" ? initial : Number(initial || 0));
+  const ref = useRef(
+    typeof initial === "number" ? initial : Number(initial || 0)
+  );
   const [, force] = useState(0);
   const set = (updater) => {
     const next = typeof updater === "function" ? updater(ref.current) : updater;

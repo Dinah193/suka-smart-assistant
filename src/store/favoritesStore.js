@@ -35,7 +35,7 @@ let featureFlags = { familyFundMode: false };
 try {
   // Prefer a service wrapper if present
   // eslint-disable-next-line global-require
-  const ff = require("@/services/featureFlags");
+  const ff = require("@/config/featureFlags");
   featureFlags = ff.default || ff || featureFlags;
 } catch {
   try {

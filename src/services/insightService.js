@@ -27,7 +27,6 @@
 // - Defensive: if storage or Hub is not ready, don’t break the pipeline.
 // -----------------------------------------------------------------------------
 
-
 /* eslint-disable no-console */
 
 const isBrowser = typeof window !== "undefined";
@@ -37,7 +36,7 @@ const SOURCE = "insightService";
 let eventBus = { emit() {}, on() {}, off() {} };
 try {
   // eslint-disable-next-line global-require
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch (_e) {}
 
@@ -71,16 +70,14 @@ try {
   securityService = ss.securityService || ss.default || ss || null;
 } catch (_e) {}
 
-
 // ------------------------------ Local storage keys ---------------------------
 const STORE_KEY = "suka.insights.v1"; // fallback if storageService missing
 
 // in-memory cache so we don't roundtrip for every event
 const INSIGHT_CACHE = {
-  byId: {},      // { [insightId]: insightObj }
-  order: []      // keep chronological ids
+  byId: {}, // { [insightId]: insightObj }
+  order: [], // keep chronological ids
 };
-
 
 // ------------------------------ Utils ----------------------------------------
 function nowIso() {
@@ -105,7 +102,9 @@ function emitSSA(type, data = {}) {
 }
 
 function safeId(prefix = "insight") {
-  return `${prefix}-${Math.random().toString(36).slice(2)}-${Date.now().toString(36)}`;
+  return `${prefix}-${Math.random()
+    .toString(36)
+    .slice(2)}-${Date.now().toString(36)}`;
 }
 
 function shallowClone(o) {
@@ -158,11 +157,14 @@ async function exportToHubIfEnabled(payload) {
     try {
       await dataGateway.exportBatch({
         scope: "insights",
-        items: Array.isArray(payload) ? payload : [payload]
+        items: Array.isArray(payload) ? payload : [payload],
       });
       return;
     } catch (err) {
-      console.warn("[insightService] export via dataGateway failed, trying securityService", err);
+      console.warn(
+        "[insightService] export via dataGateway failed, trying securityService",
+        err
+      );
     }
   }
 
@@ -171,14 +173,13 @@ async function exportToHubIfEnabled(payload) {
     try {
       await securityService.sendToHub({
         channel: "insights",
-        payload
+        payload,
       });
     } catch (_e) {
       // fail silent
     }
   }
 }
-
 
 // ------------------------------ Insight Extractors ---------------------------
 // These are “best effort” extractors per domain. Each returns either
@@ -192,7 +193,8 @@ const extractors = {
     const { payload } = ctx;
     if (!payload) return null;
     const ingredients = payload.ingredients || payload.items || [];
-    const equipment = payload.equipment || payload.tools || inferEquipmentFromRecipe(payload);
+    const equipment =
+      payload.equipment || payload.tools || inferEquipmentFromRecipe(payload);
     const cuisine = payload.cuisine || guessCuisineFromTitle(payload.title);
     return {
       id: safeId("rxp"),
@@ -205,9 +207,11 @@ const extractors = {
         ingredients,
         equipment,
         cuisine,
-        hasLambOrGoat: ingredients.some((i) => typeof i === "string" && /lamb|goat|mutton/i.test(i)),
-        tags: payload.tags || []
-      }
+        hasLambOrGoat: ingredients.some(
+          (i) => typeof i === "string" && /lamb|goat|mutton/i.test(i)
+        ),
+        tags: payload.tags || [],
+      },
     };
   },
 
@@ -223,8 +227,8 @@ const extractors = {
       data: {
         days,
         meals: payload.meals || [],
-        gapDetected: !days || days < 7
-      }
+        gapDetected: !days || days < 7,
+      },
     };
   },
 
@@ -239,11 +243,17 @@ const extractors = {
       createdAt: nowIso(),
       data: {
         totalTasks: tasks.length,
-        hasKitchen: tasks.some((t) => containsAny(t.title || t, ["kitchen", "fridge", "stove"])),
-        hasBathroom: tasks.some((t) => containsAny(t.title || t, ["bath", "toilet", "shower"])),
-        hasLaundry: tasks.some((t) => containsAny(t.title || t, ["laundry", "washer", "dryer"])),
-        scheduleHint: payload.schedule || null
-      }
+        hasKitchen: tasks.some((t) =>
+          containsAny(t.title || t, ["kitchen", "fridge", "stove"])
+        ),
+        hasBathroom: tasks.some((t) =>
+          containsAny(t.title || t, ["bath", "toilet", "shower"])
+        ),
+        hasLaundry: tasks.some((t) =>
+          containsAny(t.title || t, ["laundry", "washer", "dryer"])
+        ),
+        scheduleHint: payload.schedule || null,
+      },
     };
   },
 
@@ -259,9 +269,11 @@ const extractors = {
       data: {
         seedCount: seeds.length,
         coop: !!payload.coop,
-        varieties: seeds.map((s) => (typeof s === "string" ? s : s.name)).filter(Boolean),
-        hasStorehouseGoal: !!payload.storehouseGoal
-      }
+        varieties: seeds
+          .map((s) => (typeof s === "string" ? s : s.name))
+          .filter(Boolean),
+        hasStorehouseGoal: !!payload.storehouseGoal,
+      },
     };
   },
 
@@ -274,8 +286,8 @@ const extractors = {
       createdAt: nowIso(),
       data: {
         careTasks: ctx.payload?.careTasks || [],
-        weatherAware: true
-      }
+        weatherAware: true,
+      },
     };
   },
 
@@ -288,8 +300,8 @@ const extractors = {
       createdAt: nowIso(),
       data: {
         harvestTasks: ctx.payload?.harvestTasks || [],
-        mayFeedStorehouse: true
-      }
+        mayFeedStorehouse: true,
+      },
     };
   },
 
@@ -304,8 +316,8 @@ const extractors = {
       data: {
         sections,
         grocerySections: sections.length > 0,
-        recommended: ["syncToInventory", "emitToMealPlanner"]
-      }
+        recommended: ["syncToInventory", "emitToMealPlanner"],
+      },
     };
   },
 
@@ -318,8 +330,8 @@ const extractors = {
       createdAt: nowIso(),
       data: {
         stockItems: ctx.payload?.stock || ctx.payload?.items || [],
-        mayTriggerInventoryUpdate: true
-      }
+        mayTriggerInventoryUpdate: true,
+      },
     };
   },
 
@@ -333,9 +345,11 @@ const extractors = {
       createdAt: nowIso(),
       data: {
         animals: payload?.animals || [],
-        breeds: payload?.animals?.map((a) => a.breed || a.name).filter(Boolean) || [],
-        mayTriggerButchery: payload?.purpose === "meat" || payload?.butchery === true
-      }
+        breeds:
+          payload?.animals?.map((a) => a.breed || a.name).filter(Boolean) || [],
+        mayTriggerButchery:
+          payload?.purpose === "meat" || payload?.butchery === true,
+      },
     };
   },
 
@@ -348,8 +362,8 @@ const extractors = {
       createdAt: nowIso(),
       data: {
         animals: ctx.payload?.animals || [],
-        budget: ctx.payload?.budget || null
-      }
+        budget: ctx.payload?.budget || null,
+      },
     };
   },
 
@@ -363,8 +377,8 @@ const extractors = {
       data: {
         steps: ctx.payload?.steps || [],
         yieldCurves: ctx.payload?.yieldCurves || null,
-        mayTriggerStorehouse: true
-      }
+        mayTriggerStorehouse: true,
+      },
     };
   },
 
@@ -377,8 +391,8 @@ const extractors = {
       createdAt: nowIso(),
       data: {
         items: ctx.payload?.items || ctx.payload?.stock || [],
-        source: ctx.payload?.source || null
-      }
+        source: ctx.payload?.source || null,
+      },
     };
   },
 
@@ -390,12 +404,11 @@ const extractors = {
       title: ctx.payload?.title || "Imported content",
       createdAt: nowIso(),
       data: {
-        url: ctx.payload?.url || ctx.payload?.source?.url || null
-      }
+        url: ctx.payload?.url || ctx.payload?.source?.url || null,
+      },
     };
-  }
+  },
 };
-
 
 // ------------------------------ Insight Service ------------------------------
 export const insightService = {
@@ -431,7 +444,7 @@ export const insightService = {
     });
 
     emitSSA("insight.init", {
-      insightCount: INSIGHT_CACHE.order.length
+      insightCount: INSIGHT_CACHE.order.length,
     });
   },
 
@@ -526,9 +539,8 @@ export const insightService = {
     if (!importType || typeof fn !== "function") return;
     extractors[importType] = fn;
     emitSSA("insight.extractor.registered", { importType });
-  }
+  },
 };
-
 
 // ------------------------------ Helper Builders ------------------------------
 function guessImportTypeFromPayload(p) {
@@ -537,10 +549,13 @@ function guessImportTypeFromPayload(p) {
   if (text.includes("pantry")) return "storehouseStock";
   if (text.includes("garden") || text.includes("seed")) return "gardenPlan";
   if (text.includes("harvest")) return "harvestPlan";
-  if (text.includes("cleaning") || text.includes("declutter")) return "cleaningPlan";
+  if (text.includes("cleaning") || text.includes("declutter"))
+    return "cleaningPlan";
   if (text.includes("animal")) return "animalPlan";
-  if (text.includes("butcher") || text.includes("slaughter")) return "butcherySession";
-  if (text.includes("meal plan") || text.includes("weekly menu")) return "mealPlan";
+  if (text.includes("butcher") || text.includes("slaughter"))
+    return "butcherySession";
+  if (text.includes("meal plan") || text.includes("weekly menu"))
+    return "mealPlan";
   if (text.includes("recipe")) return "recipe";
   return "generic";
 }
@@ -563,8 +578,10 @@ function inferEquipmentFromRecipe(payload) {
   const text = JSON.stringify(payload).toLowerCase();
   const eq = [];
   if (text.includes("oven")) eq.push("oven");
-  if (text.includes("skillet") || text.includes("cast iron")) eq.push("skillet");
-  if (text.includes("pressure cooker") || text.includes("instant pot")) eq.push("pressure-cooker");
+  if (text.includes("skillet") || text.includes("cast iron"))
+    eq.push("skillet");
+  if (text.includes("pressure cooker") || text.includes("instant pot"))
+    eq.push("pressure-cooker");
   if (text.includes("grill")) eq.push("grill");
   return eq;
 }
@@ -578,7 +595,7 @@ function buildInsightFromEvent(eventKind, data) {
         kind: "inventoryUpdate",
         title: "Inventory updated",
         createdAt: nowIso(),
-        data
+        data,
       };
     case "inventoryShortage":
       return {
@@ -589,8 +606,12 @@ function buildInsightFromEvent(eventKind, data) {
         createdAt: nowIso(),
         data: {
           ...data,
-          recommendedActions: ["routeToGardenPlanner", "routeToAnimalAcquisition", "addToGroceryList"]
-        }
+          recommendedActions: [
+            "routeToGardenPlanner",
+            "routeToAnimalAcquisition",
+            "addToGroceryList",
+          ],
+        },
       };
     case "mealExecuted":
       return {
@@ -601,8 +622,8 @@ function buildInsightFromEvent(eventKind, data) {
         createdAt: nowIso(),
         data: {
           ...data,
-          mayTriggerInventoryDeduct: true
-        }
+          mayTriggerInventoryDeduct: true,
+        },
       };
     case "harvestLogged":
       return {
@@ -613,14 +634,13 @@ function buildInsightFromEvent(eventKind, data) {
         createdAt: nowIso(),
         data: {
           ...data,
-          mayTriggerStorehouse: true
-        }
+          mayTriggerStorehouse: true,
+        },
       };
     default:
       return null;
   }
 }
-
 
 // ------------------------------ Auto-init ------------------------------------
 if (isBrowser) {

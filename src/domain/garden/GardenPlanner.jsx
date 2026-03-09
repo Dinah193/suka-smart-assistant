@@ -23,13 +23,13 @@
 //   "zones" (beds, beds by sun, raised beds, hoop house, orchard, animal forage plots).
 //
 // ASSUMPTIONS
-// - src/services/eventBus.js
+// - src/services/events/eventBus.js
 // - src/config/featureFlags.json
-// - src/services/HubPacketFormatter.js → formatGardenPlanForHub
-// - src/services/FamilyFundConnector.js
-// - src/services/import/ImportIntelligenceService.js → getRecentImports()
+// - src/services/hub/HubPacketFormatter.js → formatGardenPlanForHub
+// - src/services/hub/FamilyFundConnector.js
+// - src/services/imports/ImportIntelligenceService.js → getRecentImports()
 // - src/services/garden/GardenSuggestionService.js → suggestGardenFromIntelligence(...)
-// - src/services/garden/GardenPlanStore.js → saveGardenPlan / loadLatestGardenPlan
+// - src/services/gardening/GardenPlanStore.js → saveGardenPlan / loadLatestGardenPlan
 // - src/services/garden/GardenCalendarService.js (optional) → to compute dates and windows
 //
 // EMITTED EVENTS (all in { type, ts, source, data } shape):
@@ -47,17 +47,17 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 
-import eventBus from "../../services/eventBus";
-import featureFlags from "../../config/featureFlags.json";
-import { formatGardenPlanForHub } from "../../services/HubPacketFormatter";
-import FamilyFundConnector from "../../services/FamilyFundConnector";
+import eventBus from "../../services/events/eventBus";
+import featureFlags from "@/config/featureFlags.json";
+import { formatGardenPlanForHub } from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 
-import { getRecentImports } from "../../services/import/ImportIntelligenceService";
-import { suggestGardenFromIntelligence } from "../../services/garden/GardenSuggestionService";
+import { getRecentImports } from "../../services/imports/ImportIntelligenceService";
+import { suggestGardenFromIntelligence } from "../../services/gardening/GardenSuggestionService";
 import {
   saveGardenPlan,
   loadLatestGardenPlan,
-} from "../../services/garden/GardenPlanStore";
+} from "@/services/gardening/GardenPlanStore";
 
 // optional — we call it defensively
 let GardenCalendarService = null;
@@ -121,9 +121,15 @@ function GardenPlanner() {
 
     // subscribe to imports and inventory/storehouse events
     const offImport = eventBus?.on?.("import.parsed", handleImportParsed);
-    const offInvShort = eventBus?.on?.("inventory.shortage.detected", handleInventoryShortage);
+    const offInvShort = eventBus?.on?.(
+      "inventory.shortage.detected",
+      handleInventoryShortage
+    );
     const offStorehouse = eventBus?.on?.("storehouse.low", handleStorehouseLow);
-    const offHarvest = eventBus?.on?.("garden.harvest.logged", handleGardenHarvestLogged);
+    const offHarvest = eventBus?.on?.(
+      "garden.harvest.logged",
+      handleGardenHarvestLogged
+    );
 
     return () => {
       alive = false;
@@ -147,7 +153,8 @@ function GardenPlanner() {
 
   // memo: if we have GardenCalendarService, produce session windows
   const calendarSessions = useMemo(() => {
-    if (!GardenCalendarService || !Array.isArray(planBeds) || !planBeds.length) return [];
+    if (!GardenCalendarService || !Array.isArray(planBeds) || !planBeds.length)
+      return [];
     try {
       return GardenCalendarService.buildSessionsFromPlan(planBeds);
     } catch (e) {
@@ -196,7 +203,10 @@ function GardenPlanner() {
         setSuggestions((prev) => [...auto, ...prev]);
       }
     } catch (e) {
-      console.warn("[GardenPlanner] inventory.shortage.detected handler failed", e);
+      console.warn(
+        "[GardenPlanner] inventory.shortage.detected handler failed",
+        e
+      );
     }
   }
 
@@ -328,7 +338,9 @@ function GardenPlanner() {
             Zones
           </button>
           <button
-            className={viewMode === "calendar" ? "btn-primary" : "btn-secondary"}
+            className={
+              viewMode === "calendar" ? "btn-primary" : "btn-secondary"
+            }
             onClick={() => setViewMode("calendar")}
           >
             Calendar
@@ -340,7 +352,9 @@ function GardenPlanner() {
             List
           </button>
           <button
-            className={viewMode === "sessions" ? "btn-primary" : "btn-secondary"}
+            className={
+              viewMode === "sessions" ? "btn-primary" : "btn-secondary"
+            }
             onClick={() => setViewMode("sessions")}
           >
             Sessions
@@ -371,17 +385,26 @@ function GardenPlanner() {
     if (!suggestions.length) return null;
     return (
       <div className="ssa-garden-suggestions mb-4">
-        <h3 className="font-semibold mb-2">Suggestions (imports, storehouse, harvest follow-up)</h3>
+        <h3 className="font-semibold mb-2">
+          Suggestions (imports, storehouse, harvest follow-up)
+        </h3>
         <div className="flex flex-wrap gap-2">
           {suggestions.map((s) => (
-            <div key={s.id || s.title || s.crop} className="card p-2 rounded border bg-white">
+            <div
+              key={s.id || s.title || s.crop}
+              className="card p-2 rounded border bg-white"
+            >
               <div className="font-medium">{s.crop || s.title}</div>
               {s.tags && s.tags.length ? (
-                <div className="text-xs text-gray-500 mb-1">{s.tags.join(" • ")}</div>
+                <div className="text-xs text-gray-500 mb-1">
+                  {s.tags.join(" • ")}
+                </div>
               ) : null}
               <button
                 className="btn-xs btn-primary"
-                onClick={() => handleAddFromSuggestion(s, s.zone || "Unassigned")}
+                onClick={() =>
+                  handleAddFromSuggestion(s, s.zone || "Unassigned")
+                }
               >
                 Add to plan
               </button>
@@ -399,7 +422,11 @@ function GardenPlanner() {
         <h3 className="font-semibold mb-2">Favorite Garden Plans</h3>
         <div className="flex gap-2 flex-wrap">
           {favorites.map((f) => (
-            <button key={f.id} className="btn-secondary btn-sm" onClick={() => handleApplyFavorite(f)}>
+            <button
+              key={f.id}
+              className="btn-secondary btn-sm"
+              onClick={() => handleApplyFavorite(f)}
+            >
               {f.label}
             </button>
           ))}
@@ -442,7 +469,9 @@ function GardenPlanner() {
                         type="date"
                         className="text-xs border rounded"
                         value={item.startDate?.slice(0, 10) || ""}
-                        onChange={(e) => handleStartDateChange(item.id, e.target.value)}
+                        onChange={(e) =>
+                          handleStartDateChange(item.id, e.target.value)
+                        }
                       />
                     </div>
                   </div>
@@ -468,20 +497,25 @@ function GardenPlanner() {
 
   function renderListView() {
     if (!planBeds.length) {
-      return <p className="text-gray-500 text-sm">No garden items planned yet.</p>;
+      return (
+        <p className="text-gray-500 text-sm">No garden items planned yet.</p>
+      );
     }
     return (
       <div className="flex flex-col gap-2">
         {planBeds.map((item) => (
-          <div key={item.id} className="border rounded p-2 flex items-center justify-between">
+          <div
+            key={item.id}
+            className="border rounded p-2 flex items-center justify-between"
+          >
             <div>
               <div className="font-medium">
                 {item.crop}
                 {item.variety ? " – " + item.variety : ""}
               </div>
               <div className="text-xs text-gray-500">
-                {item.zone || "Unassigned"} • {item.method || "direct-sow"} • Start{" "}
-                {item.startDate ? item.startDate.slice(0, 10) : "TBD"}
+                {item.zone || "Unassigned"} • {item.method || "direct-sow"} •
+                Start {item.startDate ? item.startDate.slice(0, 10) : "TBD"}
               </div>
             </div>
             <select
@@ -513,22 +547,25 @@ function GardenPlanner() {
   function renderCalendarView() {
     return (
       <div className="border rounded p-3 bg-white/50">
-        <h3 className="font-semibold mb-2">Garden Calendar (sessions / windows)</h3>
+        <h3 className="font-semibold mb-2">
+          Garden Calendar (sessions / windows)
+        </h3>
         {calendarSessions && calendarSessions.length ? (
           <div className="flex flex-col gap-2 max-h-72 overflow-y-auto">
             {calendarSessions.map((s) => (
               <div key={s.id} className="border rounded p-2 bg-white">
                 <div className="font-medium">{s.title}</div>
                 <div className="text-xs text-gray-500">
-                  {s.start?.slice(0, 10)} → {s.end?.slice(0, 10)} • {s.zone || "Unassigned"}
+                  {s.start?.slice(0, 10)} → {s.end?.slice(0, 10)} •{" "}
+                  {s.zone || "Unassigned"}
                 </div>
               </div>
             ))}
           </div>
         ) : (
           <p className="text-xs text-gray-500">
-            Calendar service not available or no items with dates. Dates will be generated when
-            GardenCalendarService is present.
+            Calendar service not available or no items with dates. Dates will be
+            generated when GardenCalendarService is present.
           </p>
         )}
       </div>
@@ -540,9 +577,10 @@ function GardenPlanner() {
       <div className="border rounded p-3 bg-white/50">
         <h3 className="font-semibold mb-2">Session view</h3>
         <p className="text-xs text-gray-600 mb-2">
-          This is the payload your GardenSessionEngine would receive. It will create individual
-          sessions for sowing, transplanting, watering, fertilizing, pruning, trellising, and
-          harvest windows. It also respects your Sabbath/quiet-hours/weather guards.
+          This is the payload your GardenSessionEngine would receive. It will
+          create individual sessions for sowing, transplanting, watering,
+          fertilizing, pruning, trellising, and harvest windows. It also
+          respects your Sabbath/quiet-hours/weather guards.
         </p>
         <pre className="bg-gray-100 rounded p-2 text-xs overflow-x-auto">
           {JSON.stringify(

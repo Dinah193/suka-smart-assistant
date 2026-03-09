@@ -21,25 +21,25 @@
  * - Touch UI, DOM, timers, or global mutable state
  */
 
-import { emit as emitEvent } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit as emitEvent } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
 import { getModeForIntent } from "@/reasoner/modes/map"; // (domain, intent) -> mode string
-import { runReasoner } from "@/reasoner/runtime/reasoner"; // core Reasoner entrypoint
-import { checkBudget } from "@/reasoner/runtime/budget";
-import { canInvokeReasoner } from "@/reasoner/runtime/gating";
-import { applyConfidenceRules } from "@/reasoner/runtime/confidence";
-import { applyFreshnessRules } from "@/reasoner/runtime/freshness";
+import { runReasoner } from "@/agents/runtime/reasoner/index"; // core Reasoner entrypoint
+import { checkBudget } from "@/reasoner/budget";
+import { canInvokeReasoner } from "@/reasoner/gating";
+import { applyConfidenceRules } from "@/reasoner/confidence";
+import { applyFreshnessRules } from "@/reasoner/freshness";
 
 import { getDomainContext } from "@/db/selectors"; // pulls Dexie context for domain
 import { getCached, setCached } from "@/reasoner/cache/memo";
 import { buildCacheKey } from "@/reasoner/cache/keys";
 
-import { validateModeOutput } from "@/reasoner/modes/validator"; // schema-based
+import { validateModeOutput } from "@/reasoner/modes/validate"; // schema-based
 import { buildPromptForMode } from "@/reasoner/prompts/builder";
 
-import { HubPacketFormatter } from "@/hub/HubPacketFormatter";
-import { FamilyFundConnector } from "@/hub/FamilyFundConnector";
+import { HubPacketFormatter } from "@/services/hub/HubPacketFormatter";
+import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
 
 /**
  * @typedef {Object} ShimRequest
@@ -90,7 +90,10 @@ export async function invokeShim(req) {
       );
     }
     if (!intent || typeof intent !== "string") {
-      return buildShimError("Missing intent in ShimRequest", null, { ts, domain });
+      return buildShimError("Missing intent in ShimRequest", null, {
+        ts,
+        domain,
+      });
     }
 
     const normalizedIntent = normalizeIntent(intent);
@@ -104,11 +107,15 @@ export async function invokeShim(req) {
       fallbackGardenMode(normalizedIntent);
 
     if (!mode) {
-      return buildShimError("Unable to resolve Reasoner mode for garden shim", null, {
-        ts,
-        domain,
-        intent: normalizedIntent,
-      });
+      return buildShimError(
+        "Unable to resolve Reasoner mode for garden shim",
+        null,
+        {
+          ts,
+          domain,
+          intent: normalizedIntent,
+        }
+      );
     }
 
     debug.push({ ts, stage: "mode_resolved", mode, intent: normalizedIntent });
@@ -124,9 +131,17 @@ export async function invokeShim(req) {
     // --------------------------------------------------
     // 2) Gating + Budget checks
     // --------------------------------------------------
-    const gate = await canInvokeReasoner({ domain, intent: normalizedIntent, mode, runtime });
+    const gate = await canInvokeReasoner({
+      domain,
+      intent: normalizedIntent,
+      mode,
+      runtime,
+    });
     if (!gate?.allowed) {
-      warnings.push({ code: "gated", reason: gate?.reason || "blocked_by_policy" });
+      warnings.push({
+        code: "gated",
+        reason: gate?.reason || "blocked_by_policy",
+      });
       emitEvent({
         type: "reasoner.gated",
         ts: new Date().toISOString(),
@@ -165,10 +180,16 @@ export async function invokeShim(req) {
     // 3) Dexie context + freshness adjustments
     // --------------------------------------------------
     const context = (await getDomainContext("garden")) || {};
-    debug.push({ stage: "context_loaded", contextKeys: Object.keys(context || {}) });
+    debug.push({
+      stage: "context_loaded",
+      contextKeys: Object.keys(context || {}),
+    });
 
-    const { input: freshInput, freshnessWarnings } =
-      (await applyFreshnessRules(mode, input, context)) || { input, freshnessWarnings: [] };
+    const { input: freshInput, freshnessWarnings } = (await applyFreshnessRules(
+      mode,
+      input,
+      context
+    )) || { input, freshnessWarnings: [] };
     if (freshnessWarnings?.length) {
       warnings.push(...freshnessWarnings);
       debug.push({ stage: "freshness_warnings", freshnessWarnings });
@@ -188,7 +209,10 @@ export async function invokeShim(req) {
         data: { mode, cacheKey },
       });
 
-      const normalizedFromCache = normalizeGardenEnvelope(cached, normalizedIntent);
+      const normalizedFromCache = normalizeGardenEnvelope(
+        cached,
+        normalizedIntent
+      );
       return {
         ok: true,
         mode,
@@ -236,7 +260,10 @@ export async function invokeShim(req) {
     // --------------------------------------------------
     const validation = await validateModeOutput(mode, rawResult);
     if (!validation?.valid) {
-      warnings.push({ code: "invalid_schema", errors: validation?.errors || [] });
+      warnings.push({
+        code: "invalid_schema",
+        errors: validation?.errors || [],
+      });
       debug.push({ stage: "invalid_schema", errors: validation?.errors || [] });
 
       emitEvent({
@@ -262,16 +289,26 @@ export async function invokeShim(req) {
       data: { mode },
     });
 
-    const confidenceInfo = await applyConfidenceRules({ mode, result: validation.normalized, runtime });
+    const confidenceInfo = await applyConfidenceRules({
+      mode,
+      result: validation.normalized,
+      runtime,
+    });
     if (confidenceInfo?.warnings?.length) {
       warnings.push(...confidenceInfo.warnings);
-      debug.push({ stage: "confidence_warnings", confidenceWarnings: confidenceInfo.warnings });
+      debug.push({
+        stage: "confidence_warnings",
+        confidenceWarnings: confidenceInfo.warnings,
+      });
     }
 
     // --------------------------------------------------
     // 8) Normalize into legacy garden envelope shape
     // --------------------------------------------------
-    const normalized = normalizeGardenEnvelope(validation.normalized, normalizedIntent);
+    const normalized = normalizeGardenEnvelope(
+      validation.normalized,
+      normalizedIntent
+    );
 
     // --------------------------------------------------
     // 9) Cache store (idempotent)
@@ -280,7 +317,10 @@ export async function invokeShim(req) {
       await setCached(cacheKey, normalized, { mode, ttlSec: runtime?.ttlSec });
       debug.push({ stage: "cache_stored" });
     } catch (e) {
-      warnings.push({ code: "cache_store_failed", message: String(e?.message || e) });
+      warnings.push({
+        code: "cache_store_failed",
+        message: String(e?.message || e),
+      });
       console.warn("[gardenEstimateShim] cache store failed", e);
     }
 
@@ -304,7 +344,10 @@ export async function invokeShim(req) {
         });
         debug.push({ stage: "hub_exported" });
       } catch (e) {
-        warnings.push({ code: "hub_export_failed", message: String(e?.message || e) });
+        warnings.push({
+          code: "hub_export_failed",
+          message: String(e?.message || e),
+        });
         console.warn("[gardenEstimateShim] Hub export failed", e);
       }
     }
@@ -318,7 +361,11 @@ export async function invokeShim(req) {
     };
   } catch (err) {
     console.warn("[gardenEstimateShim] fatal error", err);
-    return buildShimError("gardenEstimateShim error", err, { ts, debug, warnings });
+    return buildShimError("gardenEstimateShim error", err, {
+      ts,
+      debug,
+      warnings,
+    });
   }
 }
 
@@ -350,15 +397,23 @@ export async function handle(command, payload = {}) {
 /* ------------------------------------------------------------------ */
 
 function normalizeIntent(intent) {
-  const c = String(intent || "").toLowerCase().trim();
+  const c = String(intent || "")
+    .toLowerCase()
+    .trim();
 
-  if (["estimate", "estimateplan", "estimate_plan", "estimateplan()"].includes(c)) {
+  if (
+    ["estimate", "estimateplan", "estimate_plan", "estimateplan()"].includes(c)
+  ) {
     return "estimatePlan";
   }
   if (
-    ["generate", "generateplan", "generate_garden_plan", "generategardenplan", "generategardenplan()"].includes(
-      c
-    )
+    [
+      "generate",
+      "generateplan",
+      "generate_garden_plan",
+      "generategardenplan",
+      "generategardenplan()",
+    ].includes(c)
   ) {
     return "generateGardenPlan";
   }
@@ -407,11 +462,19 @@ function normalizeGardenEnvelope(raw, normalizedIntent) {
       ok: raw.ok !== false,
       timestamp: raw.timestamp || new Date().toISOString(),
       summary: raw.summary || defaultSummaryForIntent(normalizedIntent),
-      recommendations: Array.isArray(raw.recommendations) ? raw.recommendations : [],
-      calendarEvents: Array.isArray(raw.calendarEvents) ? raw.calendarEvents : [],
+      recommendations: Array.isArray(raw.recommendations)
+        ? raw.recommendations
+        : [],
+      calendarEvents: Array.isArray(raw.calendarEvents)
+        ? raw.calendarEvents
+        : [],
       gardenUpdates: Array.isArray(raw.gardenUpdates) ? raw.gardenUpdates : [],
-      storehouseUpdates: Array.isArray(raw.storehouseUpdates) ? raw.storehouseUpdates : [],
-      mealPlanningHooks: Array.isArray(raw.mealPlanningHooks) ? raw.mealPlanningHooks : [],
+      storehouseUpdates: Array.isArray(raw.storehouseUpdates)
+        ? raw.storehouseUpdates
+        : [],
+      mealPlanningHooks: Array.isArray(raw.mealPlanningHooks)
+        ? raw.mealPlanningHooks
+        : [],
       logs: Array.isArray(raw.logs) ? raw.logs : [],
     };
     return out;
@@ -427,13 +490,17 @@ function normalizeGardenEnvelope(raw, normalizedIntent) {
     gardenUpdates: [],
     storehouseUpdates: [],
     mealPlanningHooks: [],
-    logs: [{ msg: "Non-object Reasoner output normalized by shim", value: raw }],
+    logs: [
+      { msg: "Non-object Reasoner output normalized by shim", value: raw },
+    ],
   };
 }
 
 function defaultSummaryForIntent(normalizedIntent) {
-  if (normalizedIntent === "estimatePlan") return "Garden estimate plan generated.";
-  if (normalizedIntent === "generateGardenPlan") return "Garden workflow plan generated.";
+  if (normalizedIntent === "estimatePlan")
+    return "Garden estimate plan generated.";
+  if (normalizedIntent === "generateGardenPlan")
+    return "Garden workflow plan generated.";
   return "Garden shim result.";
 }
 

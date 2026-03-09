@@ -37,7 +37,7 @@ try {
   Events = eb.Events || {};
 } catch {
   try {
-    const eb = require("@/services/eventBus.js");
+    const eb = require("@/services/events/eventBus.js");
     eventBus = eb.default || eb.eventBus || eb;
     Events = eb.Events || {};
   } catch {
@@ -48,7 +48,9 @@ try {
 
 let featureFlags = {};
 try {
-  featureFlags = require("@/config/featureFlags").default || require("@/config/featureFlags");
+  featureFlags =
+    require("@/config/featureFlags").default ||
+    require("@/config/featureFlags");
 } catch {}
 
 let HubPacketFormatter, FamilyFundConnector;
@@ -75,52 +77,59 @@ export function initGardenAdapter() {
   }
 
   // Main glue: engines/UX ask for a garden session draft
-  eventBus.on("garden/requestSession", ({ data }) => {
-    try {
-      const draft = mapGardenToSession(data);
-      // emit domain draft (for domain UIs)
-      emit("garden/draftReady", { draft });
-      // also emit to shared tray immediately
-      emit(Events?.SESSION_DRAFT_READY || "session/draftReady", { draft });
+  eventBus.on(
+    "garden/requestSession",
+    ({ data }) => {
+      try {
+        const draft = mapGardenToSession(data);
+        // emit domain draft (for domain UIs)
+        emit("garden/draftReady", { draft });
+        // also emit to shared tray immediately
+        emit(Events?.SESSION_DRAFT_READY || "session/draftReady", { draft });
 
-      // optional hub mirror (creating a draft is a household data change)
-      exportToHubIfEnabled({
-        type: "garden/draftReady",
-        ts: new Date().toISOString(),
-        source: "adapter.garden",
-        data: { draft },
-      });
-    } catch (e) {
-      emit(Events?.SESSION_ERROR || "session/error", {
-        domain: "garden",
-        error: String(e?.message || e),
-        input: safeSmall(data),
-      });
-    }
-  }, { priority: 1 });
+        // optional hub mirror (creating a draft is a household data change)
+        exportToHubIfEnabled({
+          type: "garden/draftReady",
+          ts: new Date().toISOString(),
+          source: "adapter.garden",
+          data: { draft },
+        });
+      } catch (e) {
+        emit(Events?.SESSION_ERROR || "session/error", {
+          domain: "garden",
+          error: String(e?.message || e),
+          input: safeSmall(data),
+        });
+      }
+    },
+    { priority: 1 }
+  );
 
   // Convenience: if a plan generation event fires with a concrete task, map it
-  eventBus.on(Events?.GARDEN_PLAN_GENERATE_REQ || "garden/plan.generate.requested", ({ data }) => {
-    // If the request already carries concrete work items with a time window,
-    // generate a draft so it can be placed quickly.
-    const src = data || {};
-    const hasConcrete =
-      Array.isArray(src?.tasks) && src.tasks.length ||
-      Array.isArray(src?.beds) && src.beds.length ||
-      Array.isArray(src?.crops) && src.crops.length;
-    if (!hasConcrete) return;
-    try {
-      const draft = mapGardenToSession(src);
-      emit("garden/draftReady", { draft });
-      emit(Events?.SESSION_DRAFT_READY || "session/draftReady", { draft });
-      exportToHubIfEnabled({
-        type: "garden/draftReady",
-        ts: new Date().toISOString(),
-        source: "adapter.garden",
-        data: { draft },
-      });
-    } catch {}
-  });
+  eventBus.on(
+    Events?.GARDEN_PLAN_GENERATE_REQ || "garden/plan.generate.requested",
+    ({ data }) => {
+      // If the request already carries concrete work items with a time window,
+      // generate a draft so it can be placed quickly.
+      const src = data || {};
+      const hasConcrete =
+        (Array.isArray(src?.tasks) && src.tasks.length) ||
+        (Array.isArray(src?.beds) && src.beds.length) ||
+        (Array.isArray(src?.crops) && src.crops.length);
+      if (!hasConcrete) return;
+      try {
+        const draft = mapGardenToSession(src);
+        emit("garden/draftReady", { draft });
+        emit(Events?.SESSION_DRAFT_READY || "session/draftReady", { draft });
+        exportToHubIfEnabled({
+          type: "garden/draftReady",
+          ts: new Date().toISOString(),
+          source: "adapter.garden",
+          data: { draft },
+        });
+      } catch {}
+    }
+  );
 }
 
 /**
@@ -156,22 +165,22 @@ export function mapGardenToSession(input = {}) {
     noisy: inferNoisy(equipment, steps),
     durationMin,
     flexibilityMin: src.flexibilityMin ?? 60,
-    window,                 // { startISO?, endISO? }
-    equipment,              // [{ deviceId?, kind?, title? }]
-    ingredients,            // consumables mapped to scheduler "ingredients"
-    rolesNeeded,            // e.g., [{ role:"gardener", count:1 }]
-    steps,                  // normalized with estimates
+    window, // { startISO?, endISO? }
+    equipment, // [{ deviceId?, kind?, title? }]
+    ingredients, // consumables mapped to scheduler "ingredients"
+    rolesNeeded, // e.g., [{ role:"gardener", count:1 }]
+    steps, // normalized with estimates
     meta: {
       planId: src.planId,
       sourceUrl: src.sourceUrl,
       tags,
       plots: src.plots,
-      beds: src.beds,               // [{ id?, name, areaM2? }]
-      crops: src.crops,             // [{ crop, cultivar?, qty? }]
-      hazards: src.hazards,         // e.g., "thorns", "pesticide"
+      beds: src.beds, // [{ id?, name, areaM2? }]
+      crops: src.crops, // [{ crop, cultivar?, qty? }]
+      hazards: src.hazards, // e.g., "thorns", "pesticide"
       priority: src.priority,
       planContext: pick(src, ["planDate", "slot", "dayPart"]),
-      weatherSensitive: true,       // signals service will annotate/follow-up
+      weatherSensitive: true, // signals service will annotate/follow-up
       frostSensitive: src.frostSensitive,
       windSensitive: src.windSensitive,
       heavyRainSensitive: src.heavyRainSensitive,
@@ -179,7 +188,8 @@ export function mapGardenToSession(input = {}) {
   };
 
   // 4) Minimal validation
-  if (draft.durationMin <= 0) throw new Error("Invalid duration for garden draft");
+  if (draft.durationMin <= 0)
+    throw new Error("Invalid duration for garden draft");
 
   return draft;
 }
@@ -213,23 +223,31 @@ function normalizeGardenInput(x = {}) {
   const time = x.time || {};
 
   // Flatten tasks; allow strings or objects
-  const tasks = Array.isArray(x.tasks) ? x.tasks
-             : Array.isArray(plan.tasks) ? plan.tasks
-             : [];
+  const tasks = Array.isArray(x.tasks)
+    ? x.tasks
+    : Array.isArray(plan.tasks)
+    ? plan.tasks
+    : [];
 
   // Crops: [{crop:"Tomato", cultivar:"Sungold", qty:6, unit:"plants"}]
-  const crops = Array.isArray(x.crops) ? x.crops
-             : Array.isArray(plan.crops) ? plan.crops
-             : [];
+  const crops = Array.isArray(x.crops)
+    ? x.crops
+    : Array.isArray(plan.crops)
+    ? plan.crops
+    : [];
 
   // Beds/plots
-  const beds = Array.isArray(x.beds) ? x.beds
-            : Array.isArray(plan.beds) ? plan.beds
-            : [];
+  const beds = Array.isArray(x.beds)
+    ? x.beds
+    : Array.isArray(plan.beds)
+    ? plan.beds
+    : [];
 
-  const plots = Array.isArray(x.plots) ? x.plots
-             : Array.isArray(plan.plots) ? plan.plots
-             : [];
+  const plots = Array.isArray(x.plots)
+    ? x.plots
+    : Array.isArray(plan.plots)
+    ? plan.plots
+    : [];
 
   return {
     planId: String(plan.id || meta.planId || ""),
@@ -258,36 +276,47 @@ function normalizeGardenInput(x = {}) {
     // sensitivity flags (help weather + scheduler)
     frostSensitive: meta.frostSensitive ?? inferFrostSensitive(tasks, crops),
     windSensitive: meta.windSensitive ?? inferWindSensitive(tasks),
-    heavyRainSensitive: meta.heavyRainSensitive ?? inferHeavyRainSensitive(tasks),
+    heavyRainSensitive:
+      meta.heavyRainSensitive ?? inferHeavyRainSensitive(tasks),
   };
 }
 
 function deriveDurationMin(src) {
   if (num(src.totalMin)) return clamp(num(src.totalMin), 10, 8 * 60);
-  const fromTasks = (src.tasks || []).reduce((acc, t) => acc + (num(t?.estMin) || guessTaskMinutes(t)), 0);
-  const fromCrops = (src.crops || []).reduce((acc, c) => acc + guessCropMinutes(c), 0);
+  const fromTasks = (src.tasks || []).reduce(
+    (acc, t) => acc + (num(t?.estMin) || guessTaskMinutes(t)),
+    0
+  );
+  const fromCrops = (src.crops || []).reduce(
+    (acc, c) => acc + guessCropMinutes(c),
+    0
+  );
   const sum = fromTasks || fromCrops;
   return clamp(sum || 60, 10, 8 * 60);
 }
 
 function deriveWindow(src, durationMin) {
   const s = isISO(src.start) ? src.start : null;
-  const e = isISO(src.end) ? src.end : (s ? new Date(Date.parse(s) + durationMin * 60000).toISOString() : null);
+  const e = isISO(src.end)
+    ? src.end
+    : s
+    ? new Date(Date.parse(s) + durationMin * 60000).toISOString()
+    : null;
   if (!s && !e) return undefined;
   return { startISO: s || undefined, endISO: e || undefined };
 }
 
 function deriveEquipment(src) {
   // Header equipment
-  const head = (src.equipment || []).map(eq => ({
+  const head = (src.equipment || []).map((eq) => ({
     deviceId: eq?.deviceId ? String(eq.deviceId) : undefined,
     kind: eq?.kind ? String(eq.kind) : guessDeviceKind(eq?.name || eq?.title),
     title: eq?.title || eq?.name || undefined,
   }));
 
   // Tasks-derived (e.g., tiller, hoe, spade, shovel, rake, trellis, irrigation timer)
-  const fromTasks = (src.tasks || []).flatMap(t =>
-    arr(t.equipment).map(eq => ({
+  const fromTasks = (src.tasks || []).flatMap((t) =>
+    arr(t.equipment).map((eq) => ({
       deviceId: eq?.deviceId ? String(eq.deviceId) : undefined,
       kind: eq?.kind ? String(eq.kind) : guessDeviceKind(eq?.name || eq?.title),
       title: eq?.title || eq?.name || undefined,
@@ -306,11 +335,21 @@ function deriveConsumables(src) {
     const sku = item?.sku ? String(item.sku) : undefined;
     const qty = num(item?.qty || item?.quantity);
     const unit = String(item?.unit || item?.uom || "");
-    return (id || name) ? { id: id || undefined, sku, name: name || undefined, qty: qty || undefined, unit: unit || undefined } : null;
+    return id || name
+      ? {
+          id: id || undefined,
+          sku,
+          name: name || undefined,
+          qty: qty || undefined,
+          unit: unit || undefined,
+        }
+      : null;
   };
 
   const head = (src.consumables || []).map(normalize).filter(Boolean);
-  const fromTasks = (src.tasks || []).flatMap(t => arr(t.consumables).map(normalize).filter(Boolean));
+  const fromTasks = (src.tasks || []).flatMap((t) =>
+    arr(t.consumables).map(normalize).filter(Boolean)
+  );
   const inferred = inferConsumablesFromTasks(src.tasks, src.crops);
 
   return mergeConsumables([...head, ...fromTasks, ...inferred]);
@@ -319,7 +358,9 @@ function deriveConsumables(src) {
 function deriveRoles(src) {
   // One gardener; add helper based on scope/weight
   const base = [{ role: "gardener", count: 1 }];
-  const heavy = (src.tasks || []).some(t => /till|double dig|move soil|haul|mulch/i.test(String(t?.label || t)));
+  const heavy = (src.tasks || []).some((t) =>
+    /till|double dig|move soil|haul|mulch/i.test(String(t?.label || t))
+  );
   const long = (num(src.totalMin) || 0) > 120 || (src.crops || []).length > 6;
   if (heavy || long) base.push({ role: "helper", count: 1 });
   return base;
@@ -327,7 +368,10 @@ function deriveRoles(src) {
 
 function deriveSteps(src) {
   // Prefer explicit tasks
-  const tasks = Array.isArray(src.tasks) && src.tasks.length ? src.tasks : guessTasksFromCrops(src);
+  const tasks =
+    Array.isArray(src.tasks) && src.tasks.length
+      ? src.tasks
+      : guessTasksFromCrops(src);
   return tasks.map((t, i) => ({
     idx: i + 1,
     label: String(t?.label || t?.text || t || `Task ${i + 1}`),
@@ -338,21 +382,36 @@ function deriveSteps(src) {
 }
 
 function deriveLocation(src) {
-  const names = new Set((src.beds || []).map(b => String(b?.name || "").trim()).filter(Boolean));
-  if (names.size) return `garden: ${Array.from(names).slice(0, 3).join(", ")}${names.size > 3 ? "…" : ""}`;
+  const names = new Set(
+    (src.beds || []).map((b) => String(b?.name || "").trim()).filter(Boolean)
+  );
+  if (names.size)
+    return `garden: ${Array.from(names).slice(0, 3).join(", ")}${
+      names.size > 3 ? "…" : ""
+    }`;
   return "garden";
 }
 
 /* ------------------------------- Heuristics -------------------------------- */
 function inferFrostSensitive(tasks, crops) {
-  const text = ((tasks || []).map(t => String(t?.label || t)).join(" ") + " " + (crops || []).map(c => c?.crop).join(" ")).toLowerCase();
-  return /(transplant|seed|sow|tomato|pepper|basil|cucumber|squash|melon|bean)/.test(text);
+  const text = (
+    (tasks || []).map((t) => String(t?.label || t)).join(" ") +
+    " " +
+    (crops || []).map((c) => c?.crop).join(" ")
+  ).toLowerCase();
+  return /(transplant|seed|sow|tomato|pepper|basil|cucumber|squash|melon|bean)/.test(
+    text
+  );
 }
 function inferWindSensitive(tasks) {
-  return (tasks || []).some(t => /trellis|stake|prune fruit|spray/i.test(String(t?.label || t)));
+  return (tasks || []).some((t) =>
+    /trellis|stake|prune fruit|spray/i.test(String(t?.label || t))
+  );
 }
 function inferHeavyRainSensitive(tasks) {
-  return (tasks || []).some(t => /till|double dig|apply fertilizer|spray/i.test(String(t?.label || t)));
+  return (tasks || []).some((t) =>
+    /till|double dig|apply fertilizer|spray/i.test(String(t?.label || t))
+  );
 }
 
 function guessTaskMinutes(t) {
@@ -377,30 +436,47 @@ function guessCropMinutes(c) {
 
 function guessTasksFromCrops(src) {
   const out = [];
-  for (const c of (src.crops || [])) {
+  for (const c of src.crops || []) {
     const crop = String(c?.crop || "crop");
     if (/seed|sow/i.test(String(c?.action || ""))) {
-      out.push({ label: `Direct sow ${crop}`, crop, estMin: guessCropMinutes(c) });
+      out.push({
+        label: `Direct sow ${crop}`,
+        crop,
+        estMin: guessCropMinutes(c),
+      });
     } else if (/transplant|plant/i.test(String(c?.action || ""))) {
-      out.push({ label: `Transplant ${crop}`, crop, estMin: guessCropMinutes(c) });
+      out.push({
+        label: `Transplant ${crop}`,
+        crop,
+        estMin: guessCropMinutes(c),
+      });
     } else {
       out.push({ label: `Tend ${crop}`, crop, estMin: guessCropMinutes(c) });
     }
   }
   if (!out.length) {
-    out.push({ label: "General garden maintenance (weed/water/inspect)", estMin: 45 });
+    out.push({
+      label: "General garden maintenance (weed/water/inspect)",
+      estMin: 45,
+    });
   }
   return out;
 }
 
 function inferConsumablesFromTasks(tasks = [], crops = []) {
   const out = [];
-  const text = tasks.map(t => String(t?.label || t)).join(" ").toLowerCase();
-  if (/fertiliz|feed/.test(text)) out.push({ name: "All-purpose fertilizer", qty: 1, unit: "kg" });
+  const text = tasks
+    .map((t) => String(t?.label || t))
+    .join(" ")
+    .toLowerCase();
+  if (/fertiliz|feed/.test(text))
+    out.push({ name: "All-purpose fertilizer", qty: 1, unit: "kg" });
   if (/lime/.test(text)) out.push({ name: "Garden lime", qty: 1, unit: "kg" });
   if (/mulch/.test(text)) out.push({ name: "Mulch", qty: 3, unit: "bags" });
-  if (/trellis|stake/.test(text)) out.push({ name: "Twine / ties", qty: 1, unit: "roll" });
-  if (/spray/.test(text)) out.push({ name: "Sprayer solution", qty: 1, unit: "L" });
+  if (/trellis|stake/.test(text))
+    out.push({ name: "Twine / ties", qty: 1, unit: "roll" });
+  if (/spray/.test(text))
+    out.push({ name: "Sprayer solution", qty: 1, unit: "L" });
   // Seeds from crops
   for (const c of crops) {
     if (/sow|seed|direct/i.test(String(c?.action || ""))) {
@@ -425,9 +501,13 @@ function guessDeviceKind(name) {
 }
 
 function inferNoisy(equipment, steps) {
-  const kinds = new Set((equipment || []).map(e => (e.kind || "").toLowerCase()));
+  const kinds = new Set(
+    (equipment || []).map((e) => (e.kind || "").toLowerCase())
+  );
   if (kinds.has("tiller") || kinds.has("mower")) return true;
-  const noisyStep = (steps || []).some(s => /till|mow|blower/i.test(String(s.label || "")));
+  const noisyStep = (steps || []).some((s) =>
+    /till|mow|blower/i.test(String(s.label || ""))
+  );
   return noisyStep;
 }
 
@@ -440,8 +520,9 @@ function mergeConsumables(items) {
     if (!key) continue;
     const prev = byKey.get(key);
     if (prev) {
-      const a = num(prev.qty) || 0, b = num(c.qty) || 0;
-      byKey.set(key, { ...prev, qty: (a + b) || undefined });
+      const a = num(prev.qty) || 0,
+        b = num(c.qty) || 0;
+      byKey.set(key, { ...prev, qty: a + b || undefined });
     } else {
       byKey.set(key, c);
     }
@@ -450,11 +531,13 @@ function mergeConsumables(items) {
 }
 
 function dedupByKey(arr, getKey) {
-  const out = []; const seen = new Set();
+  const out = [];
+  const seen = new Set();
   for (const it of arr) {
     const k = getKey(it);
     if (!k || seen.has(k)) continue;
-    seen.add(k); out.push(it);
+    seen.add(k);
+    out.push(it);
   }
   return out;
 }
@@ -472,22 +555,28 @@ async function exportToHubIfEnabled(payload) {
     if (!HubPacketFormatter || !FamilyFundConnector) return;
     const pkt = HubPacketFormatter.format(payload);
     await FamilyFundConnector.send(pkt);
-  } catch { /* fail-silent */ }
+  } catch {
+    /* fail-silent */
+  }
 }
 
 /* --------------------------------- Utils ----------------------------------- */
-function num(n) { return Number.isFinite(n) ? n : Number.isFinite(+n) ? +n : undefined; }
+function num(n) {
+  return Number.isFinite(n) ? n : Number.isFinite(+n) ? +n : undefined;
+}
 function minutesFrom(v) {
   if (!v && v !== 0) return undefined;
   if (Number.isFinite(v)) return v;
   const s = String(v).trim().toLowerCase();
   const iso = /^p(t(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?)$/i.exec(s);
   if (iso) {
-    const h = +(iso[2] || 0), m = +(iso[3] || 0), sec = +(iso[4] || 0);
+    const h = +(iso[2] || 0),
+      m = +(iso[3] || 0),
+      sec = +(iso[4] || 0);
     return h * 60 + m + Math.round(sec / 60);
   }
   const hm = /(?:(\d+)\s*h)?\s*(?:(\d+)\s*m)?/.exec(s);
-  if (hm && (hm[1] || hm[2])) return (+(hm[1] || 0)) * 60 + +(hm[2] || 0);
+  if (hm && (hm[1] || hm[2])) return +(hm[1] || 0) * 60 + +(hm[2] || 0);
   const n = +s;
   return Number.isFinite(n) ? n : undefined;
 }
@@ -495,11 +584,19 @@ function clamp(n, lo, hi) {
   const x = Number.isFinite(n) ? n : lo;
   return Math.max(lo, Math.min(hi, x));
 }
-function firstISO(...vals) { return vals.find(isISO) || undefined; }
-function isISO(s) { return typeof s === "string" && !Number.isNaN(Date.parse(s)); }
-function arr(v) { return Array.isArray(v) ? v : []; }
+function firstISO(...vals) {
+  return vals.find(isISO) || undefined;
+}
+function isISO(s) {
+  return typeof s === "string" && !Number.isNaN(Date.parse(s));
+}
+function arr(v) {
+  return Array.isArray(v) ? v : [];
+}
 function pick(obj, keys) {
-  const out = {}; for (const k of keys) if (obj && Object.prototype.hasOwnProperty.call(obj, k)) out[k] = obj[k];
+  const out = {};
+  for (const k of keys)
+    if (obj && Object.prototype.hasOwnProperty.call(obj, k)) out[k] = obj[k];
   return out;
 }
 function rankPriority(v) {
@@ -508,12 +605,16 @@ function rankPriority(v) {
   if (["low", "3"].includes(s)) return "low";
   return "normal";
 }
-function genId() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
+function genId() {
+  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
 function safeSmall(obj) {
   try {
     const s = JSON.stringify(obj);
     return s && s.length > 2000 ? s.slice(0, 2000) + "…" : s;
-  } catch { return "[unserializable]"; }
+  } catch {
+    return "[unserializable]";
+  }
 }
 
 /* --------------------------------- Exports --------------------------------- */

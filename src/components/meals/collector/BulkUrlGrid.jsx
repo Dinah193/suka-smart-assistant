@@ -1,5 +1,11 @@
 // C:\Users\larho\suka-smart-assistant\src\components\meals\collector\BulkUrlGrid.jsx
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 /**
  * BulkUrlGrid.jsx — Multi-domain Collector (Pinterest/URLs/Products/Ideas)
@@ -19,22 +25,42 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 /* --------------------------------- Tiny UI kit --------------------------------- */
 const cx = (...a) => a.filter(Boolean).join(" ");
-const Button = ({ variant = "solid", size = "md", className, children, ...props }) => {
-  const v = {
-    solid: "bg-zinc-900 text-white hover:opacity-90 disabled:opacity-50",
-    outline: "border hover:bg-zinc-50",
-    ghost: "hover:bg-zinc-100",
-    subtle: "bg-zinc-100 text-zinc-900 hover:bg-zinc-200",
-  }[variant] || "bg-zinc-900 text-white";
-  const s = { sm: "h-8 px-2 text-sm", md: "h-10 px-3 text-sm", icon: "h-9 w-9 p-0" }[size] || "h-10 px-3";
+const Button = ({
+  variant = "solid",
+  size = "md",
+  className,
+  children,
+  ...props
+}) => {
+  const v =
+    {
+      solid: "bg-zinc-900 text-white hover:opacity-90 disabled:opacity-50",
+      outline: "border hover:bg-zinc-50",
+      ghost: "hover:bg-zinc-100",
+      subtle: "bg-zinc-100 text-zinc-900 hover:bg-zinc-200",
+    }[variant] || "bg-zinc-900 text-white";
+  const s =
+    { sm: "h-8 px-2 text-sm", md: "h-10 px-3 text-sm", icon: "h-9 w-9 p-0" }[
+      size
+    ] || "h-10 px-3";
   return (
-    <button className={cx("rounded-xl transition-colors", v, s, className)} {...props}>
+    <button
+      className={cx("rounded-xl transition-colors", v, s, className)}
+      {...props}
+    >
       {children}
     </button>
   );
 };
-const Input = (props) => <input className="h-9 rounded-xl border px-3 text-sm w-full" {...props} />;
-const Textarea = (props) => <textarea className="min-h-[84px] w-full rounded-xl border p-3 text-sm" {...props} />;
+const Input = (props) => (
+  <input className="h-9 rounded-xl border px-3 text-sm w-full" {...props} />
+);
+const Textarea = (props) => (
+  <textarea
+    className="min-h-[84px] w-full rounded-xl border p-3 text-sm"
+    {...props}
+  />
+);
 const Badge = ({ children, tone = "zinc", className }) => (
   <span
     className={cx(
@@ -52,27 +78,45 @@ const Badge = ({ children, tone = "zinc", className }) => (
 /* ------------------------------ Soft integrations ------------------------------ */
 // eventBus (new path, then legacy)
 let eventBus = { on: () => {}, off: () => {}, emit: () => {} };
-try { eventBus = require("@/services/events/eventBus"); } catch { try { eventBus = require("@/services/eventBus").eventBus || eventBus; } catch {} }
+try {
+  eventBus = require("@/services/events/eventBus");
+} catch {
+  try {
+    eventBus = require("@/services/events/eventBus").eventBus || eventBus;
+  } catch {}
+}
 
 // URL inspector / opengraph enrich
 let urlInspector = null; // expected: inspect(url) -> { title, description, image, site, type, canonicalUrl, price, currency, author, ogType }
-try { urlInspector = require("@/services/ingest/urlInspector"); } catch {}
+try {
+  urlInspector = require("@/services/ingest/urlInspector");
+} catch {}
 
 // Dedup services (Vaults)
 let RecipeStore = {};
 let IdeasStore = {};
 let ShoppingStore = {};
-try { RecipeStore = require("@/store/RecipeStore"); } catch {}
-try { IdeasStore = require("@/store/IdeasStore"); } catch {}
-try { ShoppingStore = require("@/store/ShoppingStore"); } catch {}
+try {
+  RecipeStore = require("@/store/RecipeStore");
+} catch {}
+try {
+  IdeasStore = require("@/store/IdeasStore");
+} catch {}
+try {
+  ShoppingStore = require("@/store/ShoppingStore");
+} catch {}
 
 // Preferences (Sabbath)
 let PreferencesStore = {};
-try { PreferencesStore = require("@/store/PreferencesStore"); } catch {}
+try {
+  PreferencesStore = require("@/store/PreferencesStore");
+} catch {}
 
 // Classifier (optional ML: guess target module)
 let classifyLink = null; // expected: classify(url, meta) -> { module, confidence, tags[] }
-try { classifyLink = require("@/services/classify/linkClassifier")?.classifyLink; } catch {}
+try {
+  classifyLink = require("@/services/classify/linkClassifier")?.classifyLink;
+} catch {}
 
 /* --------------------------------- Utilities ---------------------------------- */
 const isoNow = () => new Date().toISOString();
@@ -82,9 +126,21 @@ const normalizeUrl = (u) => {
     const url = new URL(u.trim());
     url.hash = "";
     // strip common tracker params
-    ["utm_source","utm_medium","utm_campaign","utm_term","utm_content","fbclid","gclid","mc_cid","mc_eid"].forEach(p => url.searchParams.delete(p));
+    [
+      "utm_source",
+      "utm_medium",
+      "utm_campaign",
+      "utm_term",
+      "utm_content",
+      "fbclid",
+      "gclid",
+      "mc_cid",
+      "mc_eid",
+    ].forEach((p) => url.searchParams.delete(p));
     return url.toString();
-  } catch { return u.trim(); }
+  } catch {
+    return u.trim();
+  }
 };
 const extractUrls = (text) => {
   const re = /\bhttps?:\/\/[^\s)]+/gi;
@@ -92,8 +148,12 @@ const extractUrls = (text) => {
 };
 const isPinterest = (u) => /pinterest\.[a-z.]+\/(pin|board)\//i.test(u);
 const isRecipeHostHeuristic = (u, meta) =>
-  /allrecipes|foodnetwork|serious|sallysbaking|bonappetit|epicurious|simplyrecipes|tasty|thewoksoflife|pinchofyum/i.test(u) ||
-  /recipe/i.test(`${meta?.type || ""}${meta?.ogType || ""}${meta?.title || ""}`);
+  /allrecipes|foodnetwork|serious|sallysbaking|bonappetit|epicurious|simplyrecipes|tasty|thewoksoflife|pinchofyum/i.test(
+    u
+  ) ||
+  /recipe/i.test(
+    `${meta?.type || ""}${meta?.ogType || ""}${meta?.title || ""}`
+  );
 const priceToNumber = (x) => {
   const n = parseFloat(String(x).replace(/[^0-9.]/g, ""));
   return Number.isFinite(n) ? n : null;
@@ -101,8 +161,13 @@ const priceToNumber = (x) => {
 const sabbathBlocked = () => {
   try {
     const p = PreferencesStore?.getPreferences?.() || {};
-    return !!(p?.torahProfile?.sabbath?.isActive && p?.torahProfile?.sabbath?.handsOffCooking === true);
-  } catch { return false; }
+    return !!(
+      p?.torahProfile?.sabbath?.isActive &&
+      p?.torahProfile?.sabbath?.handsOffCooking === true
+    );
+  } catch {
+    return false;
+  }
 };
 
 /* ------------------------------ Default targets ------------------------------- */
@@ -144,18 +209,27 @@ function UrlCard({ item, selected, onToggle, onChange }) {
           {m.image ? (
             <img src={m.image} alt="" className="h-full w-full object-cover" />
           ) : (
-            <div className="h-full w-full grid place-items-center text-xs text-zinc-400">no img</div>
+            <div className="h-full w-full grid place-items-center text-xs text-zinc-400">
+              no img
+            </div>
           )}
         </div>
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <a href={item.url} target="_blank" rel="noreferrer" className="truncate font-medium hover:underline">
+            <a
+              href={item.url}
+              target="_blank"
+              rel="noreferrer"
+              className="truncate font-medium hover:underline"
+            >
               {m.title || item.url}
             </a>
             <Badge>{new URL(item.url).hostname.replace(/^www\./, "")}</Badge>
             {item.duplicateOf ? <Badge tone="amber">duplicate</Badge> : null}
-            {isPinterest(item.url) ? <Badge tone="amber">Pinterest</Badge> : null}
+            {isPinterest(item.url) ? (
+              <Badge tone="amber">Pinterest</Badge>
+            ) : null}
           </div>
           <div className="text-xs text-zinc-600 line-clamp-2 mt-0.5">
             {m.description || m.author || m.site || ""}
@@ -181,7 +255,12 @@ function UrlCard({ item, selected, onToggle, onChange }) {
               placeholder="Tags (comma)"
               value={item.tags?.join(", ") || ""}
               onChange={(e) =>
-                onChange({ tags: e.target.value.split(",").map((x) => x.trim()).filter(Boolean) })
+                onChange({
+                  tags: e.target.value
+                    .split(",")
+                    .map((x) => x.trim())
+                    .filter(Boolean),
+                })
               }
               aria-label="Tags"
               title="Tags"
@@ -211,10 +290,18 @@ function UrlCard({ item, selected, onToggle, onChange }) {
           {m.canonicalUrl || item.url}
         </div>
         <div className="flex items-center gap-1">
-          <Button size="sm" variant="ghost" onClick={() => onChange({ status: "pending" })}>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => onChange({ status: "pending" })}
+          >
             Reinspect
           </Button>
-          <Button size="sm" variant="outline" onClick={() => onChange({ _remove: true })}>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => onChange({ _remove: true })}
+          >
             Remove
           </Button>
         </div>
@@ -263,12 +350,14 @@ export default function BulkUrlGrid() {
     setToast({ kind: "info", text: "Links added. Analyze to enrich & route." });
   };
 
-  const selectAll = () => setSelected(new Set(rows.filter(r => !r._removed).map((r) => r.id)));
+  const selectAll = () =>
+    setSelected(new Set(rows.filter((r) => !r._removed).map((r) => r.id)));
   const clearSelection = () => setSelected(new Set());
   const toggleRow = (id) => {
     setSelected((s) => {
       const n = new Set(s);
-      if (n.has(id)) n.delete(id); else n.add(id);
+      if (n.has(id)) n.delete(id);
+      else n.add(id);
       return n;
     });
   };
@@ -311,12 +400,16 @@ export default function BulkUrlGrid() {
       try {
         const klass = await classifyLink(row.url, res);
         if (klass?.module) moduleGuess = klass.module;
-        if (Array.isArray(klass?.tags)) tags = uniq([...(tags || []), ...klass.tags]);
+        if (Array.isArray(klass?.tags))
+          tags = uniq([...(tags || []), ...klass.tags]);
       } catch {}
     } else {
       if (isPinterest(row.url)) moduleGuess = "inspiration";
       else if (isRecipeHostHeuristic(row.url, res)) moduleGuess = "recipes";
-      else if (priceToNumber(res?.price) || /product|sku|shop|cart/i.test(`${res?.type}${res?.ogType}${res?.site}`))
+      else if (
+        priceToNumber(res?.price) ||
+        /product|sku|shop|cart/i.test(`${res?.type}${res?.ogType}${res?.site}`)
+      )
         moduleGuess = "shopping";
     }
 
@@ -345,13 +438,19 @@ export default function BulkUrlGrid() {
 
   // Analyze selected (or all if none selected)
   const analyze = async () => {
-    const targets = rows.filter((r) => !r._removed && (selected.size ? selected.has(r.id) : true));
+    const targets = rows.filter(
+      (r) => !r._removed && (selected.size ? selected.has(r.id) : true)
+    );
     if (!targets.length) return;
     setBusy(true);
     try {
       const updated = await Promise.all(
         targets.map(async (r) => {
-          try { return await inspectOne(r); } catch { return { ...r, status: "error" }; }
+          try {
+            return await inspectOne(r);
+          } catch {
+            return { ...r, status: "error" };
+          }
         })
       );
       setRows((prev) => {
@@ -359,7 +458,10 @@ export default function BulkUrlGrid() {
         updated.forEach((u) => map.set(u.id, u));
         return Array.from(map.values());
       });
-      setToast({ kind: "success", text: `Analyzed ${updated.length} item(s).` });
+      setToast({
+        kind: "success",
+        text: `Analyzed ${updated.length} item(s).`,
+      });
       eventBus.emit?.("import.urls.enqueued", {
         at: isoNow(),
         count: updated.length,
@@ -381,22 +483,36 @@ export default function BulkUrlGrid() {
   // Remove selected
   const removeSelected = () => {
     if (!selected.size) return;
-    setRows((prev) => prev.map((r) => (selected.has(r.id) ? { ...r, _removed: true } : r)));
-    setToast({ kind: "info", text: `Removed ${selected.size} from grid (not imported).` });
+    setRows((prev) =>
+      prev.map((r) => (selected.has(r.id) ? { ...r, _removed: true } : r))
+    );
+    setToast({
+      kind: "info",
+      text: `Removed ${selected.size} from grid (not imported).`,
+    });
     clearSelection();
   };
 
   // Import
   const importSelected = async () => {
     if (sabbathBlocked()) {
-      setToast({ kind: "warning", text: "Sabbath hands-off is active. Imports are paused." });
+      setToast({
+        kind: "warning",
+        text: "Sabbath hands-off is active. Imports are paused.",
+      });
       return;
     }
     const targets = rows.filter(
-      (r) => !r._removed && (selected.size ? selected.has(r.id) : true) && r.status !== "pending"
+      (r) =>
+        !r._removed &&
+        (selected.size ? selected.has(r.id) : true) &&
+        r.status !== "pending"
     );
     if (!targets.length) {
-      setToast({ kind: "info", text: "Nothing ready to import. Analyze first." });
+      setToast({
+        kind: "info",
+        text: "Nothing ready to import. Analyze first.",
+      });
       return;
     }
     setBusy(true);
@@ -416,13 +532,26 @@ export default function BulkUrlGrid() {
 
         try {
           if (r.module === "recipes" && RecipeStore?.upsertFromUrl) {
-            const out = await RecipeStore.upsertFromUrl(r.url, { meta: r.meta, tags: r.tags, board: r.board });
+            const out = await RecipeStore.upsertFromUrl(r.url, {
+              meta: r.meta,
+              tags: r.tags,
+              board: r.board,
+            });
             results.push({ id: out?.id, module: "recipes" });
           } else if (r.module === "shopping" && ShoppingStore?.upsertFromUrl) {
-            const out = await ShoppingStore.upsertFromUrl(r.url, { meta: r.meta, tags: r.tags, board: r.board });
+            const out = await ShoppingStore.upsertFromUrl(r.url, {
+              meta: r.meta,
+              tags: r.tags,
+              board: r.board,
+            });
             results.push({ id: out?.id, module: "shopping" });
           } else if (IdeasStore?.upsertFromUrl) {
-            const out = await IdeasStore.upsertFromUrl(r.url, { meta: r.meta, tags: r.tags, board: r.board, category: r.module });
+            const out = await IdeasStore.upsertFromUrl(r.url, {
+              meta: r.meta,
+              tags: r.tags,
+              board: r.board,
+              category: r.module,
+            });
             results.push({ id: out?.id, module: r.module });
           } else {
             // If no store available, rely on eventBus consumer.
@@ -438,7 +567,10 @@ export default function BulkUrlGrid() {
           targets.find((t) => t.id === r.id) ? { ...r, status: "imported" } : r
         )
       );
-      setToast({ kind: "success", text: `Imported ${results.length} item(s).` });
+      setToast({
+        kind: "success",
+        text: `Imported ${results.length} item(s).`,
+      });
       eventBus.emit?.("vault.items.created", { at: isoNow(), items: results });
     } finally {
       setBusy(false);
@@ -448,9 +580,13 @@ export default function BulkUrlGrid() {
   // Update single row
   const updateRow = (id, patch) => {
     if (patch?._remove) {
-      setRows((prev) => prev.map((r) => (r.id === id ? { ...r, _removed: true } : r)));
+      setRows((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, _removed: true } : r))
+      );
       setSelected((s) => {
-        const n = new Set(s); n.delete(id); return n;
+        const n = new Set(s);
+        n.delete(id);
+        return n;
       });
       return;
     }
@@ -462,11 +598,25 @@ export default function BulkUrlGrid() {
     const onKey = (e) => {
       if (e.target && /input|textarea|select/i.test(e.target.tagName)) return;
       const k = e.key.toLowerCase();
-      if (k === "a") { e.preventDefault(); selectAll(); }
-      if (k === "e") { e.preventDefault(); /* focus bulk edit row */ }
-      if (k === "i") { e.preventDefault(); importSelected(); }
-      if (k === "enter") { e.preventDefault(); analyze(); }
-      if (k === "backspace" || k === "delete") { e.preventDefault(); removeSelected(); }
+      if (k === "a") {
+        e.preventDefault();
+        selectAll();
+      }
+      if (k === "e") {
+        e.preventDefault(); /* focus bulk edit row */
+      }
+      if (k === "i") {
+        e.preventDefault();
+        importSelected();
+      }
+      if (k === "enter") {
+        e.preventDefault();
+        analyze();
+      }
+      if (k === "backspace" || k === "delete") {
+        e.preventDefault();
+        removeSelected();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -485,17 +635,35 @@ export default function BulkUrlGrid() {
           <div className="h-5 w-5 rounded bg-zinc-900" />
           <div className="text-lg font-semibold">Bulk URL Collector</div>
           <Badge>{visible.length} items</Badge>
-          {anySelected ? <Badge tone="amber">{selectedCount} selected</Badge> : null}
+          {anySelected ? (
+            <Badge tone="amber">{selectedCount} selected</Badge>
+          ) : null}
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="subtle" onClick={selectAll}>Select All (A)</Button>
-          <Button variant="outline" onClick={analyze} disabled={!visible.length || busy}>
+          <Button variant="subtle" onClick={selectAll}>
+            Select All (A)
+          </Button>
+          <Button
+            variant="outline"
+            onClick={analyze}
+            disabled={!visible.length || busy}
+          >
             {busy ? "Analyzing…" : "Analyze (⏎)"}
           </Button>
-          <Button variant="outline" onClick={importSelected} disabled={!visible.length || busy}>
+          <Button
+            variant="outline"
+            onClick={importSelected}
+            disabled={!visible.length || busy}
+          >
             {busy ? "Importing…" : "Import (I)"}
           </Button>
-          <Button variant="ghost" onClick={removeSelected} disabled={!anySelected}>Remove (⌫)</Button>
+          <Button
+            variant="ghost"
+            onClick={removeSelected}
+            disabled={!anySelected}
+          >
+            Remove (⌫)
+          </Button>
         </div>
       </div>
 
@@ -522,14 +690,21 @@ export default function BulkUrlGrid() {
             />
           </div>
           <div className="shrink-0 flex gap-2">
-            <Button variant="outline" onClick={handleSeedParse} disabled={!textSeed.trim()}>
+            <Button
+              variant="outline"
+              onClick={handleSeedParse}
+              disabled={!textSeed.trim()}
+            >
               Add Links
             </Button>
-            <Button variant="ghost" onClick={() => setTextSeed("")}>Clear</Button>
+            <Button variant="ghost" onClick={() => setTextSeed("")}>
+              Clear
+            </Button>
           </div>
         </div>
         <div className="mt-2 text-xs text-zinc-500">
-          Tip: Drop CSV/notes with links. Tracker params are stripped automatically.
+          Tip: Drop CSV/notes with links. Tracker params are stripped
+          automatically.
         </div>
       </div>
 
@@ -543,21 +718,37 @@ export default function BulkUrlGrid() {
             defaultValue=""
             aria-label="Set module"
           >
-            <option value="" disabled>Module…</option>
-            {MODULES.map((m) => <option key={m.key} value={m.key}>{m.label}</option>)}
+            <option value="" disabled>
+              Module…
+            </option>
+            {MODULES.map((m) => (
+              <option key={m.key} value={m.key}>
+                {m.label}
+              </option>
+            ))}
           </select>
           <Input
             placeholder="Tags (comma)"
             onBlur={(e) =>
-              e.target.value?.trim() && bulkApply({ tags: e.target.value.split(",").map((x) => x.trim()).filter(Boolean) })
+              e.target.value?.trim() &&
+              bulkApply({
+                tags: e.target.value
+                  .split(",")
+                  .map((x) => x.trim())
+                  .filter(Boolean),
+              })
             }
           />
           <Input
             placeholder="Board / Collection"
             onBlur={(e) => bulkApply({ board: e.target.value })}
           />
-          <Button variant="outline" onClick={analyze}>Re-analyze</Button>
-          <Button variant="solid" onClick={importSelected}>Import</Button>
+          <Button variant="outline" onClick={analyze}>
+            Re-analyze
+          </Button>
+          <Button variant="solid" onClick={importSelected}>
+            Import
+          </Button>
         </div>
       ) : null}
 
@@ -592,7 +783,10 @@ export default function BulkUrlGrid() {
           )}
         >
           <div className="text-sm">{toast.text}</div>
-          <button className="mt-2 rounded-lg border border-white/20 px-2 py-1 text-xs hover:bg-white/10" onClick={() => setToast(null)}>
+          <button
+            className="mt-2 rounded-lg border border-white/20 px-2 py-1 text-xs hover:bg-white/10"
+            onClick={() => setToast(null)}
+          >
             Dismiss
           </button>
         </div>
@@ -607,7 +801,16 @@ export default function BulkUrlGrid() {
   if (window.__BULK_URL_GRID_TEST__) return;
   window.__BULK_URL_GRID_TEST__ = true;
 
-  const ok = (c, m) => (c ? console.log("[BulkUrlGrid TEST PASS]", m) : console.error("[BulkUrlGrid TEST FAIL]", m));
-  ok(extractUrls("foo https://a.com x https://b.com").length === 2, "Extracts 2 urls");
-  ok(normalizeUrl("https://x.com/?utm_source=z") === "https://x.com/", "Strips utm params");
+  const ok = (c, m) =>
+    c
+      ? console.log("[BulkUrlGrid TEST PASS]", m)
+      : console.error("[BulkUrlGrid TEST FAIL]", m);
+  ok(
+    extractUrls("foo https://a.com x https://b.com").length === 2,
+    "Extracts 2 urls"
+  );
+  ok(
+    normalizeUrl("https://x.com/?utm_source=z") === "https://x.com/",
+    "Strips utm params"
+  );
 })();

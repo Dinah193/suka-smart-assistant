@@ -1,8 +1,8 @@
 // C:\Users\larho\suka-smart-assistant\src\features\calculators\gardenAnimal\IrrigationCalculator\IrrigationCalculator.hooks.js
 
 import { useEffect, useMemo, useState } from "react";
-import { emit } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { computeIrrigationSchedule } from "./IrrigationCalculator.shim";
 
 /**
@@ -74,7 +74,11 @@ import { computeIrrigationSchedule } from "./IrrigationCalculator.shim";
  * @returns {UseIrrigationCalculatorResult}
  */
 export function useIrrigationCalculator(props = {}) {
-  const { inputs: initialInputs, climateSnapshot: climateFromProps, onPlanChange } = props;
+  const {
+    inputs: initialInputs,
+    climateSnapshot: climateFromProps,
+    onPlanChange,
+  } = props;
 
   const [inputs, setInputs] = useState(() =>
     normaliseInputs(initialInputs, climateFromProps)
@@ -170,7 +174,8 @@ export function useIrrigationCalculator(props = {}) {
       setStatus((prev) => ({
         ...prev,
         isLoading: false,
-        errorMessage: "Unable to compute irrigation schedule. Please review inputs.",
+        errorMessage:
+          "Unable to compute irrigation schedule. Please review inputs.",
       }));
     }
   };
@@ -304,7 +309,9 @@ function normaliseInputs(rawInputs, climateFromProps) {
     zonesById: safe.zonesById || {},
     targets: {
       weeklyTargetIn:
-        typeof targets.weeklyTargetIn === "number" ? targets.weeklyTargetIn : 1.0,
+        typeof targets.weeklyTargetIn === "number"
+          ? targets.weeklyTargetIn
+          : 1.0,
       allowDeficitIrrigation:
         typeof targets.allowDeficitIrrigation === "boolean"
           ? targets.allowDeficitIrrigation
@@ -376,7 +383,9 @@ function pathSet(obj, path, value) {
  */
 function buildSessionFromIrrigationEvent(event, inputs) {
   const nowIso = new Date().toISOString();
-  const sessionId = `irr-${event.zoneId || "zone"}-${event.eventId || "evt"}-${Date.now()}`;
+  const sessionId = `irr-${event.zoneId || "zone"}-${
+    event.eventId || "evt"
+  }-${Date.now()}`;
 
   const durationSec = Math.max(
     60,
@@ -387,8 +396,7 @@ function buildSessionFromIrrigationEvent(event, inputs) {
     {
       id: `${sessionId}-01`,
       title: `Start irrigation – Zone ${event.zoneId}`,
-      desc:
-        "Open the valve or start the pump for this zone. Confirm emitters or sprinklers are running correctly.",
+      desc: "Open the valve or start the pump for this zone. Confirm emitters or sprinklers are running correctly.",
       durationSec: Math.round(durationSec * 0.1),
       blockers: ["weather", "quietHours", "sabbath", "equipment"],
       metadata: {
@@ -401,8 +409,7 @@ function buildSessionFromIrrigationEvent(event, inputs) {
     {
       id: `${sessionId}-02`,
       title: `Monitor irrigation – Zone ${event.zoneId}`,
-      desc:
-        "Observe the water distribution and ensure there are no leaks or dry patches. Adjust emitters if needed.",
+      desc: "Observe the water distribution and ensure there are no leaks or dry patches. Adjust emitters if needed.",
       durationSec: Math.round(durationSec * 0.3),
       blockers: ["weather", "equipment"],
       metadata: {
@@ -415,8 +422,7 @@ function buildSessionFromIrrigationEvent(event, inputs) {
     {
       id: `${sessionId}-03`,
       title: `Complete irrigation – Zone ${event.zoneId}`,
-      desc:
-        "Turn off the valve or pump when the target time has elapsed or the soil reaches the desired moisture level.",
+      desc: "Turn off the valve or pump when the target time has elapsed or the soil reaches the desired moisture level.",
       durationSec: Math.max(60, durationSec - Math.round(durationSec * 0.4)),
       blockers: ["equipment"],
       metadata: {
@@ -431,7 +437,10 @@ function buildSessionFromIrrigationEvent(event, inputs) {
   return {
     id: sessionId,
     domain: "garden",
-    title: `Irrigation – Zone ${event.zoneId} (${roundTo(event.expectedDepthIn || 0, 2)} in)`,
+    title: `Irrigation – Zone ${event.zoneId} (${roundTo(
+      event.expectedDepthIn || 0,
+      2
+    )} in)`,
     source: {
       type: "gardenPlan",
       refId: inputs?.planId || null,
@@ -497,7 +506,10 @@ async function exportPlanToHubIfEnabled(payload) {
     await FamilyFundConnector.send(packet);
   } catch (err) {
     // Fail silently per contract (log only in dev)
-    if (typeof process !== "undefined" && process.env?.NODE_ENV === "development") {
+    if (
+      typeof process !== "undefined" &&
+      process.env?.NODE_ENV === "development"
+    ) {
       console.warn("[IrrigationCalculator] Hub export failed:", err);
     }
   }

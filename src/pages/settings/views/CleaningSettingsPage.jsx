@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { automation, emitProgress } from "@/services/automation/runtime";
 import { sabbathGuard } from "@/services/guardrails/sabbathGuard";
 import { usePreferencesStore } from "@/store/PreferencesStore"; // optional
-import { useCleaningStore } from "@/store/CleaningStore";       // optional
+import { useCleaningStore } from "@/store/CleaningStore"; // optional
 import { classNames } from "@/utils/css";
 
 /* -------------------------------------------------------------------------- */
@@ -15,7 +15,9 @@ const SectionCard = ({ title, subtitle, right, children }) => (
     <div className="flex items-start justify-between p-5 border-b border-base-200">
       <div>
         <h3 className="text-lg font-semibold">{title}</h3>
-        {subtitle ? <p className="text-sm opacity-70 mt-1">{subtitle}</p> : null}
+        {subtitle ? (
+          <p className="text-sm opacity-70 mt-1">{subtitle}</p>
+        ) : null}
       </div>
       {right}
     </div>
@@ -43,7 +45,13 @@ const Toggle = ({ checked, onChange, disabled }) => (
   />
 );
 
-const Select = ({ value, onChange, options = [], disabled, className = "w-56" }) => (
+const Select = ({
+  value,
+  onChange,
+  options = [],
+  disabled,
+  className = "w-56",
+}) => (
   <select
     className={classNames("select select-bordered", className)}
     value={value ?? ""}
@@ -58,7 +66,13 @@ const Select = ({ value, onChange, options = [], disabled, className = "w-56" })
   </select>
 );
 
-const Input = ({ value, onChange, placeholder, disabled, className = "w-80" }) => (
+const Input = ({
+  value,
+  onChange,
+  placeholder,
+  disabled,
+  className = "w-80",
+}) => (
   <input
     className={classNames("input input-bordered", className)}
     value={value ?? ""}
@@ -68,7 +82,13 @@ const Input = ({ value, onChange, placeholder, disabled, className = "w-80" }) =
   />
 );
 
-const Textarea = ({ value, onChange, placeholder, disabled, className = "w-full" }) => (
+const Textarea = ({
+  value,
+  onChange,
+  placeholder,
+  disabled,
+  className = "w-full",
+}) => (
   <textarea
     className={classNames("textarea textarea-bordered", className)}
     value={value ?? ""}
@@ -79,16 +99,28 @@ const Textarea = ({ value, onChange, placeholder, disabled, className = "w-full"
 );
 
 const GhostButton = (props) => (
-  <button {...props} className={classNames("btn btn-ghost btn-sm", props.className)} />
+  <button
+    {...props}
+    className={classNames("btn btn-ghost btn-sm", props.className)}
+  />
 );
 const PrimaryButton = (props) => (
-  <button {...props} className={classNames("btn btn-primary", props.className)} />
+  <button
+    {...props}
+    className={classNames("btn btn-primary", props.className)}
+  />
 );
 const SubtleButton = (props) => (
-  <button {...props} className={classNames("btn btn-outline btn-sm", props.className)} />
+  <button
+    {...props}
+    className={classNames("btn btn-outline btn-sm", props.className)}
+  />
 );
 const DangerButton = (props) => (
-  <button {...props} className={classNames("btn btn-error btn-sm", props.className)} />
+  <button
+    {...props}
+    className={classNames("btn btn-error btn-sm", props.className)}
+  />
 );
 
 const Divider = () => <div className="border-t border-base-200 my-4" />;
@@ -135,11 +167,11 @@ function useUndoStack() {
 /* Event glue                                                                 */
 /* -------------------------------------------------------------------------- */
 const EVENT_KEYS = [
-  "recipe.consolidated",     // update kitchen cleanup steps & labels
-  "inventory.updated",       // cleaning supplies availability -> tasks & shopping
-  "calendar.synced",         // surface success
-  "preferences.changed",     // quiet hours, time windows
-  "torah.profile.updated",   // if rules affect kitchen prep/cleanup flow
+  "recipe.consolidated", // update kitchen cleanup steps & labels
+  "inventory.updated", // cleaning supplies availability -> tasks & shopping
+  "calendar.synced", // surface success
+  "preferences.changed", // quiet hours, time windows
+  "torah.profile.updated", // if rules affect kitchen prep/cleanup flow
 ];
 
 function useAutomationGlue(onEvent) {
@@ -166,10 +198,15 @@ function ZoneEditor({ zones, onAdd, onUpdate, onRemove, busy }) {
         <div className="rounded-xl border border-dashed border-base-300 p-6 grid place-items-center text-center">
           <p className="font-medium">No zones set yet</p>
           <p className="text-sm opacity-70 mt-1">
-            Zones help you rotate deep cleaning with less decision fatigue (e.g., Kitchen, Bathrooms, Entry, Bedrooms).
+            Zones help you rotate deep cleaning with less decision fatigue
+            (e.g., Kitchen, Bathrooms, Entry, Bedrooms).
           </p>
           <div className="mt-3 flex gap-2">
-            <Input value={draftName} onChange={setDraftName} placeholder="e.g., Kitchen" />
+            <Input
+              value={draftName}
+              onChange={setDraftName}
+              placeholder="e.g., Kitchen"
+            />
             <PrimaryButton
               disabled={!draftName || busy}
               onClick={() => {
@@ -182,27 +219,38 @@ function ZoneEditor({ zones, onAdd, onUpdate, onRemove, busy }) {
             </PrimaryButton>
           </div>
           <div className="mt-2 w-full max-w-xl">
-            <Textarea value={draftNotes} onChange={setDraftNotes} placeholder="Optional notes (surfaces, tools, etc.)" />
+            <Textarea
+              value={draftNotes}
+              onChange={setDraftNotes}
+              placeholder="Optional notes (surfaces, tools, etc.)"
+            />
           </div>
         </div>
       ) : (
         <>
           <div className="grid gap-3">
             {zones.map((z, idx) => (
-              <div key={z.id ?? idx} className="rounded-xl border border-base-200 p-4 bg-base-100">
+              <div
+                key={z.id ?? idx}
+                className="rounded-xl border border-base-200 p-4 bg-base-100"
+              >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <Input
                       className="w-72"
                       value={z.name}
-                      onChange={(v) => onUpdate?.(z.id ?? idx, { ...z, name: v })}
+                      onChange={(v) =>
+                        onUpdate?.(z.id ?? idx, { ...z, name: v })
+                      }
                       placeholder="Zone name"
                       disabled={busy}
                     />
                     <Textarea
                       className="w-full mt-2"
                       value={z.notes ?? ""}
-                      onChange={(v) => onUpdate?.(z.id ?? idx, { ...z, notes: v })}
+                      onChange={(v) =>
+                        onUpdate?.(z.id ?? idx, { ...z, notes: v })
+                      }
                       placeholder="Notes (surfaces, supplies, equipment)"
                       disabled={busy}
                     />
@@ -211,7 +259,9 @@ function ZoneEditor({ zones, onAdd, onUpdate, onRemove, busy }) {
                     <Select
                       className="w-40"
                       value={z.frequency ?? "weekly"}
-                      onChange={(v) => onUpdate?.(z.id ?? idx, { ...z, frequency: v })}
+                      onChange={(v) =>
+                        onUpdate?.(z.id ?? idx, { ...z, frequency: v })
+                      }
                       options={[
                         { value: "daily", label: "Daily" },
                         { value: "weekly", label: "Weekly" },
@@ -223,7 +273,9 @@ function ZoneEditor({ zones, onAdd, onUpdate, onRemove, busy }) {
                     <Select
                       className="w-40"
                       value={z.window ?? "any"}
-                      onChange={(v) => onUpdate?.(z.id ?? idx, { ...z, window: v })}
+                      onChange={(v) =>
+                        onUpdate?.(z.id ?? idx, { ...z, window: v })
+                      }
                       options={[
                         { value: "any", label: "Any time" },
                         { value: "quiet", label: "Quiet hours only" },
@@ -231,7 +283,10 @@ function ZoneEditor({ zones, onAdd, onUpdate, onRemove, busy }) {
                       ]}
                       disabled={busy}
                     />
-                    <DangerButton onClick={() => onRemove?.(z.id ?? idx)} disabled={busy}>
+                    <DangerButton
+                      onClick={() => onRemove?.(z.id ?? idx)}
+                      disabled={busy}
+                    >
                       Remove
                     </DangerButton>
                   </div>
@@ -241,7 +296,11 @@ function ZoneEditor({ zones, onAdd, onUpdate, onRemove, busy }) {
           </div>
           <Divider />
           <div className="flex items-center gap-2">
-            <Input value={draftName} onChange={setDraftName} placeholder="Add another zone…" />
+            <Input
+              value={draftName}
+              onChange={setDraftName}
+              placeholder="Add another zone…"
+            />
             <PrimaryButton
               disabled={!draftName || busy}
               onClick={() => {
@@ -282,15 +341,25 @@ export default function CleaningSettingsPage() {
 
   // Core prefs / settings
   const [autoAssign, setAutoAssign] = useState(cleaning.autoAssign ?? true);
-  const [sabbathBlock, setSabbathBlock] = useState(cleaning.sabbathBlock ?? true);
-  const [quietHours, setQuietHours] = useState(cleaning.quietHours || { start: "21:00", end: "07:00" });
-  const [defaultRotation, setDefaultRotation] = useState(cleaning.defaultRotation || "weekly");
-  const [emitForecastToFamily, setEmitForecastToFamily] = useState(cleaning.emitForecastToFamily ?? true);
-  const [syncToCalendar, setSyncToCalendar] = useState(cleaning.syncToCalendar ?? true);
+  const [sabbathBlock, setSabbathBlock] = useState(
+    cleaning.sabbathBlock ?? true
+  );
+  const [quietHours, setQuietHours] = useState(
+    cleaning.quietHours || { start: "21:00", end: "07:00" }
+  );
+  const [defaultRotation, setDefaultRotation] = useState(
+    cleaning.defaultRotation || "weekly"
+  );
+  const [emitForecastToFamily, setEmitForecastToFamily] = useState(
+    cleaning.emitForecastToFamily ?? true
+  );
+  const [syncToCalendar, setSyncToCalendar] = useState(
+    cleaning.syncToCalendar ?? true
+  );
 
   // Routine templates & zones
   const [templates, setTemplates] = useState(cleaning.templates || []); // [{id,name,steps:[...] }]
-  const [zones, setZones] = useState(cleaning.zones || []);             // [{id,name,notes,frequency,window}]
+  const [zones, setZones] = useState(cleaning.zones || []); // [{id,name,notes,frequency,window}]
 
   /* -------------------------- Event-driven glue -------------------------- */
   useAutomationGlue((event, payload) => {
@@ -298,40 +367,54 @@ export default function CleaningSettingsPage() {
       addBanner({
         key: "kitchen.cleanup",
         tone: "info",
-        text:
-          "Recipes consolidated. Consider regenerating kitchen cleanup checklists and relinking to batch sessions.",
-        actions: [{ label: "Regenerate Kitchen Cleanup", fn: () => handleGenerate("kitchen-cleanup") }],
+        text: "Recipes consolidated. Consider regenerating kitchen cleanup checklists and relinking to batch sessions.",
+        actions: [
+          {
+            label: "Regenerate Kitchen Cleanup",
+            fn: () => handleGenerate("kitchen-cleanup"),
+          },
+        ],
       });
     }
     if (event === "inventory.updated") {
       addBanner({
         key: "supplies",
         tone: "warning",
-        text:
-          "Inventory changed. Recompute cleaning supplies & shopping list to avoid mid-task shortages.",
-        actions: [{ label: "Recompute Supplies", fn: () => handleGenerate("supplies") }],
+        text: "Inventory changed. Recompute cleaning supplies & shopping list to avoid mid-task shortages.",
+        actions: [
+          { label: "Recompute Supplies", fn: () => handleGenerate("supplies") },
+        ],
       });
     }
     if (event === "calendar.synced") {
-      addBanner({ key: "synced", tone: "success", text: "Calendar sync complete.", dismissible: true });
+      addBanner({
+        key: "synced",
+        tone: "success",
+        text: "Calendar sync complete.",
+        dismissible: true,
+      });
     }
     if (event === "preferences.changed") {
-      setToast({ tone: "info", text: "Preferences updated. Quiet hours & windows will be respected." });
+      setToast({
+        tone: "info",
+        text: "Preferences updated. Quiet hours & windows will be respected.",
+      });
     }
     if (event === "torah.profile.updated") {
       // Surface as FYI; kitchen context may alter pre/post meal cleaning flow.
       addBanner({
         key: "torah-update",
         tone: "info",
-        text:
-          "Dietary profile changed. Kitchen prep/cleanup sequences may have shifted. Review your templates.",
+        text: "Dietary profile changed. Kitchen prep/cleanup sequences may have shifted. Review your templates.",
         actions: [{ label: "Open Templates", fn: () => openTemplates() }],
       });
     }
   });
 
   function addBanner(b) {
-    setBanners((prev) => (prev.find((x) => x.key === b.key) ? prev : [...prev, b]));
+    setBanners((prev) =>
+      prev.find((x) => x.key === b.key) ? prev : [...prev, b]
+    );
   }
   function dismissBanner(key) {
     setBanners((prev) => prev.filter((b) => b.key !== key));
@@ -354,8 +437,10 @@ export default function CleaningSettingsPage() {
     if ("autoAssign" in partial) setAutoAssign(partial.autoAssign);
     if ("sabbathBlock" in partial) setSabbathBlock(partial.sabbathBlock);
     if ("quietHours" in partial) setQuietHours(partial.quietHours);
-    if ("defaultRotation" in partial) setDefaultRotation(partial.defaultRotation);
-    if ("emitForecastToFamily" in partial) setEmitForecastToFamily(partial.emitForecastToFamily);
+    if ("defaultRotation" in partial)
+      setDefaultRotation(partial.defaultRotation);
+    if ("emitForecastToFamily" in partial)
+      setEmitForecastToFamily(partial.emitForecastToFamily);
     if ("syncToCalendar" in partial) setSyncToCalendar(partial.syncToCalendar);
     if ("templates" in partial) setTemplates(partial.templates);
     if ("zones" in partial) setZones(partial.zones);
@@ -376,7 +461,10 @@ export default function CleaningSettingsPage() {
       if (cleaning.saveSettings) {
         await cleaning.saveSettings({ ...prev, ...partial });
       } else {
-        await automation.request?.("cleaning.saveSettings", { ...prev, ...partial });
+        await automation.request?.("cleaning.saveSettings", {
+          ...prev,
+          ...partial,
+        });
       }
       setToast({
         tone: "success",
@@ -397,18 +485,33 @@ export default function CleaningSettingsPage() {
 
   const suggestNBA = (partial) => {
     if ("zones" in partial) {
-      return { label: "Rebuild Rotation", action: () => handleGenerate("rotation") };
+      return {
+        label: "Rebuild Rotation",
+        action: () => handleGenerate("rotation"),
+      };
     }
     if ("templates" in partial) {
-      return { label: "Generate Weekly Plan", action: () => handleGenerate("weekly") };
+      return {
+        label: "Generate Weekly Plan",
+        action: () => handleGenerate("weekly"),
+      };
     }
     if ("emitForecastToFamily" in partial) {
-      return { label: "Send Forecast Now", action: () => handleShareForecast() };
+      return {
+        label: "Send Forecast Now",
+        action: () => handleShareForecast(),
+      };
     }
     if ("syncToCalendar" in partial || "quietHours" in partial) {
-      return { label: "Sync to Calendar", action: () => handleSync("cleaning") };
+      return {
+        label: "Sync to Calendar",
+        action: () => handleSync("cleaning"),
+      };
     }
-    return { label: "Open Cleaning Dashboard", action: () => openCleaningDashboard() };
+    return {
+      label: "Open Cleaning Dashboard",
+      action: () => openCleaningDashboard(),
+    };
   };
 
   /* ------------------------------- Actions -------------------------------- */
@@ -421,9 +524,15 @@ export default function CleaningSettingsPage() {
         } else {
           await automation.request?.("cleaning.generate", { scope });
         }
-        setToast({ tone: "success", text: `Generated ${labelForScope(scope)}.` });
+        setToast({
+          tone: "success",
+          text: `Generated ${labelForScope(scope)}.`,
+        });
       } catch (e) {
-        setToast({ tone: "error", text: `Failed to generate ${labelForScope(scope)}.` });
+        setToast({
+          tone: "error",
+          text: `Failed to generate ${labelForScope(scope)}.`,
+        });
       } finally {
         setBusy(false);
       }
@@ -441,7 +550,10 @@ export default function CleaningSettingsPage() {
           await automation.request?.("calendar.sync", { scope });
         }
         automation.emit?.("calendar.synced", { scope });
-        setToast({ tone: "success", text: "Cleaning events synced to calendar." });
+        setToast({
+          tone: "success",
+          text: "Cleaning events synced to calendar.",
+        });
       } catch {
         setToast({ tone: "error", text: "Calendar sync failed." });
       }
@@ -452,12 +564,15 @@ export default function CleaningSettingsPage() {
   const handleShareForecast = async () => {
     const task = async () => {
       try {
-        await (automation.request?.("sharing.family.cleaningForecast", {
+        await automation.request?.("sharing.family.cleaningForecast", {
           includeZones: true,
           includeTemplates: true,
           horizonDays: 28,
-        }));
-        setToast({ tone: "success", text: "Cleaning forecast sent to family planners." });
+        });
+        setToast({
+          tone: "success",
+          text: "Cleaning forecast sent to family planners.",
+        });
       } catch {
         setToast({ tone: "error", text: "Could not send cleaning forecast." });
       }
@@ -468,7 +583,9 @@ export default function CleaningSettingsPage() {
   const openCleaningDashboard = () =>
     automation.emit?.("ui.navigate", { to: "/tier2/household/cleaning" });
   const openTemplates = () =>
-    automation.emit?.("ui.navigate", { to: "/tier2/household/cleaning/templates" });
+    automation.emit?.("ui.navigate", {
+      to: "/tier2/household/cleaning/templates",
+    });
 
   const labelForScope = (scope) =>
     ({
@@ -480,7 +597,11 @@ export default function CleaningSettingsPage() {
 
   /* ------------------------------- Templates ------------------------------ */
   const addTemplate = async () => {
-    const newT = { id: crypto.randomUUID?.() ?? Date.now(), name: "New Routine", steps: ["Sweep", "Mop"] };
+    const newT = {
+      id: crypto.randomUUID?.() ?? Date.now(),
+      name: "New Routine",
+      steps: ["Sweep", "Mop"],
+    };
     const prev = templates;
     setTemplates((t) => [newT, ...t]);
     const { undo: revert } = undo.push(() => setTemplates(prev), "Add routine");
@@ -490,9 +611,15 @@ export default function CleaningSettingsPage() {
       if (cleaning.saveSettings) {
         await cleaning.saveSettings({ templates: [newT, ...prev] });
       } else {
-        await automation.request?.("cleaning.saveSettings", { templates: [newT, ...prev] });
+        await automation.request?.("cleaning.saveSettings", {
+          templates: [newT, ...prev],
+        });
       }
-      setToast({ tone: "success", text: "Routine added", action: { label: "Undo", fn: revert } });
+      setToast({
+        tone: "success",
+        text: "Routine added",
+        action: { label: "Undo", fn: revert },
+      });
     } catch {
       revert();
       setToast({ tone: "error", text: "Failed to add routine." });
@@ -510,16 +637,25 @@ export default function CleaningSettingsPage() {
     const prev = templates;
     const next = templates.filter((t) => t.id !== id);
     setTemplates(next);
-    const { undo: revert } = undo.push(() => setTemplates(prev), "Remove routine");
+    const { undo: revert } = undo.push(
+      () => setTemplates(prev),
+      "Remove routine"
+    );
 
     setBusy(true);
     try {
       if (cleaning.saveSettings) {
         await cleaning.saveSettings({ templates: next });
       } else {
-        await automation.request?.("cleaning.saveSettings", { templates: next });
+        await automation.request?.("cleaning.saveSettings", {
+          templates: next,
+        });
       }
-      setToast({ tone: "success", text: "Routine removed", action: { label: "Undo", fn: revert } });
+      setToast({
+        tone: "success",
+        text: "Routine removed",
+        action: { label: "Undo", fn: revert },
+      });
     } catch {
       revert();
       setToast({ tone: "error", text: "Failed to remove routine." });
@@ -530,7 +666,12 @@ export default function CleaningSettingsPage() {
 
   /* --------------------------------- Zones -------------------------------- */
   const addZone = async (z) => {
-    const nz = { id: crypto.randomUUID?.() ?? Date.now(), frequency: defaultRotation, window: "any", ...z };
+    const nz = {
+      id: crypto.randomUUID?.() ?? Date.now(),
+      frequency: defaultRotation,
+      window: "any",
+      ...z,
+    };
     const prev = zones;
     setZones((zs) => [...zs, nz]);
     const { undo: revert } = undo.push(() => setZones(prev), "Add zone");
@@ -540,9 +681,15 @@ export default function CleaningSettingsPage() {
       if (cleaning.saveSettings) {
         await cleaning.saveSettings({ zones: [...prev, nz] });
       } else {
-        await automation.request?.("cleaning.saveSettings", { zones: [...prev, nz] });
+        await automation.request?.("cleaning.saveSettings", {
+          zones: [...prev, nz],
+        });
       }
-      setToast({ tone: "success", text: "Zone added", action: { label: "Undo", fn: revert } });
+      setToast({
+        tone: "success",
+        text: "Zone added",
+        action: { label: "Undo", fn: revert },
+      });
     } catch {
       revert();
       setToast({ tone: "error", text: "Failed to add zone." });
@@ -552,7 +699,9 @@ export default function CleaningSettingsPage() {
   };
 
   const updateZone = async (id, patch) => {
-    const next = zones.map((z) => ((z.id ?? z._id) === id ? { ...z, ...patch } : z));
+    const next = zones.map((z) =>
+      (z.id ?? z._id) === id ? { ...z, ...patch } : z
+    );
     await optimisticSave({ zones: next }, "Zone");
   };
 
@@ -569,7 +718,11 @@ export default function CleaningSettingsPage() {
       } else {
         await automation.request?.("cleaning.saveSettings", { zones: next });
       }
-      setToast({ tone: "success", text: "Zone removed", action: { label: "Undo", fn: revert } });
+      setToast({
+        tone: "success",
+        text: "Zone removed",
+        action: { label: "Undo", fn: revert },
+      });
     } catch {
       revert();
       setToast({ tone: "error", text: "Failed to remove zone." });
@@ -590,12 +743,17 @@ export default function CleaningSettingsPage() {
         <div>
           <h1 className="text-2xl font-bold">Cleaning Settings</h1>
           <p className="opacity-70">
-            Configure cleaning routines, zone rotations, quiet hours, Sabbath guard, and calendar/forecast sync.
+            Configure cleaning routines, zone rotations, quiet hours, Sabbath
+            guard, and calendar/forecast sync.
           </p>
         </div>
         <div className="flex gap-2">
-          <GhostButton onClick={() => handleGenerate("weekly")}>Generate Weekly Plan</GhostButton>
-          <PrimaryButton onClick={() => openCleaningDashboard()}>Open Cleaning</PrimaryButton>
+          <GhostButton onClick={() => handleGenerate("weekly")}>
+            Generate Weekly Plan
+          </GhostButton>
+          <PrimaryButton onClick={() => openCleaningDashboard()}>
+            Open Cleaning
+          </PrimaryButton>
         </div>
       </div>
 
@@ -611,7 +769,9 @@ export default function CleaningSettingsPage() {
                 </SubtleButton>
               ))}
               {b.dismissible !== false && (
-                <GhostButton onClick={() => dismissBanner(b.key)}>Dismiss</GhostButton>
+                <GhostButton onClick={() => dismissBanner(b.key)}>
+                  Dismiss
+                </GhostButton>
               )}
             </div>
           </div>
@@ -619,7 +779,10 @@ export default function CleaningSettingsPage() {
       ))}
 
       {/* Defaults & Behavior */}
-      <SectionCard title="Defaults & Behavior" subtitle="Apply household-wide rules and automation behavior.">
+      <SectionCard
+        title="Defaults & Behavior"
+        subtitle="Apply household-wide rules and automation behavior."
+      >
         {loading ? (
           <Skeleton lines={5} />
         ) : (
@@ -630,7 +793,9 @@ export default function CleaningSettingsPage() {
             >
               <Select
                 value={defaultRotation}
-                onChange={(v) => optimisticSave({ defaultRotation: v }, "Default rotation")}
+                onChange={(v) =>
+                  optimisticSave({ defaultRotation: v }, "Default rotation")
+                }
                 options={[
                   { value: "weekly", label: "Weekly" },
                   { value: "biweekly", label: "Every 2 Weeks" },
@@ -646,7 +811,9 @@ export default function CleaningSettingsPage() {
             >
               <Toggle
                 checked={autoAssign}
-                onChange={(v) => optimisticSave({ autoAssign: v }, "Auto-assign")}
+                onChange={(v) =>
+                  optimisticSave({ autoAssign: v }, "Auto-assign")
+                }
                 disabled={busy}
               />
             </Row>
@@ -657,7 +824,9 @@ export default function CleaningSettingsPage() {
             >
               <Toggle
                 checked={sabbathBlock}
-                onChange={(v) => optimisticSave({ sabbathBlock: v }, "Sabbath guard")}
+                onChange={(v) =>
+                  optimisticSave({ sabbathBlock: v }, "Sabbath guard")
+                }
                 disabled={busy}
               />
             </Row>
@@ -669,7 +838,12 @@ export default function CleaningSettingsPage() {
               <Input
                 className="w-32"
                 value={quietHours.start}
-                onChange={(v) => optimisticSave({ quietHours: { ...quietHours, start: v } }, "Quiet hours")}
+                onChange={(v) =>
+                  optimisticSave(
+                    { quietHours: { ...quietHours, start: v } },
+                    "Quiet hours"
+                  )
+                }
                 placeholder="21:00"
                 disabled={busy}
               />
@@ -677,7 +851,12 @@ export default function CleaningSettingsPage() {
               <Input
                 className="w-32"
                 value={quietHours.end}
-                onChange={(v) => optimisticSave({ quietHours: { ...quietHours, end: v } }, "Quiet hours")}
+                onChange={(v) =>
+                  optimisticSave(
+                    { quietHours: { ...quietHours, end: v } },
+                    "Quiet hours"
+                  )
+                }
                 placeholder="07:00"
                 disabled={busy}
               />
@@ -689,10 +868,15 @@ export default function CleaningSettingsPage() {
             >
               <Toggle
                 checked={syncToCalendar}
-                onChange={(v) => optimisticSave({ syncToCalendar: v }, "Calendar sync")}
+                onChange={(v) =>
+                  optimisticSave({ syncToCalendar: v }, "Calendar sync")
+                }
                 disabled={busy}
               />
-              <SubtleButton onClick={() => handleSync("cleaning")} disabled={busy}>
+              <SubtleButton
+                onClick={() => handleSync("cleaning")}
+                disabled={busy}
+              >
                 Sync now
               </SubtleButton>
             </Row>
@@ -703,10 +887,15 @@ export default function CleaningSettingsPage() {
             >
               <Toggle
                 checked={emitForecastToFamily}
-                onChange={(v) => optimisticSave({ emitForecastToFamily: v }, "Family forecast")}
+                onChange={(v) =>
+                  optimisticSave({ emitForecastToFamily: v }, "Family forecast")
+                }
                 disabled={busy}
               />
-              <SubtleButton onClick={() => handleShareForecast()} disabled={busy}>
+              <SubtleButton
+                onClick={() => handleShareForecast()}
+                disabled={busy}
+              >
                 Send now
               </SubtleButton>
             </Row>
@@ -718,7 +907,11 @@ export default function CleaningSettingsPage() {
       <SectionCard
         title="Routine Templates"
         subtitle="Reusable checklists for rooms and tasks. Link to batch cooking cleanups and seasonal deep cleans."
-        right={<PrimaryButton onClick={addTemplate} disabled={busy}>New Routine</PrimaryButton>}
+        right={
+          <PrimaryButton onClick={addTemplate} disabled={busy}>
+            New Routine
+          </PrimaryButton>
+        }
       >
         {loading ? (
           <Skeleton lines={4} />
@@ -726,16 +919,22 @@ export default function CleaningSettingsPage() {
           <div className="rounded-xl border border-dashed border-base-300 p-6 grid place-items-center text-center">
             <p className="font-medium">No routines yet</p>
             <p className="text-sm opacity-70 mt-1">
-              Start with a “Kitchen Daily Reset” or “Bathroom Weekly Deep-Clean.” Add steps and save.
+              Start with a “Kitchen Daily Reset” or “Bathroom Weekly
+              Deep-Clean.” Add steps and save.
             </p>
             <div className="mt-3">
-              <PrimaryButton onClick={addTemplate} disabled={busy}>Create First Routine</PrimaryButton>
+              <PrimaryButton onClick={addTemplate} disabled={busy}>
+                Create First Routine
+              </PrimaryButton>
             </div>
           </div>
         ) : (
           <div className="grid gap-3">
             {templates.map((t) => (
-              <div key={t.id} className="rounded-xl border border-base-200 p-4 bg-base-100">
+              <div
+                key={t.id}
+                className="rounded-xl border border-base-200 p-4 bg-base-100"
+              >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <Input
@@ -761,7 +960,9 @@ export default function CleaningSettingsPage() {
                           />
                           <DangerButton
                             onClick={() => {
-                              const steps = (t.steps ?? []).filter((_, idx) => idx !== i);
+                              const steps = (t.steps ?? []).filter(
+                                (_, idx) => idx !== i
+                              );
                               updateTemplate(t.id, { steps });
                             }}
                             disabled={busy}
@@ -771,7 +972,11 @@ export default function CleaningSettingsPage() {
                         </div>
                       ))}
                       <SubtleButton
-                        onClick={() => updateTemplate(t.id, { steps: [...(t.steps ?? []), ""] })}
+                        onClick={() =>
+                          updateTemplate(t.id, {
+                            steps: [...(t.steps ?? []), ""],
+                          })
+                        }
                         disabled={busy}
                       >
                         + Add Step
@@ -803,7 +1008,10 @@ export default function CleaningSettingsPage() {
                       ]}
                       disabled={busy}
                     />
-                    <DangerButton onClick={() => removeTemplate(t.id)} disabled={busy}>
+                    <DangerButton
+                      onClick={() => removeTemplate(t.id)}
+                      disabled={busy}
+                    >
                       Delete
                     </DangerButton>
                   </div>
@@ -814,13 +1022,21 @@ export default function CleaningSettingsPage() {
         )}
         <Divider />
         <div className="flex items-center gap-2">
-          <PrimaryButton onClick={() => handleGenerate("weekly")} disabled={busy}>
+          <PrimaryButton
+            onClick={() => handleGenerate("weekly")}
+            disabled={busy}
+          >
             Generate Weekly Plan
           </PrimaryButton>
-          <SubtleButton onClick={() => handleGenerate("kitchen-cleanup")} disabled={busy}>
+          <SubtleButton
+            onClick={() => handleGenerate("kitchen-cleanup")}
+            disabled={busy}
+          >
             Regenerate Kitchen Cleanup
           </SubtleButton>
-          <SubtleButton onClick={() => openTemplates()}>Open Template Library</SubtleButton>
+          <SubtleButton onClick={() => openTemplates()}>
+            Open Template Library
+          </SubtleButton>
         </div>
       </SectionCard>
 
@@ -828,7 +1044,14 @@ export default function CleaningSettingsPage() {
       <SectionCard
         title="Zones & Rotation"
         subtitle="Break your home into zones to rotate deep cleaning and prevent overwhelm."
-        right={<SubtleButton onClick={() => handleGenerate("rotation")} disabled={busy}>Rebuild Rotation</SubtleButton>}
+        right={
+          <SubtleButton
+            onClick={() => handleGenerate("rotation")}
+            disabled={busy}
+          >
+            Rebuild Rotation
+          </SubtleButton>
+        }
       >
         {loading ? (
           <Skeleton lines={4} />
@@ -844,9 +1067,15 @@ export default function CleaningSettingsPage() {
       </SectionCard>
 
       {/* Next Steps */}
-      <SectionCard title="Recommended Next Steps" subtitle="Keep momentum with one clear action.">
+      <SectionCard
+        title="Recommended Next Steps"
+        subtitle="Keep momentum with one clear action."
+      >
         <div className="flex flex-wrap gap-2">
-          <PrimaryButton onClick={() => handleGenerate("weekly")} disabled={busy}>
+          <PrimaryButton
+            onClick={() => handleGenerate("weekly")}
+            disabled={busy}
+          >
             Generate Weekly Plan
           </PrimaryButton>
           <SubtleButton onClick={() => handleSync("cleaning")} disabled={busy}>
@@ -855,10 +1084,20 @@ export default function CleaningSettingsPage() {
           <SubtleButton onClick={() => handleShareForecast()} disabled={busy}>
             Send Family Forecast
           </SubtleButton>
-          <SubtleButton onClick={() => automation.emit?.("ui.navigate", { to: "/tier2/household/meals" })}>
+          <SubtleButton
+            onClick={() =>
+              automation.emit?.("ui.navigate", { to: "/tier2/household/meals" })
+            }
+          >
             Link Kitchen Cleanup to Batch Sessions
           </SubtleButton>
-          <SubtleButton onClick={() => automation.emit?.("ui.navigate", { to: "/tier2/household/inventory" })}>
+          <SubtleButton
+            onClick={() =>
+              automation.emit?.("ui.navigate", {
+                to: "/tier2/household/inventory",
+              })
+            }
+          >
             Check Cleaning Supplies
           </SubtleButton>
         </div>
@@ -882,11 +1121,17 @@ export default function CleaningSettingsPage() {
             <div className="flex items-center gap-3">
               <span>{toast.text}</span>
               {toast.action ? (
-                <button className="btn btn-xs" onClick={() => toast.action.fn?.()}>
+                <button
+                  className="btn btn-xs"
+                  onClick={() => toast.action.fn?.()}
+                >
                   {toast.action.label}
                 </button>
               ) : null}
-              <button className="btn btn-ghost btn-xs" onClick={() => setToast(null)}>
+              <button
+                className="btn btn-ghost btn-xs"
+                onClick={() => setToast(null)}
+              >
                 ✕
               </button>
             </div>

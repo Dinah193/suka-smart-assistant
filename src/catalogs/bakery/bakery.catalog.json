@@ -1,0 +1,853 @@
+{
+  "$schema": "../../schemas/dishes.catalog.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-24T00:00:00.000Z",
+  "meta": {
+    "id": "catalogs.bakery",
+    "type": "dishes_catalog",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "label": "Bakery",
+    "description": "Canonical SSA Bakery dishes catalog (planner/search/browse). This file describes bakery dish entries that point to recipe files in this folder and provides indexes for fast lookup."
+  },
+  "description": "Baseline bakery dishes for SSA. Use this catalog as a default starter set when a user has not imported their own recipes.",
+  "tags": [
+    "catalog.bakery",
+    "domain.bakery",
+    "default.baseline",
+    "planner.friendly"
+  ],
+  "source": {
+    "curation": "ssa_canonical",
+    "author": "SSA",
+    "license": "CC-BY-4.0",
+    "recipeFolder": "src/catalogs/bakery/recipes"
+  },
+  "notes": [
+    "Schema note: meta.domain is constrained by dishes.catalog.schema.json to const 'cuisines'. This catalog still represents the bakery domain, but conforms to the schema requirement."
+  ],
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true
+  },
+  "dishes": [
+    {
+      "id": "bakery.banana_bread_loaf",
+      "label": "Banana Bread Loaf",
+      "cuisineId": "cuisines.bakery",
+      "archetypeId": "archetype.quickbread",
+      "course": "course.breakfast",
+      "difficulty": "beginner",
+      "servingStyles": ["style.sliced", "style.shareable"],
+      "summary": "Moist banana quick bread baked in a loaf pan. Great for breakfast, snacks, and freezing in slices.",
+      "originHints": [
+        "American-style quick bread.",
+        "Uses ripe bananas for sweetness and moisture."
+      ],
+      "tags": [
+        "bakery.quickbread",
+        "bakery.loaf",
+        "method.bake",
+        "freezer.friendly",
+        "batch.friendly",
+        "kid_friendly"
+      ],
+      "keywords": [
+        "banana bread",
+        "quick bread",
+        "loaf",
+        "breakfast bake",
+        "snack cake"
+      ],
+      "aliases": ["Banana Loaf", "Banana Quick Bread"],
+      "ingredients": {
+        "required": [
+          "ingredient.flour_wheat",
+          "ingredient.banana_ripe",
+          "ingredient.sugar",
+          "ingredient.egg",
+          "ingredient.butter",
+          "ingredient.baking_soda",
+          "ingredient.salt"
+        ],
+        "optional": [
+          "ingredient.vanilla",
+          "ingredient.cinnamon",
+          "ingredient.walnut",
+          "ingredient.chocolate_chips"
+        ],
+        "swappableRoles": [
+          {
+            "role": "role.fat",
+            "preferred": "ingredient.butter",
+            "fallbacks": ["ingredient.neutral_oil", "ingredient.ghee"]
+          }
+        ]
+      },
+      "techniques": ["technique.mix", "technique.bake"],
+      "allergens": {
+        "mayContain": ["allergen.gluten", "allergen.egg", "allergen.dairy"],
+        "commonTriggers": ["allergen.gluten", "allergen.egg", "allergen.dairy"],
+        "notes": ["Optional nuts add tree-nut allergens if used."]
+      },
+      "plannerHints": {
+        "batchFriendly": true,
+        "leftoversFriendly": true,
+        "timeMinutesEstimate": 80,
+        "activeMinutesEstimate": 15,
+        "equipmentIds": [
+          "equipment.oven",
+          "equipment.loaf_pan",
+          "equipment.mixing_bowl"
+        ],
+        "skillFocus": ["skill.baking", "skill.quickbreads"],
+        "weeknightBias": "medium"
+      }
+    },
+    {
+      "id": "bakery.blueberry_muffins",
+      "label": "Blueberry Muffins",
+      "cuisineId": "cuisines.bakery",
+      "archetypeId": "archetype.muffins",
+      "course": "course.breakfast",
+      "difficulty": "beginner",
+      "servingStyles": ["style.handheld", "style.portioned"],
+      "summary": "Tender muffins with blueberries, ideal for quick breakfasts and lunchbox snacks.",
+      "originHints": ["American bakery-style muffins."],
+      "tags": [
+        "bakery.muffins",
+        "method.bake",
+        "batch.friendly",
+        "freezer.friendly",
+        "kid_friendly"
+      ],
+      "keywords": [
+        "blueberry muffins",
+        "muffins",
+        "breakfast",
+        "bakery muffins"
+      ],
+      "aliases": ["Berry Muffins", "Blueberry Breakfast Muffins"],
+      "ingredients": {
+        "required": [
+          "ingredient.flour_wheat",
+          "ingredient.sugar",
+          "ingredient.egg",
+          "ingredient.milk",
+          "ingredient.butter",
+          "ingredient.baking_powder",
+          "ingredient.salt",
+          "ingredient.blueberries"
+        ],
+        "optional": [
+          "ingredient.vanilla",
+          "ingredient.lemon_zest",
+          "ingredient.yogurt"
+        ],
+        "swappableRoles": [
+          {
+            "role": "role.dairy_milk",
+            "preferred": "ingredient.milk",
+            "fallbacks": ["ingredient.buttermilk", "ingredient.yogurt"]
+          }
+        ]
+      },
+      "techniques": ["technique.mix", "technique.bake"],
+      "allergens": {
+        "mayContain": ["allergen.gluten", "allergen.egg", "allergen.dairy"],
+        "commonTriggers": ["allergen.gluten", "allergen.egg", "allergen.dairy"],
+        "notes": []
+      },
+      "plannerHints": {
+        "batchFriendly": true,
+        "leftoversFriendly": true,
+        "timeMinutesEstimate": 45,
+        "activeMinutesEstimate": 15,
+        "equipmentIds": [
+          "equipment.oven",
+          "equipment.muffin_tin",
+          "equipment.mixing_bowl"
+        ],
+        "skillFocus": ["skill.baking", "skill.quickbreads"],
+        "weeknightBias": "high"
+      }
+    },
+    {
+      "id": "bakery.brownie_slab_bakery",
+      "label": "Brownie Slab",
+      "cuisineId": "cuisines.bakery",
+      "archetypeId": "archetype.brownies",
+      "course": "course.dessert",
+      "difficulty": "beginner",
+      "servingStyles": ["style.squares", "style.shareable"],
+      "summary": "Fudgy brownie slab baked in a rectangular pan for easy slicing and sharing.",
+      "originHints": ["American classic dessert bar."],
+      "tags": [
+        "bakery.brownies",
+        "method.bake",
+        "batch.friendly",
+        "party.friendly",
+        "chocolate.forward"
+      ],
+      "keywords": [
+        "brownies",
+        "fudgy brownies",
+        "brownie slab",
+        "dessert bars"
+      ],
+      "aliases": ["Sheet Pan Brownies", "Brownie Bars"],
+      "ingredients": {
+        "required": [
+          "ingredient.cocoa_powder",
+          "ingredient.flour_wheat",
+          "ingredient.sugar",
+          "ingredient.egg",
+          "ingredient.butter",
+          "ingredient.salt"
+        ],
+        "optional": [
+          "ingredient.vanilla",
+          "ingredient.espresso_powder",
+          "ingredient.chocolate_chips",
+          "ingredient.walnut"
+        ],
+        "swappableRoles": [
+          {
+            "role": "role.fat",
+            "preferred": "ingredient.butter",
+            "fallbacks": ["ingredient.neutral_oil", "ingredient.ghee"]
+          }
+        ]
+      },
+      "techniques": ["technique.mix", "technique.bake"],
+      "allergens": {
+        "mayContain": ["allergen.gluten", "allergen.egg", "allergen.dairy"],
+        "commonTriggers": ["allergen.gluten", "allergen.egg", "allergen.dairy"],
+        "notes": ["Optional nuts add tree-nut allergens if used."]
+      },
+      "plannerHints": {
+        "batchFriendly": true,
+        "leftoversFriendly": true,
+        "timeMinutesEstimate": 55,
+        "activeMinutesEstimate": 15,
+        "equipmentIds": [
+          "equipment.oven",
+          "equipment.baking_pan",
+          "equipment.mixing_bowl"
+        ],
+        "skillFocus": ["skill.baking", "skill.desserts"],
+        "weeknightBias": "high"
+      }
+    },
+    {
+      "id": "bakery.butter_croissants",
+      "label": "Butter Croissants",
+      "cuisineId": "cuisines.bakery",
+      "archetypeId": "archetype.laminated_pastry",
+      "course": "course.breakfast",
+      "difficulty": "advanced",
+      "servingStyles": ["style.handheld", "style.brunch"],
+      "summary": "Classic laminated croissants with crisp, flaky layers and rich butter flavor.",
+      "originHints": ["French laminated pastry tradition."],
+      "tags": [
+        "bakery.pastry",
+        "bakery.croissants",
+        "method.laminate",
+        "method.bake",
+        "butter.forward",
+        "make_ahead.friendly"
+      ],
+      "keywords": [
+        "croissants",
+        "butter croissant",
+        "laminated dough",
+        "viennoiserie"
+      ],
+      "aliases": ["Croissant", "Classic Croissants"],
+      "ingredients": {
+        "required": [
+          "ingredient.flour_wheat",
+          "ingredient.butter",
+          "ingredient.milk",
+          "ingredient.yeast",
+          "ingredient.sugar",
+          "ingredient.salt"
+        ],
+        "optional": ["ingredient.egg"],
+        "swappableRoles": []
+      },
+      "techniques": ["technique.laminate", "technique.proof", "technique.bake"],
+      "allergens": {
+        "mayContain": ["allergen.gluten", "allergen.dairy", "allergen.egg"],
+        "commonTriggers": ["allergen.gluten", "allergen.dairy"],
+        "notes": ["Egg wash commonly used; omit for egg-free finish."]
+      },
+      "plannerHints": {
+        "batchFriendly": true,
+        "leftoversFriendly": true,
+        "timeMinutesEstimate": 360,
+        "activeMinutesEstimate": 60,
+        "equipmentIds": [
+          "equipment.oven",
+          "equipment.rolling_pin",
+          "equipment.sheet_pan"
+        ],
+        "skillFocus": ["skill.baking", "skill.laminated_dough"],
+        "weeknightBias": "low"
+      }
+    },
+    {
+      "id": "bakery.chocolate_cake_slices",
+      "label": "Chocolate Cake Slices",
+      "cuisineId": "cuisines.bakery",
+      "archetypeId": "archetype.cake",
+      "course": "course.dessert",
+      "difficulty": "intermediate",
+      "servingStyles": ["style.sliced", "style.portioned"],
+      "summary": "Rich chocolate cake baked and portioned into slices for easy serving and storage.",
+      "originHints": ["Bakery-style portioned cake slices."],
+      "tags": [
+        "bakery.cake",
+        "method.bake",
+        "chocolate.forward",
+        "party.friendly"
+      ],
+      "keywords": [
+        "chocolate cake",
+        "cake slices",
+        "dessert cake",
+        "bakery cake"
+      ],
+      "aliases": ["Chocolate Cake", "Bakery Chocolate Slices"],
+      "ingredients": {
+        "required": [
+          "ingredient.flour_wheat",
+          "ingredient.cocoa_powder",
+          "ingredient.sugar",
+          "ingredient.egg",
+          "ingredient.milk",
+          "ingredient.butter",
+          "ingredient.leavening",
+          "ingredient.salt"
+        ],
+        "optional": [
+          "ingredient.vanilla",
+          "ingredient.espresso_powder",
+          "ingredient.sour_cream"
+        ],
+        "swappableRoles": []
+      },
+      "techniques": ["technique.mix", "technique.bake"],
+      "allergens": {
+        "mayContain": ["allergen.gluten", "allergen.egg", "allergen.dairy"],
+        "commonTriggers": ["allergen.gluten", "allergen.egg", "allergen.dairy"],
+        "notes": []
+      },
+      "plannerHints": {
+        "batchFriendly": true,
+        "leftoversFriendly": true,
+        "timeMinutesEstimate": 90,
+        "activeMinutesEstimate": 25,
+        "equipmentIds": [
+          "equipment.oven",
+          "equipment.cake_pan",
+          "equipment.mixing_bowl"
+        ],
+        "skillFocus": ["skill.baking", "skill.cakes"],
+        "weeknightBias": "medium"
+      }
+    },
+    {
+      "id": "bakery.cinnamon_rolls_yeasted",
+      "label": "Cinnamon Rolls",
+      "cuisineId": "cuisines.bakery",
+      "archetypeId": "archetype.yeasted_sweet_rolls",
+      "course": "course.breakfast",
+      "difficulty": "intermediate",
+      "servingStyles": ["style.pull_apart", "style.shareable"],
+      "summary": "Soft yeasted rolls swirled with cinnamon sugar and finished with icing or glaze.",
+      "originHints": ["Sweet yeasted roll tradition; popular brunch bake."],
+      "tags": [
+        "bakery.yeasted",
+        "bakery.rolls",
+        "method.proof",
+        "method.bake",
+        "make_ahead.friendly",
+        "holiday.friendly"
+      ],
+      "keywords": [
+        "cinnamon rolls",
+        "sweet rolls",
+        "yeast rolls",
+        "breakfast rolls"
+      ],
+      "aliases": ["Sticky Cinnamon Rolls", "Yeasted Cinnamon Rolls"],
+      "ingredients": {
+        "required": [
+          "ingredient.flour_wheat",
+          "ingredient.yeast",
+          "ingredient.milk",
+          "ingredient.butter",
+          "ingredient.sugar",
+          "ingredient.cinnamon",
+          "ingredient.salt"
+        ],
+        "optional": [
+          "ingredient.egg",
+          "ingredient.vanilla",
+          "ingredient.cream_cheese"
+        ],
+        "swappableRoles": []
+      },
+      "techniques": ["technique.mix", "technique.proof", "technique.bake"],
+      "allergens": {
+        "mayContain": ["allergen.gluten", "allergen.dairy", "allergen.egg"],
+        "commonTriggers": ["allergen.gluten", "allergen.dairy"],
+        "notes": [
+          "Cream-cheese icing adds dairy; egg may be present in enriched doughs."
+        ]
+      },
+      "plannerHints": {
+        "batchFriendly": true,
+        "leftoversFriendly": true,
+        "timeMinutesEstimate": 180,
+        "activeMinutesEstimate": 40,
+        "equipmentIds": [
+          "equipment.oven",
+          "equipment.baking_dish",
+          "equipment.mixing_bowl"
+        ],
+        "skillFocus": ["skill.baking", "skill.yeast_dough"],
+        "weeknightBias": "low"
+      }
+    },
+    {
+      "id": "bakery.glazed_donuts_yeast",
+      "label": "Glazed Yeast Donuts",
+      "cuisineId": "cuisines.bakery",
+      "archetypeId": "archetype.donuts",
+      "course": "course.breakfast",
+      "difficulty": "intermediate",
+      "servingStyles": ["style.handheld", "style.portioned"],
+      "summary": "Light yeast-raised donuts fried until golden and dipped in a simple glaze.",
+      "originHints": ["Classic American-style yeast donut."],
+      "tags": [
+        "bakery.donuts",
+        "method.fry",
+        "method.proof",
+        "party.friendly",
+        "weekend.project"
+      ],
+      "keywords": [
+        "glazed donuts",
+        "yeast donuts",
+        "fried donuts",
+        "breakfast treats"
+      ],
+      "aliases": ["Glazed Doughnuts", "Yeast-Raised Donuts"],
+      "ingredients": {
+        "required": [
+          "ingredient.flour_wheat",
+          "ingredient.yeast",
+          "ingredient.milk",
+          "ingredient.sugar",
+          "ingredient.salt",
+          "ingredient.frying_oil"
+        ],
+        "optional": [
+          "ingredient.egg",
+          "ingredient.butter",
+          "ingredient.vanilla",
+          "ingredient.powdered_sugar"
+        ],
+        "swappableRoles": [
+          {
+            "role": "role.frying_oil",
+            "preferred": "ingredient.frying_oil",
+            "fallbacks": ["ingredient.neutral_oil"]
+          }
+        ]
+      },
+      "techniques": [
+        "technique.mix",
+        "technique.proof",
+        "technique.fry",
+        "technique.glaze"
+      ],
+      "allergens": {
+        "mayContain": ["allergen.gluten", "allergen.dairy", "allergen.egg"],
+        "commonTriggers": ["allergen.gluten"],
+        "notes": [
+          "Enriched doughs often include dairy/egg; glaze may include dairy depending on recipe."
+        ]
+      },
+      "plannerHints": {
+        "batchFriendly": true,
+        "leftoversFriendly": false,
+        "timeMinutesEstimate": 150,
+        "activeMinutesEstimate": 45,
+        "equipmentIds": [
+          "equipment.stovetop",
+          "equipment.deep_pot",
+          "equipment.thermometer"
+        ],
+        "skillFocus": ["skill.frying", "skill.yeast_dough"],
+        "weeknightBias": "low"
+      }
+    },
+    {
+      "id": "bakery.lemon_pound_cake",
+      "label": "Lemon Pound Cake",
+      "cuisineId": "cuisines.bakery",
+      "archetypeId": "archetype.pound_cake",
+      "course": "course.dessert",
+      "difficulty": "beginner",
+      "servingStyles": ["style.sliced", "style.shareable"],
+      "summary": "Dense, buttery pound cake with lemon flavor; slices well and freezes beautifully.",
+      "originHints": ["Traditional pound cake format with citrus variation."],
+      "tags": [
+        "bakery.cake",
+        "bakery.pound_cake",
+        "method.bake",
+        "freezer.friendly",
+        "citrus.forward"
+      ],
+      "keywords": ["lemon pound cake", "pound cake", "lemon cake", "tea cake"],
+      "aliases": ["Lemon Loaf Cake", "Citrus Pound Cake"],
+      "ingredients": {
+        "required": [
+          "ingredient.flour_wheat",
+          "ingredient.butter",
+          "ingredient.sugar",
+          "ingredient.egg",
+          "ingredient.salt",
+          "ingredient.lemon"
+        ],
+        "optional": [
+          "ingredient.vanilla",
+          "ingredient.baking_powder",
+          "ingredient.sour_cream"
+        ],
+        "swappableRoles": []
+      },
+      "techniques": ["technique.cream", "technique.bake"],
+      "allergens": {
+        "mayContain": ["allergen.gluten", "allergen.egg", "allergen.dairy"],
+        "commonTriggers": ["allergen.gluten", "allergen.egg", "allergen.dairy"],
+        "notes": []
+      },
+      "plannerHints": {
+        "batchFriendly": true,
+        "leftoversFriendly": true,
+        "timeMinutesEstimate": 95,
+        "activeMinutesEstimate": 20,
+        "equipmentIds": [
+          "equipment.oven",
+          "equipment.loaf_pan",
+          "equipment.mixer"
+        ],
+        "skillFocus": ["skill.baking", "skill.cakes"],
+        "weeknightBias": "medium"
+      }
+    },
+    {
+      "id": "bakery.pizza",
+      "label": "Pizza",
+      "cuisineId": "cuisines.bakery",
+      "archetypeId": "archetype.pizza",
+      "course": "course.dinner",
+      "difficulty": "intermediate",
+      "servingStyles": ["style.sliced", "style.shareable"],
+      "summary": "Homemade pizza dough baked hot with sauce and toppings; adaptable to sheets, stones, or skillets.",
+      "originHints": ["Adaptable home-oven pizza method."],
+      "tags": [
+        "bakery.pizza",
+        "bakery.yeasted",
+        "method.bake",
+        "family.friendly",
+        "customizable"
+      ],
+      "keywords": ["pizza", "pizza dough", "homemade pizza", "weeknight pizza"],
+      "aliases": ["Homemade Pizza", "Oven Pizza"],
+      "ingredients": {
+        "required": [
+          "ingredient.flour_wheat",
+          "ingredient.yeast",
+          "ingredient.salt",
+          "ingredient.water",
+          "ingredient.olive_oil"
+        ],
+        "optional": [
+          "ingredient.sugar",
+          "ingredient.tomato_sauce",
+          "ingredient.cheese",
+          "ingredient.pepperoni"
+        ],
+        "swappableRoles": [
+          {
+            "role": "role.flour",
+            "preferred": "ingredient.flour_wheat",
+            "fallbacks": [
+              "ingredient.flour_bread",
+              "ingredient.flour_all_purpose"
+            ]
+          }
+        ]
+      },
+      "techniques": ["technique.mix", "technique.proof", "technique.bake"],
+      "allergens": {
+        "mayContain": ["allergen.gluten", "allergen.dairy"],
+        "commonTriggers": ["allergen.gluten"],
+        "notes": ["Cheese toppings add dairy allergens if used."]
+      },
+      "plannerHints": {
+        "batchFriendly": true,
+        "leftoversFriendly": true,
+        "timeMinutesEstimate": 120,
+        "activeMinutesEstimate": 25,
+        "equipmentIds": ["equipment.oven", "equipment.sheet_pan"],
+        "skillFocus": ["skill.yeast_dough", "skill.baking"],
+        "weeknightBias": "medium"
+      }
+    },
+    {
+      "id": "bakery.scones_butter",
+      "label": "Butter Scones",
+      "cuisineId": "cuisines.bakery",
+      "archetypeId": "archetype.scones",
+      "course": "course.breakfast",
+      "difficulty": "beginner",
+      "servingStyles": ["style.wedges", "style.handheld"],
+      "summary": "Tender, flaky butter scones that come together quickly and bake in under 20 minutes.",
+      "originHints": ["British-inspired scones adapted for home baking."],
+      "tags": [
+        "bakery.scones",
+        "method.bake",
+        "quick.mix",
+        "freezer.friendly",
+        "brunch.friendly"
+      ],
+      "keywords": ["scones", "butter scones", "breakfast pastry", "tea scones"],
+      "aliases": ["Classic Scones", "Butter Breakfast Scones"],
+      "ingredients": {
+        "required": [
+          "ingredient.flour_wheat",
+          "ingredient.butter",
+          "ingredient.milk",
+          "ingredient.baking_powder",
+          "ingredient.sugar",
+          "ingredient.salt"
+        ],
+        "optional": [
+          "ingredient.egg",
+          "ingredient.vanilla",
+          "ingredient.cream",
+          "ingredient.raisins"
+        ],
+        "swappableRoles": [
+          {
+            "role": "role.dairy_milk",
+            "preferred": "ingredient.milk",
+            "fallbacks": ["ingredient.cream", "ingredient.buttermilk"]
+          }
+        ]
+      },
+      "techniques": ["technique.cut_in_fat", "technique.bake"],
+      "allergens": {
+        "mayContain": ["allergen.gluten", "allergen.dairy", "allergen.egg"],
+        "commonTriggers": ["allergen.gluten", "allergen.dairy"],
+        "notes": ["Egg is optional in some scone styles."]
+      },
+      "plannerHints": {
+        "batchFriendly": true,
+        "leftoversFriendly": true,
+        "timeMinutesEstimate": 35,
+        "activeMinutesEstimate": 15,
+        "equipmentIds": [
+          "equipment.oven",
+          "equipment.sheet_pan",
+          "equipment.mixing_bowl"
+        ],
+        "skillFocus": ["skill.baking", "skill.quickbreads"],
+        "weeknightBias": "high"
+      }
+    }
+  ],
+  "indexes": {
+    "byCuisine": {
+      "cuisines.bakery": [
+        "bakery.banana_bread_loaf",
+        "bakery.blueberry_muffins",
+        "bakery.brownie_slab_bakery",
+        "bakery.butter_croissants",
+        "bakery.chocolate_cake_slices",
+        "bakery.cinnamon_rolls_yeasted",
+        "bakery.glazed_donuts_yeast",
+        "bakery.lemon_pound_cake",
+        "bakery.pizza",
+        "bakery.scones_butter"
+      ]
+    },
+    "byArchetype": {
+      "archetype.quickbread": ["bakery.banana_bread_loaf"],
+      "archetype.muffins": ["bakery.blueberry_muffins"],
+      "archetype.brownies": ["bakery.brownie_slab_bakery"],
+      "archetype.laminated_pastry": ["bakery.butter_croissants"],
+      "archetype.cake": ["bakery.chocolate_cake_slices"],
+      "archetype.yeasted_sweet_rolls": ["bakery.cinnamon_rolls_yeasted"],
+      "archetype.donuts": ["bakery.glazed_donuts_yeast"],
+      "archetype.pound_cake": ["bakery.lemon_pound_cake"],
+      "archetype.pizza": ["bakery.pizza"],
+      "archetype.scones": ["bakery.scones_butter"]
+    },
+    "aliasIndex": {
+      "banana bread": "bakery.banana_bread_loaf",
+      "banana loaf": "bakery.banana_bread_loaf",
+      "banana quick bread": "bakery.banana_bread_loaf",
+      "blueberry muffins": "bakery.blueberry_muffins",
+      "berry muffins": "bakery.blueberry_muffins",
+      "brownie bars": "bakery.brownie_slab_bakery",
+      "sheet pan brownies": "bakery.brownie_slab_bakery",
+      "croissant": "bakery.butter_croissants",
+      "classic croissants": "bakery.butter_croissants",
+      "chocolate cake": "bakery.chocolate_cake_slices",
+      "cake slices": "bakery.chocolate_cake_slices",
+      "cinnamon rolls": "bakery.cinnamon_rolls_yeasted",
+      "yeasted cinnamon rolls": "bakery.cinnamon_rolls_yeasted",
+      "glazed donuts": "bakery.glazed_donuts_yeast",
+      "glazed doughnuts": "bakery.glazed_donuts_yeast",
+      "lemon pound cake": "bakery.lemon_pound_cake",
+      "lemon loaf cake": "bakery.lemon_pound_cake",
+      "pizza": "bakery.pizza",
+      "homemade pizza": "bakery.pizza",
+      "scones": "bakery.scones_butter",
+      "classic scones": "bakery.scones_butter"
+    },
+    "keywordIndex": {
+      "quick bread": [
+        "bakery.banana_bread_loaf",
+        "bakery.blueberry_muffins",
+        "bakery.scones_butter"
+      ],
+      "muffins": ["bakery.blueberry_muffins"],
+      "brownies": ["bakery.brownie_slab_bakery"],
+      "laminated dough": ["bakery.butter_croissants"],
+      "cake": ["bakery.chocolate_cake_slices", "bakery.lemon_pound_cake"],
+      "yeast dough": [
+        "bakery.butter_croissants",
+        "bakery.cinnamon_rolls_yeasted",
+        "bakery.glazed_donuts_yeast",
+        "bakery.pizza"
+      ],
+      "donuts": ["bakery.glazed_donuts_yeast"],
+      "pizza dough": ["bakery.pizza"],
+      "scones": ["bakery.scones_butter"]
+    },
+    "tagIndex": {
+      "bakery.quickbread": ["bakery.banana_bread_loaf"],
+      "bakery.loaf": ["bakery.banana_bread_loaf", "bakery.lemon_pound_cake"],
+      "bakery.muffins": ["bakery.blueberry_muffins"],
+      "bakery.brownies": ["bakery.brownie_slab_bakery"],
+      "bakery.pastry": ["bakery.butter_croissants", "bakery.scones_butter"],
+      "bakery.croissants": ["bakery.butter_croissants"],
+      "bakery.cake": [
+        "bakery.chocolate_cake_slices",
+        "bakery.lemon_pound_cake"
+      ],
+      "bakery.pound_cake": ["bakery.lemon_pound_cake"],
+      "bakery.yeasted": [
+        "bakery.butter_croissants",
+        "bakery.cinnamon_rolls_yeasted",
+        "bakery.glazed_donuts_yeast",
+        "bakery.pizza"
+      ],
+      "bakery.rolls": ["bakery.cinnamon_rolls_yeasted"],
+      "bakery.donuts": ["bakery.glazed_donuts_yeast"],
+      "bakery.pizza": ["bakery.pizza"],
+      "bakery.scones": ["bakery.scones_butter"],
+      "method.bake": [
+        "bakery.banana_bread_loaf",
+        "bakery.blueberry_muffins",
+        "bakery.brownie_slab_bakery",
+        "bakery.butter_croissants",
+        "bakery.chocolate_cake_slices",
+        "bakery.cinnamon_rolls_yeasted",
+        "bakery.lemon_pound_cake",
+        "bakery.pizza",
+        "bakery.scones_butter"
+      ],
+      "method.fry": ["bakery.glazed_donuts_yeast"],
+      "method.proof": [
+        "bakery.butter_croissants",
+        "bakery.cinnamon_rolls_yeasted",
+        "bakery.glazed_donuts_yeast",
+        "bakery.pizza"
+      ],
+      "method.laminate": ["bakery.butter_croissants"],
+      "freezer.friendly": [
+        "bakery.banana_bread_loaf",
+        "bakery.blueberry_muffins",
+        "bakery.lemon_pound_cake",
+        "bakery.scones_butter"
+      ],
+      "batch.friendly": [
+        "bakery.banana_bread_loaf",
+        "bakery.blueberry_muffins",
+        "bakery.brownie_slab_bakery",
+        "bakery.butter_croissants",
+        "bakery.chocolate_cake_slices",
+        "bakery.cinnamon_rolls_yeasted",
+        "bakery.lemon_pound_cake",
+        "bakery.pizza",
+        "bakery.scones_butter"
+      ],
+      "kid_friendly": ["bakery.banana_bread_loaf", "bakery.blueberry_muffins"],
+      "party.friendly": [
+        "bakery.brownie_slab_bakery",
+        "bakery.chocolate_cake_slices",
+        "bakery.glazed_donuts_yeast"
+      ],
+      "family.friendly": ["bakery.pizza"],
+      "customizable": ["bakery.pizza"],
+      "holiday.friendly": ["bakery.cinnamon_rolls_yeasted"],
+      "quick.mix": ["bakery.scones_butter"],
+      "brunch.friendly": ["bakery.butter_croissants", "bakery.scones_butter"],
+      "weekend.project": ["bakery.glazed_donuts_yeast"],
+      "butter.forward": ["bakery.butter_croissants"],
+      "chocolate.forward": [
+        "bakery.brownie_slab_bakery",
+        "bakery.chocolate_cake_slices"
+      ],
+      "citrus.forward": ["bakery.lemon_pound_cake"]
+    }
+  },
+  "groups": [
+    {
+      "label": "Breakfast Bakes",
+      "items": [
+        "bakery.banana_bread_loaf",
+        "bakery.blueberry_muffins",
+        "bakery.scones_butter",
+        "bakery.cinnamon_rolls_yeasted",
+        "bakery.butter_croissants",
+        "bakery.glazed_donuts_yeast"
+      ]
+    },
+    {
+      "label": "Desserts",
+      "items": [
+        "bakery.brownie_slab_bakery",
+        "bakery.chocolate_cake_slices",
+        "bakery.lemon_pound_cake"
+      ]
+    },
+    {
+      "label": "Savory Doughs",
+      "items": ["bakery.pizza"]
+    }
+  ]
+}

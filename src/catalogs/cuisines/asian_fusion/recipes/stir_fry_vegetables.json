@@ -1,0 +1,467 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+
+  "meta": {
+    "id": "recipes.asian_fusion.stir_fry_vegetables",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Asian-Fusion Stir-Fry Vegetables",
+    "subtitle": "Crisp-tender vegetables in a fast soy-garlic-ginger sauce (customizable).",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalog",
+      "notes": [
+        "SSA canonical: weeknight-ready, supports frozen veg, and designed to pair with rice/noodles and any protein.",
+        "Sauce includes optional cornstarch for glossy cling; can be made gluten-free with tamari."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.asian_fusion",
+    "category": "side",
+    "mealArchetypes": [
+      "archetype.bowls",
+      "archetype.plates",
+      "archetype.stir_fry"
+    ],
+    "servingStyles": [
+      "serving.family_style",
+      "serving.bowls",
+      "serving.plates"
+    ],
+    "plannerTags": [
+      "asian_fusion",
+      "stir_fry",
+      "vegetables",
+      "weeknight",
+      "one_pan",
+      "dairy_free",
+      "customizable",
+      "batch_friendly"
+    ]
+  },
+
+  "summary": "A flexible, crisp-tender vegetable stir-fry with a quick soy-garlic-ginger sauce. Works with fresh or frozen vegetables and can be adapted to whatever you have on hand.",
+
+  "yield": {
+    "servings": 4,
+    "notes": "Side for 4, or 2–3 as a main over rice/noodles."
+  },
+
+  "time": {
+    "activeMins": 18,
+    "totalMins": 20,
+    "handsOffMins": 2
+  },
+
+  "difficulty": "beginner",
+
+  "signals": {
+    "weeknightPossible": true,
+    "batchFriendly": true,
+    "leftoversGood": true,
+    "freezerFriendly": "low",
+    "onePan": true,
+    "vegetarian": true
+  },
+
+  "tasteProfile": {
+    "salty": 3,
+    "sweet": 1,
+    "sour": 1,
+    "spicy": 0,
+    "umami": 3,
+    "signature": ["garlic", "ginger", "soy"],
+    "finish": ["sesame_optional", "lime_optional", "chili_optional"]
+  },
+
+  "equipment": {
+    "minimum": ["tool.pan_large", "tool.knife", "tool.board", "tool.spoon"],
+    "recommended": [
+      "tool.wok",
+      "tool.microplane",
+      "tool.small_bowl",
+      "tool.whisk"
+    ],
+    "optional": [
+      {
+        "id": "tool.lid",
+        "label": "Pan lid",
+        "required": false,
+        "notes": "Helpful for 30–60 seconds of quick steam if using denser vegetables."
+      }
+    ]
+  },
+
+  "dietFlags": ["diet.vegan_option", "diet.vegetarian", "diet.dairy_free"],
+
+  "allergens": {
+    "contains": ["allergen.soy", "allergen.sesame_optional"],
+    "mayContain": [],
+    "notes": [
+      "Use tamari for gluten-free. If using oyster sauce, note it contains shellfish."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "oil.neutral",
+      "label": "Neutral oil (avocado, grapeseed, or canola)",
+      "amount": { "value": 2, "unit": "tbsp" }
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic, minced",
+      "amount": { "value": 3, "unit": "cloves" }
+    },
+    {
+      "id": "ginger.fresh",
+      "label": "Fresh ginger, grated or minced",
+      "amount": { "value": 1, "unit": "tbsp" }
+    },
+
+    {
+      "id": "broccoli",
+      "label": "Broccoli florets",
+      "amount": { "value": 3, "unit": "cups" },
+      "notes": ["Swap with cauliflower or broccolini if needed."]
+    },
+    {
+      "id": "carrot",
+      "label": "Carrots, thinly sliced on a bias",
+      "amount": { "value": 1, "unit": "cup" }
+    },
+    {
+      "id": "bell_pepper",
+      "label": "Bell pepper, sliced",
+      "amount": { "value": 1, "unit": "each" }
+    },
+    {
+      "id": "snap_peas_or_green_beans",
+      "label": "Snap peas or green beans",
+      "amount": { "value": 1.5, "unit": "cups" }
+    },
+    {
+      "id": "mushrooms",
+      "label": "Mushrooms, sliced",
+      "amount": { "value": 2, "unit": "cups" },
+      "optional": true,
+      "notes": ["Great for extra umami; can omit if unavailable."]
+    },
+    {
+      "id": "cabbage",
+      "label": "Cabbage, thinly sliced",
+      "amount": { "value": 2, "unit": "cups" },
+      "optional": true,
+      "notes": ["Napa or green cabbage both work."]
+    },
+
+    {
+      "id": "soy_sauce",
+      "label": "Soy sauce (or tamari)",
+      "amount": { "value": 3, "unit": "tbsp" }
+    },
+    {
+      "id": "water",
+      "label": "Water",
+      "amount": { "value": 0.25, "unit": "cup" }
+    },
+    {
+      "id": "vinegar.rice",
+      "label": "Rice vinegar",
+      "amount": { "value": 1, "unit": "tbsp" }
+    },
+    {
+      "id": "honey_or_sugar",
+      "label": "Honey or sugar",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true,
+      "notes": ["Optional; balances salt and acid. Omit for no-sugar versions."]
+    },
+    {
+      "id": "cornstarch",
+      "label": "Cornstarch",
+      "amount": { "value": 2, "unit": "tsp" },
+      "optional": true,
+      "notes": [
+        "Optional for glossy sauce that clings; omit for a lighter finish."
+      ]
+    },
+    {
+      "id": "sesame_oil",
+      "label": "Toasted sesame oil",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+
+    {
+      "id": "chili_flakes",
+      "label": "Red pepper flakes or chili crisp (optional)",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "lime_or_lemon",
+      "label": "Lime or lemon wedge (optional finish)",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "scallions",
+      "label": "Green onions, sliced (optional garnish)",
+      "amount": { "value": 2, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "sesame_seeds",
+      "label": "Toasted sesame seeds (optional garnish)",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    }
+  ],
+
+  "ingredientGroups": [
+    {
+      "id": "group.veg",
+      "label": "Vegetables (Flexible)",
+      "items": [
+        "broccoli",
+        "carrot",
+        "bell_pepper",
+        "snap_peas_or_green_beans",
+        "mushrooms",
+        "cabbage"
+      ]
+    },
+    {
+      "id": "group.sauce",
+      "label": "Stir-Fry Sauce",
+      "items": [
+        "soy_sauce",
+        "water",
+        "vinegar.rice",
+        "honey_or_sugar",
+        "cornstarch"
+      ]
+    },
+    {
+      "id": "group.finish",
+      "label": "Finish (Optional)",
+      "items": [
+        "sesame_oil",
+        "chili_flakes",
+        "lime_or_lemon",
+        "scallions",
+        "sesame_seeds"
+      ]
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.prep",
+      "title": "Prep vegetables and mix sauce",
+      "instructions": [
+        "Cut all vegetables into stir-fry-friendly sizes: bite-size florets, thin carrot slices, and even strips for peppers.",
+        "In a small bowl, whisk soy sauce, water, and rice vinegar.",
+        "If using cornstarch, whisk it into the sauce until fully dissolved (no lumps).",
+        "Set optional finish items (sesame oil, chili, citrus, scallions, sesame seeds) within reach."
+      ],
+      "checks": [
+        "Veg sizes should be consistent so they cook evenly.",
+        "If using cornstarch, sauce should look smooth, not chalky."
+      ],
+      "activeMins": 8
+    },
+    {
+      "id": "step.heat_pan",
+      "title": "Heat pan and bloom aromatics",
+      "instructions": [
+        "Heat a large skillet or wok over medium-high until hot.",
+        "Add neutral oil.",
+        "Add garlic and ginger and stir constantly for 15–25 seconds until fragrant (do not brown)."
+      ],
+      "timers": [{ "label": "Bloom aromatics", "seconds": 20 }],
+      "checks": [
+        "Aromatics should smell strong and fragrant; if they start browning, lower heat slightly."
+      ],
+      "activeMins": 2
+    },
+    {
+      "id": "step.stir_fry_dense",
+      "title": "Cook dense vegetables first",
+      "instructions": [
+        "Add broccoli and carrots first (and any other dense vegetables). Toss to coat in oil.",
+        "Stir-fry 2 minutes. If pan is very dry or veg seems too firm, add 1–2 tbsp water and cover for 30–60 seconds to steam, then uncover."
+      ],
+      "timers": [
+        { "label": "Stir-fry dense veg", "minutes": 2 },
+        { "label": "Optional steam", "seconds": 45 }
+      ],
+      "checks": [
+        "Broccoli should turn brighter green; carrots should begin to soften but still be crisp."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 1
+    },
+    {
+      "id": "step.stir_fry_tender",
+      "title": "Add remaining vegetables",
+      "instructions": [
+        "Add peppers, snap peas/green beans, mushrooms, and cabbage (if using).",
+        "Stir-fry 2–3 minutes until vegetables are crisp-tender."
+      ],
+      "timers": [{ "label": "Stir-fry remaining veg", "minutes": 3 }],
+      "checks": [
+        "Vegetables should still have a little bite; avoid overcooking (they continue to soften after saucing)."
+      ],
+      "activeMins": 3
+    },
+    {
+      "id": "step.sauce_glaze",
+      "title": "Sauce and glaze",
+      "instructions": [
+        "Give the sauce a quick re-whisk (cornstarch settles fast).",
+        "Pour sauce around the edges of the pan and toss continuously.",
+        "Cook 30–90 seconds until the sauce lightly thickens and coats the vegetables.",
+        "Turn off heat. Stir in sesame oil (if using)."
+      ],
+      "timers": [{ "label": "Sauce reduction", "seconds": 75 }],
+      "checks": [
+        "Sauce should cling lightly. If too thick, add 1–2 tbsp water; if too thin, cook 30 seconds longer."
+      ],
+      "activeMins": 3
+    },
+    {
+      "id": "step.finish",
+      "title": "Finish and serve",
+      "instructions": [
+        "Taste and adjust: add a squeeze of citrus for brightness or a pinch of salt if needed.",
+        "Top with scallions and sesame seeds. Add chili flakes/chili crisp if desired.",
+        "Serve immediately as a side, or over rice/noodles as a main."
+      ],
+      "activeMins": 2
+    }
+  ],
+
+  "pairings": {
+    "serveWith": [
+      "recipes.asian_fusion.fried_rice",
+      "dish.steamed_rice",
+      "dish.noodles_simple",
+      "recipes.asian_fusion.soy_ginger_chicken",
+      "recipes.asian_fusion.teriyaki_chicken"
+    ],
+    "proteinAddOns": [
+      "protein.chicken",
+      "protein.shrimp",
+      "protein.beef",
+      "protein.tofu",
+      "protein.eggs"
+    ],
+    "sauceOptions": [
+      "condiment.chili_crisp",
+      "condiment.sriracha",
+      "condiment.hoisin_optional",
+      "condiment.oyster_sauce_optional"
+    ]
+  },
+
+  "planner": {
+    "bestFor": ["weeknight", "use_up_veg", "side_or_bowl"],
+    "scaling": {
+      "notes": [
+        "For larger batches, cook vegetables in 2 rounds to avoid steaming.",
+        "Sauce scales linearly; keep cornstarch proportional if using."
+      ]
+    }
+  },
+
+  "storage": {
+    "refrigerator": {
+      "duration": "3 days",
+      "notes": [
+        "Vegetables soften over time; best within 24 hours for crispness."
+      ]
+    },
+    "freezer": {
+      "duration": "not recommended",
+      "notes": ["Freezing makes most stir-fry vegetables watery and soft."]
+    },
+    "reheat": {
+      "skillet": "Medium-high, 2–3 minutes, stirring; add a splash of water if needed.",
+      "microwave": "Cover; 60–90 seconds, stir, then 30–60 seconds more."
+    }
+  },
+
+  "safety": {
+    "notes": [
+      "Keep vegetables moving in a hot pan to avoid burning garlic/ginger.",
+      "If adding meat to the same pan, cook meat to safe internal temperature before adding vegetables."
+    ]
+  },
+
+  "variations": [
+    {
+      "id": "var.spicy_sichuanish",
+      "label": "Spicy (Sichuan-ish) Variation",
+      "notes": "Add 1 tsp chili oil and 1/2 tsp toasted crushed peppercorns at the end; increase vinegar slightly for balance."
+    },
+    {
+      "id": "var.citrus_bright",
+      "label": "Citrus Bright Variation",
+      "notes": "Replace half the water with orange juice and finish with lime; keep sweetness optional."
+    },
+    {
+      "id": "var.peanut_sauce",
+      "label": "Quick Peanut Sauce Variation",
+      "notes": "Stir 2 tbsp peanut butter into sauce with an extra splash of water; finish with lime. Note allergen: peanuts."
+    }
+  ],
+
+  "notes": [
+    "Frozen vegetable option: use 4–5 cups frozen stir-fry mix; cook hot and fast and expect more water—skip steaming and reduce sauce longer.",
+    "If your vegetables are releasing water, crank heat and keep tossing to evaporate quickly.",
+    "Cornstarch is optional; for a lighter, glossy finish, reduce sauce a little longer instead."
+  ],
+
+  "methods": ["method.stir_fry", "method.saute", "method.glaze"],
+
+  "compat": {
+    "cuisineId": "cuisines.asian_fusion",
+    "dishId": "dish.stir_fry_vegetables",
+    "search": {
+      "keywords": [
+        "stir fry vegetables",
+        "asian vegetables",
+        "soy garlic ginger vegetables",
+        "quick vegetable side",
+        "wok vegetables"
+      ],
+      "aliases": [
+        "stir-fried vegetables",
+        "soy ginger veggies",
+        "garlic ginger vegetable stir fry"
+      ]
+    },
+    "planner": {
+      "pairsWellWith": [
+        "dish.steamed_rice",
+        "dish.fried_rice",
+        "dish.noodles_simple"
+      ],
+      "inventorySignals": [
+        "ingredient.soy_sauce",
+        "ingredient.ginger_fresh",
+        "ingredient.garlic",
+        "produce.broccoli",
+        "produce.carrot",
+        "produce.pepper"
+      ]
+    }
+  }
+}

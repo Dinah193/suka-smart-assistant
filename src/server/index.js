@@ -254,6 +254,7 @@ const candidates = [
   "./routes/labelsController.js",
   "./routes/preferencesController.js",
   "./routes/automationsController.js",
+  "./routes/realtimeController.js",
   "./routes/uploadsController.js",
 ];
 

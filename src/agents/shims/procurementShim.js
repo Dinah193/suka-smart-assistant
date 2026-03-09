@@ -1,4 +1,4 @@
-// C:\Users\larho\suka-smart-assistant\src\agents\shims\procurementAgent.js
+// C:\Users\larho\suka-smart-assistant\src\agents\shims\procurementShim.js
 
 /**
  * Procurement Shim
@@ -41,20 +41,30 @@
  * @property {Array<Object>} [debug]
  */
 
-import { emit as emitBus } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit as emitBus } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
-import budgetConfig from "./budget.json" assert { type: "json" };
-import { isReasonerCallAllowed } from "./gating.js";
-import { enforceBudgetForMode } from "./confidence.js"; // includes token/time budgeting
-import { evaluateConfidence } from "./confidence.js";
-import { selectProcurementContext } from "./selectors.js";
-import { applyFreshnessRules } from "./freshness.js";
-import { getCachedResult, setCachedResult } from "./cache/memo.js";
-import { makeProcurementCacheKey } from "./cache/keys.js";
-import { getModeConfig } from "./modes/map.js";
-import { validateModeOutput } from "./modes/validate.js";
-import { invokeReasoner } from "./runtime/reasoner.js";
+/**
+ * IMPORTANT:
+ * These are NOT shim-local files; they live under src/agents/runtime/reasoner/
+ * and src/agents/* (context, policies, modes).
+ */
+import budgetConfig from "@/agents/policies/budget.json" assert { type: "json" };
+import { isReasonerCallAllowed } from "@/agents/runtime/reasoner/gating.js";
+import {
+  enforceBudgetForMode,
+  evaluateConfidence,
+} from "@/agents/runtime/reasoner/confidence.js"; // includes token/time budgeting
+import { selectProcurementContext } from "@/agents/context/selectors.js";
+import { applyFreshnessRules } from "@/agents/runtime/reasoner/freshness.js";
+import {
+  getCachedResult,
+  setCachedResult,
+} from "@/agents/runtime/reasoner/cache/memo.js";
+import { makeProcurementCacheKey } from "@/agents/runtime/reasoner/cache/keys.js";
+import { getModeConfig } from "@/agents/modes/map.js";
+import { validateModeOutput } from "@/agents/modes/validate.js";
+import { invokeReasoner } from "@/agents/runtime/reasoner/index.js";
 
 let HubPacketFormatter;
 let FamilyFundConnector;
@@ -285,7 +295,12 @@ export async function invokeShim(req) {
     }
 
     // Gating (when we are not allowed to call Reasoner) ----------------------
-    const gatingDecision = isReasonerCallAllowed({ domain, intent, runtime, input });
+    const gatingDecision = isReasonerCallAllowed({
+      domain,
+      intent,
+      runtime,
+      input,
+    });
     debug.push(debugEntry("gating.checked", gatingDecision));
 
     if (!gatingDecision.allowed) {
@@ -345,7 +360,12 @@ export async function invokeShim(req) {
     }
 
     // Pull context from Dexie / SSA selectors --------------------------------
-    const context = await selectProcurementContext({ domain, intent, input, runtime });
+    const context = await selectProcurementContext({
+      domain,
+      intent,
+      input,
+      runtime,
+    });
     debug.push(debugEntry("context.selected", { hasContext: !!context }));
 
     // Freshness rules (decide cache / re-compute) ----------------------------
@@ -512,7 +532,12 @@ export async function invokeShim(req) {
     }
 
     // Optional Hub export ----------------------------------------------------
-    if (familyFundMode && runtime.exportToHub && HubPacketFormatter && FamilyFundConnector) {
+    if (
+      familyFundMode &&
+      runtime.exportToHub &&
+      HubPacketFormatter &&
+      FamilyFundConnector
+    ) {
       try {
         const packet = HubPacketFormatter.fromProcurementPlan({
           domain,
@@ -528,7 +553,11 @@ export async function invokeShim(req) {
           intent,
           hubPacketType: packet?.type || "procurementPlan",
         });
-        debug.push(debugEntry("hub.exported", { packetType: packet?.type || "procurementPlan" }));
+        debug.push(
+          debugEntry("hub.exported", {
+            packetType: packet?.type || "procurementPlan",
+          })
+        );
       } catch (err) {
         warnings.push({
           type: "hub.export.failed",

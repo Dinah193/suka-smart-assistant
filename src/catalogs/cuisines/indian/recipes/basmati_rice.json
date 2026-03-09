@@ -1,0 +1,356 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-20T00:00:00.000Z",
+
+  "meta": {
+    "id": "recipes.cuisines.indian.basmati_rice",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Basmati Rice (Fluffy Stovetop Method)",
+    "subtitle": "Rinse + soak, then gentle simmer and steam for separate grains",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA canonical cuisines/indian/recipes/basmati_rice.json",
+      "notes": [
+        "Deterministic baseline basmati rice suitable for Indian meals (dal, curries, kebabs).",
+        "Includes soak option, absorption method, and common variations (jeera rice, ghee rice).",
+        "Written to be friendly to SSA planners: weeknight, batch, leftovers, and reheating guidance."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.indian",
+    "category": "side",
+    "mealArchetypes": ["meal.side.starch", "meal.side.rice"],
+    "servingStyles": ["family_style", "stew_and_starch"],
+    "plannerTags": [
+      "cuisine.indian",
+      "dish.basmati_rice",
+      "role.rice_or_flatbread",
+      "weeknight.friendly",
+      "batch.friendly",
+      "leftovers.good",
+      "gluten.free"
+    ]
+  },
+
+  "summary": "A reliable stovetop basmati rice method for fluffy, separate grains. Rinse well, optionally soak, then simmer briefly and steam covered off heat. Perfect with dal and curries.",
+
+  "keywords": [
+    "basmati",
+    "basmati rice",
+    "absorption method",
+    "stovetop rice",
+    "fluffy rice"
+  ],
+
+  "tags": [
+    "cuisine.indian",
+    "dish.basmati_rice",
+    "role.rice_or_flatbread",
+    "weeknight.friendly",
+    "batch.friendly",
+    "method.absorption",
+    "gluten.free"
+  ],
+
+  "yield": {
+    "servings": 4,
+    "servingSize": { "value": 1.0, "unit": "cup cooked" },
+    "notes": "Makes ~4 cups cooked rice (about 4 servings)."
+  },
+
+  "time": {
+    "activeMins": 10,
+    "handsOffMins": 20,
+    "totalMins": 30
+  },
+
+  "difficulty": 2,
+
+  "equipment": {
+    "minimum": [
+      "equip.pot",
+      "equip.stove_burner",
+      "equip.lid",
+      "equip.fine_mesh_strainer"
+    ],
+    "recommended": ["equip.measuring_cups", "equip.fork", "equip.kettle"],
+    "optional": [
+      {
+        "id": "equip.rice_cooker",
+        "label": "Rice cooker",
+        "required": false,
+        "notes": "Variation included; use cooker instructions with adjusted water if needed."
+      }
+    ]
+  },
+
+  "signals": {
+    "batchFriendly": true,
+    "leftoversGood": true,
+    "freezerFriendly": "yes (portion and freeze; reheat with steam)",
+    "weeknightPossible": true
+  },
+
+  "tasteProfile": {
+    "aroma": ["floral", "nutty"],
+    "texture": ["fluffy", "separate_grains"]
+  },
+
+  "dietFlags": ["diet.gluten_free"],
+
+  "allergens": {
+    "contains": [],
+    "mayContain": [],
+    "notes": ["Rice is naturally gluten-free."]
+  },
+
+  "ingredients": [
+    {
+      "id": "ing.basmati_rice",
+      "label": "Basmati rice (white), rinsed",
+      "role": "role.starch",
+      "amount": { "value": 1.5, "unit": "cups" },
+      "notes": [
+        "Rinse until water runs mostly clear to reduce surface starch and improve fluffy grains.",
+        "For extra long, separate grains, soak 15–20 minutes after rinsing (optional)."
+      ]
+    },
+    {
+      "id": "ing.water",
+      "label": "Water",
+      "role": "role.liquid",
+      "amount": { "value": 2.25, "unit": "cups" },
+      "notes": [
+        "Baseline absorption ratio for rinsed basmati: 1 cup rice : 1.5 cups water.",
+        "If you skip rinsing (not recommended), you may need slightly less water to avoid gumminess."
+      ]
+    },
+    {
+      "id": "ing.salt_kosher",
+      "label": "Kosher salt",
+      "role": "role.seasoning",
+      "amount": { "value": 0.75, "unit": "tsp" },
+      "notes": "Optional, but recommended for rice served with dal/curry."
+    },
+    {
+      "id": "ing.ghee",
+      "label": "Ghee or butter (optional)",
+      "role": "role.fat",
+      "amount": { "value": 1.0, "unit": "tbsp" },
+      "optional": true,
+      "notes": [
+        "Optional for richer rice (ghee rice).",
+        "For vegan, omit or use neutral oil."
+      ]
+    }
+  ],
+
+  "methods": ["method.rinse", "method.absorption", "method.steam_rest"],
+
+  "steps": [
+    {
+      "id": "step_01_rinse",
+      "title": "Rinse the rice",
+      "instructions": [
+        "Place basmati rice in a bowl and cover with cool water. Swish with your hand.",
+        "Pour off cloudy water and repeat 3–5 times, or until the water is mostly clear.",
+        "Drain well in a fine mesh strainer."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "checks": [
+        "Clearer rinse water = less surface starch = fluffier rice.",
+        "Drain thoroughly so your water ratio stays accurate."
+      ]
+    },
+    {
+      "id": "step_02_optional_soak",
+      "title": "Optional soak (for extra separate grains)",
+      "instructions": [
+        "Optional: return drained rice to the bowl, cover with fresh water, and soak 15–20 minutes.",
+        "Drain well again before cooking."
+      ],
+      "activeMins": 2,
+      "handsOffMins": 15,
+      "timers": [{ "label": "Soak rice (optional)", "minutes": 15 }],
+      "checks": [
+        "Soaking improves elongation and even cooking.",
+        "Always drain before cooking to keep your ratio consistent."
+      ]
+    },
+    {
+      "id": "step_03_boil",
+      "title": "Bring to a boil",
+      "instructions": [
+        "Add rinsed (and drained) rice to a pot with measured water and salt.",
+        "Optional: add ghee/butter for richness.",
+        "Bring to a boil over medium-high heat."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 0,
+      "checks": ["Use a pot with a tight-fitting lid for best steaming."]
+    },
+    {
+      "id": "step_04_simmer",
+      "title": "Simmer covered until water is absorbed",
+      "instructions": [
+        "Once boiling, stir once, then reduce heat to low.",
+        "Cover with a tight lid and simmer 12 minutes (do not lift the lid)."
+      ],
+      "activeMins": 1,
+      "handsOffMins": 12,
+      "timers": [{ "label": "Simmer (covered)", "minutes": 12 }],
+      "checks": [
+        "Keeping the lid closed traps steam and ensures even cooking.",
+        "Heat should be low enough to prevent scorching."
+      ]
+    },
+    {
+      "id": "step_05_steam_rest",
+      "title": "Steam off heat, then fluff",
+      "instructions": [
+        "Turn off heat. Keep lid on and let rice steam 10 minutes.",
+        "Fluff gently with a fork to separate grains."
+      ],
+      "activeMins": 2,
+      "handsOffMins": 10,
+      "timers": [{ "label": "Steam rest", "minutes": 10 }],
+      "checks": [
+        "The rest is what finishes the grains without breaking them.",
+        "Fluff with a fork, not a spoon, to avoid mashing."
+      ]
+    }
+  ],
+
+  "pairings": {
+    "mains": [
+      "recipes.cuisines.indian.dal",
+      "recipes.cuisines.indian.chicken_curry",
+      "recipes.cuisines.indian.goat_curry",
+      "recipes.cuisines.indian.butter_chicken"
+    ],
+    "sides": ["dish.indian.raita", "dish.indian.pickle", "dish.indian.salad"],
+    "notes": ["Also excellent with grilled meats and roasted vegetables."]
+  },
+
+  "storage": {
+    "refrigerator": {
+      "durationDays": 5,
+      "notes": [
+        "Cool quickly and store airtight.",
+        "Reheat with steam: sprinkle 1–2 tbsp water per cup rice, cover, and warm gently."
+      ]
+    },
+    "freezer": {
+      "durationMonths": 2,
+      "notes": [
+        "Freeze in flat portions for quick reheating.",
+        "Microwave from frozen with a splash of water, covered, until hot."
+      ]
+    }
+  },
+
+  "safety": {
+    "notes": [
+      "Cooked rice can harbor Bacillus cereus if left warm too long—cool promptly and refrigerate within 2 hours.",
+      "Reheat until steaming hot."
+    ]
+  },
+
+  "variations": [
+    {
+      "id": "var.jeera_rice",
+      "label": "Jeera Rice (cumin rice)",
+      "when": { "style": "jeera_rice" },
+      "adapt": {
+        "notes": [
+          "Before adding water, warm 1 tbsp ghee/oil and bloom 1 tsp cumin seeds for 20–30 seconds.",
+          "Add rice and stir 30 seconds, then add water + salt and proceed as written."
+        ],
+        "add": [
+          {
+            "id": "spice.cumin_seed",
+            "label": "Cumin seeds",
+            "amount": { "value": 1.0, "unit": "tsp" }
+          }
+        ]
+      }
+    },
+    {
+      "id": "var.ghee_rice",
+      "label": "Ghee Rice (richer, aromatic)",
+      "when": { "style": "ghee_rice" },
+      "adapt": {
+        "notes": [
+          "Use 1–2 tbsp ghee; optionally add 2 green cardamom pods and a small cinnamon stick while simmering.",
+          "Remove whole spices before serving."
+        ]
+      }
+    },
+    {
+      "id": "var.rice_cooker",
+      "label": "Rice cooker method",
+      "when": { "equipment": "equip.rice_cooker" },
+      "adapt": {
+        "notes": [
+          "Rinse rice well. Use ~1.35–1.5 cups water per 1 cup rice depending on cooker and desired firmness.",
+          "Cook on white rice setting; rest 10 minutes on warm, then fluff."
+        ]
+      }
+    },
+    {
+      "id": "var.brown_basmati",
+      "label": "Brown basmati (different timing)",
+      "when": { "rice": "brown_basmati" },
+      "adapt": {
+        "notes": [
+          "Use 1 cup brown basmati to 2 cups water; simmer 35–45 minutes then rest 10 minutes.",
+          "Brown rice is chewier; plan more total time."
+        ]
+      }
+    },
+    {
+      "id": "var.salt_free",
+      "label": "Salt-free rice",
+      "when": { "diet": "low_sodium" },
+      "adapt": {
+        "notes": ["Omit salt; rely on dal/curry sauces for seasoning."]
+      }
+    }
+  ],
+
+  "planner": {
+    "roles": [
+      { "role": "role.rice_or_flatbread", "primary": true },
+      { "role": "role.starch", "primary": false }
+    ],
+    "leftovers": {
+      "bestUse": [
+        "fried rice (Indian-spiced)",
+        "rice bowls with dal",
+        "quick pulao with vegetables"
+      ]
+    }
+  },
+
+  "compat": {
+    "cuisineId": "cuisines.indian",
+    "dishId": "dish.indian.basmati_rice",
+    "aliases": ["plain basmati", "steamed basmati", "absorption basmati"],
+    "index": {
+      "primaryTokens": ["basmati", "rice", "fluffy", "absorption"],
+      "secondaryTokens": ["rinse", "soak", "steam", "jeera rice", "ghee rice"]
+    }
+  },
+
+  "audit": {
+    "curatedBy": "SSA",
+    "curationTier": "canonical",
+    "lastReviewedAt": "2026-01-20T00:00:00.000Z"
+  }
+}

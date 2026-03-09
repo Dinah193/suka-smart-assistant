@@ -1,4 +1,4 @@
-// C:\Users\larho\suka-smart-assistant\src\agents\shims\recipeConsolidatorAgent.js
+// C:\Users\larho\suka-smart-assistant\src\agents\shims\recipeConsolidatorShim.js
 
 /**
  * Recipe Consolidator Shim
@@ -40,19 +40,35 @@
  * @property {Array<Object>} [debug]
  */
 
-import { emit as emitBus } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit as emitBus } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 
-import budgetConfig from "./budget.json" assert { type: "json" };
-import { isReasonerCallAllowed } from "./gating.js";
-import { enforceBudgetForMode, evaluateConfidence } from "./confidence.js";
-import { selectRecipeConsolidatorContext } from "./selectors.js";
-import { applyFreshnessRules } from "./freshness.js";
-import { getCachedResult, setCachedResult } from "./cache/memo.js";
-import { makeRecipeConsolidatorCacheKey } from "./cache/keys.js";
-import { getModeConfig } from "./modes/map.js";
-import { validateModeOutput } from "./modes/validate.js";
-import { invokeReasoner } from "./runtime/reasoner.js";
+/**
+ * NOTE on JSON import:
+ * Vite supports JSON imports; keep assert for environments that honor it.
+ */
+import budgetConfig from "@/agents/policies/budget.json" assert { type: "json" };
+
+/**
+ * IMPORTANT:
+ * These are NOT shim-local files; they live under src/agents/runtime/reasoner/
+ * and src/agents/modes/.
+ */
+import { isReasonerCallAllowed } from "@/agents/runtime/reasoner/gating.js";
+import {
+  enforceBudgetForMode,
+  evaluateConfidence,
+} from "@/agents/runtime/reasoner/confidence.js";
+import { selectRecipeConsolidatorContext } from "@/agents/context/selectors.js";
+import { applyFreshnessRules } from "@/agents/runtime/reasoner/freshness.js";
+import {
+  getCachedResult,
+  setCachedResult,
+} from "@/agents/runtime/reasoner/cache/memo.js";
+import { makeRecipeConsolidatorCacheKey } from "@/agents/runtime/reasoner/cache/keys.js";
+import { getModeConfig } from "@/agents/modes/map.js";
+import { validateModeOutput } from "@/agents/modes/validate.js";
+import { invokeReasoner } from "@/agents/runtime/reasoner/index.js";
 
 let HubPacketFormatter;
 let FamilyFundConnector;
@@ -185,9 +201,7 @@ function buildPromptForMode({ modeConfig, mode, intent, input, context }) {
  */
 function normalizeResult(intent, normalized, context) {
   const cuisinePreferences =
-    normalized.cuisinePreferences ||
-    context?.cuisinePreferences ||
-    {};
+    normalized.cuisinePreferences || context?.cuisinePreferences || {};
   const nutritionSummary =
     normalized.nutritionSummary ||
     normalized.nutrition ||

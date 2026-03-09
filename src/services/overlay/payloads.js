@@ -26,20 +26,26 @@ let eventBus = {
   on: () => () => {},
 };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
-} catch { /* optional */ }
+} catch {
+  /* optional */
+}
 
 // Feature flags and defaults (safe if missing)
 let featureFlags = {
-  streamerSafeDefault: true,         // default to true unless caller overrides
-  overlayMaxBytes: 80 * 1024,        // ~80KB cap for payload
+  streamerSafeDefault: true, // default to true unless caller overrides
+  overlayMaxBytes: 80 * 1024, // ~80KB cap for payload
 };
 try {
   const f = require("@/config/featureFlags.json");
-  featureFlags.streamerSafeDefault = f?.overlay?.streamerSafeDefault ?? featureFlags.streamerSafeDefault;
-  featureFlags.overlayMaxBytes = f?.overlay?.maxBytes ?? featureFlags.overlayMaxBytes;
-} catch { /* optional */ }
+  featureFlags.streamerSafeDefault =
+    f?.overlay?.streamerSafeDefault ?? featureFlags.streamerSafeDefault;
+  featureFlags.overlayMaxBytes =
+    f?.overlay?.maxBytes ?? featureFlags.overlayMaxBytes;
+} catch {
+  /* optional */
+}
 
 // Optional Hub export (currently not used; kept for future archival use)
 let HubPacketFormatter = null;
@@ -47,7 +53,9 @@ let FamilyFundConnector = null;
 try {
   HubPacketFormatter = require("@/integrations/HubPacketFormatter");
   FamilyFundConnector = require("@/integrations/FamilyFundConnector");
-} catch { /* optional */ }
+} catch {
+  /* optional */
+}
 
 const SRC = "services.overlay.payloads";
 const STREAM_CHANNEL = "sv-cooking-stream"; // keep consistent with your cooking overlay
@@ -88,8 +96,8 @@ function buildOverlayPayload(arg1, opts = {}) {
 
   // Compose data section
   const data = {
-    version: "1.2.0",                 // bump if contract changes
-    mode,                             // "draft" | "play"
+    version: "1.2.0", // bump if contract changes
+    mode, // "draft" | "play"
     roomId: base.roomId || null,
     stream: {
       channel: base.stream?.channel || STREAM_CHANNEL,
@@ -100,21 +108,25 @@ function buildOverlayPayload(arg1, opts = {}) {
     ui: shapeUi(base.ui),
     nutrition: shapeNutrition(base.nutrition, base.ui),
     derived,
-    extra: base.extra || null,        // forward-compatible domain extras
+    extra: base.extra || null, // forward-compatible domain extras
   };
 
   // Apply streamer-safe redaction
-  const safe = (normalizedOpts.streamerSafe ?? featureFlags.streamerSafeDefault)
-    ? redactStreamerUnsafe(data)
-    : data;
+  const safe =
+    normalizedOpts.streamerSafe ?? featureFlags.streamerSafeDefault
+      ? redactStreamerUnsafe(data)
+      : data;
 
   // Enforce allow-list if provided (top-level keys only)
-  const allowed = Array.isArray(normalizedOpts.allowKeys) && normalizedOpts.allowKeys.length
-    ? pickKeys(safe, normalizedOpts.allowKeys)
-    : safe;
+  const allowed =
+    Array.isArray(normalizedOpts.allowKeys) && normalizedOpts.allowKeys.length
+      ? pickKeys(safe, normalizedOpts.allowKeys)
+      : safe;
 
   // Enforce size bounds and include checksum/etag for cacheability
-  const maxBytes = Number.isFinite(normalizedOpts.maxBytes) ? normalizedOpts.maxBytes : featureFlags.overlayMaxBytes;
+  const maxBytes = Number.isFinite(normalizedOpts.maxBytes)
+    ? normalizedOpts.maxBytes
+    : featureFlags.overlayMaxBytes;
   const bounded = boundPayload(allowed, maxBytes);
 
   const envelope = {
@@ -129,7 +141,9 @@ function buildOverlayPayload(arg1, opts = {}) {
     roomId: base.roomId || null,
     bytes: bounded.__meta?.bytes,
     truncated: bounded.__meta?.truncated || false,
-    streamerSafe: !!(normalizedOpts.streamerSafe ?? featureFlags.streamerSafeDefault),
+    streamerSafe: !!(
+      normalizedOpts.streamerSafe ?? featureFlags.streamerSafeDefault
+    ),
   });
 
   // NOTE: Not exporting to Hub; overlay payload is presentation-only.
@@ -144,13 +158,17 @@ function buildOverlayPayload(arg1, opts = {}) {
 function deriveViewFields(base) {
   const s = base.session || {};
   const steps = Array.isArray(s.steps) ? s.steps : [];
-  const activeIndex = clampIndex(steps.findIndex(x => x?.id === s.step?.id), steps.length);
+  const activeIndex = clampIndex(
+    steps.findIndex((x) => x?.id === s.step?.id),
+    steps.length
+  );
   const nextStep = steps[activeIndex + 1] || null;
 
   // Timers: prefer explicit timers; otherwise infer from step estimates
-  const timers = Array.isArray(s.timers) && s.timers.length
-    ? normalizeTimers(s.timers)
-    : inferTimersFromStep(s.step);
+  const timers =
+    Array.isArray(s.timers) && s.timers.length
+      ? normalizeTimers(s.timers)
+      : inferTimersFromStep(s.step);
 
   // ETA: use provided eta if present, else derive from timers
   const eta = s.eta || estimateEta(timers);
@@ -171,7 +189,7 @@ function shapeSessionForOverlay(session, mode) {
   const s = session || {};
   const base = {
     id: s.id || null,
-    type: s.type || null,                 // cooking|cleaning|garden|animal|preservation
+    type: s.type || null, // cooking|cleaning|garden|animal|preservation
     title: s.title || null,
     status: coerceStatus(s.status, mode), // idle|planned|started|paused|completed|canceled|failed
     deadlineTs: s.deadlineTs || null,
@@ -190,7 +208,9 @@ function shapePlan(p) {
     p50: p.p50 || null,
     p80: p.p80 || null,
     p95: p.p95 || null,
-    criticalPath: Array.isArray(p.criticalPath) ? p.criticalPath.map(minimalStepRef) : null,
+    criticalPath: Array.isArray(p.criticalPath)
+      ? p.criticalPath.map(minimalStepRef)
+      : null,
     buffers: p.buffers || null,
   };
 }
@@ -203,7 +223,7 @@ function shapeSteps(list) {
 
 function shapeDevices(list) {
   if (!Array.isArray(list)) return null;
-  return list.map(d => ({
+  return list.map((d) => ({
     id: d?.id || null,
     name: d?.name || null,
     kind: d?.kind || null, // oven|stovetop|dishwasher|counter|grill|custom
@@ -270,7 +290,7 @@ function redactStreamerUnsafe(data) {
   const copy = safeClone(data);
 
   // Strip top-level sensitive keys (if present inside extra/unknown)
-  Object.keys(copy).forEach(k => {
+  Object.keys(copy).forEach((k) => {
     if (SENSITIVE_TOP_LEVEL.has(k)) delete copy[k];
   });
 
@@ -292,7 +312,7 @@ function redactStreamerUnsafe(data) {
 
   // Extra domain payload may include sensitive bits; remove common culprits
   if (copy.extra && typeof copy.extra === "object") {
-    Object.keys(copy.extra).forEach(k => {
+    Object.keys(copy.extra).forEach((k) => {
       if (SENSITIVE_TOP_LEVEL.has(k)) delete copy.extra[k];
     });
   }
@@ -303,7 +323,9 @@ function redactStreamerUnsafe(data) {
 function stripSensitiveFromStep(step) {
   if (!step || typeof step !== "object") return step;
   const s = { ...step };
-  Object.keys(s).forEach(k => { if (SENSITIVE_STEP_KEYS.has(k)) delete s[k]; });
+  Object.keys(s).forEach((k) => {
+    if (SENSITIVE_STEP_KEYS.has(k)) delete s[k];
+  });
   return s;
 }
 
@@ -332,11 +354,12 @@ function boundPayload(obj, maxBytes) {
   // 1) Trim steps details (keep only current & next)
   if (Array.isArray(shrunk.session?.steps) && shrunk.session.steps.length > 2) {
     const currentId = shrunk.session?.step?.id;
-    const idx = shrunk.session.steps.findIndex(x => x?.id === currentId);
+    const idx = shrunk.session.steps.findIndex((x) => x?.id === currentId);
     const keep = [];
     if (idx >= 0) {
       keep.push(shrunk.session.steps[idx]);
-      if (shrunk.session.steps[idx + 1]) keep.push(shrunk.session.steps[idx + 1]);
+      if (shrunk.session.steps[idx + 1])
+        keep.push(shrunk.session.steps[idx + 1]);
     } else {
       keep.push(shrunk.session.steps[0]);
       if (shrunk.session.steps[1]) keep.push(shrunk.session.steps[1]);
@@ -362,7 +385,10 @@ function boundPayload(obj, maxBytes) {
   json = stableStringify(shrunk);
   bytes = utf8Length(json);
   meta.bytes = bytes;
-  meta.truncated = bytes > maxBytes ? true : (meta.truncated || json.length < stableStringify(obj).length);
+  meta.truncated =
+    bytes > maxBytes
+      ? true
+      : meta.truncated || json.length < stableStringify(obj).length;
   meta.etag = hashDJB2(json);
 
   // Final guard: if STILL too big, drop steps entirely (overlay can run with current step only)
@@ -417,7 +443,9 @@ function coerceStatus(status, mode) {
 }
 
 function minimalStepRef(x) {
-  return x && typeof x === "object" ? { id: x.id || null, name: x.name || null } : null;
+  return x && typeof x === "object"
+    ? { id: x.id || null, name: x.name || null }
+    : null;
 }
 
 function minimalStep(x) {
@@ -434,7 +462,7 @@ function minimalStep(x) {
 
 function normalizeTimers(list) {
   if (!Array.isArray(list)) return null;
-  return list.map(t => ({
+  return list.map((t) => ({
     id: t?.id || null,
     label: t?.label || null,
     remainingSec: toNumber(t?.remainingSec),
@@ -447,18 +475,20 @@ function inferTimersFromStep(step) {
   if (!step || typeof step !== "object") return null;
   const secs = Math.round((Number(step.durationMin) || 0) * 60);
   if (!secs) return null;
-  return [{
-    id: step.id ? `timer-${step.id}` : "timer-1",
-    label: step.name || "Step",
-    remainingSec: secs,
-    totalSec: secs,
-    running: true,
-  }];
+  return [
+    {
+      id: step.id ? `timer-${step.id}` : "timer-1",
+      label: step.name || "Step",
+      remainingSec: secs,
+      totalSec: secs,
+      running: true,
+    },
+  ];
 }
 
 function estimateEta(timers) {
   if (!Array.isArray(timers) || !timers.length) return null;
-  const maxRem = Math.max(...timers.map(t => Number(t.remainingSec) || 0));
+  const maxRem = Math.max(...timers.map((t) => Number(t.remainingSec) || 0));
   if (!Number.isFinite(maxRem)) return null;
   const eta = new Date(Date.now() + maxRem * 1000);
   return eta.toISOString();
@@ -484,7 +514,9 @@ function collectWarnings(base) {
 
 function pickKeys(obj, keys) {
   const out = {};
-  keys.forEach(k => { if (k in obj) out[k] = obj[k]; });
+  keys.forEach((k) => {
+    if (k in obj) out[k] = obj[k];
+  });
   return out;
 }
 
@@ -505,11 +537,16 @@ function clampIndex(i, len) {
 }
 
 function safeClone(x) {
-  try { return JSON.parse(JSON.stringify(x)); }
-  catch { return x; }
+  try {
+    return JSON.parse(JSON.stringify(x));
+  } catch {
+    return x;
+  }
 }
 
-function nowIso() { return new Date().toISOString(); }
+function nowIso() {
+  return new Date().toISOString();
+}
 
 function stableStringify(obj) {
   // Deterministic stringify for etag
@@ -519,7 +556,11 @@ function stableStringify(obj) {
       if (seen.has(v)) return;
       seen.add(v);
       const o = {};
-      Object.keys(v).sort().forEach(key => { o[key] = v[key]; });
+      Object.keys(v)
+        .sort()
+        .forEach((key) => {
+          o[key] = v[key];
+        });
       return o;
     }
     return v;
@@ -528,21 +569,27 @@ function stableStringify(obj) {
 
 function utf8Length(str) {
   // Fast-ish byte length approximation for UTF-8
-  let bytes = 0, i = 0;
+  let bytes = 0,
+    i = 0;
   for (i = 0; i < str.length; i++) {
     const codePoint = str.charCodeAt(i);
     if (codePoint < 0x80) bytes += 1;
     else if (codePoint < 0x800) bytes += 2;
-    else if (codePoint >= 0xD800 && codePoint < 0xE000) { // surrogate pair
-      bytes += 4; i++;
+    else if (codePoint >= 0xd800 && codePoint < 0xe000) {
+      // surrogate pair
+      bytes += 4;
+      i++;
     } else bytes += 3;
   }
   return bytes;
 }
 
 function hashDJB2(str) {
-  let hash = 5381, i = str.length;
-  while (i) { hash = (hash * 33) ^ str.charCodeAt(--i); }
+  let hash = 5381,
+    i = str.length;
+  while (i) {
+    hash = (hash * 33) ^ str.charCodeAt(--i);
+  }
   return (hash >>> 0).toString(16);
 }
 
@@ -559,13 +606,17 @@ async function exportToHubIfEnabled(snapshotEnvelope) {
   try {
     const flags = require("@/config/featureFlags.json");
     if (!flags?.overlay?.exportSnapshotsToHub) return;
-  } catch { return; }
+  } catch {
+    return;
+  }
 
   if (!HubPacketFormatter || !FamilyFundConnector) return;
   try {
     const packet = HubPacketFormatter.format(snapshotEnvelope);
     await FamilyFundConnector.send(packet);
-  } catch { /* silent by design */ }
+  } catch {
+    /* silent by design */
+  }
 }
 
 /* --------------------------------- Exports -------------------------------- */

@@ -1,0 +1,180 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+  "meta": {
+    "id": "shawarma.condiments.pickled_shawarma_vegetables",
+    "type": "recipe",
+    "domain": "shawarma",
+    "locale": "en-US",
+    "label": "Pickled Shawarma Vegetables",
+    "tags": [
+      "condiment",
+      "pickles",
+      "shawarma",
+      "quick_pickle",
+      "topping",
+      "vegetables",
+      "acidic",
+      "make_ahead",
+      "batch_friendly",
+      "refrigerator_pickle"
+    ],
+    "source": {
+      "curation": "ssa",
+      "author": "SSA Catalog",
+      "notes": "Crisp, tangy refrigerator pickles for shawarma wraps and bowls (turnips/cucumber/onion optional)."
+    }
+  },
+  "ingredients": [
+    {
+      "id": "ing.turnip",
+      "label": "Turnips, peeled and cut into sticks",
+      "amount": { "value": 250, "unit": "g" },
+      "notes": [
+        "Classic shawarma-style pickles often include turnips.",
+        "Sub: radish or extra cucumber if you dislike turnip."
+      ]
+    },
+    {
+      "id": "ing.cucumber",
+      "label": "Cucumber, cut into spears or coins",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": ["Persian or English cucumber preferred for crunch."]
+    },
+    {
+      "id": "ing.red_onion",
+      "label": "Red onion, thinly sliced",
+      "amount": { "value": 120, "unit": "g" },
+      "notes": ["About 1 small onion."]
+    },
+    {
+      "id": "ing.carrot",
+      "label": "Carrot, cut into matchsticks",
+      "amount": { "value": 120, "unit": "g" },
+      "notes": ["Optional but adds sweetness and color."]
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic cloves, lightly crushed",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": ["About 3–4 cloves; optional but recommended."]
+    },
+    {
+      "id": "ing.beet",
+      "label": "Beet slice or small beet piece",
+      "amount": { "value": 20, "unit": "g" },
+      "notes": [
+        "Optional but traditional: adds pink color (like pickled turnips served with shawarma).",
+        "Remove after 24–48 hours once desired color is reached."
+      ]
+    },
+    {
+      "id": "ing.white_vinegar",
+      "label": "White vinegar",
+      "amount": { "value": 240, "unit": "ml" },
+      "notes": [
+        "Sub: distilled vinegar or white wine vinegar for a softer tang."
+      ]
+    },
+    {
+      "id": "ing.water",
+      "label": "Water",
+      "amount": { "value": 240, "unit": "ml" }
+    },
+    {
+      "id": "ing.salt.kosher",
+      "label": "Kosher salt",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": ["About 2 teaspoons. Reduce slightly if using fine salt."]
+    },
+    {
+      "id": "ing.sugar",
+      "label": "Sugar",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": [
+        "About 1 tablespoon; balances acidity. Optional but recommended."
+      ]
+    },
+    {
+      "id": "ing.black_peppercorns",
+      "label": "Black peppercorns",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": ["About 1 teaspoon."]
+    },
+    {
+      "id": "ing.mustard_seed",
+      "label": "Mustard seeds",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": ["About 1 teaspoon; optional."]
+    },
+    {
+      "id": "ing.coriander_seed",
+      "label": "Coriander seeds",
+      "amount": { "value": 2, "unit": "g" },
+      "notes": ["About 1 teaspoon; optional but very shawarma-friendly."]
+    },
+    {
+      "id": "ing.bay_leaf",
+      "label": "Bay leaf",
+      "amount": { "value": 1, "unit": "each" },
+      "notes": ["Optional."]
+    },
+    {
+      "id": "ing.chili_flakes",
+      "label": "Crushed red pepper flakes",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": ["Optional for heat (about 1/2 teaspoon)."]
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.01",
+      "title": "Prep the vegetables",
+      "instructions": [
+        "Wash and prep vegetables: peel turnips; cut turnips and carrots into sticks; slice cucumber; thinly slice red onion.",
+        "Pack vegetables tightly into a clean quart jar (or two pint jars). Add garlic and optional beet piece among the vegetables."
+      ]
+    },
+    {
+      "id": "step.02",
+      "title": "Make the brine",
+      "instructions": [
+        "In a small saucepan (or heat-safe bowl for microwave), combine vinegar, water, salt, sugar, peppercorns, mustard seed, coriander seed, bay leaf, and optional chili flakes.",
+        "Warm just until salt and sugar dissolve (do not boil). Stir well."
+      ]
+    },
+    {
+      "id": "step.03",
+      "title": "Pour and submerge",
+      "instructions": [
+        "Carefully pour the warm brine over the vegetables until fully covered.",
+        "Tap the jar gently to release air bubbles. Ensure vegetables are submerged (use a small weight if needed)."
+      ]
+    },
+    {
+      "id": "step.04",
+      "title": "Cool, then refrigerate",
+      "instructions": [
+        "Let cool to room temperature, then cap and refrigerate.",
+        "Quick-pickle timing: lightly pickled in 2–4 hours, best crunch/flavor after 24 hours."
+      ]
+    },
+    {
+      "id": "step.05",
+      "title": "Color control (if using beet)",
+      "instructions": [
+        "If using beet for pink color, check color after 24 hours.",
+        "Remove the beet when the desired color is reached to prevent earthy beet flavor from dominating."
+      ]
+    },
+    {
+      "id": "step.06",
+      "title": "Serve and store",
+      "instructions": [
+        "Use as a topping for shawarma wraps, bowls, and plates.",
+        "Store refrigerated and submerged in brine. Best within 7–10 days for crunch; usable up to 2–3 weeks if kept cold and clean."
+      ]
+    }
+  ]
+}

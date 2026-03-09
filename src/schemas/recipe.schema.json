@@ -1,0 +1,595 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://suka-smart-assistant.local/schemas/recipe.schema.json",
+  "title": "SSA Recipe Schema",
+  "description": "Canonical recipe schema for SSA catalogs and user-imported recipes. Backward compatible with legacy (qty/unit + body/seconds) while supporting rich v1.x recipe documents (amount.value/unit + instructions[] + mins). Expanded to allow richer catalog recipes (title/description/tags/equipment objects/timing/notes/variations/etc.) without breaking existing minimal recipes.",
+  "type": "object",
+  "required": ["schemaVersion", "meta", "ingredients", "steps"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "type": "string", "minLength": 1 },
+    "updatedAt": { "type": "string", "format": "date-time" },
+
+    "meta": { "$ref": "#/$defs/Meta" },
+
+    "classification": { "$ref": "#/$defs/Classification" },
+
+    "yield": { "$ref": "#/$defs/Yield" },
+
+    "time": { "$ref": "#/$defs/TimeBlock" },
+
+    "difficulty": {
+      "description": "Either legacy string difficulty or numeric scale (SSA).",
+      "anyOf": [
+        { "type": "string", "enum": ["beginner", "intermediate", "advanced"] },
+        { "type": "number", "minimum": 0, "maximum": 10 }
+      ]
+    },
+
+    "nutritionHints": { "type": "object", "additionalProperties": true },
+
+    "signals": {
+      "description": "High-level planner signals. Legacy schemas often require booleans; SSA may allow richer values, so keep permissive.",
+      "type": "object",
+      "additionalProperties": true
+    },
+
+    "tasteProfile": { "type": "object", "additionalProperties": true },
+
+    "equipment": { "$ref": "#/$defs/Equipment" },
+
+    "dietFlags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+
+    "allergens": {
+      "description": "Allow either legacy string-array allergens OR richer object forms used by canonical catalogs.",
+      "anyOf": [
+        { "type": "array", "items": { "type": "string" }, "default": [] },
+        { "type": "object", "additionalProperties": true }
+      ]
+    },
+
+    "ingredients": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "anyOf": [
+          { "$ref": "#/$defs/Ingredient" },
+          { "$ref": "#/$defs/IngredientMinimal" }
+        ]
+      }
+    },
+
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "anyOf": [{ "$ref": "#/$defs/Step" }, { "$ref": "#/$defs/StepMinimal" }]
+      }
+    },
+
+    "pairings": { "type": "object", "additionalProperties": true },
+
+    "adaptations": {
+      "type": "array",
+      "items": { "type": "object", "additionalProperties": true },
+      "default": []
+    },
+
+    "storage": { "type": "object", "additionalProperties": true },
+
+    "planner": { "type": "object", "additionalProperties": true },
+
+    "id": {
+      "description": "Optional canonical id used by some recipe generators/catalogs. Prefer meta.id, but allow this for compatibility.",
+      "type": "string",
+      "minLength": 1
+    },
+
+    "version": {
+      "description": "Optional semantic version for recipe docs. SSA primarily uses schemaVersion + meta/source versioning.",
+      "type": "string",
+      "minLength": 1
+    },
+
+    "status": {
+      "description": "Optional lifecycle status for canonical catalogs.",
+      "type": "string"
+    },
+
+    "language": {
+      "description": "Optional language/locale string used by some catalogs (e.g., en-US). Prefer meta.locale but allow this.",
+      "type": "string"
+    },
+
+    "title": {
+      "description": "Optional display title (rich catalogs). Prefer meta.name but allow this.",
+      "type": "string"
+    },
+
+    "subtitle": {
+      "description": "Optional display subtitle (rich catalogs). Prefer meta.subtitle but allow this.",
+      "type": "string"
+    },
+
+    "description": {
+      "description": "Optional long description for rich catalogs.",
+      "type": "string"
+    },
+
+    "attribution": {
+      "description": "Optional attribution/source object for rich catalogs.",
+      "type": "object",
+      "additionalProperties": true
+    },
+
+    "cuisine": {
+      "description": "Optional cuisine label/object used by some catalogs. Prefer classification.cuisine but allow this.",
+      "anyOf": [
+        { "type": "string" },
+        { "type": "object", "additionalProperties": true }
+      ]
+    },
+
+    "category": {
+      "description": "Optional category label used by some catalogs. Prefer classification.category but allow this.",
+      "type": "string"
+    },
+
+    "keywords": {
+      "description": "Optional keyword list used by some catalogs/search.",
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+
+    "tags": {
+      "description": "Optional tags list used by some catalogs/search. Prefer classification.plannerTags but allow this.",
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+
+    "servings": {
+      "description": "Optional servings/yield object used by some catalogs (alias-ish to yield).",
+      "type": "object",
+      "additionalProperties": true
+    },
+
+    "timing": {
+      "description": "Optional detailed timing object used by some catalogs (alias-ish to time).",
+      "type": "object",
+      "additionalProperties": true
+    },
+
+    "dietary": {
+      "description": "Optional dietary flags object used by some catalogs (separate from dietFlags).",
+      "type": "object",
+      "additionalProperties": true
+    },
+
+    "optionalComponents": {
+      "description": "Optional add-ons like tangzhong, spice packs, sauces, etc.",
+      "type": "array",
+      "items": { "type": "object", "additionalProperties": true },
+      "default": []
+    },
+
+    "method": {
+      "description": "Optional method metadata used by some catalogs (techniques, style, etc.).",
+      "type": "object",
+      "additionalProperties": true
+    },
+
+    "freshMilledNotes": {
+      "description": "Optional notes block for fresh-milled flour variants.",
+      "type": "object",
+      "additionalProperties": true
+    },
+
+    "notes": {
+      "description": "Optional freeform notes list for rich catalogs.",
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+
+    "variations": {
+      "description": "Optional variations list for rich catalogs.",
+      "type": "array",
+      "items": { "type": "object", "additionalProperties": true },
+      "default": []
+    },
+
+    "nutrition": {
+      "description": "Optional nutrition object for rich catalogs.",
+      "type": "object",
+      "additionalProperties": true
+    },
+
+    "links": {
+      "description": "Optional related links/recipes object for rich catalogs.",
+      "type": "object",
+      "additionalProperties": true
+    },
+
+    "audit": {
+      "description": "Optional audit metadata for rich catalogs.",
+      "type": "object",
+      "additionalProperties": true
+    },
+
+    "summary": {
+      "description": "Optional short summary used by canonical catalogs.",
+      "type": "string"
+    },
+
+    "yields": {
+      "description": "Optional alias to `yield` used by some canonical recipe generators.",
+      "type": "object",
+      "additionalProperties": true
+    },
+
+    "safety": {
+      "description": "Optional food safety notes used by canonical catalogs.",
+      "type": "object",
+      "additionalProperties": true
+    },
+
+    "ingredientGroups": {
+      "description": "Optional ingredient grouping (for UI display).",
+      "type": "array",
+      "items": { "type": "object", "additionalProperties": true },
+      "default": []
+    },
+
+    "diet": {
+      "description": "Optional diet block used by canonical catalogs.",
+      "type": "object",
+      "additionalProperties": true
+    },
+
+    "methods": {
+      "description": "Optional technique/method ids used by canonical catalogs.",
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+
+    "compat": {
+      "description": "Optional compatibility/normalization hints for catalog indexing.",
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "Meta": {
+      "type": "object",
+      "required": ["id", "type"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "type": "string", "const": "recipe" },
+
+        "domain": {
+          "description": "Legacy schema may enforce 'recipes'. SSA catalogs sometimes used 'cuisines'. Allow both plus any string to avoid breaking imports.",
+          "anyOf": [
+            { "type": "string", "const": "recipes" },
+            { "type": "string", "const": "cuisines" },
+            { "type": "string", "minLength": 1 }
+          ]
+        },
+
+        "locale": { "type": "string", "minLength": 2 },
+
+        "name": { "type": "string", "minLength": 1 },
+
+        "label": {
+          "description": "Legacy schemas may require `label`. If present, must be a string.",
+          "type": "string",
+          "minLength": 1
+        },
+
+        "subtitle": { "type": "string" },
+
+        "source": {
+          "type": ["object", "null"],
+          "additionalProperties": true
+        }
+      },
+      "allOf": [
+        {
+          "description": "Require either meta.name OR meta.label (many canonical catalogs only set label).",
+          "oneOf": [{ "required": ["name"] }, { "required": ["label"] }]
+        }
+      ]
+    },
+
+    "Classification": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "cuisine": { "type": "string" },
+        "subprofiles": { "type": "array", "items": { "type": "string" } },
+        "category": { "type": "string" },
+        "mealArchetypes": { "type": "array", "items": { "type": "string" } },
+        "servingStyles": { "type": "array", "items": { "type": "string" } },
+        "plannerTags": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "Yield": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "servings": { "type": "integer", "minimum": 1 },
+        "servingSize": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["value", "unit"],
+          "properties": {
+            "value": { "type": "number", "exclusiveMinimum": 0 },
+            "unit": { "type": "string", "minLength": 1 }
+          }
+        },
+        "notes": { "type": "string" }
+      }
+    },
+
+    "TimeBlock": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "activeMins": { "type": "number", "minimum": 0 },
+        "totalMins": { "type": "number", "minimum": 0 },
+        "handsOffMins": { "type": "number", "minimum": 0 }
+      }
+    },
+
+    "Equipment": {
+      "description": "Support rich object form, legacy simple array form, and common array-of-objects form. Also allow canonical object shapes with required/optional arrays.",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "recommended": { "type": "array", "items": { "type": "string" } },
+            "minimum": { "type": "array", "items": { "type": "string" } },
+            "optional": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  { "type": "string" },
+                  { "$ref": "#/$defs/EquipmentItem" }
+                ]
+              }
+            },
+            "required": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  { "type": "string" },
+                  { "$ref": "#/$defs/EquipmentItem" }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        {
+          "type": "array",
+          "items": { "$ref": "#/$defs/EquipmentItem" }
+        }
+      ]
+    },
+
+    "EquipmentItem": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "label": { "type": "string" },
+        "required": { "type": "boolean" },
+        "notes": { "type": "string" }
+      }
+    },
+
+    "Amount": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "unit"],
+      "properties": {
+        "value": { "type": "number" },
+        "unit": { "type": "string", "minLength": 1 }
+      }
+    },
+
+    "Ingredient": {
+      "type": "object",
+      "required": ["id", "label"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "label": { "type": "string", "minLength": 1 },
+
+        "role": { "type": "string" },
+        "notes": {
+          "description": "Allow either a single string note or a list of notes.",
+          "anyOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } }
+          ]
+        },
+        "optional": { "type": "boolean" },
+
+        "amount": { "$ref": "#/$defs/Amount" },
+
+        "qty": {
+          "description": "Legacy quantity field (used with `unit`).",
+          "type": "number"
+        },
+        "unit": {
+          "description": "Legacy unit field (used with `qty`).",
+          "type": "string"
+        },
+
+        "quantity": {
+          "description": "Common alt quantity field seen in some catalogs (used with `unit`).",
+          "type": "number"
+        }
+      },
+
+      "allOf": [
+        {
+          "description": "Require either (amount) OR (qty+unit) OR (quantity+unit).",
+          "oneOf": [
+            { "required": ["amount"] },
+            { "required": ["qty", "unit"] },
+            { "required": ["quantity", "unit"] }
+          ]
+        }
+      ]
+    },
+
+    "IngredientMinimal": {
+      "description": "Minimal ingredient form used by some simple recipes: label + amount only (no id).",
+      "type": "object",
+      "required": ["label", "amount"],
+      "additionalProperties": true,
+      "properties": {
+        "label": { "type": "string", "minLength": 1 },
+        "amount": { "$ref": "#/$defs/Amount" },
+        "notes": {
+          "description": "Allow either a single string note or a list of notes.",
+          "anyOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } }
+          ]
+        },
+        "optional": { "type": "boolean" }
+      }
+    },
+
+    "Timer": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "label": { "type": "string" },
+        "seconds": { "type": "number", "minimum": 0 },
+        "mins": { "type": "number", "minimum": 0 },
+        "minutes": {
+          "description": "Common timer field used by some canonical catalogs.",
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "oneOf": [
+        { "required": ["seconds"] },
+        { "required": ["mins"] },
+        { "required": ["minutes"] }
+      ]
+    },
+
+    "Temperature": {
+      "description": "Optional temperature hint for a step (oven, stovetop, internal temp, etc.). Keep permissive.",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "type": { "type": "string" },
+        "value": { "type": "number" },
+        "unit": { "type": "string" },
+        "notes": { "type": "string" }
+      }
+    },
+
+    "Step": {
+      "type": "object",
+      "required": ["id", "title"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+
+        "domain": { "type": "string" },
+
+        "activeMins": { "type": "number", "minimum": 0 },
+        "handsOffMins": { "type": "number", "minimum": 0 },
+
+        "body": {
+          "description": "Legacy single-text step content.",
+          "type": "string"
+        },
+
+        "text": {
+          "description": "Common alias for legacy body used by some catalogs.",
+          "type": "string"
+        },
+
+        "instructions": {
+          "description": "SSA rich step instructions.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+
+        "durationMinutes": {
+          "description": "Common duration field used by some catalogs.",
+          "type": "number",
+          "minimum": 0
+        },
+
+        "temperature": { "$ref": "#/$defs/Temperature" },
+
+        "timers": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Timer" }
+        },
+
+        "inputs": {
+          "type": "object",
+          "additionalProperties": true
+        },
+
+        "checks": {
+          "description": "Optional QA/checklist hints used by canonical catalogs.",
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        }
+      },
+
+      "allOf": [
+        {
+          "description": "Require either legacy body OR SSA instructions OR text alias.",
+          "oneOf": [
+            { "required": ["body"] },
+            { "required": ["instructions"] },
+            { "required": ["text"] }
+          ]
+        }
+      ]
+    },
+
+    "StepMinimal": {
+      "description": "Minimal step form used by some simple recipes: title + body (no id).",
+      "type": "object",
+      "required": ["title", "body"],
+      "additionalProperties": true,
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "body": { "type": "string", "minLength": 1 },
+        "timers": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Timer" }
+        }
+      }
+    }
+  }
+}

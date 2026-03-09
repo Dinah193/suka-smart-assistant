@@ -32,7 +32,6 @@
 // - Easy to add: energy, construction, logistics, susu-finance, coop-labor
 // -----------------------------------------------------------------------------
 
-
 /* eslint-disable no-console */
 
 const isBrowser = typeof window !== "undefined";
@@ -41,7 +40,7 @@ const isBrowser = typeof window !== "undefined";
 let eventBus = { emit() {}, on() {}, off() {} };
 try {
   // eslint-disable-next-line global-require
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch (_e) {
   // ok – window will still get events
@@ -79,15 +78,13 @@ try {
   runtimeEnv = require("@/config/env") || runtimeEnv;
 } catch (_e) {}
 
-
 // ------------------------------ Internal state -------------------------------
 // we batch small exports so we don't spam the Hub
 const BATCH_MAX = 25;
 const STATE = {
-  queue: [],     // array of { domain, action, payload, ts, meta }
-  flushing: false
+  queue: [], // array of { domain, action, payload, ts, meta }
+  flushing: false,
 };
-
 
 // ------------------------------ Utils ----------------------------------------
 function nowIso() {
@@ -134,7 +131,11 @@ async function signPayload(raw, key) {
         false,
         ["sign"]
       );
-      const sigBuf = await window.crypto.subtle.sign("HMAC", keyObj, enc.encode(dataStr));
+      const sigBuf = await window.crypto.subtle.sign(
+        "HMAC",
+        keyObj,
+        enc.encode(dataStr)
+      );
       const sigArr = Array.from(new Uint8Array(sigBuf))
         .map((b) => b.toString(16).padStart(2, "0"))
         .join("");
@@ -163,8 +164,8 @@ function buildPacket(batchItems = [], extraMeta = {}) {
     items: batchItems,
     meta: {
       ...extraMeta,
-      itemCount: batchItems.length
-    }
+      itemCount: batchItems.length,
+    },
   };
   return base;
 }
@@ -179,7 +180,6 @@ function validateForExport(item) {
   }
   return { valid: true, errors: [] };
 }
-
 
 // ------------------------------ Core API -------------------------------------
 export const dataGateway = {
@@ -205,7 +205,7 @@ export const dataGateway = {
       action: item.action || "updated",
       payload: item.payload || {},
       ts: nowIso(),
-      meta: item.meta || {}
+      meta: item.meta || {},
     };
 
     // validate if possible – if hard error we can still keep it but mark
@@ -216,7 +216,10 @@ export const dataGateway = {
 
     STATE.queue.push(record);
 
-    emitSSA("hub.export.enqueued", { item: record, queueLength: STATE.queue.length });
+    emitSSA("hub.export.enqueued", {
+      item: record,
+      queueLength: STATE.queue.length,
+    });
 
     // simple heuristic: if queue is big, flush
     if (STATE.queue.length >= BATCH_MAX) {
@@ -237,7 +240,7 @@ export const dataGateway = {
       if (STATE.queue.length > 0) {
         emitSSA("hub.export.skipped", {
           reason: "familyFundMode=false",
-          skippedCount: STATE.queue.length
+          skippedCount: STATE.queue.length,
         });
         // we DO NOT drop the queue here – user may turn on hub later
       }
@@ -259,15 +262,21 @@ export const dataGateway = {
       let packet = buildPacket(batch, {
         source: "ssa-data-gateway",
         householdId: getHouseholdIdFallback(),
-        node: isBrowser ? "browser" : "node"
+        node: isBrowser ? "browser" : "node",
       });
 
       // format for hub, if formatter is present
-      if (HubPacketFormatter && typeof HubPacketFormatter.toHubPacket === "function") {
+      if (
+        HubPacketFormatter &&
+        typeof HubPacketFormatter.toHubPacket === "function"
+      ) {
         try {
           packet = HubPacketFormatter.toHubPacket(packet);
         } catch (err) {
-          console.warn("[dataGateway] HubPacketFormatter failed, sending raw packet", err);
+          console.warn(
+            "[dataGateway] HubPacketFormatter failed, sending raw packet",
+            err
+          );
         }
       }
 
@@ -276,15 +285,18 @@ export const dataGateway = {
       packet.signature = signature;
 
       // send
-      if (FamilyFundConnector && typeof FamilyFundConnector.send === "function") {
+      if (
+        FamilyFundConnector &&
+        typeof FamilyFundConnector.send === "function"
+      ) {
         try {
           await FamilyFundConnector.send(packet);
           emitSSA("hub.export.sent", {
             packetMeta: {
               count: batch.length,
               signature,
-              householdId: packet?.meta?.householdId || null
-            }
+              householdId: packet?.meta?.householdId || null,
+            },
           });
         } catch (err) {
           // network / auth / offline → we KEEP the batch by pushing it back
@@ -292,13 +304,13 @@ export const dataGateway = {
           STATE.queue.unshift(...batch); // put back
           emitSSA("hub.export.failed", {
             error: err?.message || String(err),
-            count: batch.length
+            count: batch.length,
           });
         }
       } else {
         // no connector → pretend success locally
         emitSSA("hub.export.sent.local-only", {
-          packetMeta: { count: batch.length, signature }
+          packetMeta: { count: batch.length, signature },
         });
       }
     } finally {
@@ -337,9 +349,8 @@ export const dataGateway = {
    */
   peekQueue() {
     return [...STATE.queue];
-  }
+  },
 };
-
 
 // ------------------------------ Small helpers --------------------------------
 function getHouseholdIdFallback() {
@@ -353,3 +364,6 @@ function getHouseholdIdFallback() {
   }
   return "ssa-local-household";
 }
+
+// ✅ Build-fix: allow `import dataGateway from "../services/dataGateway.js";`
+export default dataGateway;

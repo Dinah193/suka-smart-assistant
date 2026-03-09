@@ -1,6 +1,12 @@
 // C:\Users\larho\suka-smart-assistant\src\pages\cooking\Remote.jsx
 /* eslint-disable no-console */
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 /**
@@ -24,9 +30,12 @@ import { useParams, useNavigate } from "react-router-dom";
  */
 
 /* -------------------------------- Services -------------------------------- */
-let eventBus = { emit: (...a) => console.debug("[Remote:eventBus.emit]", ...a), on: () => () => {} };
+let eventBus = {
+  emit: (...a) => console.debug("[Remote:eventBus.emit]", ...a),
+  on: () => () => {},
+};
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -127,7 +136,10 @@ function useRoomConnection(initialRoom) {
       setRoom(targetRoom);
       setConnected(true);
 
-      emitEvent("remote.joined", { room: targetRoom, clientType: client === wsFallback ? "ws" : "rtc" });
+      emitEvent("remote.joined", {
+        room: targetRoom,
+        clientType: client === wsFallback ? "ws" : "rtc",
+      });
 
       return { ok: true };
     },
@@ -176,7 +188,16 @@ function useRoomConnection(initialRoom) {
     emitEvent("remote.left", { room });
   }, [room]);
 
-  return { room, setRoom, connected, clientType, join, leave, send, subscribeState };
+  return {
+    room,
+    setRoom,
+    connected,
+    clientType,
+    join,
+    leave,
+    send,
+    subscribeState,
+  };
 }
 
 /* ------------------------------- Main Screen ------------------------------ */
@@ -185,8 +206,16 @@ export default function Remote() {
   const navigate = useNavigate();
 
   // Connection
-  const { room, setRoom, connected, clientType, join, leave, send, subscribeState } =
-    useRoomConnection(roomParam);
+  const {
+    room,
+    setRoom,
+    connected,
+    clientType,
+    join,
+    leave,
+    send,
+    subscribeState,
+  } = useRoomConnection(roomParam);
 
   // Mirror of current play state
   const [state, setState] = useState({
@@ -289,7 +318,9 @@ export default function Remote() {
   const onScan = useCallback(
     async (text) => {
       // Accept raw room or URLs like ".../cooking/remote/ROOMCODE"
-      const match = /remote\/([^/?#]+)/i.exec(text || "") || /room=([^&]+)/i.exec(text || "");
+      const match =
+        /remote\/([^/?#]+)/i.exec(text || "") ||
+        /room=([^&]+)/i.exec(text || "");
       const code = (match ? match[1] : text)?.trim();
       if (!code) return;
       setRoom(code);
@@ -361,7 +392,10 @@ export default function Remote() {
 
           {QRScanner ? (
             <>
-              <button className="btn subtle" onClick={() => setShowScanner((s) => !s)}>
+              <button
+                className="btn subtle"
+                onClick={() => setShowScanner((s) => !s)}
+              >
                 {showScanner ? "Close Scanner" : "Scan QR"}
               </button>
               {showScanner && (
@@ -383,7 +417,10 @@ export default function Remote() {
 
           <div className="station-filter">
             <label>Station</label>
-            <select value={stationFilter} onChange={(e) => setStationFilter(e.target.value)}>
+            <select
+              value={stationFilter}
+              onChange={(e) => setStationFilter(e.target.value)}
+            >
               {stationOptions.map((s) => (
                 <option key={s} value={s}>
                   {s}
@@ -407,17 +444,24 @@ export default function Remote() {
                 Step {state.idx + 1}
                 {state.total ? ` / ${state.total}` : ""}
               </div>
-              <div className="step-station">{state?.step?.station ? `Station: ${state.step.station}` : ""}</div>
+              <div className="step-station">
+                {state?.step?.station ? `Station: ${state.step.station}` : ""}
+              </div>
             </div>
 
             <div className="step-title big">{state?.step?.title || "…"}</div>
             <div className="step-text">{trimmedText}</div>
 
             <div className="timer-block">
-              {typeof state?.step?.durationSec === "number" && state.step.durationSec > 0 ? (
+              {typeof state?.step?.durationSec === "number" &&
+              state.step.durationSec > 0 ? (
                 <>
-                  <div className="timer-big">{formatMMSS(state?.remaining ?? 0)}</div>
-                  <div className="hint">Single-timer focus (overlay owns the clock)</div>
+                  <div className="timer-big">
+                    {formatMMSS(state?.remaining ?? 0)}
+                  </div>
+                  <div className="hint">
+                    Single-timer focus (overlay owns the clock)
+                  </div>
                 </>
               ) : (
                 <div className="no-timer-note">No timer for this step</div>
@@ -439,7 +483,11 @@ export default function Remote() {
             </button>
           </div>
           <div className="control-row">
-            <button className="btn" onClick={doTimerStart} disabled={!connected}>
+            <button
+              className="btn"
+              onClick={doTimerStart}
+              disabled={!connected}
+            >
               ▶ Start Timer
             </button>
             <button className="btn" onClick={doTimerStop} disabled={!connected}>
@@ -470,8 +518,15 @@ function formatMMSS(total) {
 function sanitizeStep(step) {
   if (!step) return null;
   const { id, title, text, durationSec, station } = step;
-  const trimmed = (text || "").length > 600 ? `${text.slice(0, 597)}…` : text || "";
-  return { id: id || `step_${Date.now()}`, title: title || "", text: trimmed, durationSec: durationSec ?? 0, station };
+  const trimmed =
+    (text || "").length > 600 ? `${text.slice(0, 597)}…` : text || "";
+  return {
+    id: id || `step_${Date.now()}`,
+    title: title || "",
+    text: trimmed,
+    durationSec: durationSec ?? 0,
+    station,
+  };
 }
 function collectStations(existing = [], nextStation) {
   const out = new Set(existing);

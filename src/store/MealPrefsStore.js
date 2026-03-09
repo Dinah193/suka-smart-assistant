@@ -30,15 +30,38 @@ const DEFAULTS = Object.freeze({
     preset: "custom", // "custom" | "16:8" | "18:6" | "omad" | "36h" | "adf" | custom string
     timezone: "America/New_York",
     slots: [
-      { slotId: "B", label: "Breakfast", type: "meal", start: "08:00", end: "08:45" },
-      { slotId: "L", label: "Lunch", type: "meal", start: "12:30", end: "13:15" },
-      { slotId: "D", label: "Dinner", type: "meal", start: "18:30", end: "19:15" },
+      {
+        slotId: "B",
+        label: "Breakfast",
+        type: "meal",
+        start: "08:00",
+        end: "08:45",
+      },
+      {
+        slotId: "L",
+        label: "Lunch",
+        type: "meal",
+        start: "12:30",
+        end: "13:15",
+      },
+      {
+        slotId: "D",
+        label: "Dinner",
+        type: "meal",
+        start: "18:30",
+        end: "19:15",
+      },
     ],
     // 0=Sun … 6=Sat (+ default)
     dietByDow: {
       default: "unrestricted",
-      1: "keto", 2: "keto", 3: "keto", 4: "keto", 5: "keto",
-      6: "unrestricted", 0: "unrestricted",
+      1: "keto",
+      2: "keto",
+      3: "keto",
+      4: "keto",
+      5: "keto",
+      6: "unrestricted",
+      0: "unrestricted",
     },
     adf: null, // { startIso: "2025-09-01", fastEveryOtherDay: true }
     overrides: {}, // { "YYYY-MM-DD": { slots?, dietTag? } }
@@ -71,14 +94,18 @@ const DEFAULTS = Object.freeze({
     autoGroupByAisle: true,
   },
   leftovers: { planLeftovers: true, keepDays: 3, assignToSlots: true },
-  inventorySync: { autoDecrementOnPlan: false, decrementOnCook: true, reserveOnPlan: true },
+  inventorySync: {
+    autoDecrementOnPlan: false,
+    decrementOnCook: true,
+    reserveOnPlan: true,
+  },
 
   // ── Dietary prefs (keep name aligned with your base types) ────────────────
   dietary: {
-    allergies: [],            // e.g., ["peanuts","shellfish"]
-    exclusions: [],           // ingredients to avoid
-    preferredCuisines: [],    // weight toward
-    dislikedCuisines: [],     // weight away from
+    allergies: [], // e.g., ["peanuts","shellfish"]
+    exclusions: [], // ingredients to avoid
+    preferredCuisines: [], // weight toward
+    dislikedCuisines: [], // weight away from
     // kosher-style toggles moved into exclusions/recipes filters at runtime.
   },
 
@@ -92,7 +119,11 @@ const DEFAULTS = Object.freeze({
   },
 
   // ── Reminders & generator defaults ────────────────────────────────────────
-  reminders: { enableReminders: true, reminderTimes: ["09:00", "17:00"], advanceMinutes: 15 },
+  reminders: {
+    enableReminders: true,
+    reminderTimes: ["09:00", "17:00"],
+    advanceMinutes: 15,
+  },
   defaultGenerateDays: 28,
 
   // ── Feature flags ─────────────────────────────────────────────────────────
@@ -110,7 +141,12 @@ const DEFAULTS = Object.freeze({
     proteins: ["chicken", "beef", "fish"],
     breads: ["white", "wheat", "sourdough", "cornbread"],
     veggies: ["lettuce", "spinach", "tomato", "broccoli", "onion", "pepper"],
-    batchCooking: { enabled: true, sessionDay: "Sunday", sessionHour: 14, warmUpTips: true },
+    batchCooking: {
+      enabled: true,
+      sessionDay: "Sunday",
+      sessionHour: 14,
+      warmUpTips: true,
+    },
     donenessHints: { vegetables: "tender-crisp", meat: "medium" },
   },
   calendar: { sabbathAware: true, sabbathSunsetOffsetMin: 30 },
@@ -119,12 +155,24 @@ const DEFAULTS = Object.freeze({
 const ENUMS = {
   donenessVeg: new Set(["soft", "tender-crisp"]),
   donenessMeat: new Set(["rare", "medium", "well"]),
-  sessionDays: new Set(["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]),
-  presets: new Set(["custom","16:8","18:6","omad","36h","adf"]),
+  sessionDays: new Set([
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ]),
+  presets: new Set(["custom", "16:8", "18:6", "omad", "36h", "adf"]),
 };
 
-function clone(x) { return JSON.parse(JSON.stringify(x)); }
-function isObj(x) { return x && typeof x === "object" && !Array.isArray(x); }
+function clone(x) {
+  return JSON.parse(JSON.stringify(x));
+}
+function isObj(x) {
+  return x && typeof x === "object" && !Array.isArray(x);
+}
 
 function getAtPath(obj, dot, fallback) {
   if (!dot) return obj;
@@ -158,36 +206,59 @@ function deepMerge(a, b) {
 }
 function debounce(fn, ms = 250) {
   let t;
-  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), ms);
+  };
 }
 
 /* --- Validation tuned to your prefs schema --- */
-function isTimeStr(s) { return typeof s === "string" && /^\d{2}:\d{2}$/.test(s); }
+function isTimeStr(s) {
+  return typeof s === "string" && /^\d{2}:\d{2}$/.test(s);
+}
 function validateRhythm(rhythm) {
   if (!rhythm) return;
-  if (rhythm.preset && !(ENUMS.presets.has(String(rhythm.preset).toLowerCase()) || typeof rhythm.preset === "string")) {
+  if (
+    rhythm.preset &&
+    !(
+      ENUMS.presets.has(String(rhythm.preset).toLowerCase()) ||
+      typeof rhythm.preset === "string"
+    )
+  ) {
     throw new Error(`Unknown rhythm.preset: ${rhythm.preset}`);
   }
-  if (!Array.isArray(rhythm.slots)) throw new Error("rhythm.slots must be an array");
+  if (!Array.isArray(rhythm.slots))
+    throw new Error("rhythm.slots must be an array");
   for (const slot of rhythm.slots) {
-    if (!slot || !slot.slotId || !slot.label || !slot.type) throw new Error("Invalid rhythm slot");
-    if (!isTimeStr(slot.start) || !isTimeStr(slot.end)) throw new Error("rhythm slot times must be 'HH:MM'");
+    if (!slot || !slot.slotId || !slot.label || !slot.type)
+      throw new Error("Invalid rhythm slot");
+    if (!isTimeStr(slot.start) || !isTimeStr(slot.end))
+      throw new Error("rhythm slot times must be 'HH:MM'");
   }
 }
 function validate(next) {
   const dVeg = next?.meals?.donenessHints?.vegetables;
-  if (dVeg && !ENUMS.donenessVeg.has(dVeg)) throw new Error(`Invalid vegetables doneness: ${dVeg}`);
+  if (dVeg && !ENUMS.donenessVeg.has(dVeg))
+    throw new Error(`Invalid vegetables doneness: ${dVeg}`);
   const dMeat = next?.meals?.donenessHints?.meat;
-  if (dMeat && !ENUMS.donenessMeat.has(dMeat)) throw new Error(`Invalid meat doneness: ${dMeat}`);
+  if (dMeat && !ENUMS.donenessMeat.has(dMeat))
+    throw new Error(`Invalid meat doneness: ${dMeat}`);
 
   const day = next?.meals?.batchCooking?.sessionDay;
-  if (day && !ENUMS.sessionDays.has(day)) throw new Error(`Invalid sessionDay: ${day}`);
+  if (day && !ENUMS.sessionDays.has(day))
+    throw new Error(`Invalid sessionDay: ${day}`);
   const portions = next?.meals?.portions?.default;
-  if (portions != null && (!Number.isFinite(portions) || portions < 1 || portions > 20)) {
+  if (
+    portions != null &&
+    (!Number.isFinite(portions) || portions < 1 || portions > 20)
+  ) {
     throw new Error("Portions must be between 1 and 20");
   }
   validateRhythm(next?.rhythm);
-  if (next?.defaultGenerateDays && (!Number.isFinite(next.defaultGenerateDays) || next.defaultGenerateDays < 1)) {
+  if (
+    next?.defaultGenerateDays &&
+    (!Number.isFinite(next.defaultGenerateDays) || next.defaultGenerateDays < 1)
+  ) {
     throw new Error("defaultGenerateDays must be a positive number");
   }
   return true;
@@ -197,7 +268,11 @@ function validate(next) {
 function kosherDisallowed(name, diet) {
   const k = String(name || "").toLowerCase();
   if (diet?.pork && /pork|bacon|ham|prosciutto|pepperoni/.test(k)) return true;
-  if (diet?.shellfish && /shrimp|prawn|lobster|crab|clam|oyster|scallop/.test(k)) return true;
+  if (
+    diet?.shellfish &&
+    /shrimp|prawn|lobster|crab|clam|oyster|scallop/.test(k)
+  )
+    return true;
   return false;
 }
 function calcEffectivePortions(state, overrides = {}) {
@@ -233,8 +308,16 @@ async function httpJSON(method, url, body, headers = {}) {
 function createEmitter() {
   const subs = new Set();
   return {
-    emit: (s) => subs.forEach((fn) => { try { fn(s); } catch {} }),
-    subscribe: (fn) => { subs.add(fn); return () => subs.delete(fn); },
+    emit: (s) =>
+      subs.forEach((fn) => {
+        try {
+          fn(s);
+        } catch {}
+      }),
+    subscribe: (fn) => {
+      subs.add(fn);
+      return () => subs.delete(fn);
+    },
     size: () => subs.size,
   };
 }
@@ -255,7 +338,10 @@ export function createMealPrefsStore(initial = {}) {
   let socket = null;
   let userId = null;
   const emitter = createEmitter();
-  const bc = typeof BroadcastChannel !== "undefined" ? new BroadcastChannel(BC_NAME) : null;
+  const bc =
+    typeof BroadcastChannel !== "undefined"
+      ? new BroadcastChannel(BC_NAME)
+      : null;
 
   // cross-tab listener
   bc?.addEventListener?.("message", (ev) => {
@@ -265,7 +351,9 @@ export function createMealPrefsStore(initial = {}) {
   });
 
   const persistLocal = debounce(() => {
-    try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch {}
+    try {
+      localStorage.setItem(LS_KEY, JSON.stringify(state));
+    } catch {}
   }, 200);
 
   function notify(patchObj = {}) {
@@ -293,7 +381,9 @@ export function createMealPrefsStore(initial = {}) {
         if (data && typeof data === "object") {
           state = deepMerge(state, data);
         }
-      } catch (_) { /* non-fatal */ }
+      } catch (_) {
+        /* non-fatal */
+      }
     }
 
     // wire socket live updates
@@ -317,12 +407,19 @@ export function createMealPrefsStore(initial = {}) {
   // ---------- Core mutators ----------
   async function saveToServer(patchObj) {
     if (!serverBaseUrl) return;
-    try { await httpJSON("PATCH", `${serverBaseUrl}/preferences`, patchObj); }
-    catch { /* non-fatal */ }
+    try {
+      await httpJSON("PATCH", `${serverBaseUrl}/preferences`, patchObj);
+    } catch {
+      /* non-fatal */
+    }
   }
 
-  function getState() { return clone(state); }
-  function get(dot, fallback) { return getAtPath(state, dot, fallback); }
+  function getState() {
+    return clone(state);
+  }
+  function get(dot, fallback) {
+    return getAtPath(state, dot, fallback);
+  }
 
   function set(dot, value, opts = {}) {
     const next = clone(state);
@@ -361,20 +458,30 @@ export function createMealPrefsStore(initial = {}) {
   }
 
   // ---------- Selectors / helpers ----------
-  function effectivePortions(overrides = {}) { return calcEffectivePortions(state, overrides); }
+  function effectivePortions(overrides = {}) {
+    return calcEffectivePortions(state, overrides);
+  }
   function isIngredientAllowed(name) {
     // honor both legacy meals.diet and new dietary exclusions
     const legacyDiet = state.meals?.diet || {};
     if (kosherDisallowed(name, legacyDiet)) return false;
-    const excluded = (state.dietary?.exclusions || []).map((s) => String(s).toLowerCase());
-    return !excluded.some((x) => String(name || "").toLowerCase().includes(x));
+    const excluded = (state.dietary?.exclusions || []).map((s) =>
+      String(s).toLowerCase()
+    );
+    return !excluded.some((x) =>
+      String(name || "")
+        .toLowerCase()
+        .includes(x)
+    );
   }
-  function sabbathAware() { return isSabbathAware(state); }
+  function sabbathAware() {
+    return isSabbathAware(state);
+  }
   function nextBatchSessionDate(fromDate = new Date()) {
     // prefer new batchCooking; fall back to legacy
     const prefs = state.batchCooking?.enabled ? state.batchCooking : null;
     if (prefs) {
-      const days = [0,1,2,3,4,5,6];
+      const days = [0, 1, 2, 3, 4, 5, 6];
       const active = (prefs.daysOfWeek || [0]).filter((d) => days.includes(d));
       if (active.length === 0) return null;
       const d = new Date(fromDate);
@@ -383,18 +490,34 @@ export function createMealPrefsStore(initial = {}) {
       let targetDow = cur;
       for (const dow of active) {
         const diff = (dow - cur + 7) % 7 || 7;
-        if (diff < bestDiff) { bestDiff = diff; targetDow = dow; }
+        if (diff < bestDiff) {
+          bestDiff = diff;
+          targetDow = dow;
+        }
       }
+      void targetDow;
       d.setDate(d.getDate() + bestDiff);
-      const [hh, mm] = String(prefs.defaultStart || "14:00").split(":").map((n) => parseInt(n, 10));
+      const [hh, mm] = String(prefs.defaultStart || "14:00")
+        .split(":")
+        .map((n) => parseInt(n, 10));
       d.setHours(hh || 14, mm || 0, 0, 0);
       return d.toISOString();
     }
     // legacy path
     const enabled = !!state.meals?.batchCooking?.enabled;
     if (!enabled) return null;
-    const target = (state.meals.batchCooking.sessionDay || "Sunday").toLowerCase();
-    const names = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"];
+    const target = (
+      state.meals.batchCooking.sessionDay || "Sunday"
+    ).toLowerCase();
+    const names = [
+      "sunday",
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+    ];
     const idx = names.indexOf(target);
     if (idx < 0) return null;
     const d = new Date(fromDate);
@@ -406,7 +529,9 @@ export function createMealPrefsStore(initial = {}) {
   }
 
   // ---------- Observable API ----------
-  function subscribe(fn) { return emitter.subscribe(fn); }
+  function subscribe(fn) {
+    return emitter.subscribe(fn);
+  }
 
   function destroy() {
     try {
@@ -418,22 +543,37 @@ export function createMealPrefsStore(initial = {}) {
   }
 
   // ---------- d.ts-compatible façade ----------
-  async function getAsync() { return clone(state); }
+  async function getAsync() {
+    return clone(state);
+  }
   async function setAsync(nextPartial) {
     if (!isObj(nextPartial)) throw new Error("set(partial) expects an object");
     patch(nextPartial);
   }
-  function onChange(listener) { return subscribe(listener); }
+  function onChange(listener) {
+    return subscribe(listener);
+  }
 
   return {
     // lifecycle
-    init, destroy,
+    init,
+    destroy,
     // state access (ergonomic)
-    getState, get, set, patch, reset, subscribe,
+    getState,
+    get,
+    set,
+    patch,
+    reset,
+    subscribe,
     // selectors
-    effectivePortions, isIngredientAllowed, sabbathAware, nextBatchSessionDate,
-    // d.ts facade
-    get: getAsync, set: setAsync, onChange,
+    effectivePortions,
+    isIngredientAllowed,
+    sabbathAware,
+    nextBatchSessionDate,
+    // d.ts facade (avoid duplicate keys)
+    getAsync,
+    setAsync,
+    onChange,
   };
 }
 

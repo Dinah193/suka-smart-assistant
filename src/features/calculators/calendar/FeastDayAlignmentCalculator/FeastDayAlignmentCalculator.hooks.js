@@ -20,7 +20,7 @@
  */
 
 import { useCallback, useMemo } from "react";
-import { emit } from "@/services/eventBus";
+import { emit } from "@/services/events/eventBus";
 
 /**
  * @typedef {Object} FeastOutputItem
@@ -206,7 +206,9 @@ function buildFeastPrepSession(flow, domain) {
   const session = {
     id: flow.suggestedSessionId,
     domain,
-    title: `${flow.feastLabel} – ${domain[0].toUpperCase()}${domain.slice(1)} Prep`,
+    title: `${flow.feastLabel} – ${domain[0].toUpperCase()}${domain.slice(
+      1
+    )} Prep`,
     source: {
       type: "import",
       refId: flow.feastCode,
@@ -244,7 +246,8 @@ function buildFeastPrepSession(flow, domain) {
         metadata: {
           tempTargetF: 0,
           donenessCue: "timer",
-          cueNotes: "Use SSA meal planning tools to link recipes and ingredients.",
+          cueNotes:
+            "Use SSA meal planning tools to link recipes and ingredients.",
         },
       },
       {
@@ -298,7 +301,8 @@ function buildFeastPrepSession(flow, domain) {
         metadata: {
           tempTargetF: 0,
           donenessCue: "timer",
-          cueNotes: "Scan pantry, freezer, and storehouse for items suited to canning, fermenting, or curing.",
+          cueNotes:
+            "Scan pantry, freezer, and storehouse for items suited to canning, fermenting, or curing.",
         },
       },
       {
@@ -310,7 +314,8 @@ function buildFeastPrepSession(flow, domain) {
         metadata: {
           tempTargetF: 0,
           donenessCue: "timer",
-          cueNotes: "Verify equipment (dehydrator, pressure canner, oven) availability.",
+          cueNotes:
+            "Verify equipment (dehydrator, pressure canner, oven) availability.",
         },
       },
     ];

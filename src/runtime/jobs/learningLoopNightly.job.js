@@ -22,28 +22,36 @@
 
 let eventBus = { emit: function () {} };
 try {
-  const eb = require("@/services/eventBus");
-  eventBus = eb && (eb.default || eb.eventBus || eb) || eventBus;
+  const eb = require("@/services/events/eventBus");
+  eventBus = (eb && (eb.default || eb.eventBus || eb)) || eventBus;
 } catch (_) {}
 
 let featureFlags = { familyFundMode: false };
 try {
   const ff = require("@/config/featureFlags");
-  featureFlags = ff && (ff.default || ff) || featureFlags;
+  featureFlags = (ff && (ff.default || ff)) || featureFlags;
 } catch (_) {}
 
 // Learning loop engine (expected to exist from earlier files)
 let updateModels = null; // expected: nightlyUpdate({ lookbackDays, minObservations, dryRun, maxPerDomain })
-try { updateModels = require("@/engines/scheduling/learningLoop/updateModels"); } catch (_) {}
+try {
+  updateModels = require("@/engines/scheduling/learningLoop/updateModels");
+} catch (_) {}
 
 // Optional stores/services (defensive)
 let ActualsStore = null; // expected: countInWindow(startISO,endISO)
-try { ActualsStore = require("@/engines/scheduling/learningLoop/ActualsStore"); } catch (_) {}
+try {
+  ActualsStore = require("@/engines/scheduling/learningLoop/ActualsStore");
+} catch (_) {}
 
 let HubPacketFormatter = null;
-try { HubPacketFormatter = require("@/services/hub/HubPacketFormatter"); } catch (_) {}
+try {
+  HubPacketFormatter = require("@/services/hub/HubPacketFormatter");
+} catch (_) {}
 let FamilyFundConnector = null;
-try { FamilyFundConnector = require("@/services/hub/FamilyFundConnector"); } catch (_) {}
+try {
+  FamilyFundConnector = require("@/services/hub/FamilyFundConnector");
+} catch (_) {}
 
 module.exports = {
   /**
@@ -68,20 +76,28 @@ module.exports = {
       windowStartISO: window.startISO,
       windowEndISO: window.endISO,
       dryRun: !!cfg.dryRun,
-      minObservations: cfg.minObservations
+      minObservations: cfg.minObservations,
     });
 
     // Optional: sanity check that we actually have data to learn from
     if (ActualsStore && typeof ActualsStore.countInWindow === "function") {
       try {
-        const n = await ActualsStore.countInWindow(window.startISO, window.endISO);
+        const n = await ActualsStore.countInWindow(
+          window.startISO,
+          window.endISO
+        );
         if (!isFinite(n) || n < cfg.minObservations) {
           emit("learning.models.update.skipped", {
             reason: "insufficient-actuals",
             count: isFinite(n) ? n : 0,
-            minObservations: cfg.minObservations
+            minObservations: cfg.minObservations,
           });
-          return { ok: true, skipped: true, reason: "insufficient-actuals", count: isFinite(n) ? n : 0 };
+          return {
+            ok: true,
+            skipped: true,
+            reason: "insufficient-actuals",
+            count: isFinite(n) ? n : 0,
+          };
         }
       } catch (_) {
         // If the store check fails, proceed anyway; the learning engine will decide.
@@ -89,7 +105,9 @@ module.exports = {
     }
 
     if (!updateModels || typeof updateModels.nightlyUpdate !== "function") {
-      emit("learning.models.update.failed", { error: "learning-engine-missing" });
+      emit("learning.models.update.failed", {
+        error: "learning-engine-missing",
+      });
       return { ok: false, error: "learning-engine-missing" };
     }
 
@@ -99,7 +117,7 @@ module.exports = {
         lookbackDays: cfg.lookbackDays,
         minObservations: cfg.minObservations,
         dryRun: !!cfg.dryRun,
-        maxPerDomain: cfg.maxPerDomain
+        maxPerDomain: cfg.maxPerDomain,
       });
 
       // Expect rollup like:
@@ -108,7 +126,9 @@ module.exports = {
       //   domains:[{domain, kinds:[{kind, n, corrections:{...}, buffers:{...}}]}],
       //   totals:{observations, domains, kinds, updated}
       // }
-      emit("learning.models.updated", { rollup: coerceRollup(rollup, window, cfg) });
+      emit("learning.models.updated", {
+        rollup: coerceRollup(rollup, window, cfg),
+      });
 
       // Optional Hub mirror
       await exportToHubIfEnabled({
@@ -117,28 +137,46 @@ module.exports = {
         source: "runtime.jobs.learningLoopNightly",
         data: rollup || {
           updatedAtISO: new Date().toISOString(),
-          window: { startISO: window.startISO, endISO: window.endISO, days: cfg.lookbackDays },
-          totals: { observations: null, domains: null, kinds: null, updated: null }
-        }
+          window: {
+            startISO: window.startISO,
+            endISO: window.endISO,
+            days: cfg.lookbackDays,
+          },
+          totals: {
+            observations: null,
+            domains: null,
+            kinds: null,
+            updated: null,
+          },
+        },
       });
 
       return { ok: true, updated: safeTotals(rollup) };
     } catch (err) {
       emit("learning.models.update.failed", {
-        error: String((err && err.message) || err || "unknown")
+        error: String((err && err.message) || err || "unknown"),
       });
-      return { ok: false, error: String((err && err.message) || err || "unknown") };
+      return {
+        ok: false,
+        error: String((err && err.message) || err || "unknown"),
+      };
     }
-  }
+  },
 };
 
 // --------------------------------- helpers ---------------------------------
 
 function normalizeArgs(args) {
-  const lookbackDays = Number((args && args.lookbackDays) != null ? args.lookbackDays : 30);
-  const minObservations = Number((args && args.minObservations) != null ? args.minObservations : 5);
+  const lookbackDays = Number(
+    (args && args.lookbackDays) != null ? args.lookbackDays : 30
+  );
+  const minObservations = Number(
+    (args && args.minObservations) != null ? args.minObservations : 5
+  );
   const dryRun = !!((args && args.dryRun) != null ? args.dryRun : false);
-  const maxPerDomain = Number((args && args.maxPerDomain) != null ? args.maxPerDomain : 5000);
+  const maxPerDomain = Number(
+    (args && args.maxPerDomain) != null ? args.maxPerDomain : 5000
+  );
   const timezone = (args && args.timezone) || "America/Chicago";
   if (!isFinite(lookbackDays) || lookbackDays <= 0) return null;
   if (!isFinite(minObservations) || minObservations < 0) return null;
@@ -155,10 +193,21 @@ function computeWindow(lookbackDays) {
 function coerceRollup(rollup, window, cfg) {
   // Ensure a minimal well-known shape for downstream consumers
   const r = rollup || {};
-  if (!r.window) r.window = { startISO: window.startISO, endISO: window.endISO, days: cfg.lookbackDays };
+  if (!r.window)
+    r.window = {
+      startISO: window.startISO,
+      endISO: window.endISO,
+      days: cfg.lookbackDays,
+    };
   if (!r.updatedAtISO) r.updatedAtISO = new Date().toISOString();
   if (!Array.isArray(r.domains)) r.domains = [];
-  if (!r.totals) r.totals = { observations: null, domains: r.domains.length, kinds: null, updated: null };
+  if (!r.totals)
+    r.totals = {
+      observations: null,
+      domains: r.domains.length,
+      kinds: null,
+      updated: null,
+    };
   return r;
 }
 
@@ -172,7 +221,12 @@ function safeTotals(rollup) {
 
 function emit(type, data) {
   try {
-    eventBus.emit({ type: type, ts: new Date().toISOString(), source: "runtime.jobs.learningLoopNightly", data: data });
+    eventBus.emit({
+      type: type,
+      ts: new Date().toISOString(),
+      source: "runtime.jobs.learningLoopNightly",
+      data: data,
+    });
   } catch (_) {}
 }
 
@@ -180,7 +234,9 @@ async function exportToHubIfEnabled(payload) {
   if (!featureFlags || !featureFlags.familyFundMode) return;
   if (!HubPacketFormatter || !FamilyFundConnector) return;
   try {
-    const packet = await (HubPacketFormatter.format ? HubPacketFormatter.format(payload) : payload);
+    const packet = await (HubPacketFormatter.format
+      ? HubPacketFormatter.format(payload)
+      : payload);
     if (FamilyFundConnector && typeof FamilyFundConnector.send === "function") {
       await FamilyFundConnector.send(packet);
     }

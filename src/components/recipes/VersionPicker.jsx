@@ -26,7 +26,7 @@ try {
 
 let eventBus = { emit: () => {}, on: () => {}, off: () => {} };
 try {
-  eventBus = require("@/services/eventBus").eventBus || eventBus;
+  eventBus = require("@/services/events/eventBus").eventBus || eventBus;
 } catch {}
 
 /* Optional: read/write household prefs for default versions */
@@ -36,7 +36,8 @@ let useHouseholdPrefs = () => ({
 });
 try {
   useHouseholdPrefs =
-    require("@/app/context/HouseholdSettingsContext").useHouseholdPrefs || useHouseholdPrefs;
+    require("@/app/context/HouseholdSettingsContext").useHouseholdPrefs ||
+    useHouseholdPrefs;
 } catch {}
 
 /* ---------------------------------- Helpers --------------------------------- */
@@ -75,7 +76,10 @@ function friendlyDelta(n, suffix = "") {
 /* Persist default per-household + recipe group (by canonical URL host + title) */
 function defaultKey(primary = {}, householdId = "default") {
   const site = (primary?.source?.site || "site").toLowerCase();
-  const name = (primary?.title || "recipe").toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 60);
+  const name = (primary?.title || "recipe")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .slice(0, 60);
   return `suka.recipe.defaultVersion.${householdId}.${site}.${name}`;
 }
 
@@ -91,8 +95,7 @@ export function VersionStackBadge({ count = 2, className }) {
         className
       )}
     >
-      <GitBranch className="w-3 h-3" />
-      ×{count}
+      <GitBranch className="w-3 h-3" />×{count}
     </span>
   );
 }
@@ -114,7 +117,17 @@ export default function VersionPicker({
   className,
 }) {
   const {
-    GitCompare, Star, StarOff, Check, X, Clock, ChefHat, Flame, Gauge, Utensils, Info,
+    GitCompare,
+    Star,
+    StarOff,
+    Check,
+    X,
+    Clock,
+    ChefHat,
+    Flame,
+    Gauge,
+    Utensils,
+    Info,
   } = Icons;
 
   const prefs = useHouseholdPrefs();
@@ -122,14 +135,17 @@ export default function VersionPicker({
   const sortedVersions = useMemo(() => {
     const arr = [...versions];
     // Ensure primary first
-    arr.sort((a, b) => (a?.id === primary?.id ? -1 : b?.id === primary?.id ? 1 : 0));
+    arr.sort((a, b) =>
+      a?.id === primary?.id ? -1 : b?.id === primary?.id ? 1 : 0
+    );
     return arr;
   }, [versions, primary?.id]);
 
   const [currentId, setCurrentId] = useState(primary?.id);
   const [defaultId, setDefaultId] = useState(() => {
     const key = defaultKey(primary, householdId);
-    const local = typeof window !== "undefined" ? window.localStorage.getItem(key) : null;
+    const local =
+      typeof window !== "undefined" ? window.localStorage.getItem(key) : null;
     return local || prefs.getDefaultRecipeVersion?.(primary?.id) || null;
   });
   const [showCompare, setShowCompare] = useState(compareInitiallyOpen);
@@ -138,8 +154,12 @@ export default function VersionPicker({
     setCurrentId(primary?.id);
   }, [primary?.id]);
 
-  const current = useMemo(() => sortedVersions.find((r) => r.id === currentId) || primary, [sortedVersions, currentId, primary]);
-  const isDefault = (r) => (defaultId ? r?.id === defaultId : r?.id === primary?.id);
+  const current = useMemo(
+    () => sortedVersions.find((r) => r.id === currentId) || primary,
+    [sortedVersions, currentId, primary]
+  );
+  const isDefault = (r) =>
+    defaultId ? r?.id === defaultId : r?.id === primary?.id;
 
   function makeDefault(r) {
     const key = defaultKey(primary, householdId);
@@ -149,18 +169,29 @@ export default function VersionPicker({
     prefs.setDefaultRecipeVersion?.(primary?.id, r?.id);
     setDefaultId(r?.id);
     onMakeDefault?.(r);
-    eventBus.emit("recipe.version.defaultSet", { primaryId: primary?.id, versionId: r?.id });
+    eventBus.emit("recipe.version.defaultSet", {
+      primaryId: primary?.id,
+      versionId: r?.id,
+    });
   }
 
   function choose(r) {
     setCurrentId(r?.id);
     onSelectVersion?.(r);
-    eventBus.emit("recipe.version.selected", { primaryId: primary?.id, versionId: r?.id });
+    eventBus.emit("recipe.version.selected", {
+      primaryId: primary?.id,
+      versionId: r?.id,
+    });
   }
 
   if (!primary || !sortedVersions.length) {
     return (
-      <div className={cx("rounded-xl border border-dashed p-4 text-sm text-gray-600 bg-white", className)}>
+      <div
+        className={cx(
+          "rounded-xl border border-dashed p-4 text-sm text-gray-600 bg-white",
+          className
+        )}
+      >
         No other versions found for this recipe.
       </div>
     );
@@ -178,7 +209,8 @@ export default function VersionPicker({
           <span className="font-medium">Versions</span>
           <span className="text-gray-500">•</span>
           <span className="text-xs text-gray-500">
-            Default: <strong>{isDefault(primary) ? "Current" : "Custom"}</strong>
+            Default:{" "}
+            <strong>{isDefault(primary) ? "Current" : "Custom"}</strong>
           </span>
         </div>
         <button
@@ -204,12 +236,16 @@ export default function VersionPicker({
               key={r.id || r.url}
               className={cx(
                 "group relative rounded-2xl border bg-white p-3 shadow-sm hover:shadow-md transition",
-                selected ? "border-emerald-600 ring-2 ring-emerald-500" : "border-gray-200"
+                selected
+                  ? "border-emerald-600 ring-2 ring-emerald-500"
+                  : "border-gray-200"
               )}
               role="button"
               tabIndex={0}
               onClick={() => choose(r)}
-              onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && choose(r)}
+              onKeyDown={(e) =>
+                (e.key === "Enter" || e.key === " ") && choose(r)
+              }
               aria-label={`Choose version ${r.title}`}
             >
               {/* Badge: default */}
@@ -222,15 +258,25 @@ export default function VersionPicker({
               {/* Media */}
               <div className="h-28 rounded-lg overflow-hidden bg-gray-100 mb-2">
                 {r.image ? (
-                  <img src={r.image} alt="" className="w-full h-full object-cover" />
+                  <img
+                    src={r.image}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-xs text-gray-500">No photo</div>
+                  <div className="w-full h-full flex items-center justify-center text-xs text-gray-500">
+                    No photo
+                  </div>
                 )}
               </div>
 
               {/* Title */}
-              <div className="line-clamp-2 text-sm font-semibold text-gray-900">{r.title || "Untitled"}</div>
-              <div className="text-[11px] text-gray-500 truncate">{r?.source?.site || r?.source?.url || ""}</div>
+              <div className="line-clamp-2 text-sm font-semibold text-gray-900">
+                {r.title || "Untitled"}
+              </div>
+              <div className="text-[11px] text-gray-500 truncate">
+                {r?.source?.site || r?.source?.url || ""}
+              </div>
 
               {/* Summary chips */}
               <div className="mt-2 flex flex-wrap items-center gap-1">
@@ -273,11 +319,17 @@ export default function VersionPicker({
                   }}
                   className={cx(
                     "text-xs inline-flex items-center gap-1 px-2 py-1.5 rounded-lg border bg-white hover:bg-gray-50",
-                    isDefault(r) ? "border-emerald-300 text-emerald-700" : "border-gray-300"
+                    isDefault(r)
+                      ? "border-emerald-300 text-emerald-700"
+                      : "border-gray-300"
                   )}
                   title="Set as household default"
                 >
-                  {isDefault(r) ? <Star className="w-4 h-4" /> : <StarOff className="w-4 h-4" />}
+                  {isDefault(r) ? (
+                    <Star className="w-4 h-4" />
+                  ) : (
+                    <StarOff className="w-4 h-4" />
+                  )}
                   Default
                 </button>
               </div>
@@ -287,19 +339,27 @@ export default function VersionPicker({
                 <div className="mt-2 grid grid-cols-4 gap-1 text-[10px] text-gray-600">
                   <div className="rounded border bg-gray-50 border-gray-200 px-1 py-0.5 text-center">
                     <div className="font-medium">Ing</div>
-                    <div className="text-gray-800">{friendlyDelta(del.ingredients)}</div>
+                    <div className="text-gray-800">
+                      {friendlyDelta(del.ingredients)}
+                    </div>
                   </div>
                   <div className="rounded border bg-gray-50 border-gray-200 px-1 py-0.5 text-center">
                     <div className="font-medium">Steps</div>
-                    <div className="text-gray-800">{friendlyDelta(del.steps)}</div>
+                    <div className="text-gray-800">
+                      {friendlyDelta(del.steps)}
+                    </div>
                   </div>
                   <div className="rounded border bg-gray-50 border-gray-200 px-1 py-0.5 text-center">
                     <div className="font-medium">Time</div>
-                    <div className="text-gray-800">{friendlyDelta(del.mins, "m")}</div>
+                    <div className="text-gray-800">
+                      {friendlyDelta(del.mins, "m")}
+                    </div>
                   </div>
                   <div className="rounded border bg-gray-50 border-gray-200 px-1 py-0.5 text-center">
                     <div className="font-medium">Kcal</div>
-                    <div className="text-gray-800">{friendlyDelta(del.kcal)}</div>
+                    <div className="text-gray-800">
+                      {friendlyDelta(del.kcal)}
+                    </div>
                   </div>
                 </div>
               ) : null}
@@ -311,7 +371,8 @@ export default function VersionPicker({
       {/* Footnote */}
       <div className="mt-3 text-[11px] text-gray-500 flex items-center gap-2">
         <Info className="w-3 h-3" />
-        Your default version will be used first when planning. You can always switch per-meal.
+        Your default version will be used first when planning. You can always
+        switch per-meal.
       </div>
     </section>
   );

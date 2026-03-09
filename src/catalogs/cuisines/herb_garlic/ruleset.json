@@ -1,0 +1,562 @@
+{
+  "$schema": "../../../schemas/ruleset.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-19T00:00:00.000Z",
+  "kind": "cuisine_ruleset",
+  "meta": {
+    "id": "cuisines.herb_garlic.ruleset",
+    "type": "cuisine_ruleset",
+    "label": "Herb & Garlic • Cuisine Ruleset",
+    "cuisineId": "cuisines.herb_garlic",
+    "status": "canonical",
+    "source": {
+      "kind": "catalog",
+      "name": "ssa.cuisines.herb_garlic",
+      "notes": [
+        "Deterministic overlay rules: garlic + fresh herbs + citrus + olive oil emphasis.",
+        "Used by planners (scoring/tags) and adapters (match/style guidance)."
+      ]
+    }
+  },
+  "scope": {
+    "kind": "cuisine",
+    "cuisineId": "cuisines.herb_garlic",
+    "locales": ["en-US"]
+  },
+  "normalization": {
+    "idPattern": "^[a-z0-9_\\.\\-]+$",
+    "idCase": "lower",
+    "aliasCaseFold": true,
+    "keywordCaseFold": true,
+    "trimWhitespace": true,
+    "collapseSpaces": true,
+    "tokens": {
+      "stopWords": ["and", "&", "with", "the", "a", "an", "style", "of"]
+    },
+    "ingredientAliases": {
+      "ing.olive_oil": ["extra virgin olive oil", "evoo", "olive oil"],
+      "ing.garlic": [
+        "garlic",
+        "fresh garlic",
+        "garlic cloves",
+        "minced garlic",
+        "grated garlic",
+        "garlic paste"
+      ],
+      "ing.lemon": [
+        "lemon",
+        "lemons",
+        "lemon juice",
+        "fresh lemon juice",
+        "lemon zest",
+        "zest of lemon"
+      ],
+      "ing.parsley": ["parsley", "flat-leaf parsley", "italian parsley"],
+      "ing.basil": ["basil", "fresh basil"],
+      "ing.thyme": ["thyme", "fresh thyme"],
+      "ing.rosemary": ["rosemary", "fresh rosemary"],
+      "ing.oregano": ["oregano", "fresh oregano", "dried oregano"],
+      "ing.dill": ["dill", "fresh dill"],
+      "ing.mint": ["mint", "fresh mint"],
+      "ing.chicken_breast": [
+        "chicken breast",
+        "boneless skinless chicken breast"
+      ],
+      "ing.chicken_thighs_bone_in": [
+        "bone-in chicken thighs",
+        "chicken thighs bone-in",
+        "skin-on thighs"
+      ],
+      "ing.chicken_whole": [
+        "whole chicken",
+        "roaster chicken",
+        "fryer chicken"
+      ],
+      "ing.salmon_fillet": ["salmon", "salmon fillet", "salmon filet"],
+      "ing.shrimp": ["shrimp", "prawns"],
+      "ing.lamb_chops": ["lamb chops", "rib chops", "loin chops"],
+      "ing.yogurt_greek_plain": [
+        "greek yogurt",
+        "plain greek yogurt",
+        "strained yogurt"
+      ],
+      "ing.pasta_spaghetti": ["spaghetti", "pasta spaghetti"],
+      "ing.orzo": ["orzo", "risoni"],
+      "ing.flatbread": ["flatbread", "naan", "wrap bread"],
+      "ing.pita": ["pita", "pita bread"]
+    },
+    "dishAliases": {
+      "herb_garlic.lemon_garlic_roast_chicken": [
+        "lemon garlic roast chicken",
+        "garlic herb roast chicken",
+        "lemony garlic chicken"
+      ],
+      "herb_garlic.sheet_pan_lemon_garlic_chicken_veg": [
+        "sheet pan lemon garlic chicken",
+        "one pan lemon garlic chicken",
+        "sheet pan garlic herb chicken"
+      ],
+      "herb_garlic.garlic_herb_salmon": [
+        "lemon garlic salmon",
+        "garlic herb salmon",
+        "baked herb garlic salmon"
+      ],
+      "herb_garlic.shrimp_scampi_orzo": [
+        "shrimp scampi orzo",
+        "garlic lemon shrimp orzo",
+        "scampi style orzo"
+      ],
+      "herb_garlic.aglio_olio_herbs": [
+        "aglio e olio",
+        "garlic olive oil pasta",
+        "garlic herb pasta"
+      ],
+      "herb_garlic.garlic_herb_roasted_potatoes": [
+        "garlic herb roasted potatoes",
+        "lemon garlic potatoes",
+        "herb roasted potatoes"
+      ],
+      "herb_garlic.lemon_garlic_green_beans": [
+        "garlic green beans",
+        "lemon garlic green beans",
+        "lemony garlic beans"
+      ],
+      "herb_garlic.garlic_herb_mushroom_saute": [
+        "garlic mushrooms",
+        "herb garlic mushrooms",
+        "garlic butter mushrooms"
+      ],
+      "herb_garlic.garlic_herb_chickpea_salad": [
+        "chickpea herb salad",
+        "lemon herb chickpeas",
+        "garlic herb chickpea salad"
+      ],
+      "herb_garlic.mediterranean_herb_garlic_rice_pilaf": [
+        "herb garlic rice",
+        "lemon herb rice",
+        "mediterranean rice pilaf"
+      ],
+      "herb_garlic.garlic_herb_yogurt_sauce": [
+        "garlic herb yogurt sauce",
+        "lemon herb yogurt sauce",
+        "yogurt herb dip"
+      ],
+      "herb_garlic.lemon_herb_vinaigrette": [
+        "lemon herb vinaigrette",
+        "lemon herb dressing",
+        "herb vinaigrette"
+      ],
+      "herb_garlic.lemony_garlic_lentil_soup": [
+        "lemon lentil soup",
+        "lemony garlic lentil soup",
+        "garlic herb lentil soup"
+      ],
+      "herb_garlic.garlic_herb_grilled_lamb_chops": [
+        "garlic herb lamb chops",
+        "lemon garlic lamb chops",
+        "herb grilled lamb chops"
+      ],
+      "herb_garlic.garlic_herb_flatbread_wrap": [
+        "herb garlic wrap",
+        "garlic herb flatbread wrap",
+        "lemon herb wrap"
+      ]
+    },
+    "equipmentAliases": {
+      "equip.oven": ["oven"],
+      "equip.sheet_pan": ["sheet pan", "baking sheet", "rimmed baking sheet"],
+      "equip.skillet": ["skillet", "frying pan", "saute pan"],
+      "equip.stock_pot": ["stock pot", "stockpot", "large pot"],
+      "equip.saucepan": ["saucepan", "small pot"],
+      "equip.knife": ["chef knife", "knife"],
+      "equip.cutting_board": ["cutting board", "board"],
+      "equip.thermometer": ["instant read thermometer", "meat thermometer"],
+      "equip.grill_or_grill_pan": ["grill", "grill pan"]
+    },
+    "methodAliases": {
+      "technique.roast": ["roast", "oven roast", "roasting"],
+      "technique.sheet_pan": ["sheet pan", "one pan", "tray bake"],
+      "technique.saute": ["saute", "sauté", "pan saute"],
+      "technique.bake": ["bake", "oven bake"],
+      "technique.grill": ["grill", "char grill", "grill pan"],
+      "technique.marinade": ["marinate", "marinade"],
+      "technique.emulsify": ["emulsify", "whisk together", "shake together"],
+      "technique.assemble": ["assemble", "mix", "toss"]
+    }
+  },
+  "globals": {
+    "overlayCuisine": true,
+    "flavor": {
+      "pillars": ["garlic", "fresh_herbs", "citrus", "olive_oil"],
+      "avoidOverpowering": [
+        "heavy_sweetness",
+        "smoke_dominant",
+        "very_hot_chili"
+      ]
+    },
+    "plannerDefaults": {
+      "targetHeat": 1,
+      "weeknightTotalMinsMax": 45,
+      "batchBias": 0.15
+    },
+    "adapterHints": {
+      "finishers": ["lemon_zest", "fresh_herbs", "olive_oil_drizzle"],
+      "saltTiming": [
+        "salt_proteins_early",
+        "salt_vegetables_after_roast_if_needed"
+      ]
+    }
+  },
+  "rules": [
+    {
+      "id": "hg.tag.base_overlay",
+      "enabled": true,
+      "priority": 10,
+      "title": "Apply base Herb & Garlic overlay tag",
+      "description": "Any item evaluated under this cuisine scope receives the herb_garlic overlay tag for downstream browse/filter behavior.",
+      "tags": ["tagging", "overlay"],
+      "source": "ssa.catalog.cuisines.herb_garlic",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          { "type": "hasTag", "value": "cuisines.herb_garlic" },
+          {
+            "type": "eq",
+            "path": "$.cuisineId",
+            "value": "cuisines.herb_garlic"
+          },
+          {
+            "type": "intersects",
+            "path": "$.tags",
+            "values": ["cuisine.herb_garlic", "cuisines.herb_garlic"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "addTag", "value": "herb_garlic" },
+          { "type": "set", "path": "$.signals.overlayCuisine", "value": true }
+        ]
+      }
+    },
+    {
+      "id": "hg.score.garlic_herb_citrus_olive_alignment",
+      "enabled": true,
+      "priority": 20,
+      "title": "Score up recipes that strongly match garlic + herbs + citrus + olive oil",
+      "description": "Boost score when core Herb & Garlic pillars appear in ingredients/keywords.",
+      "tags": ["scoring", "match"],
+      "source": "ssa.catalog.cuisines.herb_garlic",
+      "stopOnMatch": false,
+      "when": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "any",
+            "conditions": [
+              {
+                "type": "intersects",
+                "path": "$.ingredients.required",
+                "values": ["ing.garlic"]
+              },
+              {
+                "type": "intersects",
+                "path": "$.ingredientsCore",
+                "values": ["ing.garlic"]
+              },
+              { "type": "matches", "path": "$.title", "regex": "(?i)garlic" }
+            ]
+          },
+          {
+            "op": "any",
+            "conditions": [
+              {
+                "type": "intersects",
+                "path": "$.ingredients.required",
+                "values": ["ing.olive_oil"]
+              },
+              {
+                "type": "intersects",
+                "path": "$.ingredientsCore",
+                "values": ["ing.olive_oil"]
+              },
+              {
+                "type": "matches",
+                "path": "$.summary",
+                "regex": "(?i)olive\\s*oil|evoo"
+              }
+            ]
+          },
+          {
+            "op": "any",
+            "conditions": [
+              {
+                "type": "intersects",
+                "path": "$.ingredients.required",
+                "values": [
+                  "ing.parsley",
+                  "ing.basil",
+                  "ing.thyme",
+                  "ing.rosemary",
+                  "ing.oregano",
+                  "ing.dill",
+                  "ing.mint"
+                ]
+              },
+              {
+                "type": "intersects",
+                "path": "$.ingredientsCore",
+                "values": [
+                  "ing.parsley",
+                  "ing.basil",
+                  "ing.thyme",
+                  "ing.rosemary",
+                  "ing.oregano",
+                  "ing.dill",
+                  "ing.mint"
+                ]
+              },
+              {
+                "type": "matches",
+                "path": "$.summary",
+                "regex": "(?i)fresh\\s+herb|herb-forward|herby"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 1.25 },
+          { "type": "addTag", "value": "garlic_forward" },
+          { "type": "addTag", "value": "herb_forward" }
+        ]
+      }
+    },
+    {
+      "id": "hg.score.lemon_citrus_finish",
+      "enabled": true,
+      "priority": 30,
+      "title": "Boost lemon/citrus-finished profiles",
+      "description": "Prefer dishes that include lemon/citrus or mention bright finishing acidity.",
+      "tags": ["scoring", "citrus"],
+      "source": "ssa.catalog.cuisines.herb_garlic",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.ingredients.required",
+            "values": ["ing.lemon"]
+          },
+          {
+            "type": "intersects",
+            "path": "$.ingredientsCore",
+            "values": ["ing.lemon"]
+          },
+          {
+            "type": "matches",
+            "path": "$.summary",
+            "regex": "(?i)lemon|citrus|zest|bright"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 0.6 },
+          { "type": "addTag", "value": "lemony" },
+          {
+            "type": "set",
+            "path": "$.flavor.finishAcidPreferred",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "hg.score.weeknight",
+      "enabled": true,
+      "priority": 40,
+      "title": "Prefer weeknight-possible dishes",
+      "description": "If total time is <= 45 minutes OR tags indicate weeknight, boost score and tag as weeknight.",
+      "tags": ["scoring", "weeknight"],
+      "source": "ssa.catalog.cuisines.herb_garlic",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          { "type": "lte", "path": "$.time.totalMins", "value": 45.0 },
+          {
+            "type": "eq",
+            "path": "$.signals.weeknightPossible",
+            "value": true
+          },
+          {
+            "type": "intersects",
+            "path": "$.plannerTags",
+            "values": ["weeknight"]
+          },
+          { "type": "intersects", "path": "$.tags", "values": ["weeknight"] }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 0.35 },
+          { "type": "addTag", "value": "weeknight" }
+        ]
+      }
+    },
+    {
+      "id": "hg.score.batch_friendly",
+      "enabled": true,
+      "priority": 50,
+      "title": "Prefer batch-friendly dishes",
+      "description": "Boost dishes that declare batch-friendly signals or tags; useful for meal prep and storehouse workflows.",
+      "tags": ["scoring", "batch"],
+      "source": "ssa.catalog.cuisines.herb_garlic",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          { "type": "eq", "path": "$.signals.batchFriendly", "value": true },
+          { "type": "eq", "path": "$.signals.batchFriendly", "value": "yes" },
+          {
+            "type": "intersects",
+            "path": "$.plannerTags",
+            "values": ["batch_friendly", "meal_prep"]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": 0.4 },
+          { "type": "addTag", "value": "batch_friendly" }
+        ]
+      }
+    },
+    {
+      "id": "hg.adapter.add_finisher_hints",
+      "enabled": true,
+      "priority": 60,
+      "title": "Set adapter finisher hints for Herb & Garlic",
+      "description": "Provide deterministic finishing guidance for recipe adapters and cook setup.",
+      "tags": ["adapter", "hints"],
+      "source": "ssa.catalog.cuisines.herb_garlic",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "eq",
+            "path": "$.cuisineId",
+            "value": "cuisines.herb_garlic"
+          },
+          {
+            "type": "intersects",
+            "path": "$.plannerTags",
+            "values": ["herb_garlic"]
+          },
+          { "type": "intersects", "path": "$.tags", "values": ["herb_garlic"] }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "set",
+            "path": "$.adapterHints.finishers",
+            "value": ["lemon_zest", "fresh_herbs", "olive_oil_drizzle"]
+          },
+          {
+            "type": "set",
+            "path": "$.adapterHints.preferredFats",
+            "value": ["ing.olive_oil"]
+          },
+          {
+            "type": "set",
+            "path": "$.adapterHints.preferredAromatics",
+            "value": ["ing.garlic"]
+          }
+        ]
+      }
+    },
+    {
+      "id": "hg.tag.avoid_smoke_dominant",
+      "enabled": true,
+      "priority": 70,
+      "title": "Downscore smoke-dominant profiles under Herb & Garlic overlay",
+      "description": "Herb & Garlic overlay is bright/aromatic; heavy smoke-forward items are less aligned unless explicitly desired.",
+      "tags": ["scoring", "avoid"],
+      "source": "ssa.catalog.cuisines.herb_garlic",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          { "type": "hasTag", "value": "smoke_dominant" },
+          {
+            "type": "intersects",
+            "path": "$.tags",
+            "values": ["smoked", "smoke_dominant", "bbq"]
+          },
+          {
+            "type": "matches",
+            "path": "$.summary",
+            "regex": "(?i)smok(e|y)|bbq|barbecue"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          { "type": "scoreAdjust", "scoreDelta": -0.5 },
+          {
+            "type": "set",
+            "path": "$.fitNotes.overlayConflict",
+            "value": "smoke_dominant_vs_bright_herb_garlic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "hg.event.on_match_emit",
+      "enabled": true,
+      "priority": 999,
+      "title": "Emit event when Herb & Garlic overlay rules apply",
+      "description": "Optional event for SSA event bus listeners (analytics/debug/UI).",
+      "tags": ["event"],
+      "source": "ssa.catalog.cuisines.herb_garlic",
+      "stopOnMatch": false,
+      "when": {
+        "op": "any",
+        "conditions": [
+          {
+            "type": "intersects",
+            "path": "$.plannerTags",
+            "values": ["herb_garlic"]
+          },
+          { "type": "intersects", "path": "$.tags", "values": ["herb_garlic"] },
+          {
+            "type": "eq",
+            "path": "$.cuisineId",
+            "value": "cuisines.herb_garlic"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "type": "emitEvent",
+            "event": {
+              "name": "ssa.ruleset.applied",
+              "payload": {
+                "rulesetId": "cuisines.herb_garlic.ruleset",
+                "cuisineId": "cuisines.herb_garlic",
+                "overlay": true
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

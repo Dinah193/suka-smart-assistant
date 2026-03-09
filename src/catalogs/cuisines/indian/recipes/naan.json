@@ -1,0 +1,513 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-20T00:00:00.000Z",
+
+  "meta": {
+    "id": "recipes.cuisines.indian.naan",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Naan (Stovetop Skillet + Oven Broil Finish)",
+    "subtitle": "Soft, blistered flatbread using yogurt + yeast; no tandoor required",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA canonical cuisines/indian/recipes/naan.json",
+      "notes": [
+        "Deterministic home-kitchen naan method designed for cast iron or heavy skillet.",
+        "Includes optional oven broil finish to mimic tandoor blistering.",
+        "Supports make-ahead dough, freezing, and garlic-butter finishing."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.indian",
+    "category": "bread",
+    "mealArchetypes": ["meal.side.bread", "meal.side.starch"],
+    "servingStyles": ["family_style", "handheld"],
+    "plannerTags": [
+      "cuisine.indian",
+      "dish.naan",
+      "role.rice_or_flatbread",
+      "weeknight.possible",
+      "batch.friendly",
+      "leftovers.good",
+      "freezer.friendly"
+    ]
+  },
+
+  "summary": "Soft, chewy, blistered naan you can make at home without a tandoor. Yogurt enriches the dough; a hot skillet creates char spots, and a quick broil adds blistering.",
+
+  "keywords": [
+    "naan",
+    "flatbread",
+    "skillet naan",
+    "no tandoor",
+    "yogurt bread",
+    "garlic naan"
+  ],
+
+  "tags": [
+    "cuisine.indian",
+    "dish.naan",
+    "role.rice_or_flatbread",
+    "bread.flatbread",
+    "method.yeasted_dough",
+    "method.skilet_cook",
+    "batch.friendly"
+  ],
+
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 1, "unit": "naan" },
+    "notes": "Makes 6 medium naan (about 7–8 inches each)."
+  },
+
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 75,
+    "totalMins": 100
+  },
+
+  "difficulty": 4,
+
+  "equipment": {
+    "minimum": [
+      "equip.mixing_bowl",
+      "equip.measuring_cups",
+      "equip.measuring_spoons",
+      "equip.skillet_cast_iron",
+      "equip.spread_or_turner",
+      "equip.clean_towel"
+    ],
+    "recommended": [
+      "equip.kitchen_scale",
+      "equip.dough_scraper",
+      "equip.rolling_pin",
+      "equip.oven_broiler",
+      "equip.instant_read_thermometer"
+    ],
+    "optional": [
+      {
+        "id": "equip.stand_mixer",
+        "label": "Stand mixer",
+        "required": false,
+        "notes": "Makes kneading easier, but hand-kneading works well."
+      }
+    ]
+  },
+
+  "signals": {
+    "batchFriendly": true,
+    "leftoversGood": true,
+    "freezerFriendly": "yes (freeze cooked naan, reheat with steam/heat)",
+    "weeknightPossible": "yes if dough is made ahead"
+  },
+
+  "dietFlags": [],
+
+  "allergens": {
+    "contains": ["allergen.wheat", "allergen.dairy"],
+    "mayContain": [],
+    "notes": [
+      "Contains gluten (wheat flour) and dairy (yogurt; butter if used)."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "ing.all_purpose_flour",
+      "label": "All-purpose flour",
+      "role": "role.flour",
+      "amount": { "value": 3.25, "unit": "cups" },
+      "notes": [
+        "Start with 3 cups and reserve 1/4 cup for adjusting. Humidity and yogurt thickness affect dough.",
+        "Bread flour yields chewier naan (see variation)."
+      ]
+    },
+    {
+      "id": "ing.yeast_instant",
+      "label": "Instant yeast",
+      "role": "role.leavening",
+      "amount": { "value": 2.25, "unit": "tsp" },
+      "notes": [
+        "Equivalent to 1 packet. If using active dry yeast, bloom it in warm water (see variation)."
+      ]
+    },
+    {
+      "id": "ing.sugar",
+      "label": "Sugar",
+      "role": "role.sweetener",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Helps yeast activity and browning."
+    },
+    {
+      "id": "ing.salt_kosher",
+      "label": "Kosher salt",
+      "role": "role.seasoning",
+      "amount": { "value": 1.5, "unit": "tsp" }
+    },
+    {
+      "id": "ing.baking_powder",
+      "label": "Baking powder",
+      "role": "role.leavening",
+      "amount": { "value": 1, "unit": "tsp" },
+      "notes": "Classic home-naan helper for lift and tenderness."
+    },
+    {
+      "id": "ing.yogurt_plain",
+      "label": "Plain yogurt (full-fat preferred)",
+      "role": "role.dairy",
+      "amount": { "value": 0.75, "unit": "cup" },
+      "notes": [
+        "Thick yogurt (Greek-style) may require a splash more water.",
+        "Full-fat improves tenderness and browning."
+      ]
+    },
+    {
+      "id": "ing.water",
+      "label": "Warm water",
+      "role": "role.liquid",
+      "amount": { "value": 0.75, "unit": "cup" },
+      "notes": [
+        "Target 100–110°F (38–43°C). Too hot can weaken yeast.",
+        "Adjust 1–3 tbsp as needed to form a soft, slightly tacky dough."
+      ]
+    },
+    {
+      "id": "ing.oil_neutral",
+      "label": "Neutral oil",
+      "role": "role.fat",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "notes": "Vegetable, avocado, or light olive oil."
+    },
+    {
+      "id": "ing.butter",
+      "label": "Butter, melted (for finishing)",
+      "role": "role.finish",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true,
+      "notes": "Swap with ghee for Indian flavor; omit for dairy-free (texture will differ)."
+    },
+    {
+      "id": "ing.garlic",
+      "label": "Garlic, finely minced (for garlic naan)",
+      "role": "role.aromatic",
+      "amount": { "value": 2, "unit": "cloves" },
+      "optional": true,
+      "notes": "Mix into melted butter or press onto dough surface before cooking."
+    },
+    {
+      "id": "herb.cilantro",
+      "label": "Cilantro, chopped (optional garnish)",
+      "role": "role.garnish",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "optional": true
+    }
+  ],
+
+  "methods": [
+    "method.mix",
+    "method.knead",
+    "method.proof",
+    "method.skilet_cook",
+    "method.broil_finish"
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_mix_dry",
+      "title": "Mix dry ingredients",
+      "instructions": [
+        "In a large bowl, whisk together flour, instant yeast, sugar, salt, and baking powder."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "checks": ["Salt should be evenly distributed to avoid yeast hot-spots."]
+    },
+    {
+      "id": "step_02_add_wet",
+      "title": "Add yogurt, water, and oil",
+      "instructions": [
+        "Add yogurt and oil to the bowl.",
+        "Pour in warm water gradually while mixing until a shaggy dough forms.",
+        "If dry pockets remain, add 1 tbsp water at a time. Dough should be soft and slightly tacky, not stiff."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 0,
+      "checks": [
+        "Soft dough = tender naan. Stiff dough = dense bread.",
+        "Avoid adding too much flour early; hydrate first."
+      ]
+    },
+    {
+      "id": "step_03_knead",
+      "title": "Knead until smooth and elastic",
+      "instructions": [
+        "Turn dough onto a lightly floured surface.",
+        "Knead 6–8 minutes until smooth and elastic. Dough may remain slightly tacky.",
+        "If dough sticks heavily, dust with small amounts of the reserved flour."
+      ],
+      "activeMins": 8,
+      "handsOffMins": 0,
+      "checks": [
+        "Dough should spring back slowly when pressed.",
+        "Over-flouring here reduces blistering and tenderness."
+      ]
+    },
+    {
+      "id": "step_04_first_rise",
+      "title": "First rise",
+      "instructions": [
+        "Lightly oil a bowl and place dough inside, turning once to coat.",
+        "Cover with a towel or plastic wrap.",
+        "Let rise until doubled, 60–75 minutes in a warm spot."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 70,
+      "timers": [{ "label": "First rise", "minutes": 70 }],
+      "checks": [
+        "If your kitchen is cool, rise may take up to 90 minutes.",
+        "Dough is ready when a finger dent springs back slowly."
+      ]
+    },
+    {
+      "id": "step_05_portion",
+      "title": "Portion and rest",
+      "instructions": [
+        "Punch down gently to deflate.",
+        "Divide into 6 equal pieces.",
+        "Roll into balls, cover, and rest 10 minutes to relax gluten."
+      ],
+      "activeMins": 6,
+      "handsOffMins": 10,
+      "timers": [{ "label": "Bench rest", "minutes": 10 }],
+      "checks": ["Resting makes shaping easier and prevents snap-back."]
+    },
+    {
+      "id": "step_06_preheat_pan",
+      "title": "Preheat skillet (very hot)",
+      "instructions": [
+        "Place a cast iron (or heavy) skillet over medium-high heat.",
+        "Let it preheat 3–5 minutes until very hot (a drop of water should sizzle and dance)."
+      ],
+      "activeMins": 2,
+      "handsOffMins": 4,
+      "timers": [{ "label": "Preheat skillet", "minutes": 4 }],
+      "checks": [
+        "Hot pan is key to bubbles and char spots.",
+        "Avoid adding oil to the pan; naan should dry-cook on the surface."
+      ]
+    },
+    {
+      "id": "step_07_shape",
+      "title": "Shape naan",
+      "instructions": [
+        "Working one piece at a time, flatten and stretch/roll into an oval about 1/8–1/4 inch thick.",
+        "If desired: lightly dampen one side with water (helps bubbles) and/or press minced garlic onto the top surface."
+      ],
+      "activeMins": 10,
+      "handsOffMins": 0,
+      "checks": [
+        "Thin dough creates more blistering; thicker dough is softer but less charred.",
+        "Keep remaining dough covered while shaping to prevent drying."
+      ]
+    },
+    {
+      "id": "step_08_cook_first_side",
+      "title": "Cook first side (bubble stage)",
+      "instructions": [
+        "Place shaped naan onto the hot skillet (damp side down if you used water).",
+        "Cook 45–75 seconds until bubbles form and the underside shows brown spots."
+      ],
+      "activeMins": 0.5,
+      "handsOffMins": 1,
+      "timers": [{ "label": "First side cook", "seconds": 60 }],
+      "checks": [
+        "If no bubbles appear, pan may be too cool.",
+        "If it scorches instantly, reduce heat slightly."
+      ]
+    },
+    {
+      "id": "step_09_cook_second_side",
+      "title": "Flip and finish second side",
+      "instructions": [
+        "Flip naan and cook 45–60 seconds until the second side has brown spots and the bread is cooked through.",
+        "Optional: For more char, hold naan with tongs and briefly kiss edges to the skillet."
+      ],
+      "activeMins": 1,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Second side cook", "seconds": 50 }],
+      "checks": [
+        "Finished naan should have visible blistering and flexible softness.",
+        "If center seems doughy, reduce thickness next round or extend cook by 15–20 seconds."
+      ]
+    },
+    {
+      "id": "step_10_optional_broil_finish",
+      "title": "Optional broil finish (tandoor-like blistering)",
+      "instructions": [
+        "Optional: Place cooked naan on a baking sheet 4–6 inches under a hot broiler for 15–30 seconds until blistered.",
+        "Watch closely—broilers brown fast."
+      ],
+      "activeMins": 1,
+      "handsOffMins": 0,
+      "timers": [{ "label": "Broil finish (optional)", "seconds": 20 }],
+      "checks": [
+        "This step boosts char spots and puffing, closest to tandoor results."
+      ]
+    },
+    {
+      "id": "step_11_finish_and_hold",
+      "title": "Brush and keep warm",
+      "instructions": [
+        "Brush hot naan with melted butter or ghee (optional).",
+        "Sprinkle with chopped cilantro if desired.",
+        "Stack in a towel-lined basket to stay soft while cooking remaining pieces."
+      ],
+      "activeMins": 3,
+      "handsOffMins": 0,
+      "checks": [
+        "Covering traps steam and keeps naan pliable.",
+        "Brush immediately while hot so fat absorbs."
+      ]
+    }
+  ],
+
+  "pairings": {
+    "mains": [
+      "recipes.cuisines.indian.butter_chicken",
+      "recipes.cuisines.indian.chicken_curry",
+      "recipes.cuisines.indian.goat_curry",
+      "recipes.cuisines.indian.dal"
+    ],
+    "notes": [
+      "Naan pairs best with saucy curries and dals for scooping.",
+      "Also works as a wrap base for kebabs and grilled meats."
+    ]
+  },
+
+  "storage": {
+    "refrigerator": {
+      "durationDays": 3,
+      "notes": [
+        "Cool fully, store airtight.",
+        "Reheat: sprinkle lightly with water and warm in a covered skillet on low, or microwave covered with a damp paper towel."
+      ]
+    },
+    "freezer": {
+      "durationMonths": 2,
+      "notes": [
+        "Freeze cooked naan with parchment between pieces in a freezer bag.",
+        "Reheat from frozen: wrap in foil and warm at 350°F for ~10 minutes, or toast in a skillet with a lid."
+      ]
+    }
+  },
+
+  "safety": {
+    "notes": [
+      "Ensure naan is cooked through (no raw dough) before storing.",
+      "Cool within 2 hours to reduce moisture-related spoilage."
+    ]
+  },
+
+  "variations": [
+    {
+      "id": "var.active_dry_yeast",
+      "label": "Active dry yeast (instead of instant)",
+      "when": { "yeast": "active_dry" },
+      "adapt": {
+        "notes": [
+          "Warm the water to 105–110°F. Stir in sugar and active dry yeast; bloom 5–10 minutes until foamy.",
+          "Then add bloomed yeast-water to the dough and proceed as written."
+        ]
+      }
+    },
+    {
+      "id": "var.bread_flour_chewy",
+      "label": "Chewier naan (bread flour)",
+      "when": { "texture": "chewy" },
+      "adapt": {
+        "notes": [
+          "Replace all-purpose flour with bread flour by weight (same volume can vary).",
+          "Dough may need 1–2 tbsp extra water."
+        ]
+      }
+    },
+    {
+      "id": "var.no_broiler_all_skillet",
+      "label": "All-skillet method (no broiler)",
+      "when": { "equipment": "no_broiler" },
+      "adapt": {
+        "notes": [
+          "Cook second side slightly longer (60–90 seconds) and lightly char edges with tongs.",
+          "Keep skillet very hot between breads; let it reheat 30–45 seconds if needed."
+        ]
+      }
+    },
+    {
+      "id": "var.garlic_naan",
+      "label": "Garlic naan (classic)",
+      "when": { "style": "garlic" },
+      "adapt": {
+        "notes": [
+          "Mix minced garlic into melted butter/ghee and brush immediately after cooking.",
+          "Or press minced garlic onto the top surface before cooking."
+        ]
+      }
+    },
+    {
+      "id": "var.make_ahead_dough",
+      "label": "Make-ahead dough (cold ferment)",
+      "when": { "schedule": "make_ahead" },
+      "adapt": {
+        "notes": [
+          "After first rise, cover dough and refrigerate 8–24 hours.",
+          "Bring to room temperature 45–60 minutes before portioning and shaping.",
+          "Cold ferment improves flavor and spotting."
+        ]
+      }
+    },
+    {
+      "id": "var.dairy_free",
+      "label": "Dairy-free adaptation (texture will differ)",
+      "when": { "diet": "dairy_free" },
+      "adapt": {
+        "notes": [
+          "Replace yogurt with unsweetened thick plant yogurt; replace butter/ghee with oil or plant butter.",
+          "Expect slightly less browning; broiler finish helps."
+        ]
+      }
+    }
+  ],
+
+  "planner": {
+    "roles": [
+      { "role": "role.rice_or_flatbread", "primary": true },
+      { "role": "role.starch", "primary": false }
+    ],
+    "makeAhead": {
+      "friendly": true,
+      "notes": [
+        "Best weeknight flow: mix dough the night before, cook fresh naan in 10–15 minutes."
+      ]
+    }
+  },
+
+  "compat": {
+    "cuisineId": "cuisines.indian",
+    "dishId": "dish.indian.naan",
+    "aliases": ["naan bread", "skillet naan", "no tandoor naan", "garlic naan"],
+    "index": {
+      "primaryTokens": ["naan", "flatbread", "skillet", "yogurt", "yeast"],
+      "secondaryTokens": ["garlic naan", "tandoor style", "broil", "blistered"]
+    }
+  },
+
+  "audit": {
+    "curatedBy": "SSA",
+    "curationTier": "canonical",
+    "lastReviewedAt": "2026-01-20T00:00:00.000Z"
+  }
+}

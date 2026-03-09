@@ -43,7 +43,17 @@
       "required": ["planId", "domain"],
       "properties": {
         "planId": { "$ref": "#/definitions/ID" },
-        "domain": { "type": "string", "enum": ["meals", "cleaning", "garden", "animals", "storehouse", "inventory"] },
+        "domain": {
+          "type": "string",
+          "enum": [
+            "meals",
+            "cleaning",
+            "garden",
+            "animals",
+            "storehouse",
+            "inventory"
+          ]
+        },
         "title": { "type": "string" }
       },
       "additionalProperties": false
@@ -53,7 +63,16 @@
       "required": ["sessionId", "domain"],
       "properties": {
         "sessionId": { "$ref": "#/definitions/ID" },
-        "domain": { "type": "string", "enum": ["cooking", "cleaning", "gardening", "animalCare", "inventory"] },
+        "domain": {
+          "type": "string",
+          "enum": [
+            "cooking",
+            "cleaning",
+            "gardening",
+            "animalCare",
+            "inventory"
+          ]
+        },
         "planId": { "$ref": "#/definitions/ID" }
       },
       "additionalProperties": false
@@ -96,7 +115,10 @@
         "additionalProperties": false
       },
       "emitters": ["src/pages/**", "src/components/**"],
-      "listeners": ["src/services/eventBus/**", "src/services/automation/runtime.js"]
+      "listeners": [
+        "src/services/events/eventBus/**",
+        "src/services/automation/runtime.js"
+      ]
     },
     {
       "name": "EVENT_PLAN_CREATED",
@@ -114,7 +136,11 @@
         "additionalProperties": false
       },
       "emitters": ["src/engines/**", "src/features/**", "src/pages/**"],
-      "listeners": ["src/managers/PlanManager.js", "src/services/automation/runtime.js", "src/services/nba/Orchestrator.js"]
+      "listeners": [
+        "src/managers/PlanManager.js",
+        "src/services/automation/runtime.js",
+        "src/services/nba/Orchestrator.js"
+      ]
     },
     {
       "name": "EVENT_PLAN_UPDATED",
@@ -131,7 +157,10 @@
         "additionalProperties": false
       },
       "emitters": ["src/features/**", "src/pages/**", "src/engines/**"],
-      "listeners": ["src/managers/PlanManager.js", "src/services/automation/runtime.js"]
+      "listeners": [
+        "src/managers/PlanManager.js",
+        "src/services/automation/runtime.js"
+      ]
     },
     {
       "name": "EVENT_PLAN_DELETED",
@@ -163,8 +192,16 @@
         },
         "additionalProperties": false
       },
-      "emitters": ["src/features/**", "src/pages/**", "src/managers/SessionManager.js"],
-      "listeners": ["src/services/session/SessionRunner.js", "src/services/session/PrepSessionOrchestrator.js", "src/services/session/guards/**"]
+      "emitters": [
+        "src/features/**",
+        "src/pages/**",
+        "src/managers/SessionManager.js"
+      ],
+      "listeners": [
+        "src/services/session/SessionRunner.js",
+        "src/services/session/PrepSessionOrchestrator.js",
+        "src/services/session/guards/**"
+      ]
     },
     {
       "name": "EVENT_SESSION_PAUSE",
@@ -210,8 +247,14 @@
         },
         "additionalProperties": false
       },
-      "emitters": ["src/services/session/SessionRunner.js", "src/features/sessions/MultiTimerPanel/**"],
-      "listeners": ["src/features/sessions/MultiTimerPanel/**", "src/managers/PrepChecklistGenerator.js"]
+      "emitters": [
+        "src/services/session/SessionRunner.js",
+        "src/features/sessions/MultiTimerPanel/**"
+      ],
+      "listeners": [
+        "src/features/sessions/MultiTimerPanel/**",
+        "src/managers/PrepChecklistGenerator.js"
+      ]
     },
     {
       "name": "EVENT_SESSION_COMPLETE",
@@ -227,7 +270,11 @@
         "additionalProperties": false
       },
       "emitters": ["src/services/session/SessionRunner.js"],
-      "listeners": ["src/managers/InventorySync.js", "src/services/automation/runtime.js", "src/services/nba/Orchestrator.js"]
+      "listeners": [
+        "src/managers/InventorySync.js",
+        "src/services/automation/runtime.js",
+        "src/services/nba/Orchestrator.js"
+      ]
     },
     {
       "name": "EVENT_SESSION_CANCELLED",
@@ -242,7 +289,10 @@
         },
         "additionalProperties": false
       },
-      "emitters": ["src/services/session/SessionRunner.js", "src/managers/SessionManager.js"],
+      "emitters": [
+        "src/services/session/SessionRunner.js",
+        "src/managers/SessionManager.js"
+      ],
       "listeners": ["src/services/automation/runtime.js"]
     },
     {
@@ -257,7 +307,10 @@
         "additionalProperties": false
       },
       "emitters": ["src/services/automation/runtime.js"],
-      "listeners": ["src/services/schedule/RelativeScheduler.js", "src/services/nba/Orchestrator.js"]
+      "listeners": [
+        "src/services/schedule/RelativeScheduler.js",
+        "src/services/nba/Orchestrator.js"
+      ]
     },
     {
       "name": "EVENT_SCHEDULE_CREATED",
@@ -272,7 +325,10 @@
         },
         "additionalProperties": false
       },
-      "emitters": ["src/services/schedule/RelativeScheduler.js", "src/pages/**"],
+      "emitters": [
+        "src/services/schedule/RelativeScheduler.js",
+        "src/pages/**"
+      ],
       "listeners": ["src/engines/calendar/CalendarEngine.js"]
     },
     {
@@ -282,14 +338,20 @@
         "type": "object",
         "required": ["policy", "context", "ts"],
         "properties": {
-          "policy": { "type": "string", "enum": ["sabbath", "quietHours", "weather", "inventory"] },
+          "policy": {
+            "type": "string",
+            "enum": ["sabbath", "quietHours", "weather", "inventory"]
+          },
           "context": { "type": "object" },
           "ts": { "$ref": "#/definitions/Timestamp" }
         },
         "additionalProperties": false
       },
       "emitters": ["src/services/session/guards/**"],
-      "listeners": ["src/services/automation/runtime.js", "src/services/nba/Orchestrator.js"]
+      "listeners": [
+        "src/services/automation/runtime.js",
+        "src/services/nba/Orchestrator.js"
+      ]
     },
     {
       "name": "EVENT_CALENDAR_SYNC_REQUESTED",
@@ -298,12 +360,22 @@
         "type": "object",
         "required": ["range", "ts"],
         "properties": {
-          "range": { "type": "object", "required": ["from", "to"], "properties": { "from": { "$ref": "#/definitions/Timestamp" }, "to": { "$ref": "#/definitions/Timestamp" } } },
+          "range": {
+            "type": "object",
+            "required": ["from", "to"],
+            "properties": {
+              "from": { "$ref": "#/definitions/Timestamp" },
+              "to": { "$ref": "#/definitions/Timestamp" }
+            }
+          },
           "ts": { "$ref": "#/definitions/Timestamp" }
         },
         "additionalProperties": false
       },
-      "emitters": ["src/pages/calendar/**", "src/engines/calendar/CalendarEngine.js"],
+      "emitters": [
+        "src/pages/calendar/**",
+        "src/engines/calendar/CalendarEngine.js"
+      ],
       "listeners": ["src/engines/calendar/CalendarEngine.js"]
     },
     {
@@ -321,7 +393,10 @@
         "additionalProperties": false
       },
       "emitters": ["src/engines/calendar/CalendarEngine.js"],
-      "listeners": ["src/pages/calendar/**", "src/services/automation/runtime.js"]
+      "listeners": [
+        "src/pages/calendar/**",
+        "src/services/automation/runtime.js"
+      ]
     },
     {
       "name": "EVENT_RECIPE_SCANNED",
@@ -331,14 +406,19 @@
         "required": ["scanId", "source", "ts"],
         "properties": {
           "scanId": { "$ref": "#/definitions/ID" },
-          "source": { "type": "string", "enum": ["camera", "file", "pinterest", "web"] },
+          "source": {
+            "type": "string",
+            "enum": ["camera", "file", "pinterest", "web"]
+          },
           "imageCount": { "type": "integer", "minimum": 1 },
           "ts": { "$ref": "#/definitions/Timestamp" }
         },
         "additionalProperties": false
       },
       "emitters": ["src/features/scan-compare-trust/ui/**"],
-      "listeners": ["src/features/scan-compare-trust/services/workers/ocr.worker.js"]
+      "listeners": [
+        "src/features/scan-compare-trust/services/workers/ocr.worker.js"
+      ]
     },
     {
       "name": "EVENT_SCAN_OCR_COMPLETE",
@@ -349,13 +429,20 @@
         "properties": {
           "scanId": { "$ref": "#/definitions/ID" },
           "text": { "type": "string" },
-          "candidates": { "type": "array", "items": { "$ref": "#/definitions/ItemRef" } },
+          "candidates": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/ItemRef" }
+          },
           "ts": { "$ref": "#/definitions/Timestamp" }
         },
         "additionalProperties": false
       },
-      "emitters": ["src/features/scan-compare-trust/services/workers/ocr.worker.js"],
-      "listeners": ["src/features/scan-compare-trust/services/products/ProductResolver.js"]
+      "emitters": [
+        "src/features/scan-compare-trust/services/workers/ocr.worker.js"
+      ],
+      "listeners": [
+        "src/features/scan-compare-trust/services/products/ProductResolver.js"
+      ]
     },
     {
       "name": "EVENT_PRODUCT_RESOLVED",
@@ -365,12 +452,17 @@
         "required": ["scanId", "items", "ts"],
         "properties": {
           "scanId": { "$ref": "#/definitions/ID" },
-          "items": { "type": "array", "items": { "$ref": "#/definitions/ItemRef" } },
+          "items": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/ItemRef" }
+          },
           "ts": { "$ref": "#/definitions/Timestamp" }
         },
         "additionalProperties": false
       },
-      "emitters": ["src/features/scan-compare-trust/services/products/ProductResolver.js"],
+      "emitters": [
+        "src/features/scan-compare-trust/services/products/ProductResolver.js"
+      ],
       "listeners": [
         "src/features/scan-compare-trust/services/pricing/PriceComparator.js",
         "src/features/scan-compare-trust/services/coupons/CouponService.js",
@@ -403,8 +495,13 @@
         },
         "additionalProperties": false
       },
-      "emitters": ["src/features/scan-compare-trust/services/pricing/PriceComparator.js"],
-      "listeners": ["src/features/scan-compare-trust/managers/PricebookManager.js", "src/features/scan-compare-trust/ui/**"]
+      "emitters": [
+        "src/features/scan-compare-trust/services/pricing/PriceComparator.js"
+      ],
+      "listeners": [
+        "src/features/scan-compare-trust/managers/PricebookManager.js",
+        "src/features/scan-compare-trust/ui/**"
+      ]
     },
     {
       "name": "EVENT_COUPON_LOOKUP_COMPLETE",
@@ -419,8 +516,13 @@
         },
         "additionalProperties": false
       },
-      "emitters": ["src/features/scan-compare-trust/services/coupons/CouponService.js"],
-      "listeners": ["src/features/scan-compare-trust/ui/**", "src/features/scan-compare-trust/managers/PricebookManager.js"]
+      "emitters": [
+        "src/features/scan-compare-trust/services/coupons/CouponService.js"
+      ],
+      "listeners": [
+        "src/features/scan-compare-trust/ui/**",
+        "src/features/scan-compare-trust/managers/PricebookManager.js"
+      ]
     },
     {
       "name": "EVENT_SAFETY_FLAGS_READY",
@@ -435,7 +537,9 @@
         },
         "additionalProperties": false
       },
-      "emitters": ["src/features/scan-compare-trust/services/safety/SafetyRules.js"],
+      "emitters": [
+        "src/features/scan-compare-trust/services/safety/SafetyRules.js"
+      ],
       "listeners": ["src/features/scan-compare-trust/ui/**"]
     },
     {
@@ -450,8 +554,13 @@
         },
         "additionalProperties": false
       },
-      "emitters": ["src/features/scan-compare-trust/managers/PricebookManager.js"],
-      "listeners": ["src/features/meals/RecipeVault/**", "src/services/nba/Orchestrator.js"]
+      "emitters": [
+        "src/features/scan-compare-trust/managers/PricebookManager.js"
+      ],
+      "listeners": [
+        "src/features/meals/RecipeVault/**",
+        "src/services/nba/Orchestrator.js"
+      ]
     },
     {
       "name": "EVENT_INVENTORY_UPDATED",
@@ -472,13 +581,20 @@
               "additionalProperties": false
             }
           },
-          "reason": { "type": "string", "enum": ["session", "manual", "scanImport"] },
+          "reason": {
+            "type": "string",
+            "enum": ["session", "manual", "scanImport"]
+          },
           "ts": { "$ref": "#/definitions/Timestamp" }
         },
         "additionalProperties": false
       },
       "emitters": ["src/managers/InventorySync.js", "src/pages/inventory/**"],
-      "listeners": ["src/stores/useInventory.js", "src/services/nba/Orchestrator.js", "src/engines/storehouse/StorehouseEngine.js"]
+      "listeners": [
+        "src/stores/useInventory.js",
+        "src/services/nba/Orchestrator.js",
+        "src/engines/storehouse/StorehouseEngine.js"
+      ]
     },
     {
       "name": "EVENT_GROCERY_LIST_GENERATED",
@@ -488,12 +604,18 @@
         "required": ["plan", "items", "ts"],
         "properties": {
           "plan": { "$ref": "#/definitions/PlanRef" },
-          "items": { "type": "array", "items": { "$ref": "#/definitions/ItemRef" } },
+          "items": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/ItemRef" }
+          },
           "ts": { "$ref": "#/definitions/Timestamp" }
         },
         "additionalProperties": false
       },
-      "emitters": ["src/features/meals/GroceryListGenerator/**", "src/engines/storehouse/StorehouseEngine.js"],
+      "emitters": [
+        "src/features/meals/GroceryListGenerator/**",
+        "src/engines/storehouse/StorehouseEngine.js"
+      ],
       "listeners": ["src/services/export/**", "src/pages/inventory/**"]
     },
     {
@@ -511,7 +633,10 @@
         "additionalProperties": false
       },
       "emitters": ["src/services/templates/TemplateConnector.js"],
-      "listeners": ["src/managers/PlanManager.js", "src/managers/SessionManager.js"]
+      "listeners": [
+        "src/managers/PlanManager.js",
+        "src/managers/SessionManager.js"
+      ]
     },
     {
       "name": "EVENT_ENTITLEMENTS_UPDATED",
@@ -526,7 +651,11 @@
         "additionalProperties": false
       },
       "emitters": ["src/services/auth/SVFFHClaims.js"],
-      "listeners": ["src/stores/useEntitlementFlags.js", "src/features/coop/**", "src/services/templates/TemplateConnector.js"]
+      "listeners": [
+        "src/stores/useEntitlementFlags.js",
+        "src/features/coop/**",
+        "src/services/templates/TemplateConnector.js"
+      ]
     },
     {
       "name": "EVENT_COOP_GOAL_PROPOSED",
@@ -536,7 +665,10 @@
         "required": ["goalId", "domain", "target", "ts"],
         "properties": {
           "goalId": { "$ref": "#/definitions/ID" },
-          "domain": { "type": "string", "enum": ["meals", "garden", "animals", "cleaning", "inventory"] },
+          "domain": {
+            "type": "string",
+            "enum": ["meals", "garden", "animals", "cleaning", "inventory"]
+          },
           "target": { "type": "object" },
           "ts": { "$ref": "#/definitions/Timestamp" },
           "by": { "$ref": "#/definitions/UserRef" }

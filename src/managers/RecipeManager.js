@@ -30,7 +30,8 @@ import parseRecipeSteps from "../services/planning/parseRecipeSteps";
  *   - exportAll(), importMany(payload, { merge })
  */
 
-const iso = (d) => (d instanceof Date ? d.toISOString() : new Date(d || Date.now()).toISOString());
+const iso = (d) =>
+  d instanceof Date ? d.toISOString() : new Date(d || Date.now()).toISOString();
 const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 
 /* --------------------------------- Guards ---------------------------------- */
@@ -45,7 +46,7 @@ const hasWindow = () => typeof window !== "undefined";
 let eventBus = { emit: () => {}, on: () => {} };
 try {
   // eslint-disable-next-line global-require
-  const m = require("@/services/eventBus");
+  const m = require("@/services/events/eventBus");
   eventBus = m?.default || m || eventBus;
 } catch {}
 
@@ -112,7 +113,15 @@ const ALLERGEN_MAP = {
   dairy: ["milk", "butter", "cheese", "yogurt", "cream", "whey"],
   egg: ["egg", "eggs"],
   soy: ["soy", "soybean", "soy sauce", "tofu", "edamame", "miso"],
-  nut: ["almond", "walnut", "pecan", "cashew", "peanut", "hazelnut", "pistachio"],
+  nut: [
+    "almond",
+    "walnut",
+    "pecan",
+    "cashew",
+    "peanut",
+    "hazelnut",
+    "pistachio",
+  ],
   shellfish: ["shrimp", "prawn", "lobster", "crab", "scallop"],
   fish: ["salmon", "tuna", "cod", "trout", "anchovy", "sardine"],
   sesame: ["sesame", "tahini", "gomashio"],
@@ -121,7 +130,9 @@ const ALLERGEN_MAP = {
 function detectAllergens(recipe) {
   const words = new Set(
     [
-      ...safeArr(recipe.ingredients).map((i) => safeStr(i.name || i.ingredient).toLowerCase()),
+      ...safeArr(recipe.ingredients).map((i) =>
+        safeStr(i.name || i.ingredient).toLowerCase()
+      ),
       safeStr(recipe.title).toLowerCase(),
       safeStr(recipe.description).toLowerCase(),
     ]
@@ -132,7 +143,9 @@ function detectAllergens(recipe) {
 
   const flags = {};
   for (const [k, list] of Object.entries(ALLERGEN_MAP)) {
-    flags[k] = list.some((term) => words.has(term) || safeStr([...words].join(" ")).includes(term));
+    flags[k] = list.some(
+      (term) => words.has(term) || safeStr([...words].join(" ")).includes(term)
+    );
   }
   return flags;
 }
@@ -140,16 +153,27 @@ function detectAllergens(recipe) {
 /* -------------------------- Nutrition (very rough) ------------------------- */
 
 function estimateNutrition(recipe) {
-  if (recipe.nutrition && (recipe.nutrition.kcal || recipe.nutrition.calories)) {
+  if (
+    recipe.nutrition &&
+    (recipe.nutrition.kcal || recipe.nutrition.calories)
+  ) {
     return recipe.nutrition;
   }
-  const ingsText = safeArr(recipe.ingredients).map((i) => safeStr(i.name || i.ingredient).toLowerCase()).join(" ");
+  const ingsText = safeArr(recipe.ingredients)
+    .map((i) => safeStr(i.name || i.ingredient).toLowerCase())
+    .join(" ");
   let kcal = 250;
   if (/fried|cheese|cream|butter/i.test(ingsText)) kcal += 150;
-  if (/salad|leaf|vegetable|broccoli|lettuce|spinach/i.test(ingsText)) kcal -= 50;
+  if (/salad|leaf|vegetable|broccoli|lettuce|spinach/i.test(ingsText))
+    kcal -= 50;
   if (/beef|pork|chicken|egg|tofu|bean/i.test(ingsText)) kcal += 50;
   kcal = clamp(kcal, 80, 900);
-  return { kcal, proteinG: /beef|pork|chicken|egg|tofu|bean/i.test(ingsText) ? 20 : 8, carbsG: 24, fatG: 12 };
+  return {
+    kcal,
+    proteinG: /beef|pork|chicken|egg|tofu|bean/i.test(ingsText) ? 20 : 8,
+    carbsG: 24,
+    fatG: 12,
+  };
 }
 
 /* ------------------------------ Attribution -------------------------------- */
@@ -162,17 +186,17 @@ function normalizeAttribution(source) {
   if (!source) return null;
   const nowISO = iso();
   const out = {
-    type: source.type || "manual",              // 'manual' | 'clipper' | 'import' | 'scanner' | 'scraper' | 'api'
-    url: source.url || null,                    // canonical URL if any
-    collectedVia: source.collectedVia || null,  // e.g., 'RecipeVault', 'BulkUrlGrid', 'Scanner', 'API'
-    importedFrom: source.importedFrom || null,  // e.g., 'Paprika', 'Pinterest', 'AllRecipes'
+    type: source.type || "manual", // 'manual' | 'clipper' | 'import' | 'scanner' | 'scraper' | 'api'
+    url: source.url || null, // canonical URL if any
+    collectedVia: source.collectedVia || null, // e.g., 'RecipeVault', 'BulkUrlGrid', 'Scanner', 'API'
+    importedFrom: source.importedFrom || null, // e.g., 'Paprika', 'Pinterest', 'AllRecipes'
     scrapedAt: source.scrapedAt || nowISO,
     author: source.author || null,
     authorUrl: source.authorUrl || null,
     license: source.license || null,
-    checksum: source.checksum || null,          // optional content checksum/fingerprint
+    checksum: source.checksum || null, // optional content checksum/fingerprint
     notes: source.notes || null,
-    tool: source.tool || null,                  // which tool captured this (for analytics)
+    tool: source.tool || null, // which tool captured this (for analytics)
   };
   return out;
 }
@@ -180,9 +204,17 @@ function normalizeAttribution(source) {
 function fingerprintRecipe(r) {
   // Stable-ish fingerprint used for merge detection
   const title = safeStr(r.title).toLowerCase().trim();
-  const domain = safeStr(r?.source?.url).toLowerCase().replace(/^https?:\/\//, "").split("/")[0] || "";
+  const domain =
+    safeStr(r?.source?.url)
+      .toLowerCase()
+      .replace(/^https?:\/\//, "")
+      .split("/")[0] || "";
   const ing = safeArr(r.ingredients)
-    .map((i) => safeStr(i.name || i.ingredient).toLowerCase().trim())
+    .map((i) =>
+      safeStr(i.name || i.ingredient)
+        .toLowerCase()
+        .trim()
+    )
     .sort()
     .slice(0, 8)
     .join("|");
@@ -196,7 +228,9 @@ async function writeRecipeIndex(id, payload) {
     if (DexieDB.recipeIndex) {
       await DexieDB.recipeIndex.put({ id, ...payload });
     }
-  } catch { /* noop */ }
+  } catch {
+    /* noop */
+  }
 }
 
 /* ------------------------------ Deep Links/UX ------------------------------ */
@@ -220,7 +254,10 @@ function mergeArraysUnique(a = [], b = [], key = (x) => JSON.stringify(x)) {
   const out = [...a];
   for (const item of b) {
     const k = key(item);
-    if (!seen.has(k)) { seen.add(k); out.push(item); }
+    if (!seen.has(k)) {
+      seen.add(k);
+      out.push(item);
+    }
   }
   return out;
 }
@@ -231,7 +268,10 @@ function fieldMerge(existingVal, incomingVal, strategy = "smart") {
   if (strategy === "new") return incomingVal ?? existingVal;
 
   // smart strategy: prefer incoming when existing is empty or clearly worse
-  const empty = (v) => v == null || (typeof v === "string" && !v.trim()) || (Array.isArray(v) && v.length === 0);
+  const empty = (v) =>
+    v == null ||
+    (typeof v === "string" && !v.trim()) ||
+    (Array.isArray(v) && v.length === 0);
   if (empty(existingVal) && !empty(incomingVal)) return incomingVal;
   return existingVal ?? incomingVal;
 }
@@ -239,7 +279,11 @@ function fieldMerge(existingVal, incomingVal, strategy = "smart") {
 function normalizeForSave(recipe) {
   // Hook into recipeNormalizer if available for units/servings standardization.
   if (recipeNormalizer?.normalizeRecipe) {
-    try { return recipeNormalizer.normalizeRecipe(recipe); } catch (e) { console.warn("[RecipeManager] normalizeRecipe failed", e); }
+    try {
+      return recipeNormalizer.normalizeRecipe(recipe);
+    } catch (e) {
+      console.warn("[RecipeManager] normalizeRecipe failed", e);
+    }
   }
   return recipe;
 }
@@ -257,7 +301,10 @@ const RecipeManager = {
    *   - strategy?: "smart" | "existing" | "new"
    * @returns {Promise<Recipe>}
    */
-  async save(recipe, { overrides = null, source = null, merge = true, strategy = "smart" } = {}) {
+  async save(
+    recipe,
+    { overrides = null, source = null, merge = true, strategy = "smart" } = {}
+  ) {
     if (!(recipe instanceof Recipe)) {
       recipe = new Recipe(recipe);
     }
@@ -265,7 +312,8 @@ const RecipeManager = {
     // normalize & validate
     recipe = normalizeForSave(recipe);
     const errors = recipe.validate();
-    if (errors.length) throw new Error("Validation failed: " + errors.join(" | "));
+    if (errors.length)
+      throw new Error("Validation failed: " + errors.join(" | "));
 
     // parse steps
     const parsedSteps = parseRecipeSteps(recipe.instructions || []);
@@ -277,7 +325,10 @@ const RecipeManager = {
     }));
 
     // defaults
-    recipe.yield = recipe.yield || { servings: Number(recipe.servings || 4), unit: "servings" };
+    recipe.yield = recipe.yield || {
+      servings: Number(recipe.servings || 4),
+      unit: "servings",
+    };
     recipe.servings = recipe.yield?.servings ?? recipe.servings ?? 4;
 
     // enrich
@@ -302,7 +353,8 @@ const RecipeManager = {
         license: attr.license || recipe.source?.license || null,
         importedFrom: attr.importedFrom || recipe.source?.importedFrom || null,
         collectedVia: attr.collectedVia || recipe.source?.collectedVia || null,
-        scrapedAt: attr.scrapedAt || recipe.source?.scrapedAt || recipe.updatedAtISO,
+        scrapedAt:
+          attr.scrapedAt || recipe.source?.scrapedAt || recipe.updatedAtISO,
       };
     } else {
       recipe.attributions = safeArr(recipe.attributions);
@@ -337,10 +389,17 @@ const RecipeManager = {
         });
 
         // live events
-        safeEmit("recipes:merged", { id: merged.id, source: merged?.source?.url || null });
+        safeEmit("recipes:merged", {
+          id: merged.id,
+          source: merged?.source?.url || null,
+        });
         try {
           const s = hasWindow() ? window.__SUKA_SOCKET__ : null;
-          if (s?.connected) s.emit("RECIPES:UPDATED", { id: merged.id, at: merged.updatedAtISO });
+          if (s?.connected)
+            s.emit("RECIPES:UPDATED", {
+              id: merged.id,
+              at: merged.updatedAtISO,
+            });
         } catch {}
 
         merged.toast = `🔀 Merged — ${merged.title}`;
@@ -361,10 +420,14 @@ const RecipeManager = {
     });
 
     // live events
-    safeEmit("recipes:saved", { id: recipe.id, source: recipe?.source?.url || null });
+    safeEmit("recipes:saved", {
+      id: recipe.id,
+      source: recipe?.source?.url || null,
+    });
     try {
       const s = hasWindow() ? window.__SUKA_SOCKET__ : null;
-      if (s?.connected) s.emit("RECIPES:UPDATED", { id: recipe.id, at: recipe.updatedAtISO });
+      if (s?.connected)
+        s.emit("RECIPES:UPDATED", { id: recipe.id, at: recipe.updatedAtISO });
     } catch {}
 
     recipe.toast = toastFor(recipe);
@@ -392,9 +455,14 @@ const RecipeManager = {
     // 3) by fingerprint
     if (incoming?.fingerprint) {
       try {
-        const all = await DexieDB.recipes.where("fingerprint").equals(incoming.fingerprint).toArray();
+        const all = await DexieDB.recipes
+          .where("fingerprint")
+          .equals(incoming.fingerprint)
+          .toArray();
         if (all?.length) return all[0];
-      } catch { /* index may not exist; fall through */ }
+      } catch {
+        /* index may not exist; fall through */
+      }
       const all = await DexieDB.recipes.toArray();
       const found = all.find((r) => r.fingerprint === incoming.fingerprint);
       if (found) return found;
@@ -402,13 +470,19 @@ const RecipeManager = {
     // 4) versionPicker / deduper (best-effort fuzzy)
     try {
       if (versionPicker?.findMatch) {
-        const m = await versionPicker.findMatch(incoming, await DexieDB.recipes.toArray());
+        const m = await versionPicker.findMatch(
+          incoming,
+          await DexieDB.recipes.toArray()
+        );
         if (m) return m;
       }
     } catch {}
     try {
       if (recipeDeduper?.findDuplicate) {
-        const m = await recipeDeduper.findDuplicate(incoming, await DexieDB.recipes.toArray());
+        const m = await recipeDeduper.findDuplicate(
+          incoming,
+          await DexieDB.recipes.toArray()
+        );
         if (m) return m;
       }
     } catch {}
@@ -426,31 +500,57 @@ const RecipeManager = {
 
     // Primitive / simple fields
     merged.title = fieldMerge(existing.title, incoming.title, strategy);
-    merged.description = fieldMerge(existing.description, incoming.description, strategy);
-    merged.category = fieldMerge(existing.category, incoming.category, strategy);
+    merged.description = fieldMerge(
+      existing.description,
+      incoming.description,
+      strategy
+    );
+    merged.category = fieldMerge(
+      existing.category,
+      incoming.category,
+      strategy
+    );
     merged.cuisine = fieldMerge(existing.cuisine, incoming.cuisine, strategy);
-    merged.thumbnail = fieldMerge(existing.thumbnail, incoming.thumbnail, strategy);
+    merged.thumbnail = fieldMerge(
+      existing.thumbnail,
+      incoming.thumbnail,
+      strategy
+    );
 
     // Yield / servings
     const exServ = existing?.yield?.servings ?? existing?.servings;
     const inServ = incoming?.yield?.servings ?? incoming?.servings;
-    const finalServ = safeNum(fieldMerge(exServ, inServ, strategy), exServ || inServ || 4);
+    const finalServ = safeNum(
+      fieldMerge(exServ, inServ, strategy),
+      exServ || inServ || 4
+    );
     merged.servings = finalServ;
-    merged.yield = { ...(existing.yield || {}), ...(incoming.yield || {}), servings: finalServ };
+    merged.yield = {
+      ...(existing.yield || {}),
+      ...(incoming.yield || {}),
+      servings: finalServ,
+    };
 
     // Arrays: ingredients / tags
     merged.ingredients = mergeArraysUnique(
       safeArr(existing.ingredients),
       safeArr(incoming.ingredients),
-      (x) => `${safeStr(x.name || x.ingredient).toLowerCase()}|${safeStr(x.unit)}|${safeStr(x.form)}|${safeStr(x.note)}`
+      (x) =>
+        `${safeStr(x.name || x.ingredient).toLowerCase()}|${safeStr(
+          x.unit
+        )}|${safeStr(x.form)}|${safeStr(x.note)}`
     );
 
-    merged.tags = Array.from(new Set([...(existing.tags || []), ...(incoming.tags || [])]));
+    merged.tags = Array.from(
+      new Set([...(existing.tags || []), ...(incoming.tags || [])])
+    );
 
     // Steps (preserve existing IDs where label matches; otherwise append)
     const exSteps = safeArr(existing.steps);
     const inSteps = safeArr(incoming.steps);
-    const exByLabel = new Map(exSteps.map((s) => [safeStr(s.description || s.label).toLowerCase(), s]));
+    const exByLabel = new Map(
+      exSteps.map((s) => [safeStr(s.description || s.label).toLowerCase(), s])
+    );
     const mergedSteps = [];
     for (const s of inSteps) {
       const key = safeStr(s.description || s.label).toLowerCase();
@@ -459,14 +559,19 @@ const RecipeManager = {
         mergedSteps.push({
           ...prev,
           ...s,
-          estimatedTime: safeNum(fieldMerge(prev.estimatedTime, s.estimatedTime, "smart"), s.estimatedTime || prev.estimatedTime || 5),
+          estimatedTime: safeNum(
+            fieldMerge(prev.estimatedTime, s.estimatedTime, "smart"),
+            s.estimatedTime || prev.estimatedTime || 5
+          ),
         });
       } else {
         mergedSteps.push(s);
       }
     }
     // also keep any extra previous steps that new didn’t mention
-    const inLabels = new Set(inSteps.map((s) => safeStr(s.description || s.label).toLowerCase()));
+    const inLabels = new Set(
+      inSteps.map((s) => safeStr(s.description || s.label).toLowerCase())
+    );
     for (const s of exSteps) {
       const key = safeStr(s.description || s.label).toLowerCase();
       if (!inLabels.has(key)) mergedSteps.push(s);
@@ -482,7 +587,8 @@ const RecipeManager = {
     // Source snapshot and attribution trail
     const exTrail = safeArr(existing.attributions);
     const inTrail = safeArr(incoming.attributions);
-    const uniqueKey = (a) => `${a.type || ""}|${a.url || ""}|${a.checksum || ""}|${a.author || ""}`;
+    const uniqueKey = (a) =>
+      `${a.type || ""}|${a.url || ""}|${a.checksum || ""}|${a.author || ""}`;
     merged.attributions = mergeArraysUnique(exTrail, inTrail, uniqueKey);
 
     merged.source = {
@@ -490,11 +596,31 @@ const RecipeManager = {
       ...(incoming.source || {}),
       url: fieldMerge(existing?.source?.url, incoming?.source?.url, "smart"),
       type: fieldMerge(existing?.source?.type, incoming?.source?.type, "smart"),
-      author: fieldMerge(existing?.source?.author, incoming?.source?.author, "smart"),
-      license: fieldMerge(existing?.source?.license, incoming?.source?.license, "smart"),
-      importedFrom: fieldMerge(existing?.source?.importedFrom, incoming?.source?.importedFrom, "smart"),
-      collectedVia: fieldMerge(existing?.source?.collectedVia, incoming?.source?.collectedVia, "smart"),
-      scrapedAt: fieldMerge(existing?.source?.scrapedAt, incoming?.source?.scrapedAt, "new"),
+      author: fieldMerge(
+        existing?.source?.author,
+        incoming?.source?.author,
+        "smart"
+      ),
+      license: fieldMerge(
+        existing?.source?.license,
+        incoming?.source?.license,
+        "smart"
+      ),
+      importedFrom: fieldMerge(
+        existing?.source?.importedFrom,
+        incoming?.source?.importedFrom,
+        "smart"
+      ),
+      collectedVia: fieldMerge(
+        existing?.source?.collectedVia,
+        incoming?.source?.collectedVia,
+        "smart"
+      ),
+      scrapedAt: fieldMerge(
+        existing?.source?.scrapedAt,
+        incoming?.source?.scrapedAt,
+        "new"
+      ),
     };
 
     // Derived
@@ -503,7 +629,8 @@ const RecipeManager = {
     merged.nutrition = estimateNutrition(merged);
 
     // Fingerprint: keep existing unless missing
-    merged.fingerprint = existing.fingerprint || incoming.fingerprint || fingerprintRecipe(merged);
+    merged.fingerprint =
+      existing.fingerprint || incoming.fingerprint || fingerprintRecipe(merged);
 
     return merged;
   },
@@ -514,11 +641,15 @@ const RecipeManager = {
     if (!r) return 0;
     const attr = normalizeAttribution(attributionLike);
     const list = safeArr(r.attributions);
-    const key = (a) => `${a.type || ""}|${a.url || ""}|${a.checksum || ""}|${a.author || ""}`;
+    const key = (a) =>
+      `${a.type || ""}|${a.url || ""}|${a.checksum || ""}|${a.author || ""}`;
     const exists = new Set(list.map(key));
     if (!exists.has(key(attr))) list.push(attr);
     r.attributions = list;
-    r.source = r.source || { url: attr.url || null, type: attr.type || "manual" };
+    r.source = r.source || {
+      url: attr.url || null,
+      type: attr.type || "manual",
+    };
     if (!r.source.url && attr.url) r.source.url = attr.url;
     r.updatedAt = new Date();
     r.updatedAtISO = iso(r.updatedAt);
@@ -554,7 +685,9 @@ const RecipeManager = {
 
   /** Delete a recipe (and index row). */
   async delete(id) {
-    try { if (DexieDB.recipeIndex) await DexieDB.recipeIndex.delete(id); } catch {}
+    try {
+      if (DexieDB.recipeIndex) await DexieDB.recipeIndex.delete(id);
+    } catch {}
     return DexieDB.recipes.delete(id);
   },
 
@@ -565,12 +698,17 @@ const RecipeManager = {
       if (DexieDB.recipeIndex) {
         const ix = await DexieDB.recipeIndex.toArray();
         const hits = ix.filter((row) => {
-          const textMatch = !needle ||
+          const textMatch =
+            !needle ||
             row.title?.toLowerCase().includes(needle) ||
             safeArr(row.keywords).some((k) => k.includes(needle)) ||
             (row.sourceUrl || "").toLowerCase().includes(needle);
-          const tagMatch = !tagsAny.length || safeArr(row.tags).some((t) => tagsAny.includes(t));
-          const allergenOK = !excludeAllergens.length || excludeAllergens.every((a) => !row.allergens?.[a]);
+          const tagMatch =
+            !tagsAny.length ||
+            safeArr(row.tags).some((t) => tagsAny.includes(t));
+          const allergenOK =
+            !excludeAllergens.length ||
+            excludeAllergens.every((a) => !row.allergens?.[a]);
           return textMatch && tagMatch && allergenOK;
         });
         const ids = hits.slice(0, limit).map((h) => h.id);
@@ -586,7 +724,8 @@ const RecipeManager = {
         safeArr(r.keywords).some((k) => k.includes(needle)) ||
         safeStr(r.description).toLowerCase().includes(needle) ||
         safeStr(r?.source?.url).toLowerCase().includes(needle);
-      const tag = !tagsAny.length || safeArr(r.tags).some((t) => tagsAny.includes(t));
+      const tag =
+        !tagsAny.length || safeArr(r.tags).some((t) => tagsAny.includes(t));
       const allergens = excludeAllergens.length
         ? excludeAllergens.every((a) => !(r.allergens && r.allergens[a]))
         : true;
@@ -600,14 +739,19 @@ const RecipeManager = {
     try {
       if (DexieDB.recipeIndex?.where) {
         // Dexie multiEntry index recommended for 'tags'
-        const ix = await DexieDB.recipeIndex.where("tags").equals(tag).toArray();
+        const ix = await DexieDB.recipeIndex
+          .where("tags")
+          .equals(tag)
+          .toArray();
         const ids = ix.map((r) => r.id);
         const recs = await DexieDB.recipes.bulkGet(ids);
         return recs.filter(Boolean).map((r) => new Recipe(r));
       }
     } catch {}
     const all = await DexieDB.recipes.toArray();
-    return all.filter((r) => safeArr(r.tags).includes(tag)).map((r) => new Recipe(r));
+    return all
+      .filter((r) => safeArr(r.tags).includes(tag))
+      .map((r) => new Recipe(r));
   },
 
   async getByIngredient(name) {
@@ -615,7 +759,13 @@ const RecipeManager = {
     const n = safeStr(name).toLowerCase();
     const all = await DexieDB.recipes.toArray();
     return all
-      .filter((r) => safeArr(r.ingredients).some((i) => safeStr(i.name || i.ingredient).toLowerCase().includes(n)))
+      .filter((r) =>
+        safeArr(r.ingredients).some((i) =>
+          safeStr(i.name || i.ingredient)
+            .toLowerCase()
+            .includes(n)
+        )
+      )
       .map((r) => new Recipe(r));
   },
 
@@ -625,7 +775,10 @@ const RecipeManager = {
     if (!u) return null;
     try {
       if (DexieDB.recipeIndex?.where) {
-        const ix = await DexieDB.recipeIndex.where("sourceUrl").equals(u).toArray();
+        const ix = await DexieDB.recipeIndex
+          .where("sourceUrl")
+          .equals(u)
+          .toArray();
         if (ix?.length) {
           const rec = await DexieDB.recipes.get(ix[0].id);
           return rec ? new Recipe(rec) : null;
@@ -640,11 +793,17 @@ const RecipeManager = {
 
   /** Return a new, scaled copy (not persisted unless saved). */
   async scaleRecipe(recipeOrId, factor = 1) {
-    const base = typeof recipeOrId === "string" ? await this.getById(recipeOrId) : recipeOrId;
+    const base =
+      typeof recipeOrId === "string"
+        ? await this.getById(recipeOrId)
+        : recipeOrId;
     if (!base) return null;
     const clone = new Recipe(JSON.parse(JSON.stringify(base)));
     clone.id = clone.id; // preserve id unless you want to duplicate elsewhere
-    clone.servings = Math.max(1, Math.round((clone.servings || clone.yield?.servings || 4) * factor));
+    clone.servings = Math.max(
+      1,
+      Math.round((clone.servings || clone.yield?.servings || 4) * factor)
+    );
     clone.yield = { ...(clone.yield || {}), servings: clone.servings };
     clone.ingredients = safeArr(clone.ingredients).map((i) => {
       const qty = Number(i.quantity ?? i.qty ?? 0);
@@ -653,7 +812,9 @@ const RecipeManager = {
     });
     clone.steps = safeArr(clone.steps).map((s) => ({
       ...s,
-      estimatedTime: Math.round((s.estimatedTime || 0) * (factor > 1 ? 1.1 : 1)),
+      estimatedTime: Math.round(
+        (s.estimatedTime || 0) * (factor > 1 ? 1.1 : 1)
+      ),
     }));
     clone.updatedAt = new Date();
     return clone;
@@ -661,9 +822,14 @@ const RecipeManager = {
 
   /** Build a single-stream prep timeline for today. */
   async planPrepTimeline(recipeOrId, { startISO = iso() } = {}) {
-    const r = typeof recipeOrId === "string" ? await this.getById(recipeOrId) : recipeOrId;
+    const r =
+      typeof recipeOrId === "string"
+        ? await this.getById(recipeOrId)
+        : recipeOrId;
     if (!r) return [];
-    const steps = safeArr(r.steps).length ? r.steps : parseRecipeSteps(r.instructions || []);
+    const steps = safeArr(r.steps).length
+      ? r.steps
+      : parseRecipeSteps(r.instructions || []);
     const start = new Date(startISO);
     const out = [];
     let cursor = new Date(start);
@@ -685,31 +851,56 @@ const RecipeManager = {
 
   /** Simple substitution hints. */
   async suggestSubstitutions(recipeOrId) {
-    const r = typeof recipeOrId === "string" ? await this.getById(recipeOrId) : recipeOrId;
+    const r =
+      typeof recipeOrId === "string"
+        ? await this.getById(recipeOrId)
+        : recipeOrId;
     if (!r) return [];
     const list = [];
-    const text = safeArr(r.ingredients).map((i) => safeStr(i.name || i.ingredient).toLowerCase()).join(" ");
-    if (/buttermilk/.test(text)) list.push({ need: "buttermilk", try: "milk + vinegar/lemon (1c + 1 Tbsp)" });
-    if (/egg/.test(text)) list.push({ need: "egg", try: "ground flax + water (1 Tbsp + 3 Tbsp)" });
-    if (/soy sauce|tamari/.test(text)) list.push({ need: "soy sauce", try: "coconut aminos" });
-    if (/cream/.test(text)) list.push({ need: "heavy cream", try: "evaporated milk or milk + butter" });
-    if (/butter/.test(text)) list.push({ need: "butter", try: "ghee or coconut oil (baking)" });
+    const text = safeArr(r.ingredients)
+      .map((i) => safeStr(i.name || i.ingredient).toLowerCase())
+      .join(" ");
+    if (/buttermilk/.test(text))
+      list.push({
+        need: "buttermilk",
+        try: "milk + vinegar/lemon (1c + 1 Tbsp)",
+      });
+    if (/egg/.test(text))
+      list.push({ need: "egg", try: "ground flax + water (1 Tbsp + 3 Tbsp)" });
+    if (/soy sauce|tamari/.test(text))
+      list.push({ need: "soy sauce", try: "coconut aminos" });
+    if (/cream/.test(text))
+      list.push({
+        need: "heavy cream",
+        try: "evaporated milk or milk + butter",
+      });
+    if (/butter/.test(text))
+      list.push({ need: "butter", try: "ghee or coconut oil (baking)" });
     return list;
   },
 
   /** Lightweight inventory linkage (best-effort). */
   async linkInventoryHints(recipeOrId) {
-    const r = typeof recipeOrId === "string" ? await this.getById(recipeOrId) : recipeOrId;
+    const r =
+      typeof recipeOrId === "string"
+        ? await this.getById(recipeOrId)
+        : recipeOrId;
     if (!r) return [];
     const supplies = await (DexieDB.supplies?.toArray?.() ?? []);
-    const map = new Map(supplies.map((s) => [safeStr(s.name).toLowerCase(), s]));
+    const map = new Map(
+      supplies.map((s) => [safeStr(s.name).toLowerCase(), s])
+    );
     const rows = safeArr(r.ingredients).map((i) => {
       const key = safeStr(i.name || i.ingredient).toLowerCase();
-      const match = map.get(key) || supplies.find((s) => key.includes(safeStr(s.name).toLowerCase()));
+      const match =
+        map.get(key) ||
+        supplies.find((s) => key.includes(safeStr(s.name).toLowerCase()));
       return {
         ingredient: i,
         supplyId: match?.id || null,
-        low: match ? (match.quantity ?? 0) <= (match.threshold ?? -Infinity) : false,
+        low: match
+          ? (match.quantity ?? 0) <= (match.threshold ?? -Infinity)
+          : false,
         location: match?.location || null,
       };
     });
@@ -717,7 +908,8 @@ const RecipeManager = {
     // optional: aisle hint via IngredientLinker
     try {
       const tags = r.tags || [];
-      const aisleHint = IngredientLinker?.mapAisleHint?.(tags, r.title || "") || null;
+      const aisleHint =
+        IngredientLinker?.mapAisleHint?.(tags, r.title || "") || null;
       return rows.map((row) => ({ ...row, aisleHint }));
     } catch {
       return rows;
@@ -758,11 +950,22 @@ const RecipeManager = {
     return { exportedAt: iso(), count: recs.length, recipes: recs };
   },
 
-  async importMany(payload, { merge = true, strategy = "smart", source = { type: "import", importedFrom: "json" } } = {}) {
+  async importMany(
+    payload,
+    {
+      merge = true,
+      strategy = "smart",
+      source = { type: "import", importedFrom: "json" },
+    } = {}
+  ) {
     const list = Array.isArray(payload?.recipes) ? payload.recipes : [];
     if (!merge) {
-      try { await DexieDB.recipes.clear(); } catch {}
-      try { if (DexieDB.recipeIndex) await DexieDB.recipeIndex.clear(); } catch {}
+      try {
+        await DexieDB.recipes.clear();
+      } catch {}
+      try {
+        if (DexieDB.recipeIndex) await DexieDB.recipeIndex.clear();
+      } catch {}
     }
     for (const r of list) {
       // run the full save pipeline to normalize + attribute + index

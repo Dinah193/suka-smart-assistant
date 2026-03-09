@@ -16,11 +16,12 @@
  * - Manage sessions or timers (SessionRunner covers that).
  */
 
-import { emit } from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import { emit } from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { HubPacketFormatter, FamilyFundConnector } from "@/services/hub";
 
-const SHIM_SOURCE = "features/calculators/gardenAnimal/SeedViabilityCalculator.shim";
+const SHIM_SOURCE =
+  "features/calculators/gardenAnimal/SeedViabilityCalculator.shim";
 
 /**
  * @typedef {import("./SeedViabilityCalculator.types").SeedViabilityPayload} SeedViabilityPayload
@@ -45,15 +46,18 @@ export async function runSeedViabilityCalculatorShim(payload) {
         ok: false,
         reason: "invalid-payload",
         message: "SeedViabilityCalculator shim received an invalid payload.",
-        evaluatedAt: ts
+        evaluatedAt: ts,
       },
-      lots: []
+      lots: [],
     };
     emit({
       type: "planningGraph.seedViability.error",
       ts,
       source: SHIM_SOURCE,
-      data: { payloadSummary: summarizePayload(payload), error: errorResult.meta }
+      data: {
+        payloadSummary: summarizePayload(payload),
+        error: errorResult.meta,
+      },
     });
     return errorResult;
   }
@@ -74,9 +78,9 @@ export async function runSeedViabilityCalculatorShim(payload) {
       evaluatedAt: ts,
       lotCount: results.length,
       highRiskLotCount: summary.highRiskLotCount,
-      replaceNowCount: summary.replaceNowCount
+      replaceNowCount: summary.replaceNowCount,
     },
-    lots: results
+    lots: results,
   };
 
   emit({
@@ -93,9 +97,9 @@ export async function runSeedViabilityCalculatorShim(payload) {
         estimatedGerminationRate: r.estimatedGerminationRate,
         sowRateMultiplier: r.sowRateMultiplier,
         recommendedStatus: r.recommendedStatus,
-        riskFlags: r.riskFlags
-      }))
-    }
+        riskFlags: r.riskFlags,
+      })),
+    },
   });
 
   // Optional hub export
@@ -106,7 +110,7 @@ export async function runSeedViabilityCalculatorShim(payload) {
         type: "hub.export.seedViability.error",
         ts: new Date().toISOString(),
         source: SHIM_SOURCE,
-        data: { errorMessage: String(err) }
+        data: { errorMessage: String(err) },
       });
     });
   }
@@ -141,25 +145,29 @@ function evaluateSeedLot(lot, environment, planningHints) {
   baseGermPct *= storageScore / 100;
 
   // 3. Apply germination test override/fine-tuning if present
-  const testAdjustedPct = adjustForGerminationTest(baseGermPct, germinationTest);
+  const testAdjustedPct = adjustForGerminationTest(
+    baseGermPct,
+    germinationTest
+  );
 
   // 4. Clamp between 0 and 100
   const estimatedGerminationRate = clamp(testAdjustedPct, 0, 100);
 
   // 5. Map to viability score (can be same scale, slightly weighted)
   const viabilityScore = clamp(
-    (estimatedGerminationRate * 0.7) + (storageScore * 0.3),
+    estimatedGerminationRate * 0.7 + storageScore * 0.3,
     0,
     100
   );
 
   // 6. Determine sowing multiplier and recommended status
-  const { sowRateMultiplier, recommendedStatus, riskFlags } = deriveSowRateAndStatus(
-    viabilityScore,
-    estimatedGerminationRate,
-    planning,
-    planningHints
-  );
+  const { sowRateMultiplier, recommendedStatus, riskFlags } =
+    deriveSowRateAndStatus(
+      viabilityScore,
+      estimatedGerminationRate,
+      planning,
+      planningHints
+    );
 
   const notes = buildNotesForLot({
     ageCategory,
@@ -168,13 +176,13 @@ function evaluateSeedLot(lot, environment, planningHints) {
     viabilityScore,
     estimatedGerminationRate,
     sowRateMultiplier,
-    recommendedStatus
+    recommendedStatus,
   });
 
   const nextActions = buildNextActionsForLot({
     recommendedStatus,
     planning,
-    planningHints
+    planningHints,
   });
 
   return {
@@ -189,7 +197,7 @@ function evaluateSeedLot(lot, environment, planningHints) {
     riskFlags,
     notes,
     nextActions,
-    raw: { lot: safeLot, environment, planningHints }
+    raw: { lot: safeLot, environment, planningHints },
   };
 }
 
@@ -384,7 +392,7 @@ function deriveSowRateAndStatus(
   return {
     sowRateMultiplier: roundTo(sowRateMultiplier, 2),
     recommendedStatus,
-    riskFlags
+    riskFlags,
   };
 }
 
@@ -450,7 +458,11 @@ function buildNextActionsForLot({ recommendedStatus, planning }) {
     );
   }
 
-  if (!planning || !Array.isArray(planning.targetBeds) || !planning.targetBeds.length) {
+  if (
+    !planning ||
+    !Array.isArray(planning.targetBeds) ||
+    !planning.targetBeds.length
+  ) {
     actions.push(
       "Assign this lot to specific beds or blocks in the garden planner so sowing rates can be auto-calculated."
     );
@@ -497,10 +509,10 @@ async function tryExportToHub(ts, result, planningHints) {
         id: lot.id,
         crop: lot.crop,
         viabilityScore: lot.viabilityScore,
-        recommendedStatus: lot.recommendedStatus
+        recommendedStatus: lot.recommendedStatus,
       })),
-      planningHints
-    }
+      planningHints,
+    },
   });
 
   await FamilyFundConnector.send(packet);
@@ -512,8 +524,8 @@ async function tryExportToHub(ts, result, planningHints) {
     data: {
       mode: "planningGraph",
       nodeKey: "seedViabilityCalculator",
-      status: "ok"
-    }
+      status: "ok",
+    },
   });
 }
 
@@ -541,6 +553,6 @@ function summarizePayload(payload) {
   const count = Array.isArray(payload.seedLots) ? payload.seedLots.length : 0;
   return {
     kind: "SeedViabilityPayload",
-    lotCount: count
+    lotCount: count,
   };
 }

@@ -1,0 +1,372 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00Z",
+
+  "meta": {
+    "id": "soups.chicken_noodle_soup",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Chicken Noodle Soup",
+    "subtitle": "Universal comfort soup • “use what you have” friendly • homemade stock or quick broth path",
+    "source": {
+      "kind": "ssa-canonical",
+      "notes": "Baseline chicken noodle soup designed for SSA planning: supports leftover chicken, rotisserie, or raw chicken; quick broth or scratch stock; flexible vegetables and noodle options."
+    }
+  },
+
+  "classification": {
+    "cuisine": "soups",
+    "category": "soup",
+    "subprofiles": [
+      "comfort",
+      "brothy",
+      "stovetop",
+      "use-what-you-have",
+      "freezer-friendly"
+    ],
+    "mealArchetypes": ["lunch", "dinner", "comfort meal"],
+    "servingStyles": ["bowl"],
+    "plannerTags": [
+      "chicken noodle soup",
+      "comfort",
+      "use what you have",
+      "broth",
+      "stovetop"
+    ]
+  },
+
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 2, "unit": "cups" },
+    "notes": "Makes about 10–12 cups depending on simmer reduction and noodle choice."
+  },
+
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 45,
+    "totalMins": 65
+  },
+
+  "difficulty": "beginner",
+
+  "equipment": {
+    "minimum": [
+      "large pot or Dutch oven",
+      "knife",
+      "cutting board",
+      "stirring spoon"
+    ],
+    "recommended": ["fine mesh strainer (for stock option)", "tongs", "ladle"],
+    "optional": ["instant-read thermometer", "freezer containers"]
+  },
+
+  "dietFlags": [],
+  "allergens": ["wheat", "gluten", "egg"],
+  "signals": {
+    "comfort": true,
+    "useWhatYouHave": true,
+    "freezerFriendlyBase": true,
+    "makeAhead": true
+  },
+
+  "tasteProfile": {
+    "saltiness": "medium",
+    "richness": "light-to-medium",
+    "aromatics": ["onion", "celery", "carrot", "garlic", "herbs"],
+    "notes": "Clean chicken broth with classic mirepoix and herbs; brightened with lemon and fresh herbs at the end."
+  },
+
+  "ingredients": [
+    {
+      "id": "chicken",
+      "label": "Chicken (see options: bone-in thighs, whole chicken pieces, or cooked/rotisserie)",
+      "role": "protein",
+      "amount": { "value": 900, "unit": "g" },
+      "notes": "About 2 lb. If using cooked chicken, use ~450g cooked shredded and follow quick broth path."
+    },
+    {
+      "id": "broth",
+      "label": "Chicken broth or stock (low-sodium preferred)",
+      "role": "liquid",
+      "amount": { "value": 2000, "unit": "g" },
+      "notes": "About 8 cups. If doing scratch stock in-pot, water can replace part of this (see steps)."
+    },
+    {
+      "id": "water_optional",
+      "label": "Water (optional, for scratch stock / dilution)",
+      "role": "liquid",
+      "amount": { "value": 1000, "unit": "g" },
+      "optional": true,
+      "notes": "Up to 4 cups as needed if simmering raw chicken to create broth."
+    },
+    {
+      "id": "onion",
+      "label": "Yellow onion, diced",
+      "role": "aromatic",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "About 1 medium."
+    },
+    {
+      "id": "carrots",
+      "label": "Carrots, sliced",
+      "role": "vegetable",
+      "amount": { "value": 200, "unit": "g" },
+      "notes": "About 2–3 medium."
+    },
+    {
+      "id": "celery",
+      "label": "Celery, sliced",
+      "role": "vegetable",
+      "amount": { "value": 150, "unit": "g" },
+      "notes": "About 3 stalks."
+    },
+    {
+      "id": "garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 12, "unit": "g" },
+      "notes": "About 3–4 cloves."
+    },
+    {
+      "id": "oil",
+      "label": "Olive oil or neutral oil",
+      "role": "cook",
+      "amount": { "value": 15, "unit": "g" },
+      "notes": "About 1 tablespoon."
+    },
+    {
+      "id": "butter_optional",
+      "label": "Butter (optional, for richer base)",
+      "role": "cook",
+      "amount": { "value": 14, "unit": "g" },
+      "optional": true
+    },
+    {
+      "id": "bay_leaf",
+      "label": "Bay leaf",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "each" }
+    },
+    {
+      "id": "thyme",
+      "label": "Dried thyme (or fresh thyme sprigs)",
+      "role": "herb",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "About 1/2 teaspoon dried, or 3–4 sprigs."
+    },
+    {
+      "id": "black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1, "unit": "g" },
+      "notes": "About 1/2 teaspoon, plus more to taste."
+    },
+    {
+      "id": "salt",
+      "label": "Salt (adjust to your broth)",
+      "role": "seasoning",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "Start with ~1 teaspoon if using low-sodium broth; adjust at end."
+    },
+    {
+      "id": "noodles",
+      "label": "Egg noodles (or pasta shapes)",
+      "role": "starch",
+      "amount": { "value": 120, "unit": "g" },
+      "notes": "About 4 oz dry. Add more for thicker soup; cook separately for best leftovers."
+    },
+    {
+      "id": "parsley",
+      "label": "Fresh parsley, chopped",
+      "role": "finish",
+      "amount": { "value": 15, "unit": "g" },
+      "optional": true,
+      "notes": "About 1/2 cup chopped."
+    },
+    {
+      "id": "lemon_optional",
+      "label": "Lemon juice (optional, brightens broth)",
+      "role": "finish",
+      "amount": { "value": 15, "unit": "g" },
+      "optional": true,
+      "notes": "About 1 tablespoon, to taste."
+    },
+    {
+      "id": "greens_optional",
+      "label": "Leafy greens (optional: spinach/kale/chard), chopped",
+      "role": "vegetable",
+      "amount": { "value": 60, "unit": "g" },
+      "optional": true,
+      "notes": "Stir in at the end until wilted."
+    },
+    {
+      "id": "peas_optional",
+      "label": "Frozen peas (optional)",
+      "role": "vegetable",
+      "amount": { "value": 80, "unit": "g" },
+      "optional": true,
+      "notes": "Add in last 3–5 minutes."
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01",
+      "title": "Build the aromatic base",
+      "instructions": [
+        "Heat oil (and butter if using) in a large pot over medium heat.",
+        "Add onion, carrots, and celery. Cook 6–8 minutes until softened and fragrant.",
+        "Add garlic and cook 30 seconds until fragrant."
+      ],
+      "activeMins": 10,
+      "timers": [
+        { "label": "Sweat vegetables", "mins": 7 },
+        { "label": "Cook garlic", "seconds": 30 }
+      ]
+    },
+    {
+      "id": "step_02",
+      "title": "Choose your chicken path: raw (in-pot stock) or cooked (quick)",
+      "instructions": [
+        "RAW CHICKEN PATH (best flavor): add raw chicken pieces to the pot. Add broth plus enough water to cover chicken if needed. Add bay leaf, thyme, pepper, and a light pinch of salt.",
+        "COOKED CHICKEN PATH (fast): skip adding chicken now. Add broth to the pot with bay leaf, thyme, pepper, and a light pinch of salt. Simmer 10 minutes to blend flavors, then add shredded cooked chicken later (Step 4)."
+      ],
+      "activeMins": 3
+    },
+    {
+      "id": "step_03",
+      "title": "Simmer until chicken is tender (raw path) or flavors meld (cooked path)",
+      "instructions": [
+        "Bring to a gentle simmer (not a hard boil).",
+        "RAW PATH: simmer 25–35 minutes until chicken is cooked and tender (thighs ~30 min). Remove chicken to a bowl.",
+        "COOKED PATH: simmer broth 10–15 minutes to build flavor."
+      ],
+      "handsOffMins": 30,
+      "timers": [
+        { "label": "Raw chicken simmer", "mins": 30 },
+        { "label": "Quick broth simmer", "mins": 12 }
+      ]
+    },
+    {
+      "id": "step_04",
+      "title": "Shred chicken and return to pot",
+      "instructions": [
+        "If you cooked raw chicken: let it cool briefly, then shred or chop meat. Discard skin and bones (or save bones for stock).",
+        "Return shredded chicken to the pot.",
+        "Taste broth and adjust salt/pepper (remember noodles absorb salt)."
+      ],
+      "activeMins": 8
+    },
+    {
+      "id": "step_05",
+      "title": "Cook noodles (best practice: separate pot for leftovers)",
+      "instructions": [
+        "BEST FOR MEAL PREP/LEFTOVERS: cook noodles separately in salted water until just tender, drain, and add to each bowl when serving.",
+        "ONE-POT OPTION: add noodles directly to soup and simmer until tender (usually 6–10 minutes depending on noodle)."
+      ],
+      "activeMins": 5,
+      "handsOffMins": 8,
+      "timers": [{ "label": "Cook noodles", "mins": 8 }]
+    },
+    {
+      "id": "step_06",
+      "title": "Finish and serve",
+      "instructions": [
+        "If using peas, add for the last 3–5 minutes.",
+        "If using greens, stir in at the end until wilted (1–2 minutes).",
+        "Turn off heat. Add parsley and lemon juice (if using). Taste and adjust seasoning.",
+        "Serve hot."
+      ],
+      "activeMins": 6,
+      "timers": [
+        { "label": "Heat peas", "mins": 4 },
+        { "label": "Wilt greens", "mins": 2 }
+      ]
+    }
+  ],
+
+  "variations": [
+    {
+      "name": "Use-what-you-have vegetables",
+      "change": "Swap/add vegetables such as diced potato, zucchini, corn, green beans, mushrooms, or cabbage.",
+      "notes": "Add firm vegetables earlier; tender vegetables later."
+    },
+    {
+      "name": "Herb-forward version",
+      "change": "Add fresh dill at the end or replace thyme with Italian seasoning.",
+      "notes": "Dill + lemon is especially classic."
+    },
+    {
+      "name": "Creamy chicken noodle (light)",
+      "change": "Stir in 120g half-and-half or 120g evaporated milk off heat; do not boil after adding dairy.",
+      "notes": "Add a little more salt to balance."
+    },
+    {
+      "name": "Gluten-free",
+      "change": "Use gluten-free noodles or rice; cook separately to prevent breakup.",
+      "notes": "Allergen list changes based on noodle choice."
+    }
+  ],
+
+  "planner": {
+    "flex": {
+      "vegSwap": [
+        "carrots",
+        "celery",
+        "onion",
+        "potato",
+        "corn",
+        "peas",
+        "greens",
+        "zucchini",
+        "cabbage"
+      ],
+      "starchSwap": [
+        "egg noodles",
+        "ditalini",
+        "orzo",
+        "rice",
+        "gluten-free noodles"
+      ],
+      "proteinSwap": [
+        "chicken thighs",
+        "chicken breast",
+        "rotisserie chicken",
+        "turkey leftovers"
+      ]
+    },
+    "leftovers": {
+      "bestPractice": "Store noodles separately to avoid mushy leftovers.",
+      "batching": "Freeze base (broth + chicken + veg) without noodles for best texture."
+    }
+  },
+
+  "storage": {
+    "fridge": "Refrigerate up to 4 days. Store noodles separately if possible.",
+    "freezer": "Freeze soup base (without noodles) up to 3 months. Thaw overnight and reheat gently; cook fresh noodles when serving.",
+    "reheat": "Reheat gently to a simmer; avoid hard boiling to keep chicken tender."
+  },
+
+  "notes": [
+    "If broth tastes flat: add a squeeze of lemon, a pinch more salt, and/or extra herbs.",
+    "If soup is too salty: dilute with water and simmer 5 minutes; adjust aromatics if needed.",
+    "If using low-sodium broth, season gradually—noodles and chicken absorb salt."
+  ],
+
+  "pairings": {
+    "serveWith": [
+      "crackers",
+      "buttermilk biscuits",
+      "sandwich bread",
+      "simple salad"
+    ],
+    "addOns": ["hot sauce", "extra lemon wedges", "fresh herbs"]
+  },
+
+  "audit": {
+    "tested": true,
+    "testNotes": "Schema-compliant: schemaVersion+meta present; ingredients include id+label+amount; steps include id+title+instructions; designed for SSA 'use what you have' logic."
+  }
+}

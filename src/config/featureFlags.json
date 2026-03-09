@@ -2,6 +2,12 @@
   "version": "2025.11.30-1",
   "updatedAt": "2025-11-30T00:00:00Z",
   "description": "Central feature switches + gradual rollouts for Suka Smart Assistant (SSA). SSA-first, Hub-optional. Includes high-level toggles: import-all-domains, familyFundMode, analytics, commerce, verboseEvents, allowLLM, debugAgents, and SessionRunner background shims + guards.",
+
+  "familyFundMode": false,
+  "verboseEvents": false,
+  "allowLLM": false,
+  "debugAgents": false,
+
   "defaults": {
     "toggles": {
       "import-all-domains": true,
@@ -40,10 +46,7 @@
       "startHint": "Fri 18:00",
       "endHint": "Sat 21:00"
     },
-    "quietHours": [
-      22,
-      7
-    ],
+    "quietHours": [22, 7],
     "sessionRunner": {
       "enabled": true,
       "backgroundShims": true,
@@ -55,21 +58,11 @@
       "checkpointIntervalSec": 10,
       "autoResume": true,
       "guards": {
-        "sabbath": {
-          "enabled": true
-        },
-        "quietHours": {
-          "enabled": true
-        },
-        "weather": {
-          "enabled": true
-        },
-        "inventory": {
-          "enabled": true
-        },
-        "battery": {
-          "enabled": false
-        }
+        "sabbath": { "enabled": true },
+        "quietHours": { "enabled": true },
+        "weather": { "enabled": true },
+        "inventory": { "enabled": true },
+        "battery": { "enabled": false }
       }
     },
     "scan": {
@@ -100,15 +93,9 @@
     },
     "coupons": {
       "providers": {
-        "sams": {
-          "enabled": true
-        },
-        "costco": {
-          "enabled": true
-        },
-        "aldi": {
-          "enabled": true
-        }
+        "sams": { "enabled": true },
+        "costco": { "enabled": true },
+        "aldi": { "enabled": true }
       },
       "stacking": {
         "enabled": true,
@@ -350,82 +337,28 @@
       }
     },
     "rollouts": {
-      "enableScanCompareTrust": {
-        "percent": 100,
-        "allowlist": []
-      },
-      "enableCoupons": {
-        "percent": 100,
-        "allowlist": []
-      },
-      "enableRecallsCheck": {
-        "percent": 100,
-        "allowlist": []
-      },
-      "enableIngredientsCheck": {
-        "percent": 100,
-        "allowlist": []
-      },
-      "enablePriceCompare": {
-        "percent": 100,
-        "allowlist": []
-      },
-      "scan.trust.supplierTrace": {
-        "percent": 15,
-        "allowlist": []
-      },
-      "scan.compare.bulkPriceAudit": {
-        "percent": 25,
-        "allowlist": []
-      },
-      "coupons.partnerPerks": {
-        "percent": 10,
-        "allowlist": []
-      },
-      "cleaning.zoneRoutineEngine": {
-        "percent": 100,
-        "allowlist": []
-      },
-      "garden.careAndHarvestEngine": {
-        "percent": 100,
-        "allowlist": []
-      },
-      "storehouse.storehouseStockPlanner": {
-        "percent": 100,
-        "allowlist": []
-      },
-      "animals.butcherySessionEngine": {
-        "percent": 100,
-        "allowlist": []
-      },
+      "enableScanCompareTrust": { "percent": 100, "allowlist": [] },
+      "enableCoupons": { "percent": 100, "allowlist": [] },
+      "enableRecallsCheck": { "percent": 100, "allowlist": [] },
+      "enableIngredientsCheck": { "percent": 100, "allowlist": [] },
+      "enablePriceCompare": { "percent": 100, "allowlist": [] },
+      "scan.trust.supplierTrace": { "percent": 15, "allowlist": [] },
+      "scan.compare.bulkPriceAudit": { "percent": 25, "allowlist": [] },
+      "coupons.partnerPerks": { "percent": 10, "allowlist": [] },
+      "cleaning.zoneRoutineEngine": { "percent": 100, "allowlist": [] },
+      "garden.careAndHarvestEngine": { "percent": 100, "allowlist": [] },
+      "storehouse.storehouseStockPlanner": { "percent": 100, "allowlist": [] },
+      "animals.butcherySessionEngine": { "percent": 100, "allowlist": [] },
       "preservation.preservationSessionEngine": {
         "percent": 100,
         "allowlist": []
       },
-      "session.runner.wakeLock": {
-        "percent": 100,
-        "allowlist": []
-      },
-      "session.runner.notifications": {
-        "percent": 100,
-        "allowlist": []
-      },
-      "session.runner.pictureInPicture": {
-        "percent": 80,
-        "allowlist": []
-      },
-      "session.runner.mediaSession": {
-        "percent": 100,
-        "allowlist": []
-      },
-      "session.runner.tts": {
-        "percent": 100,
-        "allowlist": []
-      },
-      "session.runner.backgroundShims": {
-        "percent": 100,
-        "allowlist": []
-      }
+      "session.runner.wakeLock": { "percent": 100, "allowlist": [] },
+      "session.runner.notifications": { "percent": 100, "allowlist": [] },
+      "session.runner.pictureInPicture": { "percent": 80, "allowlist": [] },
+      "session.runner.mediaSession": { "percent": 100, "allowlist": [] },
+      "session.runner.tts": { "percent": 100, "allowlist": [] },
+      "session.runner.backgroundShims": { "percent": 100, "allowlist": [] }
     },
     "runtimeHints": {
       "events": [
@@ -504,9 +437,7 @@
   "rules": [
     {
       "name": "Hub-only features visible only in Suka Village Family Fund Hub",
-      "if": {
-        "context.tier": "hub"
-      },
+      "if": { "context.tier": "hub" },
       "set": {
         "toggles.familyFundMode": true,
         "familyFundMode": true,
@@ -521,11 +452,7 @@
     },
     {
       "name": "Non-hub hides hubOnly items",
-      "if": {
-        "context.tier": {
-          "$ne": "hub"
-        }
-      },
+      "if": { "context.tier": { "$ne": "hub" } },
       "set": {
         "toggles.familyFundMode": false,
         "familyFundMode": false,
@@ -535,14 +462,7 @@
     },
     {
       "name": "Admins and Testers get full access",
-      "if": {
-        "context.role": {
-          "$in": [
-            "admin",
-            "tester"
-          ]
-        }
-      },
+      "if": { "context.role": { "$in": ["admin", "tester"] } },
       "set": {
         "toggles.import-all-domains": true,
         "toggles.analytics": true,
@@ -566,12 +486,8 @@
     },
     {
       "name": "Sabbath guard off for demo booths",
-      "if": {
-        "context.deviceProfile": "kiosk-demo"
-      },
-      "set": {
-        "sabbathGuard.enabled": false
-      }
+      "if": { "context.deviceProfile": "kiosk-demo" },
+      "set": { "sabbathGuard.enabled": false }
     }
   ],
   "environments": {
@@ -590,52 +506,21 @@
         "mediaSession": true,
         "textToSpeech": true
       },
-      "cleaning": {
-        "enabled": true
-      },
-      "garden": {
-        "enabled": true
-      },
-      "storehouse": {
-        "enabled": true
-      },
-      "meals": {
-        "enabled": true
-      },
-      "animals": {
-        "enabled": true
-      },
-      "preservation": {
-        "enabled": true
-      },
-      "import": {
-        "enabled": true
-      },
-      "analytics": {
-        "enabled": true
-      },
-      "commerce": {
-        "enabled": false
-      },
+      "cleaning": { "enabled": true },
+      "garden": { "enabled": true },
+      "storehouse": { "enabled": true },
+      "meals": { "enabled": true },
+      "animals": { "enabled": true },
+      "preservation": { "enabled": true },
+      "import": { "enabled": true },
+      "analytics": { "enabled": true },
+      "commerce": { "enabled": false },
       "rollouts": {
-        "scan.trust.supplierTrace": {
-          "percent": 100,
-          "allowlist": []
-        },
-        "scan.compare.bulkPriceAudit": {
-          "percent": 100,
-          "allowlist": []
-        },
-        "session.runner.pictureInPicture": {
-          "percent": 100,
-          "allowlist": []
-        }
+        "scan.trust.supplierTrace": { "percent": 100, "allowlist": [] },
+        "scan.compare.bulkPriceAudit": { "percent": 100, "allowlist": [] },
+        "session.runner.pictureInPicture": { "percent": 100, "allowlist": [] }
       },
-      "scan": {
-        "ui": {
-          "haptics": false
-        }
-      }
+      "scan": { "ui": { "haptics": false } }
     },
     "staging": {
       "verboseEvents": false,
@@ -652,25 +537,12 @@
         "mediaSession": true,
         "textToSpeech": true
       },
-      "analytics": {
-        "enabled": true
-      },
-      "commerce": {
-        "enabled": false
-      },
+      "analytics": { "enabled": true },
+      "commerce": { "enabled": false },
       "rollouts": {
-        "scan.trust.supplierTrace": {
-          "percent": 50,
-          "allowlist": []
-        },
-        "scan.compare.bulkPriceAudit": {
-          "percent": 60,
-          "allowlist": []
-        },
-        "session.runner.pictureInPicture": {
-          "percent": 75,
-          "allowlist": []
-        }
+        "scan.trust.supplierTrace": { "percent": 50, "allowlist": [] },
+        "scan.compare.bulkPriceAudit": { "percent": 60, "allowlist": [] },
+        "session.runner.pictureInPicture": { "percent": 75, "allowlist": [] }
       }
     },
     "production": {
@@ -688,29 +560,13 @@
         "mediaSession": true,
         "textToSpeech": true
       },
-      "analytics": {
-        "enabled": true
-      },
-      "commerce": {
-        "enabled": false
-      },
+      "analytics": { "enabled": true },
+      "commerce": { "enabled": false },
       "rollouts": {
-        "scan.trust.supplierTrace": {
-          "percent": 15,
-          "allowlist": []
-        },
-        "scan.compare.bulkPriceAudit": {
-          "percent": 25,
-          "allowlist": []
-        },
-        "coupons.partnerPerks": {
-          "percent": 10,
-          "allowlist": []
-        },
-        "session.runner.pictureInPicture": {
-          "percent": 60,
-          "allowlist": []
-        }
+        "scan.trust.supplierTrace": { "percent": 15, "allowlist": [] },
+        "scan.compare.bulkPriceAudit": { "percent": 25, "allowlist": [] },
+        "coupons.partnerPerks": { "percent": 10, "allowlist": [] },
+        "session.runner.pictureInPicture": { "percent": 60, "allowlist": [] }
       }
     }
   }

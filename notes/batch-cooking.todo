@@ -50,7 +50,7 @@
   ☐ PressureCanningTracker.jsx, FreezingTracker.jsx, DehydratingTracker.jsx, CuringManager.jsx, BeerBrewingForm.jsx, WineMakingTracker.jsx
 
 4) Files/Areas to touch (agents + services)
-- src/agents/batchCookingAgent.js (NEW if missing)
+- src/agents/batchCookingShim.js (NEW if missing)
   ☐ buildIntegratedTimeline(recipes, prefs, equipment)
   ☐ proposePreservation(dish, householdConstraints)
   ☐ computeInventoryDelta(recipes, pantry)
@@ -141,7 +141,7 @@
   "missing":[ {"sku":"PAPRIKA_SMOKED","qty":10,"unit":"g"} ]
 }
 
-9) Pseudocode — Agent timeline (src/agents/batchCookingAgent.js)
+9) Pseudocode — Agent timeline (src/agents/batchCookingShim.js)
 /*
 export async function buildIntegratedTimeline(selectedRecipes, prefs, equipment){
   const steps = flattenRecipeSteps(selectedRecipes);

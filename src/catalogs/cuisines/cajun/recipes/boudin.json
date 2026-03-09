@@ -1,0 +1,145 @@
+{
+  "id": "cajun_boudin",
+  "name": "Cajun Boudin (Pork and Rice Sausage)",
+  "servings": 10,
+  "ingredients": [
+    {
+      "item": "pork shoulder",
+      "amount": 3,
+      "unit": "lb",
+      "prep": "cut into 2-inch chunks"
+    },
+    {
+      "item": "pork liver",
+      "amount": 0.5,
+      "unit": "lb",
+      "prep": "optional; or use chicken livers"
+    },
+    {
+      "item": "chicken livers",
+      "amount": 0.5,
+      "unit": "lb",
+      "prep": "optional substitute for pork liver"
+    },
+
+    {
+      "item": "yellow onion",
+      "amount": 1,
+      "unit": "large",
+      "prep": "roughly chopped"
+    },
+    {
+      "item": "celery",
+      "amount": 2,
+      "unit": "stalks",
+      "prep": "roughly chopped"
+    },
+    {
+      "item": "green bell pepper",
+      "amount": 1,
+      "unit": "large",
+      "prep": "roughly chopped"
+    },
+    { "item": "garlic", "amount": 6, "unit": "cloves", "prep": "smashed" },
+
+    { "item": "bay leaves", "amount": 2, "unit": "each" },
+    { "item": "black pepper", "amount": 1.5, "unit": "tsp" },
+    { "item": "kosher salt", "amount": 2, "unit": "tsp" },
+
+    {
+      "item": "long-grain white rice",
+      "amount": 2,
+      "unit": "cups",
+      "prep": "uncooked; yields ~6 cups cooked"
+    },
+    {
+      "item": "water",
+      "amount": 12,
+      "unit": "cups",
+      "prep": "for simmering meat (add more as needed)"
+    },
+
+    { "item": "Cajun seasoning", "amount": 2, "unit": "tbsp" },
+    {
+      "item": "cayenne pepper",
+      "amount": 0.5,
+      "unit": "tsp",
+      "prep": "adjust to heat preference"
+    },
+    { "item": "dried thyme", "amount": 1, "unit": "tsp" },
+    {
+      "item": "ground sage",
+      "amount": 0.5,
+      "unit": "tsp",
+      "prep": "optional but classic in some styles"
+    },
+
+    { "item": "green onions", "amount": 6, "unit": "stalks", "prep": "sliced" },
+    {
+      "item": "fresh parsley",
+      "amount": 0.5,
+      "unit": "cup",
+      "prep": "chopped"
+    },
+
+    {
+      "item": "pork fat",
+      "amount": 0.25,
+      "unit": "cup",
+      "prep": "optional; reserved cooking fat or softened lard for moisture"
+    },
+
+    {
+      "item": "hog casings",
+      "amount": 10,
+      "unit": "feet",
+      "prep": "soaked, rinsed, and flushed"
+    }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "text": "Prep casings (if stuffing): Rinse casings under cool water, then soak per package directions. Flush water through each casing to clean the inside. Keep submerged in clean water until ready to stuff."
+    },
+    {
+      "order": 2,
+      "text": "Cook pork: In a large pot, add pork shoulder, onion, celery, bell pepper, garlic, bay leaves, salt, and black pepper. Cover with water. Bring to a gentle simmer and cook until pork is very tender."
+    },
+    {
+      "order": 3,
+      "text": "Add liver near the end: If using pork liver or chicken livers, add them during the last 20–30 minutes of cooking so they cook through without becoming overly tough."
+    },
+    {
+      "order": 4,
+      "text": "Cook rice: While meat simmers, cook rice separately (or use some of the strained broth for extra flavor). Cook until tender; fluff and set aside."
+    },
+    {
+      "order": 5,
+      "text": "Strain and reserve broth: Remove meat and aromatics from the pot. Strain the cooking liquid and reserve several cups as broth for mixing. Discard bay leaves and any tough vegetable bits."
+    },
+    {
+      "order": 6,
+      "text": "Grind/chop meat and liver: When cool enough to handle, grind pork and liver through a coarse plate, or pulse in a food processor. Aim for a rustic texture (not a smooth paste)."
+    },
+    {
+      "order": 7,
+      "text": "Mix filling: In a large bowl, combine ground pork/liver, cooked rice, Cajun seasoning, cayenne, thyme, optional sage, green onions, and parsley. Add pork fat (if using) for moisture."
+    },
+    {
+      "order": 8,
+      "text": "Adjust texture with broth: Add reserved broth a little at a time and mix until the filling is moist and cohesive—soft enough to stuff and juicy when cooked, but not soupy. Taste and adjust salt/heat as needed."
+    },
+    {
+      "order": 9,
+      "text": "Stuff (optional): Load the mixture into a sausage stuffer. Slide casing onto the tube and tie off the end. Stuff gently, keeping the casing full but not tight. Twist into links."
+    },
+    {
+      "order": 10,
+      "text": "Poach links: Bring a pot of water (or reserved broth) to a bare simmer (not boiling). Poach boudin links until heated through. Avoid boiling to prevent casings from bursting."
+    },
+    {
+      "order": 11,
+      "text": "Serve: Serve warm as links (often eaten by squeezing filling from casing) or crisp the outside by grilling or baking briefly after poaching."
+    }
+  ]
+}

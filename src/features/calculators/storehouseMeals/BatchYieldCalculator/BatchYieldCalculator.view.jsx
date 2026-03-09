@@ -21,8 +21,7 @@
  */
 
 import React, { useState } from "react";
-import PropTypes from "prop-types";
-import { emit } from "@/services/eventBus";
+import { emit } from "@/services/events/eventBus";
 import { useBatchYieldCalculator } from "./BatchYieldCalculator.hooks";
 
 const SCALING_MODES = [
@@ -69,6 +68,13 @@ const DEFAULT_CONTAINER_CATALOG = [
 
 /**
  * Simple container target row editor.
+ *
+ * @param {{
+ *  target: { containerTypeId?: string, count?: number|string },
+ *  catalog: Array<{ containerTypeId?: string, label?: string }>,
+ *  onChange: (nextTarget: { containerTypeId?: string, count?: number|string }) => void,
+ *  onRemove: () => void
+ * }} props
  */
 function ContainerTargetRow({ target, catalog, onChange, onRemove }) {
   const handleContainerChange = (e) => {
@@ -115,21 +121,22 @@ function ContainerTargetRow({ target, catalog, onChange, onRemove }) {
   );
 }
 
-ContainerTargetRow.propTypes = {
-  target: PropTypes.shape({
-    containerTypeId: PropTypes.string,
-    count: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  }).isRequired,
-  catalog: PropTypes.arrayOf(
-    PropTypes.shape({
-      containerTypeId: PropTypes.string,
-      label: PropTypes.string,
-    })
-  ).isRequired,
-  onChange: PropTypes.func.isRequired,
-  onRemove: PropTypes.func.isRequired,
-};
-
+/**
+ * @param {{
+ *  defaultRecipe?: {
+ *    title?: string,
+ *    baseYield?: { servings?: number, servingSizeGrams?: number },
+ *    ingredients?: Array<{
+ *      inventoryItemId?: string,
+ *      name?: string,
+ *      quantity?: string|number,
+ *      unit?: string
+ *    }>,
+ *    notes?: string,
+ *    containerCatalog?: Array<{ containerTypeId?: string, label?: string }>
+ *  } | null
+ * }} props
+ */
 export function BatchYieldCalculatorView({ defaultRecipe }) {
   const { runCalculation, loading, lastResult, error } =
     useBatchYieldCalculator();
@@ -200,8 +207,7 @@ export function BatchYieldCalculatorView({ defaultRecipe }) {
       if (scalingMode === "scaleFactor") {
         return {
           mode: "scaleFactor",
-          scaleFactor:
-            scaleFactor === "" ? null : Number(scaleFactor) || null,
+          scaleFactor: scaleFactor === "" ? null : Number(scaleFactor) || null,
         };
       }
       if (scalingMode === "servings") {
@@ -269,8 +275,7 @@ export function BatchYieldCalculatorView({ defaultRecipe }) {
             lastResult.output.batchPortionYield.preservedServings,
           containerCount: lastResult.output.batchContainerPlan.length,
         },
-        inventoryDelta:
-          lastResult.output.batchInventoryDelta || undefined,
+        inventoryDelta: lastResult.output.batchInventoryDelta || undefined,
       },
     });
   };
@@ -294,8 +299,8 @@ export function BatchYieldCalculatorView({ defaultRecipe }) {
       <header className="calculator-header">
         <h1>Batch Yield Planner</h1>
         <p className="calculator-subtitle">
-          Design a big batch, estimate servings and containers, and sync
-          with your storehouse and sessions.
+          Design a big batch, estimate servings and containers, and sync with
+          your storehouse and sessions.
         </p>
       </header>
 
@@ -412,8 +417,8 @@ export function BatchYieldCalculatorView({ defaultRecipe }) {
 
               {containerTargets.length === 0 && (
                 <p className="calculator-hint">
-                  Add at least one container type and count to estimate a
-                  batch size that fills those containers.
+                  Add at least one container type and count to estimate a batch
+                  size that fills those containers.
                 </p>
               )}
 
@@ -446,9 +451,7 @@ export function BatchYieldCalculatorView({ defaultRecipe }) {
                 onChange={(e) => setReadyToEatServings(e.target.value)}
                 placeholder="Optional"
               />
-              <small>
-                Leave blank to let SSA choose a reasonable default.
-              </small>
+              <small>Leave blank to let SSA choose a reasonable default.</small>
             </label>
 
             <label className="calculator-field">
@@ -489,9 +492,7 @@ export function BatchYieldCalculatorView({ defaultRecipe }) {
                 min="1"
                 step="1"
                 value={defaultServingSizeOverride}
-                onChange={(e) =>
-                  setDefaultServingSizeOverride(e.target.value)
-                }
+                onChange={(e) => setDefaultServingSizeOverride(e.target.value)}
                 placeholder="Leave blank to use base serving size"
               />
             </label>
@@ -522,8 +523,8 @@ export function BatchYieldCalculatorView({ defaultRecipe }) {
           <header className="calculator-results-header">
             <h2>Batch yield summary</h2>
             <p>
-              Based on your inputs, here&apos;s how this batch breaks
-              down into servings and containers.
+              Based on your inputs, here&apos;s how this batch breaks down into
+              servings and containers.
             </p>
           </header>
 
@@ -540,28 +541,19 @@ export function BatchYieldCalculatorView({ defaultRecipe }) {
                 <li>
                   <span>Ready-to-eat servings</span>
                   <strong>
-                    {
-                      lastResult.output.batchPortionYield
-                        .readyToEatServings
-                    }
+                    {lastResult.output.batchPortionYield.readyToEatServings}
                   </strong>
                 </li>
                 <li>
                   <span>Servings preserved</span>
                   <strong>
-                    {
-                      lastResult.output.batchPortionYield
-                        .preservedServings
-                    }
+                    {lastResult.output.batchPortionYield.preservedServings}
                   </strong>
                 </li>
                 <li>
                   <span>Serving size (g)</span>
                   <strong>
-                    {
-                      lastResult.output.batchPortionYield
-                        .servingSizeGrams
-                    }
+                    {lastResult.output.batchPortionYield.servingSizeGrams}
                   </strong>
                 </li>
               </ul>
@@ -577,8 +569,8 @@ export function BatchYieldCalculatorView({ defaultRecipe }) {
                 )}
               </p>
               <p className="calculator-hint">
-                These lines are ready to send to your label printer or
-                Batch Session planner.
+                These lines are ready to send to your label printer or Batch
+                Session planner.
               </p>
             </div>
           </div>
@@ -588,8 +580,8 @@ export function BatchYieldCalculatorView({ defaultRecipe }) {
             <h3>Container plan</h3>
             {lastResult.output.batchContainerPlan.length === 0 ? (
               <p className="calculator-hint">
-                No container plan generated. Try using the container
-                scaling mode or adding preservation servings.
+                No container plan generated. Try using the container scaling
+                mode or adding preservation servings.
               </p>
             ) : (
               <table className="calculator-table">
@@ -604,26 +596,24 @@ export function BatchYieldCalculatorView({ defaultRecipe }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {lastResult.output.batchContainerPlan.map(
-                    (cp, idx) => (
-                      <tr key={`${cp.containerTypeId}-${idx}`}>
-                        <td>{cp.label}</td>
-                        <td>{cp.count}</td>
-                        <td>
-                          {cp.estimatedServingsPerContainer
-                            ? cp.estimatedServingsPerContainer.toFixed(1)
-                            : "—"}
-                        </td>
-                        <td>
-                          {cp.fillFraction != null
-                            ? `${Math.round(cp.fillFraction * 100)}%`
-                            : "—"}
-                        </td>
-                        <td>{cp.preservationMethod}</td>
-                        <td>{cp.storageLocation}</td>
-                      </tr>
-                    )
-                  )}
+                  {lastResult.output.batchContainerPlan.map((cp, idx) => (
+                    <tr key={`${cp.containerTypeId}-${idx}`}>
+                      <td>{cp.label}</td>
+                      <td>{cp.count}</td>
+                      <td>
+                        {cp.estimatedServingsPerContainer
+                          ? cp.estimatedServingsPerContainer.toFixed(1)
+                          : "—"}
+                      </td>
+                      <td>
+                        {cp.fillFraction != null
+                          ? `${Math.round(cp.fillFraction * 100)}%`
+                          : "—"}
+                      </td>
+                      <td>{cp.preservationMethod}</td>
+                      <td>{cp.storageLocation}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             )}
@@ -635,11 +625,11 @@ export function BatchYieldCalculatorView({ defaultRecipe }) {
             <div className="calculator-grid">
               <div className="calculator-card-lite">
                 <h4>Ingredients used</h4>
-                {lastResult.output.batchInventoryDelta
-                  .ingredientsConsumed.length === 0 ? (
+                {lastResult.output.batchInventoryDelta.ingredientsConsumed
+                  .length === 0 ? (
                   <p className="calculator-hint">
-                    No linked ingredients yet. Once this recipe is tied
-                    to storehouse items, SSA will show exact changes.
+                    No linked ingredients yet. Once this recipe is tied to
+                    storehouse items, SSA will show exact changes.
                   </p>
                 ) : (
                   <ul className="calculator-metrics-list">
@@ -659,11 +649,11 @@ export function BatchYieldCalculatorView({ defaultRecipe }) {
 
               <div className="calculator-card-lite">
                 <h4>Items produced</h4>
-                {lastResult.output.batchInventoryDelta.itemsProduced
-                  .length === 0 ? (
+                {lastResult.output.batchInventoryDelta.itemsProduced.length ===
+                0 ? (
                   <p className="calculator-hint">
-                    No produced items yet. Container plan will create
-                    production entries here.
+                    No produced items yet. Container plan will create production
+                    entries here.
                   </p>
                 ) : (
                   <ul className="calculator-metrics-list">
@@ -705,37 +695,5 @@ export function BatchYieldCalculatorView({ defaultRecipe }) {
     </div>
   );
 }
-
-BatchYieldCalculatorView.propTypes = {
-  defaultRecipe: PropTypes.shape({
-    title: PropTypes.string,
-    baseYield: PropTypes.shape({
-      servings: PropTypes.number,
-      servingSizeGrams: PropTypes.number,
-    }),
-    ingredients: PropTypes.arrayOf(
-      PropTypes.shape({
-        inventoryItemId: PropTypes.string,
-        name: PropTypes.string,
-        quantity: PropTypes.oneOfType([
-          PropTypes.string,
-          PropTypes.number,
-        ]),
-        unit: PropTypes.string,
-      })
-    ),
-    notes: PropTypes.string,
-    containerCatalog: PropTypes.arrayOf(
-      PropTypes.shape({
-        containerTypeId: PropTypes.string,
-        label: PropTypes.string,
-      })
-    ),
-  }),
-};
-
-BatchYieldCalculatorView.defaultProps = {
-  defaultRecipe: null,
-};
 
 export default BatchYieldCalculatorView;

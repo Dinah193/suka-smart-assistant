@@ -23,7 +23,7 @@
  *  - Lightweight tracing helpers: span() for duration and outcome logging.
  */
 
-import eventBus from "../services/eventBus";
+import eventBus from "../services/events/eventBus";
 import featureFlags from "../config/featureFlags";
 
 /** @typedef {'debug'|'info'|'warn'|'error'} LogLevel */
@@ -158,7 +158,10 @@ function rateLimited(rateKey, perMs) {
 
 const DEFAULT_OPTS = /** @type {LoggerOptions} */ ({
   level: featureFlags?.telemetry?.minLevel || "debug",
-  sinks: featureFlags?.telemetry?.emitDebug === false ? [eventBusSink] : [consoleSink, eventBusSink],
+  sinks:
+    featureFlags?.telemetry?.emitDebug === false
+      ? [eventBusSink]
+      : [consoleSink, eventBusSink],
   redactKeys: [],
   sampleRate: 1,
 });
@@ -196,7 +199,12 @@ export function createLogger(ctx = {}, opts = {}) {
 
   function emit(level, msg, data, meta) {
     if ((LEVEL_NUM[level] ?? 999) < minLevelNum) return;
-    if (level === "debug" && options.sampleRate < 1 && Math.random() > options.sampleRate) return;
+    if (
+      level === "debug" &&
+      options.sampleRate < 1 &&
+      Math.random() > options.sampleRate
+    )
+      return;
 
     const entry = baseEntry(level, msg, data, meta);
 
@@ -219,7 +227,11 @@ export function createLogger(ctx = {}, opts = {}) {
   /** Child logger with merged context */
   function child(extraCtx = {}, extraOpts = {}) {
     return createLogger(
-      { ...ctx, ...extraCtx, tags: { ...(ctx.tags || {}), ...(extraCtx.tags || {}) } },
+      {
+        ...ctx,
+        ...extraCtx,
+        tags: { ...(ctx.tags || {}), ...(extraCtx.tags || {}) },
+      },
       { ...options, ...extraOpts }
     );
   }
@@ -231,15 +243,26 @@ export function createLogger(ctx = {}, opts = {}) {
    *   try { ...; span.end({ ok: true }); } catch (e) { span.fail(e); }
    */
   function span(operation, data) {
-    const spanId = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+    const spanId = `${Date.now().toString(36)}${Math.random()
+      .toString(36)
+      .slice(2, 6)}`;
     const startedAt = Date.now();
-    emit("debug", `span.start:${operation}`, data, { spanId, operation, phase: "start" });
+    emit("debug", `span.start:${operation}`, data, {
+      spanId,
+      operation,
+      phase: "start",
+    });
 
     return {
       id: spanId,
       end(extra) {
         const durMs = Date.now() - startedAt;
-        emit("info", `span.end:${operation}`, { ...data, ...extra, durMs }, { spanId, operation, durMs, phase: "end" });
+        emit(
+          "info",
+          `span.end:${operation}`,
+          { ...data, ...extra, durMs },
+          { spanId, operation, durMs, phase: "end" }
+        );
       },
       fail(error, extra) {
         const durMs = Date.now() - startedAt;
@@ -306,8 +329,26 @@ export const log = createLogger({ source: DEFAULT_SOURCE });
  *   const slog = withCorrelation({ source:'ui.scheduling', sessionId, planId, modelVersion });
  *   slog.info('user.nudge', { minutes: 5 });
  */
-export function withCorrelation({ source, sessionId, stepId, planId, modelVersion, requestId, domain, tags }) {
-  return createLogger({ source, sessionId, stepId, planId, modelVersion, requestId, domain, tags });
+export function withCorrelation({
+  source,
+  sessionId,
+  stepId,
+  planId,
+  modelVersion,
+  requestId,
+  domain,
+  tags,
+}) {
+  return createLogger({
+    source,
+    sessionId,
+    stepId,
+    planId,
+    modelVersion,
+    requestId,
+    domain,
+    tags,
+  });
 }
 
 // -----------------------------
@@ -333,7 +374,12 @@ function errorToObject(err) {
  * NOTE: This helper does not export to the Hub—observability only.
  */
 export function auditEvent(source, type, data) {
-  const payload = { type, ts: nowISO(), source: source || DEFAULT_SOURCE, data };
+  const payload = {
+    type,
+    ts: nowISO(),
+    source: source || DEFAULT_SOURCE,
+    data,
+  };
   try {
     eventBus.emit(type, payload);
   } catch {

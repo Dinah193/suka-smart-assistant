@@ -1,5 +1,11 @@
 // src/pages/MealPlanning/BatchSessionLinker.jsx
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 /**
  * BatchSessionLinker — dynamic, alias-safe
@@ -23,7 +29,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 //////////////////////////////////////////
 let eventBus = { on: () => {}, off: () => {}, emit: () => {} };
 try {
-  eventBus = require("@/services/eventBus").eventBus || eventBus;
+  eventBus = require("@/services/events/eventBus").eventBus || eventBus;
 } catch {}
 
 let automation = {};
@@ -37,28 +43,48 @@ try {
 } catch {}
 
 let RecipeStore = {};
-try { RecipeStore = require("@/store/RecipeStore"); } catch {}
+try {
+  RecipeStore = require("@/store/RecipeStore");
+} catch {}
 let InventoryStore = {};
-try { InventoryStore = require("@/store/InventoryStore"); } catch {}
+try {
+  InventoryStore = require("@/store/InventoryStore");
+} catch {}
 let PreferencesStore = {};
-try { PreferencesStore = require("@/store/PreferencesStore"); } catch {}
+try {
+  PreferencesStore = require("@/store/PreferencesStore");
+} catch {}
 let BatchSessionStore = {};
-try { BatchSessionStore = require("@/store/BatchSessionStore"); } catch {}
+try {
+  BatchSessionStore = require("@/store/BatchSessionStore");
+} catch {}
 
 let nutritionEngine;
-try { nutritionEngine = require("@/services/nutrition/nutritionEngine"); } catch {}
+try {
+  nutritionEngine = require("@/services/nutrition/nutritionEngine");
+} catch {}
 
 let css = { cx: (...a) => a.filter(Boolean).join(" ") };
-try { css = { cx: require("@/utils/css").classNames || ((...a) => a.filter(Boolean).join(" ")) }; } catch {}
+try {
+  css = {
+    cx:
+      require("@/utils/css").classNames ||
+      ((...a) => a.filter(Boolean).join(" ")),
+  };
+} catch {}
 
 let fmt = {
   duration: (min) => `${Math.round(min)} min`,
   qty: (n) => (Number.isFinite(n) ? Number(n.toFixed(2)) : n),
 };
-try { fmt = { ...fmt, ...(require("@/utils/format")) }; } catch {}
+try {
+  fmt = { ...fmt, ...require("@/utils/format") };
+} catch {}
 
 let useBatchQueue = () => ({ queue: [], clear: () => {} });
-try { useBatchQueue = require("@/context/BatchQueueContext").useBatchQueue; } catch {}
+try {
+  useBatchQueue = require("@/context/BatchQueueContext").useBatchQueue;
+} catch {}
 
 //////////////////////////////////////////
 // Guards, helpers, and calculators
@@ -76,7 +102,9 @@ const shellfishFilter = (recipes, profile) => {
   if (allow) return { filtered: recipes || [], removed: [] };
   const removed = [];
   const filtered = (recipes || []).filter((r) => {
-    const tagHit = Array.isArray(r?.tags) && r.tags.some((t) => `${t}`.toLowerCase().includes("shellfish"));
+    const tagHit =
+      Array.isArray(r?.tags) &&
+      r.tags.some((t) => `${t}`.toLowerCase().includes("shellfish"));
     if (tagHit) removed.push(r);
     return !tagHit;
   });
@@ -87,7 +115,9 @@ const consolidateIngredients = (recipes = []) => {
   const map = new Map();
   for (const r of recipes) {
     for (const ing of r?.ingredients || []) {
-      const key = `${(ing.name || "").trim().toLowerCase()}::${(ing.unit || "").trim().toLowerCase()}`;
+      const key = `${(ing.name || "").trim().toLowerCase()}::${(ing.unit || "")
+        .trim()
+        .toLowerCase()}`;
       const prev = map.get(key) || { ...ing, qty: 0 };
       map.set(key, { ...prev, qty: (prev.qty || 0) + (Number(ing.qty) || 0) });
     }
@@ -109,7 +139,15 @@ const totalNutrition = (recipes = [], prefs = {}) => {
   if (nutritionEngine?.computeSessionTotals) {
     return nutritionEngine.computeSessionTotals(recipes, prefs);
   }
-  const base = { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0 };
+  const base = {
+    calories: 0,
+    protein: 0,
+    carbs: 0,
+    fat: 0,
+    fiber: 0,
+    sugar: 0,
+    sodium: 0,
+  };
   for (const r of recipes) {
     const n = r?.nutrition || {};
     base.calories += Number(n.calories) || 0;
@@ -136,7 +174,9 @@ const totalNutrition = (recipes = [], prefs = {}) => {
 // UI tiny bits
 //////////////////////////////////////////
 const Tag = ({ children, tone = "zinc" }) => (
-  <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium border-${tone}-300 text-${tone}-700 bg-${tone}-50`}>
+  <span
+    className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium border-${tone}-300 text-${tone}-700 bg-${tone}-50`}
+  >
     {children}
   </span>
 );
@@ -160,7 +200,11 @@ export default function BatchSessionLinker({
   const { queue, clear } = useBatchQueue();
 
   const [prefs, setPrefs] = useState(() => {
-    try { return PreferencesStore?.getPreferences?.() || {}; } catch { return {}; }
+    try {
+      return PreferencesStore?.getPreferences?.() || {};
+    } catch {
+      return {};
+    }
   });
 
   const [draft, setDraft] = useState(null);
@@ -171,7 +215,10 @@ export default function BatchSessionLinker({
 
   // Build source list (incoming > queue)
   const sourceRecipes = useMemo(() => {
-    const base = Array.isArray(incomingRecipes) && incomingRecipes.length ? incomingRecipes : queue;
+    const base =
+      Array.isArray(incomingRecipes) && incomingRecipes.length
+        ? incomingRecipes
+        : queue;
     const { filtered, removed } = shellfishFilter(base, prefs);
     setRemovedByShellfish(removed);
     return filtered;
@@ -179,9 +226,18 @@ export default function BatchSessionLinker({
   }, [incomingRecipes, queue, prefs?.torahProfile?.shellfishAllowed]);
 
   // Derived
-  const consolidated = useMemo(() => consolidateIngredients(sourceRecipes), [sourceRecipes]);
-  const totalMins = useMemo(() => estimateMinutes(sourceRecipes), [sourceRecipes]);
-  const nutritionTotals = useMemo(() => totalNutrition(sourceRecipes, prefs), [sourceRecipes, prefs]);
+  const consolidated = useMemo(
+    () => consolidateIngredients(sourceRecipes),
+    [sourceRecipes]
+  );
+  const totalMins = useMemo(
+    () => estimateMinutes(sourceRecipes),
+    [sourceRecipes]
+  );
+  const nutritionTotals = useMemo(
+    () => totalNutrition(sourceRecipes, prefs),
+    [sourceRecipes, prefs]
+  );
   const isSabbathBlocked = useMemo(() => !sabbathGuard(prefs), [prefs]);
 
   //////////////////////////////////////////
@@ -189,7 +245,9 @@ export default function BatchSessionLinker({
   //////////////////////////////////////////
   useEffect(() => {
     const refresh = () => {
-      try { setPrefs(PreferencesStore?.getPreferences?.() || {}); } catch {}
+      try {
+        setPrefs(PreferencesStore?.getPreferences?.() || {});
+      } catch {}
     };
     const handlers = [
       ["preferences.changed", refresh],
@@ -215,13 +273,18 @@ export default function BatchSessionLinker({
       const text = dt.getData("text/plain");
       const maybe = JSON.parse(text);
       return maybe?.type === "RECIPE_CARD" ? maybe.data : null;
-    } catch { return null; }
+    } catch {
+      return null;
+    }
   };
 
   useEffect(() => {
     const el = dropZoneRef.current;
     if (!el) return;
-    const prevent = (e) => { e.preventDefault(); e.stopPropagation(); };
+    const prevent = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
     const onDrop = (e) => {
       prevent(e);
       const data = parseDroppedData(e.dataTransfer);
@@ -234,13 +297,20 @@ export default function BatchSessionLinker({
       try {
         eventBus.emit("batch.queue.added", { at: nowIso(), recipe: data });
       } catch {}
-      setToast({ type: "info", msg: `Added "${data?.title || data?.name || "Recipe"}" to selection.` });
+      setToast({
+        type: "info",
+        msg: `Added "${data?.title || data?.name || "Recipe"}" to selection.`,
+      });
     };
 
-    ["dragenter", "dragover", "dragleave", "drop"].forEach((t) => el.addEventListener(t, prevent));
+    ["dragenter", "dragover", "dragleave", "drop"].forEach((t) =>
+      el.addEventListener(t, prevent)
+    );
     el.addEventListener("drop", onDrop);
     return () => {
-      ["dragenter", "dragover", "dragleave", "drop"].forEach((t) => el.removeEventListener(t, prevent));
+      ["dragenter", "dragover", "dragleave", "drop"].forEach((t) =>
+        el.removeEventListener(t, prevent)
+      );
       el.removeEventListener("drop", onDrop);
     };
   }, []);
@@ -249,7 +319,9 @@ export default function BatchSessionLinker({
   // Actions
   //////////////////////////////////////////
   const persistDraft = useCallback((draftSession) => {
-    try { BatchSessionStore?.saveDraft?.(draftSession.id, draftSession); } catch {}
+    try {
+      BatchSessionStore?.saveDraft?.(draftSession.id, draftSession);
+    } catch {}
   }, []);
 
   const linkToBatchSession = useCallback(async () => {
@@ -261,12 +333,19 @@ export default function BatchSessionLinker({
       return;
     }
     if (!sourceRecipes?.length) {
-      setToast({ type: "info", msg: "Select or drag recipes from Recipe Vault to start a batch." });
+      setToast({
+        type: "info",
+        msg: "Select or drag recipes from Recipe Vault to start a batch.",
+      });
       return;
     }
     setBusy(true);
     try {
-      emitProgress?.({ id: "batch.link", at: nowIso(), message: "Linking recipes into a session draft..." });
+      emitProgress?.({
+        id: "batch.link",
+        at: nowIso(),
+        message: "Linking recipes into a session draft...",
+      });
 
       const draftSession = {
         id: `batch_${Date.now()}`,
@@ -293,8 +372,15 @@ export default function BatchSessionLinker({
       setUndoStack((s) => [...s, { type: "link", payload: draftSession }]);
 
       // Emit glue
-      eventBus.emit("recipe.consolidated", { at: nowIso(), planId: draftSession.id, items: consolidated });
-      eventBus.emit("batch.session.linked", { at: nowIso(), draft: draftSession });
+      eventBus.emit("recipe.consolidated", {
+        at: nowIso(),
+        planId: draftSession.id,
+        items: consolidated,
+      });
+      eventBus.emit("batch.session.linked", {
+        at: nowIso(),
+        draft: draftSession,
+      });
 
       // Kick inventory mapping & prep tasks
       eventBus.emit("inventory.sync.requested", {
@@ -313,7 +399,10 @@ export default function BatchSessionLinker({
       persistDraft(draftSession);
 
       // Automation (no-ops if not wired)
-      automation?.record?.("batch.linked", { id: draftSession.id, count: sourceRecipes.length });
+      automation?.record?.("batch.linked", {
+        id: draftSession.id,
+        count: sourceRecipes.length,
+      });
       emitDraftApproved?.({ id: draftSession.id, type: "batch", mode });
 
       setDraft(draftSession);
@@ -324,7 +413,11 @@ export default function BatchSessionLinker({
             ? `Session draft ready. (${removedByShellfish.length} recipe(s) skipped by shellfish guard.)`
             : "Session draft ready.",
         actionLabel: "Open Session Planner",
-        onAction: () => eventBus.emit("ui.open", { panel: "BatchSessionPlanner", planId: draftSession.id }),
+        onAction: () =>
+          eventBus.emit("ui.open", {
+            panel: "BatchSessionPlanner",
+            planId: draftSession.id,
+          }),
       });
 
       onLinked?.(draftSession);
@@ -332,7 +425,10 @@ export default function BatchSessionLinker({
       if (mode === "manual") clear?.();
     } catch (err) {
       console.error("[BatchSessionLinker] link error", err);
-      setToast({ type: "error", msg: "Could not link recipes. Please try again." });
+      setToast({
+        type: "error",
+        msg: "Could not link recipes. Please try again.",
+      });
     } finally {
       setBusy(false);
     }
@@ -355,7 +451,10 @@ export default function BatchSessionLinker({
     if (!last) return;
     setUndoStack((s) => s.slice(0, -1));
     if (last.type === "link") {
-      eventBus.emit("batch.session.unlinked", { at: nowIso(), id: last.payload?.id });
+      eventBus.emit("batch.session.unlinked", {
+        at: nowIso(),
+        id: last.payload?.id,
+      });
       setDraft(null);
       setToast({ type: "info", msg: "Link undone." });
     }
@@ -381,9 +480,10 @@ export default function BatchSessionLinker({
     <div className="rounded-2xl border border-dashed p-6 text-center">
       <div className="mb-2 text-lg font-semibold">No recipes linked yet</div>
       <p className="mx-auto max-w-md text-sm text-zinc-600">
-        Drag recipes from <span className="font-medium">Recipe Vault</span>, or check multiple and choose{" "}
-        <span className="font-medium">“Add to Batch.”</span> We’ll consolidate ingredients, compute nutrition, and set
-        you up for the Session Planner.
+        Drag recipes from <span className="font-medium">Recipe Vault</span>, or
+        check multiple and choose{" "}
+        <span className="font-medium">“Add to Batch.”</span> We’ll consolidate
+        ingredients, compute nutrition, and set you up for the Session Planner.
       </p>
       <div className="mt-4 flex justify-center gap-2">
         <button
@@ -409,10 +509,16 @@ export default function BatchSessionLinker({
   const ShellfishNotice = () =>
     removedByShellfish.length > 0 ? (
       <div className="rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800">
-        {removedByShellfish.length} recipe(s) were skipped by your shellfish preference.{" "}
+        {removedByShellfish.length} recipe(s) were skipped by your shellfish
+        preference.{" "}
         <button
           className="underline"
-          onClick={() => eventBus.emit("ui.open", { panel: "Preferences", tab: "Torah Profile" })}
+          onClick={() =>
+            eventBus.emit("ui.open", {
+              panel: "Preferences",
+              tab: "Torah Profile",
+            })
+          }
         >
           Review Torah Profile
         </button>
@@ -454,13 +560,20 @@ export default function BatchSessionLinker({
       <header className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <h2 className="text-lg font-semibold">Batch Session Linker</h2>
-          <Tag tone={mode === "auto" ? "violet" : "zinc"}>{mode === "auto" ? "auto" : "manual"}</Tag>
+          <Tag tone={mode === "auto" ? "violet" : "zinc"}>
+            {mode === "auto" ? "auto" : "manual"}
+          </Tag>
           {isSabbathBlocked && <Tag tone="violet">Sabbath hands-off</Tag>}
         </div>
         <div className="flex items-center gap-2">
           <button
             className="rounded-xl border px-3 py-2 text-sm hover:bg-zinc-50"
-            onClick={() => eventBus.emit("ui.open", { panel: "BatchSessionPlanner", focus: "overview" })}
+            onClick={() =>
+              eventBus.emit("ui.open", {
+                panel: "BatchSessionPlanner",
+                focus: "overview",
+              })
+            }
           >
             Open Session Planner
           </button>
@@ -468,7 +581,11 @@ export default function BatchSessionLinker({
             className="rounded-xl bg-black px-3 py-2 text-sm text-white hover:opacity-90"
             onClick={linkToBatchSession}
             disabled={busy || isSabbathBlocked}
-            title={isSabbathBlocked ? "Sabbath hands-off is active" : "Create draft from selected recipes (L)"}
+            title={
+              isSabbathBlocked
+                ? "Sabbath hands-off is active"
+                : "Create draft from selected recipes (L)"
+            }
           >
             {busy ? "Linking…" : "Link Selected"}
           </button>
@@ -486,7 +603,8 @@ export default function BatchSessionLinker({
       {/* Notices */}
       {isSabbathBlocked ? (
         <div className="rounded-xl border border-violet-300 bg-violet-50 px-3 py-2 text-xs text-violet-900">
-          Sabbath hands-off prevents starting new batch work. Planning is allowed; timers won’t start.
+          Sabbath hands-off prevents starting new batch work. Planning is
+          allowed; timers won’t start.
         </div>
       ) : null}
       <ShellfishNotice />
@@ -501,11 +619,16 @@ export default function BatchSessionLinker({
             <div className="rounded-2xl border p-4">
               <div className="mb-3 flex items-center justify-between">
                 <div className="text-sm font-semibold">
-                  Selected Recipes <span className="text-zinc-400">({sourceRecipes.length})</span>
+                  Selected Recipes{" "}
+                  <span className="text-zinc-400">
+                    ({sourceRecipes.length})
+                  </span>
                 </div>
                 <button
                   className="text-xs underline"
-                  onClick={() => eventBus.emit("ui.open", { panel: "RecipeVault" })}
+                  onClick={() =>
+                    eventBus.emit("ui.open", { panel: "RecipeVault" })
+                  }
                 >
                   Add / Remove
                 </button>
@@ -516,16 +639,27 @@ export default function BatchSessionLinker({
                   <li key={r.id} className="rounded-2xl border p-3">
                     <div className="flex items-center justify-between gap-2">
                       <div className="min-w-0">
-                        <div className="truncate text-sm font-medium">{r.title || r.name || "Untitled recipe"}</div>
+                        <div className="truncate text-sm font-medium">
+                          {r.title || r.name || "Untitled recipe"}
+                        </div>
                         <div className="text-xs text-zinc-500">
-                          {Array.isArray(r.tags) && r.tags.length ? r.tags.slice(0, 6).join(" • ") : "—"}
+                          {Array.isArray(r.tags) && r.tags.length
+                            ? r.tags.slice(0, 6).join(" • ")
+                            : "—"}
                         </div>
                       </div>
                       <div className="flex shrink-0 items-center gap-3">
-                        <span className="text-xs text-zinc-500">{fmt.duration(estimateMinutes([r]))}</span>
+                        <span className="text-xs text-zinc-500">
+                          {fmt.duration(estimateMinutes([r]))}
+                        </span>
                         <button
                           className="rounded-lg border px-2 py-1 text-xs hover:bg-zinc-50"
-                          onClick={() => eventBus.emit("ui.open", { panel: "RecipeDetail", id: r.id })}
+                          onClick={() =>
+                            eventBus.emit("ui.open", {
+                              panel: "RecipeDetail",
+                              id: r.id,
+                            })
+                          }
                         >
                           View
                         </button>
@@ -537,7 +671,9 @@ export default function BatchSessionLinker({
 
               <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl bg-zinc-50 p-3 text-xs text-zinc-600">
                 <span>Drag more recipes here to add.</span>
-                <span className="ml-2 rounded bg-zinc-200 px-1.5 py-0.5">Drop target</span>
+                <span className="ml-2 rounded bg-zinc-200 px-1.5 py-0.5">
+                  Drop target
+                </span>
               </div>
             </div>
           </div>
@@ -547,7 +683,9 @@ export default function BatchSessionLinker({
             <div className="rounded-2xl border p-4">
               {/* Consolidated ingredients */}
               <div className="mb-2 flex items-center justify-between">
-                <div className="text-sm font-semibold">Consolidated Ingredients</div>
+                <div className="text-sm font-semibold">
+                  Consolidated Ingredients
+                </div>
                 <div className="flex items-center gap-3">
                   <button
                     className="text-xs underline"
@@ -578,11 +716,16 @@ export default function BatchSessionLinker({
               </div>
 
               {consolidated.length === 0 ? (
-                <div className="rounded-lg border border-dashed p-3 text-xs text-zinc-600">No ingredients detected.</div>
+                <div className="rounded-lg border border-dashed p-3 text-xs text-zinc-600">
+                  No ingredients detected.
+                </div>
               ) : (
                 <ul className="max-h-52 space-y-1 overflow-auto pr-1">
                   {consolidated.map((ing, idx) => (
-                    <li key={`${ing.name}-${ing.unit}-${idx}`} className="flex items-center justify-between text-xs">
+                    <li
+                      key={`${ing.name}-${ing.unit}-${idx}`}
+                      className="flex items-center justify-between text-xs"
+                    >
                       <span className="truncate">{ing.name}</span>
                       <span className="shrink-0 text-zinc-500">
                         {fmt.qty(Number(ing.qty))} {ing.unit || ""}
@@ -597,11 +740,23 @@ export default function BatchSessionLinker({
               {/* Session stats */}
               <div className="grid grid-cols-3 gap-3">
                 <Stat label="Est. Duration" value={fmt.duration(totalMins)} />
-                <Stat label="Calories" value={fmt.qty(nutritionTotals.calories)} />
-                <Stat label="Protein (g)" value={fmt.qty(nutritionTotals.protein)} />
-                <Stat label="Carbs (g)" value={fmt.qty(nutritionTotals.carbs)} />
+                <Stat
+                  label="Calories"
+                  value={fmt.qty(nutritionTotals.calories)}
+                />
+                <Stat
+                  label="Protein (g)"
+                  value={fmt.qty(nutritionTotals.protein)}
+                />
+                <Stat
+                  label="Carbs (g)"
+                  value={fmt.qty(nutritionTotals.carbs)}
+                />
                 <Stat label="Fat (g)" value={fmt.qty(nutritionTotals.fat)} />
-                <Stat label="Fiber (g)" value={fmt.qty(nutritionTotals.fiber)} />
+                <Stat
+                  label="Fiber (g)"
+                  value={fmt.qty(nutritionTotals.fiber)}
+                />
               </div>
 
               {/* Macro bars */}
@@ -609,27 +764,47 @@ export default function BatchSessionLinker({
                 <div className="mb-2 text-xs font-semibold">Macro Split</div>
                 <div className="flex items-center gap-2">
                   <div className="h-2 flex-1 overflow-hidden rounded-full bg-zinc-200">
-                    <div className="h-full bg-zinc-900" style={{ width: `${nutritionTotals.proteinPct || 0}%` }} />
+                    <div
+                      className="h-full bg-zinc-900"
+                      style={{ width: `${nutritionTotals.proteinPct || 0}%` }}
+                    />
                   </div>
-                  <span className="text-[10px] text-zinc-600">{nutritionTotals.proteinPct || 0}%</span>
+                  <span className="text-[10px] text-zinc-600">
+                    {nutritionTotals.proteinPct || 0}%
+                  </span>
                 </div>
                 <div className="mt-1 flex items-center gap-2">
                   <div className="h-2 flex-1 overflow-hidden rounded-full bg-zinc-200">
-                    <div className="h-full bg-zinc-700" style={{ width: `${nutritionTotals.carbsPct || 0}%` }} />
+                    <div
+                      className="h-full bg-zinc-700"
+                      style={{ width: `${nutritionTotals.carbsPct || 0}%` }}
+                    />
                   </div>
-                  <span className="text-[10px] text-zinc-600">{nutritionTotals.carbsPct || 0}%</span>
+                  <span className="text-[10px] text-zinc-600">
+                    {nutritionTotals.carbsPct || 0}%
+                  </span>
                 </div>
                 <div className="mt-1 flex items-center gap-2">
                   <div className="h-2 flex-1 overflow-hidden rounded-full bg-zinc-200">
-                    <div className="h-full bg-zinc-500" style={{ width: `${nutritionTotals.fatPct || 0}%` }} />
+                    <div
+                      className="h-full bg-zinc-500"
+                      style={{ width: `${nutritionTotals.fatPct || 0}%` }}
+                    />
                   </div>
-                  <span className="text-[10px] text-zinc-600">{nutritionTotals.fatPct || 0}%</span>
+                  <span className="text-[10px] text-zinc-600">
+                    {nutritionTotals.fatPct || 0}%
+                  </span>
                 </div>
                 <div className="mt-2 text-[11px] text-zinc-500">
                   Default goals: USDA standard{" "}
                   <button
                     className="underline"
-                    onClick={() => eventBus.emit("ui.open", { panel: "Preferences", tab: "Nutrition" })}
+                    onClick={() =>
+                      eventBus.emit("ui.open", {
+                        panel: "Preferences",
+                        tab: "Nutrition",
+                      })
+                    }
                   >
                     (customize)
                   </button>
@@ -653,13 +828,23 @@ export default function BatchSessionLinker({
                 <div className="flex items-center gap-2">
                   <button
                     className="rounded-xl border px-3 py-2 text-sm hover:bg-zinc-50"
-                    onClick={() => eventBus.emit("ui.open", { panel: "LabelPrinter", planId: draft?.id })}
+                    onClick={() =>
+                      eventBus.emit("ui.open", {
+                        panel: "LabelPrinter",
+                        planId: draft?.id,
+                      })
+                    }
                   >
                     Labels
                   </button>
                   <button
                     className="rounded-xl bg-black px-3 py-2 text-sm text-white hover:opacity-90"
-                    onClick={() => eventBus.emit("ui.open", { panel: "BatchSessionPlanner", planId: draft?.id })}
+                    onClick={() =>
+                      eventBus.emit("ui.open", {
+                        panel: "BatchSessionPlanner",
+                        planId: draft?.id,
+                      })
+                    }
                   >
                     Next: {draft?.nextBestAction || "Open Session Planner"}
                   </button>

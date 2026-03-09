@@ -1,0 +1,232 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-18T00:00:00.000Z",
+
+  "meta": {
+    "id": "cuisines.mediterranean.recipes.tabbouleh",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Tabbouleh (Herb-Forward Parsley Salad)",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalog",
+      "notes": [
+        "Classic Levantine herb salad: parsley-forward with mint, tomato, lemon, and bulgur.",
+        "Designed as a baseline for planners (veg-forward side; acid + herb signature)."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "cuisines.mediterranean",
+    "category": "salad",
+    "mealArchetypes": ["side", "appetizer", "light_meal"],
+    "servingStyles": ["family_style", "mezze"],
+    "plannerTags": [
+      "cuisine.mediterranean",
+      "dish.tabbouleh",
+      "salad",
+      "herb_forward",
+      "no_cook_mostly",
+      "make_ahead_short"
+    ]
+  },
+
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 160, "unit": "g" },
+    "notes": "Makes ~4–5 cups depending on herb volume and tomato juiciness."
+  },
+
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 15,
+    "totalMins": 40
+  },
+
+  "difficulty": "beginner",
+
+  "equipment": {
+    "minimum": [
+      "chef_knife",
+      "cutting_board",
+      "mixing_bowl",
+      "measuring_cups",
+      "measuring_spoons"
+    ],
+    "recommended": ["salad_spinner", "microplane", "fine_mesh_strainer"],
+    "optional": ["food_processor"]
+  },
+
+  "dietFlags": ["vegetarian", "vegan", "dairy_free"],
+
+  "allergens": ["gluten"],
+
+  "keywords": [
+    "tabbouleh",
+    "tabouli",
+    "parsley salad",
+    "bulgur",
+    "mint",
+    "lemon",
+    "mezze"
+  ],
+
+  "tags": [
+    "cuisine.mediterranean",
+    "dish.tabbouleh",
+    "salad",
+    "herb_forward",
+    "method.raw",
+    "make_ahead"
+  ],
+
+  "signals": {
+    "profile": "acid_herb_forward",
+    "acid": "lemon",
+    "textureTarget": "fluffy_bulgur_with_crisp_veg",
+    "serveChilledPreferred": true,
+    "vegForward": true
+  },
+
+  "ingredients": [
+    {
+      "id": "ingredients.bulgur",
+      "label": "Fine bulgur wheat",
+      "amount": { "value": 70, "unit": "g" },
+      "notes": "Fine bulgur (No. 1) is traditional. If using medium bulgur, allow extra soak time or briefly simmer."
+    },
+    {
+      "id": "ingredients.boiling_water",
+      "label": "Boiling water",
+      "amount": { "value": 150, "unit": "ml" },
+      "notes": "For soaking bulgur (or use very hot water)."
+    },
+    {
+      "id": "ingredients.parsley",
+      "label": "Flat-leaf parsley, finely chopped",
+      "amount": { "value": 120, "unit": "g" },
+      "notes": "About 2 large bunches. Must be very dry after washing to avoid watery salad."
+    },
+    {
+      "id": "ingredients.mint",
+      "label": "Fresh mint, finely chopped",
+      "amount": { "value": 20, "unit": "g" },
+      "notes": "Optional but classic. Adjust to taste."
+    },
+    {
+      "id": "ingredients.tomato",
+      "label": "Tomatoes, seeded and finely diced",
+      "amount": { "value": 250, "unit": "g" },
+      "notes": "Seeding reduces excess juice (keeps tabbouleh bright, not soggy)."
+    },
+    {
+      "id": "ingredients.green_onion",
+      "label": "Green onions (scallions), finely sliced",
+      "amount": { "value": 50, "unit": "g" },
+      "notes": "About 4–5 scallions. Can substitute 30 g finely diced red onion."
+    },
+    {
+      "id": "ingredients.lemon_juice",
+      "label": "Fresh lemon juice",
+      "amount": { "value": 75, "unit": "ml" },
+      "notes": "Start here; tabbouleh should be lemon-bright."
+    },
+    {
+      "id": "ingredients.olive_oil",
+      "label": "Extra-virgin olive oil",
+      "amount": { "value": 60, "unit": "ml" },
+      "notes": "Adjust for richness and mouthfeel."
+    },
+    {
+      "id": "ingredients.salt",
+      "label": "Fine salt",
+      "amount": { "value": 6, "unit": "g" },
+      "notes": "Add gradually; tomatoes vary in salt needs."
+    },
+    {
+      "id": "ingredients.black_pepper",
+      "label": "Black pepper, freshly ground",
+      "amount": { "value": 1, "unit": "g" },
+      "optional": true
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step_01_soak_bulgur",
+      "title": "Soak the bulgur",
+      "body": "Place bulgur in a bowl. Pour boiling water over it, stir once, cover, and let stand until tender and fluffy. When ready, drain any excess water through a fine mesh strainer and press gently to remove moisture.",
+      "timers": [{ "label": "Soak bulgur", "seconds": 900 }]
+    },
+    {
+      "id": "step_02_prep_herbs",
+      "title": "Wash, dry, and chop herbs very finely",
+      "body": "Wash parsley and mint. Dry extremely well (salad spinner + towels). Remove tough parsley stems. Chop herbs finely—tabbouleh should be delicate, not chunky."
+    },
+    {
+      "id": "step_03_prep_veg",
+      "title": "Dice tomatoes and slice onions",
+      "body": "Seed tomatoes (remove watery core) and dice very small. Slice scallions thinly. If using red onion, dice finely and rinse briefly under cold water to mellow bite (optional)."
+    },
+    {
+      "id": "step_04_mix",
+      "title": "Combine bulgur, herbs, and vegetables",
+      "body": "In a large bowl, combine soaked bulgur, parsley, mint, tomatoes, and scallions. Toss to distribute evenly."
+    },
+    {
+      "id": "step_05_dress_and_balance",
+      "title": "Dress with lemon and olive oil; balance salt and acid",
+      "body": "Add lemon juice, olive oil, salt, and pepper (optional). Toss well. Taste and adjust: tabbouleh should be bright and lemon-forward with enough salt to lift the herbs."
+    },
+    {
+      "id": "step_06_rest",
+      "title": "Rest briefly and re-taste",
+      "body": "Let stand 10 minutes for flavors to meld, then re-taste and adjust lemon/salt as needed. Serve as part of a mezze plate or alongside grilled meats/fish.",
+      "timers": [{ "label": "Rest for flavor", "seconds": 600 }]
+    }
+  ],
+
+  "storage": {
+    "refrigerate": {
+      "maxDays": 2,
+      "container": "airtight",
+      "notes": "Best within 24 hours. Herbs soften over time; refresh with lemon and a drizzle of olive oil before serving."
+    }
+  },
+
+  "variations": [
+    {
+      "id": "variation_gluten_free",
+      "title": "Gluten-free tabbouleh (quinoa)",
+      "changes": [
+        "Replace bulgur with 120 g cooked and cooled quinoa.",
+        "Keep lemon-forward dressing; reduce olive oil slightly if quinoa feels oily."
+      ]
+    },
+    {
+      "id": "variation_no_grain",
+      "title": "Herb salad (no bulgur)",
+      "changes": [
+        "Omit bulgur entirely and increase tomatoes to 320 g and scallions to 70 g.",
+        "This becomes a parsley-mint salad similar to some modern tabbouleh styles."
+      ]
+    },
+    {
+      "id": "variation_cucumber_addition",
+      "title": "Add cucumber (crunchy)",
+      "changes": [
+        "Add 150 g finely diced cucumber (seeded) for extra crunch.",
+        "Salt lightly and drain cucumber 5 minutes to reduce wateriness."
+      ]
+    }
+  ],
+
+  "notes": [
+    "Key success factor: DRY herbs and SEEDED tomatoes to avoid watery tabbouleh.",
+    "Flavor target: lemon-bright, herb-forward, lightly rich from olive oil.",
+    "If making ahead, store dressing separate and combine shortly before serving for best texture."
+  ]
+}

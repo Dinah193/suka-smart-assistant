@@ -33,7 +33,7 @@ try {
 
 let eventBus = { emit: () => {}, on: () => () => {} };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
@@ -66,9 +66,16 @@ function isoNow() {
 
 function uuid(prefix = "cal") {
   try {
-    return globalThis?.crypto?.randomUUID?.() || `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    return (
+      globalThis?.crypto?.randomUUID?.() ||
+      `${prefix}_${Date.now().toString(36)}_${Math.random()
+        .toString(36)
+        .slice(2, 8)}`
+    );
   } catch {
-    return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    return `${prefix}_${Date.now().toString(36)}_${Math.random()
+      .toString(36)
+      .slice(2, 8)}`;
   }
 }
 
@@ -81,12 +88,21 @@ function emit(type, data) {
 }
 
 async function exportToHubIfEnabled(payload) {
-  if (!featureFlags?.familyFundMode || !HubPacketFormatter || !FamilyFundConnector) return;
+  if (
+    !featureFlags?.familyFundMode ||
+    !HubPacketFormatter ||
+    !FamilyFundConnector
+  )
+    return;
   try {
-    const packet = HubPacketFormatter.formatCalendarChange?.(payload) || payload;
+    const packet =
+      HubPacketFormatter.formatCalendarChange?.(payload) || payload;
     await FamilyFundConnector.send?.(packet);
   } catch (err) {
-    console.warn("[CalendarsRepo] Hub export failed (silent):", err?.message || err);
+    console.warn(
+      "[CalendarsRepo] Hub export failed (silent):",
+      err?.message || err
+    );
   }
 }
 
@@ -116,21 +132,27 @@ function ensureDB() {
  *  - status: active|archived
  */
 function normalizeCalendar(input = {}) {
-  if (!input || typeof input !== "object") return { ok: false, error: "Invalid calendar payload." };
+  if (!input || typeof input !== "object")
+    return { ok: false, error: "Invalid calendar payload." };
 
   const now = isoNow();
   const record = {
     id: input.id || uuid("cal"),
     name: String(input.name || "").trim() || "Household Calendar",
     color: String(input.color || "").trim() || "#4b5563", // neutral
-    status: ["active", "archived"].includes(input.status) ? input.status : "active",
+    status: ["active", "archived"].includes(input.status)
+      ? input.status
+      : "active",
 
     householdId: input.householdId || null,
     resourceId: input.resourceId || null, // device/person/room calendar
 
     timezone: input.timezone || null,
 
-    metadata: input.metadata && typeof input.metadata === "object" ? input.metadata : {},
+    metadata:
+      input.metadata && typeof input.metadata === "object"
+        ? input.metadata
+        : {},
 
     createdAt: input.createdAt || now,
     updatedAt: now,
@@ -148,13 +170,15 @@ function normalizeCalendar(input = {}) {
  *  - status: tentative|confirmed|canceled|completed
  */
 function normalizeEvent(input = {}) {
-  if (!input || typeof input !== "object") return { ok: false, error: "Invalid event payload." };
+  if (!input || typeof input !== "object")
+    return { ok: false, error: "Invalid event payload." };
 
   const now = isoNow();
   const start = toISO(input.start);
   const end = toISO(input.end);
 
-  if (!start || !end) return { ok: false, error: "Event start/end required (ISO)." };
+  if (!start || !end)
+    return { ok: false, error: "Event start/end required (ISO)." };
   if (new Date(end).getTime() < new Date(start).getTime()) {
     return { ok: false, error: "Event end must be after start." };
   }
@@ -182,14 +206,19 @@ function normalizeEvent(input = {}) {
     location: input.location || null, // { roomId?, coords?, text? }
 
     // Status & alerts
-    status: ["tentative", "confirmed", "canceled", "completed"].includes(input.status)
+    status: ["tentative", "confirmed", "canceled", "completed"].includes(
+      input.status
+    )
       ? input.status
       : "confirmed",
     reminders: Array.isArray(input.reminders) ? input.reminders : [], // [{ minutesBefore: 10, method: "push"|"sms"|"email" }]
 
     // Misc
     timezone: input.timezone || null,
-    metadata: input.metadata && typeof input.metadata === "object" ? input.metadata : {},
+    metadata:
+      input.metadata && typeof input.metadata === "object"
+        ? input.metadata
+        : {},
 
     createdAt: input.createdAt || now,
     updatedAt: now,
@@ -300,14 +329,23 @@ const CalendarsRepo = {
       }
       if (text) {
         const q = String(text).toLowerCase();
-        coll = coll.and((c) => String(c.name || "").toLowerCase().includes(q));
+        coll = coll.and((c) =>
+          String(c.name || "")
+            .toLowerCase()
+            .includes(q)
+        );
       }
 
       const dir = sortDir === "asc" ? 1 : -1;
-      const arr = await coll.sortBy(sortBy).then((a) => (dir === 1 ? a : a.reverse()));
+      const arr = await coll
+        .sortBy(sortBy)
+        .then((a) => (dir === 1 ? a : a.reverse()));
       const slice = arr.slice(offset, offset + limit);
 
-      return { ok: true, data: { total: arr.length, items: slice, offset, limit } };
+      return {
+        ok: true,
+        data: { total: arr.length, items: slice, offset, limit },
+      };
     } catch (err) {
       console.error("[CalendarsRepo.listCalendars] failed:", err);
       return { ok: false, error: err?.message || String(err) };
@@ -316,13 +354,18 @@ const CalendarsRepo = {
 
   async patchCalendar(id, partial = {}) {
     ensureDB();
-    if (!id || typeof partial !== "object") return { ok: false, error: "Invalid patch payload." };
+    if (!id || typeof partial !== "object")
+      return { ok: false, error: "Invalid patch payload." };
     try {
       const curr = await db.calendars.get(id);
       if (!curr) return { ok: false, error: "Not found." };
       const next = { ...curr, ...partial, id, updatedAt: isoNow() };
       await db.calendars.put(next);
-      const payload = { action: "calendar.patch", calendar: next, fields: Object.keys(partial) };
+      const payload = {
+        action: "calendar.patch",
+        calendar: next,
+        fields: Object.keys(partial),
+      };
       emit("calendar.patched", payload);
       await exportToHubIfEnabled(payload);
       return { ok: true, data: next };
@@ -333,7 +376,10 @@ const CalendarsRepo = {
   },
 
   async archiveCalendar(id) {
-    const res = await this.patchCalendar(id, { status: "archived", archivedAt: isoNow() });
+    const res = await this.patchCalendar(id, {
+      status: "archived",
+      archivedAt: isoNow(),
+    });
     if (res.ok) {
       const payload = { action: "calendar.archive", id };
       emit("calendar.archived", payload);
@@ -392,7 +438,8 @@ const CalendarsRepo = {
 
   async bulkCreateEvents(list = []) {
     ensureDB();
-    if (!Array.isArray(list) || !list.length) return { ok: false, error: "Nothing to create." };
+    if (!Array.isArray(list) || !list.length)
+      return { ok: false, error: "Nothing to create." };
 
     const ready = [];
     for (const e of list) {
@@ -408,10 +455,17 @@ const CalendarsRepo = {
       for (const r of ready) if (!r.calendarId) r.calendarId = fallbackId;
 
       const ids = await db.calendarEvents.bulkPut(ready);
-      const payload = { action: "event.bulkCreate", count: ready.length, events: ready.map((e) => e.id) };
+      const payload = {
+        action: "event.bulkCreate",
+        count: ready.length,
+        events: ready.map((e) => e.id),
+      };
       emit("calendar.events_bulk_created", payload);
       await exportToHubIfEnabled(payload);
-      return { ok: true, data: Array.isArray(ids) ? ids : ready.map((e) => e.id) };
+      return {
+        ok: true,
+        data: Array.isArray(ids) ? ids : ready.map((e) => e.id),
+      };
     } catch (err) {
       console.error("[CalendarsRepo.bulkCreateEvents] failed:", err);
       return { ok: false, error: err?.message || String(err) };
@@ -435,10 +489,10 @@ const CalendarsRepo = {
     const {
       calendarId = null,
       householdId = null, // via calendar->householdId
-      resourceId = null,  // via calendar->resourceId
-      from = null,        // ISO
-      to = null,          // ISO
-      status = null,      // string or array
+      resourceId = null, // via calendar->resourceId
+      from = null, // ISO
+      to = null, // ISO
+      status = null, // string or array
       domain = null,
       limit = 500,
       offset = 0,
@@ -450,7 +504,9 @@ const CalendarsRepo = {
       let events = await db.calendarEvents.toArray();
 
       if (calendarId) {
-        const set = new Set(Array.isArray(calendarId) ? calendarId : [calendarId]);
+        const set = new Set(
+          Array.isArray(calendarId) ? calendarId : [calendarId]
+        );
         events = events.filter((e) => set.has(e.calendarId));
       }
 
@@ -485,21 +541,28 @@ const CalendarsRepo = {
           const s = new Date(e.start).getTime();
           const en = new Date(e.end).getTime();
           if (fromT && en < fromT) return false; // event ends before window starts
-          if (toT && s >= toT) return false;     // event starts at/after window end
+          if (toT && s >= toT) return false; // event starts at/after window end
           return true;
         });
       }
 
       // Expand recurrences into occurrences when requested
-      let items = expandRecurrence ? expandEvents(events, { from, to }) : events;
+      let items = expandRecurrence
+        ? expandEvents(events, { from, to })
+        : events;
 
       // Sort by start time
-      items.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+      items.sort(
+        (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime()
+      );
 
       // Paginate
       const slice = items.slice(offset, offset + limit);
 
-      return { ok: true, data: { total: items.length, items: slice, offset, limit } };
+      return {
+        ok: true,
+        data: { total: items.length, items: slice, offset, limit },
+      };
     } catch (err) {
       console.error("[CalendarsRepo.listEvents] failed:", err);
       return { ok: false, error: err?.message || String(err) };
@@ -508,7 +571,8 @@ const CalendarsRepo = {
 
   async updateEvent(id, next) {
     ensureDB();
-    if (!id || !next || typeof next !== "object") return { ok: false, error: "Invalid update payload." };
+    if (!id || !next || typeof next !== "object")
+      return { ok: false, error: "Invalid update payload." };
     const curr = await db.calendarEvents.get(id);
     if (!curr) return { ok: false, error: "Not found." };
 
@@ -529,7 +593,8 @@ const CalendarsRepo = {
 
   async patchEvent(id, partial = {}) {
     ensureDB();
-    if (!id || typeof partial !== "object") return { ok: false, error: "Invalid patch payload." };
+    if (!id || typeof partial !== "object")
+      return { ok: false, error: "Invalid patch payload." };
     try {
       const curr = await db.calendarEvents.get(id);
       if (!curr) return { ok: false, error: "Not found." };
@@ -542,7 +607,11 @@ const CalendarsRepo = {
       }
       await db.calendarEvents.put(next);
 
-      const payload = { action: "event.patch", event: next, fields: Object.keys(partial) };
+      const payload = {
+        action: "event.patch",
+        event: next,
+        fields: Object.keys(partial),
+      };
       emit("calendar.event_patched", payload);
       await exportToHubIfEnabled(payload);
       return { ok: true, data: next };
@@ -571,7 +640,11 @@ const CalendarsRepo = {
   },
 
   async cancelEvent(id, reason = null) {
-    const res = await this.patchEvent(id, { status: "canceled", canceledAt: isoNow(), metadata: { ...(await this._getEventMeta(id)), cancelReason: reason } });
+    const res = await this.patchEvent(id, {
+      status: "canceled",
+      canceledAt: isoNow(),
+      metadata: { ...(await this._getEventMeta(id)), cancelReason: reason },
+    });
     if (res.ok) {
       const payload = { action: "event.cancel", id, reason };
       emit("calendar.event_canceled", payload);
@@ -581,7 +654,10 @@ const CalendarsRepo = {
   },
 
   async completeEvent(id) {
-    const res = await this.patchEvent(id, { status: "completed", completedAt: isoNow() });
+    const res = await this.patchEvent(id, {
+      status: "completed",
+      completedAt: isoNow(),
+    });
     if (res.ok) {
       const payload = { action: "event.complete", id };
       emit("calendar.event_completed", payload);
@@ -598,7 +674,8 @@ const CalendarsRepo = {
    */
   async freeBusy({ calendars = null, from, to } = {}) {
     ensureDB();
-    if (!from || !to) return { ok: false, error: "from/to are required (ISO)." };
+    if (!from || !to)
+      return { ok: false, error: "from/to are required (ISO)." };
 
     const calIds = calendars
       ? Array.isArray(calendars)
@@ -606,7 +683,13 @@ const CalendarsRepo = {
         : [calendars]
       : (await db.calendars.toArray()).map((c) => c.id);
 
-    const eventsRes = await this.listEvents({ calendarId: calIds, from, to, expandRecurrence: true, limit: 10000 });
+    const eventsRes = await this.listEvents({
+      calendarId: calIds,
+      from,
+      to,
+      expandRecurrence: true,
+      limit: 10000,
+    });
     if (!eventsRes.ok) return eventsRes;
 
     const busy = eventsRes.data.items.map((e) => ({
@@ -626,14 +709,22 @@ const CalendarsRepo = {
    * Returns events that overlap with each other within the window.
    */
   async conflicts({ calendars = null, from, to } = {}) {
-    const res = await this.listEvents({ calendarId: calendars || null, from, to, expandRecurrence: true, limit: 10000 });
+    const res = await this.listEvents({
+      calendarId: calendars || null,
+      from,
+      to,
+      expandRecurrence: true,
+      limit: 10000,
+    });
     if (!res.ok) return res;
 
     const items = res.data.items;
     const conflicts = [];
     for (let i = 0; i < items.length; i++) {
       for (let j = i + 1; j < items.length; j++) {
-        if (overlaps(items[i].start, items[i].end, items[j].start, items[j].end)) {
+        if (
+          overlaps(items[i].start, items[i].end, items[j].start, items[j].end)
+        ) {
           conflicts.push([items[i], items[j]]);
         }
       }
@@ -645,8 +736,16 @@ const CalendarsRepo = {
    * quickAddSessionBlock({ calendarId?, sessionId, title, start, end, domain })
    * Convenience: schedule a session block on a calendar.
    */
-  async quickAddSessionBlock({ calendarId = null, sessionId, title, start, end, domain = null } = {}) {
-    if (!sessionId || !start || !end) return { ok: false, error: "sessionId, start, end required." };
+  async quickAddSessionBlock({
+    calendarId = null,
+    sessionId,
+    title,
+    start,
+    end,
+    domain = null,
+  } = {}) {
+    if (!sessionId || !start || !end)
+      return { ok: false, error: "sessionId, start, end required." };
     return this.createEvent({
       calendarId,
       sessionId,
@@ -664,7 +763,11 @@ const CalendarsRepo = {
   async attachCalendarToResource(calendarId, resourceId) {
     const res = await this.patchCalendar(calendarId, { resourceId });
     if (res.ok) {
-      const payload = { action: "calendar.attach_resource", calendarId, resourceId };
+      const payload = {
+        action: "calendar.attach_resource",
+        calendarId,
+        resourceId,
+      };
       emit("calendar.attached_resource", payload);
       exportToHubIfEnabled(payload);
     }
@@ -677,7 +780,11 @@ const CalendarsRepo = {
   async attachCalendarToHousehold(calendarId, householdId) {
     const res = await this.patchCalendar(calendarId, { householdId });
     if (res.ok) {
-      const payload = { action: "calendar.attach_household", calendarId, householdId };
+      const payload = {
+        action: "calendar.attach_household",
+        calendarId,
+        householdId,
+      };
       emit("calendar.attached_household", payload);
       exportToHubIfEnabled(payload);
     }
@@ -703,7 +810,13 @@ const CalendarsRepo = {
    * Placeholder for ICS export. Returns a minimal VCALENDAR string stub.
    */
   async exportICS({ calendarId, from = null, to = null } = {}) {
-    const eventsRes = await this.listEvents({ calendarId, from, to, expandRecurrence: false, limit: 10000 });
+    const eventsRes = await this.listEvents({
+      calendarId,
+      from,
+      to,
+      expandRecurrence: false,
+      limit: 10000,
+    });
     if (!eventsRes.ok) return eventsRes;
     const events = eventsRes.data.items;
 
@@ -777,22 +890,37 @@ function expandRecurrenceOccurrences(event, { from = null, to = null } = {}) {
   if (rec.freq === "DAILY") {
     const step = (rec.interval || 1) * 24 * 3600 * 1000;
     for (let t = startT; shouldContinue(t, until, maxCount, count); t += step) {
-      const s = t, e = t + dur;
-      if (withinWindow(s, e, windowStart, windowEnd)) results.push(cloneEventAt(event, s, e));
+      const s = t,
+        e = t + dur;
+      if (withinWindow(s, e, windowStart, windowEnd))
+        results.push(cloneEventAt(event, s, e));
       count++;
     }
   } else if (rec.freq === "WEEKLY") {
     // Start from week of start; emit on matching weekdays.
     const intervalWeeks = rec.interval || 1;
-    const weekdays = rec.byweekday && rec.byweekday.length ? rec.byweekday : [new Date(startT).getDay()];
+    const weekdays =
+      rec.byweekday && rec.byweekday.length
+        ? rec.byweekday
+        : [new Date(startT).getDay()];
     const weekStart = startOfWeek(startT);
-    for (let w = 0; shouldContinue(weekStart + w * 7 * 24 * 3600 * 1000, until, maxCount, count); w += intervalWeeks) {
+    for (
+      let w = 0;
+      shouldContinue(
+        weekStart + w * 7 * 24 * 3600 * 1000,
+        until,
+        maxCount,
+        count
+      );
+      w += intervalWeeks
+    ) {
       const base = weekStart + w * 7 * 24 * 3600 * 1000;
       for (const d of weekdays) {
         const s = alignDayTime(base, d, startT);
         if (s < startT) continue; // do not emit before first event start
         const e = s + dur;
-        if (withinWindow(s, e, windowStart, windowEnd)) results.push(cloneEventAt(event, s, e));
+        if (withinWindow(s, e, windowStart, windowEnd))
+          results.push(cloneEventAt(event, s, e));
         count++;
         if (!shouldContinue(s, until, maxCount, count)) break;
       }
@@ -802,11 +930,18 @@ function expandRecurrenceOccurrences(event, { from = null, to = null } = {}) {
     // Use the calendar day of start
     const startDate = new Date(startT);
     const day = startDate.getUTCDate();
-    for (let i = 0; shouldContinue(startDate.getTime(), until, maxCount, count); i += intervalMonths) {
+    for (
+      let i = 0;
+      shouldContinue(startDate.getTime(), until, maxCount, count);
+      i += intervalMonths
+    ) {
       const sDate = addMonthsUTC(startDate, i);
       if (sDate.getUTCDate() !== day) {
         // If month rollover (e.g., 31st), clamp to last day of month
-        const last = lastDayOfMonthUTC(sDate.getUTCFullYear(), sDate.getUTCMonth());
+        const last = lastDayOfMonthUTC(
+          sDate.getUTCFullYear(),
+          sDate.getUTCMonth()
+        );
         sDate.setUTCDate(last);
       }
       const s = Date.UTC(
@@ -820,7 +955,8 @@ function expandRecurrenceOccurrences(event, { from = null, to = null } = {}) {
       );
       if (s < startT) continue;
       const e = s + dur;
-      if (withinWindow(s, e, windowStart, windowEnd)) results.push(cloneEventAt(event, s, e));
+      if (withinWindow(s, e, windowStart, windowEnd))
+        results.push(cloneEventAt(event, s, e));
       count++;
     }
   } else {
@@ -868,12 +1004,27 @@ function alignDayTime(weekStartMs, weekday, templateMs) {
   const d = new Date(weekStartMs);
   d.setUTCDate(d.getUTCDate() + weekday);
   const template = new Date(templateMs);
-  d.setUTCHours(template.getUTCHours(), template.getUTCMinutes(), template.getUTCSeconds(), template.getUTCMilliseconds());
+  d.setUTCHours(
+    template.getUTCHours(),
+    template.getUTCMinutes(),
+    template.getUTCSeconds(),
+    template.getUTCMilliseconds()
+  );
   return d.getTime();
 }
 
 function addMonthsUTC(date, months) {
-  const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds(), date.getUTCMilliseconds()));
+  const d = new Date(
+    Date.UTC(
+      date.getUTCFullYear(),
+      date.getUTCMonth() + months,
+      date.getUTCDate(),
+      date.getUTCHours(),
+      date.getUTCMinutes(),
+      date.getUTCSeconds(),
+      date.getUTCMilliseconds()
+    )
+  );
   return d;
 }
 
@@ -904,19 +1055,32 @@ function invertBusyIntervals(windowIntervals, busy) {
         s: new Date(b.start).getTime(),
         e: new Date(b.end).getTime(),
       }))
-      .filter((b) => overlaps(win.start, win.end, new Date(b.s).toISOString(), new Date(b.e).toISOString()))
+      .filter((b) =>
+        overlaps(
+          win.start,
+          win.end,
+          new Date(b.s).toISOString(),
+          new Date(b.e).toISOString()
+        )
+      )
       .sort((a, b) => a.s - b.s);
 
     let cursor = ws;
     for (const seg of segments) {
       if (seg.s > cursor) {
-        free.push({ start: new Date(cursor).toISOString(), end: new Date(Math.min(seg.s, we)).toISOString() });
+        free.push({
+          start: new Date(cursor).toISOString(),
+          end: new Date(Math.min(seg.s, we)).toISOString(),
+        });
       }
       cursor = Math.max(cursor, seg.e);
       if (cursor >= we) break;
     }
     if (cursor < we) {
-      free.push({ start: new Date(cursor).toISOString(), end: new Date(we).toISOString() });
+      free.push({
+        start: new Date(cursor).toISOString(),
+        end: new Date(we).toISOString(),
+      });
     }
   }
   return free;
@@ -925,13 +1089,17 @@ function invertBusyIntervals(windowIntervals, busy) {
 function toICSDate(iso) {
   const d = new Date(iso);
   const pad = (n, w = 2) => String(n).padStart(w, "0");
-  return `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(
-    d.getUTCMinutes()
-  )}${pad(d.getUTCSeconds())}Z`;
+  return `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(
+    d.getUTCDate()
+  )}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}${pad(
+    d.getUTCSeconds()
+  )}Z`;
 }
 
 function escapeICS(text) {
-  return String(text).replace(/([,;])/g, "\\$1").replace(/\n/g, "\\n");
+  return String(text)
+    .replace(/([,;])/g, "\\$1")
+    .replace(/\n/g, "\\n");
 }
 
 /* ----------------------------------------------------------------------------

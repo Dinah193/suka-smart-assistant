@@ -28,10 +28,10 @@
  *  - Exports data-affecting commands to Hub when familyFundMode=true (best-effort).
  */
 
-import eventBus from "../services/eventBus";
+import eventBus from "../services/events/eventBus";
 import featureFlags from "../config/featureFlags";
-import HubPacketFormatter from "../hub/HubPacketFormatter";
-import FamilyFundConnector from "../hub/FamilyFundConnector";
+import HubPacketFormatter from "@/services/hub/HubPacketFormatter.js";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector.js";
 
 // The Automation Runtime is assumed to exist and expose a stable facade.
 let AutomationRuntime = null;
@@ -121,7 +121,9 @@ function dedupeKey(op, data) {
     return `${op}:${data.sessionId}:${Math.sign(data.offsetMs)}`;
   }
   if (op === "schedule.autofit" && data?.window?.start && data?.window?.end) {
-    return `${op}:${data.window.start}:${data.window.end}:${data.domain || "all"}`;
+    return `${op}:${data.window.start}:${data.window.end}:${
+      data.domain || "all"
+    }`;
   }
   if (op === "schedule.session.create" && data?.title && data?.startISO) {
     return `${op}:${data.title}:${data.startISO}`;
@@ -220,7 +222,9 @@ async function handleTaskSkip(data) {
 function fanoutInventoryDeltas(meta) {
   if (!meta || !Array.isArray(meta.inventoryDeltas)) return;
   if (!meta.inventoryDeltas.length) return;
-  const invPayload = safeEmit("inventory.updated", { deltas: meta.inventoryDeltas });
+  const invPayload = safeEmit("inventory.updated", {
+    deltas: meta.inventoryDeltas,
+  });
   exportToHubIfEnabled(invPayload);
 }
 
@@ -244,7 +248,11 @@ function on(type, handler, exportOnSuccess = true) {
     if (isDuplicate(key)) return;
 
     // Pre-flight telemetry
-    safeEmit("automation.command.received", { op: type, key, preview: previewFor(type, data) });
+    safeEmit("automation.command.received", {
+      op: type,
+      key,
+      preview: previewFor(type, data),
+    });
 
     try {
       const res = await handler(data);
@@ -326,19 +334,44 @@ function stop() {
 function previewFor(type, data) {
   switch (type) {
     case "schedule.session.create":
-      return { title: data?.title, domain: data?.domain, startISO: data?.startISO, endISO: data?.endISO };
+      return {
+        title: data?.title,
+        domain: data?.domain,
+        startISO: data?.startISO,
+        endISO: data?.endISO,
+      };
     case "schedule.reschedule_item":
-      return { sessionId: data?.sessionId, offsetMs: toMs(data?.offsetMs), domain: data?.domain };
+      return {
+        sessionId: data?.sessionId,
+        offsetMs: toMs(data?.offsetMs),
+        domain: data?.domain,
+      };
     case "schedule.autofit":
-      return { window: data?.window, domain: data?.domain, strategy: data?.strategy };
+      return {
+        window: data?.window,
+        domain: data?.domain,
+        strategy: data?.strategy,
+      };
     case "schedule.resource.resolution":
-      return { conflictId: data?.conflictId, strategy: data?.resolution?.strategy, resource: data?.resource?.id };
+      return {
+        conflictId: data?.conflictId,
+        strategy: data?.resolution?.strategy,
+        resource: data?.resource?.id,
+      };
     case "session.task.split":
-      return { sessionId: data?.sessionId, taskId: data?.taskId, ratio: data?.ratio };
+      return {
+        sessionId: data?.sessionId,
+        taskId: data?.taskId,
+        ratio: data?.ratio,
+      };
     case "session.task.skip":
       return { sessionId: data?.sessionId, taskId: data?.taskId };
     case "schedule.plan.revert":
-      return { changeId: data?.changeId, planId: data?.planId, sessionId: data?.sessionId };
+      return {
+        changeId: data?.changeId,
+        planId: data?.planId,
+        sessionId: data?.sessionId,
+      };
     default:
       return {};
   }

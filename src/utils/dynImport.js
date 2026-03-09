@@ -18,7 +18,7 @@ const G_TSX  = import.meta.glob('/src/**/*.tsx');
 const G_MD   = import.meta.glob('/src/**/*.md');
 const G_MDX  = import.meta.glob('/src/**/*.mdx');
 // Remove this if you don't need JSON as raw:
-const G_JSON = import.meta.glob('/src/**/*.json', { as: 'raw' });
+const G_JSON = import.meta.glob('/src/**/*.json', { query: '?raw', import: 'default' });
 
 // path -> () => Promise<Module>
 const ALL_MODULES = Object.assign({}, G_JS, G_TS, G_JSX, G_TSX, G_MD, G_MDX, G_JSON);

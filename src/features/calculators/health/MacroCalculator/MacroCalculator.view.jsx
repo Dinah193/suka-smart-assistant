@@ -29,10 +29,8 @@
  */
 
 import React, { useMemo, useState } from "react";
-import MacroCalculatorShim, {
-  computeMacroPlan
-} from "./MacroCalculator.shim";
-import { emit as emitEvent } from "@/services/eventBus";
+import MacroCalculatorShim, { computeMacroPlan } from "./MacroCalculator.shim";
+import { emit as emitEvent } from "@/services/events/eventBus";
 
 /**
  * @typedef {import("./MacroCalculator.shim").MacroCalculatorResult} MacroCalculatorResult
@@ -56,21 +54,21 @@ const DEFAULT_INPUT = {
   protein: {
     mode: "gPerKg",
     gPerKg: 1.8,
-    minGPerDay: 80
+    minGPerDay: 80,
   },
   fat: {
     mode: "percentOfCalories",
     percent: 30,
-    minGPerDay: 40
+    minGPerDay: 40,
   },
   carbs: {
     mode: "remainder",
     percent: null,
-    minGPerDay: 75
+    minGPerDay: 75,
   },
   rounding: {
     macroGrams: 5,
-    calories: 10
+    calories: 10,
   },
   mealsPerDay: 3,
   snacksPerDay: 1,
@@ -78,15 +76,15 @@ const DEFAULT_INPUT = {
   healthFlags: {
     diabetesOrPreDiabetes: false,
     kidneyIssues: false,
-    pregnantOrBreastfeeding: false
+    pregnantOrBreastfeeding: false,
   },
   ssaIntegration: {
     allowAutoLinkToMealPlanner: true,
     allowAutoLinkToGroceryPlanner: true,
     allowAutoLinkToAnimalPlanner: true,
     preferredUnitSystem: "imperial",
-    autosaveProfile: true
-  }
+    autosaveProfile: true,
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -104,7 +102,7 @@ function emitMacroEvent(type, data) {
       type,
       ts: new Date().toISOString(),
       source: "features/calculators/health/MacroCalculator.view",
-      data
+      data,
     });
   } catch (err) {
     // Fail soft; calculator should never crash on event issues.
@@ -122,7 +120,7 @@ function buildShimOptions() {
   // Placeholder for injecting user id/profile id later.
   // Can be wired to auth/user context if desired.
   return {
-    profileIdSeed: null
+    profileIdSeed: null,
   };
 }
 
@@ -151,7 +149,7 @@ export default function MacroCalculatorView() {
       emitMacroEvent("health.macroPlan.calculated", {
         input: res.input,
         macroPlan: res.output,
-        uiContext: { autoRecalc: true }
+        uiContext: { autoRecalc: true },
       });
     }
     return res;
@@ -167,7 +165,7 @@ export default function MacroCalculatorView() {
   function handleInputChange(field, value) {
     setForm((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   }
 
@@ -197,7 +195,7 @@ export default function MacroCalculatorView() {
       }
       return {
         ...prev,
-        outputGranularity: Array.from(set)
+        outputGranularity: Array.from(set),
       };
     });
   }
@@ -209,7 +207,7 @@ export default function MacroCalculatorView() {
     emitMacroEvent("health.macroPlan.calculated", {
       input: res.input,
       macroPlan: res.output,
-      uiContext: { autoRecalc: false }
+      uiContext: { autoRecalc: false },
     });
   }
 
@@ -220,8 +218,8 @@ export default function MacroCalculatorView() {
       macroPlan: displayed.output,
       uiContext: {
         appliedFrom: "MacroCalculator",
-        nowClicked: true
-      }
+        nowClicked: true,
+      },
     };
 
     emitMacroEvent("health.macroPlan.appliedNow", payload);
@@ -302,9 +300,7 @@ export default function MacroCalculatorView() {
                   <td className="px-2 py-1 text-slate-800">
                     {Math.round(slot.calories)}
                   </td>
-                  <td className="px-2 py-1">
-                    {Math.round(slot.proteinGrams)}
-                  </td>
+                  <td className="px-2 py-1">{Math.round(slot.proteinGrams)}</td>
                   <td className="px-2 py-1">{Math.round(slot.fatGrams)}</td>
                   <td className="px-2 py-1">{Math.round(slot.carbGrams)}</td>
                 </tr>
@@ -330,8 +326,8 @@ export default function MacroCalculatorView() {
             Macro Calculator
           </h1>
           <p className="mt-1 text-xs text-slate-500 sm:text-sm">
-            Set your daily protein, fat, and carb targets so SSA can build meals,
-            grocery lists, and animal plans that match your body goals.
+            Set your daily protein, fat, and carb targets so SSA can build
+            meals, grocery lists, and animal plans that match your body goals.
           </p>
         </div>
         <div className="flex items-center gap-2">

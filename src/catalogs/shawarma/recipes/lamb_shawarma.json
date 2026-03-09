@@ -1,0 +1,588 @@
+{
+  "$schema": "../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+
+  "meta": {
+    "id": "shawarma.recipes.lamb_shawarma",
+    "type": "recipe",
+    "domain": "recipes",
+    "locale": "en-US",
+    "name": "Lamb Shawarma",
+    "subtitle": "Garlic-lemon, warm-spice lamb with shawarma char—sheet-pan, skillet, or grill options",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Catalogs",
+      "notes": [
+        "Home-kitchen friendly (no vertical spit required).",
+        "Designed for strong shawarma flavor with lamb-forward richness."
+      ]
+    }
+  },
+
+  "classification": {
+    "cuisine": "Levantine",
+    "subprofiles": ["shawarma", "street_food", "meal_prep", "lamb_forward"],
+    "category": "main",
+    "mealArchetypes": [
+      "meal_archetype.wraps",
+      "meal_archetype.bowls",
+      "meal_archetype.plated_meals"
+    ],
+    "servingStyles": ["street_food", "family_style", "plates"],
+    "plannerTags": [
+      "shawarma",
+      "lamb",
+      "marinated",
+      "sheet_pan",
+      "skillet_fast",
+      "grill_optional",
+      "wraps",
+      "bowls",
+      "batch_friendly",
+      "meal_prep"
+    ]
+  },
+
+  "summary": "Lamb shawarma with classic warm spices, lemon, and garlic—cooked hot for browned edges and served in wraps, bowls, or plates with tahini or garlic sauce.",
+
+  "yield": {
+    "servings": 6,
+    "notes": "About 2.5–3 lb lamb yields ~6 hearty wraps/bowls (or 8 smaller servings)."
+  },
+
+  "time": {
+    "activeMins": 25,
+    "handsOffMins": 35,
+    "totalMins": 60
+  },
+
+  "difficulty": 3,
+
+  "signals": {
+    "batchFriendly": true,
+    "leftoversFriendly": true,
+    "weeknightPossible": true,
+    "freezerFriendly": true
+  },
+
+  "tasteProfile": {
+    "primary": [
+      "savory",
+      "garlic",
+      "lemon_bright",
+      "warm_spice",
+      "lamb_rich",
+      "caramelized_edges"
+    ],
+    "heat": {
+      "typical": 1,
+      "range": [0, 3],
+      "note": "Optional cayenne or Aleppo pepper for heat."
+    },
+    "texture": ["tender", "browned_edges", "juicy"]
+  },
+
+  "equipment": {
+    "minimum": [
+      "equipment.knife",
+      "equipment.cutting_board",
+      "equipment.bowl",
+      "equipment.measuring_spoons",
+      "equipment.sheet_pan_or_skillet"
+    ],
+    "recommended": [
+      "equipment.cast_iron_skillet",
+      "equipment.wire_rack",
+      "equipment.tongs",
+      "equipment.instant_read_thermometer"
+    ],
+    "optional": [
+      {
+        "id": "equipment.grill",
+        "label": "Grill",
+        "notes": "Excellent for lamb—adds smoke and quick browning."
+      },
+      {
+        "id": "equipment.air_fryer",
+        "label": "Air fryer",
+        "notes": "Great for small batches (single layer; shake halfway)."
+      },
+      {
+        "id": "equipment.food_processor",
+        "label": "Food processor",
+        "notes": "Optional for turning onion/garlic into a paste quickly."
+      }
+    ]
+  },
+
+  "dietFlags": [],
+  "allergens": {
+    "common": [],
+    "notes": [
+      "No dairy required in the base recipe.",
+      "If serving with tahini sauce, note sesame as an allergen."
+    ]
+  },
+
+  "ingredients": [
+    {
+      "id": "ingredient.lamb_shoulder_or_leg",
+      "label": "Lamb (shoulder, leg, or sirloin), thinly sliced or cut into thin strips",
+      "role": "protein",
+      "amount": { "value": 2.75, "unit": "lb" },
+      "notes": [
+        "Shoulder is most forgiving and flavorful.",
+        "Leg is leaner—avoid overcooking.",
+        "Freeze 20–30 minutes to firm up for thin slicing; slice across the grain."
+      ]
+    },
+
+    {
+      "id": "ingredient.olive_oil",
+      "label": "Olive oil",
+      "role": "fat",
+      "amount": { "value": 3, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.lemon_juice",
+      "label": "Lemon juice (fresh)",
+      "role": "acid",
+      "amount": { "value": 3, "unit": "tbsp" }
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic, minced",
+      "role": "aromatic",
+      "amount": { "value": 7, "unit": "clove" }
+    },
+    {
+      "id": "ingredient.onion_yellow",
+      "label": "Yellow onion, grated or very finely minced",
+      "role": "aromatic",
+      "amount": { "value": 0.5, "unit": "each" }
+    },
+
+    {
+      "id": "ingredient.salt_kosher",
+      "label": "Kosher salt",
+      "role": "seasoning",
+      "amount": { "value": 2.25, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 1.5, "unit": "tsp" }
+    },
+
+    {
+      "id": "ingredient.cumin_ground",
+      "label": "Ground cumin",
+      "role": "spice",
+      "amount": { "value": 2.5, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.coriander_ground",
+      "label": "Ground coriander",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.paprika",
+      "label": "Paprika (sweet or smoked)",
+      "role": "spice",
+      "amount": { "value": 2, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.cinnamon_ground",
+      "label": "Ground cinnamon",
+      "role": "spice",
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.allspice_ground",
+      "label": "Ground allspice",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.cardamom_ground",
+      "label": "Ground cardamom",
+      "role": "spice",
+      "optional": true,
+      "amount": { "value": 0.5, "unit": "tsp" }
+    },
+    {
+      "id": "ingredient.clove_ground",
+      "label": "Ground cloves",
+      "role": "spice",
+      "optional": true,
+      "amount": { "value": 0.125, "unit": "tsp" }
+    },
+
+    {
+      "id": "ingredient.sumac",
+      "label": "Ground sumac",
+      "role": "tangy_spice",
+      "optional": true,
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Very shawarma-shop style brightness; optional but recommended."
+    },
+    {
+      "id": "ingredient.aleppo_pepper",
+      "label": "Aleppo pepper (or crushed red pepper)",
+      "role": "heat",
+      "optional": true,
+      "amount": { "value": 1, "unit": "tsp" }
+    },
+
+    {
+      "id": "ingredient.vinegar",
+      "label": "White vinegar or apple cider vinegar",
+      "role": "acid_support",
+      "optional": true,
+      "amount": { "value": 1, "unit": "tbsp" }
+    },
+
+    {
+      "id": "ingredient.pita",
+      "label": "Pita or flatbread (to serve)",
+      "role": "serving",
+      "optional": true,
+      "amount": { "value": 6, "unit": "each" }
+    },
+    {
+      "id": "ingredient.tahini_sauce",
+      "label": "Tahini sauce (to serve)",
+      "role": "sauce",
+      "optional": true,
+      "amount": { "value": 0.75, "unit": "cup" }
+    },
+    {
+      "id": "ingredient.garlic_sauce",
+      "label": "Garlic sauce / toum (to serve)",
+      "role": "sauce",
+      "optional": true,
+      "amount": { "value": 0.75, "unit": "cup" }
+    },
+    {
+      "id": "ingredient.pickled_turnips",
+      "label": "Pickled turnips or pickles (to serve)",
+      "role": "garnish",
+      "optional": true,
+      "amount": { "value": 1, "unit": "cup" }
+    },
+    {
+      "id": "ingredient.tomatoes",
+      "label": "Tomatoes, sliced (to serve)",
+      "role": "garnish",
+      "optional": true,
+      "amount": { "value": 2, "unit": "each" }
+    },
+    {
+      "id": "ingredient.cucumber",
+      "label": "Cucumber, sliced (to serve)",
+      "role": "garnish",
+      "optional": true,
+      "amount": { "value": 1, "unit": "each" }
+    },
+    {
+      "id": "ingredient.parsley",
+      "label": "Parsley, chopped (to serve)",
+      "role": "garnish",
+      "optional": true,
+      "amount": { "value": 0.25, "unit": "cup" }
+    }
+  ],
+
+  "ingredientGroups": [
+    {
+      "id": "group.lamb",
+      "label": "Lamb",
+      "items": ["ingredient.lamb_shoulder_or_leg"]
+    },
+    {
+      "id": "group.marinade",
+      "label": "Marinade + spice blend",
+      "items": [
+        "ingredient.olive_oil",
+        "ingredient.lemon_juice",
+        "ingredient.garlic",
+        "ingredient.onion_yellow",
+        "ingredient.salt_kosher",
+        "ingredient.black_pepper",
+        "ingredient.cumin_ground",
+        "ingredient.coriander_ground",
+        "ingredient.paprika",
+        "ingredient.cinnamon_ground",
+        "ingredient.allspice_ground",
+        "ingredient.cardamom_ground",
+        "ingredient.clove_ground",
+        "ingredient.sumac",
+        "ingredient.aleppo_pepper",
+        "ingredient.vinegar"
+      ]
+    },
+    {
+      "id": "group.serving",
+      "label": "To serve (optional)",
+      "items": [
+        "ingredient.pita",
+        "ingredient.tahini_sauce",
+        "ingredient.garlic_sauce",
+        "ingredient.pickled_turnips",
+        "ingredient.tomatoes",
+        "ingredient.cucumber",
+        "ingredient.parsley"
+      ]
+    }
+  ],
+
+  "steps": [
+    {
+      "id": "step.001_slice_lamb",
+      "title": "Slice the lamb thinly",
+      "instructions": [
+        "Freeze lamb 20–30 minutes to firm it up (optional but helpful).",
+        "Slice very thinly across the grain (about 1/8-inch) or cut into thin strips.",
+        "Aim for uniform thickness so everything browns at the same rate."
+      ],
+      "timers": [
+        { "label": "Optional quick chill", "minutes": 25 },
+        { "label": "Slice lamb", "minutes": 10 }
+      ],
+      "checks": [
+        "Slices are thin and even.",
+        "Sliced across the grain for tenderness."
+      ]
+    },
+    {
+      "id": "step.002_make_marinade",
+      "title": "Mix marinade",
+      "instructions": [
+        "In a large bowl, whisk olive oil, lemon juice, garlic, and grated onion.",
+        "Add salt, pepper, cumin, coriander, paprika, cinnamon, and allspice.",
+        "Add optional cardamom, clove, sumac, Aleppo pepper, and vinegar if using. Mix well."
+      ],
+      "timers": [{ "label": "Mix marinade", "minutes": 5 }],
+      "checks": [
+        "Spices are fully blended; marinade smells bright and warm-spiced."
+      ]
+    },
+    {
+      "id": "step.003_marinate",
+      "title": "Marinate the lamb",
+      "instructions": [
+        "Add lamb to the marinade and toss thoroughly to coat.",
+        "Cover and refrigerate at least 45 minutes (ideal: 2–8 hours).",
+        "If using lean lamb leg, keep marinate closer to 2–6 hours for best texture."
+      ],
+      "timers": [
+        { "label": "Minimum marinate", "minutes": 45 },
+        { "label": "Ideal marinate", "minutes": 240 }
+      ],
+      "checks": ["Lamb is evenly coated; spices cling to the surface."]
+    },
+    {
+      "id": "step.004_cook_sheet_pan",
+      "title": "Cook (sheet-pan, oven method)",
+      "instructions": [
+        "Heat oven to 450°F. Place a rack in the upper third of the oven.",
+        "Line a sheet pan (or use a rack on the pan if you want extra airflow).",
+        "Spread lamb in a single layer (use 2 pans if needed).",
+        "Roast 8–12 minutes until browned at edges. Broil 1–2 minutes at the end for extra char (watch closely).",
+        "Rest 3 minutes before serving."
+      ],
+      "timers": [
+        { "label": "Preheat oven", "minutes": 10 },
+        { "label": "Roast lamb", "minutes": 10 },
+        { "label": "Optional broil", "minutes": 2 },
+        { "label": "Rest", "minutes": 3 }
+      ],
+      "temperature": {
+        "type": "oven",
+        "value": 450,
+        "unit": "F",
+        "notes": "High heat for browned edges; avoid steaming by not overcrowding."
+      },
+      "checks": [
+        "Edges are browned; lamb is still juicy.",
+        "If liquids pool heavily, you overcrowded—use two pans next time."
+      ]
+    },
+    {
+      "id": "step.005_cook_skillet_fast",
+      "title": "Cook (fast skillet method)",
+      "instructions": [
+        "Heat a cast-iron or heavy skillet over high heat until very hot.",
+        "Cook lamb in batches in a single layer, 60–90 seconds per side, until browned.",
+        "Transfer to a plate; repeat. Combine and rest 2–3 minutes before serving."
+      ],
+      "timers": [
+        { "label": "Skillet cook (per batch)", "minutes": 6 },
+        { "label": "Rest", "minutes": 3 }
+      ],
+      "checks": [
+        "Lamb is seared quickly (browned), not simmered.",
+        "Pan stays hot—avoid crowding."
+      ]
+    },
+    {
+      "id": "step.006_serve",
+      "title": "Serve",
+      "instructions": [
+        "Wrap: Spread toum or tahini sauce on warm pita/flatbread, add lamb, pickled turnips, tomatoes, cucumbers, and parsley.",
+        "Bowl: Serve over rice, fries, or chopped salad; drizzle sauce and add pickles.",
+        "Plate: Serve with roasted vegetables and a lemony salad for balance."
+      ],
+      "checks": [
+        "Taste and adjust: add lemon, sumac, or pickles if it needs more brightness."
+      ]
+    }
+  ],
+
+  "pairings": {
+    "classic": [
+      "lev.garlic_sauce_toum",
+      "lev.tahini_sauce",
+      "lev.pickled_turnips",
+      "lev.tomato_cucumber_salad",
+      "lev.hummus",
+      "lev.fries_or_rice"
+    ],
+    "ssa_household_friendly": [
+      "quick_slaw_lemon_garlic",
+      "herb_rice",
+      "roasted_peppers_onions",
+      "cucumber_yogurt_optional"
+    ]
+  },
+
+  "storage": {
+    "refrigerate": {
+      "duration": "4 days",
+      "notes": "Reheat in a hot skillet to re-crisp edges; microwave softens texture."
+    },
+    "freeze": {
+      "duration": "2 months",
+      "notes": "Freeze cooked lamb flat in bags. Reheat thawed in a skillet or hot oven."
+    }
+  },
+
+  "planner": {
+    "prepTasks": [
+      { "task": "Slice lamb thinly", "mins": 10 },
+      { "task": "Mix marinade", "mins": 5 },
+      { "task": "Marinate (hands-off)", "mins": 0 },
+      { "task": "Cook hot and fast", "mins": 12 },
+      { "task": "Assemble wraps/bowls", "mins": 8 }
+    ],
+    "weeknightTips": [
+      "Marinate in the morning; sheet-pan roast at dinner.",
+      "For fastest dinner: slice thin + 45 min marinade + skillet sear."
+    ],
+    "scalingNotes": [
+      "Double batch needs two pans or multiple skillet batches to avoid steaming."
+    ]
+  },
+
+  "methods": [
+    "technique.slice_thin",
+    "technique.marinade",
+    "technique.roast_high_heat",
+    "technique.sear_hot_fast"
+  ],
+
+  "compat": {
+    "search": {
+      "aliases": [
+        "lamb shawarma",
+        "shawarma lamb",
+        "oven lamb shawarma",
+        "skillet lamb shawarma"
+      ],
+      "keywords": [
+        "lemon",
+        "garlic",
+        "onion",
+        "cumin",
+        "coriander",
+        "paprika",
+        "allspice",
+        "cardamom",
+        "sumac",
+        "thin sliced lamb",
+        "wrap"
+      ]
+    },
+    "normalization": {
+      "notes": [
+        "Ingredient IDs are SSA-style; map via ingredient alias catalogs if your IDs differ.",
+        "Sumac/Aleppo are optional but help the 'shawarma shop' flavor."
+      ]
+    }
+  },
+
+  "notes": [
+    "Lamb loves brightness—sumac, lemon, and pickles help balance richness.",
+    "If your lamb is very lean, shorten cook time and skip long broiling.",
+    "For extra aroma, add 1 tsp ground ginger (optional) to the spice blend."
+  ],
+
+  "variations": [
+    {
+      "id": "variation.grill",
+      "label": "Grill method (best flavor)",
+      "when": { "equipment": ["equipment.grill"] },
+      "adapt": {
+        "notes": [
+          "Thread strips onto skewers or use larger thin slices.",
+          "Grill over high heat just to brown and cook through, then slice and serve.",
+          "Rest 3 minutes before serving."
+        ]
+      }
+    },
+    {
+      "id": "variation.air_fryer",
+      "label": "Air fryer method (small batch)",
+      "when": { "equipment": ["equipment.air_fryer"] },
+      "adapt": {
+        "notes": [
+          "Air fry at 400°F for 6–10 minutes, shaking halfway, until browned edges appear.",
+          "Cook in a single layer; do multiple batches if needed."
+        ]
+      }
+    },
+    {
+      "id": "variation.extra_bright",
+      "label": "Extra-bright shawarma (sumac-forward)",
+      "when": { "preferences": ["bright_flavors"] },
+      "adapt": {
+        "notes": [
+          "Use the optional sumac and add 1 extra tbsp lemon juice.",
+          "Finish cooked lamb with a squeeze of lemon and a pinch of sumac."
+        ]
+      }
+    },
+    {
+      "id": "variation.spicy",
+      "label": "Spicy lamb shawarma",
+      "when": { "heat": ["high"] },
+      "adapt": {
+        "notes": [
+          "Add 1 tsp cayenne or 2 tsp Aleppo pepper.",
+          "Serve with a spicy garlic sauce or hot sauce."
+        ]
+      }
+    }
+  ],
+
+  "safety": {
+    "notes": [
+      "Marinate lamb in the refrigerator.",
+      "Avoid overcrowding pans to ensure safe, even cooking and good browning.",
+      "Discard marinade that contacted raw lamb unless boiled."
+    ]
+  }
+}

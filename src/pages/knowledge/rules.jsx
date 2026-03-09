@@ -1,6 +1,12 @@
 /* eslint-disable no-console */
 // C:\Users\larho\suka-smart-assistant\src\pages\knowledge\rules.jsx
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 /**
  * knowledge/rules.jsx — Rules & Guards Knowledge Page
@@ -33,7 +39,9 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 // ----------------------------- Soft Imports ---------------------------------
 let eventBus = null;
 try {
-  eventBus = require("@/services/eventBus").default ?? require("@/services/eventBus");
+  eventBus =
+    require("@/services/events/eventBus").default ??
+    require("@/services/events/eventBus");
 } catch {}
 
 let Config = { get: (_k, fallback) => fallback };
@@ -99,14 +107,18 @@ function nanoid(len = 12) {
 //   updatedAt, createdAt
 // }
 function validateRule(obj) {
-  if (!obj || typeof obj !== "object") return { ok: false, reason: "not-an-object" };
-  if (!obj.id || typeof obj.id !== "string") return { ok: false, reason: "missing-id" };
-  if (!obj.name || typeof obj.name !== "string") return { ok: false, reason: "missing-name" };
+  if (!obj || typeof obj !== "object")
+    return { ok: false, reason: "not-an-object" };
+  if (!obj.id || typeof obj.id !== "string")
+    return { ok: false, reason: "missing-id" };
+  if (!obj.name || typeof obj.name !== "string")
+    return { ok: false, reason: "missing-name" };
   if (!obj.category || typeof obj.category !== "string")
     return { ok: false, reason: "missing-category" };
   if (!obj.domain || typeof obj.domain !== "string")
     return { ok: false, reason: "missing-domain" };
-  if (typeof obj.enabled !== "boolean") return { ok: false, reason: "missing-enabled" };
+  if (typeof obj.enabled !== "boolean")
+    return { ok: false, reason: "missing-enabled" };
   return { ok: true };
 }
 
@@ -122,7 +134,8 @@ function normalizeRule(obj) {
     then: typeof obj.then === "object" && obj.then ? obj.then : {},
     notes: obj.notes ?? "",
     updatedAt: NOW_ISO(),
-    createdAt: obj.createdAt && isISO(obj.createdAt) ? obj.createdAt : NOW_ISO(),
+    createdAt:
+      obj.createdAt && isISO(obj.createdAt) ? obj.createdAt : NOW_ISO(),
     meta: typeof obj.meta === "object" && obj.meta ? obj.meta : {},
   };
 }
@@ -200,7 +213,10 @@ export default function KnowledgeRulesPage() {
         if (!alive) return;
         setItems(Array.isArray(list) ? list : []);
       } catch {
-        setStatus({ kind: "warn", message: "Could not load rules (degraded mode)." });
+        setStatus({
+          kind: "warn",
+          message: "Could not load rules (degraded mode).",
+        });
       }
     })();
     return () => {
@@ -225,9 +241,9 @@ export default function KnowledgeRulesPage() {
       if (domain !== "all" && r.domain !== domain) return false;
       if (category !== "all" && r.category !== category) return false;
       if (!needle) return true;
-      const hay = `${r.id} ${r.name} ${r.domain} ${r.category} ${r.notes} ${JSON.stringify(
-        r.when
-      )} ${JSON.stringify(r.then)}`.toLowerCase();
+      const hay = `${r.id} ${r.name} ${r.domain} ${r.category} ${
+        r.notes
+      } ${JSON.stringify(r.when)} ${JSON.stringify(r.then)}`.toLowerCase();
       return hay.includes(needle);
     });
   }, [items, q, domain, category]);
@@ -248,7 +264,10 @@ export default function KnowledgeRulesPage() {
   const emitRecompile = useCallback(async () => {
     emitEvent("rules.recompiled", "KnowledgeRules", { count: items.length });
     await recompileRuleset();
-    setStatus({ kind: "ok", message: "Rules recompiled and runtime notified." });
+    setStatus({
+      kind: "ok",
+      message: "Rules recompiled and runtime notified.",
+    });
   }, [items.length]);
 
   const onToggle = useCallback(
@@ -256,10 +275,17 @@ export default function KnowledgeRulesPage() {
       try {
         const target = items.find((x) => x.id === id);
         if (!target) return;
-        const updated = normalizeRule({ ...target, enabled: nextEnabled, updatedAt: NOW_ISO() });
+        const updated = normalizeRule({
+          ...target,
+          enabled: nextEnabled,
+          updatedAt: NOW_ISO(),
+        });
         await upsertRule(updated);
         setItems((prev) => prev.map((x) => (x.id === id ? updated : x)));
-        emitEvent("rules.updated", "KnowledgeRules", { id, enabled: nextEnabled });
+        emitEvent("rules.updated", "KnowledgeRules", {
+          id,
+          enabled: nextEnabled,
+        });
       } catch {
         setStatus({ kind: "error", message: "Could not update rule." });
       }
@@ -267,20 +293,17 @@ export default function KnowledgeRulesPage() {
     [items]
   );
 
-  const onDelete = useCallback(
-    async (id) => {
-      if (!id) return;
-      if (!confirm("Delete this rule?")) return;
-      try {
-        await removeRule(id);
-        setItems((prev) => prev.filter((x) => x.id !== id));
-        emitEvent("rules.deleted", "KnowledgeRules", { id });
-      } catch {
-        setStatus({ kind: "error", message: "Delete failed." });
-      }
-    },
-    []
-  );
+  const onDelete = useCallback(async (id) => {
+    if (!id) return;
+    if (!confirm("Delete this rule?")) return;
+    try {
+      await removeRule(id);
+      setItems((prev) => prev.filter((x) => x.id !== id));
+      emitEvent("rules.deleted", "KnowledgeRules", { id });
+    } catch {
+      setStatus({ kind: "error", message: "Delete failed." });
+    }
+  }, []);
 
   const onClone = useCallback(
     async (id) => {
@@ -295,7 +318,10 @@ export default function KnowledgeRulesPage() {
       try {
         await upsertRule(clone);
         setItems((prev) => [clone, ...prev]);
-        emitEvent("rules.created", "KnowledgeRules", { id: clone.id, from: src.id });
+        emitEvent("rules.created", "KnowledgeRules", {
+          id: clone.id,
+          from: src.id,
+        });
       } catch {
         setStatus({ kind: "error", message: "Clone failed." });
       }
@@ -310,13 +336,19 @@ export default function KnowledgeRulesPage() {
       const candidate = normalizeRule({ ...src, ...patch });
       const check = validateRule(candidate);
       if (!check.ok) {
-        setStatus({ kind: "error", message: `Validation failed: ${check.reason}` });
+        setStatus({
+          kind: "error",
+          message: `Validation failed: ${check.reason}`,
+        });
         return;
       }
       try {
         await upsertRule(candidate);
         setItems((prev) => prev.map((x) => (x.id === id ? candidate : x)));
-        emitEvent("rules.updated", "KnowledgeRules", { id, fieldset: Object.keys(patch) });
+        emitEvent("rules.updated", "KnowledgeRules", {
+          id,
+          fieldset: Object.keys(patch),
+        });
       } catch {
         setStatus({ kind: "error", message: "Save failed." });
       }
@@ -347,11 +379,15 @@ export default function KnowledgeRulesPage() {
 
   const onExport = useCallback(() => {
     try {
-      const blob = new Blob([JSON.stringify(items, null, 2)], { type: "application/json" });
+      const blob = new Blob([JSON.stringify(items, null, 2)], {
+        type: "application/json",
+      });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `ssa-rules-${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
+      a.download = `ssa-rules-${new Date()
+        .toISOString()
+        .replace(/[:.]/g, "-")}.json`;
       a.click();
       URL.revokeObjectURL(url);
     } catch {
@@ -400,7 +436,9 @@ export default function KnowledgeRulesPage() {
         setItems(Array.isArray(fresh) ? fresh : []);
         setStatus({
           kind: "ok",
-          message: `Imported ${created + updated} rule(s) (${created} created, ${updated} updated).`,
+          message: `Imported ${
+            created + updated
+          } rule(s) (${created} created, ${updated} updated).`,
         });
         e.target.value = "";
       } catch {
@@ -430,23 +468,38 @@ export default function KnowledgeRulesPage() {
       <header className="mb-5 md:mb-7">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div>
-            <h1 className="text-xl md:text-2xl font-semibold">Rules & Guards</h1>
+            <h1 className="text-xl md:text-2xl font-semibold">
+              Rules & Guards
+            </h1>
             <p className="text-sm text-neutral-600">
-              Configure guardrails and automation policies that govern sessions. Changes emit events
-              and can optionally export to the Hub when familyFundMode is on.
+              Configure guardrails and automation policies that govern sessions.
+              Changes emit events and can optionally export to the Hub when
+              familyFundMode is on.
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <button className="rounded-xl border px-3 py-2 text-sm hover:shadow" onClick={onNew}>
+            <button
+              className="rounded-xl border px-3 py-2 text-sm hover:shadow"
+              onClick={onNew}
+            >
               New rule
             </button>
-            <button className="rounded-xl border px-3 py-2 text-sm hover:shadow" onClick={emitRecompile}>
+            <button
+              className="rounded-xl border px-3 py-2 text-sm hover:shadow"
+              onClick={emitRecompile}
+            >
               Recompile rules
             </button>
-            <button className="rounded-xl border px-3 py-2 text-sm hover:shadow" onClick={onExport}>
+            <button
+              className="rounded-xl border px-3 py-2 text-sm hover:shadow"
+              onClick={onExport}
+            >
               Export JSON
             </button>
-            <button className="rounded-xl border px-3 py-2 text-sm hover:shadow" onClick={onImportClick}>
+            <button
+              className="rounded-xl border px-3 py-2 text-sm hover:shadow"
+              onClick={onImportClick}
+            >
               Import JSON
             </button>
             <input
@@ -483,7 +536,9 @@ export default function KnowledgeRulesPage() {
         <KpiCard label="Enabled" value={kpis.enabled} />
         <KpiCard
           label="Top domain"
-          value={kpis.topDomain ? `${kpis.topDomain[0]} ×${kpis.topDomain[1]}` : "—"}
+          value={
+            kpis.topDomain ? `${kpis.topDomain[0]} ×${kpis.topDomain[1]}` : "—"
+          }
         />
       </section>
 
@@ -491,7 +546,9 @@ export default function KnowledgeRulesPage() {
       <section className="rounded-2xl border p-3 md:p-4 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4">
           <div className="md:col-span-5">
-            <label className="block text-xs text-neutral-600 mb-1">Search</label>
+            <label className="block text-xs text-neutral-600 mb-1">
+              Search
+            </label>
             <input
               className="w-full rounded-xl border px-3 py-2 text-sm"
               placeholder="Find by name, id, notes, when/then JSON…"
@@ -500,7 +557,9 @@ export default function KnowledgeRulesPage() {
             />
           </div>
           <div className="md:col-span-3">
-            <label className="block text-xs text-neutral-600 mb-1">Domain</label>
+            <label className="block text-xs text-neutral-600 mb-1">
+              Domain
+            </label>
             <select
               className="w-full rounded-xl border px-3 py-2 text-sm bg-white"
               value={domain}
@@ -514,7 +573,9 @@ export default function KnowledgeRulesPage() {
             </select>
           </div>
           <div className="md:col-span-3">
-            <label className="block text-xs text-neutral-600 mb-1">Category</label>
+            <label className="block text-xs text-neutral-600 mb-1">
+              Category
+            </label>
             <select
               className="w-full rounded-xl border px-3 py-2 text-sm bg-white"
               value={category}
@@ -556,23 +617,29 @@ export default function KnowledgeRulesPage() {
       {/* Help */}
       <section className="mt-8">
         <details className="rounded-2xl border p-3">
-          <summary className="cursor-pointer text-sm font-medium">How rules drive SSA</summary>
+          <summary className="cursor-pointer text-sm font-medium">
+            How rules drive SSA
+          </summary>
           <ul className="list-disc pl-5 text-sm mt-2 space-y-1">
             <li>
-              <strong>Imports →</strong> Context intelligence identifies seasonality, equipment, and
-              constraints that feed rule predicates (<code>when</code>).
+              <strong>Imports →</strong> Context intelligence identifies
+              seasonality, equipment, and constraints that feed rule predicates
+              (<code>when</code>).
             </li>
             <li>
-              <strong>Intelligence →</strong> Rules determine guardrails and policies (e.g.,
+              <strong>Intelligence →</strong> Rules determine guardrails and
+              policies (e.g.,
               <em>quiet hours</em> convert sessions to notifications).
             </li>
             <li>
-              <strong>Automation →</strong> The runtime consumes rules to schedule/suppress sessions
-              and emits completion/update events accordingly.
+              <strong>Automation →</strong> The runtime consumes rules to
+              schedule/suppress sessions and emits completion/update events
+              accordingly.
             </li>
             <li>
-              <strong>Hub export (optional) →</strong> Rules changes are formatted and sent to the
-              Hub when enabled, so community services can align with household preferences.
+              <strong>Hub export (optional) →</strong> Rules changes are
+              formatted and sent to the Hub when enabled, so community services
+              can align with household preferences.
             </li>
           </ul>
         </details>
@@ -603,8 +670,10 @@ function RuleCard({ rule, onToggle, onDelete, onClone, onEdit, onProbe }) {
     for (const k of ["name", "domain", "category", "priority", "notes"]) {
       if (local[k] !== rule[k]) patch[k] = local[k];
     }
-    if (JSON.stringify(local.when) !== JSON.stringify(rule.when)) patch.when = local.when;
-    if (JSON.stringify(local.then) !== JSON.stringify(rule.then)) patch.then = local.then;
+    if (JSON.stringify(local.when) !== JSON.stringify(rule.when))
+      patch.when = local.when;
+    if (JSON.stringify(local.then) !== JSON.stringify(rule.then))
+      patch.then = local.then;
     if (Object.keys(patch).length === 0) return;
     onEdit?.(rule.id, patch);
   }, [local, onEdit, rule]);
@@ -616,9 +685,15 @@ function RuleCard({ rule, onToggle, onDelete, onClone, onEdit, onProbe }) {
           <div className="font-medium">{rule.name}</div>
           <div className="text-xs text-neutral-600">
             <span className="mr-2">#{rule.id}</span>
-            <span className="px-2 py-0.5 border rounded-full">{rule.category}</span>
-            <span className="ml-2 px-2 py-0.5 border rounded-full">{rule.domain}</span>
-            <span className="ml-2 text-neutral-500">• priority {rule.priority}</span>
+            <span className="px-2 py-0.5 border rounded-full">
+              {rule.category}
+            </span>
+            <span className="ml-2 px-2 py-0.5 border rounded-full">
+              {rule.domain}
+            </span>
+            <span className="ml-2 text-neutral-500">
+              • priority {rule.priority}
+            </span>
           </div>
         </div>
         <div className="flex items-center gap-1">
@@ -631,13 +706,22 @@ function RuleCard({ rule, onToggle, onDelete, onClone, onEdit, onProbe }) {
           >
             {rule.enabled ? "Enabled" : "Disabled"}
           </button>
-          <button className="text-xs rounded-lg border px-2 py-1 hover:shadow" onClick={() => setOpen((v) => !v)}>
+          <button
+            className="text-xs rounded-lg border px-2 py-1 hover:shadow"
+            onClick={() => setOpen((v) => !v)}
+          >
             {open ? "Hide" : "Edit"}
           </button>
-          <button className="text-xs rounded-lg border px-2 py-1 hover:shadow" onClick={() => onClone?.(rule.id)}>
+          <button
+            className="text-xs rounded-lg border px-2 py-1 hover:shadow"
+            onClick={() => onClone?.(rule.id)}
+          >
             Clone
           </button>
-          <button className="text-xs rounded-lg border px-2 py-1 hover:shadow" onClick={() => onProbe?.(rule)}>
+          <button
+            className="text-xs rounded-lg border px-2 py-1 hover:shadow"
+            onClick={() => onProbe?.(rule)}
+          >
             Probe
           </button>
           <button
@@ -680,7 +764,10 @@ function RuleCard({ rule, onToggle, onDelete, onClone, onEdit, onProbe }) {
               type="number"
               value={local.priority}
               onChange={(v) =>
-                setLocal((s) => ({ ...s, priority: Number.isFinite(+v) ? +v : s.priority }))
+                setLocal((s) => ({
+                  ...s,
+                  priority: Number.isFinite(+v) ? +v : s.priority,
+                }))
               }
             />
             <LabeledInput
@@ -703,11 +790,15 @@ function RuleCard({ rule, onToggle, onDelete, onClone, onEdit, onProbe }) {
           />
 
           <div className="flex items-center gap-2">
-            <button className="text-xs rounded-lg border px-3 py-2 hover:shadow" onClick={save}>
+            <button
+              className="text-xs rounded-lg border px-3 py-2 hover:shadow"
+              onClick={save}
+            >
               Save changes
             </button>
             <span className="text-[11px] text-neutral-500">
-              Updated {rule.updatedAt ? new Date(rule.updatedAt).toLocaleString() : "—"}
+              Updated{" "}
+              {rule.updatedAt ? new Date(rule.updatedAt).toLocaleString() : "—"}
             </span>
           </div>
         </div>
@@ -716,7 +807,13 @@ function RuleCard({ rule, onToggle, onDelete, onClone, onEdit, onProbe }) {
   );
 }
 
-function LabeledInput({ label, value, onChange, type = "text", className = "" }) {
+function LabeledInput({
+  label,
+  value,
+  onChange,
+  type = "text",
+  className = "",
+}) {
   return (
     <div className={className}>
       <label className="block text-xs text-neutral-600 mb-1">{label}</label>

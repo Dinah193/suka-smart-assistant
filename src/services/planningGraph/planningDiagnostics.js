@@ -30,7 +30,7 @@
  *   • cycles for specific edge types that should be DAGs.
  */
 
-import eventBus from "@/services/eventBus";
+import eventBus from "@/services/events/eventBus";
 import { getIndexedPlanningGraph } from "@/services/planningGraph/planningGraphIndex";
 
 /**

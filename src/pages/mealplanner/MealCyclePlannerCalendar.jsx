@@ -1,5 +1,11 @@
 // src/pages/MealPlanning/MealCyclePlannerCalendar.jsx
-import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
 
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -56,7 +62,8 @@ const sabbathGuard = () => {
     const prefs = PreferencesStore?.getPreferences?.() || {};
     const active = prefs?.torahProfile?.sabbath?.isActive;
     const handsOff = prefs?.torahProfile?.sabbath?.handsOffCooking === true;
-    if (active && handsOff) return { ok: false, reason: "Sabbath hands-off is active." };
+    if (active && handsOff)
+      return { ok: false, reason: "Sabbath hands-off is active." };
   } catch {}
   if (typeof window !== "undefined" && window.__SABBATH__) {
     return { ok: false, reason: "Sabbath period: actions paused." };
@@ -167,7 +174,9 @@ function DraggablePill({ text, data }) {
    Conflict detection (naive)
 ------------------------------------------------------- */
 function detectConflicts(evts = []) {
-  const all = [...evts].filter(Boolean).sort((a, b) => (a.start || "").localeCompare(b.start || ""));
+  const all = [...evts]
+    .filter(Boolean)
+    .sort((a, b) => (a.start || "").localeCompare(b.start || ""));
   const conflicts = [];
   for (let i = 0; i < all.length - 1; i++) {
     const a = all[i];
@@ -190,27 +199,71 @@ function detectConflicts(evts = []) {
 const bundles = {
   "Torah-compliant (Israelite home)": (startDate) => {
     const s = new Date(startDate);
-    const add = (d) => new Date(s.getFullYear(), s.getMonth(), s.getDate() + d).toISOString().slice(0, 10);
+    const add = (d) =>
+      new Date(s.getFullYear(), s.getMonth(), s.getDate() + d)
+        .toISOString()
+        .slice(0, 10);
     return [
-      { id: uid(), title: "Weekly Bread Bake", start: add(3), allDay: true, extendedProps: { kind: "prep" } },
-      { id: uid(), title: "Weekly Bread Bake", start: add(10), allDay: true, extendedProps: { kind: "prep" } },
-      { id: uid(), title: "Batch Cook Beans", start: add(13), allDay: true, extendedProps: { kind: "prep" } },
-      { id: uid(), title: "Ferment Cabbage", start: add(1), allDay: true, extendedProps: { kind: "prep" } },
-      { id: uid(), title: "Ferment Cabbage", start: add(15), allDay: true, extendedProps: { kind: "prep" } },
+      {
+        id: uid(),
+        title: "Weekly Bread Bake",
+        start: add(3),
+        allDay: true,
+        extendedProps: { kind: "prep" },
+      },
+      {
+        id: uid(),
+        title: "Weekly Bread Bake",
+        start: add(10),
+        allDay: true,
+        extendedProps: { kind: "prep" },
+      },
+      {
+        id: uid(),
+        title: "Batch Cook Beans",
+        start: add(13),
+        allDay: true,
+        extendedProps: { kind: "prep" },
+      },
+      {
+        id: uid(),
+        title: "Ferment Cabbage",
+        start: add(1),
+        allDay: true,
+        extendedProps: { kind: "prep" },
+      },
+      {
+        id: uid(),
+        title: "Ferment Cabbage",
+        start: add(15),
+        allDay: true,
+        extendedProps: { kind: "prep" },
+      },
     ];
   },
   "Dairy-Free starter": (startDate) => {
     const s = new Date(startDate);
-    const add = (d) => new Date(s.getFullYear(), s.getMonth(), s.getDate() + d).toISOString().slice(0, 10);
+    const add = (d) =>
+      new Date(s.getFullYear(), s.getMonth(), s.getDate() + d)
+        .toISOString()
+        .slice(0, 10);
     return [
       { id: uid(), title: "Roast Chicken + Veg", start: add(2), allDay: true },
       { id: uid(), title: "Lentil Soup (DF)", start: add(5), allDay: true },
-      { id: uid(), title: "Taco Night (no dairy)", start: add(7), allDay: true },
+      {
+        id: uid(),
+        title: "Taco Night (no dairy)",
+        start: add(7),
+        allDay: true,
+      },
     ];
   },
   Vegetarian: (startDate) => {
     const s = new Date(startDate);
-    const add = (d) => new Date(s.getFullYear(), s.getMonth(), s.getDate() + d).toISOString().slice(0, 10);
+    const add = (d) =>
+      new Date(s.getFullYear(), s.getMonth(), s.getDate() + d)
+        .toISOString()
+        .slice(0, 10);
     return [
       { id: uid(), title: "Veggie Stir-Fry", start: add(1), allDay: true },
       { id: uid(), title: "Chickpea Curry", start: add(3), allDay: true },
@@ -219,16 +272,27 @@ const bundles = {
   },
   "Low-Carb / Low Sugar": (startDate) => {
     const s = new Date(startDate);
-    const add = (d) => new Date(s.getFullYear(), s.getMonth(), s.getDate() + d).toISOString().slice(0, 10);
+    const add = (d) =>
+      new Date(s.getFullYear(), s.getMonth(), s.getDate() + d)
+        .toISOString()
+        .slice(0, 10);
     return [
-      { id: uid(), title: "Grilled Salmon + Greens", start: add(1), allDay: true },
+      {
+        id: uid(),
+        title: "Grilled Salmon + Greens",
+        start: add(1),
+        allDay: true,
+      },
       { id: uid(), title: "Turkey Lettuce Wraps", start: add(4), allDay: true },
       { id: uid(), title: "Zoodle Bolognese", start: add(6), allDay: true },
     ];
   },
   Keto: (startDate) => {
     const s = new Date(startDate);
-    const add = (d) => new Date(s.getFullYear(), s.getMonth(), s.getDate() + d).toISOString().slice(0, 10);
+    const add = (d) =>
+      new Date(s.getFullYear(), s.getMonth(), s.getDate() + d)
+        .toISOString()
+        .slice(0, 10);
     return [
       { id: uid(), title: "Eggs + Avocado Bowls", start: add(2), allDay: true },
       { id: uid(), title: "Beef + Cauli Mash", start: add(5), allDay: true },
@@ -249,7 +313,9 @@ export default function MealCyclePlannerCalendar() {
   const [filter, setFilter] = useState("");
   const [showTray, setShowTray] = useState(true);
   const [flash, setFlash] = useState(""); // short confirmation message
-  const [bundleKey, setBundleKey] = useState("Torah-compliant (Israelite home)");
+  const [bundleKey, setBundleKey] = useState(
+    "Torah-compliant (Israelite home)"
+  );
   const [toast, setToast] = useState(null); // {type,msg,actionLabel,onAction}
   const [undoStack, setUndoStack] = useState(() => loadJSON(LS_KEY_UNDO, []));
   const [includeKinds, setIncludeKinds] = useState({ meal: true, prep: true });
@@ -296,7 +362,10 @@ export default function MealCyclePlannerCalendar() {
       >
         <div className="text-sm">{toast.msg}</div>
         {toast.actionLabel && toast.onAction ? (
-          <button className="mt-2 rounded-lg border border-white/20 px-2 py-1 text-xs hover:bg-white/10" onClick={toast.onAction}>
+          <button
+            className="mt-2 rounded-lg border border-white/20 px-2 py-1 text-xs hover:bg-white/10"
+            onClick={toast.onAction}
+          >
             {toast.actionLabel}
           </button>
         ) : null}
@@ -311,7 +380,8 @@ export default function MealCyclePlannerCalendar() {
       return;
     }
     const api = calendarRef.current?.getApi();
-    const start = api?.view?.currentStart?.toISOString().slice(0, 10) || todayISO();
+    const start =
+      api?.view?.currentStart?.toISOString().slice(0, 10) || todayISO();
     const builder = bundles[bundleKey];
     if (!builder) return;
     const newItems = builder(start);
@@ -330,7 +400,13 @@ export default function MealCyclePlannerCalendar() {
       setToast({ type: "warning", msg: guard.reason });
       return;
     }
-    const newEvt = { id: uid(), title, start: todayISO(), allDay: true, extendedProps: { kind } };
+    const newEvt = {
+      id: uid(),
+      title,
+      start: todayISO(),
+      allDay: true,
+      extendedProps: { kind },
+    };
     const prev = events;
     const next = [...events, newEvt];
     setEvents(next);
@@ -406,7 +482,10 @@ export default function MealCyclePlannerCalendar() {
       return;
     }
     const prev = events;
-    const next = [...events, { id: uid(), title: "New meal", start: arg.dateStr, allDay: true }];
+    const next = [
+      ...events,
+      { id: uid(), title: "New meal", start: arg.dateStr, allDay: true },
+    ];
     setEvents(next);
     setUndoStack((s) => [...s, { type: "add-date", prev }]);
   }
@@ -444,10 +523,15 @@ export default function MealCyclePlannerCalendar() {
         purpose: "meal-cycle",
         items: events,
         range: {
-          start: events.length ? events.map((e) => e.start).sort()[0] : todayISO(),
+          start: events.length
+            ? events.map((e) => e.start).sort()[0]
+            : todayISO(),
           end:
             events.length && events.some((e) => e.end)
-              ? events.map((e) => e.end || e.start).sort().slice(-1)[0]
+              ? events
+                  .map((e) => e.end || e.start)
+                  .sort()
+                  .slice(-1)[0]
               : todayISO(),
         },
       },
@@ -486,7 +570,9 @@ export default function MealCyclePlannerCalendar() {
 
   // Filtered view by kind (meal vs prep)
   const filteredEvents = useMemo(() => {
-    return events.filter((e) => includeKinds[e?.extendedProps?.kind || "meal"] !== false);
+    return events.filter(
+      (e) => includeKinds[e?.extendedProps?.kind || "meal"] !== false
+    );
   }, [events, includeKinds]);
 
   return (
@@ -513,14 +599,36 @@ export default function MealCyclePlannerCalendar() {
           </div>
 
           <div className="flex items-center gap-2">
-            <button className="rounded-xl border px-3 py-2 text-sm hover:bg-zinc-50" onClick={jumpToWeek}>Week</button>
-            <button className="rounded-xl border px-3 py-2 text-sm hover:bg-zinc-50" onClick={jumpToFullMonth}>Full Month</button>
-            <button className="rounded-xl border px-3 py-2 text-sm hover:bg-zinc-50" onClick={jumpToTrueQuarter}>True Quarter</button>
+            <button
+              className="rounded-xl border px-3 py-2 text-sm hover:bg-zinc-50"
+              onClick={jumpToWeek}
+            >
+              Week
+            </button>
+            <button
+              className="rounded-xl border px-3 py-2 text-sm hover:bg-zinc-50"
+              onClick={jumpToFullMonth}
+            >
+              Full Month
+            </button>
+            <button
+              className="rounded-xl border px-3 py-2 text-sm hover:bg-zinc-50"
+              onClick={jumpToTrueQuarter}
+            >
+              True Quarter
+            </button>
 
-            <button className="rounded-xl border px-3 py-2 text-sm hover:bg-zinc-50" onClick={shareSchedule}>
+            <button
+              className="rounded-xl border px-3 py-2 text-sm hover:bg-zinc-50"
+              onClick={shareSchedule}
+            >
               Share schedule
             </button>
-            <button className="rounded-xl border px-3 py-2 text-sm hover:bg-zinc-50" onClick={undo} disabled={!undoStack.length}>
+            <button
+              className="rounded-xl border px-3 py-2 text-sm hover:bg-zinc-50"
+              onClick={undo}
+              disabled={!undoStack.length}
+            >
               Undo
             </button>
           </div>
@@ -537,7 +645,12 @@ export default function MealCyclePlannerCalendar() {
           <div>
             <FullCalendar
               ref={calendarRef}
-              plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
+              plugins={[
+                dayGridPlugin,
+                timeGridPlugin,
+                listPlugin,
+                interactionPlugin,
+              ]}
               initialView="dayGridMonth"
               headerToolbar={headerToolbar}
               height="auto"
@@ -606,7 +719,12 @@ export default function MealCyclePlannerCalendar() {
                     <input
                       type="checkbox"
                       checked={includeKinds.meal}
-                      onChange={(e) => setIncludeKinds((k) => ({ ...k, meal: e.target.checked }))}
+                      onChange={(e) =>
+                        setIncludeKinds((k) => ({
+                          ...k,
+                          meal: e.target.checked,
+                        }))
+                      }
                     />
                     Meals
                   </label>
@@ -614,7 +732,12 @@ export default function MealCyclePlannerCalendar() {
                     <input
                       type="checkbox"
                       checked={includeKinds.prep}
-                      onChange={(e) => setIncludeKinds((k) => ({ ...k, prep: e.target.checked }))}
+                      onChange={(e) =>
+                        setIncludeKinds((k) => ({
+                          ...k,
+                          prep: e.target.checked,
+                        }))
+                      }
                     />
                     Prep
                   </label>
@@ -631,7 +754,10 @@ export default function MealCyclePlannerCalendar() {
                 }}
               >
                 <div style={{ fontWeight: 700 }}>Recipes & Quick Items</div>
-                <button className="btn sm" onClick={() => setShowTray((v) => !v)}>
+                <button
+                  className="btn sm"
+                  onClick={() => setShowTray((v) => !v)}
+                >
                   <span className="label">{showTray ? "Hide" : "Show"}</span>
                 </button>
               </div>
@@ -666,9 +792,18 @@ export default function MealCyclePlannerCalendar() {
                     <div style={{ marginTop: 10, fontSize: 12, opacity: 0.8 }}>
                       Quick sessions
                     </div>
-                    <DraggablePill text="Weekly Bread Bake" data={{ kind: "prep" }} />
-                    <DraggablePill text="Batch Cook Beans" data={{ kind: "prep" }} />
-                    <DraggablePill text="Ferment Cabbage" data={{ kind: "prep" }} />
+                    <DraggablePill
+                      text="Weekly Bread Bake"
+                      data={{ kind: "prep" }}
+                    />
+                    <DraggablePill
+                      text="Batch Cook Beans"
+                      data={{ kind: "prep" }}
+                    />
+                    <DraggablePill
+                      text="Ferment Cabbage"
+                      data={{ kind: "prep" }}
+                    />
 
                     <div
                       style={{
@@ -678,10 +813,16 @@ export default function MealCyclePlannerCalendar() {
                         marginTop: 10,
                       }}
                     >
-                      <button className="btn sm" onClick={() => addQuick("Weekly Bread Bake")}>
+                      <button
+                        className="btn sm"
+                        onClick={() => addQuick("Weekly Bread Bake")}
+                      >
                         <span className="label">Add Bread (today)</span>
                       </button>
-                      <button className="btn sm" onClick={() => addQuick("Batch Cook Beans")}>
+                      <button
+                        className="btn sm"
+                        onClick={() => addQuick("Batch Cook Beans")}
+                      >
                         <span className="label">Add Beans (today)</span>
                       </button>
                     </div>
@@ -692,7 +833,9 @@ export default function MealCyclePlannerCalendar() {
               {/* Conflict peek */}
               {conflicts.length > 0 && (
                 <div className="mt-3 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-                  <div className="font-medium">{conflicts.length} potential conflict(s)</div>
+                  <div className="font-medium">
+                    {conflicts.length} potential conflict(s)
+                  </div>
                   <ul className="ml-4 list-disc">
                     {conflicts.slice(0, 5).map((c, idx) => (
                       <li key={idx} className="mt-1">
@@ -703,7 +846,12 @@ export default function MealCyclePlannerCalendar() {
                   <div className="mt-1">
                     <button
                       className="underline"
-                      onClick={() => eventBus.emit("ui.open", { panel: "CalendarPreview", items: events })}
+                      onClick={() =>
+                        eventBus.emit("ui.open", {
+                          panel: "CalendarPreview",
+                          items: events,
+                        })
+                      }
                     >
                       Open timeline preview
                     </button>
@@ -726,14 +874,20 @@ export default function MealCyclePlannerCalendar() {
   if (window.__MEALCYCLE_TESTS__) return;
   window.__MEALCYCLE_TESTS__ = true;
 
-  const expect = (cond, msg) => (cond ? console.log("[MealCycle TEST PASS]", msg) : console.error("[MealCycle TEST FAIL]", msg));
+  const expect = (cond, msg) =>
+    cond
+      ? console.log("[MealCycle TEST PASS]", msg)
+      : console.error("[MealCycle TEST FAIL]", msg);
 
   // Conflict detector
   const evts = [
     { title: "A", start: "2025-01-01", end: "2025-01-01", allDay: true },
     { title: "A", start: "2025-01-01", allDay: true },
   ];
-  expect(detectConflicts(evts).length >= 1, "Detects duplicate same-day allDay titles");
+  expect(
+    detectConflicts(evts).length >= 1,
+    "Detects duplicate same-day allDay titles"
+  );
 
   // Quarter start
   const qS = quarterStart(new Date(2025, 4, 11)); // May 11, 2025 -> Q2 start Apr 1

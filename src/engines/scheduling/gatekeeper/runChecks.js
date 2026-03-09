@@ -38,11 +38,13 @@ let eventBus = {
   on: () => () => {},
 };
 try {
-  const eb = require("@/services/eventBus");
+  const eb = require("@/services/events/eventBus");
   eventBus = eb?.default || eb?.eventBus || eventBus;
 } catch {}
 
-let featureFlags = { familyFundMode: false /* quietHours?, sabbathGuard? (optional) */ };
+let featureFlags = {
+  familyFundMode: false /* quietHours?, sabbathGuard? (optional) */,
+};
 try {
   featureFlags = require("@/featureFlags.json");
 } catch {}
@@ -97,12 +99,28 @@ async function exportToHubIfEnabled(payload) {
 async function readSettingsSafe() {
   try {
     // Prefer gateway KV buckets when present; fall back to memory defaults
-    const quiet = (await dataGateway?.kv?.get?.("settings", "quietHours")) ?? MEM_SETTINGS.quietHours;
-    const sabbath = (await dataGateway?.kv?.get?.("settings", "sabbathGuard")) ?? MEM_SETTINGS.sabbathGuard;
-    const dietary = (await dataGateway?.kv?.get?.("settings", "dietary")) ?? MEM_SETTINGS.dietary;
-    const weather = (await dataGateway?.kv?.get?.("weather", "forecast")) ?? MEM_SETTINGS.weather;
-    const storehouse = (await dataGateway?.kv?.get?.("settings", "storehouse")) ?? MEM_SETTINGS.storehouse;
-    return { quietHours: quiet, sabbathGuard: sabbath, dietary, weather, storehouse };
+    const quiet =
+      (await dataGateway?.kv?.get?.("settings", "quietHours")) ??
+      MEM_SETTINGS.quietHours;
+    const sabbath =
+      (await dataGateway?.kv?.get?.("settings", "sabbathGuard")) ??
+      MEM_SETTINGS.sabbathGuard;
+    const dietary =
+      (await dataGateway?.kv?.get?.("settings", "dietary")) ??
+      MEM_SETTINGS.dietary;
+    const weather =
+      (await dataGateway?.kv?.get?.("weather", "forecast")) ??
+      MEM_SETTINGS.weather;
+    const storehouse =
+      (await dataGateway?.kv?.get?.("settings", "storehouse")) ??
+      MEM_SETTINGS.storehouse;
+    return {
+      quietHours: quiet,
+      sabbathGuard: sabbath,
+      dietary,
+      weather,
+      storehouse,
+    };
   } catch {
     return MEM_SETTINGS;
   }
@@ -115,7 +133,9 @@ async function getInventoryQtySafe(itemKey) {
       return await dataGateway.inventory.getQuantity(itemKey);
     }
     if (dataGateway?.kv?.get) {
-      const inv = (await dataGateway.kv.get("inventory", itemKey)) ?? { qty: 0 };
+      const inv = (await dataGateway.kv.get("inventory", itemKey)) ?? {
+        qty: 0,
+      };
       return Number(inv.qty || 0);
     }
   } catch {}
@@ -168,14 +188,20 @@ registerGlobalCheck(function quietHoursCheck(ctx) {
   const q = ctx.settings?.quietHours;
   if (!q?.enabled) return issues;
 
-  const [startH, startM] = String(q.start || "21:00").split(":").map((n) => parseInt(n, 10));
-  const [endH, endM] = String(q.end || "07:00").split(":").map((n) => parseInt(n, 10));
+  const [startH, startM] = String(q.start || "21:00")
+    .split(":")
+    .map((n) => parseInt(n, 10));
+  const [endH, endM] = String(q.end || "07:00")
+    .split(":")
+    .map((n) => parseInt(n, 10));
 
   for (const w of ctx.windows) {
     const s = new Date(w.startISO);
     const withinQuiet =
-      (s.getHours() > startH || (s.getHours() === startH && s.getMinutes() >= startM)) ||
-      (s.getHours() < endH || (s.getHours() === endH && s.getMinutes() <= endM));
+      s.getHours() > startH ||
+      (s.getHours() === startH && s.getMinutes() >= startM) ||
+      s.getHours() < endH ||
+      (s.getHours() === endH && s.getMinutes() <= endM);
 
     if (withinQuiet) {
       issues.push({
@@ -205,7 +231,7 @@ registerGlobalCheck(function sabbathGuardCheck(ctx) {
     // very coarse proxy: block if Fri evening or Sat (caller can override)
     const isWithin =
       (dow === 5 && d.getHours() >= 18) || // Fri >= 18:00
-      (dow === 6 && d.getHours() < 19);    // Sat < 19:00
+      (dow === 6 && d.getHours() < 19); // Sat < 19:00
 
     if (isWithin) {
       issues.push({
@@ -248,11 +274,16 @@ registerDomainCheck("cooking", function cookingDietAllergyCheck(ctx) {
   const allergies = new Set(ctx.settings?.dietary?.allergies || []);
   if (!allergies.size) return issues;
 
-  for (const w of ctx.windows.filter((x) => (x.domain || "generic") === "cooking")) {
+  for (const w of ctx.windows.filter(
+    (x) => (x.domain || "generic") === "cooking"
+  )) {
     const tags = (w.tags || []).map((t) => String(t).toLowerCase());
     // If the plan attaches ingredients to windows, they can appear in w.ingredients: [{name, qty, unit}]
-    const ing = (w.ingredients || []).map((i) => String(i.name || "").toLowerCase());
-    const hit = ing.find((i) => allergies.has(i)) || tags.find((t) => allergies.has(t));
+    const ing = (w.ingredients || []).map((i) =>
+      String(i.name || "").toLowerCase()
+    );
+    const hit =
+      ing.find((i) => allergies.has(i)) || tags.find((t) => allergies.has(t));
     if (hit) {
       issues.push({
         id: `diet-${w.id}-${hit}`,
@@ -271,45 +302,54 @@ registerDomainCheck("cooking", function cookingDietAllergyCheck(ctx) {
 });
 
 /** Preservation: jars/lids availability from inventory if quantities are provided */
-registerDomainCheck("preservation", async function preservationJarLidCheck(ctx) {
-  const issues = [];
-  for (const w of ctx.windows.filter((x) => (x.domain || "generic") === "preservation")) {
-    const needJars = Number(w.materials?.jars || 0);
-    const needLids = Number(w.materials?.lids || 0);
-    if (!needJars && !needLids) continue;
+registerDomainCheck(
+  "preservation",
+  async function preservationJarLidCheck(ctx) {
+    const issues = [];
+    for (const w of ctx.windows.filter(
+      (x) => (x.domain || "generic") === "preservation"
+    )) {
+      const needJars = Number(w.materials?.jars || 0);
+      const needLids = Number(w.materials?.lids || 0);
+      if (!needJars && !needLids) continue;
 
-    const haveJars = needJars ? await getInventoryQtySafe("jar.pint|quart|halfgal") : 0;
-    const haveLids = needLids ? await getInventoryQtySafe("lid.standard|wide") : 0;
+      const haveJars = needJars
+        ? await getInventoryQtySafe("jar.pint|quart|halfgal")
+        : 0;
+      const haveLids = needLids
+        ? await getInventoryQtySafe("lid.standard|wide")
+        : 0;
 
-    if (needJars && haveJars < needJars) {
-      issues.push({
-        id: `jar-short-${w.id}`,
-        severity: "error",
-        scope: "window",
-        windowId: w.id,
-        domain: "preservation",
-        code: "INVENTORY_SHORTAGE",
-        title: "Not enough jars",
-        detail: `Need ${needJars}, have ~${haveJars}.`,
-        refs: { needJars, haveJars },
-      });
+      if (needJars && haveJars < needJars) {
+        issues.push({
+          id: `jar-short-${w.id}`,
+          severity: "error",
+          scope: "window",
+          windowId: w.id,
+          domain: "preservation",
+          code: "INVENTORY_SHORTAGE",
+          title: "Not enough jars",
+          detail: `Need ${needJars}, have ~${haveJars}.`,
+          refs: { needJars, haveJars },
+        });
+      }
+      if (needLids && haveLids < needLids) {
+        issues.push({
+          id: `lid-short-${w.id}`,
+          severity: "error",
+          scope: "window",
+          windowId: w.id,
+          domain: "preservation",
+          code: "INVENTORY_SHORTAGE",
+          title: "Not enough lids",
+          detail: `Need ${needLids}, have ~${haveLids}.`,
+          refs: { needLids, haveLids },
+        });
+      }
     }
-    if (needLids && haveLids < needLids) {
-      issues.push({
-        id: `lid-short-${w.id}`,
-        severity: "error",
-        scope: "window",
-        windowId: w.id,
-        domain: "preservation",
-        code: "INVENTORY_SHORTAGE",
-        title: "Not enough lids",
-        detail: `Need ${needLids}, have ~${haveLids}.`,
-        refs: { needLids, haveLids },
-      });
-    }
+    return issues;
   }
-  return issues;
-});
+);
 
 /** Garden: weather window (skip if allowRain) */
 registerDomainCheck("garden", function gardenWeatherCheck(ctx) {
@@ -318,7 +358,9 @@ registerDomainCheck("garden", function gardenWeatherCheck(ctx) {
   if (!wx || wx.allowRain) return issues;
   const fc = Array.isArray(wx.forecast) ? wx.forecast : [];
 
-  for (const w of ctx.windows.filter((x) => (x.domain || "generic") === "garden")) {
+  for (const w of ctx.windows.filter(
+    (x) => (x.domain || "generic") === "garden"
+  )) {
     const t = toMs(w.startISO);
     if (t == null) continue;
     // naive match: find forecast cell +-60min
@@ -346,13 +388,17 @@ registerDomainCheck("garden", function gardenWeatherCheck(ctx) {
 /** Animals: feed/bedding check if materials specified on window */
 registerDomainCheck("animals", async function animalsSuppliesCheck(ctx) {
   const issues = [];
-  for (const w of ctx.windows.filter((x) => (x.domain || "generic") === "animals")) {
+  for (const w of ctx.windows.filter(
+    (x) => (x.domain || "generic") === "animals"
+  )) {
     const needFeed = Number(w.materials?.feedKg || 0);
     const needBedding = Number(w.materials?.beddingKg || 0);
     if (!needFeed && !needBedding) continue;
 
     const haveFeed = needFeed ? await getInventoryQtySafe("feed.mixedKg") : 0;
-    const haveBedding = needBedding ? await getInventoryQtySafe("bedding.strawKg") : 0;
+    const haveBedding = needBedding
+      ? await getInventoryQtySafe("bedding.strawKg")
+      : 0;
 
     if (needFeed && haveFeed < needFeed) {
       issues.push({
@@ -389,7 +435,9 @@ registerDomainCheck("storehouse", function storehouseCapacityCheck(ctx) {
   if (!isNum(freeBins)) return issues;
 
   // If any storehouse window plans to stash more bins than freeBins (via materials.bins)
-  for (const w of ctx.windows.filter((x) => (x.domain || "generic") === "storehouse")) {
+  for (const w of ctx.windows.filter(
+    (x) => (x.domain || "generic") === "storehouse"
+  )) {
     const needBins = Number(w?.materials?.bins || 0);
     if (needBins > freeBins) {
       issues.push({
@@ -434,13 +482,22 @@ async function runChecks(req = {}) {
   try {
     const planId = String(req.planId || "").trim() || `ad-hoc-${Date.now()}`;
     const windows = Array.isArray(req.windows) ? req.windows.slice() : [];
-    const reservations = Array.isArray(req.reservations) ? req.reservations.slice() : [];
+    const reservations = Array.isArray(req.reservations)
+      ? req.reservations.slice()
+      : [];
     const conflicts = Array.isArray(req.conflicts) ? req.conflicts.slice() : [];
 
     if (!windows.length) {
       const message = "No windows provided.";
       emit("scheduling.checks.error", source, { message, planId });
-      return { planId, ok: false, counts: zeroCounts(), issues: [], byWindow: {}, ts: nowISO() };
+      return {
+        planId,
+        ok: false,
+        counts: zeroCounts(),
+        issues: [],
+        byWindow: {},
+        ts: nowISO(),
+      };
     }
 
     // Read settings/preferences safely
@@ -465,7 +522,9 @@ async function runChecks(req = {}) {
     }
 
     // 2) Run domain checks per present domain
-    const present = new Set(windows.map((w) => (w.domain || "generic").toLowerCase()));
+    const present = new Set(
+      windows.map((w) => (w.domain || "generic").toLowerCase())
+    );
     for (const d of present) {
       const fns = DOMAIN_CHECKS.get(d) || [];
       for (const fn of fns) {
@@ -492,7 +551,15 @@ async function runChecks(req = {}) {
     }
 
     const ok = counts.blocker === 0;
-    const payload = { planId, ok, counts, issues, byWindow, ts: nowISO(), planMeta: ctx.planMeta };
+    const payload = {
+      planId,
+      ok,
+      counts,
+      issues,
+      byWindow,
+      ts: nowISO(),
+      planMeta: ctx.planMeta,
+    };
 
     // Emit events
     emit("scheduling.checks.completed", source, payload);
@@ -506,10 +573,21 @@ async function runChecks(req = {}) {
 
     return payload;
   } catch (err) {
-    emit("scheduling.checks.error", "engines/scheduling/gatekeeper/runChecks.runChecks", {
-      message: String(err?.message || err),
-    });
-    return { planId: String(req?.planId || ""), ok: false, counts: zeroCounts(), issues: [], byWindow: {}, ts: nowISO() };
+    emit(
+      "scheduling.checks.error",
+      "engines/scheduling/gatekeeper/runChecks.runChecks",
+      {
+        message: String(err?.message || err),
+      }
+    );
+    return {
+      planId: String(req?.planId || ""),
+      ok: false,
+      counts: zeroCounts(),
+      issues: [],
+      byWindow: {},
+      ts: nowISO(),
+    };
   }
 }
 

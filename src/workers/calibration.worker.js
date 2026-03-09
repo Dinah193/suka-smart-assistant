@@ -24,10 +24,10 @@
  *  - Defensive: tolerant of partial data and downstream failures.
  */
 
-import eventBus from "../services/eventBus";
+import eventBus from "../services/events/eventBus";
 import featureFlags from "../config/featureFlags";
-import HubPacketFormatter from "../hub/HubPacketFormatter";
-import FamilyFundConnector from "../hub/FamilyFundConnector";
+import HubPacketFormatter from "@/services/hub/HubPacketFormatter";
+import FamilyFundConnector from "@/services/hub/FamilyFundConnector";
 
 // ---------------------------------------------------------------------------
 // Constants & simple helpers
@@ -43,7 +43,14 @@ const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 const toNum = (n, d = 0) => (Number.isFinite(+n) ? +n : d);
 
 // Domains handled; 'all' means aggregate across everything (usually not applied)
-const DOMAINS = ["cooking", "cleaning", "garden", "animals", "storehouse", "preservation"];
+const DOMAINS = [
+  "cooking",
+  "cleaning",
+  "garden",
+  "animals",
+  "storehouse",
+  "preservation",
+];
 
 /**
  * Hub export — only for commands that change household planning behavior.
@@ -90,12 +97,16 @@ async function fetchHistoryWindow({ fromISO, toISO, domain }) {
       data: { from: fromISO, to: toISO, domain },
     };
     const off = eventBus.on("analytics.history.result", (e) => {
-      try { off?.(); } catch {}
+      try {
+        off?.();
+      } catch {}
       resolve(Array.isArray(e?.data?.runs) ? e.data.runs : []);
     });
     eventBus.emit(req.type, req);
     setTimeout(() => {
-      try { off?.(); } catch {}
+      try {
+        off?.();
+      } catch {}
       resolve([]);
     }, 5000);
   });
@@ -128,7 +139,9 @@ const strategies = {
   offset_minutes(runs) {
     const m = computeMetrics(runs);
     // Use median absolute error as a robust offset suggestion
-    const absErr = runs.map((r) => Math.abs(toNum(r.actualMin) - toNum(r.estimateMin)));
+    const absErr = runs.map((r) =>
+      Math.abs(toNum(r.actualMin) - toNum(r.estimateMin))
+    );
     const offset = Math.round(percentile(absErr, 50));
     return {
       strategy: "offset_minutes",
@@ -169,7 +182,8 @@ function computeMetrics(runs = []) {
   const bias = errors.reduce((a, b) => a + b, 0) / n;
   const mean = bias;
   const variance =
-    errors.reduce((a, b) => a + (b - mean) * (b - mean), 0) / Math.max(1, n - 1);
+    errors.reduce((a, b) => a + (b - mean) * (b - mean), 0) /
+    Math.max(1, n - 1);
   const p50 = percentile(errors, 50);
   const p90 = percentile(errors, 90);
 
@@ -201,7 +215,9 @@ function safeQuantileScale(runs, targetP90 = 0.85) {
   const delta = desired - currentP90;
   // Map desired p90 error to a multiplicative scale on estimates
   // If currentP90 = 0.30 and desired = 0.15, scale ≈ est*(1+0.15)/(1+0.30)
-  const scale = (1 + Math.max(-0.8, Math.min(1.5, desired))) / (1 + Math.max(-0.8, Math.min(1.5, currentP90)));
+  const scale =
+    (1 + Math.max(-0.8, Math.min(1.5, desired))) /
+    (1 + Math.max(-0.8, Math.min(1.5, currentP90)));
   return clamp(scale, 0.4, 2.0);
 }
 
@@ -231,15 +247,22 @@ function start({ nightlyHour = DEFAULT_NIGHTLY_HOUR } = {}) {
 
   // Safety net: if host wants a periodic guard, set a 12h ping
   clearInterval(intervalHandle);
-  intervalHandle = setInterval(() => telemetry("scheduler.ping", {}), 12 * 60 * 60 * 1000);
+  intervalHandle = setInterval(
+    () => telemetry("scheduler.ping", {}),
+    12 * 60 * 60 * 1000
+  );
 
   wireEventShortcuts();
 }
 
 function stop() {
   running = false;
-  try { clearTimeout(armedTimeout); } catch {}
-  try { clearInterval(intervalHandle); } catch {}
+  try {
+    clearTimeout(armedTimeout);
+  } catch {}
+  try {
+    clearInterval(intervalHandle);
+  } catch {}
   armedTimeout = null;
   intervalHandle = null;
   unwireEventShortcuts();
@@ -270,11 +293,19 @@ async function runNightlyCycle() {
     // - animals: proportional_bias
     // - others: proportional_bias with fallback to offset_minutes if tiny sample
     const stratKey =
-      domain === "preservation" ? "quantile_fit" : domain === "animals" ? "proportional_bias" : "proportional_bias";
+      domain === "preservation"
+        ? "quantile_fit"
+        : domain === "animals"
+        ? "proportional_bias"
+        : "proportional_bias";
 
     const strat = strategies[stratKey] || strategies.proportional_bias;
     const learned =
-      stratKey === "quantile_fit" ? strat(runs, 0.85) : runs.length >= 8 ? strat(runs) : strategies.offset_minutes(runs);
+      stratKey === "quantile_fit"
+        ? strat(runs, 0.85)
+        : runs.length >= 8
+        ? strat(runs)
+        : strategies.offset_minutes(runs);
 
     const out = {
       domain,
@@ -349,8 +380,14 @@ function wireEventShortcuts() {
       const d = e?.data || {};
       const domain = d.domain || "cooking";
       const to = new Date(d.to || Date.now());
-      const from = new Date(d.from || to.getTime() - DEFAULT_LOOKBACK_DAYS * MILLIS_DAY);
-      const runs = await fetchHistoryWindow({ fromISO: from.toISOString(), toISO: to.toISOString(), domain });
+      const from = new Date(
+        d.from || to.getTime() - DEFAULT_LOOKBACK_DAYS * MILLIS_DAY
+      );
+      const runs = await fetchHistoryWindow({
+        fromISO: from.toISOString(),
+        toISO: to.toISOString(),
+        domain,
+      });
       const m = computeMetrics(runs);
       safeEmit({
         type: "analytics.calibration.result",
@@ -398,12 +435,24 @@ async function runNightlySubset(domains) {
       metrics: learned.metrics,
       window: { from: from.toISOString(), to: to.toISOString() },
     };
-    safeEmit({ type: "analytics.calibration.result", ts: nowISO(), source: SOURCE, data: out });
+    safeEmit({
+      type: "analytics.calibration.result",
+      ts: nowISO(),
+      source: SOURCE,
+      data: out,
+    });
     const updateCmd = {
       type: "calibration.model.update",
       ts: nowISO(),
       source: SOURCE,
-      data: { strategy: out.strategy, domain, params: out.params, metrics: out.metrics, window: out.window, reason: "manual_subset" },
+      data: {
+        strategy: out.strategy,
+        domain,
+        params: out.params,
+        metrics: out.metrics,
+        window: out.window,
+        reason: "manual_subset",
+      },
     };
     safeEmit(updateCmd);
     exportToHubIfEnabled(updateCmd);
@@ -453,7 +502,10 @@ function telemetry(topic, data) {
  *  - { cmd: 'inspect', domain, from?, to? }
  */
 try {
-  if (typeof self !== "undefined" && typeof self.addEventListener === "function") {
+  if (
+    typeof self !== "undefined" &&
+    typeof self.addEventListener === "function"
+  ) {
     self.addEventListener("message", (ev) => {
       const msg = ev?.data || {};
       switch (msg.cmd) {
@@ -477,7 +529,9 @@ try {
         default:
           // Proxy unknown typed messages onto the bus
           if (msg.type) {
-            try { eventBus.emit(msg.type, msg); } catch {}
+            try {
+              eventBus.emit(msg.type, msg);
+            } catch {}
           }
       }
     });

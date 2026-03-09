@@ -1,0 +1,349 @@
+{
+  "$schema": "../../../../schemas/recipe.schema.json",
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-01-23T00:00:00.000Z",
+  "meta": {
+    "id": "mexican.rice_and_beans",
+    "type": "recipe",
+    "domain": "cuisines",
+    "locale": "en-US",
+    "name": "Mexican Rice and Beans",
+    "subtitle": "Arroz rojo (tomato rice) with frijoles (simple stovetop beans) — a flexible weeknight staple",
+    "source": {
+      "kind": "catalog",
+      "name": "SSA Canonical Mexican Cuisine"
+    }
+  },
+  "classification": {
+    "cuisine": "mexican",
+    "category": "side",
+    "mealArchetypes": ["archetype.side", "archetype.rice", "archetype.beans"],
+    "servingStyles": ["plated", "family_style"],
+    "plannerTags": [
+      "course.side",
+      "batch.friendly",
+      "weeknight",
+      "budget.friendly",
+      "leftovers.good"
+    ]
+  },
+  "summary": "A canonical SSA baseline for Mexican-style rice and beans: fluffy tomato rice (arroz rojo) plus simple seasoned beans. Supports canned-bean speed mode and dry-bean slow mode with the same flavor profile.",
+  "yield": {
+    "servings": 6,
+    "servingSize": { "value": 1, "unit": "cup" },
+    "notes": "Serves ~6 as a side (rice + beans). Increase for large families or meal prep."
+  },
+  "time": {
+    "activeMins": 20,
+    "handsOffMins": 35,
+    "totalMins": 55
+  },
+  "difficulty": "beginner",
+  "signals": {
+    "batchFriendly": true,
+    "weeknightPossible": true,
+    "leftoversGood": true,
+    "freezerFriendly": "beans_only"
+  },
+  "tasteProfile": {
+    "savory": 3,
+    "spicy": 1,
+    "acidic": 1,
+    "rich": 2
+  },
+  "equipment": {
+    "minimum": ["equipment.saucepan", "equipment.pot", "equipment.lid"],
+    "recommended": ["equipment.rice_cooker", "equipment.blender"],
+    "optional": [
+      {
+        "id": "equipment.fine_strainer",
+        "label": "Fine Strainer",
+        "notes": "Useful for rinsing rice and beans"
+      }
+    ]
+  },
+  "dietFlags": ["diet.gluten_free", "diet.vegetarian_optional"],
+  "allergens": [],
+  "ingredients": [
+    {
+      "id": "ingredient.rice_long_grain",
+      "label": "Long-grain white rice",
+      "role": "starch.rice",
+      "amount": { "value": 2, "unit": "cups" },
+      "notes": "Rinsed until water runs mostly clear"
+    },
+    {
+      "id": "ingredient.oil_neutral",
+      "label": "Neutral oil",
+      "role": "fat",
+      "amount": { "value": 2, "unit": "tbsp" },
+      "notes": "For toasting rice + sautéing aromatics"
+    },
+    {
+      "id": "ingredient.onion_white",
+      "label": "White onion",
+      "role": "aromatic",
+      "amount": { "value": 1, "unit": "medium" },
+      "notes": "Diced (divide between rice + beans)"
+    },
+    {
+      "id": "ingredient.garlic",
+      "label": "Garlic cloves",
+      "role": "aromatic",
+      "amount": { "value": 4, "unit": "cloves" },
+      "notes": "Minced (divide between rice + beans)"
+    },
+    {
+      "id": "ingredient.tomato",
+      "label": "Tomatoes (Roma or similar)",
+      "role": "base.rice",
+      "amount": { "value": 2, "unit": "medium" },
+      "notes": "Or use tomato sauce (see below)"
+    },
+    {
+      "id": "ingredient.tomato_sauce",
+      "label": "Tomato sauce",
+      "role": "base.rice",
+      "amount": { "value": 1, "unit": "cup" },
+      "optional": true,
+      "notes": "Use instead of fresh tomatoes for speed"
+    },
+    {
+      "id": "ingredient.chicken_broth",
+      "label": "Chicken broth (or vegetable broth)",
+      "role": "liquid.rice",
+      "amount": { "value": 3, "unit": "cups" },
+      "notes": "Use vegetable broth for vegetarian"
+    },
+    {
+      "id": "ingredient.cumin_ground",
+      "label": "Ground cumin",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.oregano_mexican",
+      "label": "Mexican oregano (or oregano)",
+      "role": "spice",
+      "amount": { "value": 1, "unit": "tsp" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.salt",
+      "label": "Salt",
+      "role": "seasoning",
+      "amount": { "value": 2, "unit": "tsp" },
+      "notes": "Divide between rice + beans; adjust for broth saltiness"
+    },
+    {
+      "id": "ingredient.black_pepper",
+      "label": "Black pepper",
+      "role": "seasoning",
+      "amount": { "value": 0.5, "unit": "tsp" },
+      "optional": true
+    },
+
+    {
+      "id": "ingredient.pinto_beans_canned",
+      "label": "Pinto beans, canned (drained and rinsed)",
+      "role": "legume.beans",
+      "amount": { "value": 2, "unit": "cans" },
+      "notes": "15–16 oz cans; see variations for dry beans"
+    },
+    {
+      "id": "ingredient.bean_broth_or_water",
+      "label": "Water or broth (for beans)",
+      "role": "liquid.beans",
+      "amount": { "value": 1, "unit": "cup" },
+      "notes": "Add as needed for desired sauciness"
+    },
+    {
+      "id": "ingredient.bay_leaf",
+      "label": "Bay leaf",
+      "role": "aromatic.beans",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true
+    },
+    {
+      "id": "ingredient.lime",
+      "label": "Lime",
+      "role": "finish.acid",
+      "amount": { "value": 1, "unit": "each" },
+      "optional": true,
+      "notes": "Serve with wedges or squeeze into beans"
+    },
+    {
+      "id": "ingredient.cilantro",
+      "label": "Fresh cilantro",
+      "role": "garnish",
+      "amount": { "value": 0.25, "unit": "cup" },
+      "optional": true,
+      "notes": "Chopped"
+    }
+  ],
+  "ingredientGroups": [
+    {
+      "label": "Arroz Rojo (Mexican Tomato Rice)",
+      "items": [
+        "ingredient.rice_long_grain",
+        "ingredient.oil_neutral",
+        "ingredient.onion_white",
+        "ingredient.garlic",
+        "ingredient.tomato",
+        "ingredient.tomato_sauce",
+        "ingredient.chicken_broth",
+        "ingredient.cumin_ground",
+        "ingredient.oregano_mexican",
+        "ingredient.salt",
+        "ingredient.black_pepper"
+      ]
+    },
+    {
+      "label": "Frijoles (Quick Stovetop Beans)",
+      "items": [
+        "ingredient.pinto_beans_canned",
+        "ingredient.oil_neutral",
+        "ingredient.onion_white",
+        "ingredient.garlic",
+        "ingredient.bean_broth_or_water",
+        "ingredient.bay_leaf",
+        "ingredient.salt",
+        "ingredient.cumin_ground",
+        "ingredient.black_pepper"
+      ]
+    },
+    {
+      "label": "Finish (Optional)",
+      "items": ["ingredient.lime", "ingredient.cilantro"]
+    }
+  ],
+  "steps": [
+    {
+      "id": "step.prep",
+      "title": "Prep aromatics and rinse rice",
+      "activeMins": 8,
+      "body": "Dice onion and mince garlic. Rinse rice in a fine strainer until water runs mostly clear; drain well. If using fresh tomatoes, blend them (or finely chop/juice them) to make a quick tomato puree."
+    },
+    {
+      "id": "step.toast_rice",
+      "title": "Toast the rice for fluffy texture",
+      "activeMins": 7,
+      "body": "In a saucepan over medium heat, warm 1 tbsp oil. Add rice and toast, stirring often, until lightly golden and nutty-smelling. Add half the onion and half the garlic; cook 1–2 minutes until fragrant (do not burn).",
+      "timers": [
+        { "label": "Toast rice", "minutes": 5 },
+        { "label": "Sauté aromatics", "minutes": 2 }
+      ],
+      "checks": [
+        "Rice is lightly golden",
+        "Aromatics are fragrant, not browned"
+      ]
+    },
+    {
+      "id": "step.add_tomato_and_broth",
+      "title": "Add tomato base and simmer rice",
+      "activeMins": 4,
+      "handsOffMins": 20,
+      "body": "Stir in tomato puree (or tomato sauce). Add broth, cumin and oregano (optional), and about 1 tsp salt (adjust for salty broth). Bring to a gentle boil, then cover and reduce to low. Simmer 18–20 minutes. Turn off heat and let rest covered 5–10 minutes, then fluff with a fork.",
+      "timers": [
+        { "label": "Simmer rice", "minutes": 18 },
+        { "label": "Rest rice", "minutes": 7 }
+      ],
+      "checks": [
+        "Rice is tender",
+        "Liquid absorbed",
+        "Grains separate when fluffed"
+      ]
+    },
+    {
+      "id": "step.start_beans",
+      "title": "Start quick beans",
+      "activeMins": 8,
+      "body": "In a pot over medium heat, warm 1 tbsp oil. Add remaining onion and sauté until soft. Add remaining garlic and cook 30 seconds. Stir in drained beans, bay leaf (optional), cumin (optional), and 1/2 tsp salt to start. Add 1/2–1 cup water or broth for sauciness.",
+      "timers": [
+        { "label": "Sauté onion", "minutes": 4 },
+        { "label": "Warm beans", "minutes": 4 }
+      ]
+    },
+    {
+      "id": "step.simmer_beans",
+      "title": "Simmer beans and adjust texture",
+      "activeMins": 5,
+      "handsOffMins": 10,
+      "body": "Simmer 8–12 minutes, stirring occasionally. For creamier beans, mash a small portion against the pot and stir back in. Adjust salt and pepper. Remove bay leaf before serving.",
+      "timers": [{ "label": "Simmer beans", "minutes": 10 }],
+      "checks": [
+        "Beans are hot and seasoned",
+        "Texture matches preference (soupy or thicker)"
+      ]
+    },
+    {
+      "id": "step.finish_serve",
+      "title": "Finish and serve",
+      "activeMins": 3,
+      "body": "Serve rice and beans together. Optional: squeeze lime over beans, garnish with cilantro. Great alongside tacos, enchiladas, grilled meats, or vegetables."
+    }
+  ],
+  "variations": [
+    {
+      "id": "variation.vegetarian",
+      "label": "Vegetarian / Vegan",
+      "notes": "Use vegetable broth for rice and beans. Finish with lime and cilantro for brightness. Add sautéed peppers for extra body."
+    },
+    {
+      "id": "variation.refried_style",
+      "label": "Refried-Style Beans (Quick)",
+      "notes": "Simmer beans with minimal liquid, then mash 1/2–2/3 of the beans. Cook a few minutes more until thick and creamy."
+    },
+    {
+      "id": "variation.dry_beans",
+      "label": "From Dry Pinto Beans",
+      "notes": "Soak 1 lb dry pinto beans overnight (optional). Simmer with onion, garlic, bay leaf, and salt until tender (60–120 min). Then season and thicken as desired. This increases total time significantly."
+    },
+    {
+      "id": "variation.rice_cooker",
+      "label": "Rice Cooker Method",
+      "notes": "Toast rice/aromatics in a pan first if possible, then transfer to rice cooker with tomato base + broth. Cook using white rice setting; rest 10 minutes and fluff."
+    },
+    {
+      "id": "variation.spicy",
+      "label": "Spicy",
+      "notes": "Add diced jalapeño or a pinch of cayenne to beans. Add chipotle in adobo for smoky heat."
+    }
+  ],
+  "storage": {
+    "refrigeration": "Refrigerate rice and beans separately (best texture) for up to 4 days.",
+    "freezing": "Freeze beans for up to 3 months. Rice can be frozen, but texture is best fresh; if freezing rice, cool quickly and reheat with a splash of water.",
+    "reheat": "Reheat rice covered with a splash of water; reheat beans with a splash of broth/water until steaming hot."
+  },
+  "safety": {
+    "notes": [
+      "Cool cooked rice and beans within 2 hours before refrigerating.",
+      "Reheat leftovers to steaming hot throughout."
+    ]
+  },
+  "pairings": {
+    "mains": ["mexican.tacos", "mexican.enchiladas_rojas", "mexican.fajitas"],
+    "toppings": [
+      "mexican.salsa_roja",
+      "mexican.pico_de_gallo",
+      "mexican.guacamole"
+    ],
+    "drinks": ["mexican.agua_fresca_jamaica", "mexican.horchata"]
+  },
+  "planner": {
+    "preferredFor": ["meal_prep", "weeknight", "budget_meals"],
+    "scalesWell": true,
+    "leftoversPlan": "Pack rice and beans in separate compartments/containers to keep rice fluffy; include lime wedge and salsa cup."
+  },
+  "methods": ["technique.toast", "technique.simmer", "technique.steam_rest"],
+  "compat": {
+    "dishId": "mexican.rice_and_beans",
+    "aliases": ["rice and beans", "arroz y frijoles", "arroz rojo", "frijoles"]
+  },
+  "notes": [
+    "Canonical SSA baseline supports both quick canned-bean mode and slower dry-bean mode via variations.",
+    "To avoid mushy rice: toast well, keep lid closed during simmer, and rest before fluffing.",
+    "Salt levels depend heavily on broth brand; season at the end for best control."
+  ]
+}
