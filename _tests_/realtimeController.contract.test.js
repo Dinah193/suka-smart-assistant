@@ -6,9 +6,25 @@ const controllerPath = path.resolve(
   process.cwd(),
   "src/server/routes/realtimeController.js"
 );
+const scopeMiddlewarePath = path.resolve(
+  process.cwd(),
+  "src/server/middleware/realtime/authorizeScope.js"
+);
+const validationMiddlewarePath = path.resolve(
+  process.cwd(),
+  "src/server/middleware/realtime/validateRealtimeEnvelope.js"
+);
 
 function readController() {
   return fs.readFileSync(controllerPath, "utf8");
+}
+
+function readScopeMiddleware() {
+  return fs.readFileSync(scopeMiddlewarePath, "utf8");
+}
+
+function readValidationMiddleware() {
+  return fs.readFileSync(validationMiddlewarePath, "utf8");
 }
 
 describe("realtimeController contract guards", () => {
@@ -22,16 +38,27 @@ describe("realtimeController contract guards", () => {
     expect(src).toMatch(/suggestion\s*:\s*item/);
   });
 
-  it("retains scoped auth guardrails for cross-scope requests", () => {
+  it("mounts deterministic middleware layering for realtime routes", () => {
     const src = readController();
+
+    expect(src).toMatch(/router\.use\(realtimeRateLimit, correlationContext, authenticateRequest, authorizeScope, validateRealtimeEnvelope\)/);
+    expect(src).toMatch(/router\.use\(mapRealtimeErrorMiddleware\)/);
+  });
+
+  it("retains scoped auth guardrails for cross-scope requests", () => {
+    const src = readScopeMiddleware();
 
     // Core scope authorization failure contracts.
     expect(src).toMatch(/forbidden_scope/);
     expect(src).toMatch(/family_scope_forbidden/);
     expect(src).toMatch(/household_scope_missing/);
+  });
 
-    // Ensure route handlers explicitly return 403 for scoped errors.
-    expect(src).toMatch(/status\(403\)\.json\(\{\s*ok:\s*false,\s*error:\s*scoped\.error\s*\}\)/);
+  it("enforces canonical realtime envelope validation middleware", () => {
+    const src = readValidationMiddleware();
+    expect(src).toMatch(/validateEnvelope/);
+    expect(src).toMatch(/schema_validation_failed/);
+    expect(src).toMatch(/invalid_event/);
   });
 
   it("keeps assignment and report export endpoints in controller", () => {

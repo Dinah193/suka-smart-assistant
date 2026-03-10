@@ -8,32 +8,35 @@
 "use strict";
 
 const express = require("express");
+const { correlationContext } = require("../middleware/realtime/correlationContext.js");
+const { authenticateRequest } = require("../middleware/realtime/authenticateRequest.js");
+const { authorizeScope } = require("../middleware/realtime/authorizeScope.js");
+const { validateRealtimeEnvelope } = require("../middleware/realtime/validateRealtimeEnvelope.js");
+const { mapRealtimeErrorMiddleware } = require("../middleware/realtime/mapRealtimeError.js");
 
 const router = express.Router();
 const basePath = "/api/realtime";
 
-function toList(v) {
-  if (!v) return [];
-  if (Array.isArray(v)) return v.map((x) => String(x || "").trim()).filter(Boolean);
-  return String(v)
-    .split(",")
-    .map((x) => x.trim())
-    .filter(Boolean);
-}
+const realtimeHttpRateWindowMs = Number(process.env.REALTIME_HTTP_RATE_WINDOW_MS || 60_000);
+const realtimeHttpRateMax = Number(process.env.REALTIME_HTTP_RATE_MAX || 120);
+const realtimeIpBuckets = new Map();
 
-function hasElevatedRole(roles = []) {
-  const set = new Set(roles.map((r) => String(r || "").toLowerCase()));
-  return set.has("admin") || set.has("owner") || set.has("family_admin") || set.has("household_admin");
-}
+function realtimeRateLimit(req, res, next) {
+  const now = Date.now();
+  const ip = req.ip || req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "unknown";
+  const state = realtimeIpBuckets.get(ip) || { count: 0, resetAt: now + realtimeHttpRateWindowMs };
+  if (now >= state.resetAt) {
+    state.count = 0;
+    state.resetAt = now + realtimeHttpRateWindowMs;
+  }
+  state.count += 1;
+  realtimeIpBuckets.set(ip, state);
 
-function requesterFromReq(req) {
-  const authUser = req.user || req.auth || {};
-  return {
-    userId: authUser.id || authUser.userId || req.headers["x-user-id"] || null,
-    homeId: authUser.homeId || authUser.householdId || req.headers["x-home-id"] || null,
-    familyId: authUser.familyId || req.headers["x-family-id"] || null,
-    roles: toList(authUser.roles || req.headers["x-roles"]),
-  };
+  if (state.count > realtimeHttpRateMax) {
+    res.setHeader("Retry-After", Math.ceil((state.resetAt - now) / 1000));
+    return res.status(429).json({ ok: false, error: "rate_limited" });
+  }
+  return next();
 }
 
 function getCoordinator() {
@@ -45,33 +48,10 @@ function getCoordinator() {
   }
 }
 
-function pickScope(req, requester) {
-  const scope = req.query.scope === "family" || req.body?.scope === "family"
-    ? "family"
-    : "household";
-
-  const requestedScopeId =
-    scope === "family"
-      ? req.query.familyId || req.body?.familyId || requester.familyId
-      : req.query.householdId || req.query.homeId || req.body?.householdId || req.body?.homeId || requester.homeId;
-
-  if (!requestedScopeId) {
-    return { error: scope === "family" ? "family_scope_forbidden" : "household_scope_missing" };
-  }
-
-  // Block cross-scope reads/writes unless elevated role is present.
-  if (!hasElevatedRole(requester.roles)) {
-    if (scope === "family" && requester.familyId && String(requestedScopeId) !== String(requester.familyId)) {
-      return { error: "forbidden_scope" };
-    }
-    if (scope === "household" && requester.homeId && String(requestedScopeId) !== String(requester.homeId)) {
-      return { error: "forbidden_scope" };
-    }
-  }
-
-  const scopeId = String(requestedScopeId);
-
-  return { scope, scopeId };
+function maybeAppendSignal(c, payload, context) {
+  if (!c?.shouldAppendSignals || !c?.appendSignal) return { ok: true, skipped: true };
+  if (!c.shouldAppendSignals()) return { ok: true, skipped: true };
+  return c.appendSignal(payload, context);
 }
 
 function asCsv(report) {
@@ -105,17 +85,18 @@ router.get("/health", (req, res) => {
   });
 });
 
+// Deterministic realtime middleware ordering for all non-health routes.
+router.use(realtimeRateLimit, correlationContext, authenticateRequest, authorizeScope, validateRealtimeEnvelope);
+
 router.post("/signals", (req, res) => {
   const c = getCoordinator();
   if (!c) return res.status(503).json({ ok: false, error: "realtime_not_ready" });
 
-  const requester = requesterFromReq(req);
-  const scoped = pickScope(req, requester);
-  if (scoped.error) return res.status(403).json({ ok: false, error: scoped.error });
-  const { scope, scopeId } = scoped;
-  const payload = req.body?.signal || req.body || {};
-
-  const out = c.ingest(payload, {
+  const requester = req.realtime?.requester || {};
+  const scope = req.realtime?.scope;
+  const scopeId = req.realtime?.scopeId;
+  const payload = req.realtime?.envelope || req.body?.signal || req.body || {};
+  const ingestContext = {
     sourceModule: "http.realtime",
     scope,
     scopeId,
@@ -124,19 +105,44 @@ router.post("/signals", (req, res) => {
       homeId: requester.homeId || scopeId,
       familyId: requester.familyId || null,
     },
-  });
+  };
 
-  return res.json({ ok: true, ...out });
+  try {
+    const appended = maybeAppendSignal(c, payload, ingestContext);
+    if (!appended?.ok) {
+      return res.status(503).json({
+        ok: false,
+        error: appended.error || "event_log_unavailable",
+        reason: appended.reason || "append_failed",
+      });
+    }
+
+    const out = c.ingest(payload, {
+      ...ingestContext,
+      _alreadyAppended: !appended?.skipped,
+    });
+
+    if (out?.ok === false) {
+      const status = out.error === "duplicate_event" ? 409 : 400;
+      return res.status(status).json({
+        ok: false,
+        error: out.error || "invalid_event",
+        reason: out.reason || null,
+      });
+    }
+
+    return res.json(out);
+  } catch {
+    return res.status(400).json({ ok: false, error: "invalid_event", reason: "ingest_failed" });
+  }
 });
 
 router.get("/suggestions", (req, res) => {
   const c = getCoordinator();
   if (!c) return res.status(503).json({ ok: false, error: "realtime_not_ready" });
 
-  const requester = requesterFromReq(req);
-  const scoped = pickScope(req, requester);
-  if (scoped.error) return res.status(403).json({ ok: false, error: scoped.error });
-  const { scope, scopeId } = scoped;
+  const scope = req.realtime?.scope;
+  const scopeId = req.realtime?.scopeId;
   const includeConsumed = String(req.query.includeConsumed || "false").toLowerCase() === "true";
   const items = c.listSuggestions({
     scope,
@@ -153,10 +159,10 @@ router.post("/suggestions/:id/consume", (req, res) => {
   const c = getCoordinator();
   if (!c) return res.status(503).json({ ok: false, error: "realtime_not_ready" });
 
-  const requester = requesterFromReq(req);
-  const scoped = pickScope(req, requester);
-  if (scoped.error) return res.status(403).json({ ok: false, error: scoped.error });
-  const { scope, scopeId } = scoped;
+  const requester = req.realtime?.requester || {};
+  const scope = req.realtime?.scope;
+  const scopeId = req.realtime?.scopeId;
+
   const item = c.consumeSuggestion({
     scope,
     scopeId,
@@ -172,10 +178,9 @@ router.post("/suggestions/:id/assign", (req, res) => {
   const c = getCoordinator();
   if (!c) return res.status(503).json({ ok: false, error: "realtime_not_ready" });
 
-  const requester = requesterFromReq(req);
-  const scoped = pickScope(req, requester);
-  if (scoped.error) return res.status(403).json({ ok: false, error: scoped.error });
-  const { scope, scopeId } = scoped;
+  const requester = req.realtime?.requester || {};
+  const scope = req.realtime?.scope;
+  const scopeId = req.realtime?.scopeId;
 
   const item = c.assignSuggestion({
     scope,
@@ -195,10 +200,8 @@ router.post("/reports/generate", (req, res) => {
   if (!c) return res.status(503).json({ ok: false, error: "realtime_not_ready" });
 
   c.generateReports();
-  const requester = requesterFromReq(req);
-  const scoped = pickScope(req, requester);
-  if (scoped.error) return res.status(403).json({ ok: false, error: scoped.error });
-  const { scope, scopeId } = scoped;
+  const scope = req.realtime?.scope;
+  const scopeId = req.realtime?.scopeId;
   const report = c.getLatestReport({ scope, scopeId });
   return res.json({ ok: true, report });
 });
@@ -207,10 +210,8 @@ router.get("/reports/latest", (req, res) => {
   const c = getCoordinator();
   if (!c) return res.status(503).json({ ok: false, error: "realtime_not_ready" });
 
-  const requester = requesterFromReq(req);
-  const scoped = pickScope(req, requester);
-  if (scoped.error) return res.status(403).json({ ok: false, error: scoped.error });
-  const { scope, scopeId } = scoped;
+  const scope = req.realtime?.scope;
+  const scopeId = req.realtime?.scopeId;
   const report = c.getLatestReport({ scope, scopeId });
   return res.json({ ok: true, report: report || null });
 });
@@ -219,10 +220,8 @@ router.get("/reports/latest.csv", (req, res) => {
   const c = getCoordinator();
   if (!c) return res.status(503).json({ ok: false, error: "realtime_not_ready" });
 
-  const requester = requesterFromReq(req);
-  const scoped = pickScope(req, requester);
-  if (scoped.error) return res.status(403).json({ ok: false, error: scoped.error });
-  const { scope, scopeId } = scoped;
+  const scope = req.realtime?.scope;
+  const scopeId = req.realtime?.scopeId;
   const report = c.getLatestReport({ scope, scopeId });
   if (!report) return res.status(404).json({ ok: false, error: "report_not_found" });
 
@@ -237,10 +236,6 @@ router.get("/audit", (req, res) => {
   const c = getCoordinator();
   if (!c) return res.status(503).json({ ok: false, error: "realtime_not_ready" });
 
-  const requester = requesterFromReq(req);
-  const scoped = pickScope(req, requester);
-  if (scoped.error) return res.status(403).json({ ok: false, error: scoped.error });
-
   const limit = Number(req.query.limit || 200);
   const items = c.getAuditHistory ? c.getAuditHistory({ limit }) : [];
   return res.json({ ok: true, count: items.length, items });
@@ -250,13 +245,25 @@ router.get("/signals", (req, res) => {
   const c = getCoordinator();
   if (!c) return res.status(503).json({ ok: false, error: "realtime_not_ready" });
 
-  const requester = requesterFromReq(req);
-  const scoped = pickScope(req, requester);
-  if (scoped.error) return res.status(403).json({ ok: false, error: scoped.error });
-
   const limit = Number(req.query.limit || 200);
   const items = c.getSignalHistory ? c.getSignalHistory({ limit }) : [];
   return res.json({ ok: true, count: items.length, items });
 });
+
+router.get("/diagnostics", (req, res) => {
+  const c = getCoordinator();
+  if (!c) return res.status(503).json({ ok: false, error: "realtime_not_ready" });
+
+  const scope = req.realtime?.scope;
+  const scopeId = req.realtime?.scopeId;
+
+  const diagnostics = c.getDiagnostics
+    ? c.getDiagnostics({ scope, scopeId })
+    : { state: c.getState ? c.getState() : null };
+
+  return res.json({ ok: true, scope, scopeId, diagnostics });
+});
+
+router.use(mapRealtimeErrorMiddleware);
 
 module.exports = { router, basePath };

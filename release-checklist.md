@@ -3,6 +3,7 @@
 Use this checklist before promoting a build to public launch. A release is `GO` only if all required gates pass.
 
 ## 1. Required CI Gates (Blocking)
+- [ ] Branch protection enabled on default branch with required checks (see `docs/planning/branch-protection.md`).
 - [ ] `build` check is green on the release commit.
 - [ ] `unit-tests` check is green (`vitest` default mode).
 - [ ] `lint` check is green.
@@ -56,8 +57,8 @@ Go/No-Go:
 
 ## 6. Launch Operations (Blocking)
 - [ ] Feature flags set for risky launch areas.
-- [ ] Rollback runbook reviewed and tested.
-- [ ] First-week launch watch schedule assigned.
+- [ ] Rollback runbook reviewed and tested (`docs/planning/launch-ops-runbook.md`).
+- [ ] First-week launch watch schedule assigned (`docs/planning/launch-ops-runbook.md`).
 - [ ] Daily triage owner assigned for week 1.
 
 Go/No-Go:

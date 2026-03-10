@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "vite",
     "test:ci": "vitest run",
+    "ops:branch-protection": "node tools/scripts/configure-branch-protection.cjs",
     "lint:ci": "node tools/scripts/ci-lint.cjs",
     "typecheck:ci": "node tools/scripts/ci-typecheck.cjs",
     "smoke:e2e": "vitest run _tests_/serverStartup.dbmode.contract.test.js _tests_/mealPlanningContext.battleRhythm.catalog.contract.test.js",

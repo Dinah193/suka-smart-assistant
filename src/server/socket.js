@@ -16,6 +16,10 @@ const { Server } = require("socket.io");
 const { EventEmitter } = require("events");
 const { v4: uuidv4 } = require("uuid");
 const path = require("path");
+const { applySocketCorrelationContext } = require("./middleware/realtime/correlationContext.js");
+const { authorizeSocketScope } = require("./middleware/realtime/authorizeScope.js");
+const { validateSocketRealtimeEnvelope } = require("./middleware/realtime/validateRealtimeEnvelope.js");
+const { withRealtimeSocketGuard } = require("./middleware/realtime/mapRealtimeError.js");
 
 // ---- Hybrid loader (CJS + ESM) ----------------------------------------------
 async function loadAny(modulePath) {
@@ -49,7 +53,7 @@ let realtimeCoordinator = null;
 
 // ---- Config -----------------------------------------------------------------
 const SOCKET_PATH = process.env.SOCKET_PATH || "/socket.io";
-const SOCKET_CORS = (process.env.SOCKET_CORS || "*")
+const SOCKET_CORS = (process.env.SOCKET_CORS || (process.env.NODE_ENV === "production" ? "" : "*"))
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
@@ -174,14 +178,37 @@ const ALLOW_EVENTS_FROM_CLIENT = new Map([
 function buildNamespace(ns) {
   const n = io.of(ns);
 
-  function resolveAuthorizedScopeFromSocket(socket, requestedScope) {
-    const scope = requestedScope === "family" ? "family" : "household";
-    const scopeId = scope === "family" ? socket.user?.familyId : socket.user?.homeId;
-    if (!scopeId) {
-      const code = scope === "family" ? "family_scope_forbidden" : "household_scope_missing";
-      throw new Error(code);
-    }
-    return { scope, scopeId };
+  function resolveAuthorizedScopeFromSocket(socket, requestedScope, requestedScopeId = null) {
+    return authorizeSocketScope(socket, {
+      scope: requestedScope,
+      scopeId: requestedScopeId || (requestedScope === "family" ? socket.user?.familyId : socket.user?.homeId),
+    });
+  }
+
+  function resolveRealtimeSocketContext(socket, payload, { eventName, requireEnvelope = false } = {}) {
+    const correlated = applySocketCorrelationContext(socket, payload || {}, { eventName });
+    const scopedPayload = authorizeSocketScope(socket, correlated.payload);
+    const normalizedPayload = requireEnvelope
+      ? validateSocketRealtimeEnvelope(scopedPayload, {
+          actorId: socket?.user?.id || null,
+          sourceModule: ns,
+        })
+      : scopedPayload;
+
+    return {
+      payload: normalizedPayload,
+      context: {
+        ns,
+        user: socket.user,
+        socketId: socket.id,
+        sourceModule: ns,
+        scope: normalizedPayload.scope,
+        scopeId: normalizedPayload.scopeId,
+        correlationId: correlated.context.correlationId,
+        eventId: correlated.context.eventId,
+        idempotencyKey: correlated.context.idempotencyKey,
+      },
+    };
   }
 
   function canJoinRoom(socket, room) {
@@ -308,6 +335,9 @@ function buildNamespace(ns) {
     socket.onAny((event, payload) => {
       const allow = ALLOW_EVENTS_FROM_CLIENT.get(ns);
       if (!allow || !allow.has(event)) return;
+      // signal:emit is handled by a dedicated route below to return
+      // validation/idempotency ack contracts; avoid double-ingest via onAny.
+      if (event === "signal:emit") return;
       EventBus.emit("client:event", {
         ns,
         event,
@@ -340,8 +370,51 @@ function buildNamespace(ns) {
     });
 
     // Realtime signal aggregator APIs
-    socket.on("signal:emit", (payload, cb) => {
-      try {
+    socket.on(
+      "signal:emit",
+      withRealtimeSocketGuard(async (payload, cb) => {
+        if (realtimeCoordinator?.ingest) {
+          const resolved = resolveRealtimeSocketContext(socket, payload, {
+            eventName: "signal:emit",
+            requireEnvelope: true,
+          });
+
+          let alreadyAppended = false;
+          if (realtimeCoordinator?.shouldAppendSignals?.() && realtimeCoordinator?.appendSignal) {
+            const appended = realtimeCoordinator.appendSignal(resolved.payload, resolved.context);
+            if (!appended?.ok) {
+              const err = new Error(appended.error || "event_log_unavailable");
+              err.code = appended.error || "event_log_unavailable";
+              err.status = 503;
+              err.reason = appended.reason || "append_failed";
+              throw err;
+            }
+            alreadyAppended = !appended?.skipped;
+          }
+
+          const out = realtimeCoordinator.ingest(resolved.payload, {
+            ...resolved.context,
+            _alreadyAppended: alreadyAppended,
+          });
+
+          if (out?.ok === false) {
+            const err = new Error(out.error || "invalid_event");
+            err.code = out.error || "invalid_event";
+            err.reason = out.reason || null;
+            err.status = out.error === "duplicate_event" ? 409 : 400;
+            throw err;
+          }
+
+          cb &&
+            cb({
+              ok: true,
+              signal: out.signal,
+              createdSuggestions: out.createdSuggestions,
+              mergedSuggestions: out.mergedSuggestions,
+            });
+          return;
+        }
+
         EventBus.emit("realtime:signal:ingest", {
           payload,
           context: {
@@ -352,15 +425,14 @@ function buildNamespace(ns) {
           },
         });
         cb && cb({ ok: true });
-      } catch (e) {
-        cb && cb({ ok: false, error: String(e.message || e) });
-      }
-    });
+      }),
+    );
 
-    socket.on("suggestion:list", (query = {}, cb) => {
-      try {
+    socket.on(
+      "suggestion:list",
+      withRealtimeSocketGuard(async (query = {}, cb) => {
         if (!realtimeCoordinator) throw new Error("realtime_not_ready");
-        const { scope, scopeId } = resolveAuthorizedScopeFromSocket(socket, query?.scope);
+        const { scope, scopeId } = resolveAuthorizedScopeFromSocket(socket, query?.scope, query?.scopeId);
         const items = realtimeCoordinator.listSuggestions({
           scope,
           scopeId,
@@ -370,15 +442,14 @@ function buildNamespace(ns) {
           assignedToUserId: query?.assignedToUserId,
         });
         cb && cb({ ok: true, scope, scopeId, items, suggestions: items });
-      } catch (e) {
-        cb && cb({ ok: false, error: String(e.message || e) });
-      }
-    });
+      }),
+    );
 
-    socket.on("suggestion:consume", (payload = {}, cb) => {
-      try {
+    socket.on(
+      "suggestion:consume",
+      withRealtimeSocketGuard(async (payload = {}, cb) => {
         if (!realtimeCoordinator) throw new Error("realtime_not_ready");
-        const { scope, scopeId } = resolveAuthorizedScopeFromSocket(socket, payload?.scope);
+        const { scope, scopeId } = resolveAuthorizedScopeFromSocket(socket, payload?.scope, payload?.scopeId);
         const item = realtimeCoordinator.consumeSuggestion({
           scope,
           scopeId,
@@ -386,15 +457,14 @@ function buildNamespace(ns) {
           userId: socket.user?.id,
         });
         cb && cb({ ok: !!item, item, suggestion: item });
-      } catch (e) {
-        cb && cb({ ok: false, error: String(e.message || e) });
-      }
-    });
+      }),
+    );
 
-    socket.on("suggestion:assign", (payload = {}, cb) => {
-      try {
+    socket.on(
+      "suggestion:assign",
+      withRealtimeSocketGuard(async (payload = {}, cb) => {
         if (!realtimeCoordinator) throw new Error("realtime_not_ready");
-        const { scope, scopeId } = resolveAuthorizedScopeFromSocket(socket, payload?.scope);
+        const { scope, scopeId } = resolveAuthorizedScopeFromSocket(socket, payload?.scope, payload?.scopeId);
         const item = realtimeCoordinator.assignSuggestion({
           scope,
           scopeId,
@@ -404,24 +474,21 @@ function buildNamespace(ns) {
           assignedBy: socket.user?.id,
         });
         cb && cb({ ok: !!item, item, suggestion: item });
-      } catch (e) {
-        cb && cb({ ok: false, error: String(e.message || e) });
-      }
-    });
+      }),
+    );
 
-    socket.on("report:request", (payload = {}, cb) => {
-      try {
+    socket.on(
+      "report:request",
+      withRealtimeSocketGuard(async (payload = {}, cb) => {
         if (!realtimeCoordinator) throw new Error("realtime_not_ready");
-        const { scope, scopeId } = resolveAuthorizedScopeFromSocket(socket, payload?.scope);
+        const { scope, scopeId } = resolveAuthorizedScopeFromSocket(socket, payload?.scope, payload?.scopeId);
         if (payload?.forceGenerate) {
           realtimeCoordinator.generateReports();
         }
         const report = realtimeCoordinator.getLatestReport({ scope, scopeId });
         cb && cb({ ok: true, report, scope, scopeId });
-      } catch (e) {
-        cb && cb({ ok: false, error: String(e.message || e) });
-      }
-    });
+      }),
+    );
 
     socket.on("disconnect", (reason) => {
       const payload = { ns, user: socket.user, reason, ts: Date.now() };
