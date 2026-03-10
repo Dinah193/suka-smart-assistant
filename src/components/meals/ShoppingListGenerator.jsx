@@ -53,9 +53,12 @@ import React, { useEffect, useMemo, useState } from "react";
 import { classNames as cx } from "@/utils/css";
 import { eventBus } from "@/services/events/eventBus";
 import { automation } from "@/services/automation/runtime";
+import { useStorehousePlannerStore } from "@/store/StorehousePlannerStore";
+import { forwardProvisionToStorehousePlanner } from "@/services/planners/mealPlannerBridge";
 
 export default function ShoppingListGenerator({
   recipes = [],             // [{ id, title, ingredients:[{ name, qty, unit }], slot?, mode? }]
+  seedProvisionItems = [],  // [{ name, neededQty|qty, unit, recipeTitle?, recipeId? }]
   stewardshipMode = false,  // false = TOOL MODE, true = STEWARDSHIP MODE
   seasonContext = null,     // optional { seasonKey, feastKey, dayLabel, ... }
   sessionId = null,         // optional batch/feast session id
@@ -98,8 +101,8 @@ export default function ShoppingListGenerator({
 
   const provisionList = useMemo(() => {
     const storehouseIndex = buildStorehouseIndex(storehouseSnapshot);
-    return buildProvisionList(recipes, storehouseIndex);
-  }, [JSON.stringify(recipes), JSON.stringify(storehouseSnapshot)]);
+    return buildProvisionList(recipes, storehouseIndex, seedProvisionItems);
+  }, [JSON.stringify(recipes), JSON.stringify(storehouseSnapshot), JSON.stringify(seedProvisionItems)]);
 
   const filteredList = useMemo(() => {
     if (!onlyMissing) return provisionList;
@@ -191,6 +194,13 @@ export default function ShoppingListGenerator({
         recipeTitles: Array.from(row.recipeTitles || []),
       })),
     };
+
+    const upsertNeeds = useStorehousePlannerStore?.getState?.()?.upsertNeeds;
+    forwardProvisionToStorehousePlanner({
+      payload,
+      upsertNeeds,
+      eventBusEmit: eventBus?.emit?.bind(eventBus),
+    });
 
     // Optional callback for parent
     onSendToGrocery?.(payload);
@@ -464,8 +474,10 @@ function buildStorehouseIndex(snapshot) {
  *   },
  * }
  */
-function buildProvisionList(recipes, storehouseIndex) {
-  if (!Array.isArray(recipes) || !recipes.length) return [];
+function buildProvisionList(recipes, storehouseIndex, seedProvisionItems = []) {
+  if ((!Array.isArray(recipes) || !recipes.length) && (!Array.isArray(seedProvisionItems) || !seedProvisionItems.length)) {
+    return [];
+  }
 
   const map = new Map();
 
@@ -500,6 +512,32 @@ function buildProvisionList(recipes, storehouseIndex) {
       row.recipeIds.add(rid);
       row.recipeTitles.add(rtitle);
     }
+  }
+
+  // Allow direct seed rows from planner output when recipe ingredients are unavailable.
+  for (const seed of Array.isArray(seedProvisionItems) ? seedProvisionItems : []) {
+    const rawName = String(seed?.name || "").trim();
+    if (!rawName) continue;
+    const name = rawName.toLowerCase();
+    const unit = String(seed?.unit || "ea").toLowerCase();
+    const key = `${name}::${unit}`;
+    const qty = Number(seed?.neededQty ?? seed?.qty ?? seed?.quantity ?? 0) || 0;
+
+    if (!map.has(key)) {
+      map.set(key, {
+        key,
+        name: capitalize(rawName),
+        unit,
+        neededQty: 0,
+        recipeIds: new Set(),
+        recipeTitles: new Set(),
+      });
+    }
+
+    const row = map.get(key);
+    row.neededQty += qty;
+    if (seed?.recipeId) row.recipeIds.add(seed.recipeId);
+    if (seed?.recipeTitle) row.recipeTitles.add(seed.recipeTitle);
   }
 
   // Attach coverage from storehouse

@@ -11,10 +11,12 @@ import MealCyclePlannerCalendar from "./MealCyclePlannerCalendar.jsx";
 import MealPrepNeedsReport from "../../components/meals/MealPrepNeedsReport.jsx";
 import FoodProductionForecast from "../../components/meals/FoodProductionForecast.jsx";
 import ProcurementReport from "../../components/meals/ProcurementReport.jsx";
+import ShoppingListGenerator from "../../components/meals/ShoppingListGenerator.jsx";
 import MealToMarketScalePanel from "../../components/meals/MealToMarketScalePanel.jsx";
 import SeedAnimalInventoryForm from "../../components/meals/SeedAnimalInventoryForm.jsx";
 import ZoneAwareCalendar from "../../components/meals/ZoneAwareCalendar.jsx";
 import RealtimeCoordinationPanel from "@/components/home/RealtimeCoordinationPanel";
+import useRealtimeCoordination from "@/hooks/useRealtimeCoordination";
 
 /* ---------------- Primary agent (lazy + guarded) ---------------- */
 // Prefer talking to the shim / HouseholdOrchestrator instead of raw agents.
@@ -148,6 +150,8 @@ try {
 import AutomationPanel from "../../ui/AutomationPanel.jsx";
 import { automation } from "@/services/automation/runtime";
 import { emitCanonicalSignal } from "@/services/realtime/canonicalSignalEmitter";
+import { eventBus } from "@/services/events/eventBus";
+import { emitHomesteadMealPlanGenerated } from "@/services/planners/mealPlannerBridge";
 
 /* ---------------- Vision (household profile) ---------------- */
 import { useVision } from "@/context/VisionContext";
@@ -156,6 +160,7 @@ import { useVision } from "@/context/VisionContext";
 import {
   useMealPlanDraftStore,
   saveDraft as saveDraftAPI,
+  getDraft as getDraftAPI,
   publishDraft as publishDraftAPI,
   exportDraftJSON as exportDraftJSONAPI,
   importDraftJSON as importDraftJSONAPI,
@@ -661,6 +666,27 @@ function DraftReview({ data, onViewPlan }) {
   const prep = Array.isArray(data.prepTasks) ? data.prepTasks : [];
   const budget = data.budget || {};
   const macros = data.macros || {};
+  const shoppingSeeds = shopping
+    .map((it, i) => {
+      if (typeof it === "string") {
+        return {
+          name: it,
+          neededQty: 1,
+          unit: "unit",
+          recipeId: `plan-${i + 1}`,
+          recipeTitle: "Meal Plan",
+        };
+      }
+
+      return {
+        name: it?.name,
+        neededQty: Number(it?.qty ?? it?.neededQty ?? 0) || 0,
+        unit: it?.unit || "unit",
+        recipeId: it?.recipeId || `plan-${i + 1}`,
+        recipeTitle: it?.recipeTitle || "Meal Plan",
+      };
+    })
+    .filter((row) => String(row?.name || "").trim().length > 0);
 
   return (
     <div className="sv-card sv-pad" style={{ marginTop: 16 }}>
@@ -714,6 +740,21 @@ function DraftReview({ data, onViewPlan }) {
           </ul>
         </div>
       )}
+
+      <div style={{ marginTop: 12 }}>
+        <ShoppingListGenerator
+          recipes={[]}
+          seedProvisionItems={shoppingSeeds}
+          stewardshipMode
+          sessionId={data?.id || data?.draftId || null}
+          onSendToGrocery={(payload) => {
+            automation?.emit?.("meal/shoppingForwarded", {
+              source: "mealplanner:draftReview",
+              payload,
+            });
+          }}
+        />
+      </div>
 
       {prep.length > 0 && (
         <div style={{ marginTop: 12 }}>
@@ -1100,8 +1141,163 @@ function InlineRename({ draft }) {
   );
 }
 
+function MyAssignmentsStrip({ onOpenCoordination }) {
+  const rt = useRealtimeCoordination();
+  const [busyId, setBusyId] = useState(null);
+
+  const priorityMeta = (item) => {
+    const urgency = String(item?.urgency || "").toLowerCase();
+    const score = Number(item?.priorityScore || 0);
+    const isHigh = urgency === "high" || score >= 80;
+    const isLow = urgency === "low" || score <= 35;
+
+    if (isHigh) {
+      return {
+        label: "High",
+        chipStyle: {
+          border: "1px solid #ef4444",
+          background: "#fef2f2",
+          color: "#991b1b",
+        },
+      };
+    }
+    if (isLow) {
+      return {
+        label: "Low",
+        chipStyle: {
+          border: "1px solid #9ca3af",
+          background: "#f9fafb",
+          color: "#374151",
+        },
+      };
+    }
+    return {
+      label: "Normal",
+      chipStyle: {
+        border: "1px solid #3b82f6",
+        background: "#eff6ff",
+        color: "#1e3a8a",
+      },
+    };
+  };
+
+  const roles = useMemo(() => {
+    if (typeof window === "undefined") return [];
+    const fromGlobal = window.__suka?.profile?.roles;
+    if (Array.isArray(fromGlobal)) return fromGlobal.map((r) => String(r).toLowerCase());
+    const singleRole = window.__suka?.profile?.role;
+    if (singleRole) return [String(singleRole).toLowerCase()];
+    return [];
+  }, []);
+
+  const mine = useMemo(() => {
+    const rank = (item) => {
+      const urgency = String(item?.urgency || "").toLowerCase();
+      const score = Number(item?.priorityScore || 0);
+      if (urgency === "high" || score >= 80) return 0;
+      if (urgency === "low" || score <= 35) return 2;
+      return 1;
+    };
+
+    const pending = (rt.suggestions || []).filter((x) => !x.consumedAt);
+    const userId = String(rt.userId || "");
+    return pending
+      .filter((item) => {
+        const assignedUser = String(item?.assignedToUserId || "");
+        const assignedRole = String(item?.assignedRole || "").toLowerCase();
+        const isMineByUser = !!userId && assignedUser && assignedUser === userId;
+        const isMineByRole = !!assignedRole && roles.includes(assignedRole);
+        return isMineByUser || isMineByRole;
+      })
+      .sort((a, b) => {
+        const r = rank(a) - rank(b);
+        if (r !== 0) return r;
+        const sa = Number(a?.priorityScore || 0);
+        const sb = Number(b?.priorityScore || 0);
+        return sb - sa;
+      })
+      .slice(0, 4);
+  }, [rt.suggestions, rt.userId, roles]);
+
+  const consume = async (id) => {
+    if (!id) return;
+    setBusyId(id);
+    try {
+      await rt.consumeSuggestion(id);
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  return (
+    <div className="sv-card sv-pad" style={{ marginTop: 12 }}>
+      <div className="sv-row sv-wrap" style={{ justifyContent: "space-between", gap: 8 }}>
+        <div>
+          <div className="sv-card-title">My Assignments</div>
+          <div className="sv-muted" style={{ fontSize: 12 }}>
+            Assigned to you/your role first.
+          </div>
+        </div>
+        <div className="sv-row sv-wrap" style={{ gap: 8 }}>
+          <span className={`sv-badge ${rt.connected ? "" : "sv-badge--muted"}`}>
+            {rt.connected ? "Live" : "Offline"}
+          </span>
+          <button
+            type="button"
+            className="sv-btn sv-btn--outline"
+            onClick={onOpenCoordination}
+          >
+            <span className="label">Open Coordination</span>
+          </button>
+        </div>
+      </div>
+
+      {mine.length ? (
+        <div className="sv-row sv-wrap" style={{ marginTop: 10, gap: 8 }}>
+          {mine.map((item) => {
+            const p = priorityMeta(item);
+            return (
+            <div key={item.id} className="sv-chip" style={{ maxWidth: 420, ...p.chipStyle }}>
+              <span className="sv-badge" style={{ marginRight: 6 }}>{p.label}</span>
+              <span
+                style={{
+                  display: "inline-block",
+                  maxWidth: 230,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  verticalAlign: "bottom",
+                }}
+                title={item.title || item.action || "Assignment"}
+              >
+                {item.title || item.action || "Assignment"}
+              </span>
+              <button
+                type="button"
+                className="sv-btn sv-btn--outline"
+                style={{ marginLeft: 8 }}
+                onClick={() => consume(item.id)}
+                disabled={busyId === item.id}
+              >
+                <span className="label">
+                  {busyId === item.id ? "Consuming..." : "Done"}
+                </span>
+              </button>
+            </div>
+          );})}
+        </div>
+      ) : (
+        <div className="sv-muted" style={{ marginTop: 8 }}>
+          No current assignments for your user/role.
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ---------------- Main page ---------------- */
 export default function MealPlanningPage() {
+  const coordinationRef = useRef(null);
   const [activeTool, setActiveTool] = useState("dashboard");
 
   /* Form state */
@@ -1379,21 +1575,38 @@ export default function MealPlanningPage() {
         );
       }
 
-      // If saveAsDraft was requested but not handled upstream, save locally
-      if (saveAsDraft && !res?.data?.draftId) {
-        const planObj = res?.mealPlan;
-        if (planObj?.plan?.length) {
-          await saveDraftAPI(planObj, {
-            title: planObj.summary || "Generated draft",
-            meta: { duration, createdBy: "agent:generate" },
-            tags: ["generated"],
-          });
-        }
-      }
-
       const normalized = normalizePlan(res);
       setResult(normalized);
       setOk(true);
+
+      // Ensure a real local draft record exists whenever draft mode is used.
+      // Some upstream flows may return draftId without persisting to MealPlanDraftStore.
+      let ensuredDraftId = res?.data?.draftId || null;
+      let usedLocalDraftFallback = false;
+      if (saveAsDraft) {
+        const existing = ensuredDraftId ? getDraftAPI(ensuredDraftId) : null;
+        if (!existing) {
+          const candidatePlan =
+            res?.mealPlan ||
+            res?.data?.mealPlan ||
+            res?.data?.plan ||
+            coerceToEnvelope(normalized);
+
+          if (candidatePlan?.plan?.length) {
+            ensuredDraftId = await saveDraftAPI(candidatePlan, {
+              id: ensuredDraftId || undefined,
+              title: candidatePlan.summary || "Generated draft",
+              meta: {
+                duration,
+                createdBy: "agent:generate",
+                source: "mealplanner:onGenerate",
+              },
+              tags: ["generated"],
+            });
+            usedLocalDraftFallback = true;
+          }
+        }
+      }
 
       /* ✅ PATCH: always force the generated plan into the Current Plan store and switch to Dashboard */
       if (!saveAsDraft) {
@@ -1429,9 +1642,9 @@ export default function MealPlanningPage() {
       /* ✅ END PATCH */
 
       if (saveAsDraft) {
-        if (res?.data?.draftId) {
+        if (ensuredDraftId) {
           try {
-            selectDraftAPI(res.data.draftId);
+            selectDraftAPI(ensuredDraftId);
           } catch {}
         }
         setActiveTool("drafts");
@@ -1462,6 +1675,18 @@ export default function MealPlanningPage() {
         },
       });
 
+      emitHomesteadMealPlanGenerated({
+        normalizedPlan: normalized,
+        meta: {
+          templateId,
+          cuisines,
+          presets: selectedPresets,
+          duration,
+          saveAsDraft,
+        },
+        eventBusEmit: eventBus?.emit?.bind(eventBus),
+      });
+
       window.dispatchEvent(
         new CustomEvent("toast", {
           detail: {
@@ -1470,6 +1695,18 @@ export default function MealPlanningPage() {
           },
         })
       );
+
+      if (saveAsDraft && usedLocalDraftFallback) {
+        window.dispatchEvent(
+          new CustomEvent("toast", {
+            detail: {
+              type: "success",
+              message: "Draft auto-saved locally.",
+            },
+          })
+        );
+      }
+
       setTimeout(() => setOk(false), 900);
     } catch (e) {
       setResult({
@@ -1643,7 +1880,13 @@ export default function MealPlanningPage() {
         </div>
       </div>
 
-      <div style={{ marginTop: 12 }}>
+      <MyAssignmentsStrip
+        onOpenCoordination={() => {
+          coordinationRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }}
+      />
+
+      <div style={{ marginTop: 12 }} ref={coordinationRef}>
         <RealtimeCoordinationPanel />
       </div>
 
