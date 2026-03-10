@@ -151,7 +151,11 @@ import AutomationPanel from "../../ui/AutomationPanel.jsx";
 import { automation } from "@/services/automation/runtime";
 import { emitCanonicalSignal } from "@/services/realtime/canonicalSignalEmitter";
 import { eventBus } from "@/services/events/eventBus";
-import { emitHomesteadMealPlanGenerated } from "@/services/planners/mealPlannerBridge";
+import {
+  emitHomesteadMealPlanGenerated,
+  buildEstimateInputsFromNormalizedPlan,
+} from "@/services/planners/mealPlannerBridge";
+import { useStorehousePlannerStore } from "@/store/StorehousePlannerStore";
 
 /* ---------------- Vision (household profile) ---------------- */
 import { useVision } from "@/context/VisionContext";
@@ -1578,6 +1582,41 @@ export default function MealPlanningPage() {
       const normalized = normalizePlan(res);
       setResult(normalized);
       setOk(true);
+
+      // Auto-forward normalized generated plan into downstream estimate inputs.
+      // This keeps animal/garden/preservation estimation grounded in final outputs.
+      const estimateInputs = buildEstimateInputsFromNormalizedPlan({
+        normalizedPlan: normalized,
+        meta: {
+          sessionId: res?.data?.draftId || null,
+          horizonMonths,
+        },
+      });
+
+      try {
+        const upsertPreservationTasks =
+          useStorehousePlannerStore?.getState?.()?.upsertPreservationTasks;
+        if (
+          typeof upsertPreservationTasks === "function" &&
+          Array.isArray(estimateInputs?.preservation?.tasks) &&
+          estimateInputs.preservation.tasks.length
+        ) {
+          upsertPreservationTasks(estimateInputs.preservation.tasks);
+        }
+      } catch (e) {
+        console.warn("[MealPlanner] preservation forward failed", e);
+      }
+
+      eventBus?.emit?.("planner.estimateInputs.updated", {
+        source: "mealplanner:onGenerate",
+        estimateInputs,
+      });
+
+      buildCompanions({
+        ...payload,
+        normalizedPlan: normalized,
+        estimateInputs,
+      });
 
       // Ensure a real local draft record exists whenever draft mode is used.
       // Some upstream flows may return draftId without persisting to MealPlanDraftStore.

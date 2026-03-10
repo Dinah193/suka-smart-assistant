@@ -2,6 +2,8 @@
 
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { eventBus } from "@/services/events/eventBus";
+import { buildEstimateInputsFromNormalizedPlan } from "@/services/planners/mealPlannerBridge";
 
 /**
  * Homestead Planner Store (Zustand)
@@ -92,12 +94,19 @@ const DEFAULT_STATE = {
     showDetailsDrawer: true,
     lastActivePanel: "overview",
   },
+
+  ingest: {
+    lastMealPlanContract: null,
+    lastEstimateInputs: null,
+    lastIngestedAt: null,
+  },
 };
 
 function normalizeState(input) {
   const s = input && typeof input === "object" ? input : {};
   const goals = s.goals && typeof s.goals === "object" ? s.goals : {};
   const ui = s.ui && typeof s.ui === "object" ? s.ui : {};
+  const ingest = s.ingest && typeof s.ingest === "object" ? s.ingest : {};
 
   const plannerMode = s.plannerMode === "homestead" ? "homestead" : "standard";
   const level = clampInt(s.level ?? 0, 0, 10);
@@ -128,6 +137,18 @@ function normalizeState(input) {
       showCostDelta: Boolean(ui.showCostDelta ?? true),
       showDetailsDrawer: Boolean(ui.showDetailsDrawer ?? true),
       lastActivePanel: normalizePanel(ui.lastActivePanel),
+    },
+
+    ingest: {
+      lastMealPlanContract:
+        ingest.lastMealPlanContract && typeof ingest.lastMealPlanContract === "object"
+          ? ingest.lastMealPlanContract
+          : null,
+      lastEstimateInputs:
+        ingest.lastEstimateInputs && typeof ingest.lastEstimateInputs === "object"
+          ? ingest.lastEstimateInputs
+          : null,
+      lastIngestedAt: ingest.lastIngestedAt ? normalizeIsoNow(ingest.lastIngestedAt) : null,
     },
   };
 }
@@ -414,6 +435,42 @@ export const useHomesteadPlannerStore = create(
         void meta;
         return { ok: true, state: next };
       },
+
+      ingestMealPlanGenerated: (contract, meta = {}) => {
+        if (!contract || typeof contract !== "object") return { ok: false };
+
+        set((prev) => {
+          const prevNorm = normalizeState(prev);
+          const estimateInputs = buildEstimateInputsFromNormalizedPlan({
+            normalizedPlan: {
+              title: contract?.plan?.title,
+              summary: contract?.plan?.summary,
+              // Keep backward-compatible shape from emission contract.
+              meals: Array(Number(contract?.plan?.mealCount || 0)).fill({}),
+              shoppingList: Array(Number(contract?.plan?.shoppingCount || 0)).fill({}),
+              prepTasks: Array(Number(contract?.plan?.prepTaskCount || 0)).fill({}),
+              budget: contract?.plan?.budget || {},
+              macros: contract?.plan?.macros || {},
+            },
+            meta: {
+              sessionId: meta.sessionId || null,
+            },
+          });
+
+          return normalizeState({
+            ...prevNorm,
+            ingest: {
+              lastMealPlanContract: contract,
+              lastEstimateInputs: estimateInputs,
+              lastIngestedAt: new Date().toISOString(),
+            },
+            updatedAt: new Date().toISOString(),
+          });
+        });
+
+        void meta;
+        return { ok: true };
+      },
     }),
     {
       name: STORAGE_KEY,
@@ -431,6 +488,7 @@ export const useHomesteadPlannerStore = create(
           startDate: s.startDate,
           goals: s.goals,
           ui: s.ui,
+          ingest: s.ingest,
         };
       },
       migrate: (persistedState, version) =>
@@ -438,6 +496,37 @@ export const useHomesteadPlannerStore = create(
     },
   ),
 );
+
+let _homesteadIngestorOff = null;
+export function initializeHomesteadMealPlanIngestor() {
+  if (_homesteadIngestorOff) return _homesteadIngestorOff;
+  _homesteadIngestorOff = eventBus?.on?.(
+    "homestead.planner.mealPlan.generated",
+    (payload) => {
+      try {
+        const contract =
+          payload && typeof payload === "object" && payload.data && payload.type
+            ? payload.data
+            : payload;
+
+        useHomesteadPlannerStore.getState().ingestMealPlanGenerated(contract, {
+          source: "eventBus:homestead.planner.mealPlan.generated",
+        });
+      } catch (e) {
+        console.warn("[homesteadPlannerStore] ingest failed", e);
+      }
+    }
+  );
+  return _homesteadIngestorOff;
+}
+
+if (typeof window !== "undefined") {
+  try {
+    initializeHomesteadMealPlanIngestor();
+  } catch {
+    // no-op: store remains usable even if event bus is unavailable
+  }
+}
 
 /* =============================================================================
    Selectors (recommended)
