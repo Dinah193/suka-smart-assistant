@@ -2,6 +2,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import { automation, emitProgress } from "@/services/automation/runtime";
 import { sabbathGuard } from "@/services/guardrails/sabbathGuard";
+import {
+  deleteBattleRhythmCustomization,
+  getBattleRhythmProfile,
+  listBattleRhythmCustomizations,
+  resolveRecipeWithBattleRhythm,
+  saveBattleRhythmProfile,
+  upsertBattleRhythmCustomization,
+} from "@/services/mealplanning/battleRhythmApi";
 import { classNames } from "@/utils/css";
 
 // Optional stores (graceful fallback if absent)
@@ -9,6 +17,7 @@ import { useMealPlanningStore } from "@/store/MealPlanningStore"; // optional
 import { useFoodStore } from "@/store/FoodStore"; // optional (dietary integration)
 import { useInventoryStore } from "@/store/InventoryStore"; // optional (pantry-first)
 import { useCalendarStore } from "@/store/CalendarStore"; // optional
+import { usePreferencesStore } from "@/store/PreferencesStore";
 
 /* -------------------------------------------------------------------------- */
 /* UI atoms                                                                   */
@@ -183,6 +192,49 @@ const EVENT_KEYS = [
   "torah.profile.updated", // dietary rules changed -> re-score/rebuild
 ];
 
+const BATTLE_RHYTHM_SYNC_KEYS = new Set([
+  "pantryFirst",
+  "spiceCap",
+  "batchDays",
+  "prepTimeBudgetMins",
+]);
+
+const DEFAULT_SAMPLE_RECIPE = {
+  id: "sample-recipe",
+  name: "Weeknight Lemon Chicken",
+  servings: 4,
+  ingredients: [
+    { name: "chicken breast", qty: 1, unit: "lb" },
+    { name: "salt", qty: 1, unit: "tsp" },
+    { name: "olive oil", qty: 1, unit: "tbsp" },
+  ],
+  totalTimeMins: 40,
+};
+
+function safeJsonParse(text, fallback) {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return fallback;
+  }
+}
+
+function normalizeBatchDays(batchDays = []) {
+  return (Array.isArray(batchDays) ? batchDays : [])
+    .map((d) => String(d || "").trim().slice(0, 3).toLowerCase())
+    .filter(Boolean);
+}
+
+function mapSpiceCapToSaltFactor(spiceCap) {
+  if (spiceCap === "mild") return 0.85;
+  if (spiceCap === "hot") return 1.15;
+  return 1;
+}
+
+function shouldSyncBattleRhythm(partial = {}) {
+  return Object.keys(partial || {}).some((k) => BATTLE_RHYTHM_SYNC_KEYS.has(k));
+}
+
 function useAutomationGlue(onEvent) {
   useEffect(() => {
     const offFns = [];
@@ -190,7 +242,10 @@ function useAutomationGlue(onEvent) {
       const off = automation?.on?.(k, (payload) => onEvent?.(k, payload));
       if (off) offFns.push(off);
     });
-    return () => offFns.forEach((f) => f?.());
+    return () =>
+      offFns.forEach((f) => {
+        if (typeof f === "function") f();
+      });
   }, [onEvent]);
 }
 
@@ -202,12 +257,26 @@ export default function MealPlanningSettingsPage() {
   const food = useFoodStore?.() ?? {};
   const inventory = useInventoryStore?.() ?? {};
   const calendar = useCalendarStore?.() ?? {};
+  const prefs = usePreferencesStore?.() ?? {};
 
   const loading = meal.loading || false;
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState(null);
   const [banners, setBanners] = useState([]);
+  const [apiBusy, setApiBusy] = useState(false);
+  const [battleRhythmProfileDraft, setBattleRhythmProfileDraft] = useState("{}");
+  const [battleRhythmCustomizations, setBattleRhythmCustomizations] = useState([]);
+  const [customizationRecipeId, setCustomizationRecipeId] = useState("");
+  const [customizationFingerprint, setCustomizationFingerprint] = useState("");
+  const [customizationOverrideDraft, setCustomizationOverrideDraft] = useState("{}");
+  const [resolveRecipeDraft, setResolveRecipeDraft] = useState(
+    JSON.stringify(DEFAULT_SAMPLE_RECIPE, null, 2)
+  );
+  const [resolvedRecipePreview, setResolvedRecipePreview] = useState("");
   const undo = useUndoStack();
+
+  const battleRhythmUserId =
+    String(meal?.userId || prefs?.userId || window?.__suka?.user?.id || "global");
 
   /* -------------------------------- State --------------------------------- */
   // Household / cadence
@@ -285,6 +354,27 @@ export default function MealPlanningSettingsPage() {
   const [prepTimeBudgetMins, setPrepTimeBudgetMins] = useState(
     meal.prepTimeBudgetMins ?? 45
   );
+
+  // Macro pattern presets (protein/carbs/fat) used by planner context
+  const prefPatterns = Array.isArray(prefs?.nutrition?.macroPatterns)
+    ? prefs.nutrition.macroPatterns
+    : [];
+  const [activeMacroPatternId, setActiveMacroPatternId] = useState(
+    prefs?.nutrition?.activeMacroPatternId || prefPatterns[0]?.id || ""
+  );
+  const [macroPatternsDraft, setMacroPatternsDraft] = useState(() =>
+    JSON.stringify(prefPatterns, null, 2)
+  );
+
+  const activeMacroPattern =
+    (Array.isArray(prefs?.nutrition?.macroPatterns)
+      ? prefs.nutrition.macroPatterns
+      : []
+    ).find((p) => String(p?.id || "") === String(activeMacroPatternId || "")) ||
+    (Array.isArray(prefs?.nutrition?.macroPatterns)
+      ? prefs.nutrition.macroPatterns[0]
+      : null) ||
+    null;
 
   /* -------------------------- Event-driven glue --------------------------- */
   useAutomationGlue((event, payload) => {
@@ -479,6 +569,47 @@ export default function MealPlanningSettingsPage() {
         });
       }
 
+      if (shouldSyncBattleRhythm(partial)) {
+        const parsed = safeJsonParse(battleRhythmProfileDraft, {});
+        const mergedProfile = {
+          ...parsed,
+          enabled: parsed?.enabled ?? true,
+          pantryFirst: {
+            ...(parsed?.pantryFirst || {}),
+            strictness: (partial.pantryFirst ?? pantryFirst) ? "balanced" : "relaxed",
+          },
+          seasoning: {
+            ...(parsed?.seasoning || {}),
+            saltFactor: mapSpiceCapToSaltFactor(partial.spiceCap ?? spiceCap),
+          },
+          timing: {
+            ...(parsed?.timing || {}),
+            batchDays: normalizeBatchDays(partial.batchDays ?? batchDays),
+            quickNightMaxMins: Math.max(
+              10,
+              Number(partial.prepTimeBudgetMins ?? prepTimeBudgetMins) || 45
+            ),
+          },
+        };
+
+        try {
+          const resp = await saveBattleRhythmProfile(
+            battleRhythmUserId,
+            mergedProfile
+          );
+          setBattleRhythmProfileDraft(
+            JSON.stringify(resp?.profile || mergedProfile, null, 2)
+          );
+        } catch {
+          addBanner({
+            key: "battle-rhythm-sync-failed",
+            tone: "warning",
+            text: "Meal settings saved, but battle-rhythm API sync failed.",
+            dismissible: true,
+          });
+        }
+      }
+
       setToast({
         tone: "success",
         text: `${descr} saved`,
@@ -667,6 +798,254 @@ export default function MealPlanningSettingsPage() {
   useEffect(() => {
     meal.fetchSettings?.();
   }, []); // eslint-disable-line
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function hydrateBattleRhythm() {
+      setApiBusy(true);
+      try {
+        const [profileResp, customResp] = await Promise.all([
+          getBattleRhythmProfile(battleRhythmUserId),
+          listBattleRhythmCustomizations(battleRhythmUserId),
+        ]);
+
+        if (cancelled) return;
+
+        const profile = profileResp?.profile || {};
+        setBattleRhythmProfileDraft(JSON.stringify(profile, null, 2));
+        prefs.setBattleRhythm?.(profile);
+
+        const items = Array.isArray(customResp?.items) ? customResp.items : [];
+        setBattleRhythmCustomizations(items);
+      } catch {
+        if (!cancelled) {
+          addBanner({
+            key: "battle-rhythm-load-failed",
+            tone: "warning",
+            text: "Could not load battle-rhythm API settings. You can still edit and save manually.",
+            dismissible: true,
+          });
+        }
+      } finally {
+        if (!cancelled) setApiBusy(false);
+      }
+    }
+
+    hydrateBattleRhythm();
+    return () => {
+      cancelled = true;
+    };
+  }, []); // eslint-disable-line
+
+  useEffect(() => {
+    const nextPatterns = Array.isArray(prefs?.nutrition?.macroPatterns)
+      ? prefs.nutrition.macroPatterns
+      : [];
+    setMacroPatternsDraft(JSON.stringify(nextPatterns, null, 2));
+    setActiveMacroPatternId(
+      prefs?.nutrition?.activeMacroPatternId || nextPatterns[0]?.id || ""
+    );
+  }, [prefs?.nutrition?.macroPatterns, prefs?.nutrition?.activeMacroPatternId]);
+
+  const saveMacroPatterns = () => {
+    try {
+      const parsed = JSON.parse(macroPatternsDraft || "[]");
+      if (!Array.isArray(parsed)) throw new Error("Patterns must be an array");
+      prefs.setMacroPatterns?.(parsed);
+      setToast({ tone: "success", text: "Macro patterns saved." });
+    } catch {
+      setToast({
+        tone: "error",
+        text: "Macro patterns must be valid JSON array.",
+      });
+    }
+  };
+
+  const saveActiveMacroPattern = (id) => {
+    setActiveMacroPatternId(id);
+    prefs.setActiveMacroPatternId?.(id);
+    setToast({ tone: "success", text: "Active macro pattern updated." });
+  };
+
+  const updateActiveMacroRatio = (key, value) => {
+    const list = Array.isArray(prefs?.nutrition?.macroPatterns)
+      ? prefs.nutrition.macroPatterns
+      : [];
+    if (!list.length) return;
+
+    const targetId =
+      activeMacroPatternId || String(list[0]?.id || "") || "balanced";
+    const idx = list.findIndex((p) => String(p?.id || "") === String(targetId));
+    if (idx < 0) return;
+
+    const src = list[idx] || {};
+    const clampPct = (v) => Math.max(0, Math.min(100, Math.round(Number(v) || 0)));
+    const nextMain = clampPct(value);
+
+    const current = {
+      protein: clampPct(src.protein),
+      carbs: clampPct(src.carbs),
+      fat: clampPct(src.fat),
+    };
+
+    const otherKeys = ["protein", "carbs", "fat"].filter((k) => k !== key);
+    const remaining = 100 - nextMain;
+    const oldOtherTotal = current[otherKeys[0]] + current[otherKeys[1]];
+
+    let nextA = 0;
+    let nextB = 0;
+    if (oldOtherTotal <= 0) {
+      nextA = Math.floor(remaining / 2);
+      nextB = remaining - nextA;
+    } else {
+      const scaledA = Math.round((current[otherKeys[0]] / oldOtherTotal) * remaining);
+      nextA = scaledA;
+      nextB = remaining - scaledA;
+    }
+
+    const nextRatios = { ...current, [key]: nextMain };
+    nextRatios[otherKeys[0]] = clampPct(nextA);
+    nextRatios[otherKeys[1]] = clampPct(nextB);
+
+    const total = nextRatios.protein + nextRatios.carbs + nextRatios.fat;
+    if (total !== 100) {
+      const delta = 100 - total;
+      nextRatios[otherKeys[1]] = clampPct(nextRatios[otherKeys[1]] + delta);
+    }
+
+    const nextList = list.map((p, i) =>
+      i !== idx
+        ? p
+        : {
+            ...p,
+            protein: nextRatios.protein,
+            carbs: nextRatios.carbs,
+            fat: nextRatios.fat,
+          }
+    );
+
+    prefs.setMacroPatterns?.(nextList);
+    setMacroPatternsDraft(JSON.stringify(nextList, null, 2));
+  };
+
+  const refreshBattleRhythmApi = async () => {
+    setApiBusy(true);
+    try {
+      const [profileResp, customResp] = await Promise.all([
+        getBattleRhythmProfile(battleRhythmUserId),
+        listBattleRhythmCustomizations(battleRhythmUserId),
+      ]);
+      setBattleRhythmProfileDraft(
+        JSON.stringify(profileResp?.profile || {}, null, 2)
+      );
+      setBattleRhythmCustomizations(
+        Array.isArray(customResp?.items) ? customResp.items : []
+      );
+      setToast({ tone: "success", text: "Battle-rhythm API data refreshed." });
+    } catch {
+      setToast({ tone: "error", text: "Failed to refresh battle-rhythm data." });
+    } finally {
+      setApiBusy(false);
+    }
+  };
+
+  const saveBattleRhythmProfileDraftToApi = async () => {
+    const parsed = safeJsonParse(battleRhythmProfileDraft, null);
+    if (!parsed || typeof parsed !== "object") {
+      setToast({ tone: "error", text: "Battle-rhythm profile must be valid JSON." });
+      return;
+    }
+
+    setApiBusy(true);
+    try {
+      const resp = await saveBattleRhythmProfile(battleRhythmUserId, parsed);
+      const profile = resp?.profile || parsed;
+      setBattleRhythmProfileDraft(JSON.stringify(profile, null, 2));
+      prefs.setBattleRhythm?.(profile);
+      setToast({ tone: "success", text: "Battle-rhythm profile saved to API." });
+    } catch {
+      setToast({ tone: "error", text: "Failed to save battle-rhythm profile." });
+    } finally {
+      setApiBusy(false);
+    }
+  };
+
+  const upsertCustomizationToApi = async () => {
+    const override = safeJsonParse(customizationOverrideDraft, null);
+    if (!override || typeof override !== "object") {
+      setToast({ tone: "error", text: "Customization override must be valid JSON." });
+      return;
+    }
+
+    if (!customizationRecipeId && !customizationFingerprint) {
+      setToast({ tone: "error", text: "Provide a recipe ID or fingerprint." });
+      return;
+    }
+
+    setApiBusy(true);
+    try {
+      await upsertBattleRhythmCustomization({
+        userId: battleRhythmUserId,
+        recipeId: customizationRecipeId || undefined,
+        fingerprint: customizationFingerprint || undefined,
+        override,
+      });
+      await refreshBattleRhythmApi();
+    } catch {
+      setToast({ tone: "error", text: "Failed to save recipe customization." });
+      setApiBusy(false);
+    }
+  };
+
+  const deleteCustomizationFromApi = async () => {
+    if (!customizationRecipeId && !customizationFingerprint) {
+      setToast({ tone: "error", text: "Provide a recipe ID or fingerprint." });
+      return;
+    }
+
+    setApiBusy(true);
+    try {
+      await deleteBattleRhythmCustomization({
+        userId: battleRhythmUserId,
+        recipeId: customizationRecipeId || undefined,
+        fingerprint: customizationFingerprint || undefined,
+      });
+      await refreshBattleRhythmApi();
+    } catch {
+      setToast({ tone: "error", text: "Failed to delete recipe customization." });
+      setApiBusy(false);
+    }
+  };
+
+  const previewResolvedRecipe = async () => {
+    const recipe = safeJsonParse(resolveRecipeDraft, null);
+    const profile = safeJsonParse(battleRhythmProfileDraft, null);
+    if (!recipe || typeof recipe !== "object") {
+      setToast({ tone: "error", text: "Sample recipe must be valid JSON." });
+      return;
+    }
+    if (!profile || typeof profile !== "object") {
+      setToast({ tone: "error", text: "Battle-rhythm profile must be valid JSON." });
+      return;
+    }
+
+    setApiBusy(true);
+    try {
+      const resp = await resolveRecipeWithBattleRhythm({
+        userId: battleRhythmUserId,
+        recipe,
+        rhythm: profile,
+        resolveServerSide: true,
+      });
+      setResolvedRecipePreview(JSON.stringify(resp?.resolved || resp?.recipe || {}, null, 2));
+      setToast({ tone: "success", text: "Recipe resolved through /api/mealplan/resolveRecipe." });
+    } catch {
+      setToast({ tone: "error", text: "Failed to resolve recipe preview." });
+    } finally {
+      setApiBusy(false);
+    }
+  };
 
   /* ---------------------------------- UI ---------------------------------- */
   return (
@@ -975,6 +1354,122 @@ export default function MealPlanningSettingsPage() {
         )}
       </SectionCard>
 
+      <SectionCard
+        title="Macro Patterns"
+        subtitle="Define reusable protein/carbs/fat ratios and choose the active pattern for meal-planner generation."
+      >
+        <Row
+          label="Active Pattern"
+          hint="Planner uses this ratio unless an intent/request overrides it"
+        >
+          <Select
+            value={activeMacroPatternId}
+            onChange={(v) => saveActiveMacroPattern(v)}
+            options={(Array.isArray(prefs?.nutrition?.macroPatterns)
+              ? prefs.nutrition.macroPatterns
+              : []
+            ).map((p) => ({
+              value: String(p.id || ""),
+              label: `${p.label || p.id} (${p.protein || 0}/${p.carbs || 0}/${p.fat || 0})`,
+            }))}
+            disabled={busy}
+          />
+        </Row>
+
+        <Row
+          label="Visual Ratio Editor"
+          hint="Use sliders to tune the active pattern. Ratios auto-balance to a total of 100%."
+        >
+          <div className="w-full space-y-3">
+            {activeMacroPattern ? (
+              <>
+                <div className="text-sm opacity-80">
+                  Editing: <strong>{activeMacroPattern.label || activeMacroPattern.id}</strong>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-sm">
+                    Protein: {Math.round(Number(activeMacroPattern.protein || 0))}%
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="1"
+                    className="range range-primary"
+                    value={Math.round(Number(activeMacroPattern.protein || 0))}
+                    onChange={(e) => updateActiveMacroRatio("protein", e.target.value)}
+                    disabled={busy}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-sm">
+                    Carbs: {Math.round(Number(activeMacroPattern.carbs || 0))}%
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="1"
+                    className="range range-primary"
+                    value={Math.round(Number(activeMacroPattern.carbs || 0))}
+                    onChange={(e) => updateActiveMacroRatio("carbs", e.target.value)}
+                    disabled={busy}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-sm">
+                    Fat: {Math.round(Number(activeMacroPattern.fat || 0))}%
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="1"
+                    className="range range-primary"
+                    value={Math.round(Number(activeMacroPattern.fat || 0))}
+                    onChange={(e) => updateActiveMacroRatio("fat", e.target.value)}
+                    disabled={busy}
+                  />
+                </div>
+
+                <div className="text-xs opacity-70">
+                  Total: {Math.round(Number(activeMacroPattern.protein || 0)) +
+                    Math.round(Number(activeMacroPattern.carbs || 0)) +
+                    Math.round(Number(activeMacroPattern.fat || 0))}
+                  %
+                </div>
+              </>
+            ) : (
+              <InlineNotice tone="warning">
+                No macro pattern available. Add one in the JSON editor below.
+              </InlineNotice>
+            )}
+          </div>
+        </Row>
+
+        <Row
+          label="Pattern Library (JSON)"
+          hint='Format: [{"id":"balanced","label":"Balanced","protein":30,"carbs":40,"fat":30}]'
+        >
+          <div className="w-full space-y-2">
+            <Textarea
+              value={macroPatternsDraft}
+              onChange={setMacroPatternsDraft}
+              className="w-full min-h-[180px] font-mono text-xs"
+              disabled={busy}
+            />
+            <div className="flex gap-2">
+              <SubtleButton onClick={saveMacroPatterns} disabled={busy}>
+                Save Macro Patterns
+              </SubtleButton>
+            </div>
+          </div>
+        </Row>
+      </SectionCard>
+
       {/* Dietary Integration */}
       <SectionCard
         title="Dietary Integration"
@@ -1211,6 +1706,113 @@ export default function MealPlanningSettingsPage() {
             Sync to Calendar
           </SubtleButton>
         </div>
+      </SectionCard>
+
+      <SectionCard
+        title="Battle-Rhythm API"
+        subtitle="This panel is wired directly to /api/battle-rhythm/* and /api/mealplan/resolveRecipe."
+        right={<Chip>User: {battleRhythmUserId}</Chip>}
+      >
+        <Row
+          label="Profile JSON"
+          hint="Load/save your server-backed battle-rhythm profile."
+        >
+          <div className="w-full space-y-2">
+            <Textarea
+              value={battleRhythmProfileDraft}
+              onChange={setBattleRhythmProfileDraft}
+              className="w-full min-h-[180px] font-mono text-xs"
+              disabled={apiBusy}
+            />
+            <div className="flex flex-wrap gap-2">
+              <SubtleButton
+                onClick={refreshBattleRhythmApi}
+                disabled={apiBusy}
+              >
+                Refresh from API
+              </SubtleButton>
+              <PrimaryButton
+                onClick={saveBattleRhythmProfileDraftToApi}
+                disabled={apiBusy}
+              >
+                Save Profile to API
+              </PrimaryButton>
+            </div>
+          </div>
+        </Row>
+
+        <Divider />
+
+        <Row
+          label="Recipe Customization"
+          hint="Upsert/delete per-recipe overrides via /api/battle-rhythm/customizations."
+        >
+          <div className="w-full space-y-2">
+            <div className="flex flex-wrap gap-2">
+              <Input
+                value={customizationRecipeId}
+                onChange={setCustomizationRecipeId}
+                placeholder="recipeId (optional if fingerprint)"
+                className="w-72"
+                disabled={apiBusy}
+              />
+              <Input
+                value={customizationFingerprint}
+                onChange={setCustomizationFingerprint}
+                placeholder="fingerprint (optional if recipeId)"
+                className="w-72"
+                disabled={apiBusy}
+              />
+            </div>
+            <Textarea
+              value={customizationOverrideDraft}
+              onChange={setCustomizationOverrideDraft}
+              className="w-full min-h-[120px] font-mono text-xs"
+              disabled={apiBusy}
+              placeholder='{"seasoning":{"saltFactor":0.85}}'
+            />
+            <div className="flex flex-wrap gap-2">
+              <PrimaryButton onClick={upsertCustomizationToApi} disabled={apiBusy}>
+                Upsert Customization
+              </PrimaryButton>
+              <DangerButton onClick={deleteCustomizationFromApi} disabled={apiBusy}>
+                Delete Customization
+              </DangerButton>
+            </div>
+            <div className="text-sm opacity-70">
+              Stored customizations: {battleRhythmCustomizations.length}
+            </div>
+          </div>
+        </Row>
+
+        <Divider />
+
+        <Row
+          label="Resolve Preview"
+          hint="Sends sample recipe + current profile to /api/mealplan/resolveRecipe."
+        >
+          <div className="w-full space-y-2">
+            <Textarea
+              value={resolveRecipeDraft}
+              onChange={setResolveRecipeDraft}
+              className="w-full min-h-[120px] font-mono text-xs"
+              disabled={apiBusy}
+            />
+            <div className="flex gap-2">
+              <PrimaryButton onClick={previewResolvedRecipe} disabled={apiBusy}>
+                Resolve Recipe via API
+              </PrimaryButton>
+            </div>
+            {resolvedRecipePreview ? (
+              <Textarea
+                value={resolvedRecipePreview}
+                onChange={() => {}}
+                className="w-full min-h-[160px] font-mono text-xs"
+                disabled
+              />
+            ) : null}
+          </div>
+        </Row>
       </SectionCard>
 
       {/* Toast */}

@@ -21,7 +21,7 @@
  * - addCanonicalizer() to improve name matching.
  */
 
-import { emit } from "@/services/events/eventBus"; // optional: emit 'substitution.queried' etc. (not required)
+import { emit } from "../../../services/events/eventBus.js"; // optional: emit 'substitution.queried' etc. (not required)
 let reasoner = null; // Optional async fallback; set via setReasoner(fn)
 
 /** ----------------------------- Canonicalization --------------------------- */
