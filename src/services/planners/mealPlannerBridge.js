@@ -227,10 +227,176 @@ export function buildEstimateInputsFromNormalizedPlan({
   };
 }
 
+export function buildPlannerGapsFromEstimateInputs({
+  estimateInputs,
+  normalizedPlan,
+  meta = {},
+} = {}) {
+  const shopping = Array.isArray(normalizedPlan?.shoppingList)
+    ? normalizedPlan.shoppingList
+    : [];
+
+  const produceDemand = Array.isArray(estimateInputs?.garden?.produceDemand)
+    ? estimateInputs.garden.produceDemand
+    : [];
+  const proteinDemand =
+    estimateInputs?.animal?.proteinDemandByType &&
+    typeof estimateInputs.animal.proteinDemandByType === "object"
+      ? estimateInputs.animal.proteinDemandByType
+      : {};
+
+  const baseFromShopping = shopping
+    .map((item, idx) => {
+      const label = String(typeof item === "string" ? item : item?.name || "").trim();
+      if (!label) return null;
+      const qty = Number(typeof item === "string" ? 1 : item?.qty ?? item?.neededQty ?? 1);
+      const missingQty = Number.isFinite(qty) && qty > 0 ? qty : 1;
+      const severity = missingQty >= 3 ? "hard" : "soft";
+      return {
+        id: `gap-shopping-${idx + 1}`,
+        key: label.toLowerCase(),
+        name: label,
+        unit: String((typeof item === "string" ? "unit" : item?.unit) || "unit"),
+        missingQty,
+        severity,
+        dueWindow: "next-cycle",
+      };
+    })
+    .filter(Boolean);
+
+  const produceGaps = produceDemand
+    .map((row, idx) => {
+      const name = String(row?.name || "").trim();
+      if (!name) return null;
+      const qty = Number(row?.qty || 0);
+      const missingQty = Number.isFinite(qty) && qty > 0 ? qty : 1;
+      return {
+        id: `gap-produce-${idx + 1}`,
+        key: name.toLowerCase(),
+        name,
+        unit: String(row?.unit || "unit"),
+        missingQty,
+        severity: missingQty >= 2 ? "hard" : "soft",
+        dueWindow: "next-cycle",
+        sourceSignal: "garden.produceDemand",
+      };
+    })
+    .filter(Boolean);
+
+  const proteinGaps = Object.entries(proteinDemand)
+    .map(([kind, qty], idx) => {
+      const n = Number(qty || 0);
+      if (!Number.isFinite(n) || n <= 0) return null;
+      const typeLabel = String(kind || "other").replace(/[-_]/g, " ");
+      return {
+        id: `gap-protein-${idx + 1}`,
+        key: `protein:${String(kind || "other").toLowerCase()}`,
+        name: `${typeLabel} protein supply`,
+        unit: "serving",
+        missingQty: n,
+        severity: n >= 3 ? "hard" : "soft",
+        dueWindow: "next-cycle",
+        sourceSignal: "animal.proteinDemandByType",
+      };
+    })
+    .filter(Boolean);
+
+  const merged = [...baseFromShopping, ...produceGaps, ...proteinGaps];
+  const dedup = new Map();
+  for (const gap of merged) {
+    if (!gap?.key) continue;
+    if (!dedup.has(gap.key)) {
+      dedup.set(gap.key, gap);
+      continue;
+    }
+    const cur = dedup.get(gap.key);
+    dedup.set(gap.key, {
+      ...cur,
+      missingQty: Number(cur.missingQty || 0) + Number(gap.missingQty || 0),
+      severity:
+        cur.severity === "hard" || gap.severity === "hard" ? "hard" : "soft",
+    });
+  }
+
+  const gaps = Array.from(dedup.values()).map((gap) => {
+    const n = Number(gap?.missingQty || 0);
+    const severity = gap?.severity || (n >= 3 ? "hard" : "soft");
+    return {
+      ...gap,
+      missingQty: Number.isFinite(n) && n > 0 ? n : 1,
+      severity,
+      recommendedSourcing: [
+        {
+          sourceTier: "community-marketplace",
+          priority: 1,
+          rationale: "Prioritize local/community exchanges for self-sufficiency.",
+        },
+        {
+          sourceTier: "outside-sources",
+          priority: 2,
+          rationale: "Fallback when community supply is unavailable or delayed.",
+        },
+      ],
+    };
+  });
+
+  const hardGaps = gaps.filter((g) => g.severity === "hard");
+  const softGaps = gaps.filter((g) => g.severity !== "hard");
+
+  return {
+    contractVersion: "planner.gaps.v1",
+    source: "meal-planner",
+    generatedAt: new Date().toISOString(),
+    sessionId: meta?.sessionId || null,
+    summary: {
+      totalGaps: gaps.length,
+      hardGapCount: hardGaps.length,
+      softGapCount: softGaps.length,
+      escalationRequired: hardGaps.length > 0,
+      mealCount: Array.isArray(normalizedPlan?.meals) ? normalizedPlan.meals.length : 0,
+      shoppingCount: shopping.length,
+    },
+    gaps,
+    hardGapsOnly: hardGaps,
+    productionOffsets: {
+      preservationTasks: Array.isArray(estimateInputs?.preservation?.tasks)
+        ? estimateInputs.preservation.tasks.length
+        : 0,
+    },
+  };
+}
+
+export function emitPlannerGapsUpdated({
+  estimateInputs,
+  normalizedPlan,
+  meta = {},
+  eventBusEmit,
+} = {}) {
+  if (typeof eventBusEmit !== "function") {
+    return { ok: false, error: "eventBusEmit_missing" };
+  }
+
+  const plannerGaps = buildPlannerGapsFromEstimateInputs({
+    estimateInputs,
+    normalizedPlan,
+    meta,
+  });
+
+  eventBusEmit("planner.gaps.updated", {
+    source: "mealplanner:onGenerate",
+    plannerGaps,
+    estimateInputs,
+  });
+
+  return { ok: true, plannerGaps };
+}
+
 export default {
   mapProvisionPayloadToStorehouseNeeds,
   forwardProvisionToStorehousePlanner,
   buildHomesteadMealPlanContract,
   emitHomesteadMealPlanGenerated,
   buildEstimateInputsFromNormalizedPlan,
+  buildPlannerGapsFromEstimateInputs,
+  emitPlannerGapsUpdated,
 };

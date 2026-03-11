@@ -17,6 +17,8 @@ import SeedAnimalInventoryForm from "../../components/meals/SeedAnimalInventoryF
 import ZoneAwareCalendar from "../../components/meals/ZoneAwareCalendar.jsx";
 import RealtimeCoordinationPanel from "@/components/home/RealtimeCoordinationPanel";
 import useRealtimeCoordination from "@/hooks/useRealtimeCoordination";
+import { useFoodSecurityEstimator } from "@/hooks/estimators/useFoodSecurityEstimator";
+import { useCostDeltaEstimator } from "@/hooks/estimators/useCostDeltaEstimator";
 
 /* ---------------- Primary agent (lazy + guarded) ---------------- */
 // Prefer talking to the shim / HouseholdOrchestrator instead of raw agents.
@@ -154,8 +156,10 @@ import { eventBus } from "@/services/events/eventBus";
 import {
   emitHomesteadMealPlanGenerated,
   buildEstimateInputsFromNormalizedPlan,
+  emitPlannerGapsUpdated,
 } from "@/services/planners/mealPlannerBridge";
 import { useStorehousePlannerStore } from "@/store/StorehousePlannerStore";
+import { useHomesteadPlannerStore } from "@/store/homesteadPlannerStore";
 
 /* ---------------- Vision (household profile) ---------------- */
 import { useVision } from "@/context/VisionContext";
@@ -832,6 +836,276 @@ function DraftReview({ data, onViewPlan }) {
           <span className="label">Open Procurement</span>
         </button>
       </div>
+    </div>
+  );
+}
+
+function toPlannerMealsFromPlan(plan, fallbackMealCount = 0) {
+  const rawMeals = Array.isArray(plan?.meals) ? plan.meals : [];
+  if (rawMeals.length) {
+    return rawMeals.map((meal, idx) => ({
+      id: String(meal?.id || `planner_meal_${idx + 1}`),
+      title: String(meal?.title || meal?.name || `Meal ${idx + 1}`),
+      servingsNeeded: Number.isFinite(Number(meal?.servingsNeeded))
+        ? Number(meal.servingsNeeded)
+        : null,
+    }));
+  }
+
+  const count = Math.max(0, Number(fallbackMealCount || 0));
+  return Array.from({ length: count }, (_, idx) => ({
+    id: `planner_meal_${idx + 1}`,
+    title: `Planned meal ${idx + 1}`,
+    servingsNeeded: null,
+  }));
+}
+
+function toPlannerInventoryFromPlan(plan) {
+  const rows = Array.isArray(plan?.shoppingList) ? plan.shoppingList : [];
+  return rows
+    .map((row, idx) => {
+      const isString = typeof row === "string";
+      const label = String(isString ? row : row?.name || "").trim();
+      if (!label) return null;
+      const quantity = Number(isString ? 1 : row?.qty ?? row?.neededQty ?? 0);
+      return {
+        id: `inv_${idx + 1}`,
+        label,
+        quantity: Number.isFinite(quantity) && quantity > 0 ? quantity : 1,
+        unit: String((isString ? "unit" : row?.unit) || "unit"),
+      };
+    })
+    .filter(Boolean);
+}
+
+function toProductionCreditsFromEstimateInputs(estimateInputs) {
+  const protein = estimateInputs?.animal?.proteinDemandByType || {};
+  const tasks = Array.isArray(estimateInputs?.preservation?.tasks)
+    ? estimateInputs.preservation.tasks
+    : [];
+
+  const proteinCredits = Object.entries(protein)
+    .map(([key, qty], idx) => {
+      const n = Number(qty);
+      if (!Number.isFinite(n) || n <= 0) return null;
+      return {
+        id: `prod_protein_${idx + 1}`,
+        key: `${String(key || "protein").toLowerCase()}`,
+        qtyUnits: n,
+        source: "mealplanner.estimateInputs",
+      };
+    })
+    .filter(Boolean);
+
+  const preservationCredits = tasks
+    .map((task, idx) => {
+      const produce = String(task?.produce || "").trim().toLowerCase();
+      if (!produce) return null;
+      const qty = Number(task?.quantity ?? 1);
+      return {
+        id: `prod_pres_${idx + 1}`,
+        key: produce,
+        qtyUnits: Number.isFinite(qty) && qty > 0 ? qty : 1,
+        source: "mealplanner.preservation",
+      };
+    })
+    .filter(Boolean);
+
+  return [...proteinCredits, ...preservationCredits];
+}
+
+function UnifiedReadinessCard() {
+  const lastEstimateInputs = useHomesteadPlannerStore(
+    (s) => s.ingest?.lastEstimateInputs
+  );
+  const lastGeneratedPlan = useHomesteadPlannerStore(
+    (s) => s.ingest?.lastGeneratedPlan
+  );
+  const lastIngestedAt = useHomesteadPlannerStore((s) => s.ingest?.lastIngestedAt);
+
+  const adapters = useMemo(
+    () => ({
+      getMealPlan: () => ({
+        items: toPlannerMealsFromPlan(
+          lastGeneratedPlan,
+          lastEstimateInputs?.animal?.mealCount
+        ),
+      }),
+      getInventory: () => ({
+        items: toPlannerInventoryFromPlan(lastGeneratedPlan),
+      }),
+      getTargets: () => {
+        const needs =
+          useStorehousePlannerStore.getState?.()?.storehouseNeeds || [];
+        return {
+          targets: needs.map((need) => ({
+            key: String(need?.name || "").toLowerCase(),
+            qty: Number(need?.qty ?? 0),
+            unit: need?.unit || "unit",
+            label: need?.name || "Item",
+          })),
+        };
+      },
+      getProduction: () => ({
+        credits: toProductionCreditsFromEstimateInputs(lastEstimateInputs),
+      }),
+      emit: (eventName, payload) => {
+        try {
+          eventBus?.emit?.(eventName, payload);
+        } catch {
+          // no-op
+        }
+      },
+      getMealPlanKey: () =>
+        `${lastIngestedAt || "none"}:meal:${
+          Array.isArray(lastGeneratedPlan?.meals)
+            ? lastGeneratedPlan.meals.length
+            : Number(lastEstimateInputs?.animal?.mealCount || 0)
+        }`,
+      getInventoryKey: () =>
+        `${lastIngestedAt || "none"}:inv:${
+          Array.isArray(lastGeneratedPlan?.shoppingList)
+            ? lastGeneratedPlan.shoppingList.length
+            : 0
+        }`,
+      getTargetsKey: () => {
+        const needs =
+          useStorehousePlannerStore.getState?.()?.storehouseNeeds || [];
+        return `${lastIngestedAt || "none"}:targets:${needs.length}`;
+      },
+      getProductionKey: () =>
+        `${lastIngestedAt || "none"}:prod:${
+          Array.isArray(lastEstimateInputs?.preservation?.tasks)
+            ? lastEstimateInputs.preservation.tasks.length
+            : 0
+        }`,
+    }),
+    [lastEstimateInputs, lastGeneratedPlan, lastIngestedAt]
+  );
+
+  const food = useFoodSecurityEstimator({
+    context: { mode: "meal_planner", route: "mealplanner" },
+    adapters,
+    autoRun: true,
+  });
+
+  const cost = useCostDeltaEstimator({
+    context: { mode: "meal_planner", route: "mealplanner" },
+    adapters,
+    autoRun: true,
+  });
+
+  const readiness = useMemo(() => {
+    const coverageDays = Number(food?.result?.outputs?.coverageDays || 0);
+    const weeklySavings = Number(cost?.result?.outputs?.weeklySavings || 0);
+    const confidenceA = Number(food?.result?.outputs?.confidence || 0);
+    const confidenceB = Number(cost?.result?.outputs?.confidence || 0);
+    const confidence =
+      confidenceA > 0 || confidenceB > 0
+        ? (confidenceA + confidenceB) / (confidenceB > 0 ? 2 : 1)
+        : 0;
+
+    const scoreRaw = coverageDays * 8 + Math.max(0, weeklySavings) * 1.2 + confidence * 20;
+    const score = Math.max(0, Math.min(100, Math.round(scoreRaw)));
+
+    const status =
+      score >= 75 ? "Ready" : score >= 45 ? "Stabilizing" : "Needs prep";
+
+    return {
+      score,
+      status,
+      coverageDays,
+      weeklySavings,
+      monthlySavings: Number(cost?.result?.outputs?.monthlySavings || 0),
+      confidence: Number.isFinite(confidence) ? confidence : 0,
+    };
+  }, [food?.result, cost?.result]);
+
+  const publishKey = useMemo(
+    () =>
+      JSON.stringify({
+        at: lastIngestedAt || null,
+        score: readiness.score,
+        coverageDays: readiness.coverageDays,
+        weeklySavings: readiness.weeklySavings,
+      }),
+    [lastIngestedAt, readiness]
+  );
+
+  const lastPublishKeyRef = useRef("");
+  useEffect(() => {
+    if (!lastIngestedAt) return;
+    if (publishKey === lastPublishKeyRef.current) return;
+    lastPublishKeyRef.current = publishKey;
+
+    eventBus?.emit?.("planner.readiness.updated", {
+      source: "mealplanner:unifiedReadinessCard",
+      updatedAt: new Date().toISOString(),
+      readiness,
+      estimators: {
+        foodSecurity: food?.result || null,
+        costDelta: cost?.result || null,
+      },
+      estimateInputs: lastEstimateInputs || null,
+    });
+  }, [publishKey, lastIngestedAt, readiness, food?.result, cost?.result, lastEstimateInputs]);
+
+  const isWaiting = !lastIngestedAt;
+  const isHidden = !food?.gatedOn && !cost?.gatedOn;
+
+  return (
+    <div className="sv-card sv-pad" style={{ marginTop: 12 }}>
+      <SectionTitle
+        title="Unified Readiness"
+        subtitle="Food security + budget delta combined from planner estimate inputs."
+      />
+
+      {isWaiting ? (
+        <div className="sv-muted">Generate a meal plan to publish estimate inputs and compute readiness.</div>
+      ) : isHidden ? (
+        <div className="sv-muted">
+          Homestead estimators are gated off. Enable homestead mode (level 1+) to display readiness scoring.
+        </div>
+      ) : (
+        <>
+          <div
+            className="sv-grid-3"
+            style={{ gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", marginTop: 8 }}
+          >
+            <div className="sv-card sv-pad">
+              <div style={{ fontWeight: 800 }}>Readiness Score</div>
+              <div style={{ fontSize: 28, fontWeight: 900 }}>{readiness.score}/100</div>
+              <div className="sv-muted">{readiness.status}</div>
+            </div>
+            <div className="sv-card sv-pad">
+              <div style={{ fontWeight: 800 }}>Coverage Days</div>
+              <div style={{ fontSize: 24, fontWeight: 800 }}>
+                {Number.isFinite(readiness.coverageDays)
+                  ? readiness.coverageDays.toFixed(1)
+                  : "0.0"}
+              </div>
+              <div className="sv-muted">from food-security estimator</div>
+            </div>
+            <div className="sv-card sv-pad">
+              <div style={{ fontWeight: 800 }}>Weekly Savings</div>
+              <div style={{ fontSize: 24, fontWeight: 800 }}>
+                ${Number.isFinite(readiness.weeklySavings)
+                  ? readiness.weeklySavings.toFixed(2)
+                  : "0.00"}
+              </div>
+              <div className="sv-muted">
+                Monthly: ${Number.isFinite(readiness.monthlySavings)
+                  ? readiness.monthlySavings.toFixed(2)
+                  : "0.00"}
+              </div>
+            </div>
+          </div>
+
+          <div className="sv-muted" style={{ marginTop: 8 }}>
+            Confidence: {(readiness.confidence * 100).toFixed(0)}% · Updated {new Date(lastIngestedAt).toLocaleString()}
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -1610,7 +1884,20 @@ export default function MealPlanningPage() {
       eventBus?.emit?.("planner.estimateInputs.updated", {
         source: "mealplanner:onGenerate",
         estimateInputs,
+        normalizedPlan: normalized,
       });
+
+      const gapsEmission = emitPlannerGapsUpdated({
+        estimateInputs,
+        normalizedPlan: normalized,
+        meta: {
+          sessionId: res?.data?.draftId || null,
+          duration,
+        },
+        eventBusEmit: eventBus?.emit,
+      });
+
+      const plannerGaps = gapsEmission?.plannerGaps || null;
 
       buildCompanions({
         ...payload,
@@ -2449,6 +2736,8 @@ export default function MealPlanningPage() {
               )}
             </div>
           </div>
+
+          <UnifiedReadinessCard />
 
           {/* Draft Review (View Plan switches tool and also guarantees a display) */}
           <DraftReview

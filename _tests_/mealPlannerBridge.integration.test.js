@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import {
   forwardProvisionToStorehousePlanner,
   emitHomesteadMealPlanGenerated,
+  emitPlannerGapsUpdated,
 } from "../src/services/planners/mealPlannerBridge.js";
 
 describe("meal planner direct bridge", () => {
@@ -108,5 +109,57 @@ describe("meal planner direct bridge", () => {
         }),
       })
     );
+  });
+
+  it("emits planner.gaps.updated with hard-gap summary and community-first sourcing", () => {
+    const emit = vi.fn();
+
+    const normalizedPlan = {
+      title: "Week Plan",
+      meals: [{ name: "Lunch" }, { name: "Dinner" }],
+      shoppingList: [{ name: "Tomatoes", qty: 4, unit: "lb" }],
+      prepTasks: [{ title: "Can tomatoes" }],
+    };
+
+    const estimateInputs = {
+      contractVersion: "planner.estimate-inputs.v1",
+      animal: {
+        mealCount: 2,
+        proteinDemandByType: { poultry: 1 },
+      },
+      garden: {
+        mealCount: 2,
+        produceDemand: [{ name: "Tomatoes", qty: 4, unit: "lb" }],
+      },
+      preservation: {
+        prepTaskCount: 1,
+        tasks: [{ id: "pres-1", produce: "tomato", method: "can", quantity: 2 }],
+      },
+    };
+
+    const result = emitPlannerGapsUpdated({
+      estimateInputs,
+      normalizedPlan,
+      meta: { sessionId: "session-1" },
+      eventBusEmit: emit,
+    });
+
+    expect(result.ok).toBe(true);
+    expect(emit).toHaveBeenCalledTimes(1);
+    expect(emit.mock.calls[0][0]).toBe("planner.gaps.updated");
+
+    const payload = emit.mock.calls[0][1] || {};
+    expect(payload.source).toBe("mealplanner:onGenerate");
+    expect(payload.plannerGaps).toBeTruthy();
+    expect(payload.plannerGaps.summary.hardGapCount).toBeGreaterThan(0);
+
+    const firstGap = (payload.plannerGaps.gaps || [])[0] || {};
+    const sourcing = Array.isArray(firstGap.recommendedSourcing)
+      ? firstGap.recommendedSourcing
+      : [];
+
+    expect(sourcing.length).toBeGreaterThanOrEqual(2);
+    expect(sourcing[0].sourceTier).toBe("community-marketplace");
+    expect(sourcing[1].sourceTier).toBe("outside-sources");
   });
 });

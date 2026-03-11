@@ -98,6 +98,8 @@ const DEFAULT_STATE = {
   ingest: {
     lastMealPlanContract: null,
     lastEstimateInputs: null,
+    lastGeneratedPlan: null,
+    lastPlannerGaps: null,
     lastIngestedAt: null,
   },
 };
@@ -147,6 +149,14 @@ function normalizeState(input) {
       lastEstimateInputs:
         ingest.lastEstimateInputs && typeof ingest.lastEstimateInputs === "object"
           ? ingest.lastEstimateInputs
+          : null,
+      lastGeneratedPlan:
+        ingest.lastGeneratedPlan && typeof ingest.lastGeneratedPlan === "object"
+          ? ingest.lastGeneratedPlan
+          : null,
+      lastPlannerGaps:
+        ingest.lastPlannerGaps && typeof ingest.lastPlannerGaps === "object"
+          ? ingest.lastPlannerGaps
           : null,
       lastIngestedAt: ingest.lastIngestedAt ? normalizeIsoNow(ingest.lastIngestedAt) : null,
     },
@@ -462,6 +472,71 @@ export const useHomesteadPlannerStore = create(
             ingest: {
               lastMealPlanContract: contract,
               lastEstimateInputs: estimateInputs,
+              lastGeneratedPlan: null,
+              lastIngestedAt: new Date().toISOString(),
+            },
+            updatedAt: new Date().toISOString(),
+          });
+        });
+
+        void meta;
+        return { ok: true };
+      },
+
+      ingestPlannerEstimateInputs: (payload, meta = {}) => {
+        if (!payload || typeof payload !== "object") return { ok: false };
+
+        const estimateInputs =
+          payload?.estimateInputs && typeof payload.estimateInputs === "object"
+            ? payload.estimateInputs
+            : payload;
+
+        if (!estimateInputs || typeof estimateInputs !== "object") {
+          return { ok: false };
+        }
+
+        const normalizedPlanCandidate =
+          payload?.normalizedPlan && typeof payload.normalizedPlan === "object"
+            ? payload.normalizedPlan
+            : null;
+
+        set((prev) => {
+          const prevNorm = normalizeState(prev);
+          return normalizeState({
+            ...prevNorm,
+            ingest: {
+              ...prevNorm.ingest,
+              lastEstimateInputs: estimateInputs,
+              lastGeneratedPlan: normalizedPlanCandidate,
+              lastIngestedAt: new Date().toISOString(),
+            },
+            updatedAt: new Date().toISOString(),
+          });
+        });
+
+        void meta;
+        return { ok: true };
+      },
+
+      ingestPlannerGaps: (payload, meta = {}) => {
+        if (!payload || typeof payload !== "object") return { ok: false };
+
+        const data =
+          payload?.plannerGaps && typeof payload.plannerGaps === "object"
+            ? payload.plannerGaps
+            : payload;
+
+        if (!data || typeof data !== "object") {
+          return { ok: false };
+        }
+
+        set((prev) => {
+          const prevNorm = normalizeState(prev);
+          return normalizeState({
+            ...prevNorm,
+            ingest: {
+              ...prevNorm.ingest,
+              lastPlannerGaps: data,
               lastIngestedAt: new Date().toISOString(),
             },
             updatedAt: new Date().toISOString(),
@@ -520,9 +595,59 @@ export function initializeHomesteadMealPlanIngestor() {
   return _homesteadIngestorOff;
 }
 
+let _plannerEstimateInputsIngestorOff = null;
+export function initializePlannerEstimateInputsIngestor() {
+  if (_plannerEstimateInputsIngestorOff) return _plannerEstimateInputsIngestorOff;
+  _plannerEstimateInputsIngestorOff = eventBus?.on?.(
+    "planner.estimateInputs.updated",
+    (payload) => {
+      try {
+        const data =
+          payload && typeof payload === "object" && payload.type && payload.data
+            ? payload.data
+            : payload;
+
+        useHomesteadPlannerStore
+          .getState()
+          .ingestPlannerEstimateInputs(data, {
+            source: "eventBus:planner.estimateInputs.updated",
+          });
+      } catch (e) {
+        console.warn("[homesteadPlannerStore] planner estimate-inputs ingest failed", e);
+      }
+    }
+  );
+  return _plannerEstimateInputsIngestorOff;
+}
+
+let _plannerGapsIngestorOff = null;
+export function initializePlannerGapsIngestor() {
+  if (_plannerGapsIngestorOff) return _plannerGapsIngestorOff;
+  _plannerGapsIngestorOff = eventBus?.on?.(
+    "planner.gaps.updated",
+    (payload) => {
+      try {
+        const data =
+          payload && typeof payload === "object" && payload.type && payload.data
+            ? payload.data
+            : payload;
+
+        useHomesteadPlannerStore.getState().ingestPlannerGaps(data, {
+          source: "eventBus:planner.gaps.updated",
+        });
+      } catch (e) {
+        console.warn("[homesteadPlannerStore] planner gaps ingest failed", e);
+      }
+    }
+  );
+  return _plannerGapsIngestorOff;
+}
+
 if (typeof window !== "undefined") {
   try {
     initializeHomesteadMealPlanIngestor();
+    initializePlannerEstimateInputsIngestor();
+    initializePlannerGapsIngestor();
   } catch {
     // no-op: store remains usable even if event bus is unavailable
   }

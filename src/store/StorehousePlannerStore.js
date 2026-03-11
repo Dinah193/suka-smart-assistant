@@ -2,6 +2,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { shallow } from "zustand/shallow";
+import { eventBus } from "@/services/events/eventBus";
 
 /* ----------------------------------------------------------------------------
    Types (informal)
@@ -16,7 +17,7 @@ import { shallow } from "zustand/shallow";
      }
 ---------------------------------------------------------------------------- */
 
-const VERSION = 2;
+const VERSION = 4;
 const LS_KEY = "suka.storehousePlanner.v" + VERSION;
 
 /* --------------------------------- utils ---------------------------------- */
@@ -49,7 +50,8 @@ function mapNeedIn(n) {
   const id = norm(n.id || uid());
   const name = norm(n.name);
   if (!name) return null;
-  const qty = n.qty != null ? Number(n.qty) : undefined;
+  const qty =
+    n.qty != null ? Number(n.qty) : n.total != null ? Number(n.total) : undefined;
   const unit = n.unit ? norm(n.unit) : undefined;
   const category = n.category ? norm(n.category) : undefined;
   const priority = n.priority != null ? Number(n.priority) : undefined; // 1 (highest) … 5 (lowest)
@@ -71,6 +73,140 @@ function mapNeedIn(n) {
     linkedRecipeId: n.linkedRecipeId ? norm(n.linkedRecipeId) : undefined,
     notes: n.notes ? norm(n.notes) : undefined,
   };
+}
+
+function normalizePlannerEstimateInputsPayload(payload = {}) {
+  const data =
+    payload && typeof payload === "object" && payload.type && payload.data
+      ? payload.data
+      : payload;
+
+  const estimateInputs =
+    isObj(data?.estimateInputs)
+      ? data.estimateInputs
+      : isObj(data) && /^planner\.estimate-inputs\./.test(norm(data?.contractVersion))
+      ? data
+      : null;
+
+  return {
+    estimateInputs,
+  };
+}
+
+function normalizePlannerGapsPayload(payload = {}) {
+  const data =
+    payload && typeof payload === "object" && payload.type && payload.data
+      ? payload.data
+      : payload;
+
+  const plannerGaps =
+    isObj(data?.plannerGaps)
+      ? data.plannerGaps
+      : isObj(data) && (Array.isArray(data?.gaps) || isObj(data?.summary))
+      ? data
+      : null;
+
+  return { plannerGaps };
+}
+
+function mapHardGapsToStorehouseNeeds(plannerGaps = {}) {
+  const hard = Array.isArray(plannerGaps?.gaps)
+    ? plannerGaps.gaps.filter((g) => String(g?.severity || "").toLowerCase() === "hard")
+    : [];
+
+  return hard
+    .map((gap, idx) => {
+      const name = norm(gap?.name || gap?.label || gap?.key);
+      if (!name) return null;
+      const qty = Number(gap?.missingQty ?? gap?.qty ?? 0);
+      const unit = norm(gap?.unit || "unit") || "unit";
+      const topSource = Array.isArray(gap?.recommendedSourcing)
+        ? gap.recommendedSourcing[0]
+        : null;
+      const sourceTier = norm(topSource?.sourceTier || "community") || "community";
+      return {
+        id: `gap-${idx + 1}-${name.toLowerCase()}-${unit}`,
+        name,
+        qty: Number.isFinite(qty) && qty > 0 ? qty : 1,
+        unit,
+        category: "hard-gap",
+        priority: 1,
+        tags: ["planner-gap", "hard", `source-tier:${sourceTier}`],
+        source: "planner-gaps",
+        neededBy: gap?.dueDate || undefined,
+        notes: `Hard gap escalated for sourcing. Priority order: community marketplace, then outside sources.`,
+      };
+    })
+    .filter(Boolean);
+}
+
+function titleCaseWords(v = "") {
+  return norm(v)
+    .split(/\s|-/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function mapEstimateInputsToStorehouseNeeds(estimateInputs = {}) {
+  const needs = [];
+
+  const produceDemand = Array.isArray(estimateInputs?.garden?.produceDemand)
+    ? estimateInputs.garden.produceDemand
+    : [];
+
+  for (const p of produceDemand) {
+    const name = norm(p?.name);
+    const qty = Number(p?.qty || 0);
+    if (!name || qty <= 0) continue;
+    needs.push({
+      id: `need-garden-${name.toLowerCase()}-${norm(p?.unit || "unit")}`,
+      name,
+      qty,
+      unit: norm(p?.unit) || "unit",
+      category: "garden-input",
+      priority: 2,
+      tags: ["planner-estimate", "garden", "auto-forward"],
+      source: "planner-estimate",
+      notes: "Inferred from planner produce demand.",
+    });
+  }
+
+  const proteinDemandByType = isObj(estimateInputs?.animal?.proteinDemandByType)
+    ? estimateInputs.animal.proteinDemandByType
+    : {};
+
+  for (const [type, rawDemand] of Object.entries(proteinDemandByType)) {
+    const demand = Number(rawDemand || 0);
+    if (demand <= 0) continue;
+    const label = titleCaseWords(type || "other");
+
+    needs.push({
+      id: `need-protein-${norm(type || "other")}`,
+      name: `${label} protein supply`,
+      qty: demand,
+      unit: "serving",
+      category: "animal-protein",
+      priority: 2,
+      tags: ["planner-estimate", "animal", "protein"],
+      source: "planner-estimate",
+      notes: "Inferred from meal-plan protein demand by type.",
+    });
+
+    needs.push({
+      id: `need-feed-${norm(type || "other")}`,
+      name: `${label} feed ration`,
+      qty: Math.max(1, Math.ceil(demand * 0.5)),
+      unit: "unit",
+      category: "animal-feed",
+      priority: 2,
+      tags: ["planner-estimate", "animal", "feed", "sustainability"],
+      source: "planner-estimate",
+      notes: "Heuristic feed reserve aligned to projected protein demand.",
+    });
+  }
+
+  return needs;
 }
 
 function mapTaskIn(t) {
@@ -132,6 +268,12 @@ export const useStorehousePlannerStore = create(
       /* -------------------- core state (BC) -------------------- */
       storehouseNeeds: [],
       preservationQueue: [],
+      plannerSignals: {
+        lastReadiness: null,
+        lastReadinessAt: null,
+        lastPlannerGaps: null,
+        lastPlannerGapsAt: null,
+      },
 
       /* ------------------------ BC setters --------------------- */
       setStorehouseNeeds: (next) => {
@@ -494,6 +636,110 @@ export const useStorehousePlannerStore = create(
         const key = toDateISO(iso);
         return get().preservationQueue.filter((t) => (t.dueDate || "") === key);
       },
+
+      /** Consume planner estimate-inputs contracts and upsert actionable needs/tasks. */
+      ingestPlannerEstimateInputsUpdated: (payload, meta = {}) => {
+        const { estimateInputs } = normalizePlannerEstimateInputsPayload(payload);
+        if (!estimateInputs) return { ok: false, error: "estimate_inputs_missing" };
+
+        const mappedNeeds = mapEstimateInputsToStorehouseNeeds(estimateInputs);
+        const mappedTasks = Array.isArray(estimateInputs?.preservation?.tasks)
+          ? estimateInputs.preservation.tasks
+          : [];
+
+        if (mappedNeeds.length) {
+          get().upsertNeeds(mappedNeeds);
+        }
+        if (mappedTasks.length) {
+          get().upsertPreservationTasks(mappedTasks);
+        }
+
+        void meta;
+        return {
+          ok: true,
+          needsCount: mappedNeeds.length,
+          tasksCount: mappedTasks.length,
+        };
+      },
+
+      /** Consume unified readiness and reprioritize urgent storehouse needs when prep is low. */
+      ingestPlannerReadinessUpdated: (payload, meta = {}) => {
+        const data =
+          payload && typeof payload === "object" && payload.type && payload.data
+            ? payload.data
+            : payload;
+        const readiness = isObj(data?.readiness) ? data.readiness : data;
+        const score = Number(readiness?.score || 0);
+        const status = norm(readiness?.status).toLowerCase();
+        if (!Number.isFinite(score) && !status) {
+          return { ok: false, error: "readiness_missing" };
+        }
+
+        set((prev) => ({
+          ...prev,
+          plannerSignals: {
+            ...(isObj(prev?.plannerSignals) ? prev.plannerSignals : {}),
+            lastReadiness: readiness,
+            lastReadinessAt: new Date().toISOString(),
+          },
+        }));
+
+        if (score < 45 || status === "needs prep") {
+          set((prev) => ({
+            ...prev,
+            storehouseNeeds: (Array.isArray(prev.storehouseNeeds)
+              ? prev.storehouseNeeds
+              : []
+            ).map((n) => {
+              const category = norm(n?.category).toLowerCase();
+              const source = norm(n?.source).toLowerCase();
+              const shouldEscalate =
+                source === "meal-planner" ||
+                source === "planner-estimate" ||
+                category === "garden-input" ||
+                category === "animal-feed" ||
+                category === "meal-planner";
+              if (!shouldEscalate) return n;
+              return {
+                ...n,
+                priority: 1,
+                notes: n?.notes
+                  ? `${n.notes} | Priority escalated from readiness signal.`
+                  : "Priority escalated from readiness signal.",
+              };
+            }),
+          }));
+        }
+
+        void meta;
+        return { ok: true };
+      },
+
+      /** Consume planner gap contracts and promote hard deficits to actionable needs. */
+      ingestPlannerGapsUpdated: (payload, meta = {}) => {
+        const { plannerGaps } = normalizePlannerGapsPayload(payload);
+        if (!plannerGaps) return { ok: false, error: "planner_gaps_missing" };
+
+        const hardNeeds = mapHardGapsToStorehouseNeeds(plannerGaps);
+        if (hardNeeds.length) {
+          get().upsertNeeds(hardNeeds);
+        }
+
+        set((prev) => ({
+          ...prev,
+          plannerSignals: {
+            ...(isObj(prev?.plannerSignals) ? prev.plannerSignals : {}),
+            lastPlannerGaps: plannerGaps,
+            lastPlannerGapsAt: new Date().toISOString(),
+          },
+        }));
+
+        void meta;
+        return {
+          ok: true,
+          hardGapCount: hardNeeds.length,
+        };
+      },
     }),
     {
       name: LS_KEY,
@@ -511,15 +757,132 @@ export const useStorehousePlannerStore = create(
           persisted.storehouseNeeds = nn.map(mapNeedIn).filter(Boolean);
           persisted.preservationQueue = pq.map(mapTaskIn).filter(Boolean);
         }
+        if (ver < 3) {
+          persisted.plannerSignals = {
+            lastReadiness: null,
+            lastReadinessAt: null,
+          };
+        }
+        if (ver < 4) {
+          persisted.plannerSignals = {
+            ...(persisted.plannerSignals || {}),
+            lastPlannerGaps: null,
+            lastPlannerGapsAt: null,
+          };
+        }
         return persisted;
       },
       partialize: (s) => ({
         storehouseNeeds: s.storehouseNeeds,
         preservationQueue: s.preservationQueue,
+        plannerSignals: s.plannerSignals,
       }),
     }
   )
 );
+
+let _storehousePlannerEstimateInputsOff = null;
+let _storehousePlannerReadinessOff = null;
+let _storehousePlannerGapsOff = null;
+
+export function initializeStorehousePlannerIngestors() {
+  if (
+    _storehousePlannerEstimateInputsOff &&
+    _storehousePlannerReadinessOff &&
+    _storehousePlannerGapsOff
+  ) {
+    return () => {
+      try {
+        _storehousePlannerEstimateInputsOff?.();
+      } catch {
+        // no-op
+      }
+      try {
+        _storehousePlannerReadinessOff?.();
+      } catch {
+        // no-op
+      }
+      try {
+        _storehousePlannerGapsOff?.();
+      } catch {
+        // no-op
+      }
+      _storehousePlannerEstimateInputsOff = null;
+      _storehousePlannerReadinessOff = null;
+      _storehousePlannerGapsOff = null;
+    };
+  }
+
+  _storehousePlannerEstimateInputsOff = eventBus?.on?.(
+    "planner.estimateInputs.updated",
+    (payload) => {
+      try {
+        useStorehousePlannerStore
+          .getState()
+          .ingestPlannerEstimateInputsUpdated(payload, {
+            source: "eventBus:planner.estimateInputs.updated",
+          });
+      } catch (e) {
+        console.warn("[storehousePlannerStore] estimate-inputs ingest failed", e);
+      }
+    }
+  );
+
+  _storehousePlannerReadinessOff = eventBus?.on?.(
+    "planner.readiness.updated",
+    (payload) => {
+      try {
+        useStorehousePlannerStore.getState().ingestPlannerReadinessUpdated(payload, {
+          source: "eventBus:planner.readiness.updated",
+        });
+      } catch (e) {
+        console.warn("[storehousePlannerStore] readiness ingest failed", e);
+      }
+    }
+  );
+
+  _storehousePlannerGapsOff = eventBus?.on?.(
+    "planner.gaps.updated",
+    (payload) => {
+      try {
+        useStorehousePlannerStore.getState().ingestPlannerGapsUpdated(payload, {
+          source: "eventBus:planner.gaps.updated",
+        });
+      } catch (e) {
+        console.warn("[storehousePlannerStore] planner gaps ingest failed", e);
+      }
+    }
+  );
+
+  return () => {
+    try {
+      _storehousePlannerEstimateInputsOff?.();
+    } catch {
+      // no-op
+    }
+    try {
+      _storehousePlannerReadinessOff?.();
+    } catch {
+      // no-op
+    }
+    try {
+      _storehousePlannerGapsOff?.();
+    } catch {
+      // no-op
+    }
+    _storehousePlannerEstimateInputsOff = null;
+    _storehousePlannerReadinessOff = null;
+    _storehousePlannerGapsOff = null;
+  };
+}
+
+if (typeof window !== "undefined") {
+  try {
+    initializeStorehousePlannerIngestors();
+  } catch {
+    // no-op: keep store usable if event bus is unavailable
+  }
+}
 
 /* ---------------------------------------------
    Lean selectors for components (BC)
