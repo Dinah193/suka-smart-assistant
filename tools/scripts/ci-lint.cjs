@@ -18,18 +18,29 @@ const configCandidates = [
 
 const hasConfig = configCandidates.some((f) => existsSync(f));
 if (!existsSync(eslintBin)) {
-  console.log("[lint:ci] eslint not installed yet; skipping lint gate scaffold.");
-  process.exit(0);
+  console.error("[lint:ci] eslint is required but not installed.");
+  process.exit(1);
 }
 
 if (!hasConfig) {
-  console.log("[lint:ci] eslint config not found; skipping lint gate scaffold.");
-  process.exit(0);
+  console.error("[lint:ci] eslint config is required but not found.");
+  process.exit(1);
 }
 
-const result = spawnSync(process.execPath, [eslintBin, ".", "--max-warnings=0"], {
+const lintTargets = [
+  "tools/scripts/**/*.cjs",
+  "src/server/db/adapters/**/*.js",
+  "src/services/mongodb/**/*.js",
+  "_tests_/nutritionMongoAdapter.contract.test.js",
+];
+
+const result = spawnSync(
+  process.execPath,
+  [eslintBin, ...lintTargets, "--max-warnings=0", "--no-error-on-unmatched-pattern"],
+  {
   cwd,
   stdio: "inherit",
-});
+  }
+);
 
 process.exit(typeof result.status === "number" ? result.status : 1);

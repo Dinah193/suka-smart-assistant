@@ -9,16 +9,16 @@ const tsconfig = resolve(cwd, "tsconfig.json");
 const tscBin = resolve(cwd, "node_modules", "typescript", "bin", "tsc");
 
 if (!existsSync(tsconfig)) {
-  console.log("[typecheck:ci] tsconfig.json not found; skipping typecheck gate scaffold.");
-  process.exit(0);
+  console.error("[typecheck:ci] tsconfig.json is required but was not found.");
+  process.exit(1);
 }
 
 if (!existsSync(tscBin)) {
-  console.log("[typecheck:ci] typescript not installed yet; skipping typecheck gate scaffold.");
-  process.exit(0);
+  console.error("[typecheck:ci] typescript is required but not installed.");
+  process.exit(1);
 }
 
-const result = spawnSync(process.execPath, [tscBin, "--noEmit"], {
+const result = spawnSync(process.execPath, [tscBin, "--noEmit", "--pretty", "false"], {
   cwd,
   stdio: "inherit",
 });
