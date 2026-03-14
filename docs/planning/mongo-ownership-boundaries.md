@@ -32,3 +32,13 @@ When any Mongo dataset begins to drive transactional planner behavior (status ch
   - `db:preflight` (Postgres bootstrap + Mongo connectivity + server health)
   - `_tests_/nutritionMongoAdapter.contract.test.js` with `SSA_ENABLE_DB_RUNTIME_CONTRACT_TESTS=true`
 - Branch protection must include `db-runtime-contracts` in required checks.
+
+## Nutrition Adapter Expectations (Audit Sign-off)
+- Service adapter priority is intentional: Postgres adapter first, Mongo adapter fallback only when Postgres adapter is unavailable (see `pickAdapter` in `src/server/services/nutritionService.js`).
+- Unavailable-DB behavior contract is intentional for Mongo adapter:
+  - Reads (`getById`, `getByName`) return soft miss: `{ ok: true, data: null }`
+  - Writes (`upsert`) return hard fail: `{ ok: false, error: "mongo_unavailable" }`
+- Name normalization parity is intentional and aligned between service and adapter:
+  - Service normalization in `src/server/services/nutritionService.js`
+  - Adapter normalization in `src/server/db/adapters/nutrition.mongo.js`
+  - Both use lowercase + diacritic strip + punctuation collapse + whitespace normalize + light singularization.
