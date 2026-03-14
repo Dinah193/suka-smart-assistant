@@ -5,6 +5,7 @@ node_modules/
 dist/
 build/
 .vite/
+.tmp/
 *.tsbuildinfo
 .eslintcache
 node_modules/.cache/
@@ -42,6 +43,12 @@ Thumbs.db
 # --- serverless/hosting ---
 .vercel/
 .netlify/
+
+# --- runtime data artifacts ---
+data/preferences.json
+data/preferences.bak.json
+data/catalog-index-cache.json
+data/battle-rhythm.json
 
 __pycache__/
 *.pyc
