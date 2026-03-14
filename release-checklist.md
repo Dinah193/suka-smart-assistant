@@ -63,6 +63,7 @@ Go/No-Go:
 ## 6. Launch Operations (Blocking)
 - [ ] Feature flags set for risky launch areas.
 - [ ] Rollback runbook reviewed and tested (`docs/planning/launch-ops-runbook.md`).
+- [ ] Mongo Gate 3 staging fault-injection runbook reviewed (`docs/planning/mongo-phase3-gate3-staging-runbook.md`).
 - [ ] First-week launch watch schedule assigned (`docs/planning/launch-ops-runbook.md`).
 - [ ] Daily triage owner assigned for week 1.
 
