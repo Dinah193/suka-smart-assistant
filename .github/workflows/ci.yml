@@ -25,6 +25,55 @@ jobs:
       - name: Build
         run: npm run build
 
+  db-runtime-contracts:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: suka
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d suka"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd="mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok'"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    env:
+      DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/suka
+      MONGODB_URI: mongodb://127.0.0.1:27017/suka
+      SSA_ENABLE_DB_RUNTIME_CONTRACT_TESTS: "true"
+      PLANNER_OPERATIONAL_OUTBOX_WORKER_DISABLED: "true"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: DB preflight gate
+        run: npm run db:preflight
+
+      - name: Nutrition Mongo adapter contract
+        run: npx vitest run _tests_/nutritionMongoAdapter.contract.test.js --reporter=verbose
+
   unit-tests:
     runs-on: ubuntu-latest
     steps:

@@ -4,12 +4,17 @@ Use this checklist before promoting a build to public launch. A release is `GO` 
 
 ## 1. Required CI Gates (Blocking)
 - [ ] Branch protection enabled on default branch with required checks (see `docs/planning/branch-protection.md`).
+- [ ] `db:preflight` check is green before running broader runtime/contract suites.
 - [ ] `build` check is green on the release commit.
+- [ ] `db-runtime-contracts` check is green (Postgres + Mongo service lane, includes nutrition Mongo adapter contract).
 - [ ] `unit-tests` check is green (`vitest` default mode).
 - [ ] `lint` check is green.
 - [ ] `typecheck` check is green (when TS config is present).
 - [ ] `smoke-e2e` check is green.
 - [ ] `security-audit` check is green.
+
+Ownership boundary:
+- [ ] Mongo/Postgres/Neo4j ownership boundaries reviewed and current (see `docs/planning/mongo-ownership-boundaries.md`).
 
 Go/No-Go:
 - `NO-GO` if any required check fails.

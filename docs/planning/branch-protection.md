@@ -4,6 +4,7 @@ Use this guide to enforce required checks on the default branch.
 
 ## Required Checks
 - `build`
+- `db-runtime-contracts`
 - `unit-tests`
 - `lint`
 - `typecheck`
