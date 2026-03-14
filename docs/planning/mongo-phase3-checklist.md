@@ -43,6 +43,8 @@ npm run db:preflight; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; npm run d
 ## Gate 3: Staging Fault Injection (Mongo Unavailable)
 - Objective: validate rollback readiness under realistic staging runtime conditions.
 - Runbook: `docs/planning/mongo-phase3-gate3-staging-runbook.md`
+- Evidence: `docs/qa/gate3-mongo-unavailable-20260314-183847/evidence.md`
+- Status: Complete (2026-03-14)
 - Required action:
   - Execute a controlled test window where Mongo URI is intentionally unreachable.
   - Capture service behavior and error/fallback metrics.
@@ -60,6 +62,9 @@ $env:SSA_ENABLE_DB_RUNTIME_CONTRACT_TESTS='true'; npx vitest run _tests_/nutriti
 
 ## Gate 4: Staging Fault Injection (Mongo Degraded Latency)
 - Objective: ensure service remains healthy when Mongo is slow but not fully down.
+- Runbook: `docs/planning/mongo-phase3-gate4-staging-runbook.md`
+- Evidence (baseline): `docs/qa/gate4-mongo-degraded-latency-20260314-184117/evidence.md`
+- Status: In progress (staging latency injection window pending)
 - Required action:
   - Run controlled latency injection (network shaping/proxy delay) in staging.
 - Suggested command baseline:
@@ -142,7 +147,7 @@ git log --oneline -n 10
 ## PR Evidence Checklist (copy/paste)
 - [ ] Gate 1 governance checks are real (non-scaffold) and passing.
 - [ ] Gate 2 full CI-equivalence dry run passed.
-- [ ] Gate 3 Mongo-unavailable fault injection validated fallback contract.
+- [x] Gate 3 Mongo-unavailable fault injection validated fallback contract.
 - [ ] Gate 4 degraded-latency injection maintained startup/runtime health.
 - [ ] Gate 5 retention behavior verified at scale.
 - [ ] Gate 6 observability/alerts/runbooks are active and linked.
