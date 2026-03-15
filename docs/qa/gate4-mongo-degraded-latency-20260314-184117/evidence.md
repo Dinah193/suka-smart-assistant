@@ -3,7 +3,7 @@
 Gate: Phase 3 / Gate 4 (Mongo Degraded Latency Injection)
 Date: 2026-03-14
 Environment: staging-equivalent local execution (workspace shell)
-Window: 18:41 local
+Window: 18:41-18:54 local
 Owners: IC=automation, Operator=automation, Observer=automation
 
 Baseline Results:
@@ -12,24 +12,27 @@ Baseline Results:
 - preflightAfterExitCode: 0
 
 Latency Injection Configuration:
-- mode: pending
-- reason: No network-shaping/proxy delay control is available from this workspace session.
-- requiredAction: run controlled latency injection in staging (proxy delay or network shaping), then rerun smoke:e2e and capture alerts.
+- method: MongoDB failpoint via `tools/scripts/mongo-latency-failpoint.cjs`
+- targetDelayMs: 450
+- rolloutResult: failed (`command not found` on `configureFailPoint`)
+- mongoReachableDuringTest: yes
 
 During Injection Results:
-- smokeExitCode: pending
-- startupOrReadinessRegression: pending
-- sustainedAlertSaturation: pending
+- smokeExitCode: not_run (injection failed to activate)
+- preflightDuringInjectionExitCode: not_run (injection failed to activate)
+- startupOrReadinessRegression: not_observed
+- sustainedAlertSaturation: not_observed
 
 Recovery Results:
-- preflightPostInjectionExitCode: pending
+- preflightPostInjectionExitCode: not_required (no active injection to rollback)
 
 Evidence Files:
 - 01-preflight-before.txt
 - 02-smoke-baseline.txt
 - 03-preflight-after.txt
+- 03a-latency-injection-enable.txt (new run: `docs/qa/gate4-mongo-degraded-latency-20260314-185307/03a-latency-injection-enable.txt`)
 
 Gate Decision:
-- status: IN_PROGRESS
-- rationale: Baseline health and smoke checks pass, but degraded-latency condition has not yet been injected in staging.
-- followups: Execute staging latency injection window and append final pass/fail block fields.
+- status: FAIL
+- rationale: The attempted latency injection method failed because `configureFailPoint` is unsupported on this Mongo deployment, so degraded-latency behavior could not be exercised and Gate 4 pass criteria were not met.
+- followups: Execute Gate 4 in a staging environment that supports network shaping/proxy delay (for example sidecar proxy or platform traffic shaping), then rerun smoke and preflight during the active delay window.

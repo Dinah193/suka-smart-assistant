@@ -63,8 +63,8 @@ $env:SSA_ENABLE_DB_RUNTIME_CONTRACT_TESTS='true'; npx vitest run _tests_/nutriti
 ## Gate 4: Staging Fault Injection (Mongo Degraded Latency)
 - Objective: ensure service remains healthy when Mongo is slow but not fully down.
 - Runbook: `docs/planning/mongo-phase3-gate4-staging-runbook.md`
-- Evidence (baseline): `docs/qa/gate4-mongo-degraded-latency-20260314-184117/evidence.md`
-- Status: In progress (staging latency injection window pending)
+- Evidence: `docs/qa/gate4-mongo-degraded-latency-20260314-184117/evidence.md`
+- Status: Fail (2026-03-14; injection method unsupported in current environment)
 - Required action:
   - Run controlled latency injection (network shaping/proxy delay) in staging.
 - Suggested command baseline:
@@ -80,6 +80,8 @@ npm run smoke:e2e
 
 ## Gate 5: Retention Behavior Validation at Scale
 - Objective: prove TTL/retention controls work with realistic data volume.
+- Evidence: `docs/qa/gate5-retention-20260314-185715/evidence.md`
+- Status: Complete (2026-03-14)
 - Commands:
 ```powershell
 npm run verify:mongo:retention
@@ -149,7 +151,7 @@ git log --oneline -n 10
 - [ ] Gate 2 full CI-equivalence dry run passed.
 - [x] Gate 3 Mongo-unavailable fault injection validated fallback contract.
 - [ ] Gate 4 degraded-latency injection maintained startup/runtime health.
-- [ ] Gate 5 retention behavior verified at scale.
+- [x] Gate 5 retention behavior verified at scale.
 - [ ] Gate 6 observability/alerts/runbooks are active and linked.
 - [ ] Gate 7 security/secrets hygiene verified.
 - [ ] Gate 8 release sign-offs and rollback ownership recorded.
