@@ -10,6 +10,7 @@ Sign-off Owners:
 - Operations owner: Release Manager on duty (role)
 - Rollback owner: Release Manager on duty (role)
 - Rollback procedure: docs/planning/launch-ops-runbook.md
+- Launch watch rota alignment: verified against docs/planning/launch-ops-runbook.md
 
 Evidence References:
 - Gate 3: docs/qa/gate3-mongo-unavailable-20260314-183847/evidence.md

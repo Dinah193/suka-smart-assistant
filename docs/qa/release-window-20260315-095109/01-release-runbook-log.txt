@@ -4,3 +4,5 @@ step=repoint-production status=manual-out-of-band
 releaseChecksComplete=2026-03-15T09:53:29.4777627-05:00
 step=disable-risky-flags status=not-required-no-incident
 step=rollback-not-invoked status=go-live-stable
+step=hypercare-day1 status=recorded file=day1-hypercare-status.md
+step=hypercare-day2 status=template-created file=day2-hypercare-status.md

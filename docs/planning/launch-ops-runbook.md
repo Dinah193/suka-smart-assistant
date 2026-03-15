@@ -30,13 +30,16 @@ Evidence to record:
   - QA Lead: reproductions, impact validation.
 
 Template schedule:
-- Day 1: IC ___, Backend ___, Frontend ___, QA ___
-- Day 2: IC ___, Backend ___, Frontend ___, QA ___
-- Day 3: IC ___, Backend ___, Frontend ___, QA ___
-- Day 4: IC ___, Backend ___, Frontend ___, QA ___
-- Day 5: IC ___, Backend ___, Frontend ___, QA ___
-- Day 6: IC ___, Backend ___, Frontend ___, QA ___
-- Day 7: IC ___, Backend ___, Frontend ___, QA ___
+- Day 1: IC Release Manager on duty, Backend Backend On-call, Frontend Frontend On-call, QA QA Lead
+- Day 2: IC Release Manager on duty, Backend Backend On-call, Frontend Frontend On-call, QA QA Lead
+- Day 3: IC Release Manager on duty, Backend Backend On-call, Frontend Frontend On-call, QA QA Lead
+- Day 4: IC Release Manager on duty, Backend Backend On-call, Frontend Frontend On-call, QA QA Lead
+- Day 5: IC Release Manager on duty, Backend Backend On-call, Frontend Frontend On-call, QA QA Lead
+- Day 6: IC Release Manager on duty, Backend Backend On-call, Frontend Frontend On-call, QA QA Lead
+- Day 7: IC Release Manager on duty, Backend Backend On-call, Frontend Frontend On-call, QA QA Lead
+
+Ownership alignment:
+- This rota is aligned to Gate 8 sign-off ownership in `docs/qa/gate8-signoff-20260314-201438/evidence.md`.
 
 ## 3. Feature-Flag Inventory (Risky Areas)
 - `realtime.enabled`
