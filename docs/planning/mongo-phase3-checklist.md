@@ -178,6 +178,7 @@ Consistency note:
 - Current decision: `GO`
 - Blocking gate: none
 - Next required action: execute hypercare watch rota and archive day-1/day-2 health snapshots.
+- Next phase transition: `docs/planning/mongo-phase4-proposal.md`
 
 ## Release Rule
 - `GO` only if all gates pass with attached evidence.
