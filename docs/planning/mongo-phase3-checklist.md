@@ -97,6 +97,7 @@ npm run verify:mongo:retention
 
 ## Gate 6: Observability and Alerting Readiness
 - Objective: ensure Mongo integration is monitorable and actionable.
+- Template pack: `docs/planning/mongo-phase3-gate6-gate7-evidence-pack.md`
 - Required action:
   - Define and enable alerts for:
     - Mongo connectivity failures
@@ -116,6 +117,7 @@ npm run db:preflight
 
 ## Gate 7: Security and Secrets Hygiene
 - Objective: validate Mongo credentials and logging hygiene for production rollout.
+- Template pack: `docs/planning/mongo-phase3-gate6-gate7-evidence-pack.md`
 - Required action:
   - Ensure Mongo credentials come only from environment/secret manager.
   - Verify no credential leakage in logs or committed files.
