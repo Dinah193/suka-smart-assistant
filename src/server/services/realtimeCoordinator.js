@@ -6,6 +6,11 @@
 "use strict";
 
 const { v4: uuidv4 } = require("uuid");
+const {
+  createInMemoryEventLogStore,
+  createFileEventLogStore,
+} = require("./realtimeEventLogStore.js");
+const { createGraphProjector } = require("./realtimeGraphProjector.js");
 
 const MAX_SIGNAL_HISTORY = Number(process.env.SSA_SIGNAL_HISTORY_MAX || 5000);
 const MAX_AUDIT_HISTORY = Number(process.env.SSA_AUDIT_HISTORY_MAX || 5000);
@@ -18,6 +23,33 @@ const REPORT_INTERVAL_MS = Number(
 const SUGGESTION_DEDUPE_WINDOW_MS = Number(
   process.env.SSA_SUGGESTION_DEDUPE_WINDOW_MS || 1000 * 60 * 60 * 6,
 );
+const SIGNAL_EVENT_DEDUPE_WINDOW_MS = Number(
+  process.env.SSA_SIGNAL_EVENT_DEDUPE_WINDOW_MS || 1000 * 60 * 10,
+);
+const STRICT_ENVELOPE_REQUIRED = String(
+  process.env.SSA_REALTIME_STRICT_ENVELOPE || "false",
+).toLowerCase() === "true";
+const APPEND_LOG_ENABLED = String(
+  process.env.SSA_REALTIME_APPEND_LOG_ENABLED || "false",
+).toLowerCase() === "true";
+const REPLAY_ON_BOOT_ENABLED = String(
+  process.env.SSA_REALTIME_REPLAY_ON_BOOT || "false",
+).toLowerCase() === "true";
+const EVENT_LOG_MEMORY_FALLBACK = String(
+  process.env.SSA_REALTIME_EVENTLOG_FALLBACK_MEMORY || "true",
+).toLowerCase() !== "false";
+const REPLAY_CHECKPOINT_KEY = String(
+  process.env.SSA_REALTIME_REPLAY_CHECKPOINT_KEY || "realtime.coordinator.replay",
+);
+const READINESS_STALE_MS = Number(
+  process.env.SSA_READINESS_STALE_MS || 1000 * 60 * 30,
+);
+const GRAPH_PROJECTION_ENABLED = String(
+  process.env.SSA_GRAPH_PROJECTION_ENABLED || "false",
+).toLowerCase() === "true";
+const GRAPH_MAX_RETRIES = Number(process.env.SSA_GRAPH_MAX_RETRIES || 3);
+const GRAPH_RETRY_DELAY_MS = Number(process.env.SSA_GRAPH_RETRY_DELAY_MS || 100);
+const GRAPH_DEADLETTER_LIMIT = Number(process.env.SSA_GRAPH_DEADLETTER_LIMIT || 1000);
 
 function capPush(arr, item, max) {
   arr.push(item);
@@ -27,6 +59,10 @@ function capPush(arr, item, max) {
 function toNum(v, fallback = 0) {
   const n = Number(v);
   return Number.isFinite(n) ? n : fallback;
+}
+
+function isPlainObject(v) {
+  return !!v && typeof v === "object" && !Array.isArray(v);
 }
 
 function nowIso() {
@@ -74,7 +110,13 @@ function priorityScore({ urgency = "normal", hasDependencies = false, perishable
   return Math.max(0, Math.min(150, score));
 }
 
-function createCoordinator({ eventBus, namespaceEmit }) {
+function createCoordinator({
+  eventBus,
+  namespaceEmit,
+  eventLogStore = null,
+  graphProjector = null,
+  flags = {},
+} = {}) {
   if (!eventBus) throw new Error("createCoordinator requires eventBus");
   if (typeof namespaceEmit !== "function") {
     throw new Error("createCoordinator requires namespaceEmit");
@@ -87,8 +129,56 @@ function createCoordinator({ eventBus, namespaceEmit }) {
   const suggestionQueues = new Map();
   // reportKey -> report object
   const latestReports = new Map();
+  const seenEventKeys = new Map();
+  const replayedEntryIds = new Set();
+  const ingestStats = {
+    droppedInvalid: 0,
+    droppedDuplicate: 0,
+    accepted: 0,
+    replayed: 0,
+  };
+  const projectionStats = {
+    queueDepthByScope: new Map(),
+    readinessByScope: new Map(),
+    ingestToQueueLatencyMs: {
+      count: 0,
+      total: 0,
+      last: 0,
+      avg: 0,
+      max: 0,
+    },
+  };
 
   let reportTimer = null;
+  const appendEnabled =
+    typeof flags.appendLogEnabled === "boolean" ? flags.appendLogEnabled : APPEND_LOG_ENABLED;
+  const replayOnBootEnabled =
+    typeof flags.replayOnBootEnabled === "boolean"
+      ? flags.replayOnBootEnabled
+      : REPLAY_ON_BOOT_ENABLED;
+  const graphProjectionEnabled =
+    typeof flags.graphProjectionEnabled === "boolean"
+      ? flags.graphProjectionEnabled
+      : GRAPH_PROJECTION_ENABLED;
+
+  let store = eventLogStore;
+  if (!store && appendEnabled) {
+    try {
+      store = createFileEventLogStore({});
+    } catch {
+      if (EVENT_LOG_MEMORY_FALLBACK) store = createInMemoryEventLogStore();
+    }
+  }
+
+  let projector = graphProjector;
+  if (!projector) {
+    projector = createGraphProjector({
+      enabled: graphProjectionEnabled,
+      maxRetries: GRAPH_MAX_RETRIES,
+      retryDelayMs: GRAPH_RETRY_DELAY_MS,
+      deadLetterLimit: GRAPH_DEADLETTER_LIMIT,
+    });
+  }
 
   function scopeKey(scope, scopeId) {
     return `${normalizeScope(scope)}:${normalizeScopeId(scopeId)}`;
@@ -109,6 +199,143 @@ function createCoordinator({ eventBus, namespaceEmit }) {
       },
       MAX_AUDIT_HISTORY,
     );
+  }
+
+  function shouldAppendSignals() {
+    return !!store && appendEnabled;
+  }
+
+  function enqueueGraphProjection(entry, meta = {}) {
+    try {
+      if (!projector?.enqueue) return { ok: true, skipped: true };
+      return projector.enqueue(entry, meta);
+    } catch {
+      // Graph projection must never break core realtime flow.
+      return { ok: false, skipped: true };
+    }
+  }
+
+  function appendRecord(kind, payload = {}) {
+    if (!shouldAppendSignals()) return { ok: true, skipped: true };
+    try {
+      const out = store.append({ kind, payload, ts: nowIso() });
+      if (!out?.ok) {
+        return { ok: false, error: "event_log_unavailable", reason: "append_failed" };
+      }
+      enqueueGraphProjection(out.entry, { source: "append" });
+      return { ok: true, entry: out.entry };
+    } catch {
+      return { ok: false, error: "event_log_unavailable", reason: "append_failed" };
+    }
+  }
+
+  function appendSignal(rawSignal = {}, context = {}) {
+    return appendRecord("signal.ingest", {
+      signal: rawSignal,
+      context,
+    });
+  }
+
+  function appendSuggestionAction(kind, payload = {}) {
+    return appendRecord(kind, payload);
+  }
+
+  function buildReadinessForScope(scope, scopeId) {
+    const key = scopeKey(scope, scopeId);
+    const queue = pruneExpiredQueue(key);
+    const pending = queue.filter((q) => !q.consumedAt);
+    const highPriorityPending = pending.filter((p) => Number(p.priorityScore || 0) >= 80);
+    const assignedPending = pending.filter((p) => !!p.assignedToUserId || !!p.assignedRole);
+    const unassignedPending = pending.filter((p) => !p.assignedToUserId && !p.assignedRole);
+    const now = Date.now();
+    const highPriorityUnassignedStale = highPriorityPending.filter((p) => {
+      if (p.assignedToUserId || p.assignedRole) return false;
+      return now - isoMs(p.createdAt, now) >= READINESS_STALE_MS;
+    }).length;
+
+    const readiness = {
+      scope,
+      scopeId,
+      queueDepth: pending.length,
+      pendingSuggestions: pending.length,
+      completedSuggestions: queue.length - pending.length,
+      highPriorityPending: highPriorityPending.length,
+      assignedPending: assignedPending.length,
+      unassignedPending: unassignedPending.length,
+      highPriorityUnassignedStale,
+      updatedAt: nowIso(),
+    };
+
+    projectionStats.queueDepthByScope.set(key, readiness.queueDepth);
+    projectionStats.readinessByScope.set(key, readiness);
+    return readiness;
+  }
+
+  function recordIngestQueueLatency(ms) {
+    const n = Math.max(0, Number(ms || 0));
+    const lat = projectionStats.ingestToQueueLatencyMs;
+    lat.count += 1;
+    lat.total += n;
+    lat.last = n;
+    lat.max = Math.max(lat.max, n);
+    lat.avg = lat.count ? Math.round((lat.total / lat.count) * 100) / 100 : 0;
+  }
+
+  function getReadiness(scope, scopeId) {
+    const key = scopeKey(scope, scopeId);
+    return projectionStats.readinessByScope.get(key) || buildReadinessForScope(scope, scopeId);
+  }
+
+  function pruneSeenEventKeys(now = Date.now()) {
+    for (const [key, info] of seenEventKeys.entries()) {
+      if (now - Number(info?.seenAt || 0) > SIGNAL_EVENT_DEDUPE_WINDOW_MS) {
+        seenEventKeys.delete(key);
+      }
+    }
+  }
+
+  function validateIncomingSignal(raw = {}, context = {}) {
+    if (!isPlainObject(raw)) {
+      return { ok: false, error: "invalid_event", reason: "signal_not_object" };
+    }
+
+    const eventName = raw.event || raw.type || context.event || "";
+    if (!eventName || typeof eventName !== "string") {
+      return { ok: false, error: "invalid_event", reason: "missing_event_type" };
+    }
+
+    if (raw.ts && Number.isNaN(Date.parse(raw.ts))) {
+      return { ok: false, error: "invalid_event", reason: "invalid_ts" };
+    }
+
+    if (!STRICT_ENVELOPE_REQUIRED) {
+      return { ok: true };
+    }
+
+    const meta = isPlainObject(raw.meta) ? raw.meta : {};
+    const eventId = raw.eventId || meta.eventId;
+    const correlationId = raw.correlationId || meta.correlationId;
+    const source = raw.sourceModule || raw.source || meta.source || context.sourceModule || context.ns;
+    const version = raw.version || meta.version;
+    const actorId = raw.actorId || meta.actorId || context.user?.id || raw.userId;
+
+    if (!eventId) return { ok: false, error: "invalid_event", reason: "missing_event_id" };
+    if (!correlationId) {
+      return { ok: false, error: "invalid_event", reason: "missing_correlation_id" };
+    }
+    if (!source) return { ok: false, error: "invalid_event", reason: "missing_source" };
+    if (!version) return { ok: false, error: "invalid_event", reason: "missing_version" };
+    if (!actorId) return { ok: false, error: "invalid_event", reason: "missing_actor_id" };
+
+    return { ok: true };
+  }
+
+  function dedupeKeyForSignal(signal) {
+    if (signal.eventId) return `eventId:${signal.eventId}`;
+    if (signal.correlationId) {
+      return `corr:${signal.correlationId}:${signal.event}:${signal.scope}:${signal.scopeId}`;
+    }
+    return null;
   }
 
   function inferSignalType(eventName, payload) {
@@ -153,17 +380,30 @@ function createCoordinator({ eventBus, namespaceEmit }) {
       payload?.householdId ||
       "default";
 
+    const meta = isPlainObject(raw.meta)
+      ? raw.meta
+      : isPlainObject(payload?.meta)
+        ? payload.meta
+        : {};
+
     const signal = {
       id: uuidv4(),
+      eventId: String(raw.eventId || meta.eventId || ""),
+      correlationId: String(raw.correlationId || meta.correlationId || ""),
+      causationId: String(raw.causationId || meta.causationId || ""),
       type: inferSignalType(eventName, payload),
       event: String(eventName),
       ts: raw.ts || nowIso(),
       sourceModule:
         raw.sourceModule ||
+        raw.source ||
+        meta.source ||
         context.sourceModule ||
         context.ns ||
         payload?.source ||
         "unknown",
+      version: String(raw.version || meta.version || "v1"),
+      actorId: String(raw.actorId || meta.actorId || context.user?.id || raw.userId || payload?.userId || ""),
       privacyScope: raw.privacyScope || raw.privacy || "household",
       scope,
       scopeId: String(scopeId),
@@ -429,6 +669,7 @@ function createCoordinator({ eventBus, namespaceEmit }) {
   function emitQueueUpdate(signal, createdItems, mergedItems = []) {
     const key = scopeKey(signal.scope, signal.scopeId);
     const queue = pruneExpiredQueue(key).filter((x) => !x.consumedAt);
+    const readiness = buildReadinessForScope(signal.scope, signal.scopeId);
 
     const payload = {
       scope: signal.scope,
@@ -437,6 +678,7 @@ function createCoordinator({ eventBus, namespaceEmit }) {
       queueDepth: queue.length,
       created: createdItems,
       merged: mergedItems,
+      readiness,
       ts: nowIso(),
     };
 
@@ -445,17 +687,70 @@ function createCoordinator({ eventBus, namespaceEmit }) {
     writeAudit("suggestion.queue.update", { room, payload });
   }
 
+  function projectSignal(signal) {
+    const { created, merged } = enqueueSuggestions(signal);
+    buildReadinessForScope(signal.scope, signal.scopeId);
+    if (created.length || merged.length) emitQueueUpdate(signal, created, merged);
+    return { created, merged };
+  }
+
   function ingest(rawSignal = {}, context = {}) {
+    const ingestStartedAt = Date.now();
+    if (!context?._alreadyAppended && shouldAppendSignals()) {
+      const appended = appendSignal(rawSignal, context);
+      if (!appended.ok) return appended;
+    }
+
+    const valid = validateIncomingSignal(rawSignal, context);
+    if (!valid.ok) {
+      ingestStats.droppedInvalid += 1;
+      writeAudit("signal.invalid", {
+        error: valid.error,
+        reason: valid.reason,
+        sourceModule: context?.sourceModule || context?.ns || "unknown",
+      });
+      return { ok: false, error: valid.error, reason: valid.reason };
+    }
+
     const signal = normalizeSignal(rawSignal, context);
+
+    pruneSeenEventKeys();
+    const dedupeKey = dedupeKeyForSignal(signal);
+    const seen = dedupeKey ? seenEventKeys.get(dedupeKey) : null;
+    if (seen) {
+      ingestStats.droppedDuplicate += 1;
+      writeAudit("signal.duplicate", {
+        dedupeKey,
+        priorSignalId: seen.signalId,
+        eventId: signal.eventId || null,
+        correlationId: signal.correlationId || null,
+      });
+      return {
+        ok: false,
+        error: "duplicate_event",
+        reason: "duplicate_event_id",
+        duplicateOf: seen.signalId,
+      };
+    }
+
+    if (dedupeKey) {
+      seenEventKeys.set(dedupeKey, {
+        signalId: signal.id,
+        seenAt: Date.now(),
+      });
+    }
+
     capPush(signalHistory, signal, MAX_SIGNAL_HISTORY);
+    ingestStats.accepted += 1;
 
     namespaceEmit("/core", "signal:aggregated", signal, scopeRoom(signal.scope, signal.scopeId));
     writeAudit("signal.ingested", { signalId: signal.id, type: signal.type, scope: signal.scope, scopeId: signal.scopeId });
 
-    const { created, merged } = enqueueSuggestions(signal);
-    if (created.length || merged.length) emitQueueUpdate(signal, created, merged);
+    const { created, merged } = projectSignal(signal);
 
-    return { signal, createdSuggestions: created, mergedSuggestions: merged };
+    recordIngestQueueLatency(Date.now() - ingestStartedAt);
+
+    return { ok: true, signal, createdSuggestions: created, mergedSuggestions: merged };
   }
 
   function listSuggestions({
@@ -480,11 +775,30 @@ function createCoordinator({ eventBus, namespaceEmit }) {
     });
   }
 
-  function consumeSuggestion({ scope = "household", scopeId, suggestionId, userId }) {
+  function consumeSuggestion({ scope = "household", scopeId, suggestionId, userId, _alreadyAppended = false }) {
     const key = scopeKey(scope, String(scopeId || "default"));
     const queue = suggestionQueues.get(key) || [];
     const item = queue.find((x) => x.id === suggestionId);
     if (!item) return null;
+
+    if (shouldAppendSignals() && !_alreadyAppended) {
+      const appended = appendSuggestionAction("suggestion.consume", {
+        scope,
+        scopeId,
+        suggestionId,
+        userId: userId || null,
+        target: item.target,
+        action: item.action,
+      });
+      if (!appended.ok) {
+        writeAudit("eventlog.append.failed", {
+          action: "suggestion.consume",
+          error: appended.error,
+          reason: appended.reason,
+        });
+      }
+    }
+
     if (!item.consumedAt) {
       item.consumedAt = nowIso();
       item.consumedBy = userId || null;
@@ -500,16 +814,45 @@ function createCoordinator({ eventBus, namespaceEmit }) {
 
     namespaceEmit("/core", "suggestion:queue:consumed", payload, scopeRoom(scope, String(scopeId || "default")));
     writeAudit("suggestion.consumed", payload);
+    buildReadinessForScope(scope, String(scopeId || "default"));
 
     return item;
   }
 
-  function assignSuggestion({ scope = "household", scopeId, suggestionId, assignedToUserId, assignedRole, assignedBy }) {
+  function assignSuggestion({
+    scope = "household",
+    scopeId,
+    suggestionId,
+    assignedToUserId,
+    assignedRole,
+    assignedBy,
+    _alreadyAppended = false,
+  }) {
     const key = scopeKey(scope, normalizeScopeId(scopeId));
     const queue = pruneExpiredQueue(key);
     const item = queue.find((x) => x.id === suggestionId);
     if (!item) return null;
     if (item.consumedAt) return item;
+
+    if (shouldAppendSignals() && !_alreadyAppended) {
+      const appended = appendSuggestionAction("suggestion.assign", {
+        scope,
+        scopeId,
+        suggestionId,
+        assignedToUserId: assignedToUserId || null,
+        assignedRole: assignedRole || null,
+        assignedBy: assignedBy || null,
+        target: item.target,
+        action: item.action,
+      });
+      if (!appended.ok) {
+        writeAudit("eventlog.append.failed", {
+          action: "suggestion.assign",
+          error: appended.error,
+          reason: appended.reason,
+        });
+      }
+    }
 
     item.assignedToUserId = assignedToUserId || null;
     item.assignedRole = assignedRole || null;
@@ -527,6 +870,7 @@ function createCoordinator({ eventBus, namespaceEmit }) {
 
     namespaceEmit("/core", "suggestion:queue:assigned", payload, scopeRoom(scope, normalizeScopeId(scopeId)));
     writeAudit("suggestion.assigned", payload);
+    buildReadinessForScope(normalizeScope(scope), normalizeScopeId(scopeId));
     return item;
   }
 
@@ -546,6 +890,7 @@ function createCoordinator({ eventBus, namespaceEmit }) {
       byType[s.type] = (byType[s.type] || 0) + 1;
     }
 
+    const readiness = getReadiness(scope, scopeId);
     const pending = queue.filter((q) => !q.consumedAt);
     const report = {
       id: uuidv4(),
@@ -554,21 +899,39 @@ function createCoordinator({ eventBus, namespaceEmit }) {
       scopeId,
       summary: {
         signals24h: scopeSignals.length,
-        pendingSuggestions: pending.length,
-        completedSuggestions: queue.length - pending.length,
-        highPriorityPending: pending.filter((p) => p.priorityScore >= 80).length,
-        assignedPending: pending.filter((p) => !!p.assignedToUserId || !!p.assignedRole).length,
-        unassignedPending: pending.filter((p) => !p.assignedToUserId && !p.assignedRole).length,
+        pendingSuggestions: readiness.pendingSuggestions,
+        completedSuggestions: readiness.completedSuggestions,
+        highPriorityPending: readiness.highPriorityPending,
+        assignedPending: readiness.assignedPending,
+        unassignedPending: readiness.unassignedPending,
+        highPriorityUnassignedStale: readiness.highPriorityUnassignedStale,
       },
       signalBreakdown: byType,
       topSuggestions: [...pending].slice(0, 10),
     };
 
+    const graphSummary = projector?.getScopeSummary ? projector.getScopeSummary(scope, scopeId) : null;
+    if (graphSummary) {
+      // Optional extension, intentionally outside required summary contract.
+      report.graph = graphSummary;
+    }
+
     latestReports.set(key, report);
     return report;
   }
 
-  function generateReports() {
+  function generateReports({ _alreadyAppended = false } = {}) {
+    if (shouldAppendSignals() && !_alreadyAppended) {
+      const appended = appendSuggestionAction("report.generate", {});
+      if (!appended.ok) {
+        writeAudit("eventlog.append.failed", {
+          action: "report.generate",
+          error: appended.error,
+          reason: appended.reason,
+        });
+      }
+    }
+
     const touched = new Set();
     for (const s of signalHistory) {
       touched.add(scopeKey(s.scope, s.scopeId));
@@ -623,6 +986,14 @@ function createCoordinator({ eventBus, namespaceEmit }) {
   function start() {
     if (reportTimer) return;
 
+    if (replayOnBootEnabled) {
+      try {
+        replayFromEventLog();
+      } catch {
+        writeAudit("replay.failed", { reason: "boot_replay_failed" });
+      }
+    }
+
     eventBus.on("client:event", onClientEvent);
     eventBus.on("bridge:emit", onBridgeEmit);
     eventBus.on("realtime:signal:ingest", ({ payload, context }) => ingest(payload, context));
@@ -655,6 +1026,109 @@ function createCoordinator({ eventBus, namespaceEmit }) {
     writeAudit("realtime.stopped");
   }
 
+  function applyReplayEntry(entry = {}) {
+        function resolveReplaySuggestionId(p = {}) {
+          const key = scopeKey(p.scope, normalizeScopeId(p.scopeId));
+          const queue = suggestionQueues.get(key) || [];
+          const byId = queue.find((x) => x.id === p.suggestionId);
+          if (byId) return byId.id;
+
+          if (p.target && p.action) {
+            const byTargetAction = queue.find(
+              (x) => !x.consumedAt && x.target === p.target && x.action === p.action,
+            );
+            if (byTargetAction) return byTargetAction.id;
+          }
+
+          return null;
+        }
+
+    const entryId = String(entry?.id || "");
+    if (!entryId || replayedEntryIds.has(entryId)) return false;
+    replayedEntryIds.add(entryId);
+    enqueueGraphProjection(entry, { source: "replay" });
+
+    const kind = String(entry?.kind || "");
+    const payload = entry?.payload || {};
+
+    if (kind === "signal.ingest") {
+      const out = ingest(payload.signal || {}, {
+        ...(payload.context || {}),
+        _alreadyAppended: true,
+      });
+      if (out?.ok !== false) ingestStats.replayed += 1;
+      return true;
+    }
+
+    if (kind === "suggestion.assign") {
+      const resolvedId = resolveReplaySuggestionId(payload);
+      if (!resolvedId) return false;
+      assignSuggestion({
+        scope: payload.scope,
+        scopeId: payload.scopeId,
+        suggestionId: resolvedId,
+        assignedToUserId: payload.assignedToUserId,
+        assignedRole: payload.assignedRole,
+        assignedBy: payload.assignedBy,
+        _alreadyAppended: true,
+      });
+      ingestStats.replayed += 1;
+      return true;
+    }
+
+    if (kind === "suggestion.consume") {
+      const resolvedId = resolveReplaySuggestionId(payload);
+      if (!resolvedId) return false;
+      consumeSuggestion({
+        scope: payload.scope,
+        scopeId: payload.scopeId,
+        suggestionId: resolvedId,
+        userId: payload.userId,
+        _alreadyAppended: true,
+      });
+      ingestStats.replayed += 1;
+      return true;
+    }
+
+    if (kind === "report.generate") {
+      generateReports({ _alreadyAppended: true });
+      ingestStats.replayed += 1;
+      return true;
+    }
+
+    return false;
+  }
+
+  function replayFromEventLog({ force = false } = {}) {
+    if (!store || typeof store.readAll !== "function") {
+      return { ok: true, replayed: 0, reason: "eventlog_disabled" };
+    }
+
+    const all = store.readAll();
+    const checkpoint = force ? null : store.getCheckpoint?.(REPLAY_CHECKPOINT_KEY);
+    const startIndex = Number.isInteger(checkpoint?.lastIndex) ? checkpoint.lastIndex + 1 : 0;
+
+    let replayed = 0;
+    for (let i = Math.max(0, startIndex); i < all.length; i += 1) {
+      if (applyReplayEntry(all[i])) replayed += 1;
+    }
+
+    const marker = {
+      at: nowIso(),
+      lastIndex: all.length - 1,
+      replayed,
+      total: all.length,
+    };
+    try {
+      store.setCheckpoint?.(REPLAY_CHECKPOINT_KEY, marker);
+    } catch {
+      // no-op
+    }
+
+    writeAudit("replay.completed", marker);
+    return { ok: true, ...marker };
+  }
+
   return {
     start,
     stop,
@@ -676,9 +1150,46 @@ function createCoordinator({ eventBus, namespaceEmit }) {
       return {
         signalCount: signalHistory.length,
         auditCount: auditHistory.length,
+        appendLogEnabled: shouldAppendSignals(),
+        ingest: {
+          accepted: ingestStats.accepted,
+          droppedInvalid: ingestStats.droppedInvalid,
+          droppedDuplicate: ingestStats.droppedDuplicate,
+          replayed: ingestStats.replayed,
+        },
+        projection: {
+          readinessScopes: projectionStats.readinessByScope.size,
+          latency: {
+            ...projectionStats.ingestToQueueLatencyMs,
+          },
+        },
+        graphProjection: projector?.getState ? projector.getState() : null,
         queues: Array.from(suggestionQueues.entries()).map(([k, v]) => ({ key: k, size: v.length })),
       };
     },
+    getDiagnostics({ scope = null, scopeId = null } = {}) {
+      const readiness =
+        scope && scopeId
+          ? [getReadiness(scope, scopeId)]
+          : Array.from(projectionStats.readinessByScope.values());
+      return {
+        ingest: { ...ingestStats },
+        projection: {
+          queueDepthByScope: Object.fromEntries(projectionStats.queueDepthByScope.entries()),
+          readiness,
+          latency: { ...projectionStats.ingestToQueueLatencyMs },
+        },
+        graphProjection: projector?.getDiagnostics
+          ? projector.getDiagnostics({ scope, scopeId })
+          : projector?.getState
+            ? { state: projector.getState() }
+            : null,
+      };
+    },
+    shouldAppendSignals,
+    appendSignal,
+    appendSuggestionAction,
+    replayFromEventLog,
   };
 }
 
