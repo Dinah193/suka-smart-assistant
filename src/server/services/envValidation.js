@@ -8,6 +8,14 @@ function hasAny(names = []) {
   return false;
 }
 
+function hasAll(names = []) {
+  for (const name of names) {
+    const raw = process.env[name];
+    if (raw == null || String(raw).trim() === "") return false;
+  }
+  return true;
+}
+
 function getMissing(names = []) {
   return names.filter((name) => {
     const raw = process.env[name];
@@ -28,12 +36,17 @@ function validateStartupEnv({ nodeEnv = "development" } = {}) {
     n8nSecretConfigured: hasAny(["N8N_INBOUND_SECRET", "N8N_SHARED_SECRET"]),
     jwtSecretConfigured: hasAny(["JWT_SECRET"]),
     corsOriginConfigured: hasAny(["CORS_ORIGIN"]),
+    neo4jEnabled:
+      String(process.env.NEO4J_ENABLED || "false").toLowerCase() === "true" ||
+      hasAny(["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD"]),
+    neo4jConfigComplete: hasAll(["NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD"]),
   };
 
   const corsOriginRaw = String(process.env.CORS_ORIGIN || "").trim();
   const socketCorsRaw = String(process.env.SOCKET_CORS || "").trim();
   const allowInsecureHeaderAuth =
     String(process.env.ALLOW_INSECURE_HEADER_AUTH || "false").toLowerCase() === "true";
+  const neo4jRequired = String(process.env.NEO4J_REQUIRED || "false").toLowerCase() === "true";
 
   if (!checks.mongoUriConfigured) {
     warnings.push("Mongo URI is not configured (MONGODB_URI/MONGO_URI/MONGO_URL); backend will run in file-fallback mode.");
@@ -43,12 +56,20 @@ function validateStartupEnv({ nodeEnv = "development" } = {}) {
     warnings.push("n8n inbound webhook secret is not configured (N8N_INBOUND_SECRET/N8N_SHARED_SECRET); signatures cannot be verified.");
   }
 
+  if (checks.neo4jEnabled && !checks.neo4jConfigComplete) {
+    warnings.push("Neo4j is enabled but configuration is incomplete; set NEO4J_URI, NEO4J_USER, and NEO4J_PASSWORD.");
+  }
+
   if (isProd && !checks.mongoUriConfigured) {
     errors.push("Production requires MONGODB_URI (or MONGO_URI/MONGO_URL).");
   }
 
   if (isProd && !checks.n8nSecretConfigured) {
     errors.push("Production requires N8N_INBOUND_SECRET (or N8N_SHARED_SECRET).");
+  }
+
+  if ((neo4jRequired || (isProd && checks.neo4jEnabled)) && !checks.neo4jConfigComplete) {
+    errors.push("Neo4j requires NEO4J_URI, NEO4J_USER, and NEO4J_PASSWORD when enabled/required.");
   }
 
   if (isProd && !checks.jwtSecretConfigured) {

@@ -326,6 +326,7 @@ const candidates = [
   "./routes/inventoryController.js",
   "./routes/irrigationController.js",
   { file: "./routes/mealPlanController.js", basePath: "/api/mealplan" },
+  { file: "./routes/planners.js", basePath: "/api/planners" },
   "./routes/labelsController.js",
   "./routes/preferencesController.js",
   { file: "./routes/battleRhythmController.js", basePath: "/api/battle-rhythm" },
@@ -416,8 +417,57 @@ async function startServer() {
     console.warn("[boot] db connection init failed; continuing in file-fallback mode:", e?.message || e);
   }
 
+  try {
+    const plannerIntegration = await loadAny("./services/planners/PlannerIntegrationService.js").catch(
+      () => null
+    );
+    if (plannerIntegration?.verifyNeo4jIntegration) {
+      const required = String(process.env.NEO4J_REQUIRED || "false").toLowerCase() === "true";
+      const neo4jStatus = await plannerIntegration.verifyNeo4jIntegration({ required });
+      if (!neo4jStatus.ok) {
+        const message = `[boot] neo4j validation failed: ${neo4jStatus.error || "unknown"}`;
+        if (neo4jStatus.required) {
+          throw new Error(message);
+        }
+        console.warn(`${message}; continuing (NEO4J_REQUIRED=false)`);
+      } else if (neo4jStatus.skipped) {
+        console.log("[boot] neo4j validation skipped (feature not enabled)");
+      } else {
+        console.log("[boot] neo4j validation passed (ping ok)");
+      }
+    }
+  } catch (e) {
+    console.warn("[boot] neo4j validation warning:", e?.message || e);
+    if (String(process.env.NEO4J_REQUIRED || "false").toLowerCase() === "true") {
+      throw e;
+    }
+  }
+
   await routesReadyPromise;
   installTerminalHandlers();
+
+  try {
+    const projectionSync = await loadAny("./services/planners/PlannerProjectionSync.js").catch(
+      () => null
+    );
+    projectionSync?.startProjectionWorker?.();
+  } catch (e) {
+    console.warn("[boot] projection worker start skipped:", e?.message || e);
+  }
+
+  try {
+    const disabled =
+      String(process.env.PLANNER_OPERATIONAL_OUTBOX_WORKER_DISABLED || "false").toLowerCase() ===
+      "true";
+    if (!disabled) {
+      const outboxWorker = await loadAny(
+        "./services/planners/OperationalProjectionWorker.js"
+      ).catch(() => null);
+      outboxWorker?.startOperationalProjectionWorker?.();
+    }
+  } catch (e) {
+    console.warn("[boot] operational outbox worker start skipped:", e?.message || e);
+  }
 
   server.listen(PORT, HOST, () => {
     const db = dbConnection.getStatus();
@@ -457,6 +507,14 @@ async function shutdown(signal) {
     dbConnection.close().catch((e) => {
       console.warn("[server] DB close warning:", e?.message || e);
     });
+    Promise.resolve()
+      .then(() => loadAny("./services/planners/PlannerProjectionSync.js"))
+      .then((projectionSync) => projectionSync?.stopProjectionWorker?.())
+      .catch(() => {});
+    Promise.resolve()
+      .then(() => loadAny("./services/planners/OperationalProjectionWorker.js"))
+      .then((outboxWorker) => outboxWorker?.stopOperationalProjectionWorker?.())
+      .catch(() => {});
     try {
       setTimeout(() => process.exit(), 200);
     } catch {
