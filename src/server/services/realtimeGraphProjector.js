@@ -6,6 +6,10 @@ function nowIso() {
   return new Date().toISOString();
 }
 
+function readNeo4jAvailability() {
+  return String(process.env.SSA_NEO4J_AVAILABLE || "true").toLowerCase() === "true";
+}
+
 function toObject(value) {
   return value && typeof value === "object" ? value : {};
 }
@@ -42,7 +46,8 @@ function resolveHomesteadProjectionInput(entry = {}, meta = {}) {
 }
 
 async function defaultProcessEvent(entry = {}, meta = {}) {
-  const neo4jAvailable = String(process.env.SSA_NEO4J_AVAILABLE || "true").toLowerCase() === "true";
+  const neo4jAvailable =
+    typeof meta.neo4jAvailable === "boolean" ? meta.neo4jAvailable : readNeo4jAvailability();
   if (!neo4jAvailable) {
     throw new Error("neo4j_unavailable");
   }
@@ -72,6 +77,7 @@ function createGraphProjector({
   maxRetries = 3,
   retryDelayMs = 100,
   deadLetterLimit = 1000,
+  neo4jAvailable = readNeo4jAvailability(),
 } = {}) {
   const queue = [];
   const deadLetter = [];
@@ -172,7 +178,7 @@ function createGraphProjector({
 
   async function processOne(item) {
     try {
-      await processEvent(item.entry, item.meta);
+      await processEvent(item.entry, { ...item.meta, neo4jAvailable });
       stats.processed += 1;
       stats.lastProcessedAt = nowIso();
       markScopeProjected(item.entry);

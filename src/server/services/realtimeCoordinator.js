@@ -50,6 +50,7 @@ const GRAPH_PROJECTION_ENABLED = String(
 const GRAPH_MAX_RETRIES = Number(process.env.SSA_GRAPH_MAX_RETRIES || 3);
 const GRAPH_RETRY_DELAY_MS = Number(process.env.SSA_GRAPH_RETRY_DELAY_MS || 100);
 const GRAPH_DEADLETTER_LIMIT = Number(process.env.SSA_GRAPH_DEADLETTER_LIMIT || 1000);
+const NEO4J_AVAILABLE = String(process.env.SSA_NEO4J_AVAILABLE || "true").toLowerCase() === "true";
 
 function capPush(arr, item, max) {
   arr.push(item);
@@ -177,6 +178,7 @@ function createCoordinator({
       maxRetries: GRAPH_MAX_RETRIES,
       retryDelayMs: GRAPH_RETRY_DELAY_MS,
       deadLetterLimit: GRAPH_DEADLETTER_LIMIT,
+      neo4jAvailable: NEO4J_AVAILABLE,
     });
   }
 
