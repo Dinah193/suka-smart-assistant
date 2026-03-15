@@ -139,6 +139,8 @@ npm run db:preflight
 
 ## Gate 8: Release Gate and Go/No-Go Approval
 - Objective: formalize final production rollout decision.
+- Evidence: `docs/qa/gate8-signoff-20260314-201438/evidence.md`
+- Status: Complete (2026-03-14; NO-GO)
 - Required action:
   - Attach evidence for Gates 1-7.
   - Confirm owners sign off (engineering + operations).
@@ -161,7 +163,12 @@ git log --oneline -n 10
 - [x] Gate 5 retention behavior verified at scale.
 - [x] Gate 6 observability/alerts/runbooks are active and linked.
 - [x] Gate 7 security/secrets hygiene verified.
-- [ ] Gate 8 release sign-offs and rollback ownership recorded.
+- [x] Gate 8 release sign-offs and rollback ownership recorded.
+
+## Release-Decision Readiness
+- Current decision: `NO-GO`
+- Blocking gate: Gate 4 degraded-latency injection (true staging execution pending)
+- Next required action: execute Gate 4 with service mesh/proxy/network policy latency shaping in staging and attach passing evidence.
 
 ## Release Rule
 - `GO` only if all gates pass with attached evidence.

@@ -5,6 +5,7 @@ Date: 2026-03-14
 Environment: staging-equivalent local execution (workspace shell)
 Window: 18:41-18:54 local
 Owners: IC=automation, Operator=automation, Observer=automation
+Final Result: FAIL (true staging latency injection not executable from current workspace access)
 
 Baseline Results:
 - preflightBeforeExitCode: 0
@@ -35,4 +36,4 @@ Evidence Files:
 Gate Decision:
 - status: FAIL
 - rationale: The attempted latency injection method failed because `configureFailPoint` is unsupported on this Mongo deployment, so degraded-latency behavior could not be exercised and Gate 4 pass criteria were not met.
-- followups: Execute Gate 4 in a staging environment that supports network shaping/proxy delay (for example sidecar proxy or platform traffic shaping), then rerun smoke and preflight during the active delay window.
+- followups: Execute Gate 4 in a staging environment with service mesh/proxy/network policy control and rerun smoke + preflight during active delay. This machine does not have required staging control CLIs (`kubectl`, `istioctl`, `docker`) and therefore cannot perform the true-staging injection step directly.
