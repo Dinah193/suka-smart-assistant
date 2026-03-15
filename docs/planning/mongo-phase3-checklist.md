@@ -13,6 +13,8 @@ This checklist defines Phase 3 gates for production rollout, enforceability, res
 
 ## Gate 1: Governance Enforcement (Real, Not Scaffold)
 - Objective: convert CI governance checks from scaffold mode to blocking quality gates.
+- Evidence: `docs/qa/phase3-closeout-20260315-100936/01-gate1-lint-ci.txt`, `docs/qa/phase3-closeout-20260315-100936/02-gate1-typecheck-ci.txt`
+- Status: Complete (2026-03-15)
 - Required action:
   - Install/configure ESLint and TypeScript project config (`tsconfig.json`) so `lint:ci` and `typecheck:ci` perform real checks.
 - Commands:
@@ -30,6 +32,8 @@ npm run typecheck:ci
 
 ## Gate 2: Full CI Equivalence Dry Run
 - Objective: verify local execution path matches merge-time CI behavior.
+- Evidence: `docs/qa/phase3-closeout-20260315-100936/03-gate2-db-preflight.txt`, `docs/qa/phase3-closeout-20260315-100936/04-gate2-db-verify.txt`, `docs/qa/phase3-closeout-20260315-100936/05-gate2-nutrition-contract.txt`, `docs/qa/phase3-closeout-20260315-100936/06-gate2-smoke-e2e.txt`
+- Status: Complete (2026-03-15)
 - Command:
 ```powershell
 npm run db:preflight; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; npm run db:verify; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; $env:SSA_ENABLE_DB_RUNTIME_CONTRACT_TESTS='true'; npx vitest run _tests_/nutritionMongoAdapter.contract.test.js --reporter=verbose; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; npm run smoke:e2e
@@ -156,8 +160,8 @@ git log --oneline -n 10
   - Missing evidence, missing sign-off, or unresolved risk.
 
 ## PR Evidence Checklist (copy/paste)
-- [ ] Gate 1 governance checks are real (non-scaffold) and passing.
-- [ ] Gate 2 full CI-equivalence dry run passed.
+- [x] Gate 1 governance checks are real (non-scaffold) and passing.
+- [x] Gate 2 full CI-equivalence dry run passed.
 - [x] Gate 3 Mongo-unavailable fault injection validated fallback contract.
 - [x] Gate 4 degraded-latency injection maintained startup/runtime health.
 - [x] Gate 5 retention behavior verified at scale.
@@ -166,14 +170,14 @@ git log --oneline -n 10
 - [x] Gate 8 release sign-offs and rollback ownership recorded.
 
 Consistency note:
-- Gate 1 and Gate 2 remain unchecked in this copy/paste PR checklist block because their evidence source is CI governance and CI-equivalence command history, not a dedicated docs/qa evidence packet.
+- Gate 1 and Gate 2 closure evidence is now attached in `docs/qa/phase3-closeout-20260315-100936/`.
 - Authoritative release decision evidence is recorded in `docs/qa/gate8-signoff-20260314-201438/evidence.md`, which documents final `GO` only after prior gates were validated.
 - Post-deploy release-window command evidence is recorded in `docs/qa/release-window-20260315-095109/`.
 
 ## Release-Decision Readiness
 - Current decision: `GO`
 - Blocking gate: none
-- Next required action: proceed with release window and maintain post-deploy monitoring coverage.
+- Next required action: execute hypercare watch rota and archive day-1/day-2 health snapshots.
 
 ## Release Rule
 - `GO` only if all gates pass with attached evidence.
