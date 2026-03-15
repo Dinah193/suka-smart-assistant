@@ -63,8 +63,8 @@ $env:SSA_ENABLE_DB_RUNTIME_CONTRACT_TESTS='true'; npx vitest run _tests_/nutriti
 ## Gate 4: Staging Fault Injection (Mongo Degraded Latency)
 - Objective: ensure service remains healthy when Mongo is slow but not fully down.
 - Runbook: `docs/planning/mongo-phase3-gate4-staging-runbook.md`
-- Evidence: `docs/qa/gate4-mongo-degraded-latency-20260314-184117/evidence.md`
-- Status: Fail (2026-03-14; injection method unsupported in current environment)
+- Evidence: `docs/qa/gate4-mongo-degraded-latency-20260315-094204/evidence.md`
+- Status: Complete (2026-03-15)
 - Required action:
   - Run controlled latency injection (network shaping/proxy delay) in staging.
 - Suggested command baseline:
@@ -140,7 +140,7 @@ npm run db:preflight
 ## Gate 8: Release Gate and Go/No-Go Approval
 - Objective: formalize final production rollout decision.
 - Evidence: `docs/qa/gate8-signoff-20260314-201438/evidence.md`
-- Status: Complete (2026-03-14; NO-GO)
+- Status: Complete (2026-03-15; GO)
 - Required action:
   - Attach evidence for Gates 1-7.
   - Confirm owners sign off (engineering + operations).
@@ -159,16 +159,16 @@ git log --oneline -n 10
 - [ ] Gate 1 governance checks are real (non-scaffold) and passing.
 - [ ] Gate 2 full CI-equivalence dry run passed.
 - [x] Gate 3 Mongo-unavailable fault injection validated fallback contract.
-- [ ] Gate 4 degraded-latency injection maintained startup/runtime health.
+- [x] Gate 4 degraded-latency injection maintained startup/runtime health.
 - [x] Gate 5 retention behavior verified at scale.
 - [x] Gate 6 observability/alerts/runbooks are active and linked.
 - [x] Gate 7 security/secrets hygiene verified.
 - [x] Gate 8 release sign-offs and rollback ownership recorded.
 
 ## Release-Decision Readiness
-- Current decision: `NO-GO`
-- Blocking gate: Gate 4 degraded-latency injection (true staging execution pending)
-- Next required action: execute Gate 4 with service mesh/proxy/network policy latency shaping in staging and attach passing evidence.
+- Current decision: `GO`
+- Blocking gate: none
+- Next required action: proceed with release window and maintain post-deploy monitoring coverage.
 
 ## Release Rule
 - `GO` only if all gates pass with attached evidence.

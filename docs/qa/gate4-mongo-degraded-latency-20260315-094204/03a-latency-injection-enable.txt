@@ -1,0 +1,3 @@
+method=Fly.io TCP latency proxy
+proxyHost=50.31.246.205
+targetDelayMs=450
