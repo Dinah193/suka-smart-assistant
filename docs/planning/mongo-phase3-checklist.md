@@ -98,6 +98,9 @@ npm run verify:mongo:retention
 ## Gate 6: Observability and Alerting Readiness
 - Objective: ensure Mongo integration is monitorable and actionable.
 - Template pack: `docs/planning/mongo-phase3-gate6-gate7-evidence-pack.md`
+- Alert matrix: `docs/planning/mongo-phase3-alerting-matrix.md`
+- Evidence: `docs/qa/gate6-gate7-20260314-192919/05-gate6-evidence.md`
+- Status: Complete (2026-03-14)
 - Required action:
   - Define and enable alerts for:
     - Mongo connectivity failures
@@ -118,6 +121,8 @@ npm run db:preflight
 ## Gate 7: Security and Secrets Hygiene
 - Objective: validate Mongo credentials and logging hygiene for production rollout.
 - Template pack: `docs/planning/mongo-phase3-gate6-gate7-evidence-pack.md`
+- Evidence: `docs/qa/gate6-gate7-20260314-192919/06-gate7-evidence.md`
+- Status: Complete (2026-03-14)
 - Required action:
   - Ensure Mongo credentials come only from environment/secret manager.
   - Verify no credential leakage in logs or committed files.
@@ -154,8 +159,8 @@ git log --oneline -n 10
 - [x] Gate 3 Mongo-unavailable fault injection validated fallback contract.
 - [ ] Gate 4 degraded-latency injection maintained startup/runtime health.
 - [x] Gate 5 retention behavior verified at scale.
-- [ ] Gate 6 observability/alerts/runbooks are active and linked.
-- [ ] Gate 7 security/secrets hygiene verified.
+- [x] Gate 6 observability/alerts/runbooks are active and linked.
+- [x] Gate 7 security/secrets hygiene verified.
 - [ ] Gate 8 release sign-offs and rollback ownership recorded.
 
 ## Release Rule
