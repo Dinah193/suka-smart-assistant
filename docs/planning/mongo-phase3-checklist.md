@@ -165,6 +165,11 @@ git log --oneline -n 10
 - [x] Gate 7 security/secrets hygiene verified.
 - [x] Gate 8 release sign-offs and rollback ownership recorded.
 
+Consistency note:
+- Gate 1 and Gate 2 remain unchecked in this copy/paste PR checklist block because their evidence source is CI governance and CI-equivalence command history, not a dedicated docs/qa evidence packet.
+- Authoritative release decision evidence is recorded in `docs/qa/gate8-signoff-20260314-201438/evidence.md`, which documents final `GO` only after prior gates were validated.
+- Post-deploy release-window command evidence is recorded in `docs/qa/release-window-20260315-095109/`.
+
 ## Release-Decision Readiness
 - Current decision: `GO`
 - Blocking gate: none
