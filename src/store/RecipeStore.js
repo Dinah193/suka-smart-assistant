@@ -233,12 +233,71 @@ function mergeRecipes(base, incoming) {
   };
 }
 
+function normalizeRhythmOverrideBlock(block = {}) {
+  if (!block || typeof block !== "object") return {};
+  const out = {
+    substitutions: Array.isArray(block.substitutions) ? block.substitutions : undefined,
+    ingredientRules:
+      block.ingredientRules && typeof block.ingredientRules === "object"
+        ? {
+            avoid: Array.isArray(block.ingredientRules.avoid)
+              ? block.ingredientRules.avoid
+              : undefined,
+            boost: Array.isArray(block.ingredientRules.boost)
+              ? block.ingredientRules.boost
+              : undefined,
+          }
+        : undefined,
+    techniques:
+      block.techniques && typeof block.techniques === "object"
+        ? { ...block.techniques }
+        : undefined,
+    scaling:
+      block.scaling && typeof block.scaling === "object"
+        ? { ...block.scaling }
+        : undefined,
+    pantryFirst:
+      block.pantryFirst && typeof block.pantryFirst === "object"
+        ? { ...block.pantryFirst }
+        : undefined,
+    macroBias:
+      block.macroBias && typeof block.macroBias === "object"
+        ? { ...block.macroBias }
+        : undefined,
+    seasoning:
+      block.seasoning && typeof block.seasoning === "object"
+        ? { ...block.seasoning }
+        : undefined,
+    timing:
+      block.timing && typeof block.timing === "object"
+        ? {
+            ...block.timing,
+            batchDays: Array.isArray(block.timing.batchDays)
+              ? block.timing.batchDays
+              : undefined,
+            quickWeekdays: Array.isArray(block.timing.quickWeekdays)
+              ? block.timing.quickWeekdays
+              : undefined,
+          }
+        : undefined,
+    meta: block.meta && typeof block.meta === "object" ? { ...block.meta } : undefined,
+  };
+
+  return Object.fromEntries(
+    Object.entries(out).filter(([, value]) => value !== undefined)
+  );
+}
+
 /* --------------------------------- Store ---------------------------------- */
 export const useRecipeStore = create(
   persist(
     (set, get) => ({
       recipes: [],
       tags: [],
+      battleRhythmOverrides: {
+        byRecipeId: {},
+        byFingerprint: {},
+      },
 
       /* ------------ local undo/redo (not persisted) ------------ */
       _history: [],
@@ -304,6 +363,71 @@ export const useRecipeStore = create(
         emitEvent("recipes/added", { recipe: nextRec });
       },
 
+      addFromCatalog: (catalogRecipe, opts = {}) => {
+        if (!catalogRecipe || typeof catalogRecipe !== "object") return null;
+
+        const sourceRaw = catalogRecipe.raw && typeof catalogRecipe.raw === "object"
+          ? catalogRecipe.raw
+          : catalogRecipe;
+
+        const rid = normId(
+          opts?.id ||
+            catalogRecipe.id ||
+            sourceRaw?.meta?.id ||
+            sourceRaw?.id ||
+            `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+        );
+
+        const nextRec = mapRecipeIn({
+          ...sourceRaw,
+          id: rid,
+          name:
+            catalogRecipe.title ||
+            sourceRaw?.meta?.name ||
+            sourceRaw?.title ||
+            sourceRaw?.name ||
+            "Catalog Recipe",
+          tags: uniq([
+            ...arr(catalogRecipe.tags),
+            ...arr(sourceRaw?.tags),
+            "catalog-import",
+          ]),
+          ingredients: Array.isArray(catalogRecipe.ingredients)
+            ? catalogRecipe.ingredients
+            : sourceRaw?.ingredients,
+          nutrition: catalogRecipe.macros || sourceRaw?.nutrition || {},
+          origin: "catalog",
+          sourceUrl: catalogRecipe.sourceUrl || sourceRaw?.sourceUrl || sourceRaw?.url,
+          meta: {
+            ...(sourceRaw?.meta || {}),
+            catalog: {
+              catalogId:
+                catalogRecipe.catalogId ||
+                sourceRaw?.meta?.id ||
+                sourceRaw?.id ||
+                rid,
+              catalogDomain: catalogRecipe.catalogDomain || sourceRaw?.catalogDomain || null,
+              catalogTags: arr(catalogRecipe.catalogTags),
+            },
+          },
+        });
+
+        const prev = get().recipes;
+        const existing = prev.find((r) => normId(r.id) === rid);
+        if (existing) {
+          get().upsertRecipe(nextRec);
+        } else {
+          get().addRecipe(nextRec);
+        }
+
+        emitEvent("recipes/catalogImported", {
+          id: rid,
+          name: nextRec.name,
+          catalogDomain: nextRec?.meta?.catalog?.catalogDomain || null,
+        });
+        return nextRec;
+      },
+
       removeRecipe: (id) => {
         const rid = normId(id);
         const prev = get().recipes;
@@ -333,6 +457,56 @@ export const useRecipeStore = create(
           set({ recipes: next });
           emitEvent("recipes/changed", { id: rid, updates });
         }
+      },
+
+      setBattleRhythmOverride: ({ recipeId, fingerprint, override } = {}) => {
+        const rid = normId(recipeId);
+        const fp = normId(fingerprint);
+        if (!rid && !fp) return;
+
+        const prev = get().battleRhythmOverrides || {
+          byRecipeId: {},
+          byFingerprint: {},
+        };
+        const byRecipeId = { ...(prev.byRecipeId || {}) };
+        const byFingerprint = { ...(prev.byFingerprint || {}) };
+        const nextOverride = normalizeRhythmOverrideBlock(override || {});
+
+        if (rid) byRecipeId[rid] = nextOverride;
+        if (fp) byFingerprint[fp] = nextOverride;
+
+        set({ battleRhythmOverrides: { byRecipeId, byFingerprint } });
+      },
+
+      clearBattleRhythmOverride: ({ recipeId, fingerprint } = {}) => {
+        const rid = normId(recipeId);
+        const fp = normId(fingerprint);
+        if (!rid && !fp) return;
+
+        const prev = get().battleRhythmOverrides || {
+          byRecipeId: {},
+          byFingerprint: {},
+        };
+        const byRecipeId = { ...(prev.byRecipeId || {}) };
+        const byFingerprint = { ...(prev.byFingerprint || {}) };
+
+        if (rid) delete byRecipeId[rid];
+        if (fp) delete byFingerprint[fp];
+
+        set({ battleRhythmOverrides: { byRecipeId, byFingerprint } });
+      },
+
+      getBattleRhythmOverride: ({ recipeId, fingerprint } = {}) => {
+        const rid = normId(recipeId);
+        const fp = normId(fingerprint);
+        const map = get().battleRhythmOverrides || {
+          byRecipeId: {},
+          byFingerprint: {},
+        };
+
+        if (rid && map.byRecipeId?.[rid]) return map.byRecipeId[rid];
+        if (fp && map.byFingerprint?.[fp]) return map.byFingerprint[fp];
+        return null;
       },
 
       /* ------------------- Usage / Favorites hooks ------------------- */
@@ -839,9 +1013,30 @@ export const useRecipeStore = create(
             .map((t) => ({ id: t?.id || Date.now(), name: normName(t?.name) }))
             .filter((t) => !!t.name);
         }
+
+        persisted.battleRhythmOverrides =
+          persisted.battleRhythmOverrides &&
+          typeof persisted.battleRhythmOverrides === "object"
+            ? {
+                byRecipeId:
+                  persisted.battleRhythmOverrides.byRecipeId &&
+                  typeof persisted.battleRhythmOverrides.byRecipeId === "object"
+                    ? persisted.battleRhythmOverrides.byRecipeId
+                    : {},
+                byFingerprint:
+                  persisted.battleRhythmOverrides.byFingerprint &&
+                  typeof persisted.battleRhythmOverrides.byFingerprint === "object"
+                    ? persisted.battleRhythmOverrides.byFingerprint
+                    : {},
+              }
+            : { byRecipeId: {}, byFingerprint: {} };
         return persisted;
       },
-      partialize: (s) => ({ recipes: s.recipes, tags: s.tags }),
+      partialize: (s) => ({
+        recipes: s.recipes,
+        tags: s.tags,
+        battleRhythmOverrides: s.battleRhythmOverrides,
+      }),
     }
   )
 );
@@ -866,6 +1061,9 @@ export function addRecipe(recipe) {
 }
 export function upsertRecipe(recipe) {
   return useRecipeStore.getState().upsertRecipe(recipe);
+}
+export function addFromCatalog(catalogRecipe, opts) {
+  return useRecipeStore.getState().addFromCatalog(catalogRecipe, opts);
 }
 export function upsertManyRecipes(list) {
   return useRecipeStore.getState().upsertMany(list);
@@ -900,6 +1098,18 @@ export async function getMissingFromInventory(recipeId) {
 }
 export async function recommendRecipes(opts) {
   return useRecipeStore.getState().recommend(opts);
+}
+
+export function setBattleRhythmOverride(ref = {}) {
+  return useRecipeStore.getState().setBattleRhythmOverride(ref);
+}
+
+export function clearBattleRhythmOverride(ref = {}) {
+  return useRecipeStore.getState().clearBattleRhythmOverride(ref);
+}
+
+export function getBattleRhythmOverride(ref = {}) {
+  return useRecipeStore.getState().getBattleRhythmOverride(ref);
 }
 
 /* ---------------------------- URL Import helper --------------------------- */
@@ -937,6 +1147,7 @@ export const useRecipeActions = () =>
     (s) => ({
       addRecipe: s.addRecipe,
       upsertRecipe: s.upsertRecipe,
+      addFromCatalog: s.addFromCatalog,
       removeRecipe: s.removeRecipe,
       toggleSelectRecipe: s.toggleSelectRecipe,
       clearSelections: s.clearSelections,
@@ -960,6 +1171,9 @@ export const useRecipeActions = () =>
       markUsed: s.markUsed,
       toggleFavorite: s.toggleFavorite,
       recommend: s.recommend,
+      setBattleRhythmOverride: s.setBattleRhythmOverride,
+      clearBattleRhythmOverride: s.clearBattleRhythmOverride,
+      getBattleRhythmOverride: s.getBattleRhythmOverride,
       // undo/redo
       undo: s.undo,
       redo: s.redo,
@@ -1045,6 +1259,7 @@ export const Recipes = {
   setRecipes,
   addRecipe,
   upsertRecipe,
+  addFromCatalog,
   upsertManyRecipes,
   removeTagFromRecipe,
   renameTag,
@@ -1061,6 +1276,9 @@ export const Recipes = {
   getMissingFromInventory,
   recommendRecipes,
   addFromUrl,
+  getBattleRhythmOverride,
+  setBattleRhythmOverride,
+  clearBattleRhythmOverride,
 
   // per-recipe preferences helpers
   savePreferences,

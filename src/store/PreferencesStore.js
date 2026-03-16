@@ -51,6 +51,12 @@ const DEFAULTS = {
     showMacroRing: true,
     dailyGoals: { calories: 2000, protein: 120, carbs: 220, fat: 70 }, // source of truth
     macroGoalMode: "calculated", // calculated | custom
+    macroPatterns: [
+      { id: "balanced", label: "Balanced", protein: 30, carbs: 40, fat: 30 },
+      { id: "high-protein", label: "High Protein", protein: 40, carbs: 30, fat: 30 },
+      { id: "lower-carb", label: "Lower Carb", protein: 35, carbs: 25, fat: 40 },
+    ],
+    activeMacroPatternId: "balanced",
   },
 
   /** Back-compat alias for older modules expecting Preferences.foodTargets */
@@ -64,6 +70,44 @@ const DEFAULTS = {
     seasonalOnly: false,
     sabbathAware: false,
     rhythm: { enabled: false, start: "11:00", end: "19:00" },
+    battleRhythm: {
+      enabled: false,
+      substitutions: [],
+      ingredientRules: {
+        avoid: [],
+        boost: [],
+      },
+      techniques: {
+        searLonger: false,
+        lowSodium: false,
+        lessSugar: false,
+      },
+      scaling: {
+        defaultServings: 4,
+        batchMultiplier: 1,
+        wholeWheatRatio: 0,
+      },
+      pantryFirst: {
+        strictness: "balanced", // relaxed | balanced | strict
+      },
+      macroBias: {
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+      },
+      seasoning: {
+        saltFactor: 1,
+        sugarFactor: 1,
+      },
+      timing: {
+        weeknightTimeFactor: 0.9,
+        weekendTimeFactor: 1,
+        quickNightMaxMins: 45,
+        batchDays: ["sun"],
+        quickWeekdays: ["mon", "tue", "wed", "thu"],
+        sabbathHandling: "respect", // off | respect | strict
+      },
+    },
   },
 
   calendar: {
@@ -132,6 +176,89 @@ function migrate(raw) {
   if (!raw || typeof raw !== "object") return { ...DEFAULTS };
   const v = raw.__v || 1;
   let next = { ...DEFAULTS, ...raw };
+
+  // Always deep-merge key nested buckets so new defaults are backfilled.
+  next.ui = {
+    ...DEFAULTS.ui,
+    ...(next.ui || {}),
+    theme: {
+      ...DEFAULTS.ui.theme,
+      ...(next.ui?.theme || {}),
+      vars: {
+        ...DEFAULTS.ui.theme.vars,
+        ...(next.ui?.theme?.vars || {}),
+      },
+    },
+  };
+  next.nutrition = {
+    ...DEFAULTS.nutrition,
+    ...(next.nutrition || {}),
+    dailyGoals: {
+      ...DEFAULTS.nutrition.dailyGoals,
+      ...(next.nutrition?.dailyGoals || {}),
+    },
+    macroPatterns: Array.isArray(next.nutrition?.macroPatterns)
+      ? next.nutrition.macroPatterns
+      : DEFAULTS.nutrition.macroPatterns,
+    activeMacroPatternId:
+      next.nutrition?.activeMacroPatternId ||
+      DEFAULTS.nutrition.activeMacroPatternId,
+  };
+  next.cooking = {
+    ...DEFAULTS.cooking,
+    ...(next.cooking || {}),
+    rhythm: {
+      ...DEFAULTS.cooking.rhythm,
+      ...(next.cooking?.rhythm || {}),
+    },
+    battleRhythm: {
+      ...DEFAULTS.cooking.battleRhythm,
+      ...(next.cooking?.battleRhythm || {}),
+      ingredientRules: {
+        ...DEFAULTS.cooking.battleRhythm.ingredientRules,
+        ...(next.cooking?.battleRhythm?.ingredientRules || {}),
+        avoid: Array.isArray(next.cooking?.battleRhythm?.ingredientRules?.avoid)
+          ? next.cooking.battleRhythm.ingredientRules.avoid
+          : DEFAULTS.cooking.battleRhythm.ingredientRules.avoid,
+        boost: Array.isArray(next.cooking?.battleRhythm?.ingredientRules?.boost)
+          ? next.cooking.battleRhythm.ingredientRules.boost
+          : DEFAULTS.cooking.battleRhythm.ingredientRules.boost,
+      },
+      techniques: {
+        ...DEFAULTS.cooking.battleRhythm.techniques,
+        ...(next.cooking?.battleRhythm?.techniques || {}),
+      },
+      scaling: {
+        ...DEFAULTS.cooking.battleRhythm.scaling,
+        ...(next.cooking?.battleRhythm?.scaling || {}),
+      },
+      pantryFirst: {
+        ...DEFAULTS.cooking.battleRhythm.pantryFirst,
+        ...(next.cooking?.battleRhythm?.pantryFirst || {}),
+      },
+      macroBias: {
+        ...DEFAULTS.cooking.battleRhythm.macroBias,
+        ...(next.cooking?.battleRhythm?.macroBias || {}),
+      },
+      seasoning: {
+        ...DEFAULTS.cooking.battleRhythm.seasoning,
+        ...(next.cooking?.battleRhythm?.seasoning || {}),
+      },
+      timing: {
+        ...DEFAULTS.cooking.battleRhythm.timing,
+        ...(next.cooking?.battleRhythm?.timing || {}),
+        batchDays: Array.isArray(next.cooking?.battleRhythm?.timing?.batchDays)
+          ? next.cooking.battleRhythm.timing.batchDays
+          : DEFAULTS.cooking.battleRhythm.timing.batchDays,
+        quickWeekdays: Array.isArray(next.cooking?.battleRhythm?.timing?.quickWeekdays)
+          ? next.cooking.battleRhythm.timing.quickWeekdays
+          : DEFAULTS.cooking.battleRhythm.timing.quickWeekdays,
+      },
+      substitutions: Array.isArray(next.cooking?.battleRhythm?.substitutions)
+        ? next.cooking.battleRhythm.substitutions
+        : DEFAULTS.cooking.battleRhythm.substitutions,
+    },
+  };
 
   if (v < 2) {
     // v1 -> v2: introduce a11y + decimalPlaces defaults (from your previous code)
@@ -453,10 +580,116 @@ function setDecimalPlaces(n) {
   return next;
 }
 
+function setMacroPatterns(patterns /* [{id,label,protein,carbs,fat}] */) {
+  const list = Array.isArray(patterns)
+    ? patterns
+        .map((p, i) => ({
+          id: String(p?.id || `pattern-${i + 1}`),
+          label: String(p?.label || p?.name || `Pattern ${i + 1}`),
+          protein: Number(p?.protein || 0),
+          carbs: Number(p?.carbs || 0),
+          fat: Number(p?.fat || 0),
+        }))
+        .filter((p) => p.protein > 0 || p.carbs > 0 || p.fat > 0)
+    : [];
+
+  const next = patch("nutrition", (n) => {
+    const active = n?.activeMacroPatternId;
+    const nextActive =
+      list.some((p) => p.id === active) && active ? active : list[0]?.id || null;
+    return {
+      ...n,
+      macroPatterns: list,
+      activeMacroPatternId: nextActive,
+    };
+  });
+  BUS.emit("preferences.nutrition.changed", next);
+  return next;
+}
+
+function setActiveMacroPatternId(id) {
+  const next = patch("nutrition", (n) => ({
+    ...n,
+    activeMacroPatternId: id == null ? null : String(id),
+  }));
+  BUS.emit("preferences.nutrition.changed", next);
+  return next;
+}
+
 /* Cooking defaults */
 function setCookingDefaults(p) {
   const next = patch("cooking", (c) => ({ ...c, ...p }));
   BUS.emit("preferences.cooking.changed", next);
+  return next;
+}
+
+function setBattleRhythm(prefs = {}) {
+  const next = patch("cooking", (c) => ({
+    ...c,
+    battleRhythm: {
+      ...(c?.battleRhythm || DEFAULTS.cooking.battleRhythm),
+      ...prefs,
+      ingredientRules: {
+        ...(c?.battleRhythm?.ingredientRules ||
+          DEFAULTS.cooking.battleRhythm.ingredientRules),
+        ...(prefs?.ingredientRules || {}),
+        avoid: Array.isArray(prefs?.ingredientRules?.avoid)
+          ? prefs.ingredientRules.avoid
+          : Array.isArray(c?.battleRhythm?.ingredientRules?.avoid)
+          ? c.battleRhythm.ingredientRules.avoid
+          : DEFAULTS.cooking.battleRhythm.ingredientRules.avoid,
+        boost: Array.isArray(prefs?.ingredientRules?.boost)
+          ? prefs.ingredientRules.boost
+          : Array.isArray(c?.battleRhythm?.ingredientRules?.boost)
+          ? c.battleRhythm.ingredientRules.boost
+          : DEFAULTS.cooking.battleRhythm.ingredientRules.boost,
+      },
+      techniques: {
+        ...(c?.battleRhythm?.techniques ||
+          DEFAULTS.cooking.battleRhythm.techniques),
+        ...(prefs?.techniques || {}),
+      },
+      scaling: {
+        ...(c?.battleRhythm?.scaling || DEFAULTS.cooking.battleRhythm.scaling),
+        ...(prefs?.scaling || {}),
+      },
+      pantryFirst: {
+        ...(c?.battleRhythm?.pantryFirst ||
+          DEFAULTS.cooking.battleRhythm.pantryFirst),
+        ...(prefs?.pantryFirst || {}),
+      },
+      macroBias: {
+        ...(c?.battleRhythm?.macroBias || DEFAULTS.cooking.battleRhythm.macroBias),
+        ...(prefs?.macroBias || {}),
+      },
+      seasoning: {
+        ...(c?.battleRhythm?.seasoning ||
+          DEFAULTS.cooking.battleRhythm.seasoning),
+        ...(prefs?.seasoning || {}),
+      },
+      timing: {
+        ...(c?.battleRhythm?.timing || DEFAULTS.cooking.battleRhythm.timing),
+        ...(prefs?.timing || {}),
+        batchDays: Array.isArray(prefs?.timing?.batchDays)
+          ? prefs.timing.batchDays
+          : Array.isArray(c?.battleRhythm?.timing?.batchDays)
+          ? c.battleRhythm.timing.batchDays
+          : DEFAULTS.cooking.battleRhythm.timing.batchDays,
+        quickWeekdays: Array.isArray(prefs?.timing?.quickWeekdays)
+          ? prefs.timing.quickWeekdays
+          : Array.isArray(c?.battleRhythm?.timing?.quickWeekdays)
+          ? c.battleRhythm.timing.quickWeekdays
+          : DEFAULTS.cooking.battleRhythm.timing.quickWeekdays,
+      },
+      substitutions: Array.isArray(prefs?.substitutions)
+        ? prefs.substitutions
+        : Array.isArray(c?.battleRhythm?.substitutions)
+        ? c.battleRhythm.substitutions
+        : DEFAULTS.cooking.battleRhythm.substitutions,
+    },
+  }));
+  BUS.emit("preferences.cooking.changed", next);
+  BUS.emit("preferences.battleRhythm.changed", next?.cooking?.battleRhythm);
   return next;
 }
 function toggleMealTag(tag) {
@@ -614,9 +847,12 @@ export const preferencesStore = {
   setMacroGoalMode,
   setShowMacroRing,
   setDecimalPlaces,
+  setMacroPatterns,
+  setActiveMacroPatternId,
 
   // Cooking
   setCookingDefaults,
+  setBattleRhythm,
   toggleMealTag,
 
   // Calendar & Inventory

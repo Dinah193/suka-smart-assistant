@@ -670,7 +670,15 @@ export function addElapsed(progress, dtSec) {
 /** Install global keyboard shortcuts for Runner */
 export function installRunnerHotkeys({ onPauseToggle, onNext, onPrev }) {
   const handler = (e) => {
-    if (e.target && ["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName))
+    const target = e.target;
+    const tag = String(target?.tagName || "").toUpperCase();
+    if (
+      (target && ["INPUT", "TEXTAREA", "SELECT"].includes(tag)) ||
+      target?.isContentEditable ||
+      e.ctrlKey ||
+      e.metaKey ||
+      e.altKey
+    )
       return;
     if (e.key === " " || e.code === "Space") {
       e.preventDefault();

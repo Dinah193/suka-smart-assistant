@@ -82,6 +82,8 @@ export default function useRealtimeCoordination(overrides = {}) {
 
   const sock = useSocket({
     userId: identity.userId,
+    namespace: "/core",
+    autoJoinUserRoom: false,
     alsoJoinRooms: joinedRooms,
   });
 

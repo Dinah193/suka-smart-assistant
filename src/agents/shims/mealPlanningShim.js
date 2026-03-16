@@ -77,6 +77,14 @@ import { FamilyFundConnector } from "@/services/hub/FamilyFundConnector";
 const isoNow = () => new Date().toISOString();
 const lower = (s) => (s == null ? "" : String(s).toLowerCase().trim());
 
+function normalizeMealPlanningDomain(rawDomain) {
+  const d = lower(rawDomain || "cooking");
+  if (["cooking", "meal", "meals", "mealplanning", "meal-planning"].includes(d)) {
+    return "cooking";
+  }
+  return d;
+}
+
 /* ---------------------------------------------------------------------------
  * Intent normalization
  * ------------------------------------------------------------------------ */
@@ -548,7 +556,7 @@ export async function invokeShim(req) {
       });
     }
 
-    const domain = req.domain || "cooking";
+    const domain = normalizeMealPlanningDomain(req.domain);
     const intent = normalizeIntent(req.intent || "");
     const input = req.input || {};
     const runtime = req.runtime || {};
@@ -561,7 +569,7 @@ export async function invokeShim(req) {
         warnings: [
           {
             type: "badDomain",
-            message: `Meal Planning Shim only supports domain="cooking", received "${domain}".`,
+            message: `Meal Planning Shim only supports meal-planning domains (cooking/meals), received "${domain}".`,
           },
         ],
         debug,

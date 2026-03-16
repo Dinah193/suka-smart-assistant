@@ -493,7 +493,7 @@
     var best = null,
       bestScore = 0;
     for (var cid in canonical) {
-      if (!canonical.hasOwnProperty(cid)) continue;
+      if (!Object.prototype.hasOwnProperty.call(canonical, cid)) continue;
       var c = canonical[cid];
       var hay = tokens(
         c.label +
@@ -517,7 +517,7 @@
   function listVendorSkusFor(canonicalId) {
     var out = [];
     for (var v in vendorCatalogs) {
-      if (!vendorCatalogs.hasOwnProperty(v)) continue;
+      if (!Object.prototype.hasOwnProperty.call(vendorCatalogs, v)) continue;
       var list = vendorCatalogs[v];
       for (var i = 0; i < list.length; i++) {
         if (list[i].canonicalId === canonicalId) out.push(list[i]);
@@ -761,7 +761,7 @@
     // flatten suggestions and compute best vendor per line
     var out = [];
     for (var k in lines) {
-      if (!lines.hasOwnProperty(k)) continue;
+      if (!Object.prototype.hasOwnProperty.call(lines, k)) continue;
       var L = lines[k];
       var flat = [];
       for (var s = 0; s < L.suggestions.length; s++)

@@ -2197,6 +2197,13 @@ export default function MealPlanningPage() {
             >
               <span className="label">Clear</span>
             </button>
+            <a
+              className="sv-btn sv-btn--outline"
+              href="/meal-planning/planner-dashboard"
+              title="Open scaffolded preservation-aware planner dashboard"
+            >
+              <span className="label">Open Planner Dashboard</span>
+            </a>
             {ok ? (
               <span className="sv-muted" style={{ color: "var(--success)" }}>
                 ✓ Done

@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { eventBus } from "@/services/events/eventBus";
 import { automation } from "@/services/automation/runtime";
+import { applyBattleRhythmToRecipe } from "@/services/recipes/battleRhythmResolver";
 
 import MealTemplatePicker from "./MealTemplatePicker.jsx";
 import MealPlanNutritiionPeek from "./MealPlanNutritiionPeek.jsx";
@@ -37,8 +38,10 @@ let useMealPlanStore = () => ({
 let usePreferencesStore = () => ({
   sabbathAware: true,
   unitSystem: "imperial",
+  cooking: { battleRhythm: { enabled: false } },
 });
 let useRecipeStore = () => ({ findSimilar: async () => [] });
+let getRecipeById = () => null;
 
 try {
   useMealPlanStore = require("@/store/MealPlanStore").useMealPlanStore;
@@ -48,6 +51,9 @@ try {
 } catch {}
 try {
   useRecipeStore = require("@/store/RecipeStore").useRecipeStore;
+} catch {}
+try {
+  getRecipeById = require("@/store/RecipeStore").getById;
 } catch {}
 
 // Utilities
@@ -60,6 +66,67 @@ const fmtDate = (iso) => {
   const d = new Date(iso);
   return `${DAY_NAMES[d.getDay()]} • ${d.toLocaleDateString()}`;
 };
+
+function toNum(v) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+function asArr(v) {
+  return Array.isArray(v) ? v : [];
+}
+
+function ingredientName(ing) {
+  return String(ing?.name || ing?.label || "").trim().toLowerCase();
+}
+
+function buildIngredientDiffs(originalIngredients, variantIngredients) {
+  const originalMap = new Map(
+    asArr(originalIngredients).map((ing) => [ingredientName(ing), ing])
+  );
+  const variantMap = new Map(
+    asArr(variantIngredients).map((ing) => [ingredientName(ing), ing])
+  );
+
+  const keys = new Set([...originalMap.keys(), ...variantMap.keys()]);
+  const rows = [];
+
+  keys.forEach((key) => {
+    if (!key) return;
+    const before = originalMap.get(key);
+    const after = variantMap.get(key);
+
+    if (!before && after) {
+      rows.push({ type: "added", name: key, before: null, after });
+      return;
+    }
+
+    if (before && !after) {
+      rows.push({ type: "removed", name: key, before, after: null });
+      return;
+    }
+
+    const bQty = toNum(before?.qty ?? before?.quantity ?? before?.amount?.value);
+    const aQty = toNum(after?.qty ?? after?.quantity ?? after?.amount?.value);
+    const qtyChanged =
+      bQty !== null && aQty !== null ? Math.abs(bQty - aQty) > 0.0001 : false;
+    const unitChanged = String(before?.unit || before?.amount?.unit || "") !==
+      String(after?.unit || after?.amount?.unit || "");
+
+    if (qtyChanged || unitChanged) {
+      rows.push({ type: "changed", name: key, before, after });
+    }
+  });
+
+  return rows;
+}
+
+function buildTimeDiff(originalRecipe, variantRecipe) {
+  const b = toNum(originalRecipe?.time?.totalMins ?? originalRecipe?.totalTimeMin);
+  const a = toNum(variantRecipe?.time?.totalMins ?? variantRecipe?.totalTimeMin);
+  if (b === null || a === null || Math.abs(a - b) < 0.5) return null;
+  return { before: b, after: a };
+}
 
 // Slot card for each meal time
 function SlotCard({
@@ -224,8 +291,12 @@ export default function MealPlanView({ className }) {
     modeLabel,
     setSelectedScope,
   } = useMealPlanStore();
-  const { sabbathAware } = usePreferencesStore();
+  const { sabbathAware, cooking } = usePreferencesStore();
   const { findSimilar } = useRecipeStore();
+  const battleRhythm =
+    cooking?.battleRhythm && typeof cooking.battleRhythm === "object"
+      ? cooking.battleRhythm
+      : { enabled: false };
 
   // State
   const [draft, setDraft] = useState(() => getActiveDraft?.() || null);
@@ -233,6 +304,8 @@ export default function MealPlanView({ className }) {
   const [view, setView] = useState("plan"); // day | week | plan
   const prevDraftRef = useRef(null);
   const [loading, setLoading] = useState(false);
+  const [showBattleRhythmPreview, setShowBattleRhythmPreview] = useState(false);
+  const [showOnlyChangedRecipes, setShowOnlyChangedRecipes] = useState(true);
 
   // Subscribe to plan/draft updates
   useEffect(() => {
@@ -283,6 +356,61 @@ export default function MealPlanView({ className }) {
         )
     );
   }, [draft, search]);
+
+  const plannedRecipeIds = useMemo(() => {
+    if (!draft?.days) return [];
+    const ids = new Set();
+    asArr(draft.days).forEach((day) => {
+      asArr(day?.slots).forEach((slot) => {
+        asArr(slot?.items).forEach((it) => {
+          if (it?.type !== "recipe") return;
+          const id = String(it.ref || it.id || "").trim();
+          if (id) ids.add(id);
+        });
+      });
+    });
+    return Array.from(ids);
+  }, [draft]);
+
+  const battleRhythmPreviewItems = useMemo(() => {
+    if (!battleRhythm?.enabled) return [];
+    return plannedRecipeIds
+      .map((id) => {
+        const recipe = getRecipeById?.(id);
+        if (!recipe || typeof recipe !== "object") return null;
+
+        const variant = applyBattleRhythmToRecipe(recipe, {
+          battleRhythm,
+          dayKey: draft?.days?.[0]?.date || null,
+          mealType: null,
+        });
+
+        const traces = asArr(variant?.battleRhythm?.trace);
+        const ingredientDiffs = buildIngredientDiffs(
+          recipe.ingredients,
+          variant?.ingredients
+        );
+        const timeDiff = buildTimeDiff(recipe, variant);
+
+        const hasChanges = Boolean(
+          traces.length || ingredientDiffs.length || timeDiff
+        );
+        return {
+          id,
+          title: variant?.title || recipe?.title || id,
+          ingredientDiffs,
+          timeDiff,
+          traces,
+          hasChanges,
+        };
+      })
+      .filter(Boolean);
+  }, [battleRhythm, plannedRecipeIds, draft]);
+
+  const visibleBattleRhythmPreviewItems = useMemo(() => {
+    if (!showOnlyChangedRecipes) return battleRhythmPreviewItems;
+    return battleRhythmPreviewItems.filter((item) => item.hasChanges);
+  }, [battleRhythmPreviewItems, showOnlyChangedRecipes]);
 
   // Undo helpers
   const snapshot = () => JSON.parse(JSON.stringify(draft || {}));
@@ -434,6 +562,14 @@ export default function MealPlanView({ className }) {
       id: "MealPlanEditor",
       params: { draftId: draft?.id },
     });
+
+  const openRecipeFromPreview = (recipeId) => {
+    if (!recipeId) return;
+    eventBus.emit("ui.open", {
+      id: "RecipeVault",
+      params: { recipeId, from: "MealPlanView.battleRhythmPreview" },
+    });
+  };
 
   // Slot actions wiring
   const onSlotAction = async (type, day, slot, item) => {
@@ -688,6 +824,19 @@ export default function MealPlanView({ className }) {
                 <Button size="sm" onClick={autofill} disabled={loading}>
                   Autofill
                 </Button>
+                <Button
+                  size="sm"
+                  variant={showBattleRhythmPreview ? "secondary" : "outline"}
+                  onClick={() => setShowBattleRhythmPreview((v) => !v)}
+                  disabled={!battleRhythm?.enabled || !battleRhythmPreviewItems.length}
+                  title={
+                    battleRhythm?.enabled
+                      ? "Preview recipe diffs before commit"
+                      : "Enable battle rhythm in preferences to preview diffs"
+                  }
+                >
+                  Rhythm Diffs ({battleRhythmPreviewItems.length})
+                </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button size="sm" variant="secondary">
@@ -728,6 +877,98 @@ export default function MealPlanView({ className }) {
             </Tabs>
           </div>
         </Card>
+
+        {showBattleRhythmPreview && (
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between gap-2">
+                <CardTitle className="text-base">Battle Rhythm Preview</CardTitle>
+                <Button
+                  size="sm"
+                  variant={showOnlyChangedRecipes ? "secondary" : "outline"}
+                  onClick={() => setShowOnlyChangedRecipes((v) => !v)}
+                >
+                  {showOnlyChangedRecipes ? "Showing Changed Only" : "Show Only Changed"}
+                </Button>
+              </div>
+              <div className="text-xs text-muted-foreground">
+                Inspect recipe changes before you use Save / Commit. Showing {visibleBattleRhythmPreviewItems.length} of {battleRhythmPreviewItems.length} recipes.
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {!visibleBattleRhythmPreviewItems.length && (
+                <div className="text-xs text-muted-foreground">
+                  No recipes match this preview filter.
+                </div>
+              )}
+
+              {visibleBattleRhythmPreviewItems.map((item) => (
+                <div key={item.id} className="rounded-md border p-3 space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="font-medium text-sm">{item.title}</div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => openRecipeFromPreview(item.id)}
+                      >
+                        Open Recipe
+                      </Button>
+                      <Badge variant="outline">
+                        {item.ingredientDiffs.length} ingredient diff
+                      </Badge>
+                      {item.timeDiff ? (
+                        <Badge variant="outline">
+                          {Math.round(item.timeDiff.before)}m {"->"} {Math.round(item.timeDiff.after)}m
+                        </Badge>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  {item.ingredientDiffs.length > 0 && (
+                    <div className="space-y-1">
+                      {item.ingredientDiffs.slice(0, 6).map((diff, idx) => {
+                        const bQty = toNum(
+                          diff.before?.qty ??
+                            diff.before?.quantity ??
+                            diff.before?.amount?.value
+                        );
+                        const aQty = toNum(
+                          diff.after?.qty ??
+                            diff.after?.quantity ??
+                            diff.after?.amount?.value
+                        );
+                        const bUnit =
+                          diff.before?.unit || diff.before?.amount?.unit || "";
+                        const aUnit =
+                          diff.after?.unit || diff.after?.amount?.unit || "";
+
+                        return (
+                          <div
+                            key={`${item.id}-diff-${idx}`}
+                            className="text-xs text-muted-foreground"
+                          >
+                            {diff.name}: {bQty ?? "-"} {bUnit} {"->"} {aQty ?? "-"} {aUnit}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {item.traces.length > 0 && (
+                    <div className="text-xs text-muted-foreground">
+                      {item.traces.slice(0, 3).map((t, idx) => (
+                        <div key={`${item.id}-trace-${idx}`}>
+                          {t.type}: {String(t.ingredient || t.metric || "adjusted")}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Content */}
         <Tabs value={view} onValueChange={setView}>

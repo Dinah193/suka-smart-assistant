@@ -1,6 +1,7 @@
 // src/components/storehouse/PreservationQueuePlanner.jsx
 import React, { useMemo } from "react";
 import { useStorehousePlannerStore } from "@/store/StorehousePlannerStore";
+import { suggestPreservationType } from "@/utils/storehouseUtils";
 
 export default function PreservationQueuePlanner() {
   // ✅ Subscribe only to the slice we need
@@ -10,9 +11,12 @@ export default function PreservationQueuePlanner() {
   const queue = useMemo(() => {
     const needs = Array.isArray(storehouseNeeds) ? storehouseNeeds : [];
     return needs
-      .filter((item) => item.preservation !== "Root Cellar / Dry Storage")
+      .filter(
+        (item) => suggestPreservationType(item?.name || "") !== "Root Cellar / Dry Storage"
+      )
       .map((item) => ({
         ...item,
+        preservation: suggestPreservationType(item?.name || ""),
         status: "Queued",
       }));
   }, [storehouseNeeds]);
@@ -33,7 +37,7 @@ export default function PreservationQueuePlanner() {
               className="p-2 border border-yellow-200 rounded bg-yellow-50 flex justify-between"
             >
               <span>
-                {item.name} — {Number(item.total ?? 0).toFixed(1)} {item.unit}
+                {item.name} — {Number(item.qty ?? item.total ?? 0).toFixed(1)} {item.unit}
               </span>
               <span className="text-yellow-700 font-medium">
                 {item.preservation}
